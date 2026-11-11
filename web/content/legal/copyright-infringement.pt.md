@@ -1,8 +1,8 @@
-Respeitamos os direitos dos autores e esperamos o mesmo de todas as pessoas que contribuem com o LordOS. Se você acredita que algo em lordos.org, numa versão do LordOS ou no repositório do LordOS infringe seus direitos autorais, avise-nos e vamos analisar.
+Respeitamos os direitos dos autores e esperamos o mesmo de todas as pessoas que contribuem com o Insane OS. Se você acredita que algo em lordos.org, numa versão do Insane OS ou no repositório do Insane OS infringe seus direitos autorais, avise-nos e vamos analisar.
 
 ## A lei aplicável
 
-O LordOS é mantido a partir da Argentina pela iPERFEX (Pablo Miranda e Federico Pereira), e tratamos essas notificações segundo a lei argentina, principalmente a Lei 11.723 de propriedade intelectual. Não somos um provedor de serviços dos Estados Unidos e não prometemos os procedimentos da Digital Millennium Copyright Act (DMCA) americana. A notificação que pedimos é parecida com uma notificação DMCA, então você pode usar uma que já tenha.
+O Insane OS é mantido a partir da Argentina pela iPERFEX (Pablo Miranda e Federico Pereira), e tratamos essas notificações segundo a lei argentina, principalmente a Lei 11.723 de propriedade intelectual. Não somos um provedor de serviços dos Estados Unidos e não prometemos os procedimentos da Digital Millennium Copyright Act (DMCA) americana. A notificação que pedimos é parecida com uma notificação DMCA, então você pode usar uma que já tenha.
 
 ## Como enviar uma notificação
 
@@ -31,7 +31,7 @@ Deixamos de aceitar contribuições de quem infringe repetidamente os direitos d
 
 ## Outras plataformas
 
-O material hospedado em outros serviços segue as regras deles. Para conteúdo no GitHub, incluindo o repositório do LordOS e suas versões, você também pode usar a [política de remoção por DMCA do GitHub](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Os pacotes do Debian são tratados pelo Debian.
+O material hospedado em outros serviços segue as regras deles. Para conteúdo no GitHub, incluindo o repositório do Insane OS e suas versões, você também pode usar a [política de remoção por DMCA do GitHub](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Os pacotes do Debian são tratados pelo Debian.
 
 ## Controvérsias
 

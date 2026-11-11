@@ -118,7 +118,7 @@ takes the initials of the name being typed.
 
 - **Local network** (the default): private ranges (10/8, 172.16/12, 192.168/16, 100.64/10),
   loopback, link-local and IPv6 unique-local, plus connections over a VPN of this computer: only
-  on an interface LordOS's VPN manager created (`wg-`, `ovpn-`, `ips-`, `ppp-`, `oc-`, `fvpn-` +
+  on an interface Insane OS's VPN manager created (`wg-`, `ovpn-`, `ips-`, `ppp-`, `oc-`, `fvpn-` +
   the VPN's name, `vpn_ifname` in `server/src/net/wg.c`), to that interface's own address, and
   from inside its subnet or its point-to-point peer (`rs_vpn_accepts`). A bare `ppp0` (often a
   PPPoE internet uplink), `tun0` or `wg0` never counts. Public addresses are closed.
@@ -613,7 +613,7 @@ listed after the table.
 | 15 | Low | Log injection: `Origin`/`Host` logged raw (a bare LF forged a journal line); attempted names logged only when valid. | Everything logged is cleaned to printable ASCII; attempted names logged sanitized. | journal check. |
 | 16 | Info | The privilege drop didn't check saved ids or groups, kept the environment and every inherited descriptor, and the bridge outlived `lord-sessiond` (the parent-death signal is cleared by `setuid`). | See "Process and privileges". | `/proc` check above. |
 | 17 | Info | After a failure the user name went into the URL (`/?e=1&u=…`): a password typed into the user field ended up in the history. | The page keeps the name in `sessionStorage` and clears the address bar. | browser check. |
-| 18 | High | (Found in review of this branch.) "Local network" counted any interface named `ppp*`, `tun*` or `wg*` as a VPN, so a public address arriving over a PPPoE uplink (`ppp0`) or any tunnel passed the default. | Only LordOS's own VPN interface names (with the dash), only to that interface's address, and only from inside its subnet or its point-to-point peer. | unit tests: `ppp0` with a public peer refused; `wg-home` with an in-subnet peer accepted and a public one refused; `/0` subnets refused. |
+| 18 | High | (Found in review of this branch.) "Local network" counted any interface named `ppp*`, `tun*` or `wg*` as a VPN, so a public address arriving over a PPPoE uplink (`ppp0`) or any tunnel passed the default. | Only Insane OS's own VPN interface names (with the dash), only to that interface's address, and only from inside its subnet or its point-to-point peer. | unit tests: `ppp0` with a public peer refused; `wg-home` with an in-subnet peer accepted and a public one refused; `/0` subnets refused. |
 
 **Greeter and lock.** A remote browser can't unlock the monitor: the monitor shows the login
 screen (a separate `lord-server` as `lordos-greeter`), and the session only reaches `lord-sessiond`
@@ -729,9 +729,9 @@ by these actions: that stays in the package engine. `lord-server` only reads the
 
 ### Firewall
 
-Nothing to open. `lord-netperm`'s per-app rules apply to programs started from a LordOS session
+Nothing to open. `lord-netperm`'s per-app rules apply to programs started from a Insane OS session
 (they live in its cgroup tree); `sshd` is a system service in `system.slice/ssh.service`, so the
-rules never block it, and LordOS adds no system-wide packet filter. If you run your own (nftables,
+rules never block it, and Insane OS adds no system-wide packet filter. If you run your own (nftables,
 a router), allow TCP port 22 from the local network only. As with remote desktop, to use it from
 the internet, use a VPN instead of opening the port.
 

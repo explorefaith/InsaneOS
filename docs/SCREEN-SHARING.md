@@ -91,7 +91,7 @@ at the computer has to. Limits: 1,000 pointer events and 200 keys a second.
 
 ## Fullscreen
 
-A fullscreen Wayland or X11 surface is drawn over every layer, the indicator's too, on the CPU path and the GPU path. So while an app holds a share there is none: a surface asking for it stays in its window, and one already fullscreen goes back to it. A LordOS window in fullscreen stays, because it's drawn under the `notification` layer. It was found by running one on VM 125: a fullscreen `xterm` covered the indicator whole.
+A fullscreen Wayland or X11 surface is drawn over every layer, the indicator's too, on the CPU path and the GPU path. So while an app holds a share there is none: a surface asking for it stays in its window, and one already fullscreen goes back to it. A Insane OS window in fullscreen stays, because it's drawn under the `notification` layer. It was found by running one on VM 125: a fullscreen `xterm` covered the indicator whole.
 
 ## Keyframes
 

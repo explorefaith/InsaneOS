@@ -1,6 +1,6 @@
 ## The short version
 
-An installable LordOS app (a `.lpk` package) doesn't get the keys to your house. It runs in a room of its own, with the door locked from the outside. When it needs something, it asks the system through a single hatch, the **broker**. The system checks what you decided, and if you haven't decided yet, it asks you with a prompt that the system draws, not the app.
+An installable Insane OS app (a `.lpk` package) doesn't get the keys to your house. It runs in a room of its own, with the door locked from the outside. When it needs something, it asks the system through a single hatch, the **broker**. The system checks what you decided, and if you haven't decided yet, it asks you with a prompt that the system draws, not the app.
 
 [[shot:0]]
 
@@ -20,17 +20,17 @@ This is the first question a careful reader should ask, so here is the precise a
 |---|---|---|---|---|---|
 | Installed `.lpk` apps | yes | yes | yes, with memory and CPU limits | yes | yes |
 | Passwords, Mail, Calendar, Contacts and Reminders (built-in apps in their own process; the last four since 0.8.2) | yes | yes | yes | yes | yes |
-| Other built-in apps (Files, Settings, Terminal…) | no, they run inside `lord-server` | no | no (they count as "LordOS") | their camera, microphone and screen use is checked in C | yes, as "LordOS" |
+| Other built-in apps (Files, Settings, Terminal…) | no, they run inside `lord-server` | no | no (they count as "Insane OS") | their camera, microphone and screen use is checked in C | yes, as "Insane OS" |
 | Linux apps opened from the app launcher (apt, the Store) | yes, a normal process | **no** by default; with "no access to your files", their own namespaces and Landlock | yes, `app-lordos-<id>.scope`, no limits | **no** | **yes**, plus the restrictions you set (camera, microphone, USB, Bluetooth, files, notifications) |
-| Programs started from the Terminal | yes | no | they share the Terminal's place in the tree | no | as "Terminal", with its own rules (since 0.8.5; before, as "LordOS") |
+| Programs started from the Terminal | yes | no | they share the Terminal's place in the tree | no | as "Terminal", with its own rules (since 0.8.5; before, as "Insane OS") |
 
-So: **Linux apps are not sandboxed by default.** They run as your user, exactly as on any Debian system, and can read your home folder. What LordOS adds for them is attribution (the Monitor knows which app made each connection), the kernel-enforced per-app firewall, and the restrictions you choose for an app: no camera, no microphone, no USB, no Bluetooth sockets, no notifications, and "no access to your files", which from its next launch starts the app in its own namespaces with an empty home folder holding only its own folders. Flatpak is not used or integrated by LordOS, and it hasn't been tested.
+So: **Linux apps are not sandboxed by default.** They run as your user, exactly as on any Debian system, and can read your home folder. What Insane OS adds for them is attribution (the Monitor knows which app made each connection), the kernel-enforced per-app firewall, and the restrictions you choose for an app: no camera, no microphone, no USB, no Bluetooth sockets, no notifications, and "no access to your files", which from its next launch starts the app in its own namespaces with an empty home folder holding only its own folders. Flatpak is not used or integrated by Insane OS, and it hasn't been tested.
 
 Built-in apps are part of the system's own code, reviewed with it; most don't get the per-process isolation that third-party packages get. The exceptions are Passwords, because it holds your secrets, and, since 0.8.2, Mail, Calendar, Contacts and Reminders, because they read what arrives from the internet: each one runs as its own sandboxed process and reaches mail and your keyring only through broker requests allowed for that app alone.
 
 ## How the sandbox works
 
-The sandbox is LordOS's own code (`server/src/sec/sandbox.c`), not bubblewrap, Flatpak or firejail. It uses kernel features directly, and it is applied **after** the app connects to the compositor and to the broker, and **before** any line of the app's code is loaded.
+The sandbox is Insane OS's own code (`server/src/sec/sandbox.c`), not bubblewrap, Flatpak or firejail. It uses kernel features directly, and it is applied **after** the app connects to the compositor and to the broker, and **before** any line of the app's code is loaded.
 
 [[diagram:sandbox]]
 
@@ -40,7 +40,7 @@ The sandbox is LordOS's own code (`server/src/sec/sandbox.c`), not bubblewrap, F
 - **A cgroup of its own**, `app-lordos-lpk-<id>.scope`, with a soft memory limit of 192 MB, a hard one of 512 MB and at most one CPU core. The scope is created and owned by root (`lord-sessiond`), so the app can't move itself elsewhere.
 - **Network only with permission.** Without the `network` permission, seccomp refuses to create internet sockets and Landlock refuses TCP connect and bind. With it (declared in the manifest **and** allowed by you), they are allowed, and the per-app firewall still applies.
 
-**Are namespaces used?** Not for `.lpk` apps. `lord-server` runs without root, and creating a network namespace needs privileges it doesn't have. The design uses Landlock, seccomp and cgroups instead, and leaves the app in the machine's network namespace under the rules above. The one place LordOS uses namespaces is a Linux app restricted with "no access to your files": it starts in its own unprivileged user, mount and PID namespaces, built by LordOS's own code in the launcher, so it can't reach the session's sockets.
+**Are namespaces used?** Not for `.lpk` apps. `lord-server` runs without root, and creating a network namespace needs privileges it doesn't have. The design uses Landlock, seccomp and cgroups instead, and leaves the app in the machine's network namespace under the rules above. The one place Insane OS uses namespaces is a Linux app restricted with "no access to your files": it starts in its own unprivileged user, mount and PID namespaces, built by Insane OS's own code in the launcher, so it can't reach the session's sockets.
 
 The project keeps a deliberately malicious test app (`tests/lpk-evil`). It declares no permissions and tries everything at start: reading `~/.ssh/id_rsa` and `settings.json`, writing outside its folder, reading the clipboard silently, opening `/etc/shadow`, opening a socket, running `/bin/sh`, `ptrace`, opening the graphics card. Every attempt is blocked. The sandbox test suite passes 14 of 14 checks for apps, 14 of 14 with network and 17 of 17 for helpers.
 
@@ -78,25 +78,25 @@ Permissions an app can declare: files, clipboard, notifications, network, camera
 
 **Can I make sure an app never gets the camera, whatever it asks?** Yes: restrict it in Settings → Privacy → App network access. A firewall restriction beats any permission: the app is refused without a prompt even if you allowed it before, and restricting a running app takes its camera and microphone away at once. For isolated apps the broker enforces all eight restrictions (camera, microphone, screen, USB, files, clipboard, Bluetooth, notifications).
 
-**What about apps that need more privileges?** There is no way for a `.lpk` app to get root or extra capabilities. Everything in LordOS that needs root goes through a closed list of validated actions (`server/src/admin.c`), and JavaScript can't run arbitrary commands. Linux apps behave as on any Debian system: if a program needs `sudo`, you run it yourself in the Terminal.
+**What about apps that need more privileges?** There is no way for a `.lpk` app to get root or extra capabilities. Everything in Insane OS that needs root goes through a closed list of validated actions (`server/src/admin.c`), and JavaScript can't run arbitrary commands. Linux apps behave as on any Debian system: if a program needs `sudo`, you run it yourself in the Terminal.
 
-## LordOS checks its own code before running it
+## Insane OS checks its own code before running it
 
-Since 0.8.2, every bundle LordOS runs as its own code (the themes with the shell and every native app, the login screen, the host of isolated apps and the system apps that run as their own process) is listed with its SHA-256 in a manifest signed with the LordOS release key (Ed25519). `lord-server` checks the signature with the public key compiled into it, and the hash of each bundle from the same read it loads, so there is no window to swap the file. A bundle that doesn't match is not run: the desktop falls back to another theme and says so, or shows a recovery screen that explains how to repair it, never a blank screen. About LordOS shows "Verified", or "Development build" for an unsigned development tree. This protects against changes by processes that aren't root and against offline modification; root can still replace `lord-server` itself, which a later phase (fs-verity, A/B images) is meant to cover.
+Since 0.8.2, every bundle Insane OS runs as its own code (the themes with the shell and every native app, the login screen, the host of isolated apps and the system apps that run as their own process) is listed with its SHA-256 in a manifest signed with the Insane OS release key (Ed25519). `lord-server` checks the signature with the public key compiled into it, and the hash of each bundle from the same read it loads, so there is no window to swap the file. A bundle that doesn't match is not run: the desktop falls back to another theme and says so, or shows a recovery screen that explains how to repair it, never a blank screen. About Insane OS shows "Verified", or "Development build" for an unsigned development tree. This protects against changes by processes that aren't root and against offline modification; root can still replace `lord-server` itself, which a later phase (fs-verity, A/B images) is meant to cover.
 
 ## Check it on your own computer (since 0.8.5)
 
-Since 0.8.5, **System Information** (About LordOS → System Report…) has a Checks tab that tests these claims on the computer in front of you: the display server without root, Landlock, the per-app firewall, verified code, the remote desktop closed when it's off, app scopes owned by the system. Each check says whether the mechanism was only found *configured* or was actually *tried*. **Run tests** starts the Sandbox Probe, a hidden test app that starts exactly like any isolated app and tries, inside the same sandbox, what it must not be able to do: your files and the system's, sockets, `ptrace`, a user namespace, `mount`, `exec`, leaving its scope. It also tries what the decoders' sandbox must refuse, and asks the broker for things it must deny. The probe never gets a permission or network access, and nothing is sent anywhere.
+Since 0.8.5, **System Information** (About Insane OS → System Report…) has a Checks tab that tests these claims on the computer in front of you: the display server without root, Landlock, the per-app firewall, verified code, the remote desktop closed when it's off, app scopes owned by the system. Each check says whether the mechanism was only found *configured* or was actually *tried*. **Run tests** starts the Sandbox Probe, a hidden test app that starts exactly like any isolated app and tries, inside the same sandbox, what it must not be able to do: your files and the system's, sockets, `ptrace`, a user namespace, `mount`, `exec`, leaving its scope. It also tries what the decoders' sandbox must refuse, and asks the broker for things it must deny. The probe never gets a permission or network access, and nothing is sent anywhere.
 
 [[shot:6]]
 
 ## The helpers that read untrusted data
 
-Files from outside are the classic way in. LordOS opens them in small separate processes that are locked in even harder than apps: `lord-doc` (PDFs, archives, fonts), `lord-media` (video, music, photos, camera), `lord-maild` (mail, calendars, contacts) and `lord-vault` (passwords). They have no network, can't create sockets, can't run programs and can only create threads, not processes. They don't open paths: `lord-server` opens files and passes them as file descriptors. If seccomp can't be applied, the helper exits rather than run unconfined. A malicious PDF can crash `lord-doc`, but not the desktop. Since 0.8.5 `lord-fetch` (the firewall's blocklists) and `lord-tls` (the Store's HTTPS) are locked in the same way and can't create sockets either: they only get one connection that `lord-server` or the Store opened for them. Since 0.8.7 `lord-lan` reads what comes back from the local network for Files → Network the same way, with no sockets and no files, and `lord-rdesk`, Remote Desk's connection, is sandboxed once it has connected: no new sockets and no programs. LordBench's `lord-bench` (since 0.8.6) runs its workloads under the same lock.
+Files from outside are the classic way in. Insane OS opens them in small separate processes that are locked in even harder than apps: `lord-doc` (PDFs, archives, fonts), `lord-media` (video, music, photos, camera), `lord-maild` (mail, calendars, contacts) and `lord-vault` (passwords). They have no network, can't create sockets, can't run programs and can only create threads, not processes. They don't open paths: `lord-server` opens files and passes them as file descriptors. If seccomp can't be applied, the helper exits rather than run unconfined. A malicious PDF can crash `lord-doc`, but not the desktop. Since 0.8.5 `lord-fetch` (the firewall's blocklists) and `lord-tls` (the Store's HTTPS) are locked in the same way and can't create sockets either: they only get one connection that `lord-server` or the Store opened for them. Since 0.8.7 `lord-lan` reads what comes back from the local network for Files → Network the same way, with no sockets and no files, and `lord-rdesk`, Remote Desk's connection, is sandboxed once it has connected: no new sockets and no programs. InsaneBench's `lord-bench` (since 0.8.6) runs its workloads under the same lock.
 
 ## Protected windows
 
-A window can be marked protected. Passwords is. Its pixels come out black in LordOS screenshots, screen recordings, thumbnails and the remote desktop, while the real monitor shows it normally. Linux apps can't capture the screen through LordOS: the compositor doesn't offer any screen-capture protocol to them, X11 apps (through Xwayland since 0.8.3) only see each other, never Wayland apps, LordOS's screen or Passwords, and a restricted app is also denied the framebuffer device.
+A window can be marked protected. Passwords is. Its pixels come out black in Insane OS screenshots, screen recordings, thumbnails and the remote desktop, while the real monitor shows it normally. Linux apps can't capture the screen through Insane OS: the compositor doesn't offer any screen-capture protocol to them, X11 apps (through Xwayland since 0.8.3) only see each other, never Wayland apps, Insane OS's screen or Passwords, and a restricted app is also denied the framebuffer device.
 
 [[shot:5]]
 
@@ -109,13 +109,13 @@ A window can be marked protected. Passwords is. Its pixels come out black in Lor
 
 ## Read the source
 
-- [server/src/sec/sandbox.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/sandbox.c): Landlock, seccomp, capabilities, network rules
-- [server/src/sec/brokersrv.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/brokersrv.c): the broker, server side
-- [server/src/sec/perms.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/perms.c): per-app permissions
-- [server/src/sec/brokercam.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/brokercam.c): the camera for isolated apps
-- [server/src/sec/restrict.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/restrict.c): firewall restrictions in the broker
-- [server/src/sec/cgroup.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/cgroup.c) and [server/src/remote/cgsup.c](https://github.com/lordbasex/LordOS/blob/main/server/src/remote/cgsup.c): root-owned app scopes
-- [server/src/app/appclient.c](https://github.com/lordbasex/LordOS/blob/main/server/src/app/appclient.c): the isolated app process
-- [sdk/privacy.js](https://github.com/lordbasex/LordOS/blob/main/sdk/privacy.js) and [sdk/powerbox.jsx](https://github.com/lordbasex/LordOS/blob/main/sdk/powerbox.jsx): prompts and the file dialog
-- [server/tests/sandbox_test.c](https://github.com/lordbasex/LordOS/blob/main/server/tests/sandbox_test.c) and [tests/lpk-evil](https://github.com/lordbasex/LordOS/tree/main/tests/lpk-evil): the tests
-- [docs/PRIVACY.md](https://github.com/lordbasex/LordOS/blob/main/docs/PRIVACY.md)
+- [server/src/sec/sandbox.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/sandbox.c): Landlock, seccomp, capabilities, network rules
+- [server/src/sec/brokersrv.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokersrv.c): the broker, server side
+- [server/src/sec/perms.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/perms.c): per-app permissions
+- [server/src/sec/brokercam.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokercam.c): the camera for isolated apps
+- [server/src/sec/restrict.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/restrict.c): firewall restrictions in the broker
+- [server/src/sec/cgroup.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/cgroup.c) and [server/src/remote/cgsup.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/remote/cgsup.c): root-owned app scopes
+- [server/src/app/appclient.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/app/appclient.c): the isolated app process
+- [sdk/privacy.js](https://github.com/lordbasex/Insane OS/blob/main/sdk/privacy.js) and [sdk/powerbox.jsx](https://github.com/lordbasex/Insane OS/blob/main/sdk/powerbox.jsx): prompts and the file dialog
+- [server/tests/sandbox_test.c](https://github.com/lordbasex/Insane OS/blob/main/server/tests/sandbox_test.c) and [tests/lpk-evil](https://github.com/lordbasex/Insane OS/tree/main/tests/lpk-evil): the tests
+- [docs/PRIVACY.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PRIVACY.md)

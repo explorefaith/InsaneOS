@@ -1,7 +1,7 @@
 #!/bin/sh
 # bare-metal-gates.sh — Machines' three release gates (disk integrity, failure recovery, leaks; docs/VIRTUALIZATION.md
-# 12 and 3.9, "Bare-metal gates") on a physical amd64 PC with VT-x or AMD-V, from the LordOS live USB or an installed
-# LordOS, and one results file to attach to the release notes or an issue. Runs as the session user, never as root.
+# 12 and 3.9, "Bare-metal gates") on a physical amd64 PC with VT-x or AMD-V, from the Insane OS live USB or an installed
+# Insane OS, and one results file to attach to the release notes or an issue. Runs as the session user, never as root.
 #
 #   sh tools/vm/bare-metal-gates.sh [--lord-vm DIR] [--image FILE] [--work DIR] [--cycles N] [--out FILE]
 #
@@ -19,7 +19,7 @@
 # Exit status: 0 when the three gates pass, 1 when one fails, 2 when the PC can't run them.
 set -u
 here=$(cd "$(dirname "$0")" && pwd)
-tests=$(cd "$here/../../server/tests" 2>/dev/null && pwd) || { echo "run it from the LordOS source tree (server/tests is missing)"; exit 2; }
+tests=$(cd "$here/../../server/tests" 2>/dev/null && pwd) || { echo "run it from the Insane OS source tree (server/tests is missing)"; exit 2; }
 BIN=/usr/lib/lordos/bin IMG= WORK=/var/tmp N=100 OUT=
 while [ $# -gt 0 ]; do
     case $1 in
@@ -69,9 +69,9 @@ fi
 
 # ---- the results file: this PC, then each gate ----
 {
-    echo "LordOS Machines release gates, $([ "$virt" = none ] && echo 'bare metal' || echo "NOT bare metal: a $virt virtual machine (GATES_ALLOW_VM)")"
+    echo "Insane OS Machines release gates, $([ "$virt" = none ] && echo 'bare metal' || echo "NOT bare metal: a $virt virtual machine (GATES_ALLOW_VM)")"
     echo "date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    echo "system:    $(. /etc/os-release 2>/dev/null; echo "${PRETTY_NAME:-?}"), LordOS $(dpkg-query -W -f '${Version}' lordos 2>/dev/null || echo 'not installed')$( [ -d /run/live ] && echo ', live USB')"
+    echo "system:    $(. /etc/os-release 2>/dev/null; echo "${PRETTY_NAME:-?}"), Insane OS $(dpkg-query -W -f '${Version}' lordos 2>/dev/null || echo 'not installed')$( [ -d /run/live ] && echo ', live USB')"
     echo "kernel:    $(uname -r)"
     echo "cpu:       $(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo | head -1), $(nproc) threads, $(grep -qw vmx /proc/cpuinfo && echo VT-x || echo AMD-V)"
     echo "board:     $(cat /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name 2>/dev/null | tr '\n' ' ')"

@@ -204,7 +204,7 @@ function readImport(path) {
   const head = String.fromCharCode(...new Uint8Array(bytes.slice(0, 8)));
   if (head === 'bplist00') return importIterm(bytes, path, fontsApi());
   const text = fs.read(rel);
-  // a LordTerminal export (or a terminal.json): its profiles, schemes and key mappings as they are
+  // a InsaneTerminal export (or a terminal.json): its profiles, schemes and key mappings as they are
   if (/^\s*\{/.test(text)) {
     let data = null;
     try { data = parseConfig(text); } catch (e) { data = null; }
@@ -256,7 +256,7 @@ function ImportPanel({ t, onClose, onDone }) {
     let added = 0;
     for (const np of result.profiles) {
       if (!pick[np.id]) continue;
-      // the same iTerm2 profile, or (a LordTerminal export) the same profile id: replaced, not duplicated
+      // the same iTerm2 profile, or (a InsaneTerminal export) the same profile id: replaced, not duplicated
       let i = np.itermGuid ? profiles.findIndex((x) => x.itermGuid === np.itermGuid) : -1;
       if (i < 0 && result.kind === 'lordos') i = profiles.findIndex((x) => x.id === np.id);
       // the default profile is never replaced by one that types into the shell by itself (every new tab would run

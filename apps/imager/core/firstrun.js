@@ -34,7 +34,7 @@ export function check(cfg, secrets = {}) {
 
 // The file. Only what was chosen is written; everything else keeps the image's defaults.
 export function build(cfg, { passwordHash, psk } = {}) {
-  const L = ['# LordOS first-run settings, written by the LordOS Imager.',
+  const L = ['# Insane OS first-run settings, written by the Insane OS Imager.',
     '# Read once on the first boot by lordos-firstrun and then deleted. docs/IMAGER.md', 'version=1'];
   const put = (k, val) => { if (val !== undefined && val !== null && val !== '') L.push(`${k}=${val}`); };
   const bool = (k, b) => L.push(`${k}=${b ? 1 : 0}`);

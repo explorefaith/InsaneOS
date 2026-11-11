@@ -1,9 +1,9 @@
 {
   "scenes": [
     { "id": "intro", "kind": "title", "cues": [
-      { "en": "LordOS Imager writes LordOS to an SD card or a USB stick, and sets up the Raspberry Pi 5's first boot.",
-        "es": "LordOS Imager graba LordOS en una tarjeta SD o un pendrive y prepara el primer arranque de la Raspberry Pi 5.",
-        "pt": "O LordOS Imager grava o LordOS em um cartão SD ou pendrive e prepara o primeiro boot do Raspberry Pi 5." },
+      { "en": "Insane OS Imager writes Insane OS to an SD card or a USB stick, and sets up the Raspberry Pi 5's first boot.",
+        "es": "Insane OS Imager graba Insane OS en una tarjeta SD o un pendrive y prepara el primer arranque de la Raspberry Pi 5.",
+        "pt": "O Insane OS Imager grava o Insane OS em um cartão SD ou pendrive e prepara o primeiro boot do Raspberry Pi 5." },
       { "en": "Here is every step, screen by screen.",
         "es": "Acá está cada paso, pantalla por pantalla.",
         "pt": "Aqui está cada passo, tela por tela." }
@@ -21,9 +21,9 @@
     ]},
     { "id": "image", "shot": "02-image", "step": 2, "title": "Choose the system image", "cues": [
       { "box": [431, 186, 1123, 154],
-        "en": "The latest LordOS release is already selected and marked Signed by LordOS.",
-        "es": "La última versión de LordOS ya viene elegida y marcada Firmada por LordOS.",
-        "pt": "A versão mais recente do LordOS já vem escolhida e marcada Assinada pelo LordOS." },
+        "en": "The latest Insane OS release is already selected and marked Signed by Insane OS.",
+        "es": "La última versión de Insane OS ya viene elegida y marcada Firmada por Insane OS.",
+        "pt": "A versão mais recente do Insane OS já vem escolhida e marcada Assinada pelo Insane OS." },
       { "box": [431, 466, 1121, 128],
         "en": "The download is kept for the next card. You can also use an image file of your own.",
         "es": "La descarga se guarda para la próxima tarjeta. También podés usar un archivo de imagen propio.",
@@ -68,9 +68,9 @@
     ]},
     { "id": "remote", "shot": "08-tab-remote", "step": 4, "title": "Remote access", "cues": [
       { "box": [735, 276, 183, 46],
-        "en": "Remote access offers remote login with keys, and LordOS remote desktop on your local network.",
-        "es": "Acceso remoto ofrece el inicio de sesión remoto con claves y el escritorio remoto de LordOS en tu red local.",
-        "pt": "Acesso remoto oferece o login remoto com chaves e a área de trabalho remota do LordOS na sua rede local." }
+        "en": "Remote access offers remote login with keys, and Insane OS remote desktop on your local network.",
+        "es": "Acceso remoto ofrece el inicio de sesión remoto con claves y el escritorio remoto de Insane OS en tu red local.",
+        "pt": "Acesso remoto oferece o login remoto com chaves e a área de trabalho remota do Insane OS na sua rede local." }
     ]},
     { "id": "look", "shot": "09-tab-look", "step": 4, "title": "Appearance", "cues": [
       { "box": [924, 276, 155, 46],
@@ -80,9 +80,9 @@
     ]},
     { "id": "cooling", "shot": "10-tab-cooling", "step": 4, "title": "Cooling", "cues": [
       { "box": [1084, 276, 113, 46],
-        "en": "Tell LordOS what keeps the board cool, and it picks the fan curve to match.",
-        "es": "Contale a LordOS qué enfría la placa y elige la curva del ventilador que corresponde.",
-        "pt": "Conte ao LordOS o que resfria a placa e ele escolhe a curva da ventoinha certa." },
+        "en": "Tell Insane OS what keeps the board cool, and it picks the fan curve to match.",
+        "es": "Contale a Insane OS qué enfría la placa y elige la curva del ventilador que corresponde.",
+        "pt": "Conte ao Insane OS o que resfria a placa e ele escolhe a curva da ventoinha certa." },
       { "box": [431, 427, 245, 282],
         "en": "A closed case with its own fan on the board's fan connector? Choose Case with a fan.",
         "es": "¿Una caja cerrada con su propio ventilador en el conector de la placa? Elegí Caja con ventilador.",
@@ -97,9 +97,9 @@
     ]},
     { "id": "more", "shot": "12-tab-more", "step": 4, "title": "More", "cues": [
       { "box": [1202, 276, 88, 46],
-        "en": "And a promise: LordOS collects nothing.",
-        "es": "Y una promesa: LordOS no recopila nada.",
-        "pt": "E uma promessa: o LordOS não coleta nada." }
+        "en": "And a promise: Insane OS collects nothing.",
+        "es": "Y una promesa: Insane OS no recopila nada.",
+        "pt": "E uma promessa: o Insane OS não coleta nada." }
     ]},
     { "id": "profiles", "shot": "13-profiles", "step": 4, "title": "Profiles", "cues": [
       { "en": "Save it all as a profile for the next card. Passwords are never saved.",
@@ -157,9 +157,9 @@
         "pt": "Em cerca de um minuto, a tela de login mostra a sua conta." }
     ]},
     { "id": "end", "kind": "end", "cues": [
-      { "en": "LordOS Imager is free and open source. Welcome home!",
-        "es": "LordOS Imager es libre y de código abierto. ¡Bienvenida a casa!",
-        "pt": "O LordOS Imager é livre e de código aberto. Bem-vindo!" }
+      { "en": "Insane OS Imager is free and open source. Welcome home!",
+        "es": "Insane OS Imager es libre y de código abierto. ¡Bienvenida a casa!",
+        "pt": "O Insane OS Imager é livre e de código aberto. Bem-vindo!" }
     ]}
   ]
 }

@@ -1,5 +1,5 @@
 // wayland.js — ventanas de apps Linux (GTK, Qt, foot…) que se conectan al compositor Wayland
-// de lord-server (server/src/wl). Para el tema son ventanas como las de las apps LordOS: entran
+// de lord-server (server/src/wl). Para el tema son ventanas como las de las apps Insane OS: entran
 // en el gestor con la app interna 'linux' y su id es 'linux#<superficie>'.
 //
 // Those that ask for server-side decoration (Qt, foot) get the theme's frame; those that draw their
@@ -156,7 +156,7 @@ function sync() {
     const key = (st.maximized ? 1 : 0) | (st.iconic ? 2 : 0) | (st.parked ? 4 : 0);
     if (lastState.get(s) !== key) { lastState.set(s, key); lord.wayland.state(s, st.maximized, false, st.iconic, st.parked); }
   }
-  // search, the launcher, a sheet or a system prompt is open: the keys are LordOS's, not the app's
+  // search, the launcher, a sheet or a system prompt is open: the keys are Insane OS's, not the app's
   const f = keyboardSurface(list, active, shellHasKeyboard(), surfaceOf);
   if (f !== lastFocus) { lastFocus = f; lord.wayland.focus(f, !!f && isTerminalEmulator(focusedOn(list, active))); }
 }

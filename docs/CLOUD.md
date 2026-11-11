@@ -1,8 +1,8 @@
 # Cloud
 
-The design of **Cloud**, LordOS's layer over the person's cloud storage accounts: every account in one place, browsed and shared
+The design of **Cloud**, Insane OS's layer over the person's cloud storage accounts: every account in one place, browsed and shared
 from Files, set up and watched from Settings, backed up to by Backups, with files that live in the cloud and come down when they
-are opened. The engine is [rclone](https://rclone.org) (MIT, the same license as LordOS); everything the person sees is ours.
+are opened. The engine is [rclone](https://rclone.org) (MIT, the same license as Insane OS); everything the person sees is ours.
 
 Target release: **0.8.8.5**, all of it in one release (decided 2026-11-06). Phase 0 is measured (section 15); Phase 1
 (the core, section 17.1, and the interface, section 18) is built and merged on branch `cloud`.
@@ -13,7 +13,7 @@ How to read it:
   haven't reproduced it. **To test** means nobody here has run it.
 - Providers appear by the names rclone gives them, as plain text, only where the person has to pick one or sees which one an
   account is (Add Account, an account's provider line, "Open website"): the one exception to [the brand rule](../tools/brand-check.mjs)
-  (17.2 item 2). No provider logos or trade dress; LordOS draws its own glyphs. Other operating systems' cloud features are
+  (17.2 item 2). No provider logos or trade dress; Insane OS draws its own glyphs. Other operating systems' cloud features are
   never named anywhere else.
 
 Mocks of every screen: https://claude.ai/artifact/FosCD4rEoU5Jr8ZM5K8oyq (private to the maintainer).
@@ -31,7 +31,7 @@ Mocks of every screen: https://claude.ai/artifact/FosCD4rEoU5Jr8ZM5K8oyq (privat
 5. **Sharing from Files.** A link to a file or folder, copied in one click, with an expiry where the provider has one, and
    **Stop Sharing**.
 6. **Backups to the cloud.** The Backups app can put scheduled, encrypted backups in a folder of an account.
-7. **Same security model as the rest of LordOS** (section 4): no open port, the interface can't run commands, each account's
+7. **Same security model as the rest of Insane OS** (section 4): no open port, the interface can't run commands, each account's
    tokens stay in the keyring.
 
 Non-goals for 0.8.8.5: two-way sync of a local folder such as Desktop or Documents (section 13), serving a folder to the local
@@ -58,7 +58,7 @@ Debian 13 has rclone **1.60.1** (Reported: packages.debian.org, trixie 1.60.1+df
 upload queue in rc, bisync over rc and several providers' current APIs are newer. rclone has no apt repository of its own.
 
 **Decided:** a package of our own, `lordos-rclone`, built from the upstream release tag's source with Go (reproducible, `-trimpath`,
-both architectures), signed and published in LordOS's apt repository like `lordos-hwdata`. It installs to
+both architectures), signed and published in Insane OS's apt repository like `lordos-hwdata`. It installs to
 `/usr/lib/lordos/rclone/rclone`, so it never fights Debian's `/usr/bin/rclone`. `lordos` depends on it, so it is preinstalled and
 comes with updates. Connect to Server moves to the same binary (`RCLONE` in `rconnect.c`). Which upstream version: the newest stable
 release when 0.8.8.5 is built, at least the one that has every rc call in section 5 (To test, Phase 0).
@@ -89,7 +89,7 @@ there: the scope and the socket are the boundary.
 - **Authentication even on the socket**: a random user and password per start, so `--rc-no-auth` is never used. As built:
   not `--rc-user`/`--rc-pass` (the command line is readable by every user) but `--rc-htpasswd /proc/self/fd/3`, a memfd with
   one bcrypt line (cost 4: the password is 32 random bytes); `lord-server` keeps the password in memory for Basic auth.
-- **Configuration**: rclone's is in memory only (`--config ""`). `~/.config/lordos/cloud/rclone.conf` (0600) is LordOS's own
+- **Configuration**: rclone's is in memory only (`--config ""`). `~/.config/lordos/cloud/rclone.conf` (0600) is Insane OS's own
   record of each account's type and non-secret options, with **no secrets in it**: tokens and passwords are in the keyring
   (section 6) and given to rclone per account through `config/create` at each start, kept in its memory.
 - **Restart**: Settings → Cloud → Service → **Restart** (and automatically after a crash, at most 5 times a minute, as Machines'
@@ -209,11 +209,11 @@ not offered.
 
 Client IDs (decided 2026-11-06): **0.8.8.5 uses rclone's own built-in OAuth client IDs.** `lordos-rclone` is upstream rclone,
 unpatched, so the person is signing in to rclone, exactly as with Debian's or any distribution's rclone package. Nothing hides it:
-the provider's consent page names rclone, and the sign-in sheet says so ("Signing in uses rclone, the open source engine LordOS
+the provider's consent page names rclone, and the sign-in sheet says so ("Signing in uses rclone, the open source engine Insane OS
 uses for Cloud. The provider's page will ask you to allow rclone."). rclone's IDs are shared by every rclone user, and some
 providers rate-limit them (Reported: rclone's docs recommend your own ID for the largest drive). So each account has, under
-Advanced, **Use my own client ID** (client ID and secret, to the keyring), and later LordOS can register its own apps (owner
-account iPERFEX, identity lordos.org: name LordOS, home page and privacy policy on lordos.org) and ship them in
+Advanced, **Use my own client ID** (client ID and secret, to the keyring), and later Insane OS can register its own apps (owner
+account iPERFEX, identity lordos.org: name Insane OS, home page and privacy policy on lordos.org) and ship them in
 `assets/cloud/oauth.json`, read by `lord-server`, without changing anything else.
 
 Redirect address (decided 2026-11-06): the sign-in returns to rclone on `127.0.0.1:53682` on the person's own computer, the
@@ -252,7 +252,7 @@ Context menu on files and folders of an account: **Keep on This Computer** / **F
 
 - rclone's VFS with `--vfs-cache-mode full` already fetches on open and keeps what was read; uploads changed files after
   `--vfs-write-back 5s`.
-- **LordOS decides what stays**, not rclone: the mount runs with `--vfs-cache-max-age 100y` and no `--vfs-cache-max-size`, so
+- **Insane OS decides what stays**, not rclone: the mount runs with `--vfs-cache-max-age 100y` and no `--vfs-cache-max-size`, so
   rclone never evicts on its own. `lord-server`'s cloud manager evicts instead:
   - **Free Up Space** on a file or folder: for each clean file (not open, not in `vfs/queue`, not kept), the cached copy is
     dropped. How: rclone has no evict call (Reported); Phase 0 tests dropping the cache file and its metadata in
@@ -321,7 +321,7 @@ the list in 4.2: it would read the whole account; To decide whether to offer it 
 
 **Share Link…** opens a sheet: the link (`operations/publiclink`), **Copy**, an expiry where the provider supports one (`expire`:
 1 day, 7 days, 30 days, never), and **Stop Sharing** (`unlink`) where the provider supports it. Providers without public links
-show **Open on Website** instead. The links made from LordOS are listed in Settings → Cloud → the account → **Shared Links**, from
+show **Open on Website** instead. The links made from Insane OS are listed in Settings → Cloud → the account → **Shared Links**, from
 `~/.config/lordos/cloud/links.json` (rclone can't list links), each with Copy and Stop Sharing.
 
 ## 10. Backups to Cloud
@@ -331,7 +331,7 @@ The Backups app gets a third kind of destination, **Cloud**: an account and a fo
 - Clouds have no hard links, so the snapshot layout of docs/SYSTEM.md can't be used. The cloud layout:
 
 ```
-<account>:<folder>/LordOS-Backups/<host>-<user>/
+<account>:<folder>/Insane OS-Backups/<host>-<user>/
 ├── current/                  the home folder as of the last backup
 ├── versions/2026-11-06-020000/   what that run replaced or deleted, as it was before (rclone --backup-dir)
 ├── manifests/2026-11-06-020000.json.zst   every path of that snapshot: size, mtime, mode, hash
@@ -353,7 +353,7 @@ The Backups app gets a third kind of destination, **Cloud**: an account and a fo
 A cloud glyph by the clock while at least one account exists: still when idle, with a moving arrow while transferring, with a
 badge for errors or waiting changes. Its panel: each account's state (up to date, syncing with the file and percentage, paused,
 needs sign-in), the last changes (file, account, up or down, time) with **Show in Files**, **Pause All** / **Resume**, and
-**Cloud Settings…**. Following the Lord Classic rule (#29), the panel opens toward the middle of the screen.
+**Cloud Settings…**. Following the Insane Classic rule (#29), the panel opens toward the middle of the screen.
 
 ## 12. Settings → Cloud
 
@@ -364,7 +364,7 @@ In Settings' second group, next to Sharing, glyph `☁`, color `#0a84ff`:
 2. **On this computer**: cache use per account, the free-space threshold (7.2), **Free Up Space**.
 3. **Bandwidth**: upload and download limits, "Pause on battery", "Pause on metered networks".
 4. **Service**: state (running, its version, uptime, memory), **Restart**, **Show Log** (opens the Logs app on the unit),
-   and a line "Only LordOS can reach it: it listens on no network address."
+   and a line "Only Insane OS can reach it: it listens on no network address."
 5. **About rclone**: version, MIT license, link to rclone.org.
 
 ## 13. Later
@@ -385,7 +385,7 @@ Camera and Photos; a cloud's shared-with-me folder where the provider exposes it
 
 Run on 2026-11-06 with rclone **v1.75.2** built from its tag's source with Go 1.26.10 (`CGO_ENABLED=0 go build -trimpath`; since
 17.2 item 7 the package carries rclone's official release binary instead, the same version), on
-VM 116 (Debian 13.7, amd64) and the Raspberry Pi 5 (arm64, LordOS 0.8.8.4). v1.76.0 came out the same day; 0.8.8.5 takes the newest
+VM 116 (Debian 13.7, amd64) and the Raspberry Pi 5 (arm64, Insane OS 0.8.8.4). v1.76.0 came out the same day; 0.8.8.5 takes the newest
 patch release when it is built. Probe: `tools/cloud/phase0.sh` (a local `rclone serve webdav` stands in for the cloud). Same
 results on both architectures unless a number says otherwise.
 
@@ -521,7 +521,7 @@ contract above leaves open, and the few places the core differs from it:
   `cloud.authFailed`, `cloud.mountFailed`, `cloud.folderNotEmpty`, `cloud.addFailed`…; `message` is rclone's own text).
   `about` has `used` always and the others only when the provider gives them.
 - `pause(null)` / `resume(null)`: Pause All (`options.pauseAll`); `resume(null)` also resumes each account.
-- `pauseOnMetered` is kept but does nothing yet: LordOS's network service doesn't say whether a network is metered.
+- `pauseOnMetered` is kept but does nothing yet: Insane OS's network service doesn't say whether a network is metered.
 - `showLog()` opens Logs on `~/.cache/lordos/cloud.log` (`wm.open('logs', { args: { file: 'cloud.log' } })`; Logs reads
   `args.file` since this branch).
 - Not in the core: per-account options (`setAccountOptions`, `account.options`: rclone's bandwidth limit is one for the
@@ -551,7 +551,7 @@ Decisions taken while building it:
   the service) and adds below them section 12's **Bandwidth** (upload and download limits, pause on battery, pause on
   metered networks) and **About rclone** (version, MIT license, rclone.org). **Show Log** sits next to Restart.
   **Add Account…** is in Settings' title bar, beside "Cloud", as in the mock.
-- Sizes use LordOS's own `formatBytes` (1024-based, like the rest of the system), so the mocks' "612 GB" reads 570 GB.
+- Sizes use Insane OS's own `formatBytes` (1024-based, like the rest of the system), so the mocks' "612 GB" reads 570 GB.
 - **Providers**: groups as in the mock (the encrypted folder with object storage, last). Each group shows the first
   five (browser), three (server) or two (object storage) in the order `providers()` gives, and a **More…** tile with
   the rest; a group with only one more shows it instead of a "1 more" tile. Search looks at the label, the hint and
@@ -570,7 +570,7 @@ Decisions taken while building it:
 - **Copy Link** copies the existing link, or makes one for 7 days. The account's Shared links are `links(id)`.
 - Notifications go out as Settings' (sign-in, full) and Files' (conflict), so Settings → Notifications governs them.
 - Right to left: every row uses logical edges (`insetInlineEnd`, `textAlign: 'start'`), the chevrons and the back
-  button turn; the bars and rings fill left to right in every language, as LordOS's other gauges.
+  button turn; the bars and rings fill left to right in every language, as Insane OS's other gauges.
 
 What the interface needs beyond section 17 (both optional: without them the interface works and says less):
 
@@ -586,12 +586,12 @@ What the interface needs beyond section 17 (both optional: without them the inte
 
 ## 19. Verified providers
 
-rclone offers far more providers than anyone has tried on LordOS. The Add Account sheet says which were checked here and
+rclone offers far more providers than anyone has tried on Insane OS. The Add Account sheet says which were checked here and
 asks people to check the rest. Decided 2026-11-06 with the maintainer.
 
 ### 19.1 The list
 
-`assets/cloud/providers.json` names the kinds verified on LordOS, each with `since` (the release), `date` and `evidence`:
+`assets/cloud/providers.json` names the kinds verified on Insane OS, each with `since` (the release), `date` and `evidence`:
 `"maintainer test: <what>"` or `"issue #N"` (a person's Check This Account report on GitHub). A kind goes in only when it
 was really checked end to end. Today:
 
@@ -611,7 +611,7 @@ ownCloud server was tried.
 
 The verified providers come first, grouped by kind as before. Below them, **Not verified yet** (closed, with how many)
 holds every other provider rclone offers, still addable, with the line "These work through rclone, but nobody has
-confirmed them on LordOS yet. Using one? Check it and tell us, and we'll mark it verified." and **Tell Us on GitHub**.
+confirmed them on Insane OS yet. Using one? Check it and tell us, and we'll mark it verified." and **Tell Us on GitHub**.
 Search looks in both parts and opens the second when it has matches.
 
 For a browser sign-in provider not verified yet, the sheet asks before Continue: **Sign in with rclone's app** (the
@@ -641,7 +641,7 @@ a problem). `sdk/cloudcheck.js` runs it with `lord.fs` and `cloud.*` only, each 
    scratch folder of the home, which goes to the Trash and out of it. Runs even when an earlier step failed.
 10. **Delete it in the cloud**: gone from a fresh listing and nothing of it waiting to go up, 1 minute at most.
 
-Then a **report** with nothing personal: LordOS version and architecture, rclone's version, the provider's kind and
+Then a **report** with nothing personal: Insane OS version and architecture, rclone's version, the provider's kind and
 label, whether it is verified, **own app: yes/no** (no IDs), which `about` fields the provider gives (not their values),
 whether it has links, each step's result, time and a fixed note word (never an error's text, which can hold a path), and
 the totals. No account name, email, file names but the check's, links or tokens. **Copy Report** and **Tell Us on GitHub**.
@@ -649,8 +649,8 @@ the totals. No account name, email, file names but the check's, links or tokens.
 ### 19.4 GitHub
 
 `.github/ISSUE_TEMPLATE/cloud-provider.yml` is an issue form (label `cloud-provider`): provider, does it work (yes, partly,
-no), the report, LordOS version, anything else. **Tell Us on GitHub** opens
-`https://github.com/lordbasex/LordOS/issues/new?template=cloud-provider.yml&title=Cloud provider: <label>&provider=<label>&version=…&report=…`
+no), the report, Insane OS version, anything else. **Tell Us on GitHub** opens
+`https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud provider: <label>&provider=<label>&version=…&report=…`
 (every value URL-encoded) in the default browser; the report is cut at a line, with "[truncated]", so the address stays
 under 7000 characters. From the Add Account sheet's line the same address goes without a report. A maintainer who
 confirms a report adds the kind to `providers.json` with `"evidence": "issue #N"`.
@@ -681,7 +681,7 @@ confirms a report adds the kind to `providers.json` with `"evidence": "issue #N"
 7. **`lordos-rclone` repackages rclone's official release binary**: `tools/iso/mkdeb-rclone.sh` downloads the release's
    `.zip` and `SHA256SUMS`, verifies the PGP signature with Nick Craig-Wood's key (fingerprint
    `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`, pinned in the script, key file in `packaging/keys/`), checks the hash, and puts
-   the unmodified binary in `/usr/lib/lordos/rclone/rclone`. It is published in LordOS's own apt repository with each release
+   the unmodified binary in `/usr/lib/lordos/rclone/rclone`. It is published in Insane OS's own apt repository with each release
    (rclone has no apt repository of its own), so Store → Updates and `apt` keep it current. No Go on the build host.
 
 ### 18.1 The interface of 17.2 (items 1 to 6)
@@ -753,7 +753,7 @@ the sign-in page opened more than once. Now:
 3. **Questions.** `add` always answers through `{ req }` (a Promise in the SDK) when its arguments pass: `{ id }`, `{ question:
    { state, name, help, type, examples: [{ value, help }], isPassword, required, exclusive, default } }` or `{ error, message
    }`. `state` is `"<account id>:<rclone's state>"`; `answer(state, value)` runs `config/update` with `opt.continue`,
-   `state`, `result` (and `obscure`) and answers the same three ways. LordOS answers only `config_refresh_token` and
+   `state`, `result` (and `obscure`) and answers the same three ways. Insane OS answers only `config_refresh_token` and
    `config_is_local` itself; every other question goes to the person. While a new account waits for an answer it is in the
    state with `configuring: true`; if its setup ends in an error it is removed (`config/delete`), and an existing one being
    updated stays as it was with the error. Secret answers that rclone keeps as options go to the keyring with the rest
@@ -860,7 +860,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
 12. **Options JS may set (B5, 4.2).** Only an allow-list per kind: rclone's non-advanced, non-hidden options of that
     backend, minus every option `cloud_option_refused` catches, which is applied again to whatever goes to `config/create`:
     names ending `_command`, `_file`, `_path`, `_socket`, `_dir`, `_cmd`, `_exec` or `_agent`; `ssh` (sftp's external ssh
-    command), `server_command`, `key_use_agent`, `ssh_agent`, `unix_socket`, `known_hosts_file` (LordOS sets it, item 14),
+    command), `server_command`, `key_use_agent`, `ssh_agent`, `unix_socket`, `known_hosts_file` (Insane OS sets it, item 14),
     `env_auth`, `use_msi`, `use_az`, `use_cli`, the proxies, `auth_url`, `token_url`, `client_credentials`, every `config_*`;
     and every option whose type isn't plain data (string, int, bool, size, duration, tristate, float, comma list, encoding,
     bits, time): sftp's `ssh` is a `SpaceSepList`. Keys go as content (`key_pem`). `cloud.add('sftp', …, { ssh: 'sh -c …' })`
@@ -927,7 +927,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
 
 ### 18.6 The e2e re-run (U9, U10)
 
-- **U9**: the SFTP form's note is about the server's key ("The first time, LordOS shows the server's key fingerprint…"),
+- **U9**: the SFTP form's note is about the server's key ("The first time, Insane OS shows the server's key fingerprint…"),
   not a certificate.
 - **U10**: `cloud.hostKeyChanged` and `cloud.certChanged` no longer carry `{old}`/`{new}` in their text; the fingerprints
   show apart, in monospace, as **Before** and **Now** (`changedPrints`: the answer's `old`/`new`, else the new one from the

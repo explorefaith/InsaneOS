@@ -50,7 +50,7 @@
  *                                      /etc/chromium/policies/recommended/lordos-session.json and
  *                                      /etc/firefox-esr/lordos-session.js; off: removes both
  *                                      (docs/SESSIONS.md, "Session restore")                 anyone
- *   boot-test <n>                      LordBench's boot time test (bench/boottest.h): n restarts
+ *   boot-test <n>                      InsaneBench's boot time test (bench/boottest.h): n restarts
  *                                      in a row, 2..10; writes only the fixed-format state file
  *                                      /var/lib/lordos/boot-test, which lord-sessiond follows at
  *                                      each boot; refused in the live session                  admin
@@ -104,7 +104,7 @@ int hw_uv_log(const char *log, size_t n, long long *last_s);
 const char *hw_rpi_case_text(const char *id);   /* fixed file text of a known case, NULL otherwise */
 void hw_act_video(const AdminReq *r, const char *arg, size_t len);
 void hw_act_browser_restore(const AdminReq *r, const char *arg, size_t len);
-void hw_act_boot_test(const AdminReq *r, const char *arg, size_t len);          /* LordBench, bench/boottest.h */
+void hw_act_boot_test(const AdminReq *r, const char *arg, size_t len);          /* InsaneBench, bench/boottest.h */
 void hw_act_boot_test_cancel(const AdminReq *r, const char *arg, size_t len);
 /* The two files video-optimize writes, from its argument; 0 if the argument is valid. */
 int hw_video_files(const char *arg, char *chromium, size_t cn, char *firefox, size_t fn);

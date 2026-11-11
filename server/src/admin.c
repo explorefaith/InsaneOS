@@ -1,4 +1,4 @@
-/* admin.c — minimal privileged helper of LordOS (like polkit in GNOME, but with a closed
+/* admin.c — minimal privileged helper of Insane OS (like polkit in GNOME, but with a closed
  * list of actions).
  *
  * lord-server starts as root (to open DRM and evdev) and drops privileges right away.
@@ -49,6 +49,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <grp.h>
 #include <limits.h>
 #include <locale.h>
@@ -389,6 +390,70 @@ static void a_system_locale(const AdminReq *r, const char *a, size_t n) { (void)
 static void a_timezone(const AdminReq *r, const char *a, size_t n) { (void)r; (void)n; act_timezone(a); }
 static void a_langpack(const AdminReq *r, const char *a, size_t n) { (void)r; (void)n; act_langpack(a); }
 
+/* battery-limit: "5".."100" — the charge threshold in percent for every battery that exposes
+ * charge_control_end_threshold (ThinkPads and most modern laptops). 100 lifts the limit. The
+ * value is also kept in /etc/lordos/battery-limit so the boot service re-applies it. */
+static void act_battery_limit(const char *arg) {
+    int pct = atoi(arg && *arg ? arg : "80");
+    if (pct < 5 || pct > 100) pct = 80;
+    FILE *f = fopen("/etc/lordos/battery-limit", "w");
+    if (f) { fprintf(f, "%d\n", pct); fclose(f); }
+    char path[128];
+    for (int i = 0; i < 4; i++) {
+        snprintf(path, sizeof path, "/sys/class/power_supply/BAT%d/charge_control_end_threshold", i);
+        f = fopen(path, "w");
+        if (!f) continue;
+        fprintf(f, "%d", pct);
+        fclose(f);
+    }
+}
+static void a_battery_limit(const AdminReq *r, const char *a, size_t n) { (void)r; (void)n; act_battery_limit(a); }
+
+/* dictate-transcribe: the path of a WAV recorded with lord.media.audioRecord. Finds a
+ * whisper.cpp binary and a ggml model, runs the transcription locally and prints the text
+ * on this action's own output stream (each line arrives at the app as a log line). Nothing
+ * leaves the computer: the helper only reads that one recording. A_FORK: runs in a child
+ * whose fd 3 is the pipe to the app, so whisper's stdout is dup2'ed onto it. */
+static void a_dictate_transcribe(const AdminReq *r, const char *arg, size_t n) {
+    (void)r;
+    char wav[512] = "", bin[512] = "", model[512] = "";
+    if (arg && n && n < sizeof wav) { memcpy(wav, arg, n); wav[n] = 0; }
+    if (!wav[0] || access(wav, R_OK)) { dprintf(3, "dictate: no recording to transcribe\n"); return; }
+    static const char *const bins[] = { "/usr/local/bin/whisper-cli", "/usr/bin/whisper-cli",
+        "/usr/local/bin/whisper.cpp", "/opt/whisper.cpp/build/bin/whisper-cli", NULL };
+    for (int i = 0; bins[i] && !bin[0]; i++) if (!access(bins[i], X_OK)) snprintf(bin, sizeof bin, "%s", bins[i]);
+    if (!bin[0]) { dprintf(3, "dictate: whisper.cpp is not installed (Settings → AI → Dictation)\n"); return; }
+    glob_t g;
+    static const char *const pats[] = { "/usr/local/share/lordos-whisper/ggml-*.bin", "/usr/local/share/whisper/ggml-*.bin",
+        "/root/.cache/whisper/ggml-*.bin", "/home/*/.cache/whisper/ggml-*.bin", "/home/*/.local/share/whisper/ggml-*.bin", NULL };
+    for (int i = 0; pats[i] && !model[0]; i++)
+        if (!glob(pats[i], GLOB_NOSORT, NULL, &g)) {
+            if (g.gl_pathc) snprintf(model, sizeof model, "%s", g.gl_pathv[g.gl_pathc - 1]);
+            globfree(&g);
+        }
+    if (!model[0]) { dprintf(3, "dictate: no ggml model found (Settings → AI → Dictation)\n"); return; }
+    dprintf(3, "\n__DICTATE_BEGIN__\n");
+    dup2(3, 1);
+    execl(bin, "whisper-cli", "-m", model, "-f", wav, "-nt", "-np", "-l", "auto", (char *)NULL);
+    dprintf(3, "dictate: could not run %s\n", bin);
+}
+
+/* optimize-now: the "Speed up" button. Frees the page cache, trims the SSD's unused blocks
+ * and shrinks the system journal; each step's result goes on the action's output stream.
+ * A_FORK: runs in a child whose fd 3 is the pipe to the app. Only fixed commands — the
+ * shell lines take no argument from the caller. */
+static void a_optimize_now(const AdminReq *r, const char *arg, size_t n) {
+    (void)r; (void)arg; (void)n;
+    FILE *f = fopen("/proc/sys/vm/drop_caches", "w");
+    if (f) { fputs("3\n", f); fclose(f); dprintf(3, "page cache freed\n"); }
+    char out[256];
+    FILE *p = popen("fstrim -v / 2>/dev/null", "r");
+    if (p) { while (fgets(out, sizeof out, p)) dprintf(3, "%s", out); pclose(p); }
+    p = popen("journalctl --vacuum-size=128M 2>&1 | tail -n 1", "r");
+    if (p) { while (fgets(out, sizeof out, p)) dprintf(3, "%s", out); pclose(p); }
+    dprintf(3, "done\n");
+}
+
 #endif /* LORD_NETD */
 
 static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
@@ -400,6 +465,8 @@ static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
     { "system-locale", a_system_locale, 0 },
     { "timezone", a_timezone, 0 },
     { "langpack", a_langpack, A_FORK },
+    { "battery-limit", a_battery_limit, 0 },
+    { "optimize-now", a_optimize_now, A_FORK },
     PKG_ADMIN_ACTIONS
     NET_ADMIN_ACTIONS
     INSTALL_ADMIN_ACTIONS

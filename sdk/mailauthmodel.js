@@ -6,7 +6,7 @@
 //   authAfterStatus(authFailed, acct, st) the "password needed" marks after a status event
 
 // 'locked': the keyring exists but is closed (automatic login, or the login password changed outside
-// LordOS): the system prompt can open it. 'missing': this session has no keyring yet; lord-vault
+// Insane OS): the system prompt can open it. 'missing': this session has no keyring yet; lord-vault
 // creates it the next time the person logs in or unlocks the screen with their password (the prompt
 // cannot). 'error': anything else. null: no error.
 export function keyringTrouble(code) {

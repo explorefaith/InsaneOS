@@ -164,8 +164,8 @@ function fwPoll(force) {
 }
 const fwBump = (r) => { firewallState.set((s) => ({ ...s, rev: s.rev + 1 })); fwPoll(true); return r; };
 const fwCall = (fn, dflt) => { try { const api = fwApi(); return api ? fn(api) : dflt; } catch (e) { return dflt; } };
-// A rule can only be applied to an app with its own scope: LordOS, a .desktop app, an .lpk or (0.8.5)
-// one of LordOS's own components with its own scope (lordos:mail, lordos:store, lordos:print,
+// A rule can only be applied to an app with its own scope: Insane OS, a .desktop app, an .lpk or (0.8.5)
+// one of Insane OS's own components with its own scope (lordos:mail, lordos:store, lordos:print,
 // lordos:terminal, lordos:lists). The essential system services (system:dns, system:time,
 // system:network) are shown but never take a rule.
 const fwEnforceable = (app) => app === 'lordos' || /^(desktop|lpk|lordos):/.test(app || '');

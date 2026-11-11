@@ -1,4 +1,4 @@
-/* tpsim.c — simulated touchpad via uinput, for testing the LordOS driver (server/src/tp) in a
+/* tpsim.c — simulated touchpad via uinput, for testing the Insane OS driver (server/src/tp) in a
  * VM without a touchpad. Creates a clickpad similar to a laptop Synaptics (gestures.h) and replays
  * scripted gestures with their real timing. See docs/TRACKPAD.md.
  *
@@ -97,7 +97,7 @@ static int create(int touchscreen) {
     u.id.bustype = touchscreen ? BUS_USB : BUS_I8042;
     u.id.vendor = touchscreen ? 0x0eef : 0x0002;
     u.id.product = touchscreen ? 0x0001 : 0x0007;
-    snprintf(u.name, sizeof u.name, "%s", touchscreen ? "LordOS Pantalla táctil (simulada)" : SIM_NAME);
+    snprintf(u.name, sizeof u.name, "%s", touchscreen ? "Insane OS Pantalla táctil (simulada)" : SIM_NAME);
     if (ioctl(fd, UI_DEV_SETUP, &u) || ioctl(fd, UI_DEV_CREATE)) { perror("tpsim: create device"); close(fd); return -1; }
     char sys[64] = "";
     if (ioctl(fd, UI_GET_SYSNAME(sizeof sys), sys) >= 0) fprintf(stderr, "tpsim: %s created (/sys/devices/virtual/input/%s)\n", u.name, sys);
@@ -178,7 +178,7 @@ static int create_mouse(void) {
     u.id.bustype = BUS_USB;
     u.id.vendor = 0x046d;
     u.id.product = 0x4082;
-    snprintf(u.name, sizeof u.name, "LordOS mouse con rueda de alta resolución (simulado)");
+    snprintf(u.name, sizeof u.name, "Insane OS mouse con rueda de alta resolución (simulado)");
     if (ioctl(fd, UI_DEV_SETUP, &u) || ioctl(fd, UI_DEV_CREATE)) { perror("tpsim: create mouse"); close(fd); return -1; }
     fprintf(stderr, "tpsim: %s created\n", u.name);
     return fd;

@@ -1,11 +1,11 @@
 /* rpifw.h — what the Raspberry Pi firmware says about power and throttling, as the kernel shows it to an
- * unprivileged process (docs/BENCHMARK.md, "The Raspberry Pi firmware's throttling"). Shared by LordBench's
+ * unprivileged process (docs/BENCHMARK.md, "The Raspberry Pi firmware's throttling"). Shared by InsaneBench's
  * guards (bench/lbcond.c) and System Information (sysreport/sysreport.c). World-readable sysfs only: no
  * mailbox (/dev/vcio), no vcgencmd, no exec. Every reader takes a root folder ("" for the real one) so tests
  * can feed fake trees.
  *
  * Two sources, either, both or none:
- *  - the hwmon "rpi_volt" (drivers/hwmon/raspberrypi-hwmon.c), the only one the LordOS rpi-6.18.y kernel has:
+ *  - the hwmon "rpi_volt" (drivers/hwmon/raspberrypi-hwmon.c), the only one the Insane OS rpi-6.18.y kernel has:
  *    it asks GET_THROTTLED every 2 s with the sticky bits cleared each time and exposes in0_lcrit_alarm, the
  *    "under-voltage has occurred" bit of the last answer, so "under-voltage in the last 2 s window";
  *  - the firmware node's get_throttled of older Raspberry Pi kernels (the whole GET_THROTTLED word). With

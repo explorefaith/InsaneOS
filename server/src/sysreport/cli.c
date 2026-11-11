@@ -9,8 +9,8 @@
  * lordos-fetch is a link to this binary. --root <dir> reads a fake tree instead of this machine
  * (tests and fixtures only).
  *
- * bench runs LordBench through lord-server's own code (bench/lbrun.c): the same sandboxed lord-bench
- * and lord-media, which must be next to this binary (it is installed in the LordOS folder; /usr/bin has
+ * bench runs InsaneBench through lord-server's own code (bench/lbrun.c): the same sandboxed lord-bench
+ * and lord-media, which must be next to this binary (it is installed in the Insane OS folder; /usr/bin has
  * links), the same guards and the same result file as System Information → Performance. Without a session
  * the helper gets no cgroup scope and the desktop test can't run. */
 #include "sysreport.h"
@@ -39,7 +39,7 @@ static int usage(int fetch) {
                         "       lordos-sysreport fetch [--share] [--color=auto|always|never]\n"
                         "  report prints this computer's hardware and what the system made of it (no serial\n"
                         "  numbers, addresses, host or user names). Markdown by default.\n"
-                        "  bench measures it with LordBench, as System Information → Performance does: --quick\n"
+                        "  bench measures it with InsaneBench, as System Information → Performance does: --quick\n"
                         "  (default, about half a minute) or --full (adds storage and 3 minutes of sustained load,\n"
                         "  4 to 6 minutes). The result is also saved for the app. Nothing is sent anywhere.\n");
     return 2;
@@ -62,7 +62,7 @@ static int bench_print(const char *json) {
     if (json_parse(json, strlen(json), &d, err, sizeof err)) { puts(json); return 0; }
     const JVal *r = json_get(d.root, "result");
     const char *status = json_str(r, "status"), *stop = json_str(r, "stopReason");
-    printf("LordBench %d, %s test: %s in %.0f s (LordOS %s, %s, %.0f threads)\n", (int)json_num(r, "lordbench", 0),
+    printf("InsaneBench %d, %s test: %s in %.0f s (Insane OS %s, %s, %.0f threads)\n", (int)json_num(r, "lordbench", 0),
            json_str(r, "mode") ? json_str(r, "mode") : "?", status ? status : "?", json_num(r, "seconds", 0),
            json_str(r, "lordos") ? json_str(r, "lordos") : "?", json_str(r, "arch") ? json_str(r, "arch") : "?", json_num(r, "threads", 0));
     if (stop && stop[0]) printf("stopped: %s\n", stop);
@@ -116,7 +116,7 @@ static int bench(int full, int json) {
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
     if (lbrun_start(full ? "full" : "quick", full ? CLI_SUSTAINED_S : 0, "{\"cli\":true}")) {
-        fprintf(stderr, "lordos-sysreport: LordBench did not start: another run is going on, or the lord-bench next to this program is missing or writable by others\n");
+        fprintf(stderr, "lordos-sysreport: InsaneBench did not start: another run is going on, or the lord-bench next to this program is missing or writable by others\n");
         return 1;
     }
     char last[96] = "";

@@ -17,7 +17,7 @@ typedef struct {
     int user;                           /* from ~/.local/share/applications */
 } DesktopApp;
 
-/* Lists the apps visible to LordOS (Type=Application, no NoDisplay/Hidden, OnlyShowIn and
+/* Lists the apps visible to Insane OS (Type=Application, no NoDisplay/Hidden, OnlyShowIn and
  * NotShowIn, TryExec present, not terminal apps). lang = "es-AR": translated names.
  * Returns the count; *out is an internal array valid until the next call. */
 int apps_list(const char *lang, const DesktopApp **out);

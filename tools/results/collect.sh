@@ -1,6 +1,6 @@
 #!/bin/sh
-# collect.sh — the evidence for one machine and one LordOS version, written to results/<version>/<machine>/
-# (docs/RESULTS.md). Run it as the user, inside a LordOS session (the Test Bench is a Wayland client):
+# collect.sh — the evidence for one machine and one Insane OS version, written to results/<version>/<machine>/
+# (docs/RESULTS.md). Run it as the user, inside a Insane OS session (the Test Bench is a Wayland client):
 #
 #   tools/results/collect.sh <machine> [--no-memory] [--no-lordbench] [--bench-seconds N] [--version V]
 #
@@ -11,7 +11,7 @@
 #                    sudo, root's processes too
 #   boot.txt         systemd-analyze, and the time to the desktop's first frame from the kernel's start
 #   boot-times.jsonl every recorded boot on this machine: seconds to the first frame, version, kernel
-#   lordbench.json   lordos-sysreport bench --full --json (LordBench, about 5 minutes; --no-lordbench skips it)
+#   lordbench.json   lordos-sysreport bench --full --json (InsaneBench, about 5 minutes; --no-lordbench skips it)
 #   README.md        when, what version, the conditions to fill in, and these exact commands
 # The version is the installed one (software.lordos in the report); --version names it for a development
 # build, e.g. 0.8.5-dev.
@@ -80,11 +80,11 @@ J() { if sudo -n true 2>/dev/null; then sudo -n journalctl "$@"; else journalctl
 
 # last: its load would disturb the memory and frame times above
 if [ "$LB" = 1 ]; then
-    lordos-sysreport bench --full --json > "$D/lordbench.json" || { rm -f "$D/lordbench.json"; echo "LordBench ended with an error: lordbench.json skipped" >&2; }
+    lordos-sysreport bench --full --json > "$D/lordbench.json" || { rm -f "$D/lordbench.json"; echo "InsaneBench ended with an error: lordbench.json skipped" >&2; }
 fi
 
 cat > "$D/README.md" <<MD
-# $M — LordOS $V
+# $M — Insane OS $V
 
 Collected $(date -u +%Y-%m-%dT%H:%MZ) with \`tools/results/collect.sh $M\` (docs/RESULTS.md); the report's
 own version field says \`$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["software"]["lordos"])' "$D/sysreport.json" 2>/dev/null)\`.
@@ -96,7 +96,7 @@ Reproduce:
 
 \`\`\`sh
 lordos-sysreport report --json > sysreport.json
-lordos-testbench --gl --auto $SECS > testbench.json      # inside a LordOS session
+lordos-testbench --gl --auto $SECS > testbench.json      # inside a Insane OS session
 free -m                                                  # whole system
 sudo sh -c 'for f in /proc/[0-9]*/smaps_rollup; do ...'  # PSS per process: see tools/results/collect.sh
 systemd-analyze

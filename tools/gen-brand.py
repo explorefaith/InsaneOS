@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# gen-brand.py — the LordOS logo (assets/brand/*.svg) and its PNG renders (assets/icons/).
+# gen-brand.py — the Insane OS logo (assets/brand/*.svg) and its PNG renders (assets/icons/).
 #
 #   python3 tools/gen-brand.py          render the PNGs from the SVGs (needs rsvg-convert:
 #                                       `brew install librsvg` or `apt install librsvg2-bin`)
@@ -16,7 +16,7 @@ REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 OUT = os.path.join(REPO, 'assets/brand')
 ICONS = os.path.join(REPO, 'assets/icons')
 # The wordmark face: Plus Jakarta Sans (SIL OFL 1.1, assets/fonts), "Lord" ExtraBold + "OS" Medium.
-# The same files are the 'brand' fontFamily of the UI (LordOSWordmark in sdk/logo.js).
+# The same files are the 'brand' fontFamily of the UI (InsaneWordmark in sdk/logo.js).
 WORD_BOLD, WORD_REGULAR = 'PlusJakartaSans-ExtraBold.ttf', 'PlusJakartaSans-Medium.ttf'
 TRACK = -0.01                      # letter spacing, in em (the UI uses the same)
 
@@ -157,7 +157,7 @@ def author():
         b, x = outline(WORD_REGULAR, 'OS', x, 184, size)
         d, body = crown_mono(mono) if mono else crown_color()
         g = f'<g transform="matrix(.437 0 0 .437 -10 19)">{body}</g>\n<path fill="{ink}" d="{a}{b}"/>'
-        write(name, svg(round(x + 16), 240, d, g, 'LordOS'))
+        write(name, svg(round(x + 16), 240, d, g, 'Insane OS'))
         return d, g, round(x + 16)
 
 
@@ -165,15 +165,15 @@ def author():
                '<radialGradient id="gl" cx=".22" cy=".12" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
                '<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#1E1660" stop-opacity=".5"/><stop offset="1" stop-color="#1E1660" stop-opacity="0"/></radialGradient>')
     d, body = crown_color()
-    write('crown.svg', svg(512, 512, d, body, 'LordOS crown'))
+    write('crown.svg', svg(512, 512, d, body, 'Insane OS crown'))
     d, body = crown_mono('#000')
-    write('crown-mono.svg', svg(512, 512, d, body, 'LordOS crown, one colour'))
+    write('crown-mono.svg', svg(512, 512, d, body, 'Insane OS crown, one colour'))
 
     d, body = crown_color('c')
     icon = ('<rect width="512" height="512" rx="113" fill="url(#bg)"/><rect width="512" height="512" rx="113" fill="url(#gl)"/>'
             '<ellipse cx="256" cy="416" rx="160" ry="30" fill="url(#sh)"/>'
             f'<g transform="matrix(.72 0 0 .72 71.7 84)">{body}</g>')
-    write('app-icon.svg', svg(512, 512, ICON_BG + d, icon, 'LordOS'))
+    write('app-icon.svg', svg(512, 512, ICON_BG + d, icon, 'Insane OS'))
     lockup('logo-horizontal-light.svg', '#12122A')
     lockup('logo-horizontal-dark.svg', '#fff')
     lockup('logo-mono-white.svg', '#fff', mono='#fff')
@@ -184,7 +184,7 @@ def author():
     k = 820 / w                                    # the lockup 820 px wide, centred
     card = ('<rect width="1200" height="630" fill="url(#bg)"/><rect width="1200" height="630" fill="url(#gl)"/>'
             f'<g transform="matrix({n(k)} 0 0 {n(k)} {n((1200 - 820) / 2)} {n(315 - 128 * k)})">{g}</g>')
-    write('social-card.svg', svg(1200, 630, ICON_BG + d, card, 'LordOS'))
+    write('social-card.svg', svg(1200, 630, ICON_BG + d, card, 'Insane OS'))
 
     # ---- small sizes: pixel-grid geometry (32 grid for the icon, 16 grid for the menu bar glyph) ----
     small_icon = (
@@ -195,10 +195,10 @@ def author():
         '<path fill="#DCD5FA" d="M8 22H24V24Q24 25 23 25H9Q8 25 8 24Z"/>'
         '<path fill="#FFD60A" d="M16 4L18 6.5L16 9L14 6.5Z"/>'
         '<path fill="#FFC300" d="M7 7.5L8.5 9.5L7 11.5L5.5 9.5ZM25 7.5L26.5 9.5L25 11.5L23.5 9.5Z"/>')
-    write('app-icon-small.svg', svg(32, 32, ICON_BG.split('<radialGradient')[0], small_icon, 'LordOS (16 to 32 px)'))
+    write('app-icon-small.svg', svg(32, 32, ICON_BG.split('<radialGradient')[0], small_icon, 'Insane OS (16 to 32 px)'))
     small_mono = ('<path d="M1.5 5.5L5 9L8 5L11 9L14.5 5.5L12.5 11.5H3.5Z"/><rect x="3.5" y="12.5" width="9" height="2" rx=".5"/>'
                   '<path d="M8 1L9.5 2.75L8 4.5L6.5 2.75Z"/><path d="M1.5 2.5L2.75 3.75L1.5 5L.25 3.75ZM14.5 2.5L15.75 3.75L14.5 5L13.25 3.75Z"/>')
-    write('crown-mono-small.svg', svg(16, 16, '', f'<g fill="#000">{small_mono}</g>', 'LordOS crown, one colour (16 px)'))
+    write('crown-mono-small.svg', svg(16, 16, '', f'<g fill="#000">{small_mono}</g>', 'Insane OS crown, one colour (16 px)'))
 
 
 # PNG renders: (output in assets/icons, source svg, width, recolour)

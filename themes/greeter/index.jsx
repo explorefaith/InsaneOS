@@ -1,4 +1,4 @@
-// "greeter" theme: the LordOS login screen (docs/SESSIONS.md).
+// "greeter" theme: the Insane OS login screen (docs/SESSIONS.md).
 //
 // It is not a theme you choose in Settings: lord-sessiond loads it with `lord-server --greeter`,
 // as the system user lordos-greeter, without the administration helper. It shows the date,
@@ -14,7 +14,7 @@
 //           · {t:'busy'} (dark, off, sleep, sleepLeft: a locked session's idle state, see idleOnLock)
 import { render, screen, mainBox, onScreenChange, addListener } from '@lordos/runtime';
 import {
-  View, Text, Image, TextInput, ThemeProvider, useStore, locale, t, formatDate, formatTime, setLanguage, languages, CORE_LANGUAGES, keyboard, settings, LordOSWordmark,
+  View, Text, Image, TextInput, ThemeProvider, useStore, locale, t, formatDate, formatTime, setLanguage, languages, CORE_LANGUAGES, keyboard, settings, InsaneWordmark,
   lordosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView,
   regionOf, regionCountry,
 } from '@lordos/sdk';
@@ -68,7 +68,7 @@ function LoginVideo({ box, stop }) {
     const start = (codecs) => {
       const files = [LOGIN_PICKED, ...codecs.map((c) => `${LOGIN_BUILTIN}.${c}.mp4`)];
       for (const f of files) {
-        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, appName: 'LordOS' }); } catch (e) { cur = 0; }
+        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, appName: 'Insane OS' }); } catch (e) { cur = 0; }
         if (cur) break;
       }
       if (!cur) return;
@@ -219,6 +219,13 @@ function Greeter() {
   const [info, setInfo] = useState({ users: [], host: '', mode: 'login', user: '' });
   const [sel, setSel] = useState('');
   const [pass, setPass] = useState('');
+  // entrance: the whole login composition rises and fades in once, over ~0.8 s
+  const [enter, setEnter] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => setEnter((v) => { const n = v + 0.045; return n >= 1 ? 1 : n; }), 16);
+    return () => clearInterval(iv);
+  }, []);
+  const ease = 1 - Math.pow(1 - enter, 3);           // cubic ease-out
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(0);
@@ -243,7 +250,7 @@ function Greeter() {
   useEffect(() => {
     const on = (m) => {
       if (m.t === 'hello') {
-        // a boot time test restarts soon (LordBench, bench/boottest.h): when, by this screen's clock
+        // a boot time test restarts soon (InsaneBench, bench/boottest.h): when, by this screen's clock
         setInfo((old) => ({ ...old, ...m, bootTest: m.bootTest ? { ...m.bootTest, end: Date.now() + m.bootTest.in * 1000 } : null }));
         // system keyboard and language (/etc/default/keyboard and /etc/default/locale)
         const layouts = String(m.layouts || 'us').split(',').filter(Boolean);     // no file: US, as the server's (#55)
@@ -316,7 +323,7 @@ function Greeter() {
   const avatarSize = Math.round(Math.max(76, Math.min(110, H * 0.12)));
   const kbs = keyboard.configured();
   const kbIdx = Math.min(s.keyboardIndex || 0, kbs.length - 1);
-  // the languages LordOS ships: English, Español and Português first, then the others (Français,
+  // the languages Insane OS ships: English, Español and Português first, then the others (Français,
   // Italiano…) after a separator; a user's packs aren't readable from the login screen
   const shipped = languages().filter((l) => !l.user);
   const core = CORE_LANGUAGES.map((id) => shipped.find((l) => l.id === id)).filter(Boolean);
@@ -336,18 +343,22 @@ function Greeter() {
       <View style={{ width: screen.width, height: screen.height, direction: 'ltr' }}>
         <Image src={image || wallpaperSrc(findWallpaper(lordosWallpapers, still || GREETER_WALLPAPER), screen.width, screen.height) || 'assets/background.jpg'}
           style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height, objectFit: 'cover' }} />
+        {/* soft dark vignette so the glass panels read on any wallpaper */}
+        <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
+          background: 'linear-gradient(180deg, rgba(4,4,14,0.30) 0%, rgba(4,4,14,0.16) 42%, rgba(4,4,14,0.52) 100%)', pointerEvents: 'none' }} />
         {still || image ? null : <LoginVideo box={M} stop={entered} />}
         <View style={{ position: 'absolute', left: M.left, top: M.top, width: W, height: H }}>
 
-        {/* date and clock */}
-        <View style={{ position: 'absolute', left: 0, top: Math.round(H * 0.085), width: W, alignItems: 'center' }}>
+        {/* date and clock — they settle in first, slightly before the glass panel */}
+        <View style={{ position: 'absolute', left: 0, top: Math.round(H * 0.085), width: W, alignItems: 'center',
+          opacity: Math.min(1, ease * 1.4), transform: `translateY(${Math.round((1 - Math.min(1, ease * 1.5)) * 14)}px)` }}>
           <Text style={{ fontSize: Math.round(clockSize * 0.16), fontWeight: 500, color: 'rgba(255,255,255,0.88)' }}>
             {capitalize(formatDate(now, 'dayMonth'))}</Text>
           <Text style={{ fontSize: clockSize, fontWeight: 700, color: 'rgba(255,255,255,0.86)', marginTop: -Math.round(clockSize * 0.04),
             letterSpacing: -Math.round(clockSize * 0.03) }}>{formatTime(now)}</Text>
         </View>
 
-        {/* LordBench's boot time test: which boot this was, the restart's countdown and a way to stop it */}
+        {/* InsaneBench's boot time test: which boot this was, the restart's countdown and a way to stop it */}
         {info.bootTest ? (
           <View style={{ position: 'absolute', left: Math.round(W / 2 - 230), top: 18, width: 460, padding: 12, gap: 8, borderRadius: 14,
             backgroundColor: 'rgba(30,22,40,0.88)', border: '1px solid rgba(255,255,255,0.18)', alignItems: 'center' }}>
@@ -357,24 +368,29 @@ function Greeter() {
           </View>
         ) : null}
 
-        {/* selected user and password */}
-        <View style={{ position: 'absolute', left: 0, top: Math.round(H * 0.6) - avatarSize - lift, width: W, alignItems: 'center' }}>
-          {user ? <Avatar user={user} size={avatarSize} /> : null}
-          <Text style={{ marginTop: 14, fontSize: 16, fontWeight: 600, color: '#fff', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-            {user ? user.full || user.name : t('greeter.noUsers')}</Text>
-          {locked ? <Text style={{ marginTop: 2, fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{t('greeter.locked')}</Text> : null}
-          {user ? (
-            <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', transform: [{ translateX: shake }] }}>
-              <TextInput key={`${user.name}#${focusRev}`} secure autoFocus value={pass} onChange={(v) => { setPass(v); if (msg) setMsg(''); }} onSubmit={submit}
-                onCancel={() => setPass('')} placeholder={t('greeter.password')} size={14}
-                style={{ width: 210, height: 32, borderRadius: 16, paddingLeft: 14, paddingRight: 34, backgroundColor: 'rgba(255,255,255,0.16)',
-                  border: '1px solid rgba(255,255,255,0.28)' }} />
-              <View onClick={submit} style={{ position: 'absolute', right: 5, top: 5, width: 22, height: 22, borderRadius: 11, alignItems: 'center',
-                justifyContent: 'center', backgroundColor: pass && !busy ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.35)' }}>
-                <Text style={{ fontSize: 13, fontWeight: 700, color: '#3a2a4a', marginTop: -1 }}>{busy ? '…' : '→'}</Text>
+        {/* selected user and password — one glass panel, macOS-style, entering last */}
+        <View style={{ position: 'absolute', left: 0, top: Math.round(H * 0.6) - avatarSize - lift, width: W, alignItems: 'center',
+          opacity: 0.15 + 0.85 * ease, transform: `translateY(${Math.round((1 - ease) * 20)}px)` }}>
+          <View style={{ alignItems: 'center', paddingHorizontal: 44, paddingVertical: 24, borderRadius: 26,
+            backgroundColor: 'rgba(8,8,20,0.36)', backdropFilter: 'blur(30px)',
+            border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 22px 60px rgba(0,0,0,0.45)' }}>
+            {user ? <Avatar user={user} size={avatarSize} /> : null}
+            <Text style={{ marginTop: 14, fontSize: 16, fontWeight: 600, color: '#fff', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+              {user ? user.full || user.name : t('greeter.noUsers')}</Text>
+            {locked ? <Text style={{ marginTop: 2, fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{t('greeter.locked')}</Text> : null}
+            {user ? (
+              <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', transform: [{ translateX: shake }] }}>
+                <TextInput key={`${user.name}#${focusRev}`} secure autoFocus value={pass} onChange={(v) => { setPass(v); if (msg) setMsg(''); }} onSubmit={submit}
+                  onCancel={() => setPass('')} placeholder={t('greeter.password')} size={14}
+                  style={{ width: 250, height: 38, borderRadius: 19, paddingLeft: 16, paddingRight: 40, backgroundColor: 'rgba(255,255,255,0.13)',
+                    border: '1px solid rgba(255,255,255,0.24)' }} />
+                <View onClick={submit} style={{ position: 'absolute', right: 5, top: 5, width: 28, height: 28, borderRadius: 14, alignItems: 'center',
+                  justifyContent: 'center', backgroundColor: pass && !busy ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)' }}>
+                  <Text style={{ fontSize: 14, fontWeight: 700, color: '#2a1f3d', marginTop: -1 }}>{busy ? '…' : '→'}</Text>
+                </View>
               </View>
-            </View>
-          ) : null}
+            ) : null}
+          </View>
           <Text style={{ marginTop: 10, height: 16, fontSize: 12, color: msg ? '#ffd2d2' : 'transparent' }}>{msg || ' '}</Text>
           {others.length ? (
             <View style={{ marginTop: 18, flexDirection: 'row', gap: 12 }}>
@@ -389,9 +405,9 @@ function Greeter() {
           ) : null}
         </View>
 
-        {/* the LordOS logo: the crown and the wordmark as live text (docs/brand/README.md) */}
+        {/* the Insane OS logo: the crown and the wordmark as live text (docs/brand/README.md) */}
         <View style={{ position: 'absolute', left: 0, bottom: 24, width: W, height: 28, alignItems: 'center', justifyContent: 'center' }}>
-          <LordOSWordmark size={17} color="#ffffff" />
+          <InsaneWordmark size={17} color="#ffffff" />
         </View>
 
         {/* bottom: the machine's address; language, keyboard, reboot and power off */}

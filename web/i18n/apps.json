@@ -654,7 +654,7 @@
       "en": [
         "Network, Wi-Fi, VPN and Bluetooth",
         "Displays (numbered, with Identify), Night Light, sound and notifications",
-        "Appearance: desktop style (Lord Flow or Lord Classic), wallpaper and the Dock",
+        "Appearance: desktop style (Insane Flow or Insane Classic), wallpaper and the Dock",
         "Privacy, app permissions, network access and blocklists",
         "Users, remote desktop and updates",
         "New in 0.8.7: moving wallpapers, session restore and an on-screen keyboard",
@@ -663,7 +663,7 @@
       "es": [
         "Red, Wi-Fi, VPN y Bluetooth",
         "Pantallas (numeradas, con Identificar), luz nocturna, sonido y notificaciones",
-        "Apariencia: estilo de escritorio (Lord Flow o Lord Classic), fondo de pantalla y el Dock",
+        "Apariencia: estilo de escritorio (Insane Flow o Insane Classic), fondo de pantalla y el Dock",
         "Privacidad, permisos de apps, acceso a la red y listas de bloqueo",
         "Usuarios, escritorio remoto y actualizaciones",
         "Nuevo en 0.8.7: fondos en movimiento, restaurar la sesión y un teclado en pantalla",
@@ -672,7 +672,7 @@
       "pt": [
         "Rede, Wi-Fi, VPN e Bluetooth",
         "Telas (numeradas, com Identificar), luz noturna, som e notificações",
-        "Aparência: estilo da área de trabalho (Lord Flow ou Lord Classic), papel de parede e o Dock",
+        "Aparência: estilo da área de trabalho (Insane Flow ou Insane Classic), papel de parede e o Dock",
         "Privacidade, permissões de apps, acesso à rede e listas de bloqueio",
         "Usuários, área de trabalho remota e atualizações",
         "Novo na 0.8.7: fundos em movimento, restauração da sessão e um teclado na tela",
@@ -775,16 +775,16 @@
       "pt": "Loja"
     },
     "tagline": {
-      "en": "Find, install and update LordOS and Debian apps",
-      "es": "Buscá, instalá y actualizá apps de LordOS y de Debian",
-      "pt": "Encontre, instale e atualize apps do LordOS e do Debian"
+      "en": "Find, install and update Insane OS and Debian apps",
+      "es": "Buscá, instalá y actualizá apps de Insane OS y de Debian",
+      "pt": "Encontre, instale e atualize apps do Insane OS e do Debian"
     },
     "features": {
       "en": [
         "Debian apps by category, as cards in a grid, with search",
         "Artificial Intelligence and Commercial apps from their makers' signed repositories",
         "See exactly what changes before you install",
-        "Install LordOS apps (.lpk) without root, or a .deb or .lpk from Files",
+        "Install Insane OS apps (.lpk) without root, or a .deb or .lpk from Files",
         "All updates in one click, over HTTPS from https:// sources",
         "New in 0.8.7: Disk Formats, one item for disks from other systems",
         "New in 0.8.8: a Remote access section, shown once the catalog has an app in it"
@@ -793,7 +793,7 @@
         "Apps de Debian por categoría, como tarjetas en una grilla, con búsqueda",
         "Apps de Inteligencia Artificial y Comerciales desde los repositorios firmados de sus fabricantes",
         "Mirá exactamente qué cambia antes de instalar",
-        "Instalá apps de LordOS (.lpk) sin root, o un .deb o .lpk desde Archivos",
+        "Instalá apps de Insane OS (.lpk) sin root, o un .deb o .lpk desde Archivos",
         "Todas las actualizaciones con un clic, por HTTPS desde fuentes https://",
         "Nuevo en 0.8.7: Disk Formats, un solo ítem para discos de otros sistemas",
         "Nuevo en 0.8.8: una sección Acceso remoto, que aparece cuando el catálogo tiene una app ahí"
@@ -802,7 +802,7 @@
         "Apps do Debian por categoria, como cartões em uma grade, com busca",
         "Apps de Inteligência Artificial e Comerciais dos repositórios assinados dos fabricantes",
         "Veja exatamente o que muda antes de instalar",
-        "Instale apps do LordOS (.lpk) sem root, ou um .deb ou .lpk pelo Arquivos",
+        "Instale apps do Insane OS (.lpk) sem root, ou um .deb ou .lpk pelo Arquivos",
         "Todas as atualizações com um clique, por HTTPS de fontes https://",
         "Novo na 0.8.7: Disk Formats, um único item para discos de outros sistemas",
         "Novo na 0.8.8: uma seção Acesso remoto, que aparece quando o catálogo tem um app nela"
@@ -895,25 +895,25 @@
       "pt": "Registros"
     },
     "tagline": {
-      "en": "Read system, app and LordOS logs",
-      "es": "Leé los registros del sistema, de las apps y de LordOS",
-      "pt": "Leia os registros do sistema, dos apps e do LordOS"
+      "en": "Read system, app and Insane OS logs",
+      "es": "Leé los registros del sistema, de las apps y de Insane OS",
+      "pt": "Leia os registros do sistema, dos apps e do Insane OS"
     },
     "features": {
       "en": [
-        "Your logs, system, kernel and LordOS",
+        "Your logs, system, kernel and Insane OS",
         "Filter by level, time, process or text",
         "Follow new entries live",
         "Export the filtered view as text"
       ],
       "es": [
-        "Tus registros, sistema, kernel y LordOS",
+        "Tus registros, sistema, kernel y Insane OS",
         "Filtrá por nivel, tiempo, proceso o texto",
         "Seguí las entradas nuevas en vivo",
         "Exportá la vista filtrada como texto"
       ],
       "pt": [
-        "Seus registros, sistema, kernel e LordOS",
+        "Seus registros, sistema, kernel e Insane OS",
         "Filtre por nível, período, processo ou texto",
         "Acompanhe novas entradas ao vivo",
         "Exporte a visão filtrada como texto"
@@ -967,9 +967,9 @@
       "pt": "Ajuda"
     },
     "tagline": {
-      "en": "Help and tips for every part of LordOS",
-      "es": "Ayuda y consejos para cada parte de LordOS",
-      "pt": "Ajuda e dicas para cada parte do LordOS"
+      "en": "Help and tips for every part of Insane OS",
+      "es": "Ayuda y consejos para cada parte de Insane OS",
+      "pt": "Ajuda e dicas para cada parte do Insane OS"
     },
     "features": {
       "en": [
@@ -1042,35 +1042,35 @@
       "pt": "Informações do sistema"
     },
     "tagline": {
-      "en": "Every piece of hardware, and what LordOS makes of it",
-      "es": "Todo el hardware de tu computadora y qué hace LordOS con él",
-      "pt": "Todo o hardware do seu computador e o que o LordOS faz com ele"
+      "en": "Every piece of hardware, and what Insane OS makes of it",
+      "es": "Todo el hardware de tu computadora y qué hace Insane OS con él",
+      "pt": "Todo o hardware do seu computador e o que o Insane OS faz com ele"
     },
     "features": {
       "en": [
-        "Opens from About LordOS → System Report…",
+        "Opens from About Insane OS → System Report…",
         "The graphics card layer by layer, with the reason when the screen is composed on the CPU",
         "Compatibility: what works, what works with limits and what wasn't checked",
-        "Checks of LordOS's claims on this computer, with a Sandbox Probe that tries what an isolated app must not do",
-        "Performance: LordBench, quick and full tests of the processor, memory, graphics, video and disk, shown against reference machines, never as one score",
+        "Checks of Insane OS's claims on this computer, with a Sandbox Probe that tries what an isolated app must not do",
+        "Performance: InsaneBench, quick and full tests of the processor, memory, graphics, video and disk, shown against reference machines, never as one score",
         "Reports in Markdown or JSON, shown before you copy or save them; nothing is sent",
         "New in 0.8.7: computer, motherboard, firmware and peripherals, serial numbers only on request, and sharing a hardware report on GitHub"
       ],
       "es": [
-        "Se abre desde Acerca de LordOS → Informe del sistema…",
+        "Se abre desde Acerca de Insane OS → Informe del sistema…",
         "La placa de video capa por capa, con el motivo cuando la pantalla se compone en la CPU",
         "Compatibilidad: qué funciona, qué funciona con límites y qué no se comprobó",
-        "Verificaciones de lo que LordOS afirma, en esta computadora, con la Prueba del aislamiento, que intenta lo que una app aislada no debe poder hacer",
-        "Rendimiento: LordBench, pruebas rápida y completa del procesador, la memoria, los gráficos, el video y el disco, frente a máquinas de referencia, nunca como un único puntaje",
+        "Verificaciones de lo que Insane OS afirma, en esta computadora, con la Prueba del aislamiento, que intenta lo que una app aislada no debe poder hacer",
+        "Rendimiento: InsaneBench, pruebas rápida y completa del procesador, la memoria, los gráficos, el video y el disco, frente a máquinas de referencia, nunca como un único puntaje",
         "Informes en Markdown o JSON, que ves antes de copiarlos o guardarlos; no se envía nada",
         "Nuevo en 0.8.7: computadora, placa madre, firmware y periféricos, números de serie solo si los pedís, y compartir un reporte de hardware en GitHub"
       ],
       "pt": [
-        "Abre em Sobre o LordOS → Relatório do sistema…",
+        "Abre em Sobre o Insane OS → Relatório do sistema…",
         "A placa de vídeo camada por camada, com o motivo quando a tela é composta na CPU",
         "Compatibilidade: o que funciona, o que funciona com limites e o que não foi verificado",
-        "Verificações do que o LordOS afirma, neste computador, com o Teste do isolamento, que tenta o que um app isolado não deve conseguir fazer",
-        "Desempenho: o LordBench, testes rápido e completo do processador, da memória, dos gráficos, do vídeo e do disco, frente a máquinas de referência, nunca como uma única pontuação",
+        "Verificações do que o Insane OS afirma, neste computador, com o Teste do isolamento, que tenta o que um app isolado não deve conseguir fazer",
+        "Desempenho: o InsaneBench, testes rápido e completo do processador, da memória, dos gráficos, do vídeo e do disco, frente a máquinas de referência, nunca como uma única pontuação",
         "Relatórios em Markdown ou JSON, que você vê antes de copiar ou salvar; nada é enviado",
         "Novo na 0.8.7: computador, placa-mãe, firmware e periféricos, números de série só se você pedir, e compartilhar um relatório de hardware no GitHub"
       ]
@@ -1082,14 +1082,14 @@
     "icon": "apps/imager/index.jsx",
     "screenshot": "docs/imager/native-13-review.png",
     "name": {
-      "en": "LordOS Imager",
-      "es": "LordOS Imager",
-      "pt": "LordOS Imager"
+      "en": "Insane OS Imager",
+      "es": "Insane OS Imager",
+      "pt": "Insane OS Imager"
     },
     "tagline": {
-      "en": "Write LordOS to an SD card or a USB stick, ready for its first boot",
-      "es": "Grabá LordOS en una tarjeta SD o un pendrive, listo para su primer arranque",
-      "pt": "Grave o LordOS num cartão SD ou pendrive, pronto para a primeira inicialização"
+      "en": "Write Insane OS to an SD card or a USB stick, ready for its first boot",
+      "es": "Grabá Insane OS en una tarjeta SD o un pendrive, listo para su primer arranque",
+      "pt": "Grave o Insane OS num cartão SD ou pendrive, pronto para a primeira inicialização"
     },
     "features": {
       "en": [
@@ -1115,7 +1115,7 @@
       ]
     }
   },
-  "_notes": "Apps: every folder in apps/ except about (system info dialog), installer (live-ISO only) and README.md. There is no 'linux' folder in apps/ (the Linux-window bridge is registered in sdk/wayland.js), and there is no separate privacy or firewall app: Privacy and the per-app firewall are Settings sections (Monitor registers them with registerPrivacySection) plus Monitor's Network tab, so only Passwords is in the privacy category. Names come from assets/locales/{en,es,pt}/apps.json. Isolation: apps/passwords and, since 0.8.2, apps/mail, apps/calendar, apps/contacts and apps/reminders have \"process\": \"isolated\" in their manifest (built into assets/sysapps/<id> by tools/build-theme.mjs; apps/sysprobe is isolated too but hidden, a test app of System Information). System Information (sysinfo, released in 0.8.5) and LordOS Imager (imager, 0.8.4) were added on 2026-10-26; their icons were exported with tools/web/render-icons.mjs. Machines (machines, released in 0.8.8.5) was added on 2026-11-08; its icon (AppMark in apps/machines/library.jsx) was rendered at the size and crop tools/web/render-icons.mjs uses, and it has no screenshot because the repository holds no English capture of it. No app in apps/ ships as an .lpk; the only .lpk definitions are examples/apps/fractal and the tests/lpk-legit and tests/lpk-evil fixtures, none of them user-facing apps, so they are not included. ICONS (DOUBT): the desktop does not use an SVG or PNG for built-in apps. tools/build-theme.mjs takes the exported Icon React component from each apps/<id>/index.jsx, and the Dock draws app.Icon (themes/default/components/Dock.jsx). The icons are drawn in code with Views and gradients. So 'icon' points to the source file that draws it: apps/<id>/index.jsx, or apps/disks/icons.jsx (DisksIcon) and apps/monitor/icons.jsx (MonitorIcon). The repo has no icon files for these apps; to show them on the website someone must render them to SVG or PNG (for example, crop the Dock in docs/screenshots/*.png or export from a headless lord-server). Only .lpk apps use a real file (manifest icon, e.g. examples/apps/fractal/icon.png). SCREENSHOTS: most docs/polish/*-after-light.png captures are in Spanish (checked: backup, calculator, camera, characters, monitor), so I used them only for Passwords, which is in English. I visually checked that every other pick is English and shows the main window: the curated docs/screenshots/*.png (files, mail, calendar, photos, player, store, terminal, settings-general), plus English gallery entries (variant normal), mostly dark. Calculator and Scanner use docs/qa/*.png (English, dark). The Scanner shot only shows the 'Choose a scanner' empty state, because no English capture with a scanner exists. docs/screenshots/README.md lists passwords.png, but that file is missing. COPY: every bullet comes from the app's manifest and docs (MAIL.md, MEDIA.md, DOCUMENTS.md, SYSTEM.md, PRINTING.md, PACKAGES.md, TERMINAL.md, MONITOR.md, NOTES.md, EDITOR.md, FILES.md, PASSWORDS.md, SETTINGS.md) or the app's code (calculator keyboard and parentheses, Contacts .vcf import, Settings pages in apps/settings/)..",
+  "_notes": "Apps: every folder in apps/ except about (system info dialog), installer (live-ISO only) and README.md. There is no 'linux' folder in apps/ (the Linux-window bridge is registered in sdk/wayland.js), and there is no separate privacy or firewall app: Privacy and the per-app firewall are Settings sections (Monitor registers them with registerPrivacySection) plus Monitor's Network tab, so only Passwords is in the privacy category. Names come from assets/locales/{en,es,pt}/apps.json. Isolation: apps/passwords and, since 0.8.2, apps/mail, apps/calendar, apps/contacts and apps/reminders have \"process\": \"isolated\" in their manifest (built into assets/sysapps/<id> by tools/build-theme.mjs; apps/sysprobe is isolated too but hidden, a test app of System Information). System Information (sysinfo, released in 0.8.5) and Insane OS Imager (imager, 0.8.4) were added on 2026-10-26; their icons were exported with tools/web/render-icons.mjs. Machines (machines, released in 0.8.8.5) was added on 2026-11-08; its icon (AppMark in apps/machines/library.jsx) was rendered at the size and crop tools/web/render-icons.mjs uses, and it has no screenshot because the repository holds no English capture of it. No app in apps/ ships as an .lpk; the only .lpk definitions are examples/apps/fractal and the tests/lpk-legit and tests/lpk-evil fixtures, none of them user-facing apps, so they are not included. ICONS (DOUBT): the desktop does not use an SVG or PNG for built-in apps. tools/build-theme.mjs takes the exported Icon React component from each apps/<id>/index.jsx, and the Dock draws app.Icon (themes/default/components/Dock.jsx). The icons are drawn in code with Views and gradients. So 'icon' points to the source file that draws it: apps/<id>/index.jsx, or apps/disks/icons.jsx (DisksIcon) and apps/monitor/icons.jsx (MonitorIcon). The repo has no icon files for these apps; to show them on the website someone must render them to SVG or PNG (for example, crop the Dock in docs/screenshots/*.png or export from a headless lord-server). Only .lpk apps use a real file (manifest icon, e.g. examples/apps/fractal/icon.png). SCREENSHOTS: most docs/polish/*-after-light.png captures are in Spanish (checked: backup, calculator, camera, characters, monitor), so I used them only for Passwords, which is in English. I visually checked that every other pick is English and shows the main window: the curated docs/screenshots/*.png (files, mail, calendar, photos, player, store, terminal, settings-general), plus English gallery entries (variant normal), mostly dark. Calculator and Scanner use docs/qa/*.png (English, dark). The Scanner shot only shows the 'Choose a scanner' empty state, because no English capture with a scanner exists. docs/screenshots/README.md lists passwords.png, but that file is missing. COPY: every bullet comes from the app's manifest and docs (MAIL.md, MEDIA.md, DOCUMENTS.md, SYSTEM.md, PRINTING.md, PACKAGES.md, TERMINAL.md, MONITOR.md, NOTES.md, EDITOR.md, FILES.md, PASSWORDS.md, SETTINGS.md) or the app's code (calculator keyboard and parentheses, Contacts .vcf import, Settings pages in apps/settings/)..",
   "cleaner": {
     "category": "system",
     "isolated": false,
@@ -1163,9 +1163,9 @@
       "pt": "Remote Desk"
     },
     "tagline": {
-      "en": "Another computer's screen over RDP or VNC, drawn by LordOS itself",
-      "es": "La pantalla de otra computadora por RDP o VNC, dibujada por LordOS",
-      "pt": "A tela de outro computador por RDP ou VNC, desenhada pelo LordOS"
+      "en": "Another computer's screen over RDP or VNC, drawn by Insane OS itself",
+      "es": "La pantalla de otra computadora por RDP o VNC, dibujada por Insane OS",
+      "pt": "A tela de outro computador por RDP ou VNC, desenhada pelo Insane OS"
     },
     "features": {
       "en": [
@@ -1293,19 +1293,19 @@
     "features": {
       "en": [
         "Coming in 0.8.8.4, in Store → Third-party apps (#38)",
-        "Installed and updated from its makers' signed repository, with the key LordOS pins",
+        "Installed and updated from its makers' signed repository, with the key Insane OS pins",
         "Extensions from the Open VSX registry",
         "MIT, for amd64 and arm64"
       ],
       "es": [
         "Llega en 0.8.8.4, en Store → Apps de terceros (#38)",
-        "Se instala y actualiza desde el repositorio firmado de sus autores, con la clave que LordOS fija",
+        "Se instala y actualiza desde el repositorio firmado de sus autores, con la clave que Insane OS fija",
         "Extensiones del registro Open VSX",
         "MIT, para amd64 y arm64"
       ],
       "pt": [
         "Chega na 0.8.8.4, em Store → Apps de terceiros (#38)",
-        "Instalado e atualizado a partir do repositório assinado dos seus autores, com a chave que o LordOS fixa",
+        "Instalado e atualizado a partir do repositório assinado dos seus autores, com a chave que o Insane OS fixa",
         "Extensões do registro Open VSX",
         "MIT, para amd64 e arm64"
       ]
@@ -1330,20 +1330,20 @@
     "features": {
       "en": [
         "Coming in 0.8.8.4, in Store → Third-party apps (#39)",
-        "Installed and updated from its maker's signed repository, with the key LordOS pins",
-        "LordOS's window buttons in its tab bar with Settings → Appearance → \"Browsers: tabs in the title bar\"",
+        "Installed and updated from its maker's signed repository, with the key Insane OS pins",
+        "Insane OS's window buttons in its tab bar with Settings → Appearance → \"Browsers: tabs in the title bar\"",
         "MPL-2.0, for amd64 and arm64"
       ],
       "es": [
         "Llega en 0.8.8.4, en Store → Apps de terceros (#39)",
-        "Se instala y actualiza desde el repositorio firmado de su autor, con la clave que LordOS fija",
-        "Los botones de ventana de LordOS en su barra de pestañas con Configuración → Apariencia → «Navegadores: pestañas en la barra de título»",
+        "Se instala y actualiza desde el repositorio firmado de su autor, con la clave que Insane OS fija",
+        "Los botones de ventana de Insane OS en su barra de pestañas con Configuración → Apariencia → «Navegadores: pestañas en la barra de título»",
         "MPL-2.0, para amd64 y arm64"
       ],
       "pt": [
         "Chega na 0.8.8.4, em Store → Apps de terceiros (#39)",
-        "Instalado e atualizado a partir do repositório assinado do seu autor, com a chave que o LordOS fixa",
-        "Os botões de janela do LordOS na barra de abas com Configurações → Aparência → «Navegadores: abas na barra de título»",
+        "Instalado e atualizado a partir do repositório assinado do seu autor, com a chave que o Insane OS fixa",
+        "Os botões de janela do Insane OS na barra de abas com Configurações → Aparência → «Navegadores: abas na barra de título»",
         "MPL-2.0, para amd64 e arm64"
       ]
     }

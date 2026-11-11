@@ -9,9 +9,9 @@
  *
  * It keeps that JSON as ~/.cache/lordos/claude/<session_id>.json (0600, in a 0700 folder of the user's, written
  * whole and renamed into place), then runs the rest of its arguments with the same stdin, so the user's status
- * line is unchanged. With no arguments it prints LordOS's own status line, the same as the Terminal's footer:
+ * line is unchanged. With no arguments it prints Insane OS's own status line, the same as the Terminal's footer:
  *
- *   Opus 5.5 | LordOS | main | ctx 11% | 5h 37% | sem 5%
+ *   Opus 5.5 | Insane OS | main | ctx 11% | 5h 37% | sem 5%
  *
  * (the model, the folder, its git branch, the context used and the plan's limits; "5h –" when Claude Code sends the
  * limits without the 5-hour window; the labels in the user's language). It is not lord-server's: Claude Code runs it,
@@ -102,7 +102,7 @@ static void keep(const char *data, size_t len) {
     close(d);
 }
 
-/* ---- LordOS's own status line (no command to wrap) ---- */
+/* ---- Insane OS's own status line (no command to wrap) ---- */
 
 /* s with control characters (escape sequences) and '|' left out, at most n bytes, cut at a whole UTF-8 sequence */
 static void clean(char *out, size_t n, const char *s) {

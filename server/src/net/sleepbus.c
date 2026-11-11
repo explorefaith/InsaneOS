@@ -1,7 +1,7 @@
 /* sleepbus.c — lord-netd hears the computer go to sleep and wake (issue #14).
  *
  * logind announces both with the PrepareForSleep(b) signal on the system bus: true just before the
- * sleep, false right after waking. lord-netd listens with LordOS's own D-Bus client (vault/dbus.c:
+ * sleep, false right after waking. lord-netd listens with Insane OS's own D-Bus client (vault/dbus.c:
  * libc only, strict parser), subscribed to that one signal, and only believes it from the
  * connection that owns org.freedesktop.login1 (the bus sets the sender; nobody can forge it).
  * It owns no name, exports nothing and calls nothing else. Without a system bus (a container, a

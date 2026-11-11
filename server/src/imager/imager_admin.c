@@ -1,4 +1,4 @@
-/* imager_admin.c — the LordOS Imager's actions in the privileged helper (admin.c). See
+/* imager_admin.c — the Insane OS Imager's actions in the privileged helper (admin.c). See
  * docs/IMAGER.md, "Security model".
  *
  *   imager-fetch meta                                the release list (GitHub API) into the cache
@@ -9,7 +9,7 @@
  *                                                    writes a verified image to a whole removable disk
  *                                                    (cancel: disk-cancel <disk>)
  *
- * Downloads: only two fixed URL shapes (the release list of lordbasex/LordOS, and a file of one of
+ * Downloads: only two fixed URL shapes (the release list of lordbasex/Insane OS, and a file of one of
  * its releases), fetched by /usr/bin/curl running as the session user (setresuid, no new privileges,
  * no curlrc, https only, also on redirects) into ~/.cache/lordos/imager. Root never parses what
  * arrives; the UI reads the list as the user, and the image is verified by imager-write.
@@ -23,7 +23,7 @@
  *     it is opened O_EXCL, so the kernel refuses a disk still in use;
  *   - the image is opened with the user's permissions, from their home or their mounts only, never
  *     from the disk being written; its uncompressed size must fit;
- *   - official: SHA256SUMS.sig must verify with the release key compiled into LordOS
+ *   - official: SHA256SUMS.sig must verify with the release key compiled into Insane OS
  *     (codesig_release_key, the key of docs/SIGNING.md) and the image's SHA-256 must be the listed
  *     one, BEFORE anything is erased; the bytes are hashed again while writing and the disk is
  *     wiped if they changed in between;
@@ -64,9 +64,9 @@
 
 #define CURL "/usr/bin/curl"
 #define XZ   "/usr/bin/xz"
-#define REPO "lordbasex/LordOS"
+#define REPO "lordbasex/Insane OS"
 #define MIB (1024u * 1024u)
-#define MAX_IMAGE (64ull << 30)          /* 64 GiB: far above any LordOS image */
+#define MAX_IMAGE (64ull << 30)          /* 64 GiB: far above any Insane OS image */
 
 /* snprintf for paths and short lines; truncation (never expected: the parts are validated and
  * short) leaves a shorter string that the following open/stat simply fails on. */
@@ -384,7 +384,7 @@ void imager_act_write(const AdminReq *r, const char *arg, size_t len) {
     if (disk_admin_whole(r, f[0], &t)) { free(buf); return; }
     free(buf);
     if (!t.removable) { admin_err("imager.notRemovable", "name", t.disk, NULL); return; }
-    /* LordOS images use an MBR table (2 TiB at most); a larger "removable" drive is also not a card */
+    /* Insane OS images use an MBR table (2 TiB at most); a larger "removable" drive is also not a card */
     if (t.size > (2ull << 40)) { admin_err("imager.driveTooLarge", "name", t.disk, NULL); return; }
     char ro[8] = "0", rop[96];
     pathf(rop, sizeof rop, "/sys/class/block/%s/ro", t.disk);

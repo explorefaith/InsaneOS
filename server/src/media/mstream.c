@@ -111,7 +111,7 @@ static int start(Enc *e, int codec) {
     MediaSrc *s = media_src_new(SK_STREAM, "remote");
     if (!s) return -1;
     int ring = -1, render = codec == 1 ? media_render_fd() : -1;
-    if (e->audio) s->mic = maudio_open(1, "LordOS", "Remote desktop", "@DEFAULT_MONITOR@", &ring);
+    if (e->audio) s->mic = maudio_open(1, "Insane OS", "Remote desktop", "@DEFAULT_MONITOR@", &ring);
     char params[200];
     snprintf(params, sizeof params, "codec=%s\nwidth=%d\nheight=%d\nfps=%d\nkbps=%u\nhw=%d\nhwaccel=%s\naudio=%d\nrender=%d\n",
              codec == 1 ? "h264" : "vp8", fw, fh, e->fps, e->kbps, render >= 0, media_hwaccel(), ring >= 0, render >= 0);

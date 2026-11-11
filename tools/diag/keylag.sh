@@ -1,14 +1,14 @@
 #!/bin/sh
 # keylag.sh — where does the typing delay come from? (docs/TROUBLESHOOTING.md, "Typing feels slow")
 #
-# Run it as the logged-in user, in the LordOS Terminal (keys typed there are never traced):
+# Run it as the logged-in user, in the Insane OS Terminal (keys typed there are never traced):
 #
 #     sh keylag.sh [seconds]          (default 30)
 #
 # 1. It prints what matters for input latency: version, GPU or CPU composition, virtual machine,
 #    guest tools, the boot flags, and whether Chromium has complained about the compositor.
 # 2. If the session was started with the key latency trace (boot menu: add lordos.inputdebug=1 to
-#    the kernel line, LordOS 0.8.1 or later), it asks you to type in the slow app for a few
+#    the kernel line, Insane OS 0.8.1 or later), it asks you to type in the slow app for a few
 #    seconds and prints, per stage, p50/p95/max in ms after the kernel's evdev timestamp:
 #    lord-server read it (rx), the app got it (flush), the app answered (commit) and the frame with
 #    it was on screen (shown). The trace has timings only: no key, character or modifier.
@@ -24,7 +24,7 @@ ALOG=$LOGDIR/apps.log
 
 say() { printf '%s\n' "$*"; }
 
-say "== LordOS key latency check"
+say "== Insane OS key latency check"
 ver=$(dpkg-query -W -f '${Version}' lordos 2>/dev/null || echo "?")
 virt=$(systemd-detect-virt 2>/dev/null || echo "?")
 cmd=$(cat /proc/cmdline)
@@ -52,12 +52,12 @@ say ""
 if ! grep -q "keylag: key latency trace on" "$SLOG" 2>/dev/null; then
     say "No key latency trace in this session."
     if [ "$buggy" -gt 0 ] && [ "${comp#GPU}" != "$comp" ]; then
-        say "-> Chromium's warning on the GPU path is the presentation bug fixed in LordOS 0.8.1: a Linux"
+        say "-> Chromium's warning on the GPU path is the presentation bug fixed in Insane OS 0.8.1: a Linux"
         say "   app's new frame was only shown when something else on the screen changed (up to ~1 s late)."
         say "   To confirm on this build in 2 minutes: reboot, press 'e' in the boot menu, add lordos.gpu=0"
         say "   at the end of the 'linux' line, Ctrl+X, then type in Chromium. If the delay is gone, that was it."
     fi
-    say "With LordOS 0.8.1 or later: add lordos.inputdebug=1 the same way (one boot only) and run this again."
+    say "With Insane OS 0.8.1 or later: add lordos.inputdebug=1 the same way (one boot only) and run this again."
     exit 0
 fi
 
@@ -69,7 +69,7 @@ i=$SECS
 while [ "$i" -gt 0 ]; do printf '\r%3d s ' "$i"; sleep 1; i=$((i - 1)); done
 printf '\r       \n'
 if [ ! -f "$TRACE" ]; then
-    say "Nothing was traced: no key reached a Linux app (keys for LordOS's own apps are never traced)."
+    say "Nothing was traced: no key reached a Linux app (keys for Insane OS's own apps are never traced)."
     exit 1
 fi
 tail -n +"$((before + 1))" "$TRACE" | grep '^keylag n=' | grep ' press ' > "$RT/keylag-run.txt"

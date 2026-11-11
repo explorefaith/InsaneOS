@@ -1,7 +1,7 @@
-/* lbframes.h — LordBench's compositor frame recorder (docs/BENCHMARK.md, "Frame times against the refresh
+/* lbframes.h — InsaneBench's compositor frame recorder (docs/BENCHMARK.md, "Frame times against the refresh
  * budget"). While a recording is on, lord-server's main loop (main.c) reports the work of every frame it
  * builds (layout, paint and present, ms) and every frame the main display shows (the page flip's time, or
- * the end of the frame without a monitor); LordBench's thread (lbrun.c) starts and stops the recording
+ * the end of the frame without a monitor); InsaneBench's thread (lbrun.c) starts and stops the recording
  * and gets the statistics. Off, each call is one atomic read. */
 #ifndef LORD_BENCH_LBFRAMES_H
 #define LORD_BENCH_LBFRAMES_H
@@ -45,7 +45,7 @@ int  lbf_end(LbFrameStats *st);
  * the end of render(), or for a frame the pipeline prepared, right after its submission), and completes it at
  * that frame's presentation (lbf_phase_shown). Times are CLOCK_MONOTONIC ns, 0 =
  * unknown. All measured by lord-server itself; nothing comes from a helper. Two recorders take them:
- * LordBench's (lbf_begin/lbf_end, lbf_phases) and the scripted drag's (lbf_drag_begin/lbf_drag_end), for
+ * InsaneBench's (lbf_begin/lbf_end, lbf_phases) and the scripted drag's (lbf_drag_begin/lbf_drag_end), for
  * its "drag (scripted):" line. Off, each call is one atomic read. */
 #define LBF_GDRAG_R 8                       /* GDRAG_R_N (ui/ui.h), checked in main.c */
 #define LBF_GDRAG_L 17                      /* GDRAG_L_N */
@@ -79,7 +79,7 @@ typedef struct { double p50, p99; } LbPct;
 typedef struct {
     int n;                              /* frames with their phases */
     LbPct wake;                         /* the flip to lord-server running (frames started by a flip) */
-    LbPct pre;                          /* that wake to render(): input, LordBench's scripted step, JS */
+    LbPct pre;                          /* that wake to render(): input, InsaneBench's scripted step, JS */
     LbPct paint, up, gdragup, swap, submit_call;
     LbPct build;                        /* render() */
     LbPct gpu;                          /* the flip queued to the GPU done (the fence's signal time) */
@@ -102,7 +102,7 @@ typedef struct {
 void lbf_phase_built(const LbPhase *p);
 void lbf_phase_shown(uint64_t flip_ns, uint64_t gpu_done_ns);
 int  lbf_recording(void);               /* either recorder is on (main.c takes the GPU's fences only then) */
-void lbf_phases(LbPhaseStats *st);      /* LordBench's, of the recording lbf_end just stopped */
+void lbf_phases(LbPhaseStats *st);      /* InsaneBench's, of the recording lbf_end just stopped */
 void lbf_drag_begin(void);
 void lbf_drag_end(LbPhaseStats *st);
 /* names of GDRAG_R_* and GDRAG_L_* (ui/ui.h's order) and the phases as text for a log line */

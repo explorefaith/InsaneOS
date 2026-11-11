@@ -1,8 +1,8 @@
-# LordOS live ISO
+# Insane OS live ISO
 
-An image to boot LordOS from a USB stick or a CD on any 64-bit PC (and, since 0.8.7, on
+An image to boot Insane OS from a USB stick or a CD on any 64-bit PC (and, since 0.8.7, on
 UEFI arm64 machines and virtual machines: "The arm64 ISO" below), without installing anything. It
-is the LordOS distribution itself (a minimal Debian 13 with the LordOS desktop environment) and
+is the Insane OS distribution itself (a minimal Debian 13 with the Insane OS desktop environment) and
 it boots straight into the desktop. It's for testing real hardware: the GPU (AMD or Nvidia),
 sound, Wi-Fi and displays. It is the first step of M8 (the
 installable image).
@@ -10,9 +10,9 @@ installable image).
 | | |
 |---|---|
 | ![bios](iso-bios-boot.png) | ![uefi](iso-final/live-about.png) |
-| VM with SeaBIOS: boots on its own into LordOS | VM with OVMF (UEFI); screenshot from the final 0.7.0 ISO test |
+| VM with SeaBIOS: boots on its own into Insane OS | VM with OVMF (UEFI); screenshot from the final 0.7.0 ISO test |
 | ![grub](iso-grub-menu.png) | ![terminal](iso-final/live-services.png) |
-| Boot menu (screenshot from before the grub font fix: the borders showed up as "?") | Network via LordOS's own DHCP, DNS, `ping` without root, sound (PipeWire) and boot in 11.8 s (screenshot: services and network in the final 0.7.0 ISO test) |
+| Boot menu (screenshot from before the grub font fix: the borders showed up as "?") | Network via Insane OS's own DHCP, DNS, `ping` without root, sound (PipeWire) and boot in 11.8 s (screenshot: services and network in the final 0.7.0 ISO test) |
 
 ## Writing it to a USB stick
 
@@ -37,11 +37,11 @@ motherboard. It works with **UEFI** and with **BIOS/Legacy**. **Secure Boot** ha
 
 | Entry | What for |
 |---|---|
-| LordOS (live) | normal, in English (the default language) |
+| Insane OS (live) | normal, in English (the default language) |
 | Check this computer (nothing is installed) | `lordos.check=1`: the session opens System Information on its Performance tab instead of the installer (0.8.7). Nothing is measured until the user asks. The interface is in English, like the first entry |
-| LordOS (safe mode: no GPU) | passes `lordos.gpu=0` → `LORD_GPU=0`: lord-server doesn't use the GPU path and composites on the CPU |
-| LordOS (Español) / LordOS (Português) / LordOS (Français) | `lordos.lang=es` / `lordos.lang=pt` / `lordos.lang=fr`: the interface in that language the first time |
-| LordOS (copy to RAM) | `toram`: copies the system to memory and the USB stick can be removed. The ISO is about 1.1 GB and all of it goes to memory, so give the machine at least 4 GB |
+| Insane OS (safe mode: no GPU) | passes `lordos.gpu=0` → `LORD_GPU=0`: lord-server doesn't use the GPU path and composites on the CPU |
+| Insane OS (Español) / Insane OS (Português) / Insane OS (Français) | `lordos.lang=es` / `lordos.lang=pt` / `lordos.lang=fr`: the interface in that language the first time |
+| Insane OS (copy to RAM) | `toram`: copies the system to memory and the USB stick can be removed. The ISO is about 1.1 GB and all of it goes to memory, so give the machine at least 4 GB |
 | Install automatically (lordos-auto.conf: erases the disk it names) | `lordos.auto=1` (in the package since 0.8.8.1; on the ISO from 0.8.9): the unattended install from a configuration file on a disk labelled `LORDOSAUTO`, in text, also on the first serial port. Never the default; it stops before touching any disk when something is missing or doesn't match. See [UNATTENDED.md](UNATTENDED.md) |
 
 The GRUB menu itself is in English (GRUB's default). Every entry except safe mode and the unattended install
@@ -75,7 +75,7 @@ starts above the top edge). UEFI keeps `gfxmode=auto` (GOP, native mode). The th
 fix through the `lordos` package; their `/etc/default/grub` keeps `GRUB_GFXMODE=auto`, which is
 now safe at 640×480.
 
-**No KMS display.** LordOS draws through kernel modesetting. QEMU's VMware-compatible display is
+**No KMS display.** Insane OS draws through kernel modesetting. QEMU's VMware-compatible display is
 refused by `vmwgfx` ("unsupported hypervisor", "no pitchlock"), and Debian's kernel has no
 `simpledrm`, so there is no `/dev/dri/card0` with any firmware: the boot ended on a black screen.
 Since 0.8.1 `vmwgfx` loads only on VMware itself and, since 0.8.8, on VirtualBox, whose default VMSVGA display needs it (VirtualBox 7.2.22, 0.8.7 ISO: VMSVGA showed no desktop, VBoxSVGA and VBoxVGA did; 0.8.8 test ISO: VMSVGA, VBoxSVGA and VBoxVGA all reach the desktop, with BIOS and with EFI). Before, it loaded only on VMware (`/etc/modprobe.d/lordos-vmwgfx.conf`, DMI vendor
@@ -145,7 +145,7 @@ xHCI keyboard and tablet, the ISO on virtio-scsi, a 16 GB qcow2 on virtio-blk.
 | What | Result |
 |---|---|
 | ISO boot through GRUB | menu with the theme ([screenshot](boot/arm64-grub-menu.png)) on GOP; the menu's timeout boots the kernel; live desktop about 3 minutes after power on, with the installer open ([screenshot](boot/arm64-live-desktop.png)) |
-| Live session | `lordos`, `lord-netperm` and `lord-fand` active, no failed unit; network by LordOS's own DHCP on `enp0s1` |
+| Live session | `lordos`, `lord-netperm` and `lord-fand` active, no failed unit; network by Insane OS's own DHCP on `enp0s1` |
 | Composition | CPU path, on its own: `gpu: the card (virtio_gpu) has no 3D acceleration: CPU composition`; the KMS driver is `virtio_gpu` (features `-virgl`) |
 | Safe mode (`lordos.gpu=0`) | the menu's "safe mode" entry: `LORD_GPU=0` in the session (`gpu: off (LORD_GPU=0), CPU composition`), desktop and installer |
 | Disk installer, through the wizard | installed onto the qcow2 in about 17 minutes ([screenshot](boot/arm64-installed.png)): GPT with `vda1` EFI and `vda2` of type "Linux root (ARM-64)", no BIOS partition; the Summary step shows that layout |
@@ -175,7 +175,7 @@ Secure Boot, which has to be off as on amd64.
 
 ## Boot splash and boot menu
 
-From power-on to the login screen LordOS shows its own look: the boot menu, then the crown with a
+From power-on to the login screen Insane OS shows its own look: the boot menu, then the crown with a
 progress bar, then the login screen (or the desktop, with autologin) without a black frame or console
 text in between.
 
@@ -200,9 +200,9 @@ text in between.
   it never jumps or goes back; there are no text messages, and **Esc** shows the text console as
   usual. If a disk is encrypted (LUKS), a styled password field with a lock replaces the bar.
   Since 0.8.5 the bottom right corner shows the time since the splash started, in seconds and
-  milliseconds (it never goes backwards); the time from the kernel's start to LordOS's first frame
+  milliseconds (it never goes backwards); the time from the kernel's start to Insane OS's first frame
   is logged by lord-sessiond on every boot (`journalctl -b -u lordos | grep "first frame"`, kept in
-  `/var/lib/lordos/boot-times.jsonl`, the last 200 boots) and shown in About LordOS → Startup time
+  `/var/lib/lordos/boot-times.jsonl`, the last 200 boots) and shown in About Insane OS → Startup time
   (`RESULTS.md`, "Boot time").
 - **Installed system:** the installer writes `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash
   vt.global_cursor_default=0 loglevel=3"`, `GRUB_GFXPAYLOAD_LINUX=keep`, `GRUB_TERMINAL_OUTPUT=gfxterm`
@@ -210,18 +210,18 @@ text in between.
   the initramfs and the GRUB menu. `nosplash` on the kernel command line (`e` in the menu) boots in
   text for one boot.
 - **Hand-off:** see `SESSIONS.md`, "Boot splash": Plymouth gives up the card just before
-  lord-sessiond takes it, its last frame stays until LordOS's first frame replaces it, and only then
+  lord-sessiond takes it, its last frame stays until Insane OS's first frame replaces it, and only then
   is Plymouth ended with `--retain-splash`.
 - **On Debian (install.sh):** optional and asked for; see `INSTALL-DEBIAN.md`.
 
 **Tested on VM 117** (OVMF, `vga: virtio`, 2026-10-18), recording the screen at 4 frames per second
 over QMP (`tools/demo/record.py`): the boot menu, ~2.5 s of black while the kernel loads virtio-gpu
 and Plymouth starts, the splash from ~19 s, and at ~43 s the desktop (autologin) replaces the
-splash directly: no black or console frame between the last splash frame and the first LordOS one.
+splash directly: no black or console frame between the last splash frame and the first Insane OS one.
 The journal (of the first test boot, the same hand-off code) shows the chain: `lordos.service` started (21.2 s), lord-sessiond "first frame on the
 monitor" (27.9 s), `lordos-splash-quit.service` finished, then `plymouth-quit.service`.
 
-| Last splash frame | Next frame: LordOS | The journal |
+| Last splash frame | Next frame: Insane OS | The journal |
 |---|---|---|
 | ![Splash before the hand-off](boot/iso-handoff-1-splash.png) | ![Desktop after the hand-off](boot/iso-handoff-2-desktop.png) | ![Journal](boot/iso-handoff-journal.png) |
 
@@ -252,7 +252,7 @@ In the live session:
 
 ## Installing to disk
 
-On the live ISO the **Install LordOS** assistant (`apps/installer`) opens on its own. It only exists
+On the live ISO the **Install Insane OS** assistant (`apps/installer`) opens on its own. It only exists
 on the live system: the manifest has `"live": true` and the SDK hides it if
 `/run/live/medium/live/filesystem.squashfs` is not there.
 
@@ -301,10 +301,10 @@ How the disk ends up:
 |---|---|---|
 | 1 `biosboot` (EF02) | 1 MiB | grub for BIOS on a GPT disk |
 | 2 `EFI` (EF00) | 512 MiB, FAT32 | grub for UEFI, at the removable path (`EFI/BOOT/BOOTX64.EFI`: boots on any firmware without an NVRAM entry) |
-| 3 `LordOS` (8304) | the rest, ext4 | the system; swap is `/swapfile` |
+| 3 `Insane OS` (8304) | the rest, ext4 | the system; swap is `/swapfile` |
 
 On **arm64** (UEFI only) there is no BIOS partition: 1 `EFI` (EF00, 512 MiB, FAT32, `EFI/BOOT/BOOTAA64.EFI`) and
-2 `LordOS` (8305, the Linux ARM64 root type). `grub-install --target=arm64-efi` is the only grub target, and the wizard's
+2 `Insane OS` (8305, the Linux ARM64 root type). `grub-install --target=arm64-efi` is the only grub target, and the wizard's
 Summary shows that layout.
 
 The installed system is a copy of the live system with these changes:
@@ -318,18 +318,18 @@ The installed system is a copy of the live system with these changes:
   - `fstab` with UUIDs;
   - hostname and `/etc/hosts`;
   - `/etc/default/locale`, `/etc/localtime` and `/etc/default/keyboard`;
-  - the user's LordOS settings (language and keyboard);
+  - the user's Insane OS settings (language and keyboard);
   - a new `machine-id`;
   - the regenerated initramfs and `grub.cfg`.
 - **Login:**
-  - `lordos.service` starts `lord-sessiond`, which shows LordOS's own login screen
+  - `lordos.service` starts `lord-sessiond`, which shows Insane OS's own login screen
     (`SESSIONS.md`): the installer writes an empty `AUTOLOGIN=` to `/etc/lordos/session.conf`;
   - automatic login is turned on in Settings → Users;
   - the password is used for `sudo` and for administration actions.
 
 ### Installing in free space
 
-The second mode (`"mode": "free"` in `install-run`) adds LordOS to a disk that already holds another
+The second mode (`"mode": "free"` in `install-run`) adds Insane OS to a disk that already holds another
 system. It creates exactly **one** new partition and leaves the rest alone.
 
 What the disk needs. The root side checks each of these itself, and the wizard only shows the choice
@@ -340,7 +340,7 @@ when `install-disks` says the disk qualifies:
 | The live system booted through UEFI, and `efibootmgr` is in the image | `install.free.needUefi`, `install.free.noBootTool` |
 | A GPT with a plain protective MBR: not MBR, not a hybrid MBR, not a blank disk | `install.free.mbr`, `install.free.hybridMbr`, `install.free.noTable` |
 | A sound table (below) | `install.free.tableDamaged` |
-| Exactly one EFI partition, on FAT, with 32 MB free and no `EFI/LordOS` folder yet | `install.free.noEsp`, `manyEsps`, `espNotFat`, `espUnreadable`, `espFull`, `espHasLordOS` |
+| Exactly one EFI partition, on FAT, with 32 MB free and no `EFI/Insane OS` folder yet | `install.free.noEsp`, `manyEsps`, `espNotFat`, `espUnreadable`, `espFull`, `espHasInsane OS` |
 | An unpartitioned region of at least 8 GB (the size an erase install requires of the disk), after aligning it, and a free table slot; an existing empty partition doesn't count, it has to be deleted first | `install.free.noRoom`, `install.free.tableFull` |
 | Nothing mounted, swapped or held (device-mapper, md) on the disk | `install.free.busy` |
 
@@ -362,7 +362,7 @@ What it does, in `server/src/install/freepart.c`; the decisions are in `freespac
    (`freeStart`, `freeEnd`): a disk that changed behind the wizard gives `install.free.diskChanged`.
 2. Saves the table with `sgdisk --backup` to `/run/lordos-install` and takes a byte copy of the
    first sector, both headers and both entry arrays. Compares them again right before writing.
-3. `sgdisk -n N:start:end -t N:8304 -c N:LordOS` (8305 on arm64), in the largest free region, aligned
+3. `sgdisk -n N:start:end -t N:8304 -c N:Insane OS` (8305 on arm64), in the largest free region, aligned
    to 1 MiB, by explicit sectors. N is the lowest free number: existing partitions are not renumbered.
 4. Proves the result on the raw disk: the first sector's boot code, each existing entry byte for byte,
    and exactly one new entry with those sectors and that type. Then that the kernel sees it there.
@@ -371,25 +371,25 @@ What it does, in `server/src/install/freepart.c`; the decisions are in `freespac
 No existing partition is deleted, moved, resized or formatted, the EFI one included. The system is
 then copied and configured as in an erase install, except:
 
-- grub goes in `EFI/LordOS` on the existing EFI partition (`--bootloader-id=LordOS`, no `--removable`).
+- grub goes in `EFI/Insane OS` on the existing EFI partition (`--bootloader-id=Insane OS`, no `--removable`).
   `EFI/BOOT` is another system's fallback loader and isn't touched, and nothing is written to the
   disk's first sectors: no BIOS grub in this mode.
-- `efibootmgr -c` adds a `LordOS` entry, as the last step of all. The other entries stay; LordOS goes
+- `efibootmgr -c` adds a `Insane OS` entry, as the last step of all. The other entries stay; Insane OS goes
   first in the boot order.
 - `GRUB_DISABLE_OS_PROBER=false` and a 5 second menu; when `os-prober` is in the image, grub lists the
   other system. **The ISO ships `os-prober` from this version on. In an image without it, the other
-  system is not in the LordOS menu**, and is reached from the firmware's boot menu.
+  system is not in the Insane OS menu**, and is reached from the firmware's boot menu.
 - `/etc/fstab` mounts the EFI partition with `nofail` and pass 0: a shared partition is not checked or
   repaired at every boot.
 
 If a step fails after the write (partitioning, formatting, copying, configuring, grub or the boot
-entry), the installer deletes `EFI/LordOS`, which it knows is its own, restores the table with `sgdisk
+entry), the installer deletes `EFI/Insane OS`, which it knows is its own, restores the table with `sgdisk
 --load-backup` and compares it with the byte copy. If that comparison fails it says so, with the path of
 the backup: don't restart before saving it. A power cut in the middle can't be rolled back: the
 new partition stays in the table, unfinished, with the others untouched.
 
 To keep in mind: another system that is hibernated or was closed with a fast startup may have the
-EFI partition cached, so shut it down fully first. Secure Boot has to be off, as for any LordOS install.
+EFI partition cached, so shut it down fully first. Secure Boot has to be off, as for any Insane OS install.
 
 `build/freepart-cli` (`make -C server build/freepart-cli`, root, loop devices only, never installed) and
 `server/tests/freepart_loop.sh` run the real partitioning step on an image, with failures injected.
@@ -397,7 +397,7 @@ EFI partition cached, so shut it down fully first. Secure Boot has to be off, as
 ### Manual partitioning
 
 The third mode (`"mode": "manual"` in `install-run`, **Choose partitions** in the wizard, 0.8.8.4,
-[#31](https://github.com/lordbasex/LordOS/issues/31)) lets the person decide where LordOS goes on a
+[#31](https://github.com/lordbasex/Insane OS/issues/31)) lets the person decide where Insane OS goes on a
 disk: which partition is `/`, an optional separate `/home` (keeping its files or formatted), the EFI
 partition to boot from (kept, or formatted only when asked) and an optional swap partition. Partitions
 can be deleted, and new ones created in free space, with a size. Nothing is written until **Install**.
@@ -427,7 +427,7 @@ What each partition can become (the menu on each row):
 | /home: keep its files | mounted as `/home`, nothing formatted; only ext4, ext3, ext2, XFS or Btrfs |
 | /home: format (ext4) | formatted |
 | Swap: format | `mkswap`; 256 MB to 64 GB |
-| EFI partition: keep it, add LordOS | grub goes in `EFI/LordOS`; the other folders stay. FAT, readable, 32 MB free. Only for a partition of the EFI type |
+| EFI partition: keep it, add Insane OS | grub goes in `EFI/Insane OS`; the other folders stay. FAT, readable, 32 MB free. Only for a partition of the EFI type |
 | EFI partition: format it | FAT32, every boot loader on it is erased; only when chosen. At least 64 MB |
 | Delete | its table entry is removed |
 
@@ -461,12 +461,12 @@ What it does, in `server/src/install/manualpart.c`:
    table says. If not, the table is put back from the backup and compared again.
 4. `wipefs` and the file system on each partition that gets one, and nothing else.
 
-Then the system is copied and configured as in "Installing in free space" (grub in `EFI/LordOS`, its own
+Then the system is copied and configured as in "Installing in free space" (grub in `EFI/Insane OS`, its own
 firmware entry first in the boot order, a 5 second menu, `os-prober`, nothing written to the disk's
 first sectors), plus:
 
 - `/etc/fstab` gets `/home` (`UUID=… /home <type> defaults 0 2`, pass 0 for XFS and Btrfs) and the swap
-  partition (`UUID=… none swap sw 0 0`). An EFI partition LordOS formatted is its own, as in an erase
+  partition (`UUID=… none swap sw 0 0`). An EFI partition Insane OS formatted is its own, as in an erase
   install (`0 1`, and grub also at the removable path `EFI/BOOT`); one it kept is shared (`nofail`, `0 0`).
 - `/home` is mounted only after the live user's folder was removed, so that removal can never reach
   a kept `/home`.
@@ -475,7 +475,7 @@ first sectors), plus:
   owner's files to the new user and nothing else, never following a link. The user's
   `~/.config/lordos/settings.json` and `~/.config/locale.conf` are written only when missing, and
   nothing is written through a link in that folder.
-- A kept EFI partition that already has `EFI/LordOS` (an earlier LordOS) is reused; that folder is
+- A kept EFI partition that already has `EFI/Insane OS` (an earlier Insane OS) is reused; that folder is
   then not removed if the install fails.
 
 If a step fails: a plan that deletes nothing puts the table back as in "Installing in free space". A
@@ -501,7 +501,7 @@ another system's partition. Through the wizard: delete it, a 1 GB swap partition
 the free space, keep `/home` and the EFI partition. The install finished in about a minute and a half. Afterwards: the
 table had exactly the planned entries (5 swap, 6 `/` of type 8304, 3 gone, 1, 2 and 4 as they were,
 `sgdisk -v` clean); the other system's partition was byte-identical by checksum and every file on the EFI
-partition outside `EFI/LordOS` unchanged; the firmware had a `LordOS` entry first in the boot order;
+partition outside `EFI/Insane OS` unchanged; the firmware had a `Insane OS` entry first in the boot order;
 `fstab` had `/`, the EFI partition (`nofail`), `/home` and the swap partition by UUID; the installed
 system booted to its login screen, `/home` was the old partition with `keep.txt` and the other files
 intact, the user's old folder now owned by the new user, another user's folder left as it was, and the
@@ -576,7 +576,7 @@ It is a standard OVA, amd64 only: an OVF 1.0 descriptor, a SHA-256 manifest and 
 The image has no account for a person and no password. The ISO's emergency root password is not in it: root is locked, as on an installed system.
 
 1. The first boot logs in by itself as `lordos`, the same setup account as the Raspberry Pi image. It exists only for this: no password, not offered by the login screen, and remote desktop refuses it. There is no SSH server in the image.
-2. `/etc/lordos/first-account` exists, so `lord.system.info().firstAccount` is true: the **Install LordOS** assistant opens by itself as **Set up LordOS**, without the disk step, and can't be closed until the account exists. Its steps are Language & region, Keyboard, User and Summary.
+2. `/etc/lordos/first-account` exists, so `lord.system.info().firstAccount` is true: the **Install Insane OS** assistant opens by itself as **Set up Insane OS**, without the disk step, and can't be closed until the account exists. Its steps are Language & region, Keyboard, User and Summary.
 3. **Create account** runs `install-account`, which does what `install-run` does for the person: the same validation and the same code (`setup_person` in `install.c`), on the running system. `lordos` as a user name is refused here.
 4. After **Restart**, `lordos-live-prep` removes `lordos`, and the login screen is what starts from then on.
 
@@ -601,30 +601,30 @@ The VMDK is cut at its end-of-stream marker. `qemu-img` pads the file after it, 
 
 The released file is `lordos-0.8.8-amd64.ova`, 1,255,577,600 bytes, sha256
 `98ff7979993093840834e65b92f25dd8e4972451ce5e8d519007c80fb9f6d7a9`. On the maintainer's own computer it was imported in
-VirtualBox 7.2: the account was created in **Set up LordOS**, the machine restarted into the login screen and signed in
+VirtualBox 7.2: the account was created in **Set up Insane OS**, the machine restarted into the login screen and signed in
 with that password. It was also imported in VMware Fusion through Fusion's own import window (File → Import), without problems,
 and on 2026-11-03 the same steps passed there: the account created, the restart into the login screen and the sign-in.
 The screenshots of both are in `docs/vm/` and on lordos.org/virtual-machine/.
 
-The table below is from the first build, `lordos-0.8.7-amd64.ova`. The test build of 0.8.8, with test keys, is `lordos-0.8.8-amd64.ova`, 1,255,546,880 bytes, sha256 `997869abff6777e5540522020b5a1b3764a13af68d21a080d5a3054506de8112`: imported on VirtualBox 7.2.22, it reached **Set up LordOS** with VBoxSVGA (its own setting) and with VMSVGA, both BIOS.
+The table below is from the first build, `lordos-0.8.7-amd64.ova`. The test build of 0.8.8, with test keys, is `lordos-0.8.8-amd64.ova`, 1,255,546,880 bytes, sha256 `997869abff6777e5540522020b5a1b3764a13af68d21a080d5a3054506de8112`: imported on VirtualBox 7.2.22, it reached **Set up Insane OS** with VBoxSVGA (its own setting) and with VMSVGA, both BIOS.
 
 | Check | Result |
 |---|---|
 | Built twice from the same squashfs on VM 116, about 6 minutes each | byte-identical (`cmp`), `e2fsck -f` clean |
 | `VBoxManage import` on VirtualBox 7.2.22 | `graphicscontroller="vboxsvga"`, BIOS, 2 CPUs, 4096 MB, LsiLogic, NAT, USB tablet |
-| Boot, headless, VBoxSVGA, BIOS | **Set up LordOS** in about 75 s, in 1024×768 |
-| Same machine with VMSVGA, VirtualBox's default for Linux | **Set up LordOS** at 1280×800, `vmwgfx` in use, so the fix for [#9](https://github.com/lordbasex/LordOS/issues/9) holds on this image |
-| Same machine with UEFI (an earlier build, same boot files) | **Set up LordOS** |
+| Boot, headless, VBoxSVGA, BIOS | **Set up Insane OS** in about 75 s, in 1024×768 |
+| Same machine with VMSVGA, VirtualBox's default for Linux | **Set up Insane OS** at 1280×800, `vmwgfx` in use, so the fix for [#9](https://github.com/lordbasex/Insane OS/issues/9) holds on this image |
+| Same machine with UEFI (an earlier build, same boot files) | **Set up Insane OS** |
 | Inside, in the setup session's terminal (an earlier build) | `systemctl` says running, no failed units, a `machine-id` of its own, no SSH host keys, DHCP on NAT and a ping out |
 | The wizard, with the mouse (an earlier build) | Language & region, Keyboard and User open in order; Next stays off on an empty User step; the window's close button doesn't close it |
 | `ovftool` 5.0.0 to a VMX | manifest and disk digests pass, conversion completes. Its guest type comes out as `otherlinux-64` with a warning |
-| VMware Fusion, headless, with that VMX (an earlier build, with the VMDK cut by hand the same way) | **Set up LordOS** at 1280×800, read over a local VNC port added for the test |
+| VMware Fusion, headless, with that VMX (an earlier build, with the VMDK cut by hand the same way) | **Set up Insane OS** at 1280×800, read over a local VNC port added for the test |
 
 Not tested: **Create account**, the reboot after it and the login screen on VMware Fusion (on VirtualBox they were tested with the released file, above), VMware Workstation, VirtualBox before 7.2 and Windows or Linux hosts. Sound in the machine.
 
 ## What it ships
 
-- **LordOS** as its own package, `lordos_<version>_amd64.deb`, built by `tools/iso/mkdeb.sh`. The
+- **Insane OS** as its own package, `lordos_<version>_amd64.deb`, built by `tools/iso/mkdeb.sh`. The
   version and the release channel come from `package.json` (`"version"` and `"lordos": {"channel": "beta"}`;
   an empty channel is a stable release). `make -C server` bakes both, plus the build date and git
   commit, into `lord-server`, and About and Settings → General show them. The package contains:
@@ -646,7 +646,7 @@ Not tested: **Create account**, the reboot after it and the login screen on VMwa
   - The user has linger, so their PipeWire starts with the system.
   - The system user `lordos-greeter`, the login screen's user, is created when building the ISO
     (lord-sessiond also creates it if it's missing).
-- **Network:** LordOS's own DHCP, in `lord-netd` from boot (`NETWORK.md`). No ifupdown,
+- **Network:** Insane OS's own DHCP, in `lord-netd` from boot (`NETWORK.md`). No ifupdown,
   systemd-networkd or NetworkManager.
 - **Sound:** PipeWire, pipewire-pulse, WirePlumber, alsa-ucm-conf and the SOF firmware (audio on
   Intel laptops).
@@ -657,14 +657,14 @@ Not tested: **Create account**, the reboot after it and the login screen on VMwa
 - **Fonts:** Noto (core, CJK, emoji) and DejaVu; the rest of what M5b needs: libthai-data, skkdic
   and rime-data-pinyin-simp.
 - **Linux apps:** Chromium and Firefox ESR (preinstalled browsers that draw their own bar with
-  LordOS's window buttons, `WAYLAND.md`), plus foot and FeatherPad as samples.
+  Insane OS's window buttons, `WAYLAND.md`), plus foot and FeatherPad as samples.
 - **X11 apps (0.8.3):** `xwayland`, started by lord-server only when an X11 app connects
   ([WAYLAND.md](WAYLAND.md), "X11 apps (Xwayland)").
 
 ## Building it
 
 On a Debian 13, from the root of an already compiled repository. Since M8 it is built on **VM 116**
-(`lordos-gpu`, 172.17.0.52, a clone of 115), in `~/LordOS-iso`: 115 is the user's development VM and
+(`lordos-gpu`, 172.17.0.52, a clone of 115), in `~/Insane OS-iso`: 115 is the user's development VM and
 is not used for this.
 
 ```sh
@@ -672,7 +672,7 @@ is not used for this.
 npm run build
 COPYFILE_DISABLE=1 tar czf - --no-xattrs --exclude build --exclude node_modules \
   package.json README.md server third_party assets themes tools | \
-  ssh lord@172.17.0.52 'rm -rf ~/LordOS-iso && mkdir ~/LordOS-iso && cd ~/LordOS-iso && tar xzf -'
+  ssh lord@172.17.0.52 'rm -rf ~/Insane OS-iso && mkdir ~/Insane OS-iso && cd ~/Insane OS-iso && tar xzf -'
 # on VM 116
 make -C server -j4                            # lord-server (GPU=1) and lord-sessiond (needs libssl-dev, libsrtp2-dev, libusrsctp-dev)
 sudo tools/iso/build.sh /var/tmp/lordos-iso   # → /var/tmp/lordos-iso/out/
@@ -683,15 +683,15 @@ previous one is kept with its date: `lordos-live-0.7.0-amd64-20261016-1529.iso` 
 `lordos-session` (sha256 `d4a8b25f…4b4dc5`).
 
 `build.sh` steps:
-1. `mkdeb.sh`: the LordOS package; (0.8.7) `mkdeb-hwdata.sh`: `lordos-hwdata_<date>_all.deb`, the signed
+1. `mkdeb.sh`: the Insane OS package; (0.8.7) `mkdeb-hwdata.sh`: `lordos-hwdata_<date>_all.deb`, the signed
    tested-hardware snapshot it depends on (installed together with it in step 3).
 2. `debootstrap --variant=minbase` of trixie, with main, contrib, non-free and non-free-firmware.
-3. `apt-get install --no-install-recommends` of the list above and the LordOS package.
+3. `apt-get install --no-install-recommends` of the list above and the Insane OS package.
 4. Configuration:
    - locales `es_ES`, `es_AR`, `es_MX`, `en_US`, `pt_BR` and `fr_FR`;
    - the `lordos` user, with linger;
    - `lordos.service` enabled and `getty@tty1` masked;
-   - `/etc/resolv.conf` as a regular file, for LordOS's DHCP;
+   - `/etc/resolv.conf` as a regular file, for Insane OS's DHCP;
    - `/etc/network/interfaces` with only `lo`;
    - `net.ipv4.ping_group_range`, so `ping` works without root.
 5. Cleanup: apt lists, caches and `machine-id`.
@@ -804,14 +804,14 @@ from signed code. The checksums are in the release's `SHA256SUMS`.
 | Test | Result |
 |---|---|
 | Server tests | 26 passed, 0 failed |
-| The released OVA in VirtualBox 7.2 on the maintainer's own computer | account created in **Set up LordOS**, restart, login with its password: works |
+| The released OVA in VirtualBox 7.2 on the maintainer's own computer | account created in **Set up Insane OS**, restart, login with its password: works |
 | The released OVA in VMware Fusion, through its own import window | imported without problems; on 2026-11-03 the account, the restart and the sign-in passed there too |
 | Update 0.8.7 → 0.8.8 with `apt` against lordos.org/apt-staging, a clean installed amd64 VM (VM 125) | installed; `/usr/bin/pkexec` diverted to `lord-pkexec`; a clean restart with no failed units; a reinstall ran no migration (0.8.8 adds none) |
 | Raspberry Pi 5 against apt-staging | arm64 index read, candidate 0.8.8 |
 | arm64 ISO | built, not booted for this release |
 | Raspberry Pi image | built, not flashed or booted for this release |
 
-Not checked: the Store's own update screen ("LordOS 0.8.8 is available", then "Restart required") on screen.
+Not checked: the Store's own update screen ("Insane OS 0.8.8 is available", then "Restart required") on screen.
 
 ## Release test (0.8.7 Beta, November 1)
 
@@ -858,7 +858,7 @@ menu and the splash, as in 0.8.5 ("Boot splash and boot menu" above). The others
 | Test | Result |
 |---|---|
 | Update with apt, the same package built as `0.8.5~rc2`: a VMware machine on 0.8.4.1 and a Raspberry Pi 5 on 0.8.4, then a restart | no migration (`/var/lib/lordos/migrations` unchanged from 0.8.4), settings kept |
-| Update 0.8.4.1 → 0.8.5 through LordOS's package engine against lordos.org/apt-staging, VMware Fusion guest (`results/0.8.5-beta/vmware-fusion/`) | first frame on the monitor 7.4 s after the kernel started; GPU composition on SVGA3D; Test Bench 59.8 frames a second at 60 Hz |
+| Update 0.8.4.1 → 0.8.5 through Insane OS's package engine against lordos.org/apt-staging, VMware Fusion guest (`results/0.8.5-beta/vmware-fusion/`) | first frame on the monitor 7.4 s after the kernel started; GPU composition on SVGA3D; Test Bench 59.8 frames a second at 60 Hz |
 
 Known issues of the release that concern the image: the legacy BIOS black rectangle between the boot
 menu and the splash ("Boot splash and boot menu" above). The others (the remote desktop's black corners
@@ -885,13 +885,13 @@ The image: `lordos-0.8.4.1-rpi5-arm64.img.xz`, 784 982 908 bytes, sha256
 | Check | Result |
 |---|---|
 | Image, read-only (loop device on the Pi): `config.txt` has `display_auto_detect`/`camera_auto_detect` (lines 15–16) **before** `dtoverlay=vc4-kms-v3d` (line 21); `lordos` 0.8.4.1 verified, release build; Chromium 156 and Firefox ESR 153 (Debian's) with `custom_chrome_frame` true, the GTK theme and `inTitlebar` 1; `systemd-timesyncd`, `cups`, `avahi-daemon`, `exfatprogs`, `ntfs-3g`, `power-profiles-daemon`, `gsettings-desktop-schemas`, `rpi-eeprom` 28.34-1 installed; `lord-doc`, `lord-media` and `lord-netperm` with its BPF programs in the package; `dpkg --audit` clean | pass |
-| Store → Updates on VM 120 (0.8.4 installed from its ISO, UEFI, user `rtester`, `lordos.sources` on `apt-staging`): "LordOS 0.8.4.1 is available" with the notes; the plan is `lordos` only (11 MB); Update → no migration → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.4.1 · Beta", build `20261025.9796cda3`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units; Settings has no Board firmware on a PC (search "firmware": no results) | pass |
+| Store → Updates on VM 120 (0.8.4 installed from its ISO, UEFI, user `rtester`, `lordos.sources` on `apt-staging`): "Insane OS 0.8.4.1 is available" with the notes; the plan is `lordos` only (11 MB); Update → no migration → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.4.1 · Beta", build `20261025.9796cda3`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units; Settings has no Board firmware on a PC (search "firmware": no results) | pass |
 | `apt update && apt-get upgrade` (VM 120 back at the fresh 0.8.4): 27 s, `lordos` and a Debian update, nothing kept back, no migration, `settings.json` byte-identical, `/run/reboot-required.pkgs` = `lordos`; `apt install --reinstall lordos` runs no migration; after the restart 0 failed units | pass |
-| Staging repository: the 11 Raspberry Pi packages verified against Raspberry Pi's signed index and the pinned SHA-256s; only the arm64 index lists them; `apt-repo.sh verify staging` passes. On the Pi, `apt-get install -s rpi-eeprom` with only Debian and LordOS sources (Raspberry Pi's archive left out, empty dpkg status) resolves everything from `LordOS:stable` and Debian | pass |
+| Staging repository: the 11 Raspberry Pi packages verified against Raspberry Pi's signed index and the pinned SHA-256s; only the arm64 index lists them; `apt-repo.sh verify staging` passes. On the Pi, `apt-get install -s rpi-eeprom` with only Debian and Insane OS sources (Raspberry Pi's archive left out, empty dpkg status) resolves everything from `Insane OS:stable` and Debian | pass |
 | Raspberry Pi 5 (test SD, 0.8.4 image with the `config.txt` fix by hand): `apt-get install lordos` from staging: 0.8.4.1 in 18 s, no migration, `sshd -t` clean, `lord-server --check-code` verified | pass |
-| Settings → Board firmware on the Pi (a test account over the LordOS remote desktop): "Update available", installed Tuesday, May 26, 2026, latest Friday, September 25, 2026, release Default; **Update** → "Update ready: restart to finish" with the note and **Restart…** (the session's Restart sheet); the board staged `pieeprom.upd`, `pieeprom.sig` and `recovery.bin` and wrote `/run/rpi-eeprom-update-pending` (no `flashrom`, no `rpieepromab`) | pass |
+| Settings → Board firmware on the Pi (a test account over the Insane OS remote desktop): "Update available", installed Tuesday, May 26, 2026, latest Friday, September 25, 2026, release Default; **Update** → "Update ready: restart to finish" with the note and **Restart…** (the session's Restart sheet); the board staged `pieeprom.upd`, `pieeprom.sig` and `recovery.bin` and wrote `/run/rpi-eeprom-update-pending` (no `flashrom`, no `rpieepromab`) | pass |
 | After the restart: `vcgencmd bootloader_version` 2026/09/25 (`1accd665…`, was 2026/05/26 `086b83e3…`), the staged files gone; the page says "Up to date", installed = latest = September 25, 2026 | pass |
-| Browsers on the Pi (installed on the test SD the same way as the image, defaults from `browser-defaults.sh`): Chromium 156 on Wayland with one bar and LordOS's traffic lights; Firefox ESR 153 with its own single bar; Settings → Displays → Video: "Automatic", this board can't decode VP9 or AV1 in hardware, so sites are asked for H.264 | pass |
+| Browsers on the Pi (installed on the test SD the same way as the image, defaults from `browser-defaults.sh`): Chromium 156 on Wayland with one bar and Insane OS's traffic lights; Firefox ESR 153 with its own single bar; Settings → Displays → Video: "Automatic", this board can't decode VP9 or AV1 in hardware, so sites are asked for H.264 | pass |
 
 Found in this test:
 
@@ -923,7 +923,7 @@ RELEASE=1` from a tree whose `code-manifest.json` was signed on the maintainer's
 pass) and 24 passed, 0 failed, 7 skipped on the Raspberry Pi 5; 0 compiler warnings. Both `.deb`:
 lintian 0 errors (17 warnings, the known ones); both SBOMs validated with `pyspdxtools`. New
 dependencies: `libsrtp2-1` and `libusrsctp2` (the WebRTC remote desktop). The release also carries the
-LordOS Imager's desktop downloads (`lordos_imager_0.8.4_universal.dmg`, signed and notarized;
+Insane OS Imager's desktop downloads (`lordos_imager_0.8.4_universal.dmg`, signed and notarized;
 `_amd64.deb`; `_x64_setup.exe`, not code-signed), listed in the signed `SHA256SUMS`. The test VMs got
 a fresh 0.8.3 install from the published 0.8.3 ISO first (user `rtester`), so the upgrade ran on a
 clean system. The tests started on October 19 with build `20261019.13bdd697` and were repeated on
@@ -931,10 +931,10 @@ October 25 with the final build (it adds the Pi HDMI wait, 4d17d2d, and strips `
 
 | Check | Result |
 |---|---|
-| Store → Updates on VM 120 (0.8.3 installed from its ISO, UEFI, `lordos.sources` pointed at `apt-staging`): "LordOS 0.8.4 is available" with the notes; the plan is `lordos` plus `libsrtp2-1` and `libusrsctp2`; Update → migration 005 only → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.4 · Beta", build `20261025.ca52be13`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units | pass |
+| Store → Updates on VM 120 (0.8.3 installed from its ISO, UEFI, `lordos.sources` pointed at `apt-staging`): "Insane OS 0.8.4 is available" with the notes; the plan is `lordos` plus `libsrtp2-1` and `libusrsctp2`; Update → migration 005 only → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.4 · Beta", build `20261025.ca52be13`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units | pass |
 | `apt update && apt upgrade` (0.8.3 → 0.8.4, VM 120 back at the clean 0.8.3): 41 s, migration 005, the two libraries installed, `settings.json` byte-identical, restart, 0 failed units; `apt install --reinstall lordos` runs no migration again. `apt-get upgrade` keeps `lordos` back (new dependencies; noted in the release notes) | pass |
-| Migration 005 on the upgraded system: `/etc/chromium/master_preferences` `custom_chrome_frame` false → true, `/etc/firefox-esr/lordos.js` `inTitlebar` 0 → 1. Settings → Appearance → "Browsers: tabs in the title bar" lists "1 Chromium profile still uses the LordOS frame" (a profile opened on 0.8.3); **Change them** → Chromium opens with a single bar and LordOS's traffic lights | pass |
-| Smoke checks: XTerm opens (Xwayland `:0`, `app-lordos-debian-xterm.scope`); the native LordOS Imager opens (Device step); the overlay scroll bar shows while scrolling and is gone once the pointer leaves; smartmontools installed and smartd forced past its virtualization check: it stays off | pass |
+| Migration 005 on the upgraded system: `/etc/chromium/master_preferences` `custom_chrome_frame` false → true, `/etc/firefox-esr/lordos.js` `inTitlebar` 0 → 1. Settings → Appearance → "Browsers: tabs in the title bar" lists "1 Chromium profile still uses the Insane OS frame" (a profile opened on 0.8.3); **Change them** → Chromium opens with a single bar and Insane OS's traffic lights | pass |
+| Smoke checks: XTerm opens (Xwayland `:0`, `app-lordos-debian-xterm.scope`); the native Insane OS Imager opens (Device step); the overlay scroll bar shows while scrolling and is gone once the pointer leaves; smartmontools installed and smartd forced past its virtualization check: it stays off | pass |
 | Remote desktop on the upgraded VM 120 (Settings → Sharing on, "Local network"), from the maintainer's machine in headless Chrome: H.264 video over UDP, 1280×800, the data channel up, audio packets flowing; with UDP and every TCP connection to 5673 beyond the first dropped (`iptables` on the VM, for the test only) the page shows "Couldn't connect to the remote desktop" with why and what to do, and Try again | pass |
 | VM 117, OVMF: the final ISO boots to the live desktop, About "Version 0.8.4 · Beta", build `20261025.ca52be13`, **Verified**; the install itself was tested with the first build's ISO (`20261019.13bdd697`, the same installer): install on the disk (en_US, Buenos Aires, 2 GB swap) in under 2 minutes; installed: login screen, `lordos` 0.8.4, `xwayland` and `libsrtp2-1` installed, Chromium's new-profile default `custom_chrome_frame: true`, `lordos-firstrun` present, 0 failed units, boot 6.8 s, 4.6 GB used | pass |
 | Raspberry Pi 5 (lordos 0.8.3, kernel `6.18.57-lordos.3-rpi-2712`): `apt-get install lordos` from staging: 0.8.4 in 13 s, migration 005, `sshd -t` clean, `lord-server --check-code` verified; `lordos`, `lord-netperm`, `lord-fand` restarted (no reboot), `display: /dev/dri/card1`; then the source switched back to the live repository: `lordos 0.8.4` installed and candidate | pass |
@@ -970,14 +970,14 @@ the published 0.8.2 ISO first (user `rtester`), so the upgrade ran on a clean sy
 
 | Check | Result |
 |---|---|
-| Store → Updates on VM 120 (0.8.2 installed from its ISO, UEFI, `lordos.sources` pointed at `apt-staging`): "LordOS 0.8.3 is available" with the notes; the plan is `lordos` only; Update → migration 004 only (a running smartd, started for the test, was stopped) → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.3 · Beta", build `20261019.36cf07b4`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units | pass |
+| Store → Updates on VM 120 (0.8.2 installed from its ISO, UEFI, `lordos.sources` pointed at `apt-staging`): "Insane OS 0.8.3 is available" with the notes; the plan is `lordos` only; Update → migration 004 only (a running smartd, started for the test, was stopped) → "Restart required" → Restart (the sheet with the open apps) → login screen → About "Version 0.8.3 · Beta", build `20261019.36cf07b4`, **Verified**; `lordos`, `lord-netperm`, `lord-fand` active, 0 failed units | pass |
 | `apt update && apt upgrade` (0.8.2 → 0.8.3, VM 120 back at the clean 0.8.2): 31 s, migration 004, `xwayland` installed as a new recommendation, `settings.json` byte-identical, restart, 0 failed units, X display reserved; `apt install --reinstall lordos` runs no migration again. `apt-get upgrade` keeps `lordos` back (new recommended package; noted in the release notes) | pass |
 | Smoke checks on the upgraded system: XTerm opens (Xwayland `:0`, `app-lordos-debian-xterm.scope`); the Passwords padlock and the Backups clock centered in the Dock; Settings → Appearance → Classic and back, live; overlay scroll bar visible while scrolling and gone 3 s later; smartmontools installed and smartd forced past its virtualization check: it stays off (`ConditionPathExists=/etc/lordos/smartd-enabled`) | pass |
 | Firewall: Chromium playing a video, its row switched off in Monitor → Network: its established sockets went from 10 to 0 within 0.5 s of the click, received bytes stopped; Monitor counts the denials; switching it back on works | pass |
 | Remote desktop on the upgraded VM 120 (Settings → Sharing on, "Local network"): login from the LAN (303 + `__Host-` cookie); 3 wrong passwords (1.25 s each) block the address, the 4th connection is cut before TLS; the block notification and the "Temporarily blocked" row in Settings; **Unblock** → login works again; Monitor → Network shows the "Remote desktop" row with the 3 denials | pass |
 | VM 117, OVMF: live desktop, About 0.8.3 Verified; install on the disk (en_US, Buenos Aires, 2 GB swap) in under 5 minutes; installed: login screen, `lordos` 0.8.3 and `xwayland` installed, `DISPLAY=:0`, 0 failed units, boot 7.4 s, 4.6 GB used | pass |
 | Raspberry Pi 5 (lordos 0.8.0, no repository yet): the 0.8.0 one-time step (key and `lordos.sources`), then `apt-get install lordos` from staging: 0.8.3 in 15 s, migrations 001–004, `xwayland` installed, `sshd -t` clean with root keys kept (migration 002), `lord-server --check-code` verified, `lordos` restarted to the login screen without a reboot; then the source switched to the live repository: `lordos 0.8.3` is the candidate | pass |
-| Raspberry Pi 5 image, read-only: the signed manifest (same SHA-256 as the maintainer's), build `20261019.36cf07b4` in `lord-server`, migrations 001–004, `/usr/bin/Xwayland`, the smartd drop-in, the LordOS kernel `6.18.57-lordos-rpi-2712` | pass |
+| Raspberry Pi 5 image, read-only: the signed manifest (same SHA-256 as the maintainer's), build `20261019.36cf07b4` in `lord-server`, migrations 001–004, `/usr/bin/Xwayland`, the smartd drop-in, the Insane OS kernel `6.18.57-lordos-rpi-2712` | pass |
 
 Found in this test:
 
@@ -1000,7 +1000,7 @@ version delivered to installed systems as an update, so the upgrade path was tes
 
 | Check | Result |
 |---|---|
-| Store → Updates on VM 120, 0.8.1 installed from the published 0.8.1 ISO (UEFI), `lordos.sources` only (`https://lordos.org/apt`): "LordOS 0.8.2 is available", the whole "What's new" with no overlapping lines | pass |
+| Store → Updates on VM 120, 0.8.1 installed from the published 0.8.1 ISO (UEFI), `lordos.sources` only (`https://lordos.org/apt`): "Insane OS 0.8.2 is available", the whole "What's new" with no overlapping lines | pass |
 | Update from the Store (a `file:` copy of the final live tree, then the staging repo with the first 0.8.2 build): migration 003 only, "Restart required" → Restart Now (the sheet with the open apps) → login screen with Crystal Crown → About "Version 0.8.2 · Beta", build `20261019.dcb8293e`, **Verified**; wallpaper `aurora` kept; 0 failed units; `apt install --reinstall lordos` runs no migration again | pass |
 | `apt update && apt upgrade` (0.8.1 → 0.8.2): migration 003, `settings.json` byte-identical, restart, code verified | pass |
 | `install.sh --deb` 0.8.1 → 0.8.2 and 0.8.0 → 0.8.2 (0.8.0 from its ISO, after `apt install curl`): "valid Ed25519 signature of SHA256SUMS", migrations 001–003, `session.conf` unchanged, settings kept, restart | pass |
@@ -1033,7 +1033,7 @@ with `pyspdxtools`.
 | VM 123, SeaBIOS, standard VGA, 2 GB: menu, splash, live desktop | pass |
 | Upgrade with apt (VM 120, 0.8.0 from the ISO, `apt-staging`): 0.8.1 in 33 s, migrations 001 and 002, settings and `session.conf` unchanged, restart, `--reinstall` runs no migration again | pass |
 | Upgrade with `install.sh` (VM 117, 0.8.0 installed from the 0.8.0 ISO): after adding `apt-staging`, the 0.8.0 Store's Updates lists `lordos 0.8.0 → 0.8.1`; `install.sh --deb` (the tag's file) upgrades in place, migrations 001 and 002, `session.conf` unchanged, settings kept (only window positions and recent apps changed, `schema: 1` added), after the restart About shows 0.8.1 | pass |
-| Raspberry Pi 5 image, checked read-only: LordOS kernel `6.18.57-2+lordos` with BPF LSM, BTF and Yama, Bluetooth packages and helper, services enabled, SSH off, the repository and migrations; `apt-get update` against staging on the board in temporary lists lists `lordos 0.8.1 arm64` | pass |
+| Raspberry Pi 5 image, checked read-only: Insane OS kernel `6.18.57-2+lordos` with BPF LSM, BTF and Yama, Bluetooth packages and helper, services enabled, SSH off, the repository and migrations; `apt-get update` against staging on the board in temporary lists lists `lordos 0.8.1 arm64` | pass |
 
 Found in this test: a system installed from the 0.8.0 ISO has no `curl`, so the one-time
 `curl -fsSL https://lordos.org/install.sh | sh` step needs `sudo apt update && sudo apt install -y curl`
@@ -1052,11 +1052,11 @@ network, the greeter restart and the full install were repeated with the tagged 
 
 | Check | Result |
 |---|---|
-| Boot menu with the LordOS theme ("LordOS 0.8.0 (live)"), splash with its bar, hand-off to the desktop without a black or text frame (recorded at 5 fps on VM 117) | pass |
+| Boot menu with the Insane OS theme ("Insane OS 0.8.0 (live)"), splash with its bar, hand-off to the desktop without a black or text frame (recorded at 5 fps on VM 117) | pass |
 | About "Version 0.8.0 · Beta", build `20261018.46c972ac`; Settings → General 0.8.0 | pass |
 | `lordos`, `lord-netperm` (9 BPF programs, devices and Bluetooth: yes), `lord-fand` active; 0 failed units; `ptrace_scope = 1`; pipewire-pulse module loading off; remote desktop off | pass |
 | Network (DHCP from `lord-netd`, ping) and audio (tone through the HDA sink, 0 errors in `pw-top`) | pass |
-| Chromium and Firefox ESR open pages with the LordOS frame; Passwords opens as `lord-server --app passwords` (own scope, seccomp, NoNewPrivs) | pass |
+| Chromium and Firefox ESR open pages with the Insane OS frame; Passwords opens as `lord-server --app passwords` (own scope, seccomp, NoNewPrivs) | pass |
 | Firewall: Foot launched from the app launcher, "No internet (LAN only)" set in Settings → Privacy while it runs: a connection to the internet gets EPERM (logged by `lord-netperm`), the LAN still works; Monitor's per-app switch blocks it too | pass |
 | Domain rules: Settings → Privacy → Network rules by app → Add rule opens the "Block a destination" sheet | pass |
 | SIGPIPE: Foot killed with `kill -9` while flooding output; `lord-server` (same pid) and the session survive; shells keep the default SIGPIPE | pass |
@@ -1066,7 +1066,7 @@ network, the greeter restart and the full install were repeated with the tagged 
 | Installed: splash, login screen, sign in, `lordos`/`lord-netperm`/`lord-fand` active, 0 failed units, boot 4.3 + 3.0 s, 493 MB used, UEFI, network | pass |
 | `install.sh --remote-desktop` on the installed VM 120: port 5673 listening, login page and a login from another machine | pass |
 
-Seen and left for later: the installed system's GRUB prints "Booting `LordOS GNU/Linux`" and
+Seen and left for later: the installed system's GRUB prints "Booting `Insane OS GNU/Linux`" and
 "Loading Linux …" in the theme's text box for about a second (Debian's `10_linux` echoes them).
 
 ## Final ISO test (0.7.0 Beta, October 18)
@@ -1089,8 +1089,8 @@ the whole installation were repeated with the final ISO.
 | `lord-fand` on a VM: "0 fan(s) … profile auto", Cooling says "No controllable fans" calmly | pass |
 | Firewall step 2: 7 BPF programs loaded and attached to `lordos.service` and `user@1000.service` | pass |
 | Remote desktop off: no `/etc/lordos/remote/config`, port 5673 closed, toggle off in Sharing | pass |
-| Chromium 155 and Firefox ESR 153 preinstalled, open pages, LordOS frame | pass |
-| GTK 3 app (Mousepad, installed with apt in the live session) with the LordOS titlebar and dark theme | pass (after fix 2) |
+| Chromium 155 and Firefox ESR 153 preinstalled, open pages, Insane OS frame | pass |
+| GTK 3 app (Mousepad, installed with apt in the live session) with the Insane OS titlebar and dark theme | pass (after fix 2) |
 | Passwords: separate `lord-server --app passwords` in its own scope, seccomp, NoNewPrivs; create, lock | pass |
 | Mail, Monitor (Cooling and Network tabs), Settings (General, Cooling, Sharing), Files, Store (73 097 packages), Terminal, About "0.7.0 · Beta" | pass |
 | Audio: 30 s tone through PipeWire (HDA), 0 errors in `pw-top`, data loop real time (FIFO 88) | pass |
@@ -1127,15 +1127,15 @@ VM 117 has 4 GB of RAM, 4 cores, q35, `vga: virtio`, an HDA sound card and the I
 has a 24 GB `scsi0` disk, left over from an earlier installer test, with an old installation on it.
 It boots from the CD first.
 
-- **SeaBIOS:** boots on its own into LordOS; `systemd-analyze` gives 11.8 s (4.3 s kernel and 7.5 s
+- **SeaBIOS:** boots on its own into Insane OS; `systemd-analyze` gives 11.8 s (4.3 s kernel and 7.5 s
   userspace). Working:
   - the Terminal;
-  - PipeWire, which sees the HDA card: `wpctl status` lists the output and the input, and LordOS as
+  - PipeWire, which sees the HDA card: `wpctl status` lists the output and the input, and Insane OS as
     a client;
   - Settings, Files and the Store;
-  - the network, with LordOS's own DHCP: IP, route, DNS and internet access.
+  - the network, with Insane OS's own DHCP: IP, route, DNS and internet access.
 - **OVMF (UEFI)**, with the efidisk without preloaded keys (Secure Boot off): boots on its own into
-  LordOS (`/sys/firmware/efi` present) in 12.5 s, with the network and the rest the same as with BIOS.
+  Insane OS (`/sys/firmware/efi` present) in 12.5 s, with the network and the rest the same as with BIOS.
 - **Installation to disk** (24 GB, OVMF): the full assistant in ~3 minutes; afterwards it boots from the disk via **UEFI and SeaBIOS**, logs in on its own with the created user, with network (DHCP), sound (HDA), 2 GB swap, es_AR, America/Argentina/Buenos_Aires and the Latin American keyboard; `sudo` asks for the chosen password; `live-boot` and the `lordos` user are gone.
 - **"Restart" when finished** (bug found on VM 120): after installing, the first click did nothing and the second left a black screen without restarting. The cause was the recursive `bind` of `/dev`, `/proc`, `/sys` and `/run` for the chroot: with systemd those mounts are *shared*, so unmounting the target also unmounted the live system's `/run/live/medium`. From then on the live system lost files and the action answered "only from the live system". Now the `bind`s are slaves (`MS_SLAVE`). Also:
   - `install-reboot` launches `systemctl --no-block reboot` from a separate process and doesn't wait. If nothing has ended it after 20 s, it does `sync` + `reboot(2)`;
@@ -1143,7 +1143,7 @@ It boots from the CD first.
   - the button shows "Restarting…".
   Measured on VM 117 after the fix: a single click, shutdown completes and after ~5 s the firmware is already up.
 - **Bugs found and fixed along the way:**
-  - **Network down:** `live-boot` writes `/etc/network/interfaces` with the interface on DHCP. LordOS
+  - **Network down:** `live-boot` writes `/etc/network/interfaces` with the interface on DHCP. Insane OS
     reads that as "managed by ifupdown" (even though ifupdown isn't there) and didn't touch it, so
     the network stayed down. Now `lordos-live-prep` leaves that file with only `lo` when there's no
     ifupdown. I tried `ip=frommedia`, but Debian's initramfs takes it as an interface name and wastes
@@ -1161,7 +1161,7 @@ It boots from the CD first.
 
 - **Secure Boot:** sign with shim and our own MOK, or with Debian's shim plus a signed grub. Today
   Secure Boot has to be turned off.
-- **Switching consoles** (Ctrl+Alt+F2) while LordOS runs (still not possible, see `SESSIONS.md`).
+- **Switching consoles** (Ctrl+Alt+F2) while Insane OS runs (still not possible, see `SESSIONS.md`).
 - Optional persistence on the USB stick (live-boot's `persistence`). (The installer to disk is done:
   "Installing to disk" above.)
 - **Keyboard:** `lordos-live-prep` sets the live user's layout from the boot entry's language

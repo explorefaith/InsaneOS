@@ -1,5 +1,5 @@
-/* lbproto.h — the channel between lord-server (lbrun.c) and lord-bench (lbmain.c), LordBench's
- * sandboxed helper (docs/BENCHMARK.md, "0.8.6 — LordBench").
+/* lbproto.h — the channel between lord-server (lbrun.c) and lord-bench (lbmain.c), InsaneBench's
+ * sandboxed helper (docs/BENCHMARK.md, "0.8.6 — InsaneBench").
  *
  * A SOCK_SEQPACKET pair on fd 3. lord-server sends one LbGo (with up to two fds: the GPU's render node
  * and a storage scratch file, both opened by lord-server); lord-bench answers only with fixed-size
@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #define LB_MAGIC   0x4c424e31u          /* "LBN1" */
-#define LB_VERSION 1                    /* LordBench's version: results compare only with the same one */
+#define LB_VERSION 1                    /* InsaneBench's version: results compare only with the same one */
 
 /* what to run */
 enum { LB_MODE_QUICK = 1, LB_MODE_FULL = 2,

@@ -20,7 +20,7 @@ typedef struct {
     AUDIO_FORMAT fmt;
     double phase;                   /* resampling: where the next output sample falls in the input */
     int16_t last[2];                /* the input's last frame, for interpolation across packets */
-} LordSnd;
+} InsaneSnd;
 
 static BOOL supported(rdpsndDevicePlugin *d, const AUDIO_FORMAT *f) {
     (void)d;
@@ -29,7 +29,7 @@ static BOOL supported(rdpsndDevicePlugin *d, const AUDIO_FORMAT *f) {
 }
 static BOOL open_dev(rdpsndDevicePlugin *d, const AUDIO_FORMAT *f, UINT32 latency) {
     (void)latency;
-    LordSnd *s = (LordSnd *)d;
+    InsaneSnd *s = (InsaneSnd *)d;
     if (!supported(d, f)) return FALSE;
     s->fmt = *f;
     s->phase = 0;
@@ -61,7 +61,7 @@ static UINT queued_ms(void) {
 static int skipping;
 
 static UINT play(rdpsndDevicePlugin *d, const BYTE *data, size_t size) {
-    LordSnd *s = (LordSnd *)d;
+    InsaneSnd *s = (InsaneSnd *)d;
     if (!rd_audio_ring || !data) return 0;
     UINT q = queued_ms();
     if (q > RD_DROP_MS) skipping = 1;
@@ -101,7 +101,7 @@ static UINT play(rdpsndDevicePlugin *d, const BYTE *data, size_t size) {
 }
 
 static UINT entry(PFREERDP_RDPSND_DEVICE_ENTRY_POINTS ep) {
-    LordSnd *s = calloc(1, sizeof *s);
+    InsaneSnd *s = calloc(1, sizeof *s);
     if (!s) return CHANNEL_RC_NO_MEMORY;
     s->dev.FormatSupported = supported;
     s->dev.Open = open_dev;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds the LordOS wallpaper collection (assets/wallpapers/) from the original PNGs.
+// Builds the Insane OS wallpaper collection (assets/wallpapers/) from the original PNGs.
 //
 // Usage: node tools/gen-wallpapers.mjs <source dir>
 //   <source dir>/<category>/lordos-<name>.png              (category: signature, lumo, cosmos)

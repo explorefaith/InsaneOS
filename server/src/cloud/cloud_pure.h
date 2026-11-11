@@ -107,7 +107,7 @@ int              cloud_remote_changed(const char *fingerprint, long long size, d
  * (an OAuth provider, or S3 on the provider's own endpoint). host/port/url/endpoint/tls as the account's fields */
 int              cloud_server_of(const char *type, const char *host, const char *port, const char *url, const char *endpoint,
                                  const char *tls, char *h, size_t hn);
-int              cloud_conflict_name(const char *rel, int n, char *out, size_t cap);   /* config/create's questions LordOS answers itself */
+int              cloud_conflict_name(const char *rel, int n, char *out, size_t cap);   /* config/create's questions Insane OS answers itself */
 /* a question's state as JS sees it, "<account id>:<rclone's state>": 0 and both parts */
 int              cloud_answer_state(const char *s, char *id, size_t n, const char **state);
 /* the page of an account: 1 and out, 0 none. field: the value of k->webfield (NULL if none). */

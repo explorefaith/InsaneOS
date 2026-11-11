@@ -172,7 +172,7 @@ size_t smb_negotiate(uint8_t *out, size_t cap, uint64_t msgid) {
     put16(b, 36);
     put16(b + 2, 4);
     put16(b + 4, 1);                    /* signing enabled, not required */
-    memcpy(b + 12, "LordOS-Network\0\1", 16);
+    memcpy(b + 12, "Insane OS-Network\0\1", 16);
     for (size_t i = 0; i < 4; i++) put16(b + 36 + i * 2, dialects[i]);
     transport(out, n - 4);
     return n;

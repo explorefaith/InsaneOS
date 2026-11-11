@@ -11,7 +11,7 @@ access" permission on Android and other systems. It is built in steps:
 | 4 | Settings: "Trusted apps" and "Restricted apps" | **done**: lists and mode (silent / off; deny since 0.8.5) |
 | 4b | Settings: network rules by app (domains, addresses, networks) | **done** (VM 122), see [Rules by app](#rules-by-app-settings-and-monitor) |
 | 5 | "Ask" mode | planned (see "The ask mode") |
-| 0.8.5 | Blocklists, the deny mode, LordOS's components and the system services as their own apps | **done** (VM 118), see [Blocklists](#blocklists-085), [components](#lordos-components-in-their-own-scopes-085) |
+| 0.8.5 | Blocklists, the deny mode, Insane OS's components and the system services as their own apps | **done** (VM 118), see [Blocklists](#blocklists-085), [components](#lordos-components-in-their-own-scopes-085) |
 
 Step 1 is C code only, with no daemon and without touching the kernel or the network (step 2,
 below, is the service that enforces it):
@@ -66,7 +66,7 @@ Destination details:
 `fw_app_canon` accepts:
 
 - `lordos` (lord-server and its built-in apps);
-- `desktop:<id>` (Linux apps with a `.desktop`). Three ids belong to LordOS's own helpers: `desktop:lordos-rclone` (rclone for remote folders, with `ssh-keyscan` and `openssl`), `desktop:lordos-cloud` (Cloud's `rclone rcd` and `rclone authorize`, 0.8.8.5, docs/CLOUD.md) and `desktop:lordos-rdesk` (the RDP and VNC apps). The launcher refuses a `.desktop` with any of these ids (`app_scope_reserved`), so none can inherit their rules;
+- `desktop:<id>` (Linux apps with a `.desktop`). Three ids belong to Insane OS's own helpers: `desktop:lordos-rclone` (rclone for remote folders, with `ssh-keyscan` and `openssl`), `desktop:lordos-cloud` (Cloud's `rclone rcd` and `rclone authorize`, 0.8.8.5, docs/CLOUD.md) and `desktop:lordos-rdesk` (the RDP and VNC apps). The launcher refuses a `.desktop` with any of these ids (`app_scope_reserved`), so none can inherit their rules;
 - `lpk:<id>` (`.lpk` apps);
 - the absolute path of the executable (what the Monitor uses when it can't find a `.desktop`).
 
@@ -137,7 +137,7 @@ reloading anything. What each kind of app goes through:
   `js_media.c` `permitted()` refuses camera, microphone and screen capture and recording with
   `fw.restricted.*`, before the permission. `sdk/notify.js` drops notifications from built-in and
   isolated apps (`lord.fw.blocks()`); Settings' own system warnings (battery) are exempt. The
-  `LordOS` row in Settings does not offer files, USB, clipboard or Bluetooth: that row is the
+  `Insane OS` row in Settings does not offer files, USB, clipboard or Bluetooth: that row is the
   desktop itself (Files, copy and paste, Disks, Settings → Bluetooth), and the screen says so in
   one line. Restrict individual apps instead.
 - **Linux apps (`desktop:<id>`).** They are not sandboxed by default and reach devices, sockets
@@ -213,12 +213,12 @@ the `bpf` LSM active, as in Debian 13) on the `socket_create` hook. Its attach p
 of `bpf_lsm_socket_create`, which `lord-netperm` reads from `/sys/kernel/btf/vmlinux` with its own
 small reader (`bpfs_btf_func_id`). The kernel only loads LSM programs that declare a
 GPL-compatible license: this one declares "Dual MIT/GPL" (our code is MIT, which may also be
-distributed under the GPL); the others keep "LordOS". If the kernel refuses the device or the
+distributed under the GPL); the others keep "Insane OS". If the kernel refuses the device or the
 Bluetooth program, the network ones still work and the status says `"devices":false` or
 `"bluetooth":false`.
 
-On the Raspberry Pi 5 this needs the LordOS kernel from 0.8.1 on (`6.18.57-2+lordos`, built with
-`CONFIG_BPF_LSM` and BTF; see `RASPBERRY.md`, "The LordOS kernel"). 0.8.0's Pi kernel had neither,
+On the Raspberry Pi 5 this needs the Insane OS kernel from 0.8.1 on (`6.18.57-2+lordos`, built with
+`CONFIG_BPF_LSM` and BTF; see `RASPBERRY.md`, "The Insane OS kernel"). 0.8.0's Pi kernel had neither,
 so there `lord-netperm` reported `"bluetooth":false` and "No Bluetooth" wasn't enforced. Tested on
 a Pi 5 (2026-10-18): `lord-netperm: 9 BPF programs loaded (devices: yes, Bluetooth sockets: yes)`,
 `npverify-test` 37/37, and the steps of `tests/fwlinux/bluetooth.sh` (as root, for the board's
@@ -235,7 +235,7 @@ system bus either (see below).
 (`wl/wl.c`) offers no screencopy, image-capture or dmabuf-export protocol, and no
 `xdg-desktop-portal` screen-cast backend is installed, so PipeWire has no screen node. Since 0.8.3
 X11 apps run through Xwayland, which is a Wayland client like any other: an X app can read other X
-apps' windows on the shared X display, but never a Wayland or LordOS window (rootless, no root
+apps' windows on the shared X display, but never a Wayland or Insane OS window (rootless, no root
 picture), and a restricted app gets no X display at all (`PRIVACY.md`, "X11 apps"). `screen.sh`
 checks the compositor's globals (`build/wl-globals` lists them as a client sees them), the portal
 and PipeWire on the running system, and `no-screen` also denies `/dev/fb*`. (Its "no X server
@@ -265,7 +265,7 @@ the apps could change. Who a client is:
   fds), and must live in our PID namespace (a process in another one, such as a `no-files` app,
   reports its inner PID, so a claim of its outer PID is someone else's);
 - `pipewire-pulse`'s own connection carries the streams of modules a pulse client loaded; while a
-  restricted app runs its capture streams are closed. Module loading itself is off in LordOS
+  restricted app runs its capture streams are closed. Module loading itself is off in Insane OS
   (`/etc/pipewire/pipewire-pulse.conf.d/lordos-no-modules.conf`: a loopback from the
   microphone, a tunnel to any host or a pipe at any path would run outside the app's scope);
 - a client of a process under `user@<uid>` (escaped with `systemd-run --user`, or D-Bus
@@ -302,7 +302,7 @@ the apps could change. Who a client is:
   `firewall.json` itself. Such a change takes effect outside the restriction later (the next
   login, a reload). Only `no-files` keeps an app from them.
 - A Linux app restricted without `no-files` runs as the user, so it could take over another of the
-  user's processes (lord-server, PipeWire, another app) with `ptrace` and act through it. LordOS
+  user's processes (lord-server, PipeWire, another app) with `ptrace` and act through it. Insane OS
   sets `kernel.yama.ptrace_scope = 1` (`/usr/lib/sysctl.d/50-lordos-ptrace.conf`): only a
   process's own descendants can be traced.
 - A pulse socket of its own for each restricted app (`pipewire-pulse` listening on a per-app
@@ -330,7 +330,7 @@ says so). Two layers:
    themselves), mount namespace and PID namespace, unprivileged. The home folder is an empty
    tmpfs with only the allowed folders bound into it; `$XDG_RUNTIME_DIR` is an empty tmpfs with
    only the Wayland socket, `pipewire-0` and `pulse/native` bound into it (no session bus, no
-   `systemd/private`, no `pipewire-0-manager`, no agents, no LordOS sockets); `/tmp` and
+   `systemd/private`, no `pipewire-0-manager`, no agents, no Insane OS sockets); `/tmp` and
    `/var/tmp` are private; `/proc` is a new procfs of the new PID namespace, so
    `/proc/<pid>/root` of the session's processes isn't reachable. PID 1 of the namespace is a
    small reaper (our code); the app is its child. This layer exists because Landlock in kernel
@@ -494,7 +494,7 @@ reader in `server/src/sec/json.c`. For example:
   doesn't exist, `fw_load` returns 1 and the store stays as it was.
 
 The path is on the `lord.fs` deny list (`server/src/fsops.c`, like `settings.json` and
-`permisos.json`, see `AGENTS.md`): a LordOS app can't write its own rules. A Linux app runs as the
+`permisos.json`, see `AGENTS.md`): a Insane OS app can't write its own rules. A Linux app runs as the
 user and could edit the file, just like `permisos.json`; `.lpk` apps can't, because of Landlock.
 
 ### Names for an address (dnsmap)
@@ -529,7 +529,7 @@ received, without asking anyone anything: no reverse DNS, no services.
   - a name that isn't a host name (spaces, odd bytes) invalidates the record, not the packet.
 
 **Rule for step 2:** `dnsmap_learn` is only fed responses that the system resolver received
-(`systemd-resolved` or LordOS's own), never packets the app received on its own sockets.
+(`systemd-resolved` or Insane OS's own), never packets the app received on its own sockets.
 Otherwise, an app with its own DNS server could claim that `permitido.com` is any IP and escape a
 "allow only permitido.com" rule.
 
@@ -606,7 +606,7 @@ tests/netperm_bench.c, netperm_measure.sh   measurements
     depend on it.
   - **Also on `user@<uid>.service`** (closing the `systemd-run --user` escape, see
     [Escape via `systemd-run --user`](#escape-via-systemd-run---user-the-user-union)): the same
-    programs are attached a second time, with a `bpf_link` per session, to each LordOS session
+    programs are attached a second time, with a `bpf_link` per session, to each Insane OS session
     user's `user@<uid>.service` cgroup. Re-attached the same way when that cgroup changes (the user
     manager restarting) or disappears.
 - **The apps.** It reads the session folders (`lordos-session-<uid>`) with inotify, plus a rescan
@@ -651,7 +651,7 @@ the source cgroup, so the process lands in `user@<uid>.service/app.slice/…` �
 internet from there.
 
 **Chosen fix (option a): attach to `user@<uid>.service` + a per-user restriction union.** For each
-LordOS session user, `lord-netperm` attaches the same cgroup programs a second time to that user's
+Insane OS session user, `lord-netperm` attaches the same cgroup programs a second time to that user's
 `user@<uid>.service`. There the process is not in any app scope, so `find_app` (`np.bpf.c`) falls
 back to `np_union`, keyed by the `user@<uid>` cgroup id (the ancestor at `cfg->user_level`). Its
 value is the **strictest union** of the restrictions (the `NP_R_*` bits ORed) of all of that user's
@@ -674,7 +674,7 @@ Why this and not the alternatives:
 - The union is **restriction-only**: it never grants access, so an escaped process is always at
   least as restricted as its own policy. The cost is that it is coarse — while a restricted app is
   running, every process under that user's `user@` is held to the union. That is acceptable because
-  LordOS's own apps live under `lordos.service` (unaffected), and it activates only while a
+  Insane OS's own apps live under `lordos.service` (unaffected), and it activates only while a
   restricted app runs. A precise per-process identity (option c) is a possible future refinement if
   the loader gains tracing support.
 
@@ -784,8 +784,8 @@ second, so the row shows the block within a second.
 
 **Kernels:** `SOCK_DESTROY` needs `CONFIG_INET_DIAG_DESTROY` (TCP) and `CONFIG_INET_UDP_DIAG` (UDP).
 Debian 13's kernel (6.12) has both. The Raspberry Pi kernel of the 0.8.2 and 0.8.3 images
-(`6.18.57-2+lordos`) doesn't; the LordOS Pi kernel has them since `6.18.57-3+lordos`
-(`6.18.57-lordos.3-rpi-2712`, 0.8.4; `RASPBERRY.md`, "The LordOS kernel"). With an older kernel the
+(`6.18.57-2+lordos`) doesn't; the Insane OS Pi kernel has them since `6.18.57-3+lordos`
+(`6.18.57-lordos.3-rpi-2712`, 0.8.4; `RASPBERRY.md`, "The Insane OS kernel"). With an older kernel the
 drop still applies and the journal says once that the app will see a stall (TCP retransmits until
 it gives up) instead of a reset. All 11 programs pass the verifier on 6.12 (VM 118) and on the Pi's
 6.18.57 (`npverify-test`, built and run in a temporary folder, removed afterwards).
@@ -887,7 +887,7 @@ Only from responses the system resolver gave (`npdns.c`):
      app got from elsewhere isn't in the trie and is denied.
    - If a lying server slips in a record that doesn't follow from the question (`evil.example` → an
      A of another name), `dnsmap` ignores it. There is a test.
-2. **Without resolved:** `NETWORK.md` says LordOS writes `/etc/resolv.conf` (as root). The UDP
+2. **Without resolved:** `NETWORK.md` says Insane OS writes `/etc/resolv.conf` (as root). The UDP
    responses that arrive **from port 53 of those servers** are taken.
    - They are read by an AF_PACKET socket that only receives. A classic BPF filter lets through
      only unfragmented UDP with source port 53.
@@ -1100,10 +1100,10 @@ programs:
 - Script: `bench-monred-118.sh` in the scratchpad (veth `npb0`/`npb1`, namespace `npb`, both
   removed afterwards); `iperf3` was installed on VM 118 for this (`VM-SETUP.md`).
 
-### LordOS components in their own scopes (0.8.5)
+### Insane OS components in their own scopes (0.8.5)
 
 Built-in parts that use the network used to run inside lord-server, so their traffic was
-"LordOS" and a rule could only take all of them at once. Since 0.8.5 each one has its own process in
+"Insane OS" and a rule could only take all of them at once. Since 0.8.5 each one has its own process in
 its own scope, `lordos-net-<name>.scope`, which lord-netperm reads as the firewall app
 `lordos:<name>` (`fw_component_scope`, a fixed list: `mail`, `store`, `print`, `terminal`,
 `lists`). The kernel attributes a socket to the cgroup of the process that *created* it, so:
@@ -1118,7 +1118,7 @@ its own scope, `lordos-net-<name>.scope`, which lord-netperm reads as the firewa
   (non-blocking; lord-server waits for the result). It returns the socket over SCM_RIGHTS and
   lord-server checks it is the kind it asked for. It takes no names or paths, runs nothing, has
   `no_new_privs`, is not dumpable and has 64 file descriptors; it only does what lord-server could
-  do itself, as the same user. **Fail closed:** in a LordOS session a connector that can't enter its
+  do itself, as the same user. **Fail closed:** in a Insane OS session a connector that can't enter its
   scope exits and the request fails (the traffic would otherwise be lord-server's and decided by
   its rules). Outside a session (development, the tests) the socket is made in place, as before.
 - **Store and updates:** the package engine's download child (the root admin helper's fork that
@@ -1149,7 +1149,7 @@ neither).
 Files → Network (`FILES.md`, "Network") uses the network for one thing: one bounded pass over the LAN while its page
 is open. By the rule above its sockets come from a connector of its own, approved by the maintainer on 2026-10-31.
 Borrowing `print` was rejected: file-share probes would show as "Printers and scanners" in the Monitor and follow that
-row's rules. Making the sockets in lord-server was rejected too: the traffic would be LordOS's own.
+row's rules. Making the sockets in lord-server was rejected too: the traffic would be Insane OS's own.
 
 **What was added:** a component `lan` (firewall app `lordos:lan`, scope `lordos-net-lan.scope`): the same connector,
 same fixed-size requests, no new request type, used by `lan.c` only for one unconnected UDP socket per link
@@ -1279,7 +1279,7 @@ tests/fwlists_test.c, fwsub_test.c
 ### The catalog and its licences
 
 Each list was added only after its licence was checked (the list file's own header and its
-project's licence file, 2026-10-19), and the catalog records what was found; LordOS ships no list
+project's licence file, 2026-10-19), and the catalog records what was found; Insane OS ships no list
 data, each machine downloads what its owner turns on.
 
 | List | Topic | Format | Source | Licence |

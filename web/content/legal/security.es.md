@@ -1,4 +1,4 @@
-Nos tomamos en serio la seguridad de LordOS y agradecemos a cualquiera que nos ayude a encontrar y corregir problemas. Esta página explica cómo reportar una vulnerabilidad y qué podés esperar de nosotros.
+Nos tomamos en serio la seguridad de Insane OS y agradecemos a cualquiera que nos ayude a encontrar y corregir problemas. Esta página explica cómo reportar una vulnerabilidad y qué podés esperar de nosotros.
 
 ## Cómo reportar una vulnerabilidad
 
@@ -6,7 +6,7 @@ Escribinos por **[nuestro formulario de contacto](https://www.iperfex.com/contac
 
 Incluí, en la medida de lo posible:
 
-- la versión de LordOS (la ves en la app Acerca de LordOS, por ejemplo "0.8.8 · Beta") y si es la ISO, la imagen para Raspberry Pi o el paquete para Debian;
+- la versión de Insane OS (la ves en la app Acerca de Insane OS, por ejemplo "0.8.8 · Beta") y si es la ISO, la imagen para Raspberry Pi o el paquete para Debian;
 - el componente afectado (por ejemplo el compositor, el aislamiento de apps, el firewall por app, el escritorio remoto, la bóveda de contraseñas, la Tienda, el script de instalación para Debian o el sitio);
 - los pasos para reproducirlo, una prueba de concepto si la tenés, y el impacto que ves;
 - cómo te gustaría que te mencionemos, si querés que lo hagamos.
@@ -17,14 +17,14 @@ Podés escribir en inglés, español o portugués.
 
 **Dentro del alcance:**
 
-- el código propio de LordOS: `lord-server` (el servidor gráfico y compositor Wayland), `lord-sessiond` y la pantalla de inicio de sesión, el aislamiento de apps y el intermediario de permisos, `lord-netperm`, `lord-vault`, los procesos auxiliares de correo, documentos y multimedia, el motor de paquetes, las apps nativas y el SDK;
+- el código propio de Insane OS: `lord-server` (el servidor gráfico y compositor Wayland), `lord-sessiond` y la pantalla de inicio de sesión, el aislamiento de apps y el intermediario de permisos, `lord-netperm`, `lord-vault`, los procesos auxiliares de correo, documentos y multimedia, el motor de paquetes, las apps nativas y el SDK;
 - los archivos de cada versión y sus firmas, y el script de instalación para Debian (`lordos.org/install.sh`);
-- la configuración del sistema que trae LordOS (por ejemplo, los servicios que activa);
+- la configuración del sistema que trae Insane OS (por ejemplo, los servicios que activa);
 - el sitio lordos.org.
 
 **Fuera del alcance** (reportalos a sus propios proyectos):
 
-- vulnerabilidades de paquetes de Debian, del kernel Linux, de Mesa, de los navegadores o de otro software de terceros que también afecten a un Debian común ([equipo de seguridad de Debian](https://www.debian.org/security/)); avisanos también si LordOS lo empeora;
+- vulnerabilidades de paquetes de Debian, del kernel Linux, de Mesa, de los navegadores o de otro software de terceros que también afecten a un Debian común ([equipo de seguridad de Debian](https://www.debian.org/security/)); avisanos también si Insane OS lo empeora;
 - apps `.lpk` de terceros (reportalas a su autor; avisanos si alguna escapa del aislamiento);
 - ataques que requieran acceso físico a una computadora desbloqueada, ingeniería social, o denegación de servicio por saturación;
 - reportes de escáneres automáticos sin un impacto demostrado, y encabezados de buenas prácticas faltantes sin consecuencias de seguridad.
@@ -53,7 +53,7 @@ Te vamos a mantener al tanto, te vamos a mencionar en las notas de la versión s
 
 ## Verificar las versiones
 
-Cada archivo de una versión (la ISO, la imagen para Raspberry Pi y el `.deb`) figura con su SHA-256 en `SHA256SUMS`, y `SHA256SUMS` está firmado con la clave de versiones de LordOS (Ed25519). El script de instalación para Debian se niega a instalar si la firma falta o no es válida.
+Cada archivo de una versión (la ISO, la imagen para Raspberry Pi y el `.deb`) figura con su SHA-256 en `SHA256SUMS`, y `SHA256SUMS` está firmado con la clave de versiones de Insane OS (Ed25519). El script de instalación para Debian se niega a instalar si la firma falta o no es válida.
 
 - Clave pública: [lordos-release.pub.pem](/lordos-release.pub.pem)
 - Huella (SHA-256 de la clave pública en DER):

@@ -10,14 +10,14 @@
 // minimizes it); right click: its jump list.
 //
 // One taskbar per display (0.8.8.6; Settings → Desktop & Dock → Taskbar → "Show the taskbar on every display", on by
-// default, the same settings.menuBarAllDisplays as Lord Flow's menu bar): each one is whole (start, pinned and
+// default, the same settings.menuBarAllDisplays as Insane Flow's menu bar): each one is whole (start, pinned and
 // running apps, Trash, tray, clock) and every bar shows every app, as there is no per-display window list. `area`
 // is the display it is drawn on; the panels it opens go on that display (themes/classic/index.jsx). The bars share
 // one clock timer and one network poll, and each registers its own drop target for pins.
 import {
   View, Text, Layer, useSettings, useWindows, wm, windowTitle, formatTime, formatDate, t as tr, settings, sharedTicker,
   useDockEntries, dockActivate, dockMenu, useStore, dockDrag, beginDockDrag, registerDockTarget, dockDragJustEnded,
-  useTrash, openTrash, refreshTrash, trashMenu, StatusItems, PrivacyIndicators, keyboard, useSound, defaultSink, LordOSLogo,
+  useTrash, openTrash, refreshTrash, trashMenu, StatusItems, PrivacyIndicators, keyboard, useSound, defaultSink, InsaneLogo,
   mainDisplay, toggleShowDesktop, menuBarPrefs,
 } from '@lordos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -192,7 +192,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
     <View style={{ flexDirection: vert ? 'column' : 'row', alignItems: 'center', gap: 2, direction: 'ltr' }}>
       <BarButton t={t} vert={vert} active={start} refFn={startRef} onClick={() => { hideTip(); onStart(); }}
         onEnter={() => showTip(tr('shell.classic.start'), startRef.current)} onLeave={hideTip}>
-        <LordOSLogo size={26} />
+        <InsaneLogo size={26} />
       </BarButton>
       <BarButton t={t} vert={vert} refFn={searchRef} onClick={() => { hideTip(); onSearch(); }}
         onEnter={() => showTip(tr('shell.classic.search'), searchRef.current)} onLeave={hideTip}>

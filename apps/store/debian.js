@@ -6,7 +6,7 @@ import { createElement as h, useEffect, useState } from 'react';
 import {
   View, Text, Image, Button, EmptyState, GroupBox, useTheme, useStore, createStore, admin, formatBytes, formatDate,
   refreshApps, launchApp, useLauncherApps, LetterIcon, typeScale, spacing, direction, t, locale, errorText, statusText,
-  Markdown, Toggle, LordOSLogo, session, lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs,
+  Markdown, Toggle, InsaneLogo, session, lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs,
 } from '@lordos/sdk';
 import { Suggested } from './suggested.js';
 import { Card, CardGrid, Facts, Pill, Shelf } from './ui.js';
@@ -68,7 +68,7 @@ function PkgIcon({ app, name, size = 48 }) {
   return h(LetterIcon, { size, name: app?.name || name });
 }
 
-// A package's name as the Updates list and the plans show it: LordOS's data packages in words
+// A package's name as the Updates list and the plans show it: Insane OS's data packages in words
 // (syspkg.js), every other package by its name.
 const pkgLabel = (name) => { const k = sysPkgKey(name); return k ? t(`${k}.name`) : name; };
 // The line under it: for a data package, what it is and its date (in the user's region when the
@@ -280,8 +280,8 @@ function Category({ cat, query, onOpen }) {
       : h(EmptyState, { icon: h(StoreGlyph), title: t('store.debian.none'), hint: t('store.debian.noneHint'), style: { minHeight: 300 } }));
 }
 
-// LordOS itself (docs/UPDATES.md): "LordOS <version> is available", its release notes and Update.
-function LordOSCard({ up }) {
+// Insane OS itself (docs/UPDATES.md): "Insane OS <version> is available", its release notes and Update.
+function InsaneCard({ up }) {
   const th = useTheme();
   const { job } = useStore(state);
   const [plan, setPlan] = useState(null);
@@ -297,7 +297,7 @@ function LordOSCard({ up }) {
   };
   return h(View, { style: boxStyle(th, { gap: spacing.m }) },
     h(View, { style: { flexDirection: 'row', alignItems: 'center', gap: spacing.l } },
-      h(LordOSLogo, { size: 56 }),
+      h(InsaneLogo, { size: 56 }),
       h(View, { style: { flex: 1, minWidth: 0, gap: 2 } },
         h(Text, { style: { fontSize: typeScale.title, fontWeight: 600, color: th.text, textAlign: 'start' } }, t('store.system.available', { version: up.version })),
         h(Text, { style: { fontSize: typeScale.callout, color: th.textDim, textAlign: 'start' } },
@@ -368,7 +368,7 @@ function Updates() {
           const extra = plan.items.some((i) => i.action === 'remove');
           runJob('pkg-upgrade', extra ? '--allow-remove' : '', t('store.job.upgrade')); setPlan(null);
         } }))),
-    own?.available ? h(LordOSCard, { up: own }) : null,
+    own?.available ? h(InsaneCard, { up: own }) : null,
     own && !own.available && !ups.length ? h(Text, { style: { fontSize: typeScale.callout, color: th.textDim, textAlign: 'start' } },
       t('store.system.current', { version: own.installed })) : null,
     ups.length === 0 ? h(EmptyState, { mascot: 'celebrate', title: t('store.updates.none'), style: { minHeight: 260 } }) : null,

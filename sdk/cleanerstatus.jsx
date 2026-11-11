@@ -18,7 +18,7 @@ import { lordosUpdateWaiting } from './updates.js';
 import { cleanerItemShown } from './menubarmodel.js';
 
 
-// The rule, documented in docs/CLEANER.md: under 10 % of the disk free is "low"; with a LordOS update waiting,
+// The rule, documented in docs/CLEANER.md: under 10 % of the disk free is "low"; with a Insane OS update waiting,
 // "update"; otherwise "good". No disk reading: no word.
 export function statusWord(free, total, updateWaiting) {
   if (!(total > 0) || free < 0) return null;

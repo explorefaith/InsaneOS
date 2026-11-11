@@ -1,4 +1,4 @@
-/* forti_test.c — openfortivpn's output → what LordOS does (src/net/forti.c). All names and
+/* forti_test.c — openfortivpn's output → what Insane OS does (src/net/forti.c). All names and
  * fingerprints here are invented. */
 #include "../src/net/forti.h"
 

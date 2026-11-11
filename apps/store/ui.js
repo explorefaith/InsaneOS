@@ -88,7 +88,7 @@ export function nameColor(name, l = 0.55) {
 // The featured banner: a dark gradient with two soft lights in the app's color behind (its glow;
 // the engine has no blur filter, so a wide shadow does it), then the icon, a kicker, the name, the
 // summary and the action.
-// With `image` (the banner published in LordOS's repository) the picture fills it, under a shade
+// With `image` (the banner published in Insane OS's repository) the picture fills it, under a shade
 // that keeps the text readable; `colors` replaces the default gradient.
 export function Featured({ icon, glow, image, colors, kicker, title, text, action, onClick }) {
   const light = (size, right, top, alpha) => h(View, { style: { position: 'absolute', right, top, width: size, height: size, borderRadius: size / 2, pointerEvents: 'none',

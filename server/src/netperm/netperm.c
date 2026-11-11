@@ -547,7 +547,7 @@ static void sync_user_scope(Session *s) {
 
 static int scope_app(const char *name, char *app) {
     if (!strcmp(name, "server")) { snprintf(app, FW_APP_MAX, "lordos"); return 0; }
-    /* (0.8.5) LordOS's own components that use the network: lordos-net-<name>.scope → lordos:<name>;
+    /* (0.8.5) Insane OS's own components that use the network: lordos-net-<name>.scope → lordos:<name>;
      * (0.8.8.6) a running machine's scope → lordos:machines, so several scopes can share one app */
     return fw_scope_app(name, app, FW_APP_MAX);
 }

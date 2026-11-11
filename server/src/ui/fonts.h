@@ -1,6 +1,6 @@
 /* fonts.h — catalog of installed fonts (TTF/OTF/TTC) to pick the terminal's font.
  *
- * Searches LordOS's assets/fonts, /usr/share/fonts, /usr/local/share/fonts,
+ * Searches Insane OS's assets/fonts, /usr/share/fonts, /usr/local/share/fonts,
  * ~/.local/share/fonts and ~/.fonts. It only reads the name/OS-2/post/hmtx tables with our own
  * parser that validates bounds; stb_truetype loads only the font that is chosen. */
 #ifndef LORD_FONTS_H

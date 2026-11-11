@@ -10,6 +10,7 @@ import { textDirection, direction } from './i18n.js';
 import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitThumb, barShown, barOpacity, hideTime, barWidth } from './scrollbar.js';
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
+import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
 
@@ -338,6 +339,27 @@ export function pasteIntoFocused() {
 // deselect it), as when renaming in Files.
 // The caret moves with ←, →, Home, End and a click, and typing, Backspace, Delete and a paste work where it is
 // (textfieldmodel.js); a value changed from outside puts it back at the end.
+// Text replacement (Settings → Keyboard's "Replacements", settings.textReplace = { omw: 'on my way', … }):
+// typing a token followed by a space, newline or punctuation swaps in the full text. Insane OS's own
+// text fields only — Linux apps would need an input-method hook (server/src/ime.c, a later phase).
+function expandReplacement(r, secure) {
+  try {
+    if (secure || !r?.value) return r;
+    const map = settings.get().textReplace;
+    if (!map || typeof map !== 'object') return r;
+    const ch = r.value[r.pos - 1];
+    if (ch !== ' ' && ch !== '\n' && ch !== ',' && ch !== '.' && ch !== '!' && ch !== '?' && ch !== ';') return r;
+    const before = r.value.slice(0, r.pos - 1);
+    const m = before.match(/(\S+)$/);
+    if (!m) return r;
+    const rep = map[m[1]];
+    if (typeof rep !== 'string' || !rep) return r;
+    const start = r.pos - 1 - m[1].length;
+    const value = r.value.slice(0, start) + rep + r.value.slice(r.pos - 1);
+    return { value, pos: start + rep.length + 1 };
+  } catch { return r; }
+}
+
 export function TextInput({ value, onChange, placeholder, onSubmit, onCancel, onKeyDown, autoFocus, style, secure, size = 13, selectAll = false }) {
   const t = useTheme();
   const token = useRef({}).current;
@@ -377,7 +399,10 @@ export function TextInput({ value, onChange, placeholder, onSubmit, onCancel, on
       const all = allRef.current;
       if (at.current.value !== p.value) at.current = { value: p.value, pos: [...(p.value || '')].length };
       // a value and its caret, drawn at once (a caret that only moved changes no value)
-      const put = (r) => { at.current = r; if (r.value !== p.value) p.onChange(r.value); redraw((n) => n + 1); };
+      const put = (r) => {
+        const rr = expandReplacement(r, secureRef.current);
+        at.current = rr; if (rr.value !== p.value) p.onChange(rr.value); redraw((n) => n + 1);
+      };
       if (all && (e.char || e.key === 'Backspace' || e.key === 'Delete' || ((e.ctrl || e.meta) && e.base === 'v'))) {
         setAllSel(false); allRef.current = false;
         if (!e.char && !((e.ctrl || e.meta) && e.base === 'v')) { put({ value: '', pos: 0 }); setBlink(true); return; }

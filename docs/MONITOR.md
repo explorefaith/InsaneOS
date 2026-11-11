@@ -13,7 +13,7 @@ each destination of an app has its own allow/block switch, the traffic chart rea
 ("Traffic history"), the Disks tab shows each disk's temperature and health, and the session can
 notify when a disk gets too hot or less healthy ("Disk temperature and health"). In 0.8.3 the
 remote desktop is a row of its own and blocking an app cuts the connections it had open. In 0.8.5
-(0.8.5-beta, released 2026-10-27) the Network tab became a tree with a view menu and search chips, LordOS's own
+(0.8.5-beta, released 2026-10-27) the Network tab became a tree with a view menu and search chips, Insane OS's own
 components and the system's services got rows of their own, and the menu bar network item and the
 blocklists arrived ("Network, second generation").
 
@@ -21,13 +21,13 @@ blocklists arrived ("Network, second generation").
 
 | Tab | What it shows |
 |---|---|
-| Overview | CPU, Memory, Network and Disk with a 60 s chart; (0.8.8.6) the main GPU (load, graphics memory, temperature, fan, the app using it most, "+N" with several; a click opens the GPU tab), LordOS's AI (active engine or idle) and running virtual machines; below, CPU temperature, fan, 1 min load, 5/15 min load and cached memory |
+| Overview | CPU, Memory, Network and Disk with a 60 s chart; (0.8.8.6) the main GPU (load, graphics memory, temperature, fan, the app using it most, "+N" with several; a click opens the GPU tab), Insane OS's AI (active engine or idle) and running virtual machines; below, CPU temperature, fan, 1 min load, 5/15 min load and cached memory |
 | CPU | total usage (big chart), one chart per core, 1/5/15 load, temperature and tasks |
 | Memory | stacked bar (apps, system and drivers, file cache, free), swap, "Using the most memory" (each app's processes added up, the 8 largest) and a 60 s chart |
 | Network | apps with connections, map, summary or detail of the chosen app (see below) |
 | Disks | total read and write; one row per disk (model, `/dev`, size, temperature, health, rates); the chosen disk's temperature over the last 30 minutes and its health, with "Open in Disks" (see "Disk temperature and health") |
 | Processes | sortable table (CPU, memory, threads, PID, user), search, "Mine" / "All"; Stop and Get Info for the selected process (see "Process actions") |
-| GPU | (0.8.8.6) each graphics card drawn live, load, temperature and fan history, the apps using it, graphics memory, clocks, power, the installed APIs, LordOS's AI engines and, for administrators on amdgpu, the fan by hand (`apps/monitor/Gpu.jsx`, see "GPU") |
+| GPU | (0.8.8.6) each graphics card drawn live, load, temperature and fan history, the apps using it, graphics memory, clocks, power, the installed APIs, Insane OS's AI engines and, for administrators on amdgpu, the fan by hand (`apps/monitor/Gpu.jsx`, see "GPU") |
 | Cooling | the cooling hardware drawn live, the active fan profile, a temperature and fan history and "full speed" (`apps/monitor/Cooling.jsx`, see `FANS.md`) |
 | Voltage | (0.8.7) only on machines that report something: the input rail or battery with a trace, the board's power state and rails, motherboard sensors, batteries and adapters (`apps/monitor/Voltage.jsx`, see "Voltage") |
 
@@ -37,7 +37,7 @@ itself.
 
 ### Network
 
-Since 0.8.5 the left column is a tree with a view menu, search chips and rows for LordOS's own
+Since 0.8.5 the left column is a tree with a view menu, search chips and rows for Insane OS's own
 parts and the system's services: see "Network, second generation (0.8.5)" below. What follows is
 the rest of the tab, and the first generation of the list.
 
@@ -143,9 +143,9 @@ server, and this app's rule is that no address leaves the machine.
 
 ![Monitor → Network: the tree, a listed destination and the system rows](monitor-net2-tree.png)
 
-**Rows for LordOS's own parts.** Everything built in that uses the network is a row of its own,
+**Rows for Insane OS's own parts.** Everything built in that uses the network is a row of its own,
 backed by its own process and cgroup scope, so its rules are enforced by the kernel like any app's
-(`FIREWALL.md`, "LordOS components in their own scopes"):
+(`FIREWALL.md`, "Insane OS components in their own scopes"):
 
 | Row | Firewall id | Its traffic |
 |---|---|---|
@@ -154,7 +154,7 @@ backed by its own process and cgroup scope, so its rules are enforced by the ker
 | Printers and scanners | `lordos:print` | IPP and eSCL to network printers and scanners, and their mDNS discovery |
 | Terminal | `lordos:terminal` | the shell of every terminal and every program it starts; the detail lists the programs by name |
 | Blocklist updates | `lordos:lists` | the daily blocklist downloads (`lord-fetch`) |
-| VPN | `lordos:vpn` | the counters of LordOS's own VPN interfaces (Settings → Network); not blockable |
+| VPN | `lordos:vpn` | the counters of Insane OS's own VPN interfaces (Settings → Network); not blockable |
 | Name resolution (DNS) | `system:dns` | systemd-resolved; shown, never blockable |
 | Time synchronization | `system:time` | systemd-timesyncd; shown, never blockable |
 | Network service | `system:network` | lord-netd's own leaf (DHCP, Wi-Fi, the VPN daemons); shown, never blockable |
@@ -165,7 +165,7 @@ Blocking the Store asks first, because no security update arrives while it is bl
 
 ![Blocking the Store and updates asks first](monitor-net2-store-warning.png)
 
-The **"LordOS" row** is now what is left in lord-server itself, close to zero; every socket a
+The **"Insane OS" row** is now what is left in lord-server itself, close to zero; every socket a
 component's connector made counts as that component's, also in the open-connections list (the
 socket's cgroup, `INET_DIAG_CGROUP_ID`, mapped to the session's scopes: conn.c `cgApp`).
 
@@ -444,8 +444,8 @@ is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
   |---|---|---|
   | `init` | PID 1 | "This process starts and runs the whole system." |
   | `kernel` | kernel threads (`PF_KTHREAD`) | "This is part of the Linux kernel." |
-  | `session` | the session's own `lord-server` | "This is your LordOS session. To end it, use Log Out…" |
-  | `system` | `lord-sessiond`, `lord-netperm`, `lord-netd`, `lord-fand`, `lord-vault`, `lord-maild`, `lord-doc`, `lord-media`, the root helper (`lord-admin`), any `lord-server` that is not an isolated app (another session, a terminal holder), PipeWire (`pipewire`, `pipewire-pulse`, `wireplumber`) and the systemd managers | "This process is part of LordOS." |
+  | `session` | the session's own `lord-server` | "This is your Insane OS session. To end it, use Log Out…" |
+  | `system` | `lord-sessiond`, `lord-netperm`, `lord-netd`, `lord-fand`, `lord-vault`, `lord-maild`, `lord-doc`, `lord-media`, the root helper (`lord-admin`), any `lord-server` that is not an isolated app (another session, a terminal holder), PipeWire (`pipewire`, `pipewire-pulse`, `wireplumber`) and the systemd managers | "This process is part of Insane OS." |
 
   An isolated `.lpk` app (`lord-server --app <id>`) is not protected: a hung app can be quit. The
   names are matched against the process name and, when it can be read, the executable's name. This
@@ -462,8 +462,8 @@ is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
 - **Statistics:** user (and the effective uid if it differs), parent process (a link: it selects the
   parent and shows its details), process group and session, CPU %, CPU time, threads, context
   switches (voluntary and forced), page faults (minor and major), start time, nice and priority, the
-  control group (the app scope, as the firewall sees it) and the restrictions LordOS knows about:
-  an isolated LordOS app (Landlock, seccomp, its own cgroup), a seccomp filter, "no new
+  control group (the app scope, as the firewall sees it) and the restrictions Insane OS knows about:
+  an isolated Insane OS app (Landlock, seccomp, its own cgroup), a seccomp filter, "no new
   privileges", a network block rule and the app's restrictions from Settings → Privacy (`lord.fw`).
 - **Open files and ports:** each descriptor of `/proc/<pid>/fd` (up to 300; the total is always
   shown): files, devices, pipes, kernel objects and sockets, with the protocol, local and remote
@@ -480,7 +480,7 @@ is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
 
 The details are built on the Monitor's sampling thread (`mon_detail`, once per second and only
 while the sheet is open), never during a frame. Sampling a process's stacks ("Sample process") is
-not offered: it needs ptrace and an unwinder, which LordOS doesn't ship.
+not offered: it needs ptrace and an unwinder, which Insane OS doesn't ship.
 
 Tests: `build/procctl-test` (in `make -C server test`): stat parsing with a hostile name, the
 protected list, a stale start time refused while the process survives, TERM and KILL on real
@@ -510,17 +510,17 @@ whole reading. Rail names come from a closed list in C; a well-formed line of an
 `uv <count|-1> <last_s|-1> <RAIL>=<uV>,<uA|-1> ...`: numbers and those names, never the program's text.
 `apps/monitor/voltmodel.js` (`parsePmic`) checks that line again.
 
-**States.** Under-voltage is only ever the board's own alarm; LordOS doesn't decide it from a number:
+**States.** Under-voltage is only ever the board's own alarm; Insane OS doesn't decide it from a number:
 
 | State | When |
 |---|---|
 | Under-voltage now | the alarm is on (`rpi_volt`'s window is the last 2 s) |
-| Low | the 5 V input reads under **4.8 V** (`LOW_5V`) and the alarm is off. This is LordOS's own line, a warning that the supply or the cable is weak; it isn't a limit of the board |
+| Low | the 5 V input reads under **4.8 V** (`LOW_5V`) and the alarm is off. This is Insane OS's own line, a warning that the supply or the cable is weak; it isn't a limit of the board |
 | Happened since boot | an alarm earlier and none now |
 | Normal | the alarm is off and the input is at 4.8 V or more |
 
 "Since boot" needed a source of its own. `rpi_volt` asks the firmware every 2 s and clears its "has occurred" bits, so on
-the LordOS kernel those bits never mean "since boot" (`hw/rpifw.h`). The kernel does log each alarm, as `<driver> <device>:
+the Insane OS kernel those bits never mean "since boot" (`hw/rpifw.h`). The kernel does log each alarm, as `<driver> <device>:
 Undervoltage detected!`, so `rpi-pmic` also counts those lines in `/dev/kmsg` (`hw_uv_log`: kernel facility only, only that
 exact shape) and answers the count and the last time. That log is a ring: very old messages can be gone, and the view says
 so. Without `rpi_volt`, `get_throttled`'s own bit is used. An alarm seen while the view is open also counts.
@@ -580,7 +580,7 @@ and the load light take the temperature's color.
 A client duplicated across fds or handed to another process is counted once (the pair `drm-pdev` + `drm-client-id`,
 under the lowest pid). An engine's share is Δns ÷ (Δt × capacity), or Δcycles ÷ Δtotal-cycles on xe, capped at 100 %;
 the first second shows memory but no share. Processes become apps exactly as in Processes and Network (`annotate()`
-in `js_monitor.c`: the cgroup scope, then the `.desktop` program; lord-server itself is "LordOS"). Each app shows its
+in `js_monitor.c`: the cgroup scope, then the `.desktop` program; lord-server itself is "Insane OS"). Each app shows its
 busiest engine, the categories (3D, compute, video, encode, copy), its graphics memory (VRAM; on a GPU that shares the
 computer's memory, the system memory it holds) and its APIs, e.g. a browser "OpenGL (radeonsi), Video decoding",
 lord-server "OpenGL ES (radeonsi)", a game "Vulkan (RADV)".
@@ -591,7 +591,7 @@ loader, the Mesa driver for the card, …); *not installed* when this card has a
 `simpledrm`); *not available* when nothing was found and there is no known driver. WebGPU is shown as "in browsers,
 through Vulkan". ROCm with `/dev/kfd` but no runtime says so. NVIDIA's paths are tested with fixtures only.
 
-**AI.** A small table of LordOS's AI helpers (`AI_ENGINES` in the model, `ai_name` in C): the voice (`lord-tts`,
+**AI.** A small table of Insane OS's AI helpers (`AI_ENGINES` in the model, `ai_name` in C): the voice (`lord-tts`,
 started by `lord-say`) and text in pictures (`lord-ocr`, Tesseract, always on the processor). lord-tts runs sandboxed and
 not dumpable, so its `/proc/<pid>/fd`, `fdinfo` and `maps` belong to root and its graphics memory is shown as hidden
 ("it runs isolated"): its sandbox is untouched. What it runs on comes from lord-say, which is not sandboxed: once the first
@@ -641,7 +641,7 @@ hwmon sensor, which the session reads like any other sysfs file (`server/src/mon
 
 | Disk | Sensor | Where it sits in sysfs |
 |---|---|---|
-| NVMe / M.2 (also an M.2 drive on a Raspberry Pi 5 HAT) | the nvme driver's own (`CONFIG_NVME_HWMON`, on in Debian's and LordOS's Pi kernel) | `/sys/block/nvme0n1/device` is the controller; the sensor is its child `hwmonN` (name `nvme`). With native multipath the block device's `device` is the `nvme-subsysN`, and the sensor is found through the controllers it lists |
+| NVMe / M.2 (also an M.2 drive on a Raspberry Pi 5 HAT) | the nvme driver's own (`CONFIG_NVME_HWMON`, on in Debian's and Insane OS's Pi kernel) | `/sys/block/nvme0n1/device` is the controller; the sensor is its child `hwmonN` (name `nvme`). With native multipath the block device's `device` is the `nvme-subsysN`, and the sensor is found through the controllers it lists |
 | SATA | `drivetemp` (`CONFIG_SENSORS_DRIVETEMP=m`), loaded at boot by `/usr/lib/modules-load.d/lordos-drivetemp.conf` from the `lordos` package (migration `003-0.8.2-drivetemp` loads it once on an upgraded running system) | `/sys/block/sda/device` is the SCSI device; the sensor is in its glue folder `hwmon/hwmonN` (name `drivetemp`) |
 | microSD / eMMC cards, virtual disks (virtio, QEMU), optical drives, most USB bridges | none | the tab says **No sensor**: there is never a made-up value |
 
@@ -664,7 +664,7 @@ cached SMART summary (`smartSummaries`, `smart.refresh` in `sdk/smart.js`):
 - with smartmontools installed: the root helper's `smart-health` action (`smartctl -n standby -i -H
   -A -c -l selftest`), which **never wakes a resting disk** (`-n standby`: smartctl only asks the
   power mode, and a disk in standby keeps its previous summary);
-- without it: LordOS's own reader (`disk-smart`, see `SYSTEM.md`), only for flash disks and for
+- without it: Insane OS's own reader (`disk-smart`, see `SYSTEM.md`), only for flash disks and for
   spinning disks that are awake;
 - at most once every 5 minutes per disk, one disk at a time, and only for disks that can have
   SMART (`sd*`, `hd*`, `nvme*n*`). Cards, optical drives and virtual disks say **No SMART** or **No
@@ -809,7 +809,7 @@ listening one) or `out`. Scope: `internet`, `lan` (private, CGNAT, link-local, U
 0. (0.8.5) a socket made in one of the session's scopes is that scope's app (`cgApp`, from the
    socket's cgroup id; conn.c reads the session's scope ids every 5 s): Mail's connector, the
    Terminal's programs, an app's own sockets;
-1. `lord-server` itself is **LordOS** (native apps and the Store run inside it);
+1. `lord-server` itself is **Insane OS** (native apps and the Store run inside it);
 2. otherwise, the `.desktop` whose `Exec` program (`DesktopApp.bin`) matches the executable,
    `argv[0]` or the process name;
 3. otherwise, `StartupWMClass` equal to the process name;
@@ -905,7 +905,7 @@ four switches, saved in `settings.monitor`, and a button:
 - **Host names** without asking anyone (0.8.2): `lord-netperm` learns them from the system resolver
   and its notices carry them (`hosts`); the destinations are listed by those names.
 - (0.8.2) Each destination's own switch and the traffic history; (0.8.3) blocking cuts the open
-  connections; (0.8.5) the tree, the "Deny silently" mode, the blocklists and LordOS's own components
+  connections; (0.8.5) the tree, the "Deny silently" mode, the blocklists and Insane OS's own components
   as rows of their own (see "Network, second generation").
 
 **Planned:**
@@ -1047,7 +1047,7 @@ Layout and paint per frame (`LORD_FRAME_STATS`) were the same within 0.1 ms in e
 screen, also with `LORD_DAMAGE=multi`, so the blur margin adds next to nothing. The reason, found
 afterwards (next section): those sessions had a translucent, blurred Terminal hidden behind Monitor,
 and the blur rule repainted it whole every frame. Most of the process's CPU here is the remote
-desktop's frame comparison and the session itself, not paint. LordBench's desktop mode in the headless harness (`perf-theme.js`, three runs each):
+desktop's frame comparison and the session itself, not paint. InsaneBench's desktop mode in the headless harness (`perf-theme.js`, three runs each):
 58.9–60.0 fps, build p50 1.25–1.26 ms, p99 5.9–7.6 ms before; 60.0 fps, p50 1.24–1.27 ms, p99
 5.95–6.32 ms after.
 
@@ -1243,7 +1243,7 @@ It runs outside the frame. While it draws, the screen shows the previous frame s
 
 - **Countries by IP:** DB-IP Lite Country © db-ip.com, CC BY 4.0 license
   (<https://creativecommons.org/licenses/by/4.0/>).
-  - The attribution is shown in About LordOS, at the foot of the map and in
+  - The attribution is shown in About Insane OS, at the foot of the map and in
     `/usr/share/doc/lordos/copyright`.
   - Source used: `dbip-country-lite-2026-10`.
 - **Country outlines and names:** Natural Earth (<https://www.naturalearthdata.com>), public

@@ -1,10 +1,10 @@
-LordOS is free software and contributions are welcome: code, documentation, translations, tests on real hardware, and good bug reports. This page explains how to take part and the few rules every contribution follows.
+Insane OS is free software and contributions are welcome: code, documentation, translations, tests on real hardware, and good bug reports. This page explains how to take part and the few rules every contribution follows.
 
 ## Ways to take part
 
-The repository is public at [github.com/lordbasex/LordOS](https://github.com/lordbasex/LordOS). You can:
+The repository is public at [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). You can:
 
-- try LordOS and [report problems](/legal/issues/) on [GitHub Issues](https://github.com/lordbasex/LordOS/issues), with the output of `lordos-issue` (from 0.8.8 on: run it in a terminal; it writes `~/lordos-issue-<date>.txt` with names and addresses replaced, and sends nothing);
+- try Insane OS and [report problems](/legal/issues/) on [GitHub Issues](https://github.com/lordbasex/Insane OS/issues), with the output of `lordos-issue` (from 0.8.8 on: run it in a terminal; it writes `~/lordos-issue-<date>.txt` with names and addresses replaced, and sends nothing);
 - test it on your hardware and tell us what works and what doesn't;
 - **watch** or **star** the repository to hear about releases.
 
@@ -20,7 +20,7 @@ For larger changes (a new app, a new system service, a new dependency), open an 
 
 ## License of contributions
 
-LordOS uses **inbound = outbound** licensing: by contributing, you license your contribution under the same **MIT license** as the rest of the project ([LICENSE](https://github.com/lordbasex/LordOS/blob/main/LICENSE)). You keep the copyright of your work; there is no copyright assignment and no separate contributor agreement to sign.
+Insane OS uses **inbound = outbound** licensing: by contributing, you license your contribution under the same **MIT license** as the rest of the project ([LICENSE](https://github.com/lordbasex/Insane OS/blob/main/LICENSE)). You keep the copyright of your work; there is no copyright assignment and no separate contributor agreement to sign.
 
 ## Developer Certificate of Origin (sign-off)
 
@@ -42,15 +42,15 @@ Use your real name (or the name you are publicly known by). Pull requests with c
 
 - **English only.** All code, identifiers, code comments, commit messages and Markdown documentation are written in English. User-facing text is the exception: it lives in the language catalogs (`assets/locales/<lang>/`) and goes through translation, with English as the default.
 - **Tests must pass.** Run `make -C server test` for the self-contained suites (and `make -C server test-full` when you touch the helpers or the sandbox), and `node tools/i18n-check.mjs` when you touch user-facing text. Add a test for every bug you fix and every feature you add, where possible.
-- **Clean C.** Readable, modular C11 that builds without warnings under `-Wall -Wextra`. Respect the dependency policy in [docs/ARCHITECTURE.md](https://github.com/lordbasex/LordOS/blob/main/docs/ARCHITECTURE.md).
+- **Clean C.** Readable, modular C11 that builds without warnings under `-Wall -Wextra`. Respect the dependency policy in [docs/ARCHITECTURE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/ARCHITECTURE.md).
 - **Don't claim untested compatibility.** If you say something works on a piece of hardware or with an app, you tested it.
-- **Brand rules.** Follow the [brand kit](https://github.com/lordbasex/LordOS/blob/main/docs/LORDOS-BRAND.md) for the logo, colours and the spelling "LordOS". Use generic names for features, and keep other companies' brand and product names out of public text; `node tools/brand-check.mjs` checks this.
+- **Brand rules.** Follow the [brand kit](https://github.com/lordbasex/Insane OS/blob/main/docs/LORDOS-BRAND.md) for the logo, colours and the spelling "Insane OS". Use generic names for features, and keep other companies' brand and product names out of public text; `node tools/brand-check.mjs` checks this.
 - **No secrets.** Never commit private keys, passwords or personal data.
 
 ## Translations
 
-LordOS ships in four languages: English, Spanish, Portuguese and French (since 0.8.8). Other languages are added as **language packs** built from the translation catalogs; see [docs/LANGUAGES.md](https://github.com/lordbasex/LordOS/blob/main/docs/LANGUAGES.md). Corrections to the existing translations are welcome too.
+Insane OS ships in four languages: English, Spanish, Portuguese and French (since 0.8.8). Other languages are added as **language packs** built from the translation catalogs; see [docs/LANGUAGES.md](https://github.com/lordbasex/Insane OS/blob/main/docs/LANGUAGES.md). Corrections to the existing translations are welcome too.
 
 ## Code of conduct
 
-Everyone who takes part in LordOS follows our [Code of conduct](/legal/code-of-conduct/). Security problems are never reported in public: see the [Security policy](/legal/security/).
+Everyone who takes part in Insane OS follows our [Code of conduct](/legal/code-of-conduct/). Security problems are never reported in public: see the [Security policy](/legal/security/).

@@ -1,4 +1,4 @@
-/* ui.h — LordOS interface engine: node tree, styles, layout, painting. */
+/* ui.h — Insane OS interface engine: node tree, styles, layout, painting. */
 #ifndef LORD_UI_H
 #define LORD_UI_H
 
@@ -221,12 +221,12 @@ const Glyph *text_glyph_id(int font, uint32_t gid, float size);
 const Glyph *text_glyph_color(int font, uint32_t gid, int max_w, int max_h);
 void  text_font_vmetrics(int font, float size, float *asc, float *desc);
 int   text_init(const char *font_dir);
-/* For LordBench's helper, which opens no files: one interface font already in memory (it must stay there) */
+/* For InsaneBench's helper, which opens no files: one interface font already in memory (it must stay there) */
 int   text_init_mem(const unsigned char *data, size_t size);
 /* Weight + TEXT_MONO picks the monospaced font (JetBrains Mono) in text_measure/text_draw and in
  * lord.measureText: this way the font travels with the weight without changing the signatures. */
 #define TEXT_MONO 1000.0f
-/* Weight + TEXT_BRAND: the brand face of the LordOS wordmark (Plus Jakarta Sans, docs/brand/README.md). */
+/* Weight + TEXT_BRAND: the brand face of the Insane OS wordmark (Plus Jakarta Sans, docs/brand/README.md). */
 #define TEXT_BRAND 2000.0f
 #define TEXT_WEIGHT(s) ((s)->font_weight + ((s)->mono == 2 ? TEXT_BRAND : (s)->mono ? TEXT_MONO : 0))
 float text_line_height(float size, float line_h);

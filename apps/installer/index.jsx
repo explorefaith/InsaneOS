@@ -1,4 +1,4 @@
-// Install LordOS: a wizard that installs the live system (ISO) on the disk.
+// Install Insane OS: a wizard that installs the live system (ISO) on the disk.
 // It only shows up in the live session ("live": true in the manifest). What needs root is done by
 // the administration helper with closed actions (server/src/install): install-disks, install-run
 // (validates everything again on the root side) and install-reboot. See docs/ISO.md.

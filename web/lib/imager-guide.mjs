@@ -1,5 +1,5 @@
-// imager-guide.mjs — the "How to use LordOS Imager" guide (/imager/, /es/imager/, /pt/imager/) and the
-// "How to write LordOS" block of the download section. Content: web/content/imager/guide.<lang>.json;
+// imager-guide.mjs — the "How to use Insane OS Imager" guide (/imager/, /es/imager/, /pt/imager/) and the
+// "How to write Insane OS" block of the download section. Content: web/content/imager/guide.<lang>.json;
 // screenshots: web/content/imager/shots/{light,dark}/<lang>/*.webp (1600 px wide, the desktop app's
 // real interface with demo values); the video slot: web/content/imager/video/ (see videoSlot()).
 import fs from 'node:fs';
@@ -34,7 +34,7 @@ export function imagerGuide({ content, repo, lang: l, t, g, version, esc, webp, 
       const load = eager && theme === 'light' ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
       return `<a class="g-card ig-${theme === 'light' ? 'l' : 'd'}" href="${full.url}" data-w="1600" data-h="${thumb.h * 2}" data-cap="${esc(caption)}" aria-label="${esc(g.open + ': ' + caption)}"><img src="${thumb.url}" srcset="${thumb.url} ${thumb.w}w, ${full.url} 1600w" sizes="${sizes}" width="${thumb.w}" height="${thumb.h}" alt="${esc(caption)}"${load}></a>`;
     }).join('');
-    return `<figure class="ig-win${cls ? ' ' + cls : ''}"><div class="ig-bar" aria-hidden="true"><span>LordOS Imager</span></div>${imgs}<figcaption>${esc(caption)}</figcaption></figure>`;
+    return `<figure class="ig-win${cls ? ' ' + cls : ''}"><div class="ig-bar" aria-hidden="true"><span>Insane OS Imager</span></div>${imgs}<figcaption>${esc(caption)}</figcaption></figure>`;
   }
   // a screenshot from docs/ (the board's own screens), one theme
   function docShot(file, caption) {
@@ -214,7 +214,7 @@ const COOL_ART = {
   none: `<svg viewBox="0 0 96 64" width="96" height="64"><rect x="8" y="12" width="80" height="44" rx="5" fill="#1E9E55" opacity=".4" stroke="#1E9E55" stroke-width="2"/><rect x="38" y="26" width="16" height="16" rx="2" fill="currentColor" opacity=".55"/><rect x="62" y="18" width="18" height="10" rx="2" fill="currentColor" opacity=".3"/><rect x="62" y="32" width="18" height="10" rx="2" fill="currentColor" opacity=".3"/></svg>`,
 };
 
-// ---- the "How to write LordOS to a USB stick or SD card" block of the download section ----
+// ---- the "How to write Insane OS to a USB stick or SD card" block of the download section ----
 export function writeBlock({ l, t, g, esc, links, version, isoVersion = version, guideUrl }) {
   const h = g.home;
   const md = (s) => inline(String(s || ''));

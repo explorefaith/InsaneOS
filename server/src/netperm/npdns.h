@@ -7,7 +7,7 @@
  *      answer resolved gave to any program (NSS, the 127.0.0.53 stub, D-Bus) arrives, with the
  *      records in wire format ("raw").
  *   2. Without resolved: the UDP responses that arrive FROM port 53 of the servers in
- *      /etc/resolv.conf (a root file, written by LordOS: docs/NETWORK.md), read with a receive-only
+ *      /etc/resolv.conf (a root file, written by Insane OS: docs/NETWORK.md), read with a receive-only
  *      AF_PACKET socket (classic BPF filter: UDP from port 53). What an app asks another server
  *      isn't learned.
  *

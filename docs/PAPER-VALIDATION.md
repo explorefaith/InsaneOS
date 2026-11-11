@@ -1,6 +1,6 @@
 # Validating the paper
 
-The technical paper (https://lordos.org/paper/, `docs/PAPER.md`) makes claims about LordOS. This page was
+The technical paper (https://lordos.org/paper/, `docs/PAPER.md`) makes claims about Insane OS. This page was
 written against its 0.8.0 edition and lists each claim with how it is checked today and its state in 0.8.5, with rows added for the
 0.8.6 edition (published with the 0.8.6-beta release on 2026-10-30) and for what the paper marks in 0.8.7,
 so anyone can see what is proven, what was measured once and what is not tested. **The rows marked
@@ -14,7 +14,7 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 |---|---|
 | **Test** | An automated test in the repository (`make -C server test`, `test-full` or `node` suites) fails if the claim stops being true. |
 | **Check** | System Information → Checks verifies it on the user's own computer: *configured* (the mechanism is there) or *effective* (it was tried and gave the right answer). |
-| **Measured** | A number measured by hand on a named machine; nothing repeats it yet. LordBench (0.8.6) is meant to. |
+| **Measured** | A number measured by hand on a named machine; nothing repeats it yet. InsaneBench (0.8.6) is meant to. |
 | **Untested** | The paper itself says it wasn't tested (real hardware). |
 | **Outdated → corrected in 0.8.5** | No longer true in 0.8.5: the paper must change. |
 | **Design** | A design rule, checked by review and `AGENTS.md`, not by a program. |
@@ -101,10 +101,10 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 
 | § | Claim | How | State |
 |---|---|---|---|
-| 7.1 | Live ISO idle 465 MB, installed idle 487 MB, CPU 99 % idle | Measured once (VM 117, 120) | Measured → LordBench |
-| 7.1 | Boot 16.3 s with UEFI | Measured once | Measured → LordBench |
+| 7.1 | Live ISO idle 465 MB, installed idle 487 MB, CPU 99 % idle | Measured once (VM 117, 120) | Measured → InsaneBench |
+| 7.1 | Boot 16.3 s with UEFI | Measured once | Measured → InsaneBench |
 | 7.1 | `lord-server` without 3D ~32 MB RSS; session ~50 MB, login 41 MB | Measured once; Check `memory` shows the current number (VM 116 today: ~100 MB in a headless session with apps open) | **Re-measure** at idle |
-| 7.2 | Window drag 1280×800 CPU path 6.7–6.9 ms, ~120 fps | Measured once (VM 118) | Measured → LordBench |
+| 7.2 | Window drag 1280×800 CPU path 6.7–6.9 ms, ~120 fps | Measured once (VM 118) | Measured → InsaneBench |
 | 7.2 | Video: lord-server 42 % → 13 %, fullscreen 92 % → 15 % of a core | Measured once | Measured |
 | 7.1 | — | New in the 0.8.5-beta edition: the released package measured on a VMware VM updated from 0.8.4.1, whole system 592 MB used and the first frame 7.4 s after the kernel started (`results/0.8.5-beta/vmware-fusion`, `RESULTS.md`) | Measured, versioned results (§7.1) |
 | 7.2 | — | New in 0.8.5: remote desktop CPU reference (`REMOTE.md`, "Measurements (0.8.5, CPU reference)") | Added in the 0.8.5 edition (§7.2) |
@@ -115,11 +115,11 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 7.4 | In 0.8.7: the buffer-age scissor stays off (GPU part 1.51 → 2.58 ms alone; under load 30.1–31.8 → 28.4–29.9 fps, pointer p99 63–66 → 83–95 ms) | Measured on the Pi 5 (5 runs without, 3 with, v087.22); `build/engine-test` over a simulated chain. Measured |
 | 10.1 | In 0.8.7: Cleaner on a Pi 5 with its monitor: 4.5–7.2 % of a core with the hero idle, 12.2–18.0 % scanning, 0.1 % closed (`CLEANER-TESTS.md`) | Measured (v087.22, two runs a cell). Aurora's pauses of up to a second are not explained. Measured |
 | 7.4 | Pi 5: build 1 min 02 s, tests 23/0/0, NEON 2.0–2.3×, idle 36 MB, fan behaviour | Measured once on the Pi (2026-10-18; the tests were not rerun on the Pi for 0.8.6) | Measured |
-| 7.4 | — | New in 0.8.6: with a 1920×1080 60 Hz monitor, login screen 5.99 s after the kernel starts; desktop 59.4 fps alone (p99 13.0 ms, 1 % late) and 24 fps under a low-priority all-core load (96.5 % late); 3 minutes sustained at 5.9 GFLOP/s, 55.6 °C; software video decoding per codec. LordBench on the Pi (`BENCHMARK.md`, "Built so far") | Measured with LordBench (one run each); the load result led to two fixes (compositor CPU weight: 31–33 % → 7–8 % late without the monitor; with the real-time priority, measured on the monitor: 24 → 28.9–30.5 fps, still 94–98 % late, the frame's build time under load still to explain) |
-| 7.4 | — | New in 0.8.6: LordBench's square now turns; with it, the frame-cost work took the Pi 5 with its monitor from 53–58 to 59.8–60 fps alone and from 24–25 to about 31 fps under load; the frame pipeline (+2–5 fps under load, 17–29 ms more pointer latency) and GPU drag (no measurable gain) were measured and are off by default; the remaining cost under load is the GPU's time per frame (1.5 → 14–16 ms, no clock or thermal throttling; memory contention likely, not proven); fewer pixels per frame, what slows the GPU and GPU drag for the whole drag moved to 0.8.7 (2026-10-30) (`BENCHMARK.md`, "The drag frame's cost") | Measured with LordBench on the Pi 5 (2–3 runs each, 2026-10-28; final run 2026-10-29: both off 59.9 / 30.5–31.1 fps, pointer to screen p50 25.7–25.9 / 48.5–49.0 ms; GPU drag on 59.9 / 30.8–31.6; the pipeline 60.0 / 33.0–36.2 fps, pointer 42 / 78 ms; `vcgencmd` every 2 s) | Measured (2026-10-29) |
+| 7.4 | — | New in 0.8.6: with a 1920×1080 60 Hz monitor, login screen 5.99 s after the kernel starts; desktop 59.4 fps alone (p99 13.0 ms, 1 % late) and 24 fps under a low-priority all-core load (96.5 % late); 3 minutes sustained at 5.9 GFLOP/s, 55.6 °C; software video decoding per codec. InsaneBench on the Pi (`BENCHMARK.md`, "Built so far") | Measured with InsaneBench (one run each); the load result led to two fixes (compositor CPU weight: 31–33 % → 7–8 % late without the monitor; with the real-time priority, measured on the monitor: 24 → 28.9–30.5 fps, still 94–98 % late, the frame's build time under load still to explain) |
+| 7.4 | — | New in 0.8.6: InsaneBench's square now turns; with it, the frame-cost work took the Pi 5 with its monitor from 53–58 to 59.8–60 fps alone and from 24–25 to about 31 fps under load; the frame pipeline (+2–5 fps under load, 17–29 ms more pointer latency) and GPU drag (no measurable gain) were measured and are off by default; the remaining cost under load is the GPU's time per frame (1.5 → 14–16 ms, no clock or thermal throttling; memory contention likely, not proven); fewer pixels per frame, what slows the GPU and GPU drag for the whole drag moved to 0.8.7 (2026-10-30) (`BENCHMARK.md`, "The drag frame's cost") | Measured with InsaneBench on the Pi 5 (2–3 runs each, 2026-10-28; final run 2026-10-29: both off 59.9 / 30.5–31.1 fps, pointer to screen p50 25.7–25.9 / 48.5–49.0 ms; GPU drag on 59.9 / 30.8–31.6; the pipeline 60.0 / 33.0–36.2 fps, pointer 42 / 78 ms; `vcgencmd` every 2 s) | Measured (2026-10-29) |
 | 7.5 | No measurements on real PCs | — | **Untested** |
-| 7.5 | — | New in 0.8.6: LordBench's interface workloads on VM 116 (layout and paint 37.0/39.9 fps, shaping 619/3,595 runs/s; compared only within the same LordOS version) and the helper-sandbox self-test (six tries, all refused on VM 116: seccomp `EPERM`, Landlock `EACCES`) (`BENCHMARK.md`, "Built so far") | Measured with LordBench (one Full and four Quick runs); on the Pi 5 two Quick runs from a terminal (2026-10-29): 39.3–39.4 / 45.4 fps, 630–632 / 2,522–2,527 runs/s; its reference from a Full run over SSH without the monitor (2026-10-30, `ondemand`, 180 s sustained, 37.0 → 49.6 °C, no throttling or under-voltage): 39.22 / 45.23 fps, 628.3 / 2,514.0 runs/s, a second Full run within 0.4 % | Measured (2026-10-30) |
-| 7.5 | — | New in 0.8.6: on a Raspberry Pi LordBench watches the firmware's under-voltage alarm (the only flag the LordOS kernel exposes), `get_throttled` on older kernels and 80 °C as the firmware's limit (a peak test stops as throttled); System Information's Raspberry Pi section reads the same through `hw/rpifw.c` and leaves out what the kernel doesn't show (`BENCHMARK.md`, "The Raspberry Pi firmware's throttling") | Tested on fake sysfs trees (`tests/lordbench_test.c`, `tests/sysreport_test.c`) on VM 116; on the Pi 5 (2026-10-29) the `rpi_volt` alarm is present and reads 0 with the official supply (LordBench's `piFirmware`), `get_throttled` absent; an actual under-voltage not provoked |
+| 7.5 | — | New in 0.8.6: InsaneBench's interface workloads on VM 116 (layout and paint 37.0/39.9 fps, shaping 619/3,595 runs/s; compared only within the same Insane OS version) and the helper-sandbox self-test (six tries, all refused on VM 116: seccomp `EPERM`, Landlock `EACCES`) (`BENCHMARK.md`, "Built so far") | Measured with InsaneBench (one Full and four Quick runs); on the Pi 5 two Quick runs from a terminal (2026-10-29): 39.3–39.4 / 45.4 fps, 630–632 / 2,522–2,527 runs/s; its reference from a Full run over SSH without the monitor (2026-10-30, `ondemand`, 180 s sustained, 37.0 → 49.6 °C, no throttling or under-voltage): 39.22 / 45.23 fps, 628.3 / 2,514.0 runs/s, a second Full run within 0.4 % | Measured (2026-10-30) |
+| 7.5 | — | New in 0.8.6: on a Raspberry Pi InsaneBench watches the firmware's under-voltage alarm (the only flag the Insane OS kernel exposes), `get_throttled` on older kernels and 80 °C as the firmware's limit (a peak test stops as throttled); System Information's Raspberry Pi section reads the same through `hw/rpifw.c` and leaves out what the kernel doesn't show (`BENCHMARK.md`, "The Raspberry Pi firmware's throttling") | Tested on fake sysfs trees (`tests/lordbench_test.c`, `tests/sysreport_test.c`) on VM 116; on the Pi 5 (2026-10-29) the `rpi_volt` alarm is present and reads 0 with the official supply (InsaneBench's `piFirmware`), `get_throttled` absent; an actual under-voltage not provoked |
 
 ## §10–§11 Limits and verification
 
@@ -212,7 +212,7 @@ State in the 0.8.5 edition (`web/content/paper/paper.en.md`, checked 2026-10-26)
 | Gap | Covers | Plan |
 |---|---|---|
 | A denied connection, tried on the user's machine | §6.6 effective | An app with network access and a temporary rule (Checks) |
-| Repeatable performance numbers | §7 | LordBench (0.8.6: CPU, memory, GPU offscreen, storage, sustained load, software video decoding and encoders, the desktop's frame times and pointer-to-screen latency alone and under load (and the compositor's CPU weight and real-time priority they led to), the boot time per version, the N-boot test, `lordos-sysreport bench`, the interface layout/paint and shaping workloads and the helper-sandbox self-test are built, with VM 116 and the Pi 5 as references, `BENCHMARK.md` "Built so far"; idle memory and CPU, hardware video decoding and app start are not; hardware video decoding and the x86 PC reference moved to 0.8.7 on 2026-10-29) |
+| Repeatable performance numbers | §7 | InsaneBench (0.8.6: CPU, memory, GPU offscreen, storage, sustained load, software video decoding and encoders, the desktop's frame times and pointer-to-screen latency alone and under load (and the compositor's CPU weight and real-time priority they led to), the boot time per version, the N-boot test, `lordos-sysreport bench`, the interface layout/paint and shaping workloads and the helper-sandbox self-test are built, with VM 116 and the Pi 5 as references, `BENCHMARK.md` "Built so far"; idle memory and CPU, hardware video decoding and app start are not; hardware video decoding and the x86 PC reference moved to 0.8.7 on 2026-10-29) |
 | Rendering, 3D and video on every GPU | §3.2, §7.2–7.3 | The visual test bench below |
 | Every key, the mouse, touchpads, gamepads, and the Wayland protocols | §3.3–§3.4 | The visual test bench below |
 | Real hardware | §10.2 | Reports from System Information (0.8.7) |
@@ -235,7 +235,7 @@ compositor's keymap, modifiers and layout, repeat rate and delay) and every glob
 **Phase 2, the protocol checklist (2026-10-26, `checks.c`):** runs at start (F5 runs it again; Pause freezes
 the picture for a still capture) and in `--auto`'s JSON. Each protocol is bound at the advertised version
 and exercised, and a protocol error ends the connection with the failing check named (its first run caught
-the bench's own mistake, `wl_shm.release` on version 1, which LordOS's compositor rightly refused). First
+the bench's own mistake, `wl_shm.release` on version 1, which Insane OS's compositor rightly refused). First
 run on VM 116 (headless session); after the two compositor fixes below: 16 passed, 0 failed:
 
 | Check | Result |
@@ -281,10 +281,10 @@ Linux app.
 
 ![The Test Bench in System Information](sysinfo-bench.png)
 
-Keys LordOS's compositor keeps (`wl.c`, `wl_key`: Print Screen, the media keys, ❖ on its own) are outlined in
+Keys Insane OS's compositor keeps (`wl.c`, `wl_key`: Print Screen, the media keys, ❖ on its own) are outlined in
 purple on the bench's keyboard, so a key that never lights isn't mistaken for a broken one.
 
-**Shared code (2026-10-26).** The measurement pieces moved to `server/src/bench/`, shared with LordBench
+**Shared code (2026-10-26).** The measurement pieces moved to `server/src/bench/`, shared with InsaneBench
 (0.8.6): frame times now give p50, p99 and frames that missed the refresh budget (`frameMsP50`,
 `frameMsP99`, `missedBudget` in the report); `build/bench-test` (22 checks) found that vblanks skipped were
 never counted from presentation times when the first frame was at time 0, fixed.
@@ -294,7 +294,7 @@ zero-copy).
 
 ### The plan
 
-LordOS writes its own compositor, so it needs its own tool to show, on any computer, that what it draws
+Insane OS writes its own compositor, so it needs its own tool to show, on any computer, that what it draws
 and what it receives are right. The idea is a test-pattern window like a TV test card (and like the test
 pattern of go-link-console), with live measurements around it:
 
@@ -325,7 +325,7 @@ pattern of go-link-console), with live measurements around it:
   `pointer-gestures`, `text-input`, `primary-selection`, data device (copy and paste of text and images),
   `idle-inhibit`, `xdg-activation`, cursor-shape. Its output is a report (JSON and Markdown) that System
   Information can attach, with the GPU and the monitor, so the same run on many computers shows where
-  LordOS's Wayland works and where it doesn't.
+  Insane OS's Wayland works and where it doesn't.
 - **Automation:** `lordos-testbench --auto` runs the protocol checklist and a timed render without a person,
   for CI and for the VMs (the input tests then use the remote desktop's injected keys and pointer, as the
   tests in this repository already do).

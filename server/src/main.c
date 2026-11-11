@@ -1,6 +1,6 @@
 #include <dirent.h>
 /*
- * lord-server — servidor gráfico de LordOS, escrito desde cero.
+ * lord-server — servidor gráfico de Insane OS, escrito desde cero.
  *
  * Toma la placa de video (DRM/KMS) y el input (evdev) directamente del kernel, sin X11,
  * Wayland, libdrm ni libinput. La interfaz la define un tema React que corre en QuickJS
@@ -119,7 +119,7 @@ static DragStats dstat;
 
 /* The copy of what is below the dragged window during the drag (paint.c, docs/WINDOWS.md): built
  * whole, built in part, frames that used it where 001633b's rule painted everything, and why others
- * didn't. Appended to the "drag: …" line, and written on its own when LordBench's scripted move ends. */
+ * didn't. Appended to the "drag: …" line, and written on its own when InsaneBench's scripted move ends. */
 static void below_stats_text(char *buf, size_t len) {
     BelowStats b;
     paint_below_stats(&b);
@@ -188,7 +188,7 @@ typedef struct {
     /* the frame pipeline (fpipe.h, docs/GPU.md "The frame pipeline"): a frame painted into the scene while the
      * flip was pending (prep, an FPIPE_*), what it painted (prep_r; prep_whole: all of it) and what it was painted
      * against, checked before it is submitted (the scene's pixels, the GPU context and output, paint.c's GPU drag
-     * epoch); its CPU time so far and its phases for LordBench (main display) */
+     * epoch); its CPU time so far and its phases for InsaneBench (main display) */
     int prep, prep_whole, prep_gpu;
     int prep_js;                /* an FPIPE_EMPTY prepare ran the JS frame callbacks and they asked again (fpipe_hold_callbacks) */
     Rect prep_r;
@@ -345,8 +345,8 @@ static void jquote(char *out, size_t n, const char *s) {
     out[k] = 0;
 }
 
-/* Cursor that is shown: the Linux app's under the pointer, or a LordOS shape (cursor.c) at the
- * display's scale (pct). mode 0 = the LordOS arrow, 1 = image, 2 = hidden (like wl_cursor). */
+/* Cursor that is shown: the Linux app's under the pointer, or a Insane OS shape (cursor.c) at the
+ * display's scale (pct). mode 0 = the Insane OS arrow, 1 = image, 2 = hidden (like wl_cursor). */
 typedef struct { int mode; const uint32_t *px; int w, h, hx, hy; unsigned gen; } Cur;
 
 /* An own shape's generation: changes with the shape, the scale it's drawn at and the pointer size. */
@@ -623,11 +623,11 @@ static void publish_displays(Server *s) {
         memset(w, 0, sizeof *w);
         *w = (WlOutput){ o->v.x, o->v.y, o->v.w, o->v.h, o->v.pw, o->v.ph, s->headless ? 60000 : mode_refresh_mhz(&o->kms.mode),
                          out_scale(o), o->d.mm_w, o->d.mm_h, "", "" };
-        if (s->headless) { snprintf(w->name, sizeof w->name, "LORD-1"); snprintf(w->desc, sizeof w->desc, "LordOS display"); }
+        if (s->headless) { snprintf(w->name, sizeof w->name, "LORD-1"); snprintf(w->desc, sizeof w->desc, "Insane OS display"); }
         else { snprintf(w->name, sizeof w->name, "%s", o->d.connector); snprintf(w->desc, sizeof w->desc, "%s", o->d.name); }
         if (len < (int)sizeof json - 300) {
             char name[140];
-            jquote(name, sizeof name, s->headless ? "LordOS" : o->d.name);
+            jquote(name, sizeof name, s->headless ? "Insane OS" : o->d.name);
             len += snprintf(json + len, sizeof json - (size_t)len, "%s{\"id\":%u,\"name\":%s,\"connector\":\"%s\",\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d,"
                             "\"pw\":%d,\"ph\":%d,\"scale\":%d,\"main\":%s}", n ? "," : "", s->headless ? 0 : o->kms.conn_id, name, w->name,
                             o->v.x, o->v.y, o->v.w, o->v.h, o->v.pw, o->v.ph, out_scale(o), i == s->main_out ? "true" : "false");
@@ -1428,7 +1428,7 @@ static Rect cursor_rect(const Server *s, const Out *o, const Cur *k) {
     return r;
 }
 
-/* The arrow of LordOS in ARGB (for the cursor plane or a texture). */
+/* The arrow of Insane OS in ARGB (for the cursor plane or a texture). */
 static void arrow_argb(uint32_t *px, int w, int h) {
     memset(px, 0, (size_t)w * h * 4);
     Canvas c;
@@ -1522,7 +1522,7 @@ static uint64_t mono_ns(void) {
     clock_gettime(CLOCK_MONOTONIC, &t);
     return (uint64_t)t.tv_sec * 1000000000ull + (uint64_t)t.tv_nsec;
 }
-/* LordBench's frame phases (bench/lbframes.h): the poll() return before this frame and whether it handled
+/* InsaneBench's frame phases (bench/lbframes.h): the poll() return before this frame and whether it handled
  * the main display's flip; render_frame fills the main display's part of fph */
 static uint64_t loop_wake;
 static int loop_wake_flip;
@@ -1547,7 +1547,7 @@ static void render(Server *s) {
     int shown = render_frame(s);                /* 0: it only prepared the next frame (the frame pipeline) */
     double t1 = now_ms();
     uint64_t r1 = phases ? mono_ns() : 0;
-    /* LordBench's compositor measurement (bench/lbframes.c); a prepared frame's goes at its submission */
+    /* InsaneBench's compositor measurement (bench/lbframes.c); a prepared frame's goes at its submission */
     if (shown && !call_piped) lbf_frame(t1 - t0);
     gdrag_feed_now(s, &fph);                       /* after the frame's time: its flip is queued already */
     if (phases && fph_main) {
@@ -1780,7 +1780,7 @@ static void gdrag_feed_now(Server *s, LbPhase *ph) {
 static int pipe_on(const Server *s, const Out *o) {
     return fpipe_engaged(&fpipe) && !s->headless && flip_instant < 3 && o->on && out_count(s) == 1;
 }
-/* pointer input and LordBench's scripted step wait for this display's flip (fpipe_blocked) */
+/* pointer input and InsaneBench's scripted step wait for this display's flip (fpipe_blocked) */
 static int out_blocked(const Server *s, const Out *o) { return fpipe_blocked(pipe_on(s, o), o->kms.flip_pending, o->prep); }
 static int any_blocked(const Server *s) {
     for (int i = 0; i < OUT_MAX; i++) if (s->out[i].on && out_blocked(s, &s->out[i])) return 1;
@@ -2110,7 +2110,7 @@ static int render_frame(Server *s) {
             }
         } else if (c->on) { out_free(c); c->on = 0; c->pend = (Box){ 0, 0, 0, 0 }; }
     }
-    lbf_built(s->headless || main_built);      /* LordBench: the synthetic pointer's events are in this frame */
+    lbf_built(s->headless || main_built);      /* InsaneBench: the synthetic pointer's events are in this frame */
     if (!prep_only) s->frames++;
     /* The pool only while frames are heavy: it costs CPU to wake (a light frame painted on one thread
      * spends less), so it turns on when painting takes more than 70 % of a frame at the target rate (the
@@ -2433,7 +2433,7 @@ int main(int argc, char **argv) {
      * login screen has none: what needs root is done by lord-sessiond. */
     const char *session_user = s.greeter ? NULL : user ? user : getenv("SUDO_USER");
     if (session_user && admin_start(session_user)) fprintf(stderr, "lord-server: no administration helper\n");
-    /* LordOS networking: with lord-sessiond the network belongs to the system (lord-netd brings it
+    /* Insane OS networking: with lord-sessiond the network belongs to the system (lord-netd brings it
      * up at boot) and net-restore only confirms; without it (a standalone lord-server) this
      * session's helper brings it up (see net_act_restore and docs/NETWORK.md) */
     else if (session_user) admin_send("net-restore", "", 0);
@@ -2537,7 +2537,7 @@ int main(int argc, char **argv) {
             dispatch_pointer(&s);
             if (gpu_active()) update_cursor(&s);
         }
-        /* LordBench's scene moves its window one step per frame, as a drag does (ui/grab.c) */
+        /* InsaneBench's scene moves its window one step per frame, as a drag does (ui/grab.c) */
         if (grab_scripted() && !any_blocked(&s)) grab_script_tick(now_ms());
         static int scripted;                    /* its end: the layer's counters, as a drag's line has them */
         if (scripted && !grab_scripted()) {
@@ -2699,7 +2699,7 @@ int main(int argc, char **argv) {
         if (pbase >= 0) pfd[n++] = (struct pollfd){ portal_fd(), (short)(POLLIN | (portal_wants_write() ? POLLOUT : 0)), 0 };
         int lgbase = logs_fd() >= 0 ? n : -1;                    /* app Registros: consultas e inotify */
         if (lgbase >= 0) pfd[n++] = (struct pollfd){ logs_fd(), POLLIN, 0 };
-        int lbibase = lbi_fd() >= 0 ? n : -1;                    /* LordBench's synthetic pointer, like a device */
+        int lbibase = lbi_fd() >= 0 ? n : -1;                    /* InsaneBench's synthetic pointer, like a device */
         if (lbibase >= 0) pfd[n++] = (struct pollfd){ lbi_fd(), POLLIN, 0 };
         int mbase = n, nm = mirror_pollfds(pfd + n, 12);
         n += nm;
@@ -2714,7 +2714,7 @@ int main(int argc, char **argv) {
         int hwbase = n, nhw = hw_pollfds(pfd + n, 7);            /* uevents and the system bus (src/hw) */
         n += nhw;
         if (poll(pfd, n, wait) < 0 && errno != EINTR) { perror("poll"); break; }
-        loop_wake = mono_ns();                  /* LordBench's frame phases: the next frame starts from here */
+        loop_wake = mono_ns();                  /* InsaneBench's frame phases: the next frame starts from here */
         loop_wake_flip = 0;
         if (pfd[0].revents & POLLIN) {
             Kms *heads[OUT_MAX], *mk = &main_out(&s)->kms;

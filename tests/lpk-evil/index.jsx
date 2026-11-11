@@ -1,5 +1,5 @@
 // Malicious test app (tests/lpk-evil). Declares ZERO permissions and, when opened, tries everything
-// an isolated app should not be able to do. Shows the result of each attempt: with the LordOS
+// an isolated app should not be able to do. Shows the result of each attempt: with the Insane OS
 // sandbox (server/src/sec/sandbox.c) all of them must fail. See docs/PRIVACY.md.
 //
 // When apps run as their own process (lord-server --app <id>) these attempts hit

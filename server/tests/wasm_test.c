@@ -428,7 +428,7 @@ static int builtin_tests(const char *dir) {
     expect_i64("fact64(20)", call1(demo, "fact64", 20, 1), 2432902008176640000ll);
     expect_i64("primes(10000)", call1(demo, "primes", 10000, 0), 1229);
     expect_i64("sort_check(1000)", call1(demo, "sort_check", 1000, 0), 1);
-    expect_i64("crc32 of 'LordOS'", call1(demo, "crc_demo", 0, 0), (int32_t)0xd951d347u);
+    expect_i64("crc32 of 'Insane OS'", call1(demo, "crc_demo", 0, 0), (int32_t)0xd951d347u);
     expect_i64("dispatch(3) (call_indirect)", call1(demo, "dispatch", 3, 0), 9);
     expect_i64("fdemo(10) (float)", call1(demo, "fdemo", 10, 0), 3628800);
     expect_i64("greet (host import)", call1(demo, "greet", 0, 0), 13);

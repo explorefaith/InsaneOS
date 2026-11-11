@@ -7,7 +7,7 @@
  *   lord.fan.setGpuFan(n, v)     an amdgpu card's fan by hand (0.8.8.6): n from status().gpuFans, v 'auto' or a
  *                                percentage 0..100 (lord-fand keeps it within 30..100 and gives it back to the card
  *                                above 85 °C, on errors and when this session ends)
- *   lord.fan.caseConfig()        'argon-one-v5' | 'none' | null (not a LordOS Raspberry Pi image)
+ *   lord.fan.caseConfig()        'argon-one-v5' | 'none' | null (not a Insane OS Raspberry Pi image)
  *
  * Everything is validated here and again in lord-fand (which also checks that the user is an
  * administrator). The requests are one short line over /run/lordos/fand.sock; the daemon answers

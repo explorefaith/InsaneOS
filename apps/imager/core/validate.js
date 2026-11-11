@@ -1,4 +1,4 @@
-// validate.js — the LordOS Imager's checks, the same rules as the first-run parser on the board
+// validate.js — the Insane OS Imager's checks, the same rules as the first-run parser on the board
 // (server/src/firstrun/firstrun.c, docs/IMAGER.md). Shared by the native app and the desktop app;
 // plain JavaScript, no lord.* and no DOM. Each check returns null when the value is fine, or the
 // i18n key (imager.err.*) of the problem.

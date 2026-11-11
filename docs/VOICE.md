@@ -1,11 +1,11 @@
 # Voice: text to speech (0.8.8.6, in development)
 
-LordOS reads text aloud on the computer, without the internet. Speech comes from **Pocket TTS** (Kyutai; code MIT,
+Insane OS reads text aloud on the computer, without the internet. Speech comes from **Pocket TTS** (Kyutai; code MIT,
 model weights **CC-BY-4.0**: use, redistribution and commercial use allowed, crediting Kyutai), run by **audio.cpp**
 (Apache-2.0) and its **ggml**, on the CPU or the GPU (Vulkan).
 
 **No voice model is installed by default**: the person downloads the languages, qualities and voices they want from
-Settings → AI → Voice, as signed LordOS packages (below). Reading aloud from the desktop is on by default and can be
+Settings → AI → Voice, as signed Insane OS packages (below). Reading aloud from the desktop is on by default and can be
 turned off there; without a model it says so.
 
 ## Phases
@@ -15,7 +15,7 @@ turned off there; without a model it says so.
 | 1 | `lord-tts` (the engine) and `say` (the command) | done |
 | 2 | Read the selection anywhere: Edit → Speech and the right-click menu, ❖Esc, the player, saving as a sound file | done |
 | 3 | Settings → AI → Voice: models (standard and HD) and 23 voices per language as signed packages, heard before downloading; Personal Voice (read six phrases or speak freely); Live Speech | done |
-| 4 | LordOS's own voice; more languages | to do |
+| 4 | Insane OS's own voice; more languages | to do |
 
 ## `say`
 
@@ -55,7 +55,7 @@ Every place with text has **Speech** (`sdk/voice.js`, `speechMenu`):
 - **Edit → Speech** (Text Editor, Terminal; Notes in View) and the **right-click** menu (Text Editor, Terminal, Notes):
   *Start Speaking*, *Stop Speaking*, *Save as Audio…* Start Speaking reads the selection, or the whole text when
   nothing is selected (Text Editor, Notes). The right-click menu is the SDK's (`sdk/contextmenu.jsx`, with submenus).
-- **A Linux app** (Firefox, foot…) gets an **Edit** menu with Speech in the menu bar (Lord Classic: in its window's
+- **A Linux app** (Firefox, foot…) gets an **Edit** menu with Speech in the menu bar (Insane Classic: in its window's
   menu strip), as its own menus aren't the desktop's (`useMenusWithSpeech`). It reads the app's **primary selection**.
 - **❖Esc** reads what the window in front has selected; pressed again while reading, it stops (`sdk/shortcuts.js`).
 - **The player** (`sdk/voiceplayer.jsx`): a small pill with the voice's wave, ↻ read again, ⏸/▶ pause and go on,
@@ -108,7 +108,7 @@ non-commercial) and cosette, javert, marius (origin not documented). Daan exists
 is the default: Lola (es), Rafael (pt), Alba (en).
 
 **Packages** (`tools/voice/mkdeb-voice.mjs`, `Architecture: all`, into `/usr/share/lordos/voice`), published in the
-signed APT repository, never fetched from Hugging Face by a LordOS system:
+signed APT repository, never fetched from Hugging Face by a Insane OS system:
 
 - `lordos-voice-<lang>` and `lordos-voice-<lang>-hd`: the models;
 - `lordos-voice-<lang>-<voice>` and `…-hd`: one voice, depending on its model;
@@ -177,7 +177,7 @@ first request and kept; another file, backend or language is refused. With `lang
 
 ## Building
 
-`sh tools/tts/fetch-audiocpp.sh` puts audio.cpp at the commit LordOS was tested with in `third_party/audiocpp` (ignored
+`sh tools/tts/fetch-audiocpp.sh` puts audio.cpp at the commit Insane OS was tested with in `third_party/audiocpp` (ignored
 by git; the image builders run it). `server/mk/tts.mk` builds its Pocket TTS family only, with
 `-DENGINE_ENABLE_CPU_ALL_VARIANTS=ON` (so one image serves every x86-64 processor) and Vulkan. It needs `cmake`,
 `glslc`, `libvulkan-dev` and `spirv-headers`; without them `make` skips lord-tts.
@@ -194,4 +194,4 @@ Not yet tested: the Raspberry Pi (aarch64: ggml's CPU variants and the Pi 5's Vu
 
 Pocket TTS © Kyutai, CC-BY-4.0 (https://huggingface.co/kyutai/pocket-tts), converted to GGUF by audio.cpp. Kyutai
 forbids cloning a voice without the person's explicit consent, impersonation and presenting generated speech as a real
-recording; LordOS shows that notice where voices are created.
+recording; Insane OS shows that notice where voices are created.

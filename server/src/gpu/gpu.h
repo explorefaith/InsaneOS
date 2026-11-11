@@ -112,7 +112,7 @@ int  gpu_gdrag_holds(int out);             /* the GPU drag textures hold that ou
  * between frames (paint_gdrag_feed's up). 1: it held nothing of that output at that size: it is now that
  * output's, and the caller sends all of it again; 0 sent; -1 failed (GPU drag is then off). */
 int  gpu_gdrag_feed(int out, int which, const uint32_t *px, int w, int h, Rect r);
-/* Where the last gpu_frame_ex of an output spent its time (LordBench's frame phases, bench/lbframes.h) */
+/* Where the last gpu_frame_ex of an output spent its time (InsaneBench's frame phases, bench/lbframes.h) */
 typedef struct {
     double up_ms;                       /* the UI texture's rectangles */
     long up_px;

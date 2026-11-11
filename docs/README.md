@@ -1,6 +1,6 @@
-# LordOS documentation
+# Insane OS documentation
 
-LordOS is a free GNU/Linux distribution based on Debian 13, with its own desktop environment:
+Insane OS is a free GNU/Linux distribution based on Debian 13, with its own desktop environment:
 a display server and Wayland compositor written in C, its own interface engine, and native apps.
 This folder documents how it works, how to build it and how to verify it. Start with the
 [paper](PAPER.md) for the big picture, or [ARCHITECTURE.md](ARCHITECTURE.md) for the technical map.
@@ -15,7 +15,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [PAPER.md](PAPER.md) | The project paper: vision, architecture, security model, performance, roadmap |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Components, processes, dependencies and platforms |
 | [ROADMAP.md](ROADMAP.md) | Milestones, what is done and what comes next |
-| [DESIGN.md](DESIGN.md) | Design guide for LordOS apps |
+| [DESIGN.md](DESIGN.md) | Design guide for Insane OS apps |
 | [LORDOS-BRAND.md](LORDOS-BRAND.md) | Logo, colours, typography and the Lumo mascot |
 
 ## Install and build
@@ -24,9 +24,9 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 |---|---|
 | [ISO.md](ISO.md) | The live and installable ISO for 64-bit PCs: building, booting, final test results |
 | [RASPBERRY.md](RASPBERRY.md) | The Raspberry Pi 5 image, our kernel with Landlock, boot switch files |
-| [IMAGER.md](IMAGER.md) | LordOS Imager: writing LordOS to cards and sticks, in LordOS and on other computers, and the first-run file |
+| [IMAGER.md](IMAGER.md) | Insane OS Imager: writing Insane OS to cards and sticks, in Insane OS and on other computers, and the first-run file |
 | [UNATTENDED.md](UNATTENDED.md) | The unattended install: the ISO installs itself from `lordos-auto.conf`, for test machines |
-| [INSTALL-DEBIAN.md](INSTALL-DEBIAN.md) | Installing LordOS on an existing Debian 13 with one command |
+| [INSTALL-DEBIAN.md](INSTALL-DEBIAN.md) | Installing Insane OS on an existing Debian 13 with one command |
 | [VM-SETUP.md](VM-SETUP.md) | The development VM, step by step |
 | [UPDATES.md](UPDATES.md) | Updating an installed system in place from the signed APT repository, and migrations |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Known problems and how to fix them (for example a modified system component) |
@@ -45,7 +45,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [DESKTOPS.md](DESKTOPS.md) | Desktops and Overview |
 | [WALLPAPERS.md](WALLPAPERS.md) | Moving wallpapers on the desktop and the login screen |
 | [ON-SCREEN-KEYBOARD.md](ON-SCREEN-KEYBOARD.md) | The on-screen keyboard, for a computer with no physical keyboard |
-| [THEMES-GUIDE.md](THEMES-GUIDE.md) | How to build a LordOS appearance (theme): anatomy, tokens, frames, building, verified code, testing |
+| [THEMES-GUIDE.md](THEMES-GUIDE.md) | How to build a Insane OS appearance (theme): anatomy, tokens, frames, building, verified code, testing |
 | [LAYERS.md](LAYERS.md) | The desktop's stacking order: what is drawn and clicked above what |
 | [SPOTLIGHT.md](SPOTLIGHT.md) | Search and the advanced clipboard |
 | [TRACKPAD.md](TRACKPAD.md) | Touchpads, gestures and touchscreens |
@@ -93,7 +93,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [CLEANER-TESTS.md](CLEANER-TESTS.md) | Cleaner's tests and measurements |
 | [CLEANER-ROADMAP.md](CLEANER-ROADMAP.md) | The state of each Cleaner feature |
 | [VIRTUALIZATION.md](VIRTUALIZATION.md) | Machines, the virtualization app: plan (MVP from 0.8.9) |
-| [GO-LINK.md](GO-LINK.md) | go-link Desk on LordOS and the public screen-sharing API: design, API from 0.8.7.1, status in the document |
+| [GO-LINK.md](GO-LINK.md) | go-link Desk on Insane OS and the public screen-sharing API: design, API from 0.8.7.1, status in the document |
 | [FLATPAK.md](FLATPAK.md) | Flatpak and Flathub: a design review, not planned for any release |
 
 ## System and hardware
@@ -104,7 +104,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [NETWORK.md](NETWORK.md) | Networking and VPNs |
 | [SOUND.md](SOUND.md) | Sound (PipeWire) |
 | [FANS.md](FANS.md) | Fan control on the Raspberry Pi 5 and PCs |
-| [BENCHMARK.md](BENCHMARK.md) | System Information (0.8.5), LordBench and hardware reports: design and status |
+| [BENCHMARK.md](BENCHMARK.md) | System Information (0.8.5), InsaneBench and hardware reports: design and status |
 
 ## Measurements and validation
 
@@ -123,8 +123,8 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [iso-final/](iso-final/) | Screenshots of the final ISO test |
 | [polish/](polish/) | Before and after screenshots of the visual polish pass |
 | [packs/](packs/) | Sample language pack and script test text |
-| [classic/](classic/) | Screenshots of the Lord Classic theme and the Lord Flow theme, light and dark |
-| [imager/](imager/) | Screenshots of LordOS Imager (native app and desktop app) |
+| [classic/](classic/) | Screenshots of the Insane Classic theme and the Insane Flow theme, light and dark |
+| [imager/](imager/) | Screenshots of Insane OS Imager (native app and desktop app) |
 | [qa/](qa/) | Screenshots of the app-by-app QA pass (see [VM-SETUP.md](VM-SETUP.md)) |
 
 ## Research notes

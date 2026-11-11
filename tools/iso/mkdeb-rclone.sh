@@ -86,13 +86,13 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: rclone
 Upstream-Contact: https://rclone.org
 Source: https://downloads.rclone.org/v$RCLONE_VERSION/$Z (sha256 $got, from SHA256SUMS signed by $RCLONE_FPR)
-Comment: rclone's official release binary v$RCLONE_VERSION, unmodified, repackaged by LordOS's tools/iso/mkdeb-rclone.sh.
+Comment: rclone's official release binary v$RCLONE_VERSION, unmodified, repackaged by Insane OS's tools/iso/mkdeb-rclone.sh.
  The Go modules linked in follow rclone's own license, each with the license file it ships.
 
 C
         cat "$LIC"
     } > "$D/copyright"
-    printf 'lordos-rclone (%s) trixie; urgency=medium\n\n  * rclone v%s, the official release binary for linux-%s, repackaged by tools/iso/mkdeb-rclone.sh.\n\n -- LordOS <lord.basex@gmail.com>  %s\n' \
+    printf 'lordos-rclone (%s) trixie; urgency=medium\n\n  * rclone v%s, the official release binary for linux-%s, repackaged by tools/iso/mkdeb-rclone.sh.\n\n -- Insane OS <lord.basex@gmail.com>  %s\n' \
         "$VERSION" "$RCLONE_VERSION" "$ARCH" "$RFC" | gzip -9n > "$D/changelog.gz"
     chmod 644 "$D/copyright" "$D/changelog.gz"
     (cd "$PKG" && find usr -type f | LC_ALL=C sort | xargs md5sum) > "$PKG/DEBIAN/md5sums"
@@ -101,15 +101,15 @@ C
 Package: lordos-rclone
 Version: $VERSION
 Architecture: $ARCH
-Maintainer: LordOS <lord.basex@gmail.com>
+Maintainer: Insane OS <lord.basex@gmail.com>
 Installed-Size: $SIZE
 Depends: fuse3
 Section: net
 Priority: optional
 Homepage: https://rclone.org
-Description: rclone for LordOS Cloud and Connect to Server
+Description: rclone for Insane OS Cloud and Connect to Server
  rclone's official release binary v$RCLONE_VERSION, unmodified, at
- /usr/lib/lordos/rclone/rclone, apart from Debian's own rclone package. LordOS
+ /usr/lib/lordos/rclone/rclone, apart from Debian's own rclone package. Insane OS
  runs it for the cloud accounts of Cloud (rclone rcd on a Unix socket, for the
  session user only) and for the remote folders of Files' Connect to Server.
 C

@@ -1,12 +1,12 @@
 {
  "format": 1,
- "base": "https://raw.githubusercontent.com/lordbasex/LordOS-wallpapers/main",
+ "base": "https://raw.githubusercontent.com/lordbasex/Insane OS-wallpapers/main",
  "items": [
   {
    "id": "crown",
    "section": "dynamic",
    "name": "Crystal Crown",
-   "author": "Federico Pereira, LordOS",
+   "author": "Federico Pereira, Insane OS",
    "license": "MIT",
    "licenseUrl": "https://opensource.org/license/mit",
    "source": "https://lordos.org",

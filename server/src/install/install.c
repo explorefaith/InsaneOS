@@ -1,4 +1,4 @@
-/* install.c — LordOS installer to disk (privileged helper actions, admin.c).
+/* install.c — Insane OS installer to disk (privileged helper actions, admin.c).
  *
  * It only works on the live ISO (/run/live/medium exists); on an installed system every
  * action answers ERR. Actions:
@@ -14,7 +14,7 @@
  *                           BIOS boot (1 MiB, x86-64 only), ESP (512 MiB, FAT32) and ext4 root; copies
  *                           the live system (unsquashfs), configures it and installs grub: UEFI and BIOS
  *                           on x86-64, UEFI only on arm64. Mode "free": see freepart.c: one new ext4
- *                           partition in free space of a GPT disk, grub in EFI/LordOS on its ESP.
+ *                           partition in free space of a GPT disk, grub in EFI/Insane OS on its ESP.
  *                           Mode "manual": see manualpart.c: the partitions the person chose on a
  *                           GPT disk (delete, create, which is /, /home, swap and the ESP).
  *                           Progress: "LOG progress <phase> <done> <total>", phases partition,
@@ -716,7 +716,7 @@ static int undo_boot_folder;
 static MppResult mres;
 
 static void free_abort(void) {
-    if (undo_boot_folder) {                     /* EFI/LordOS didn't exist before (freespace.c): it's all ours */
+    if (undo_boot_folder) {                     /* EFI/Insane OS didn't exist before (freespace.c): it's all ours */
         const char *const a[] = { "/usr/bin/rm", "-rf", "--", TARGET "/boot/efi/EFI/" FP_BOOT_FOLDER, NULL };
         run(a);
         undo_boot_folder = 0;
@@ -772,7 +772,7 @@ static const char *setup_person(Plan *pl, int *step, int steps) {
     /* lord-sessiond (docs/SESSIONS.md): the user logs in through the login screen; autologin
      * is turned on in Settings → Users (AUTOLOGIN=). USER= is for the pre-M8
      * lordos-session. */
-    writef(TARGET "/etc/lordos/session.conf", 0644, "# Written by the LordOS installer. See docs/SESSIONS.md\n"
+    writef(TARGET "/etc/lordos/session.conf", 0644, "# Written by the Insane OS installer. See docs/SESSIONS.md\n"
            "# AUTOLOGIN=user logs in automatically at boot; empty: login screen\nAUTOLOGIN=%s\nUSER=%s\n", pl->autologin ? pl->user : "", pl->user);
     progress("configure", ++*step, steps);
 
@@ -790,7 +790,7 @@ static const char *setup_person(Plan *pl, int *step, int steps) {
     writef(TARGET "/etc/default/keyboard", 0644, "XKBMODEL=\"pc105\"\nXKBLAYOUT=\"%s\"\nXKBVARIANT=\"%s\"\nXKBOPTIONS=\"\"\nBACKSPACE=\"guess\"\n", pl->kblayout, pl->kbvariant);
     progress("configure", ++*step, steps);
 
-    /* the user's LordOS settings: chosen language and keyboard */
+    /* the user's Insane OS settings: chosen language and keyboard */
     uid_t uid; gid_t gid;
     if (target_ids(pl->user, &uid, &gid)) return "install.userMissing";
     /* the kept folder belonged to another uid (an earlier system): only that owner's files become
@@ -846,7 +846,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     if (disk_busy(pl.disk)) { admin_err("install.diskBusy", "disk", pl.disk, NULL); explicit_bzero(&pl, sizeof pl); return; }
 
     const int beside = fsp_mode(pl.mode) == 1, manual = fsp_mode(pl.mode) == 2;
-    /* both share a disk with other systems: grub in EFI/LordOS with its own firmware entry */
+    /* both share a disk with other systems: grub in EFI/Insane OS with its own firmware entry */
     const int shared = beside || manual;
     char dev[48], esp[48], root[48];
     snprintf(dev, sizeof dev, "/dev/%s", pl.disk);
@@ -880,11 +880,11 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
 #if INSTALL_BIOS
     { const char *const a[] = { "/usr/sbin/sgdisk", "-n", "1:0:+1M", "-t", "1:ef02", "-c", "1:biosboot",
                                 "-n", "2:0:+512M", "-t", "2:ef00", "-c", "2:EFI",
-                                "-n", "3:0:0", "-t", "3:8304", "-c", "3:LordOS", dev, NULL };
+                                "-n", "3:0:0", "-t", "3:8304", "-c", "3:Insane OS", dev, NULL };
       if (run(a)) FAIL("install.partitionFailed"); }
 #else
     { const char *const a[] = { "/usr/sbin/sgdisk", "-n", "1:0:+512M", "-t", "1:ef00", "-c", "1:EFI",
-                                "-n", "2:0:0", "-t", "2:8305", "-c", "2:LordOS", dev, NULL };
+                                "-n", "2:0:0", "-t", "2:8305", "-c", "2:Insane OS", dev, NULL };
       if (run(a)) FAIL("install.partitionFailed"); }
 #endif
     progress("partition", 1, 4);
@@ -893,7 +893,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     if (access(esp, F_OK) || access(root, F_OK)) FAIL("install.noPartitions");
     { const char *const a[] = { "/usr/sbin/mkfs.vfat", "-F", "32", "-n", "EFI", esp, NULL }; if (run(a)) FAIL("install.formatEfiFailed"); }
     progress("partition", 2, 4);
-    { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "LordOS", root, NULL }; if (run(a)) FAIL("install.formatRootFailed"); }
+    { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "Insane OS", root, NULL }; if (run(a)) FAIL("install.formatRootFailed"); }
     progress("partition", 3, 4);
     }
     mkdir("/run/lordos-install", 0700);
@@ -931,12 +931,12 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
         snprintf(swapline, sizeof swapline, "UUID=%s none swap sw 0 0\n", su);
     }
     /* a shared ESP is never checked or repaired at boot, and its absence doesn't stop this system;
-     * one LordOS formatted is its own, as in an erase install */
+     * one Insane OS formatted is its own, as in an erase install */
     const int esp_shared = beside || (manual && !mres.esp_formatted);
     if (writef(TARGET "/etc/fstab", 0644,
-               esp_shared ? "# /etc/fstab — generated by the LordOS installer\n"
+               esp_shared ? "# /etc/fstab — generated by the Insane OS installer\n"
                             "UUID=%s / ext4 errors=remount-ro 0 1\nUUID=%s /boot/efi vfat umask=0077,nofail 0 0\n%s%s"
-                          : "# /etc/fstab — generated by the LordOS installer\n"
+                          : "# /etc/fstab — generated by the Insane OS installer\n"
                             "UUID=%s / ext4 errors=remount-ro 0 1\nUUID=%s /boot/efi vfat umask=0077 0 1\n%s%s", ru, eu, homeline, swapline))
         FAIL("sys.writeFailed", "path", "/etc/fstab");
     progress("configure", ++step, steps);
@@ -978,7 +978,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
      * in the image */
     int prober = shared && access(TARGET "/usr/bin/os-prober", X_OK) == 0;
     writef(TARGET "/etc/default/grub", 0644,
-           "# generated by the LordOS installer\nGRUB_DEFAULT=0\nGRUB_TIMEOUT=%d\nGRUB_DISTRIBUTOR=LordOS\n"
+           "# generated by the Insane OS installer\nGRUB_DEFAULT=0\nGRUB_TIMEOUT=%d\nGRUB_DISTRIBUTOR=Insane OS\n"
            "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet %sloglevel=3\"\nGRUB_CMDLINE_LINUX=\"\"\nGRUB_DISABLE_OS_PROBER=%s\n"
            "GRUB_GFXMODE=auto\nGRUB_GFXPAYLOAD_LINUX=keep\n%s",
            shared ? 5 : 2,
@@ -997,11 +997,11 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     int boot_step = 0;
     progress("bootloader", 0, boot_steps);
     if (shared) {
-        /* mode manual may reuse a folder an earlier LordOS left: then it isn't ours to remove */
+        /* mode manual may reuse a folder an earlier Insane OS left: then it isn't ours to remove */
         undo_boot_folder = beside || mres.esp_formatted || access(TARGET "/boot/efi/EFI/" FP_BOOT_FOLDER, F_OK) != 0;
         const char *const a[] = { "/usr/sbin/grub-install", GRUB_EFI_TARGET, "--efi-directory=/boot/efi", "--bootloader-id=" FP_BOOT_FOLDER, "--no-nvram", NULL };
         if (in_target(a) || access(TARGET "/boot/efi/EFI/" FP_BOOT_FOLDER "/" GRUB_EFI_FILE, R_OK)) FAIL("install.grubEfiFailed");
-        /* an EFI partition LordOS formatted holds nobody else's loader: the removable path too, so it
+        /* an EFI partition Insane OS formatted holds nobody else's loader: the removable path too, so it
          * boots on firmware that forgets its entries */
         if (manual && mres.esp_formatted) {
             const char *const b[] = { "/usr/sbin/grub-install", GRUB_EFI_TARGET, "--efi-directory=/boot/efi", "--removable", "--no-nvram", NULL };
@@ -1027,7 +1027,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
          * entry: the others stay, this one goes first in the boot order */
         char pn[16];
         snprintf(pn, sizeof pn, "%u", manual ? mres.esp_num : undo.esp_num);
-        const char *const a[] = { "/usr/bin/efibootmgr", "-q", "-c", "-d", dev, "-p", pn, "-L", "LordOS",
+        const char *const a[] = { "/usr/bin/efibootmgr", "-q", "-c", "-d", dev, "-p", pn, "-L", "Insane OS",
                                   "-l", "\\EFI\\" FP_BOOT_FOLDER "\\" GRUB_EFI_FILE, NULL };
         if (run(a)) FAIL("install.free.bootEntryFailed");
         progress("bootloader", ++boot_step, boot_steps);

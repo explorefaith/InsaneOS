@@ -1,8 +1,8 @@
-# LordOS wallpapers
+# Insane OS wallpapers
 
-Created by iPERFEX with an AI image generator; part of the LordOS brand assets.
+Created by iPERFEX with an AI image generator; part of the Insane OS brand assets.
 
-The collection that LordOS ships in `/usr/share/backgrounds/lordos/` and shows in
+The collection that Insane OS ships in `/usr/share/backgrounds/lordos/` and shows in
 **Settings → Wallpaper**, grouped by category. The default theme also keeps its four gradients
 (Aurora, Ocean, Sunset, Graphite; `themes/default/assets/`, made by `tools/gen-wallpaper.py`) as the
 "Gradients" category.
@@ -52,10 +52,10 @@ screen gets the 4K one. No code changes are needed.
 
 ## License and provenance
 
-The images were created by iPERFEX with an AI image generator and are part of the LordOS brand
-assets, like the logo and Lumo. The files are distributed with LordOS under the same terms as the
-rest of the repository (MIT); the LordOS name, the crown and Lumo that appear in them are also
-covered by the LordOS trademark and brand policy (`web/content/legal/trademark.en.md`). Because
+The images were created by iPERFEX with an AI image generator and are part of the Insane OS brand
+assets, like the logo and Lumo. The files are distributed with Insane OS under the same terms as the
+rest of the repository (MIT); the Insane OS name, the crown and Lumo that appear in them are also
+covered by the Insane OS trademark and brand policy (`web/content/legal/trademark.en.md`). Because
 they are AI-generated, copyright protection for the images themselves may be limited in some
 countries; the trademark policy still applies to the brand elements in them. The "Lumo" pieces are
 an artistic interpretation of the celestial fox, not the official mascot drawing (for that, use

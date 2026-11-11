@@ -1,6 +1,6 @@
 /* clip_secret.c — clipboard history test: a Wayland client that copies a text
  * marking it as secret, just like KeePassXC (it offers text/plain and x-kde-passwordManagerHint).
- * LordOS's history must not store it, but it must still be possible to paste it.
+ * Insane OS's history must not store it, but it must still be possible to paste it.
  *
  *   cc -o clip-secret tests/clip_secret.c -lwayland-client
  *   WAYLAND_DISPLAY=wayland-0 ./clip-secret "contraseña"

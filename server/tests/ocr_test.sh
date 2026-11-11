@@ -1,5 +1,5 @@
 #!/bin/sh
-# ocr_test.sh — lord-ocr (src/doc/h_ocr.c), without lord-server: it reads a picture LordOS rendered (accents
+# ocr_test.sh — lord-ocr (src/doc/h_ocr.c), without lord-server: it reads a picture Insane OS rendered (accents
 # included), rejects bad language names and missing data, and its confinement blocks what lord-doc's does.
 # Needs build/lord-ocr, build/doc-test and the Tesseract eng and spa data.
 cd "$(dirname "$0")/.." || exit 2

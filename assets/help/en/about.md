@@ -1,13 +1,13 @@
 ---
-title: About LordOS
+title: About Insane OS
 app: about
 section: apps
 order: 39
 keywords: version, information, system, computer, hardware
 ---
-# About LordOS
+# About Insane OS
 
-Shows the LordOS version, the computer (processor, memory, graphics card), the Linux kernel and how
+Shows the Insane OS version, the computer (processor, memory, graphics card), the Linux kernel and how
 the display server is drawing (GPU or CPU).
 
 It's the first thing worth looking at —or copying— when reporting a problem. For more detail on

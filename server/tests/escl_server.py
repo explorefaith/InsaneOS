@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""escl_server.py — test eSCL (AirScan) scanner for the LordOS Scanner (docs/PRINTING.md).
+"""escl_server.py — test eSCL (AirScan) scanner for the Insane OS Scanner (docs/PRINTING.md).
 
 There is no real scanner in the VM: this server answers like one. It returns capabilities,
 accepts jobs (POST /eSCL/ScanJobs) and delivers a "scanned page" built here: a PNG with a
 header, ruled lines, a circle and a frame, at the requested area and resolution. Standard
-library only (no PIL), so the only format it delivers is PNG; LordOS converts it to PDF or JPEG
+library only (no PIL), so the only format it delivers is PNG; Insane OS converts it to PDF or JPEG
 in its confined helper.
 
 Usage:  python3 -I escl_server.py [port]          (default 8090)
 and announce it over mDNS, for example with avahi:
-      avahi-publish -s "Escáner de prueba" _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba LordOS"
+      avahi-publish -s "Escáner de prueba" _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba Insane OS"
 """
 import http.server, socketserver, struct, sys, uuid, zlib, re
 
@@ -20,7 +20,7 @@ JOBS = {}
 CAPS = f"""<?xml version="1.0" encoding="UTF-8"?>
 <scan:ScannerCapabilities xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03" xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm">
 <pwg:Version>2.63</pwg:Version>
-<pwg:MakeAndModel>Escáner de prueba LordOS</pwg:MakeAndModel>
+<pwg:MakeAndModel>Escáner de prueba Insane OS</pwg:MakeAndModel>
 <pwg:SerialNumber>LORD-0001</pwg:SerialNumber>
 <scan:Platen><scan:PlatenInputCaps>
 <scan:MinWidth>16</scan:MinWidth><scan:MaxWidth>{MAXW}</scan:MaxWidth><scan:MinHeight>16</scan:MinHeight><scan:MaxHeight>{MAXH}</scan:MaxHeight>

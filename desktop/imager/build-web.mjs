@@ -1,4 +1,4 @@
-// build-web.mjs — builds the desktop app's window (dist/) from the SAME UI as LordOS's native imager
+// build-web.mjs — builds the desktop app's window (dist/) from the SAME UI as Insane OS's native imager
 // (apps/imager): @lordos/sdk becomes web/sdk.jsx (DOM versions of the few primitives it uses) and
 // apps/imager/platform.js becomes web/platform.js (the Tauri commands). docs/IMAGER.md.
 //

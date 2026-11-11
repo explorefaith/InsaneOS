@@ -518,7 +518,7 @@ int fido_make_credential(int fd, const char *pin, uint8_t *cred, size_t *cred_le
     cbw_uint(&w, 1); cbw_bytes(&w, cdh, 32);
     cbw_uint(&w, 2); cbw_map(&w, 2);
     cbw_text(&w, "id"); cbw_text(&w, FIDO_RP_ID);
-    cbw_text(&w, "name"); cbw_text(&w, "LordOS");
+    cbw_text(&w, "name"); cbw_text(&w, "Insane OS");
     cbw_uint(&w, 3); cbw_map(&w, 3);
     cbw_text(&w, "id"); cbw_bytes(&w, uid, 16);
     cbw_text(&w, "name"); cbw_text(&w, "vault");

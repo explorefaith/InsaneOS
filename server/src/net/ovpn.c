@@ -6,7 +6,7 @@
  * It's saved in /etc/lordos/net/vpn/<name>.ovpn (0600) and the metadata in <name>.json.
  *
  * Connect: a resident process "vpn:<name>" writes the final config (the saved one + the
- * options LordOS sets: interface, management interface over a Unix socket, verb 3,
+ * options Insane OS sets: interface, management interface over a Unix socket, verb 3,
  * script-security 1), launches openvpn and drives it through the management interface: answers
  * user and password (from <name>.auth, 0600), follows the states and applies the DNS the
  * server pushes (OpenVPN on Linux doesn't apply them without scripts; here they're read from PUSH_REPLY). */
@@ -52,7 +52,7 @@ static const char *const allowed[] = {
     NULL,
 };
 static const char *const blocks[] = { "ca", "cert", "key", "tls-auth", "tls-crypt", "tls-crypt-v2", "extra-certs", "peer-fingerprint", NULL };
-/* LordOS sets these: they're removed from the file. */
+/* Insane OS sets these: they're removed from the file. */
 static const char *const replaced[] = { "dev", "verb", "auth-retry", NULL };
 /* Only valid on other operating systems: ignored. */
 static const char *const windows_only[] = { "block-outside-dns", "register-dns", "route-method", "ip-win32", "tap-sleep", NULL };
@@ -237,7 +237,7 @@ void ovpn_run(const char *name) {
     snprintf(conf, sizeof conf, OVPN_RUN "/%s.conf", name);
     unlink(sock);
     Buf c = {0};
-    buf_printf(&c, "%s\n# --- LordOS ---\ndev %s\ndev-type tun\nverb 3\nscript-security 1\nmanagement %s unix\n"
+    buf_printf(&c, "%s\n# --- Insane OS ---\ndev %s\ndev-type tun\nverb 3\nscript-security 1\nmanagement %s unix\n"
                "management-query-passwords\nauth-retry interact\n", stored, ifn, sock);
     int local_full = strstr(stored, "\nredirect-gateway") != NULL || !strncmp(stored, "redirect-gateway", 16);
     memset(stored, 0, strlen(stored));

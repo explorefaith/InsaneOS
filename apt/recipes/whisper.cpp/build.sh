@@ -74,7 +74,7 @@ Description: speech recognition with OpenAI's Whisper models, in C/C++
  "/usr/share/whisper.cpp/download-ggml-model.sh base.en ~/models" and run
  "whisper-cli -m ~/models/ggml-base.en.bin -f audio.wav".
  .
- Built by LordOS from the upstream release $(jq -r .source.tag "$app") (commit $(printf %s "$commit" | cut -c1-12)), CPU
+ Built by Insane OS from the upstream release $(jq -r .source.tag "$app") (commit $(printf %s "$commit" | cut -c1-12)), CPU
  only, with every CPU variant of the architecture. Programs: $bins
 EOF
 build_deb "$r"

@@ -88,7 +88,7 @@ check_account() {         # KIND NAME FIELDS SERVERDIR (where the cloud keeps th
         r=$(cmd link "$D/check.bin" 1d)
         if has "$r" '"url"'; then ok "$kind: make a link"; cmd unlink "$D/check.bin" >/dev/null
         # rclone serve s3 answers with an http:// link, and lord-server keeps only https links (cloud_url_ok)
-        elif [ "$kind" = s3 ] && has "$r" 'cloud.linkFailed'; then ok "$kind: links" "skipped (the stand-in's links are http://, LordOS keeps https only)"
+        elif [ "$kind" = s3 ] && has "$r" 'cloud.linkFailed'; then ok "$kind: links" "skipped (the stand-in's links are http://, Insane OS keeps https only)"
         else bad "$kind: make a link" "$r"; grep -i link "$H/.cache/lordos/cloud.log" 2>/dev/null | tail -2 | cut -c1-300; fi
     else ok "$kind: links" "skipped (the provider has none)"; fi
     step "$kind: delete the file and the folder" sh -c "rm '$D/check.bin' && rmdir '$D'"

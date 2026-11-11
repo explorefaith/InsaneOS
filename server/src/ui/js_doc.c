@@ -445,7 +445,7 @@ static const JSCFunctionListEntry doc_funcs[] = {
 };
 
 void js_doc_register(JSContext *c, JSValue lord) {
-    /* the helper reads LordOS's fonts for Quick Preview and the samples */
+    /* the helper reads Insane OS's fonts for Quick Preview and the samples */
     const char *assets = js_sys_assets();
     if (assets && !getenv("LORD_DOC_FONTS")) {
         char p[PATH_MAX];

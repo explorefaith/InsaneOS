@@ -1,5 +1,5 @@
 /* mmdb.c — our own reader for the MaxMind DB 2.0 format (https://maxmind.github.io/MaxMind-DB/),
- * only what's needed to look up country.iso_code. It works both for LordOS's small file
+ * only what's needed to look up country.iso_code. It works both for Insane OS's small file
  * (assets/monitor/geoip-country.mmdb, built by tools/gen-monitor-data.py) and for the original
  * dbip-country-lite.mmdb.
  *
@@ -217,7 +217,7 @@ int mmdb_open(Mmdb *m, const char *path) {
              fread(buf, 1, (size_t)len, f) == (size_t)len;
     fclose(f);
     size_t n = ok ? (size_t)len : 0;
-    /* .mmdb.xz (LordOS's): decompressed in memory with our own xz (src/pkg/xz.c) */
+    /* .mmdb.xz (Insane OS's): decompressed in memory with our own xz (src/pkg/xz.c) */
     size_t pl = strlen(path);
     if (ok && pl > 3 && !strcmp(path + pl - 3, ".xz")) {
         uint8_t *raw = NULL;

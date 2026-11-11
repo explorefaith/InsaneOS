@@ -147,7 +147,7 @@ export function throttleFlags(v) {
 
 // The Raspberry Pi section's power and throttling rows, as locale keys under sysinfo.pi (null: the kernel
 // doesn't tell, so the row is left out). `throttled` is get_throttled (older kernels only); `underVoltageAlarm`
-// rpi_volt's alarm, the only one the LordOS kernel has. rpi_volt clears the sticky bits every 2 s, so with it
+// rpi_volt's alarm, the only one the Insane OS kernel has. rpi_volt clears the sticky bits every 2 s, so with it
 // they mean "in the last few seconds", never "since boot".
 export function piStatus(pi) {
   if (!pi) return { power: null, throttling: null };

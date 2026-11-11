@@ -1,4 +1,4 @@
-/* lordbench_test.c — LordBench without the helper process (docs/BENCHMARK.md, "0.8.6 — LordBench"): the
+/* lordbench_test.c — InsaneBench without the helper process (docs/BENCHMARK.md, "0.8.6 — InsaneBench"): the
  * records lord-server accepts from lord-bench and from lord-media's video measurement (and the helper-sandbox
  * self-test's), the compositor's frame statistics, short runs of every CPU, memory and storage workload (the
  * UI engine's scene and the shaper's paragraphs with every glyph in the built-in fonts), the
@@ -266,14 +266,14 @@ int main(void) {
     char small[16];
     lbf_phases_text(&ps, small, sizeof small);
     CHECK(strlen(small) == 15, "a short buffer is cut, terminated");
-    lbf_begin();                                        /* LordBench's recorder: its own, read after lbf_end */
+    lbf_begin();                                        /* InsaneBench's recorder: its own, read after lbf_end */
     lbf_phase_built(&a);
     lbf_phase_shown(F0 + P, 0);
     lbf_end(&fs);
     lbf_phase_built(&a);                                /* stopped: ignored */
     lbf_phase_shown(F0 + P, 0);
     lbf_phases(&ps);
-    CHECK(ps.n == 1 && ps.on_time == 1 && ps.gpu_known == 0 && ps.gpu.p50 == 0, "LordBench's phases: %d frames", ps.n);
+    CHECK(ps.n == 1 && ps.on_time == 1 && ps.gpu_known == 0 && ps.gpu.p50 == 0, "InsaneBench's phases: %d frames", ps.n);
     /* a frame the pipeline prepared: painted during the flip before (12 ms), held until that flip, submitted
      * at it in 2 ms and shown at the next vblank: on time, its build is both parts */
     LbPhase e = { .piped = 1, .prev_flip = F0 + 7 * P, .wake = F0 + 6 * P + 100000, .from_flip = 1, .period = (uint32_t)P,
@@ -448,7 +448,7 @@ int main(void) {
           rpifw_parse_throttled("g") < 0 && rpifw_parse_throttled("5\nx") < 0 && rpifw_parse_throttled(NULL) < 0,
           "get_throttled: empty, too long, spaces, signs, other letters and a second line refused");
 
-    /* a Raspberry Pi 5 with the kernel LordOS ships (rpi-6.18.y): no get_throttled, only rpi_volt's alarm (cleared
+    /* a Raspberry Pi 5 with the kernel Insane OS ships (rpi-6.18.y): no get_throttled, only rpi_volt's alarm (cleared
      * by the driver every 2 s); no passive trip */
     LbRpiWatch pw;
     unsigned ev;

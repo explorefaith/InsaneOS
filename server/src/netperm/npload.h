@@ -63,6 +63,6 @@ static inline int np_attach_user(uint32_t attach) { return attach != BPF_CGROUP_
 static inline int np_attach_system(uint32_t attach) { return !np_attach_user(attach); }
 
 /* The license the kernel sees: LSM programs must declare a GPL-compatible one (see bpfsys.h). */
-static inline const char *np_prog_license(const NpProgSpec *p) { return p->type == BPF_PROG_TYPE_LSM ? "Dual MIT/GPL" : "LordOS"; }
+static inline const char *np_prog_license(const NpProgSpec *p) { return p->type == BPF_PROG_TYPE_LSM ? "Dual MIT/GPL" : "Insane OS"; }
 
 #endif

@@ -473,7 +473,7 @@
         "pt": "Formato comercial: abre discos NTFS, exFAT, FAT, HFS+ e APFS. Os drivers são software livre e sem custo"
       },
       "license": "Free software: GPL-2.0, LGPL-2.1, GPL-3.0",
-      "vendor": "LordOS",
+      "vendor": "Insane OS",
       "homepage": "https://lordos.org",
       "arches": ["amd64", "arm64"],
       "kind": "system",

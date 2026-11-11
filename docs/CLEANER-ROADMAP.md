@@ -32,7 +32,7 @@ Last updated 2026-11-01. Released in 0.8.7-beta.
 | Motion budget | Built | Frame times on VM 116 and a Raspberry Pi 5 in `CLEANER-TESTS.md`: 5 to 7 % of a core idle, 12 to 18 % scanning. Aurora's pauses of up to a second while scanning are not explained yet |
 | Bubble view | Built | Glass spheres with an icon per kind of folder. Selecting a folder reviews its large files; no folder action |
 | Similar images | Built | Decoded only in `lord-clean`; JPEG, PNG, GIF and BMP; 20,000 images at most; to the Trash, one image of each group always stays |
-| Apps | Built | Installed apps by size, removed by the package engine or `.lpk` removal, with a row in Activity; leftovers of removed LordOS apps. A real removal of an installed Linux app and its Activity row ran on VM 125 on 2026-10-31 |
+| Apps | Built | Installed apps by size, removed by the package engine or `.lpk` removal, with a row in Activity; leftovers of removed Insane OS apps. A real removal of an installed Linux app and its Activity row ran on VM 125 on 2026-10-31 |
 | System files | Built | Three closed admin actions plus `clean-status`. Not run on the VM; all four ran as root in a throwaway emulated arm64 system on 2026-10-30 |
 | Status word: updates | Built | The panel reads the `lordos` package's state when it opens. The word itself was seen only with that state stubbed: `lordos` isn't a package on the VM |
 | Translated Downloads folders | Built | From `XDG_DOWNLOAD_DIR`, only a `$HOME/…` value that passes as a rule's root |
@@ -64,10 +64,10 @@ Last updated 2026-11-01. Released in 0.8.7-beta.
 - A root that is a symbolic link or a mount is not read: someone with `~/.cache` on another disk gets nothing from those rules.
 - Similar images doesn't cover WebP, HEIC or camera raw files, and ignores EXIF rotation, so a turned copy isn't found. Different screenshots of the same desktop can group together: that is why nothing is selected and every image is shown.
 - A full scan doesn't include similar images: it reads every picture, so it is started on its own.
-- A leftover is only a removed LordOS app's data folder. What a Linux app leaves in `~/.config` or `~/.cache` can't be tied to the app with certainty, so it isn't offered.
+- A leftover is only a removed Insane OS app's data folder. What a Linux app leaves in `~/.config` or `~/.cache` can't be tied to the app with certainty, so it isn't offered.
 - `/tmp` is measured, never offered: which of the files there a program still uses can't be shown, and the Trash can't take them from another disk.
 - An absolute `XDG_DOWNLOAD_DIR` or `XDG_DESKTOP_DIR` isn't followed: those rules then use `~/Downloads` or `~/Desktop`.
-- A `.deb` cache is often empty on LordOS: the package engine deletes its own downloads.
+- A `.deb` cache is often empty on Insane OS: the package engine deletes its own downloads.
 - Closing the app cancels a running job and drops its results. The kept storage map stays, by design.
 - A project's evidence is a name of a file, not proof that it can be built again: that is why outputs are chosen by name and go to the Trash.
 - A scan of another disk removes the kept map and saves none.

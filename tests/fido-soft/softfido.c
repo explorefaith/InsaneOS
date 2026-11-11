@@ -5,7 +5,7 @@
  *
  *   sudo build/softfido [--pin 1234] [--touches 3] [--seed hex32]
  *
- * Crea un dispositivo HID «LordOS Soft FIDO2» (página 0xF1D0) que aparece como /dev/hidrawN.
+ * Crea un dispositivo HID «Insane OS Soft FIDO2» (página 0xF1D0) que aparece como /dev/hidrawN.
  * Habla CTAPHID (INIT, PING, CBOR, CANCEL, KEEPALIVE, ERROR) y CTAP2: getInfo, clientPIN
  * (getRetries, getKeyAgreement, setPIN, getPinToken; protocolo 1), makeCredential y
  * getAssertion con hmac-secret (como CTAP 2.0: un solo CredRandom por credencial).
@@ -459,7 +459,7 @@ int main(int argc, char **argv) {
     struct uhid_event ev;
     memset(&ev, 0, sizeof ev);
     ev.type = UHID_CREATE2;
-    snprintf((char *)ev.u.create2.name, sizeof ev.u.create2.name, "LordOS Soft FIDO2");
+    snprintf((char *)ev.u.create2.name, sizeof ev.u.create2.name, "Insane OS Soft FIDO2");
     snprintf((char *)ev.u.create2.phys, sizeof ev.u.create2.phys, "softfido");
     ev.u.create2.rd_size = sizeof RDESC;
     memcpy(ev.u.create2.rd_data, RDESC, sizeof RDESC);

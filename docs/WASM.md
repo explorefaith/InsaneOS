@@ -1,8 +1,8 @@
-# WebAssembly in LordOS
+# WebAssembly in Insane OS
 
-LordOS ships its own WebAssembly interpreter, written in C with no dependencies. It doesn't use
+Insane OS ships its own WebAssembly interpreter, written in C with no dependencies. It doesn't use
 wasm3, WAMR, V8 or Wasmtime. From JavaScript it is used through the standard `WebAssembly`
-global, just like in a browser, so a native LordOS app (React) can carry modules compiled from
+global, just like in a browser, so a native Insane OS app (React) can carry modules compiled from
 C, C++, Rust or Zig and call them.
 
 | Piece | File |
@@ -102,7 +102,7 @@ The global is the same as in browsers:
   and `buffer` gives a new one, as the specification requires;
 - the memory never moves, so no pointer can be left dangling.
 
-### Example in a LordOS app
+### Example in a Insane OS app
 
 `calc.c`:
 ```c
@@ -205,7 +205,7 @@ Text assertions (`module_type: text`) test wabt's parser, not ours, and aren't c
 
 ## Performance (VM: Xeon Silver 4108 at 1.8 GHz, 1 core of 4 vCPUs)
 
-| Test | wasm (LordOS) | Same code in JS (QuickJS) |
+| Test | wasm (Insane OS) | Same code in JS (QuickJS) |
 |---|---|---|
 | Recursive `fib(30)` (1.6 million calls) | 66–90 ms | 322 ms |
 | Prime sieve up to 2,000,000 | 173–237 ms | 540 ms |
@@ -214,7 +214,7 @@ Text assertions (`module_type: text`) test wabt's parser, not ours, and aren't c
 The range depends on the VM's load, which had other builds running.
 
 Compared with browser engines: an interpreter is 3 to 10 times slower than their JIT compiler,
-which LordOS doesn't have. Even so, wasm beats the same code written in JS on QuickJS by 2 to 3.5
+which Insane OS doesn't have. Even so, wasm beats the same code written in JS on QuickJS by 2 to 3.5
 times. Instantiating `demo.wasm` (2.5 KB, with 2 MB of memory) takes no RAM until the module
 touches that memory.
 
@@ -223,7 +223,7 @@ comparison + `br_if`): it gives 20–40% more in other interpreters.
 
 ## Packages in the VM
 
-Only for building the tests and running the suite; LordOS doesn't need them to work.
+Only for building the tests and running the suite; Insane OS doesn't need them to work.
 
 | Package | What for |
 |---|---|

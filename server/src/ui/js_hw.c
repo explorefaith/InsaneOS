@@ -43,12 +43,12 @@
  *                                               trusts and well formed (sysreport/hwsnap.c); no arguments, no path
  *                                               from JS; state 'ok' | 'missing' | 'unsigned' | 'bad-signature' | 'invalid'
  *   lord.sysinfo.bench.start(mode, sustainedS) / poll() / cancel() / saved(which) / boots()
- *                                               LordBench (bench/lbrun.c, the lord-bench helper): mode
+ *                                               InsaneBench (bench/lbrun.c, the lord-bench helper): mode
  *                                               'quick' | 'full' (then video in lord-media) | 'desktop'
  *                                               (the compositor's frame times, alone and under load);
  *                                               poll() → {state, step, progress, result}; saved(0|1) the
  *                                               last or previous peak result, saved(2|3) the desktop ones;
- *                                               boots() the boot times per LordOS version (lord-sessiond's history);
+ *                                               boots() the boot times per Insane OS version (lord-sessiond's history);
  *                                               bootTest() the boot time test's state or null (bench/boottest.h;
  *                                               started and stopped with the boot-test admin actions)
  *   lord.fan.status() / setProfile(p) / setCurve(pts) / force(v) / caseConfig()   (js_fan.c, lord-fand)
@@ -56,7 +56,7 @@
  *                                               one preference in the user's Chromium/Firefox profiles
  *                                               (hw/brframe.c); which = 'all' | 'chromium' | 'firefox';
  *                                               { chromium: {…}, firefox: {…} } counts
- *   lord.browserFrame.tidy()                    removes LordOS's Firefox user.js line once Firefox read it
+ *   lord.browserFrame.tidy()                    removes Insane OS's Firefox user.js line once Firefox read it
  *   lord.browserFrame.chromiumRunning()         Chromium's profile folder is in use
  *   lord.browserFrame.state()                   { chromiumOn, chromiumOff }: profiles with each frame
  */
@@ -493,7 +493,7 @@ static const JSCFunctionListEntry hwinfo_funcs[] = { JS_CFUNC_DEF("scan", 0, f_h
 
 /* ---- lord.sysinfo (System Information, docs/BENCHMARK.md) ---- */
 
-/* The report of this machine (or of the development fixture), with LordOS's version; NULL on OOM. */
+/* The report of this machine (or of the development fixture), with Insane OS's version; NULL on OOM. */
 static SysReport *sysinfo_collect(void) {
     SysReport *r = malloc(sizeof *r);
     if (!r) return NULL;
@@ -599,7 +599,7 @@ static JSValue f_sysinfo_community(JSContext *c, JSValueConst t, int argc, JSVal
     return o;
 }
 
-/* ---- lord.sysinfo.bench (LordBench) ---- */
+/* ---- lord.sysinfo.bench (InsaneBench) ---- */
 
 /* what a result records about this session: how the screen is composed and each active display's
  * connector, mode, refresh, scale and rotation (no names, vendors or identities) */

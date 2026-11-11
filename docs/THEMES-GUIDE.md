@@ -1,6 +1,6 @@
-# How to build a LordOS appearance (theme)
+# How to build a Insane OS appearance (theme)
 
-This guide is for a React developer who has never seen LordOS. It explains what a theme is, what it
+This guide is for a React developer who has never seen Insane OS. It explains what a theme is, what it
 must provide, the SDK pieces it builds on, how it is built and loaded, and what to check before
 sharing it. Everything here is checked against the current code; file references point to where
 each piece lives. A small working starting point is in [`examples/theme-minimal/`](../examples/theme-minimal/).
@@ -9,8 +9,8 @@ Read first, if you can: [`themes/README.md`](../themes/README.md) (the short ref
 events and the supported style subset), [DESIGN.md](DESIGN.md) (tokens and the shared controls),
 [LAYERS.md](LAYERS.md) (stacking order) and [WINDOWS.md](WINDOWS.md) (moving and resizing).
 
-> **Today a theme only runs on a development build of LordOS.** A release build loads only JavaScript
-> that is listed in LordOS's signed code manifest, and a theme you build yourself is not in it. See
+> **Today a theme only runs on a development build of Insane OS.** A release build loads only JavaScript
+> that is listed in Insane OS's signed code manifest, and a theme you build yourself is not in it. See
 > [Verified code](#verified-code-what-happens-to-a-theme-that-lordos-did-not-sign) for exactly what happens and what
 > would be needed.
 
@@ -50,23 +50,23 @@ its own layout (for example what the Super key alone does).
 
 | Theme | Folder | Layout |
 |---|---|---|
-| Lord Flow | `themes/default` | menu bar on top (with the app's menus), magnifying Dock, app launcher, Control Center |
-| Lord Classic | `themes/classic` | taskbar (bottom, top or a side), start menu with search, quick settings, notification panel, menus in each window, snapping and the SDK's Overview |
+| Insane Flow | `themes/default` | menu bar on top (with the app's menus), magnifying Dock, app launcher, Control Center |
+| Insane Classic | `themes/classic` | taskbar (bottom, top or a side), start menu with search, quick settings, notification panel, menus in each window, snapping and the SDK's Overview |
 
 `themes/greeter` is the login and lock screen: it is a separate program, not a desktop theme (see
 [The login and lock screen](#the-login-and-lock-screen-are-not-your-theme)).
 
 **Switching.** The user switches themes live from **Settings → Appearance → Desktop style**, which
 since 0.8.5 lists every installed theme (the only place to choose one; `StylePicker` in
-`apps/settings/index.jsx`). Lord Flow and Lord Classic come first, the others by name; a theme with
+`apps/settings/index.jsx`). Insane Flow and Insane Classic come first, the others by name; a theme with
 `"hidden": true` in its `theme.json` is not listed. Switching discards the JavaScript context and
 loads the new bundle (`themes.use` in `sdk/index.js`, `lord.themes.use` in `server/src/ui/js_sys.c`,
-`switch_theme` in `server/src/main.c`): the LordOS app windows that were open (up to 8) reopen in
+`switch_theme` in `server/src/main.c`): the Insane OS app windows that were open (up to 8) reopen in
 the new theme with their frames, and Linux windows stay connected and get the new frame. The
 choice is stored as `theme` in `~/.config/lordos/settings.json`.
 
 How a session starts: `lord-sessiond` always starts `lord-server` with
-`--theme <LordOS folder>/themes/default/theme.bundle.js` (`server/src/remote/sessiond.c`,
+`--theme <Insane OS folder>/themes/default/theme.bundle.js` (`server/src/remote/sessiond.c`,
 `sess.c`); the default theme's `startShell()` sees that the user chose another one and switches to
 it at once. If the chosen theme can't be loaded, the session stays on the theme it came from.
 
@@ -102,7 +102,7 @@ The theme's **id is its folder name**: letters, digits, `-` and `_`, at most 64 
 
 Every app reads its colors with `useTheme()` (`sdk/theme.js`), so it looks right in any theme. The
 theme passes its tokens to `<ThemeProvider tokens={…}>`; whatever it leaves out falls back to
-`DEFAULT_TOKENS` (Lord Flow's dark colors), and its own extra keys pass through untouched. Isolated
+`DEFAULT_TOKENS` (Insane Flow's dark colors), and its own extra keys pass through untouched. Isolated
 apps (their own processes) receive the same tokens through the broker, and Linux apps get the mode,
 the accent and the title-bar button order through the settings portal (`publishTokens` and
 `syncPortal` in `sdk/theme.js`). So the tokens must be plain JSON values (no functions).
@@ -131,7 +131,7 @@ the accent and the title-bar button order through the settings portal (`publishT
   `naranja`, `verde`, `grafito`) so the user's choice survives a switch; `syncPortal` maps them to
   the portal's accent names.
 - `wallpapers`: `[{ id, nameKey, name, src, thumb?, category?, variants? }]` for Settings →
-  Wallpaper; `lordosWallpapers` from the SDK is the LordOS collection
+  Wallpaper; `lordosWallpapers` from the SDK is the Insane OS collection
   (`assets/wallpapers/README.md`).
 - Shape tokens for the shared controls: `controlRadius`, `controlRadiusSmall`, `groupRadius`,
   `menuRadius`, `menuItemRadius`, `menuHighlight` (`'accent'`|`'subtle'`), `selection`
@@ -188,7 +188,7 @@ startShell(<App />);
 - `chrome: { w, h }`: how much the frame adds around the content (borders plus title bar), so a
   Linux window opens at the size it asked for.
 - `snap: true`: window snapping (drag to the edges, `wm.snap`, `wm.snapKey`, the `snapPreview`
-  store to draw the preview; [WINDOWS.md](WINDOWS.md#snapping-083)). Lord Classic turns it on.
+  store to draw the preview; [WINDOWS.md](WINDOWS.md#snapping-083)). Insane Classic turns it on.
 
 **`startShell(element)`** (`sdk/index.js`): switches to the user's theme if it isn't this one, turns
 the layers on, reopens the windows after a theme switch, renders your element inside a root that
@@ -219,7 +219,7 @@ Inside it:
 - a title bar whose `onMouseDown` calls **`wm.beginMove(w.id)`**. Moving and resizing are then done
   by `lord-server` in C (`server/src/ui/grab.c`): React gets no event per frame, and the moving
   window is painted from a cached layer ([WINDOWS.md](WINDOWS.md)). `beginMove` returns `false` when
-  it can't (a maximized window, no button held); Lord Classic then drags out of the maximized place
+  it can't (a maximized window, no button held); Insane Classic then drags out of the maximized place
   in JS with `wm.move`;
 - **`<AppHost id={w.id} focused={…} />`** for the content, in a `flex: 1` box;
 - no background under the content when `getApp(w.id).transparent` (the Terminal). Such a window has
@@ -248,10 +248,10 @@ The SDK gives menus as **item lists**; the theme draws them. An item is
 | `windowMenuItems(winId)` | the Window menu, the same in every theme: Minimize, Zoom, Fill, Center, Move & Resize (halves, quarters, thirds, arrangements), Move to *display*, Bring All to Front, the window list (`sdk/windowmenu.js`) |
 | `dockMenu(entry)` | a Dock or taskbar item's context menu |
 | `trashMenu({ onEmpty })` | the Trash's menu |
-| `recentItems(n)`, `storeUpdates()`, `runningApps()`, `forceQuit(key)`, `appGroup(winId)` | for a system menu like Lord Flow's crown menu |
+| `recentItems(n)`, `storeUpdates()`, `runningApps()`, `forceQuit(key)`, `appGroup(winId)` | for a system menu like Insane Flow's crown menu |
 
-Where they go is the theme's choice: Lord Flow shows the app menus in its top menu bar
-(`themes/default/components/MenuBar.jsx`), Lord Classic in a strip under each window's title bar
+Where they go is the theme's choice: Insane Flow shows the app menus in its top menu bar
+(`themes/default/components/MenuBar.jsx`), Insane Classic in a strip under each window's title bar
 (`themes/classic/components/Window.jsx`). A theme without either must still give the app's menus a
 place, or the apps lose commands. Each bundled theme has its own `components/Menu.jsx` that puts the
 menu in the `popover` layer.
@@ -289,9 +289,9 @@ drag image and the "poof"). The Trash: `useTrash()`, `openTrash()`, `emptyTrash(
 
 There are no ready-made panels in the SDK: each theme draws its own from SDK stores and controls.
 
-- **App launcher / start menu:** `useLauncherApps()` (LordOS apps and installed Linux apps, sorted by
+- **App launcher / start menu:** `useLauncherApps()` (Insane OS apps and installed Linux apps, sorted by
   name, with `name`, `Icon`, `kind`), `launchApp(id)`, `appCategory(app)`, `APP_CATEGORIES`;
-  system-wide search results from `searchEverything` (Lord Classic's start menu).
+  system-wide search results from `searchEverything` (Insane Classic's start menu).
 - **Control Center / quick settings:** `Toggle`, `Slider`, `Segmented`; `useSound`, `sound`,
   `defaultSink`; `useBluetooth`; `useBattery`, `BatteryGlyph`; `nightActive`, `setNightManual`;
   `notifyPrefs`, `dndActive` (Do Not Disturb); `NowPlayingTile`; `useCpuUsage`, `useSystemInfo`;
@@ -347,7 +347,7 @@ With Arabic or Hebrew the engine flips rows and alignment by itself. Your part
 - The accent comes as a name (`settings.accent`) mapped through your `accents`.
 - `settings.effects === false` means "no transparency": draw opaque bars and `blur: 0`.
 - **Reduce motion** (`settings.reduceMotion`, also `useTheme().reduceMotion`): skip decorative
-  animation (both themes skip the Dock's "poof" when an item is removed, Lord Flow also the Dock's
+  animation (both themes skip the Dock's "poof" when an item is removed, Insane Flow also the Dock's
   reorder glide; `ScrollView` stops fading).
 
 ### Several displays
@@ -356,12 +356,12 @@ Use `screenDisplays()` (`[{ id, name, x, y, w, h, scale, main }]`), `mainDisplay
 `displayAt(x, y)`, `displayFor(rect)` and `screen.mirror` ([DISPLAYS.md](DISPLAYS.md#the-theme-and-the-sdk)).
 The bundled themes draw a wallpaper per display at its pixel size
 (`wallpaperSrc(w, d.w * d.scale / 100, d.h * d.scale / 100)`), and put the Dock on the main display.
-Lord Flow draws a menu bar on every display (`<MenuBars>` in `themes/default/components/MenuBar.jsx`;
+Insane Flow draws a menu bar on every display (`<MenuBars>` in `themes/default/components/MenuBar.jsx`;
 off with `settings.menuBarAllDisplays === false`, read it with `menuBarEveryDisplay(settings)`):
 `barDisplays`, `hasBar`, `activeBarId`, `pinBar` and `panelLeft` (`sdk/menubarmodel.js`) say which
 displays get a bar, which work areas reserve it, which bar has the app's menus lit and where a panel
 opens; `sharedTicker` (`sdk/ticker.js`) gives every bar's clock one timer; `spotlight.toggle(display)`
-opens Search on that display. Lord Classic draws a taskbar on every display under the same setting
+opens Search on that display. Insane Classic draws a taskbar on every display under the same setting
 (`themes/classic/placement.js`; each bar registers its own `registerDockTarget`, and a drop goes to the first
 bar that is hit). Your `workArea` function receives each display; `workAreaOf(d)` and
 `pointerWorkArea()` read it back. New windows open on the display under the pointer, or the one the
@@ -379,7 +379,7 @@ Linux apps. A slow theme makes the whole desktop slow.
   it with reduce motion. `lord.setStyle` takes the engine's own keys (`rotate` in degrees, `scaleX`,
   `scaleY`), not a CSS `transform` string: an unknown key changes nothing and is logged once.
 - **`transform` scale and rotate are cheap**: the subtree is painted once into a cached raster and
-  composited (Lord Flow's minimize effect scales a whole window).
+  composited (Insane Flow's minimize effect scales a whole window).
 - **Blur costs**: `backdropFilter: blur(r)` reads a margin of 2×r around the surface, and any change
   touching it repaints the whole surface ([LAYERS.md](LAYERS.md#blurred-surfaces-and-partial-repaints)).
   Keep blurred surfaces few and small, and turn blur off with `effects: false`.
@@ -395,7 +395,7 @@ Linux apps. A slow theme makes the whole desktop slow.
 ### Images, fonts and other files
 
 `<Image src="assets/x.png">` is resolved against the theme's folder; `asset:wallpapers/…` against
-LordOS's `assets/`; an absolute path as is (`server/src/ui/js.c`). PNG and JPEG. Text uses the
+Insane OS's `assets/`; an absolute path as is (`server/src/ui/js.c`). PNG and JPEG. Text uses the
 bundled Inter (400/500/600/700). The `.deb` packaging copies only `theme.json`, `theme.bundle.js`
 and `assets/` of each theme (`tools/iso/mkdeb.sh`), so keep your files there.
 
@@ -405,9 +405,9 @@ Visible text goes through `t('namespace.key')` ([LANGUAGES.md](LANGUAGES.md)); a
 `appName(app)`, dates and times through `formatDate`/`formatTime`. The bundled themes' strings are in
 the `shell` catalog (`assets/locales/{en,es,pt}/shell.json`). A theme of your own can reuse existing
 `shell.*` keys (the example does) or bring its own namespace: `lord.locale.catalog` reads
-`<lang>/<namespace>.json` from `~/.local/share/lordos/locales/` first and then LordOS's
+`<lang>/<namespace>.json` from `~/.local/share/lordos/locales/` first and then Insane OS's
 `assets/locales/` (`f_locale_catalog` in `js_sys.c`). A missing key shows the key itself. Inside the
-LordOS tree, `node tools/i18n-check.mjs` checks every `t()` key in `themes/` against the English
+Insane OS tree, `node tools/i18n-check.mjs` checks every `t()` key in `themes/` against the English
 catalog and every language against English.
 
 ## 3. Building it
@@ -429,25 +429,25 @@ bundle is 1.5–1.8 MB and why every theme carries the same apps. Apps with `"pr
 (`isolatedApp` in `sdk/packages.js`).
 
 The tool only builds folders under `themes/` of the tree it lives in: there is no option for a theme
-elsewhere, so a theme is developed inside a LordOS development tree (copy it to `themes/<id>`).
+elsewhere, so a theme is developed inside a Insane OS development tree (copy it to `themes/<id>`).
 
 After building, it rewrites **`code-manifest.json`** at the tree's root (`tools/code-manifest.mjs`):
 the size and SHA-256 of every `themes/*/theme.bundle.js`, `assets/app-host.bundle.js` and
 `assets/sysapps/*/app.js`. If the manifest changed, a `code-manifest.sig` next to it is deleted (it
 signed the old one).
 
-### Verified code: what happens to a theme that LordOS did not sign
+### Verified code: what happens to a theme that Insane OS did not sign
 
-LordOS's own JavaScript is checked before it runs ([SIGNING.md](SIGNING.md#verified-system-code-082)).
+Insane OS's own JavaScript is checked before it runs ([SIGNING.md](SIGNING.md#verified-system-code-082)).
 Every bundle goes through `codesig_load` (`server/src/sec/codesig.c`, called from `load_code` in
 `server/src/ui/js.c`): once per process `lord-server` reads `code-manifest.json` and
-`code-manifest.sig` from the LordOS folder (`/usr/lib/lordos` installed, the repository root in a
+`code-manifest.sig` from the Insane OS folder (`/usr/lib/lordos` installed, the repository root in a
 development tree) and verifies the signature with the release key compiled into it. Then, per
 bundle:
 
-| `lord-server` build | Manifest in the LordOS folder | A `themes/<id>/theme.bundle.js` that is not listed |
+| `lord-server` build | Manifest in the Insane OS folder | A `themes/<id>/theme.bundle.js` that is not listed |
 |---|---|---|
-| **Release** (`make -C server RELEASE=1`; the published images and `.deb`) | signed by LordOS | **refused**: `code: REFUSED themes/<id>/theme.bundle.js: not listed in the manifest` |
+| **Release** (`make -C server RELEASE=1`; the published images and `.deb`) | signed by Insane OS | **refused**: `code: REFUSED themes/<id>/theme.bundle.js: not listed in the manifest` |
 | Release | missing, unsigned, or a bad signature | **everything is refused** (state "invalid"): the recovery screen |
 | Development (`make -C server`) | none | **loads** (About says "Development build") |
 | Development | unsigned (what `npm run build` writes) | **refused unless listed**: the hashes are still checked, so rebuild with `npm run build` / `build-theme.mjs` to list it |
@@ -457,16 +457,16 @@ So on an installed release system, copying a theme into `/usr/lib/lordos/themes/
 root anyway) makes it **appear** in Settings → Appearance → Desktop style (the list only looks for a
 readable `theme.bundle.js`), but choosing it does nothing visible except a notice: the switch is
 refused, `lord-server` reloads the theme it was on (`switch_theme`), the session shows the sticky
-notification "This LordOS component was modified and was not loaded" naming the file
+notification "This Insane OS component was modified and was not loaded" naming the file
 (`sdk/codesig.js`), and choosing it again in that session does nothing (`ui.theme_failed`). Because `theme` was already
 saved in the settings, the same happens once at every login. **Do not** try to make it load by
 regenerating the installed manifest: on a release build an unsigned or changed manifest invalidates
-all of LordOS's code and leaves only the recovery screen.
+all of Insane OS's code and leaves only the recovery screen.
 
-A bundle outside the LordOS folder (for example `lord-server --theme /home/me/x/theme.bundle.js`)
+A bundle outside the Insane OS folder (for example `lord-server --theme /home/me/x/theme.bundle.js`)
 is run only when the state is "development" (a development build with no manifest or an unsigned
 one), logged as `code: … loaded unchecked (outside …, development build)`; otherwise it is refused
-with "not part of LordOS's system code".
+with "not part of Insane OS's system code".
 
 **Third-party themes can't run on release builds today.** That is deliberate for now: a theme is not
 sandboxed. It runs inside `lord-server`, in the same JavaScript context as every native app, with
@@ -475,7 +475,7 @@ and it sees the desktop's keyboard and pointer input. It also carries its own co
 including the code that shows the permission prompts and records the answers (`lord.perms.set`,
 `server/src/ui/js_sec.c`), so a theme decides what those prompts do. Supporting
 them would need, at least: a theme package format and a separate, user-confirmed trust decision
-(signed like `.lpk` packages, [SIGNING.md](SIGNING.md), not the LordOS release key), a place for
+(signed like `.lpk` packages, [SIGNING.md](SIGNING.md), not the Insane OS release key), a place for
 user-installed themes that the code check knows about, and probably a narrower API for theme code
 than what built-in code gets. None of that exists yet.
 
@@ -489,7 +489,7 @@ holds the running theme's folder (`themes_root` in `js_sys.c`); there is no per-
 **Trying one in a development session** (a development build of `lord-server`, see the table
 above):
 
-1. Put the theme in `themes/<id>` of your LordOS tree and run `node tools/build-theme.mjs <id>` (or
+1. Put the theme in `themes/<id>` of your Insane OS tree and run `node tools/build-theme.mjs <id>` (or
    `npm run build`).
 2. Copy the tree to the VM and build `lord-server` as in [VM-SETUP.md](VM-SETUP.md), step 6 (`themes/`
    and `assets/` with `server/`). Copy `code-manifest.json` too, or none at all: a stale manifest
@@ -502,8 +502,8 @@ above):
    There is no hot reload.
 
 A theme that throws while its bundle is evaluated makes the switch fall back to the theme you came
-from (`lord-server: the theme failed, going back to …`); the error is in the log. Keep Lord Flow or
-Lord Classic installed: they are the fallback (`start_theme` in `main.c`).
+from (`lord-server: the theme failed, going back to …`); the error is in the log. Keep Insane Flow or
+Insane Classic installed: they are the fallback (`start_theme` in `main.c`).
 
 **Debugging.**
 
@@ -522,7 +522,7 @@ Lord Classic installed: they are the fallback (`start_theme` in `main.c`).
 
 Check each item on a real session and take a screenshot ([VM-SETUP.md](VM-SETUP.md), `screendump`):
 
-- **Both kinds of window:** LordOS apps (the Terminal for a transparent one, Settings, Files) and
+- **Both kinds of window:** Insane OS apps (the Terminal for a transparent one, Settings, Files) and
   Linux apps with and without their own frame (`args.csd`), including the window menu from a right
   click on an app's own bar, and an app opening at the size it asked for (`chrome`).
 - **Menus:** every app's menus are reachable (`useAppMenus`), the Window menu works, menus never open
@@ -540,7 +540,7 @@ Check each item on a real session and take a screenshot ([VM-SETUP.md](VM-SETUP.
 - **The work area follows the bar and the Dock** (position, size, auto-hide) live.
 - **Performance:** dragging and resizing stay smooth with your blur; nothing re-renders per frame
   when idle (no `requestAnimationFrame` loop left running).
-- **Theme switch both ways** with windows open: they come back in your theme, and back in Lord Flow.
+- **Theme switch both ways** with windows open: they come back in your theme, and back in Insane Flow.
 - **The login and lock screen** are the system's (`themes/greeter`): nothing in your theme should
   try to imitate them.
 - **Notifications, search, permission prompts and the power dialog** look right inside your

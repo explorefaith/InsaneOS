@@ -1,4 +1,4 @@
-/* lbwork.h — LordBench's CPU, memory and storage workloads (docs/BENCHMARK.md, "Workloads"). Pure
+/* lbwork.h — InsaneBench's CPU, memory and storage workloads (docs/BENCHMARK.md, "Workloads"). Pure
  * computation on memory the caller gives or allocates, plus one fd for storage: no paths, no network.
  * Used by lord-bench (lbmain.c) and tested in tests/lordbench_test.c. Each returns a rate (higher is
  * better) or, for latency, nanoseconds; a value < 0 means it could not run (out of memory, an I/O error). */

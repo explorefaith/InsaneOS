@@ -1,4 +1,4 @@
-// packages.js — native LordOS apps installed as a package (.lpk; see docs/NATIVE-APPS.md).
+// packages.js — native Insane OS apps installed as a package (.lpk; see docs/NATIVE-APPS.md).
 //
 // A package brings its app already bundled (tools/lpk.mjs) without React or the SDK inside: it uses
 // the theme's, which are shared here through globalThis.__lordos.require(). The app is only loaded

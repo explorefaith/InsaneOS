@@ -1,4 +1,4 @@
-/* net.h — LordOS's own networking and VPN (see docs/NETWORK.md).
+/* net.h — Insane OS's own networking and VPN (see docs/NETWORK.md).
  *
  * Two sides:
  *  - lord-server (no root): reads the state with rtnetlink (interfaces, addresses, routes,

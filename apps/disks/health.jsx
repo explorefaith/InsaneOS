@@ -5,7 +5,7 @@
 // temperature and its limits, SSD wear, power-on hours and cycles, reallocated and pending
 // sectors, every attribute with a plain name, the error log, the SCT temperature history and
 // self-tests (short/long) with progress — all through the root helper's closed smart-* actions.
-// Without it, LordOS's own reader (disk-smart) gives the basic health, and the card offers to
+// Without it, Insane OS's own reader (disk-smart) gives the basic health, and the card offers to
 // install smartmontools with the package engine (pkg-install, an administrator), like Settings →
 // Sharing does for SSH.
 import {
@@ -23,7 +23,7 @@ function ownAttrName(tr, id) { return KNOWN.includes(id) ? tr(`disks.attr.a${id}
 // smartctl attribute: our plain name when we have one, else smartctl's own (from its drive database)
 function attrName(tr, a) { return a.key ? tr(`disks.attr.${a.key}`) : prettyAttrName(a.name) || tr('disks.attr.unknown', { id: a.id }); }
 
-// LordOS's own reader (no smartmontools): summary and ATA attributes
+// Insane OS's own reader (no smartmontools): summary and ATA attributes
 function readOwn(name) {
   const res = { summary: null, attrs: [] };
   const t0 = Date.now();
@@ -366,7 +366,7 @@ function nvmeRows(tr, n) {
   ].filter(([, v]) => v != null);
 }
 
-// LordOS's own reader's attribute list (no smartmontools)
+// Insane OS's own reader's attribute list (no smartmontools)
 function OwnAttrs({ attrs }) {
   const t = useTheme();
   const tr = useTr();

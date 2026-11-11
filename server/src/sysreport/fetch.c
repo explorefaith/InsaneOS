@@ -205,7 +205,7 @@ char *fetch_render(const SysReport *r, const FetchLive *l, FetchColor c) {
     int n = 0;
     char v[256], a[96], b2[96];
 
-    snprintf(v, sizeof v, "LordOS %s%s%s%s", r->sw.lordos, r->sw.os[0] ? " (" : "", r->sw.os, r->sw.os[0] ? ")" : "");
+    snprintf(v, sizeof v, "Insane OS %s%s%s%s", r->sw.lordos, r->sw.os[0] ? " (" : "", r->sw.os, r->sw.os[0] ? ")" : "");
     n = add(ls, n, "OS", v);
     const SrMachine *m = &r->machine;
     snprintf(v, sizeof v, "%s%s%s", m->vendor, m->vendor[0] && m->product[0] ? " " : "", m->product);
@@ -265,7 +265,7 @@ char *fetch_render(const SysReport *r, const FetchLive *l, FetchColor c) {
     /* the title: user@host (or the product) and a rule under it */
     char title[160];
     if (l->user[0] && l->host[0]) snprintf(title, sizeof title, "%s@%s", l->user, l->host);
-    else snprintf(title, sizeof title, "LordOS");
+    else snprintf(title, sizeof title, "Insane OS");
     /* title, rule, the lines, and with color a blank line and the palette; at least the crown's height */
     int rows = n + (c == FETCH_PLAIN ? 2 : 4);
     if (rows < (CROWN_H + 1) / 2) rows = (CROWN_H + 1) / 2;

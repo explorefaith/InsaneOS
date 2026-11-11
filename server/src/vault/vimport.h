@@ -10,7 +10,7 @@
  *   - Bitwarden JSON (unencrypted) and CSV.
  *   - Chrome and other Chromium-based browsers, Firefox, and the generic
  *     Title,URL,Username,Password,Notes,OTPAuth CSV of other password managers.
- *   - LordOS own CSV (the one exp_csv writes).
+ *   - Insane OS own CSV (the one exp_csv writes).
  * The parsers are robust against broken or malicious files ("fuzz-ish" tests in tests/). */
 #ifndef LORD_VAULT_VIMPORT_H
 #define LORD_VAULT_VIMPORT_H
@@ -66,7 +66,7 @@ int  imp_parse(int kind, const uint8_t *data, size_t len, const char *password,
                const uint8_t *keyfile, size_t kflen, ImpList *l);
 void imp_free(ImpList *l);           /* wipes and frees everything (including l->v) */
 
-/* LordOS own CSV (IMP_LORD_CSV), with header; entries as in ImpList. *out in smem. */
+/* Insane OS own CSV (IMP_LORD_CSV), with header; entries as in ImpList. *out in smem. */
 int  exp_csv(const ImpList *l, char **out, size_t *outlen);
 
 /* Shared utilities */

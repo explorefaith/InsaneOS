@@ -46,6 +46,9 @@ export const closeFileFd = (f) => { if (f && typeof f === 'object' && f.fd >= 0)
 const waiting = new Map();
 const listeners = new Set();
 let fast = null, slow = null;
+// Idle backoff (see vault.js): a stalled reply otherwise keeps the 12 ms poller spinning forever.
+let lastAct = 0, fastPeriod = 12;
+const MAIL_FAST_MS = 12, MAIL_BACKOFF_MS = 60, MAIL_BACKOFF_AFTER = 10000;
 
 function dispatch(m) {
   if (m.type === 'evt') {
@@ -68,8 +71,17 @@ function dispatch(m) {
 function pump() {
   let list = null;
   try { list = lord.mail.poll(); } catch (e) { list = null; }
-  if (Array.isArray(list)) for (const m of list) dispatch(m);
+  if (Array.isArray(list)) {
+    for (const m of list) dispatch(m);
+    if (list.length) {
+      lastAct = Date.now();
+      if (fast && fastPeriod !== MAIL_FAST_MS) { clearInterval(fast); fast = setInterval(pump, MAIL_FAST_MS); fastPeriod = MAIL_FAST_MS; }
+    }
+  }
   if (!waiting.size && fast) { clearInterval(fast); fast = null; }
+  else if (fast && lastAct && Date.now() - lastAct > MAIL_BACKOFF_AFTER && fastPeriod !== MAIL_BACKOFF_MS) {
+    clearInterval(fast); fast = setInterval(pump, MAIL_BACKOFF_MS); fastPeriod = MAIL_BACKOFF_MS;
+  }
 }
 
 function startSlow() { if (!slow && has()) slow = setInterval(pump, 500); }
@@ -85,7 +97,9 @@ export function mailRequest(op, args = {}, { files } = {}) {
   startSlow();
   return new Promise((resolve, reject) => {
     waiting.set(id, { resolve, reject });
-    if (!fast) fast = setInterval(pump, 12);
+    lastAct = Date.now();
+    if (!fast) { fast = setInterval(pump, MAIL_FAST_MS); fastPeriod = MAIL_FAST_MS; }
+    else if (fastPeriod !== MAIL_FAST_MS) { clearInterval(fast); fast = setInterval(pump, MAIL_FAST_MS); fastPeriod = MAIL_FAST_MS; }
   });
 }
 
@@ -323,7 +337,7 @@ function fixDavAccounts(cfg) {
 }
 
 // lord-maild asks for each account's password once (need-auth). When the session keyring is not open
-// yet (automatic login, a login password changed outside LordOS, or lord-maild asking before
+// yet (automatic login, a login password changed outside Insane OS, or lord-maild asking before
 // lord-vault finished opening it at login), the accounts wait here: the system keyring prompt is
 // shown once, and every waiting account is answered as soon as the keyring opens, from that prompt,
 // a screen unlock with the password or the login itself (issue #63: before, the password was taken

@@ -5,7 +5,7 @@
 //   { id: <typed Dock id>, f: { x, y, w, h }, max?: 1, min?: 1, snap?: <zone>, desk?: n, args?: {…} }
 // (desk: the window's position in the list of desktops, left out for the first).
 // Nothing else ever enters it: no Exec line, argv, environment, pid, title or Linux document path.
-// args exist only for LordOS apps, only the fields below, and never "nonce" (wm.open adds a new one).
+// args exist only for Insane OS apps, only the fields below, and never "nonce" (wm.open adds a new one).
 // The file can be edited by any program the user runs, so all of it is checked again when it is read.
 import { parseDockId } from './dockmodel.js';
 import { MAX_DESKTOPS } from './desktopmodel.js';
@@ -19,7 +19,7 @@ export const NEVER = ['forcequit', 'appabout', 'installer', 'sysprobe', 'screens
 
 const text = (v) => typeof v === 'string' && v.length > 0 && v.length <= 80 && /^[A-Za-z0-9._:-]+$/.test(v);
 const path = (v) => typeof v === 'string' && v.length > 1 && v.length <= 1024 && /^[/~]/.test(v) && !v.includes('\0');
-// Per LordOS app, the args it reads as "what this window shows" and how each must look. An app or a
+// Per Insane OS app, the args it reads as "what this window shows" and how each must look. An app or a
 // field that isn't here reopens without them: a Store install request, a Help tour or a Mail draft
 // is an action that already happened, not a state.
 const ARGS = {

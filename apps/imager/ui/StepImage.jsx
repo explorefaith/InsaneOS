@@ -1,6 +1,6 @@
-// Step 2 — the system image: the latest LordOS release (signed; downloaded and cached, resumable),
+// Step 2 — the system image: the latest Insane OS release (signed; downloaded and cached, resumable),
 // an older one, or a file of the user's own (with a clear warning: nobody vouches for it).
-import { View, Text, Button, LordOSLogo, useTheme, useLocale, formatDate, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Button, InsaneLogo, useTheme, useLocale, formatDate, typeScale, spacing } from '@lordos/sdk';
 import { useState } from 'react';
 import { platform } from '../platform.js';
 import { app, set, loadReleases, officialImage, setOptions } from '../state.js';
@@ -15,12 +15,12 @@ function ReleaseCard({ r, selected, latest }) {
   const cached = platform.isCached(r.tag, r.image);
   const partial = !cached && platform.partialSize(r.tag, r.image);
   return (
-    <Card id={`rel-${r.tag}`} label={`LordOS ${r.version}`} selected={selected} onClick={() => set({ image: officialImage(r) })}
+    <Card id={`rel-${r.tag}`} label={`Insane OS ${r.version}`} selected={selected} onClick={() => set({ image: officialImage(r) })}
       style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.l }}>
-      <LordOSLogo size={44} />
+      <InsaneLogo size={44} />
       <View style={{ flex: 1, gap: 3 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <Text style={{ fontSize: typeScale.headline, fontWeight: 600, color: t.text }}>{`LordOS ${r.version}`}</Text>
+          <Text style={{ fontSize: typeScale.headline, fontWeight: 600, color: t.text }}>{`Insane OS ${r.version}`}</Text>
           {latest ? <Badge tone="info">{tr('imager.image.latest')}</Badge> : null}
           {r.prerelease ? <Badge tone="warn">{tr('imager.image.beta')}</Badge> : null}
         </View>

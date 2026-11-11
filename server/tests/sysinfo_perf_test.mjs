@@ -1,4 +1,4 @@
-// sysinfo_perf_test.mjs — LordBench's model (apps/sysinfo/perf.js, 0.8.6): ratios against the reference
+// sysinfo_perf_test.mjs — InsaneBench's model (apps/sysinfo/perf.js, 0.8.6): ratios against the reference
 // machines, category means, the stability and compatibility verdicts, comparisons with the previous
 // result and the conditions that differ. Run by tests/run_suites.sh (needs node).
 import { CATEGORIES, DESKTOP_CATEGORIES, SANDBOX_TRIES, ENGINE_IDS, desktopVerdict, REFERENCES, ratio, categoryRatios, comparableReferences, stability, compatibilityVerdict, conditionDiffs, changes, sustainedSeries, refreshBudget, fileName, piFirmware } from '../../apps/sysinfo/perf.js';
@@ -27,7 +27,7 @@ eq('32 measurements, no repeats', [ids.length, new Set(ids).size], [32, 32]);
 eq('references have every measurement or say it was not measured', REFERENCES.every((r) => ids.every((id) => (r.results[id] && r.results[id].value > 0) !== (r.notMeasured || []).includes(id))), true);
 
 near('×2 SHA', ratio(res(), ref, 'cpu.sha256.1'), 2);
-// the engine's own workloads compare only within one LordOS version
+// the engine's own workloads compare only within one Insane OS version
 const engRef = { lordbench: 1, results: { 'cpu.ui.1': { value: 20, lordos: '0.8.6' }, 'cpu.sha256.1': { value: 50 } } };
 const engRes = (v) => res({ lordos: v, results: { 'cpu.ui.1': { value: 40 }, 'cpu.sha256.1': { value: 100 } } });
 near('engine id, same version', ratio(engRes('0.8.6'), engRef, 'cpu.ui.1'), 2);
@@ -39,7 +39,7 @@ eq('missing on one side', ratio(res(), ref, 'gpu.scene'), null);
 const cr = categoryRatios(res(), ref);
 near('CPU: geometric mean of ×2 and ×4', cr.cpu, Math.sqrt(8));
 eq('no GPU numbers: null', cr.gpu, null);
-eq('only the same LordBench version', comparableReferences({ lordbench: 99 }).length, 0);
+eq('only the same InsaneBench version', comparableReferences({ lordbench: 99 }).length, 0);
 
 // stability
 eq('clean run passes', stability(res()), { state: 'pass', notes: [] });
@@ -87,7 +87,7 @@ const ch = changes(res({ results: { 'cpu.sha256.1': { value: 220 }, 'mem.latency
 near('+10 %', ch['cpu.sha256.1'], 0.1);
 near('latency got worse', ch['mem.latency'], 45 / 50 - 1);
 eq('another mode: no comparison', changes(res({ mode: 'quick' }), res()), null);
-eq('another LordBench: no comparison', changes(res({ lordbench: 2 }), res()), null);
+eq('another InsaneBench: no comparison', changes(res({ lordbench: 2 }), res()), null);
 
 eq('samples, bad ones dropped', sustainedSeries({ sustained: { samples: [[10, 19.8, null], [20, -1, 50], 'x', [30, 19.7, 61.5]] } }), [[10, 19.8, null], [30, 19.7, 61.5]]);
 near('the slowest display sets the budget', refreshBudget(res()), 1000 / 60);

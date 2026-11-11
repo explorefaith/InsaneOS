@@ -67,7 +67,7 @@ int homedirs_create(const char *home, uid_t uid, gid_t gid, const char *locale) 
     if (cfd >= 0) {
         char text[1024];
         size_t o = (size_t)snprintf(text, sizeof text,
-            "# User folders (xdg-user-dirs). Written by LordOS when the account was created.\n");
+            "# User folders (xdg-user-dirs). Written by Insane OS when the account was created.\n");
         for (int i = 0; i < HOMEDIRS_COUNT && o < sizeof text; i++)
             o += (size_t)snprintf(text + o, sizeof text - o, "XDG_%s_DIR=\"$HOME/%s\"\n", xdg_keys[i], names[li][i]);
         if (o < sizeof text) snprintf(text + o, sizeof text - o, "XDG_TEMPLATES_DIR=\"$HOME/\"\nXDG_PUBLICSHARE_DIR=\"$HOME/\"\n");

@@ -15,7 +15,7 @@
  *   wayland-scanner client-header $P/stable/presentation-time/presentation-time.xml presentation-time-client-protocol.h
  *   wayland-scanner private-code  $P/stable/presentation-time/presentation-time.xml presentation-time-protocol.c
  *   cc -O2 -I. -o keylag-client keylag-client.c xdg-shell-protocol.c presentation-time-protocol.c -lwayland-client
- * Run inside a LordOS session: XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-0 ./keylag-client */
+ * Run inside a Insane OS session: XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-0 ./keylag-client */
 #define _GNU_SOURCE
 #include <stdint.h>
 #include <stdio.h>

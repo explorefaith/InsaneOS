@@ -139,7 +139,7 @@ export function Glyph({ name, color, size = 13 }) {
           <View style={{ position: 'absolute', left: s * 0.06, right: s * 0.06, top: s * 0.48, height: b, backgroundColor: color }} />
         </View>
       );
-    // (0.8.5) LordOS's own components and the system services (Monitor → Network rows)
+    // (0.8.5) Insane OS's own components and the system services (Monitor → Network rows)
     case 'printer':
       return (
         <View style={box}>

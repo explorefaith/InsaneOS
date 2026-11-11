@@ -26,7 +26,7 @@ T=$(mktemp -d)
 pass=0; fail=0
 ok()  { pass=$((pass+1)); echo "  ok:   $*"; }
 bad() { fail=$((fail+1)); echo "  BAD:  $*"; }
-[ -d "$SESS" ] || { echo "no LordOS session for uid $U ($SESS)"; exit 2; }
+[ -d "$SESS" ] || { echo "no Insane OS session for uid $U ($SESS)"; exit 2; }
 [ -S /run/lordos/netperm.sock ] || { echo "lord-netperm is not running"; exit 2; }
 mkdir -p ~/.config/lordos
 HAD=0

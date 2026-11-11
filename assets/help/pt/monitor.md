@@ -15,7 +15,7 @@ de rede de cada app.
 - **Rede:** uma linha por app com o seu tráfego e as suas conexões, e um **mapa** com arcos até o
   país de cada servidor. O país vem de uma base local: ninguém é consultado.
 - **GPU:** cada placa de vídeo desenhada ao vivo, seu uso, temperatura, ventoinha, memória, clocks e consumo, os
-  apps que a usam (e quais API gráficas usam), as API instaladas, e se a voz do LordOS está funcionando nela. Um
+  apps que a usam (e quais API gráficas usam), as API instaladas, e se a voz do Insane OS está funcionando nela. Um
   administrador pode ajustar à mão a ventoinha de uma placa AMD; ela volta ao automático se a placa esquentar demais
   e ao sair da sessão.
 - **Privacidade:** quais apps usaram a câmera, o microfone ou a tela.

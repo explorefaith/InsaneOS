@@ -1,4 +1,4 @@
-LordOS has no accounts, no advertising and no tracking, on the website or in the distribution. Nobody sells, shares or keeps your data, because we never collect it. This policy has two parts: the **lordos.org website**, and the **LordOS distribution** you install on your computer.
+Insane OS has no accounts, no advertising and no tracking, on the website or in the distribution. Nobody sells, shares or keeps your data, because we never collect it. This policy has two parts: the **lordos.org website**, and the **Insane OS distribution** you install on your computer.
 
 ## Part 1: the website
 
@@ -33,15 +33,15 @@ Donation buttons take you to PayPal or Mercado Pago (and, later, Binance). The p
 
 If you write to us through [our contact form](https://www.iperfex.com/contacto/?lang=en), on the iPERFEX website, we keep your message and the contact details you give only to answer you and to follow up on the matter.
 
-## Part 2: the LordOS distribution
+## Part 2: the Insane OS distribution
 
 ### No telemetry
 
-LordOS sends **no telemetry**: no usage statistics, no crash reports, no device identifiers, no "phone home" checks and no account sign-in. Nothing about you or your computer is sent to us.
+Insane OS sends **no telemetry**: no usage statistics, no crash reports, no device identifiers, no "phone home" checks and no account sign-in. Nothing about you or your computer is sent to us.
 
-### What LordOS connects to by default
+### What Insane OS connects to by default
 
-These are the only network connections a fresh LordOS installation makes without you asking for something:
+These are the only network connections a fresh Insane OS installation makes without you asking for something:
 
 | Connection | When | Why | How to turn it off |
 |---|---|---|---|
@@ -49,13 +49,13 @@ These are the only network connections a fresh LordOS installation makes without
 | **Network time (NTP)** through `systemd-timesyncd`, to Debian's public NTP pool | when the computer is online | to keep the clock right | Settings → Date & Time → automatic time off |
 | **mDNS** (`avahi-daemon`, on the ISOs and the Raspberry Pi image, with `libnss-mdns` so `.local` names resolve) | on the local network only | announces the computer's name so other devices on your network can find it, and answers local name queries | `sudo systemctl disable --now avahi-daemon` |
 
-The time zone is never guessed from the network. Nothing in this table goes to the LordOS project.
+The time zone is never guessed from the network. Nothing in this table goes to the Insane OS project.
 
 ### Only when you ask
 
 These connections happen only after an action of yours:
 
-- **Store and updates:** the package lists and packages come from the Debian mirrors in your apt sources (`deb.debian.org` and `security.debian.org` by default; on the Raspberry Pi, the kernel and firmware come from `archive.raspberrypi.com`). The Store refreshes them only when you press **Check for updates** (in the Store or in Settings → Updates) or install something, and checks every list with Debian's signatures. LordOS's own updates come from LordOS's signed repository at `lordos.org/apt`, fetched at the same time. Since 0.8.5 that repository also carries the Store's featured banner (taken only from a source whose signed index says it is LordOS's, and checked against its hashes) and the list of apps on Store → Artificial Intelligence; `https://` sources are downloaded over HTTPS. LordOS's own `.lpk` apps are installed from files you choose; there is no online catalog of `.lpk` apps.
+- **Store and updates:** the package lists and packages come from the Debian mirrors in your apt sources (`deb.debian.org` and `security.debian.org` by default; on the Raspberry Pi, the kernel and firmware come from `archive.raspberrypi.com`). The Store refreshes them only when you press **Check for updates** (in the Store or in Settings → Updates) or install something, and checks every list with Debian's signatures. Insane OS's own updates come from Insane OS's signed repository at `lordos.org/apt`, fetched at the same time. Since 0.8.5 that repository also carries the Store's featured banner (taken only from a source whose signed index says it is Insane OS's, and checked against its hashes) and the list of apps on Store → Artificial Intelligence; `https://` sources are downloaded over HTTPS. Insane OS's own `.lpk` apps are installed from files you choose; there is no online catalog of `.lpk` apps.
 - **Apps from their makers' repositories** (since 0.8.5): installing an app from Store → Artificial Intelligence or Store → Commercial whose maker has its own repository first tells you whose repository it adds and its key fingerprint, then adds it, so from then on the Store and apt also fetch that maker's package lists. Removing the app removes that repository unless another installed app uses it. What the app itself connects to is up to its maker.
 - **Language packages:** adding a language in Settings can install its dictionaries and fonts from the same Debian mirrors.
 - **Printers and scanners:** Settings → Printers & Scanners asks the local network (mDNS) which printers and scanners are there, and talks only to local addresses.
@@ -63,7 +63,7 @@ These connections happen only after an action of yours:
 - **Blocklists** (since 0.8.5, all off by default): each list you turn on in Settings → Privacy → Blocklists, or add by its https address, is downloaded over HTTPS once a day from its publisher's https address, by a sandboxed downloader. Nothing about you is sent with the request beyond what any download carries.
 - **Files → Network and servers** (since 0.8.7): Files → Network is off until you open that page. Then it makes one bounded pass over the local network, with mDNS and by trying the SMB and NFS ports on this computer's own private links, and talks only to local addresses. Connect to Server and Remote Desk connect only to the servers you name.
 - **Moving wallpapers** (since 0.8.7): a clip is downloaded from the project's repository on `raw.githubusercontent.com` when you choose it, and checked against a SHA-256 in the package. GitHub sees that request as it sees any download.
-- **Hardware reports** (since 0.8.7): LordOS sends nothing by itself. Share on GitHub saves a report and a page on your computer; if you submit GitHub's form, with your own account, the report is public there. It has no field for serial numbers, addresses or host, user or network names.
+- **Hardware reports** (since 0.8.7): Insane OS sends nothing by itself. Share on GitHub saves a report and a page on your computer; if you submit GitHub's form, with your own account, the report is public there. It has no field for serial numbers, addresses or host, user or network names.
 - **Wi-Fi, Bluetooth and VPNs:** only the networks, devices and VPN servers you choose.
 - **Remote desktop** is **off** by default (port 5673 closed). It listens only after you turn it on in Settings → Sharing. On the Raspberry Pi, remote desktop and the SSH server also stay off unless you put a `remote-desktop` or `ssh` switch file on the boot partition.
 - **Web browsers and other apps:** Firefox ESR, Chromium and any Linux app you install are separate programs from their own projects. They make the connections their settings allow, under their own privacy policies. Isolated `.lpk` apps reach the network only if you grant them the permission, and the per-app firewall shows and controls what each app connects to.
@@ -71,7 +71,7 @@ These connections happen only after an action of yours:
 
 ### What stays on your computer
 
-- **Monitor's world map** uses an offline IP-to-country database (DB-IP Lite) shipped with LordOS. Looking up where a connection goes never asks a server.
+- **Monitor's world map** uses an offline IP-to-country database (DB-IP Lite) shipped with Insane OS. Looking up where a connection goes never asks a server.
 - **Cleaner's storage map** keeps folder names and sizes between sessions on this computer only, readable by your user alone. You can turn it off in Cleaner's Settings or clear it in its Activity.
 - **Passwords:** the vault is encrypted on your disk and its process has no network access. The "breached password" check is offline only.
 - **Settings, mail, files and logs** stay on your computer. Logs are not uploaded anywhere.
@@ -88,4 +88,4 @@ Privacy questions or requests: [our contact form](https://www.iperfex.com/contac
 
 ### Changes
 
-If LordOS or the website starts making a new kind of connection, or this policy changes in any other way, we will update this page first and change the date at the top.
+If Insane OS or the website starts making a new kind of connection, or this policy changes in any other way, we will update this page first and change the date at the top.

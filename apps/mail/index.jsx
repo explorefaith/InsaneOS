@@ -884,7 +884,7 @@ function ThreadItem({ it, expanded, onToggle, width, onLink, cfg, onTrustSender 
   );
 }
 
-// A link: there is no web engine in LordOS, so the address is shown and can be copied. A link
+// A link: there is no web engine in Insane OS, so the address is shown and can be copied. A link
 // whose visible text names another site is called out.
 function LinkSheet({ link, onClose }) {
   const th = useTheme();

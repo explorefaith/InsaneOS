@@ -1,10 +1,10 @@
 ## The short version
 
-LordOS ships four native apps for your personal information: **Mail**, **Calendar**, **Contacts** and **Reminders**. They are ordinary LordOS apps, drawn by the same engine as the rest of the desktop. What is unusual is where the risky work happens: every network protocol and every parser of data that comes from outside runs in one locked-in helper process, **`lord-maild`**, which is not even allowed to open a network connection by itself.
+Insane OS ships four native apps for your personal information: **Mail**, **Calendar**, **Contacts** and **Reminders**. They are ordinary Insane OS apps, drawn by the same engine as the rest of the desktop. What is unusual is where the risky work happens: every network protocol and every parser of data that comes from outside runs in one locked-in helper process, **`lord-maild`**, which is not even allowed to open a network connection by itself.
 
 [[shot:0]]
 
-Mail is the most common way to attack a computer. A message is a stranger's document: HTML, images, attachments, invitations. So LordOS treats it like a parcel that is opened in a sealed room. If something in it is malicious and takes over the room, it still can't call out, can't run anything, and can't reach your files.
+Mail is the most common way to attack a computer. A message is a stranger's document: HTML, images, attachments, invitations. So Insane OS treats it like a parcel that is opened in a sealed room. If something in it is malicious and takes over the room, it still can't call out, can't run anything, and can't reach your files.
 
 [[diagram:mail]]
 
@@ -25,17 +25,17 @@ Mail is the most common way to attack a computer. A message is a stranger's docu
 
 ## How it works
 
-1. **The helper starts locked in.** `lord-server` launches `lord-maild` from a fixed path, with no arguments and a minimal environment. Before reading anything from the network it loads the system's certificate authorities and locks itself in with the same helper sandbox as LordOS's other decoders: write access only to its cache folder, no `socket`, `connect`, `bind`, `execve` or `fork`, threads only, no capabilities, its own cgroup.
+1. **The helper starts locked in.** `lord-server` launches `lord-maild` from a fixed path, with no arguments and a minimal environment. Before reading anything from the network it loads the system's certificate authorities and locks itself in with the same helper sandbox as Insane OS's other decoders: write access only to its cache folder, no `socket`, `connect`, `bind`, `execve` or `fork`, threads only, no capabilities, its own cgroup.
 2. **It asks for each connection.** To reach a server it sends `lord-server` a request: host and port. `lord-server` checks that endpoint against your accounts file, and only then connects and passes the connected socket back. Allowed endpoints are exactly your accounts' IMAP, SMTP and calendar/contacts servers, plus other hosts of the same domain on port 443 when a calendar server redirects during discovery.
 3. **TLS is checked properly.** Every connection is verified against the system's certificate store and the server name. A certificate that doesn't verify is never accepted silently: Mail shows the problem and its fingerprint, and only if you press *Trust This Certificate* is that exact certificate remembered for that account.
-4. **HTML is translated, not executed.** LordOS has no web engine, and Mail doesn't need one. LordOS's own sanitizer turns a message's HTML into a small tree of blocks, tables, text runs, images and links, and Mail draws it with native views. Scripts, styles, frames, forms, SVG, media, event handlers and hidden "preheader" tricks are dropped.
+4. **HTML is translated, not executed.** Insane OS has no web engine, and Mail doesn't need one. Insane OS's own sanitizer turns a message's HTML into a small tree of blocks, tables, text runs, images and links, and Mail draws it with native views. Scripts, styles, frames, forms, SVG, media, event handlers and hidden "preheader" tricks are dropped.
 
 ## What you see and decide
 
 - **Remote images are blocked** until you press *Load Images* for that message or *Always from this sender*. Even then, `lord-server` allows only those image hosts, on ports 80 and 443, for ten minutes, and refuses any address that isn't public (local network, loopback, cloud metadata and similar), checked on the address it actually connects to. Tracking pixels are counted and never shown.
 - **Deceptive links are flagged** in red with a warning when the visible text looks like an address but points somewhere else, or uses tricks like an IP address, `user@` or look-alike characters. Clicking shows the real destination. Mail never opens a browser by itself; you can copy the address.
 - **The apps themselves are isolated.** Since 0.8.2, Mail, Calendar, Contacts and Reminders each run as their own sandboxed process, like an installed `.lpk` app, and reach mail and the keyring only through broker requests allowed for these four apps alone. Since 0.8.5, the connections to your mail servers also come from a process of their own, so they get their own row and rules in Monitor → Network.
-- **Passwords never touch a file.** Mail stores account passwords in the system keyring (see Passwords) and hands them to `lord-maild` in memory only. Since 0.8.8.6, when the keyring is still locked at boot (with automatic login, or after the login password was changed outside LordOS), the accounts wait, the keyring prompt shows once, and every waiting account gets its password as soon as the keyring opens, instead of Mail asking again at every boot; when a password can't be kept, Mail says why. The accounts file holds servers, user names, signatures and trusted certificate fingerprints, and the code refuses to write a password into it.
+- **Passwords never touch a file.** Mail stores account passwords in the system keyring (see Passwords) and hands them to `lord-maild` in memory only. Since 0.8.8.6, when the keyring is still locked at boot (with automatic login, or after the login password was changed outside Insane OS), the accounts wait, the keyring prompt shows once, and every waiting account gets its password as soon as the keyring opens, instead of Mail asking again at every boot; when a password can't be kept, Mail says why. The accounts file holds servers, user names, signatures and trusted certificate fingerprints, and the code refuses to write a password into it.
 
 [[shot:1]]
 
@@ -63,10 +63,10 @@ Mail is the most common way to attack a computer. A message is a stranger's docu
 
 ## Read the source
 
-- [server/src/mail/maild.c](https://github.com/lordbasex/LordOS/blob/main/server/src/mail/maild.c): the `lord-maild` helper and its sandbox
-- [server/src/mail/mailc.c](https://github.com/lordbasex/LordOS/blob/main/server/src/mail/mailc.c): the connector in `lord-server` that decides which endpoints are allowed
-- [server/src/mail/html.c](https://github.com/lordbasex/LordOS/blob/main/server/src/mail/html.c): the HTML sanitizer
-- [server/src/ui/js_mail.c](https://github.com/lordbasex/LordOS/blob/main/server/src/ui/js_mail.c): `lord.mail`, the session API
-- [apps/mail](https://github.com/lordbasex/LordOS/tree/main/apps/mail), [apps/calendar](https://github.com/lordbasex/LordOS/tree/main/apps/calendar), [apps/contacts](https://github.com/lordbasex/LordOS/tree/main/apps/contacts), [apps/reminders](https://github.com/lordbasex/LordOS/tree/main/apps/reminders)
-- [server/tests/mail_test.c](https://github.com/lordbasex/LordOS/blob/main/server/tests/mail_test.c): the parser and sanitizer tests
-- [docs/MAIL.md](https://github.com/lordbasex/LordOS/blob/main/docs/MAIL.md)
+- [server/src/mail/maild.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/maild.c): the `lord-maild` helper and its sandbox
+- [server/src/mail/mailc.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/mailc.c): the connector in `lord-server` that decides which endpoints are allowed
+- [server/src/mail/html.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/html.c): the HTML sanitizer
+- [server/src/ui/js_mail.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_mail.c): `lord.mail`, the session API
+- [apps/mail](https://github.com/lordbasex/Insane OS/tree/main/apps/mail), [apps/calendar](https://github.com/lordbasex/Insane OS/tree/main/apps/calendar), [apps/contacts](https://github.com/lordbasex/Insane OS/tree/main/apps/contacts), [apps/reminders](https://github.com/lordbasex/Insane OS/tree/main/apps/reminders)
+- [server/tests/mail_test.c](https://github.com/lordbasex/Insane OS/blob/main/server/tests/mail_test.c): the parser and sanitizer tests
+- [docs/MAIL.md](https://github.com/lordbasex/Insane OS/blob/main/docs/MAIL.md)

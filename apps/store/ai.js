@@ -1,8 +1,8 @@
-// ai.js — the Store's Artificial Intelligence category (0.8.5): LordOS's curated list of AI apps
+// ai.js — the Store's Artificial Intelligence category (0.8.5): Insane OS's curated list of AI apps
 // (apt/catalog.json, bundled at build time). An app whose maker has a signed APT repository
 // ("delivery": "direct") comes from that repository: the first install adds it, with the maker's key
 // whose fingerprint the catalog pins (pkg-source-add, server/src/pkg/sources_admin.c), over HTTPS. The
-// others come from LordOS's own signed repository (lordos.org/apt), built or copied by LordOS from
+// others come from Insane OS's own signed repository (lordos.org/apt), built or copied by Insane OS from
 // verified sources (docs/UPDATES.md, "Mirrored apps (catalog)"). Installing goes through the package
 // engine like any Debian package: the plan first, then pkg-install.
 import { createElement as h, useState } from 'react';
@@ -65,7 +65,7 @@ function AddSource({ a, onDone }) {
       h(Button, { primary: true, label: busy ? t('store.ai.adding') : t('store.ai.addSource'), disabled: busy || !admin.available(), onClick: add })));
 }
 
-// A LordOS-built app that isn't in the package lists yet (they were fetched before the catalog had it):
+// A Insane OS-built app that isn't in the package lists yet (they were fetched before the catalog had it):
 // fetching them again (pkg-update) brings it, instead of the package page's "not found".
 function NotListed({ a, onDone }) {
   const th = useTheme();
@@ -141,7 +141,7 @@ const sectionOf = (a) => a.section || 'ai';
 export const catalogApps = (section) => (catalog.apps || []).filter((a) => !section || sectionOf(a) === section);
 export const catalogApp = (pkg) => (catalog.apps || []).find((x) => x.package === pkg);
 
-// A catalog app's page: add its maker's repository first, fetch the lists when LordOS's own package
+// A catalog app's page: add its maker's repository first, fetch the lists when Insane OS's own package
 // isn't in them yet, else the usual package page.
 export function AiDetail({ pkg }) {
   useStore(locale);
@@ -197,7 +197,7 @@ export function CatalogResults({ query, onOpen }) {
     h(CardGrid, null, ...apps.slice(0, 8).map((a) => h(AiCard, { key: a.id, a, here, onOpen }))));
 }
 
-// The banner LordOS publishes in its repository (apt/featured/featured.json and banner.png, signed with
+// The banner Insane OS publishes in its repository (apt/featured/featured.json and banner.png, signed with
 // the indexes and verified by the package engine; lord.pkg.featured()), or null.
 function published() {
   try { return typeof lord.pkg.featured === 'function' ? lord.pkg.featured() : null; } catch (e) { return null; }

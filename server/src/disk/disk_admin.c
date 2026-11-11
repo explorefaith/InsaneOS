@@ -783,7 +783,7 @@ void disk_act_eject(const AdminReq *r, const char *arg, size_t len) {
     admin_ok("disk.ejected", NULL);
 }
 
-/* ---- for the LordOS Imager (imager/imager_admin.c) ---- */
+/* ---- for the Insane OS Imager (imager/imager_admin.c) ---- */
 
 int disk_admin_whole(const AdminReq *r, const char *name, DiskTarget *o) {
     Target t;

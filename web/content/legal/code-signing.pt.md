@@ -1,11 +1,11 @@
-O LordOS assina o que publica para que você possa confirmar que um arquivo vem do projeto e que ninguém o alterou no caminho. Esta página explica o que é assinado, com quais chaves e como você mesmo pode conferir. Para avisar sobre um problema com uma assinatura, veja a [Política de segurança](/legal/security/).
+O Insane OS assina o que publica para que você possa confirmar que um arquivo vem do projeto e que ninguém o alterou no caminho. Esta página explica o que é assinado, com quais chaves e como você mesmo pode conferir. Para avisar sobre um problema com uma assinatura, veja a [Política de segurança](/legal/security/).
 
 ## Arquivos de cada versão
 
-Cada arquivo de uma versão no GitHub (a imagem ISO, a imagem para Raspberry Pi 5 e o pacote `.deb`) aparece com o seu SHA-256 num arquivo chamado `SHA256SUMS`. O `SHA256SUMS` é assinado com a **chave de versões do LordOS**:
+Cada arquivo de uma versão no GitHub (a imagem ISO, a imagem para Raspberry Pi 5 e o pacote `.deb`) aparece com o seu SHA-256 num arquivo chamado `SHA256SUMS`. O `SHA256SUMS` é assinado com a **chave de versões do Insane OS**:
 
 - `SHA256SUMS.sig` é o base64 da assinatura **Ed25519** de 64 bytes sobre os bytes exatos do `SHA256SUMS`.
-- Chave pública: [lordos-release.pub.pem](/lordos-release.pub.pem), também no repositório como [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/LordOS/blob/main/tools/release/lordos-release.pub.pem).
+- Chave pública: [lordos-release.pub.pem](/lordos-release.pub.pem), também no repositório como [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/Insane OS/blob/main/tools/release/lordos-release.pub.pem).
 - Impressão digital (SHA-256 da chave pública em DER):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
@@ -25,24 +25,24 @@ O primeiro comando decodifica a assinatura, o segundo precisa mostrar `Signature
 openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum
 ```
 
-## Apps do LordOS (.lpk) e a Loja
+## Apps do Insane OS (.lpk) e a Loja
 
-Os apps nativos do LordOS vêm como pacotes `.lpk`. Um `.lpk` assinado traz a lista de todos os seus arquivos com o SHA-256 de cada um e uma assinatura **Ed25519** sobre essa lista. O LordOS a confere com o seu próprio código em C ao instalar o app e toda vez que o carrega, então um arquivo alterado é detectado.
+Os apps nativos do Insane OS vêm como pacotes `.lpk`. Um `.lpk` assinado traz a lista de todos os seus arquivos com o SHA-256 de cada um e uma assinatura **Ed25519** sobre essa lista. O Insane OS a confere com o seu próprio código em C ao instalar o app e toda vez que o carrega, então um arquivo alterado é detectado.
 
 A Loja e a janela de instalação mostram um destes níveis de confiança:
 
 | Nível | Quando |
 |---|---|
-| **LordOS** | assinado com a chave oficial do LordOS, que vem compilada no sistema (nenhum arquivo da sua pasta pessoal pode adicionar uma chave oficial) |
-| **Autor verificado** | assinado com uma chave que consta no catálogo assinado do LordOS |
-| **Assinado por <nome>** | assinado com uma chave que o LordOS não conhece |
+| **Insane OS** | assinado com a chave oficial do Insane OS, que vem compilada no sistema (nenhum arquivo da sua pasta pessoal pode adicionar uma chave oficial) |
+| **Autor verificado** | assinado com uma chave que consta no catálogo assinado do Insane OS |
+| **Assinado por <nome>** | assinado com uma chave que o Insane OS não conhece |
 | **Sem assinatura** | não tem assinatura: a Loja avisa para instalar só se você confiar em quem o enviou |
 
 Outras regras protegem você depois da instalação:
 
 - **Mesma chave nas atualizações.** Uma versão nova precisa ser assinada com a mesma chave da instalada; uma atualização assinada com outra chave é recusada.
-- **Catálogo assinado e revogação.** O catálogo do LordOS é assinado com a chave do LordOS e traz as chaves dos autores verificados e uma **lista de revogação** de chaves e pacotes. Um pacote revogado não é instalado, e um já instalado é desativado com uma mensagem clara.
-- **Modificado por você.** Se você editar um app instalado, o LordOS o marca como modificado, mostra quais arquivos mudaram e pode restaurar o original. Se você compartilhar a sua versão, ela é assinada com a sua própria chave e dá o crédito ao autor original.
+- **Catálogo assinado e revogação.** O catálogo do Insane OS é assinado com a chave do Insane OS e traz as chaves dos autores verificados e uma **lista de revogação** de chaves e pacotes. Um pacote revogado não é instalado, e um já instalado é desativado com uma mensagem clara.
+- **Modificado por você.** Se você editar um app instalado, o Insane OS o marca como modificado, mostra quais arquivos mudaram e pode restaurar o original. Se você compartilhar a sua versão, ela é assinada com a sua própria chave e dá o crédito ao autor original.
 
 ## Pacotes do Debian
 
@@ -50,7 +50,7 @@ O sistema base e todos os pacotes da seção Debian da Loja vêm do Debian e sã
 
 - O índice de pacotes (`InRelease`) precisa ter uma assinatura OpenPGP válida de uma chave do chaveiro daquela fonte, instalado pelo pacote `debian-archive-keyring` do Debian. Índices vencidos, revogados ou repetidos são recusados.
 - Cada lista de pacotes e cada `.deb` são conferidos contra o SHA-256 desse índice assinado antes de serem guardados ou passados ao `dpkg`.
-- O LordOS faz essas verificações com o seu próprio motor de pacotes, e o `apt` continua funcionando ao lado com as mesmas chaves.
+- O Insane OS faz essas verificações com o seu próprio motor de pacotes, e o `apt` continua funcionando ao lado com as mesmas chaves.
 
 Quando a fonte pede HTTPS, os downloads vão por HTTP, como no `apt` com `deb.debian.org`: a segurança vem das assinaturas e dos hashes, então alguém na rede pode ver quais pacotes você baixa, mas não consegue alterá-los.
 
@@ -65,7 +65,7 @@ No Raspberry Pi 5, o kernel e o firmware vêm do arquivo do Raspberry Pi (`archi
 ## Como guardamos as chaves
 
 - A metade privada da **chave de versões** fica só no computador do mantenedor, legível só pelo dono, com uma cópia de segurança offline. Ela nunca é guardada no repositório, numa máquina de compilação nem num servidor.
-- A metade privada da **chave do LordOS** para os pacotes `.lpk` também fica fora do repositório, no computador do mantenedor. Hoje é uma chave de desenvolvimento; a chave definitiva para as versões públicas vai substituí-la no sistema e a troca será anunciada.
+- A metade privada da **chave do Insane OS** para os pacotes `.lpk` também fica fora do repositório, no computador do mantenedor. Hoje é uma chave de desenvolvimento; a chave definitiva para as versões públicas vai substituí-la no sistema e a troca será anunciada.
 - As chaves públicas são publicadas no repositório e neste site, para que qualquer pessoa possa conferi-las.
 
 ## Se uma chave for comprometida

@@ -1,6 +1,6 @@
 /* wifi.c — Wi-Fi with wpa_supplicant (Debian's, fixed path), root side.
  *
- * For each Wi-Fi interface LordOS manages it runs a wpa_supplicant ("wpa:<if>", a resident
+ * For each Wi-Fi interface Insane OS manages it runs a wpa_supplicant ("wpa:<if>", a resident
  * process of the helper) with a minimal configuration we write ourselves (only the control
  * socket) and a DHCP client ("if:<if>", dhcp.c) that also translates its notices. Networks
  * are loaded over the control socket: the SSID goes in hexadecimal and the WPA2 key as an
@@ -8,7 +8,7 @@
  * WPA3 password (sae_password), which is validated (no line breaks or control characters).
  *
  * Saved networks: /etc/lordos/net/wifi/<ssid in hex>.json (public: ssid and security) and
- * <ssid in hex>.key (0600: the password, "pass=…"). A network saved by the LordOS Imager's first-run
+ * <ssid in hex>.key (0600: the password, "pass=…"). A network saved by the Insane OS Imager's first-run
  * file (lordos-firstrun, docs/IMAGER.md) has the already derived key instead ("psk=<64 hex>"), so
  * the password never reaches the card: it joins WPA2/WPA3-transition networks (not WPA3-only ones,
  * which need the password itself for SAE). */

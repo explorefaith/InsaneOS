@@ -224,7 +224,7 @@ struct passwd *sd_system_user(const char *name, const char *home) {
     struct passwd *pw = getpwnam(name);
     if (!pw) {
         const char *const a[] = { "/usr/sbin/useradd", "--system", "--home-dir", home, "--create-home", "--shell", "/usr/sbin/nologin",
-                                  "--comment", "LordOS", name, NULL };
+                                  "--comment", "Insane OS", name, NULL };
         sd_run_wait(a);
         pw = getpwnam(name);
         if (pw) sd_log("system user %s created", name);

@@ -1,6 +1,6 @@
 # Fans and cooling
 
-LordOS drives the fans by temperature from the first boot, before anyone logs in, and keeps doing
+Insane OS drives the fans by temperature from the first boot, before anyone logs in, and keeps doing
 it if a session crashes. A small root service, `lord-fand`, reads the CPU temperature every two
 seconds and writes each fan's duty from a profile. **Settings → Cooling** picks the profile, edits a
 custom curve and runs the fans at full speed for a while; **Monitor → Cooling** shows the same
@@ -53,11 +53,11 @@ kernel trip 4: 75000 mC (/sys/class/thermal/thermal_zone0)
 - **Desktop motherboards** with `nct67xx`/`nct6687` (the `nct6775`/`nct6683` drivers) or ITE
   `it87xx` (`it87`, often out of tree) chips expose `pwmN` + `pwmN_enable`; mode 1 is manual on all
   of them. The driver must be loaded (some boards need `acpi_enforce_resources=lax` for `nct6775`);
-  LordOS does not load modules or change kernel parameters. Covered by the fake-sysfs test only:
+  Insane OS does not load modules or change kernel parameters. Covered by the fake-sysfs test only:
   **not tried on a real motherboard yet.**
-- Some headers drive a pump or are wired in DC mode; LordOS drives all allow-listed channels with
+- Some headers drive a pump or are wired in DC mode; Insane OS drives all allow-listed channels with
   the same curve. That is why a PC starts with the **System** profile (the motherboard firmware
-  keeps control) and LordOS only takes over when the user picks a profile. The Raspberry Pi starts
+  keeps control) and Insane OS only takes over when the user picks a profile. The Raspberry Pi starts
   with **Balanced**.
 - **Laptops** usually have no writable PWM (the embedded controller owns the fan), or a vendor
   driver with its own semantics: they show "Fans managed by the firmware" with the RPM, and are
@@ -97,7 +97,7 @@ cooling device to four active trip points of `cpu-thermal` (50, 60, 67.5 and 75 
    number of steps is fixed too.
 2. **Write `pwm1` directly** and keep the kernel out of the way.
 
-LordOS does (2), with the kernel as a **backstop**: while `lord-fand` drives the fan it moves the
+Insane OS does (2), with the kernel as a **backstop**: while `lord-fand` drives the fan it moves the
 four active trips to 78, 80, 82 and 84 °C (the critical 110 °C trip is never touched). Below that
 the kernel's `step_wise` governor leaves `pwm1` alone; if `lord-fand` ever hangs and the board gets
 hot, the kernel still spins the fan up by itself (the firmware throttles at 85 °C). Each tick the
@@ -262,7 +262,7 @@ into a scratch folder and read; **none of them was executed**.
   down, raises any duty below 25 % to 25 %, kicks the fan at 100 % first, and its default curve is
   55 °C → 30 %, 60 °C → 55 %, 65 °C → 100 % (our Balanced). The power button reaches the board as
   pulses on GPIO 4 (20–30 ms = reboot, 40–50 ms = shut down), read with libgpiod, and the IR receiver
-  uses `dtoverlay=gpio-ir,gpio_pin=23` with LIRC. LordOS implements none of this because the V5 has
+  uses `dtoverlay=gpio-ir,gpio_pin=23` with LIRC. Insane OS implements none of this because the V5 has
   none of it, and blindly writing to address 0x1a could hit an audio codec on another board.
 - **Its board's extras:** an HDMI-USB2-audio board adds two front USB 2.0 ports (an FE1.1s hub) and
   a microphone and headphone DAC (HS100B, USB audio). Both sit on the Raspberry Pi 5's USB-C
@@ -276,14 +276,14 @@ the admin action `rpi-case argon-one-v5`, which writes `/boot/firmware/lordos-ca
 text, included at the end of `config.txt` by the image) and takes effect after a restart. Any other
 case gets nothing Argon-specific. The illustration shows the Argon only after it is chosen.
 
-| The vendor script | LordOS |
+| The vendor script | Insane OS |
 |---|---|
 | Fan daemon (Python, I2C or GPIO) | `lord-fand` (C, root, hardened); the V5's fan is on the fan header |
 | Fan curve config `/etc/argononed.conf` | Settings → Cooling, `/etc/lordos/fan.json` |
 | `dtoverlay=dwc2,dr_mode=host` (front USB, audio) | `rpi-case argon-one-v5` → `lordos-case.txt` |
-| `dtparam=nvme`, `pciex1_gen=3` | already in the LordOS image's `config.txt` |
+| `dtparam=nvme`, `pciex1_gen=3` | already in the Insane OS image's `config.txt` |
 | `usb_max_current_enable=1` | **not set**: it lets the board draw 1.6 A for USB, which is only safe with a 5 A supply; documented here instead |
-| `PSU_MAX_CURRENT=5000` in the bootloader EEPROM | **not done**: LordOS does not change the bootloader configuration (Settings → Board firmware, 0.8.4.1, only applies Raspberry Pi's bootloader updates, never `rpi-eeprom-config`) |
+| `PSU_MAX_CURRENT=5000` in the bootloader EEPROM | **not done**: Insane OS does not change the bootloader configuration (Settings → Board firmware, 0.8.4.1, only applies Raspberry Pi's bootloader updates, never `rpi-eeprom-config`) |
 | Power button daemon (GPIO 4 pulses) | not needed on the V5: the Raspberry Pi 5's own power button is handled by systemd-logind (Settings → Energy) |
 | IR remote (LIRC, `gpio-ir` on GPIO 23) | not on the V5 (not in its feature list); left for a case that has it |
 | OLED module, ZigBee module (optional add-ons) | not supported |

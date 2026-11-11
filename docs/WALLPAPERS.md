@@ -106,6 +106,6 @@ A moving wallpaper plays with `hwOnly`: if the hardware decoder doesn't start, o
 
 ## The collection
 
-Files live in a separate repository, `LordOS-wallpapers`, because 353 MB of video doesn't belong in the code's history. Its
+Files live in a separate repository, `Insane OS-wallpapers`, because 353 MB of video doesn't belong in the code's history. Its
 README credits each clip; licenses come from each file's own page. Only public domain, CC0, CC BY and CC BY-SA sources are
 used.

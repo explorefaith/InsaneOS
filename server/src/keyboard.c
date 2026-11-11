@@ -87,7 +87,7 @@ void kb_reset_state(void) {
     kb_set_group(g);
 }
 
-/* The computer's layouts, as Debian's installer, keyboard-configuration and the LordOS installer write
+/* The computer's layouts, as Debian's installer, keyboard-configuration and the Insane OS installer write
  * them (XKBLAYOUT="us,latam", XKBVARIANT=",deadtilde"). Without the file, or with a value keyboard.c
  * would refuse, it is "us": never a layout nobody chose (#55). */
 void kb_system_from(const char *path, char *layouts, size_t ln, char *variants, size_t vn) {

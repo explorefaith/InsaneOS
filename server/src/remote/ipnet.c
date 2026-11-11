@@ -154,7 +154,7 @@ void rs_access_parse(const char *text, RsAccess *acc, int *bad) {
 
 int rs_access_format(const RsAccess *acc, char *out, size_t n) {
     size_t o = 0;
-    int k = snprintf(out, n, "# LordOS remote desktop: manual address lists (Settings -> Sharing). See docs/REMOTE.md\n");
+    int k = snprintf(out, n, "# Insane OS remote desktop: manual address lists (Settings -> Sharing). See docs/REMOTE.md\n");
     if (k < 0 || (size_t)k >= n) return -1;
     o = (size_t)k;
     for (int pass = 0; pass < 2; pass++) {
@@ -208,7 +208,7 @@ int rs_access_decide(const RsAccess *acc, int mode, const RsAddr *peer, int via_
 }
 
 int rs_vpn_ifname(const char *name) {
-    /* exactly the names LordOS's VPN manager gives (vpn_ifname in server/src/net/wg.c): "<type>-<name>".
+    /* exactly the names Insane OS's VPN manager gives (vpn_ifname in server/src/net/wg.c): "<type>-<name>".
      * Never a bare ppp0 (often a PPPoE internet uplink), tun0 or wg0, which anything can create. */
     static const char *const pre[] = { "wg-", "ovpn-", "ips-", "ppp-", "oc-", "fvpn-", NULL };
     if (!name) return 0;

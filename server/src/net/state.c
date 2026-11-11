@@ -26,7 +26,7 @@
 /* systemd-networkd configures it (its state file says something other than "unmanaged"), or
  * it appears in /etc/network/interfaces (ifupdown). networkd's state format isn't
  * public, but it has been stable for years; if it changes, the interface shows as free and
- * nothing bad happens (LordOS only touches it if the user configures it). */
+ * nothing bad happens (Insane OS only touches it if the user configures it). */
 static int networkd_manages(int ifindex) {
     char path[64], line[128];
     snprintf(path, sizeof path, "/run/systemd/netif/links/%d", ifindex);
@@ -259,7 +259,7 @@ char *net_interfaces_json(void) {
         snprintf(conf, sizeof conf, NET_IF_DIR "/%s.conf", k->name);
         const char *managed = managed_by_system(k->name) ? "system" : access(conf, F_OK) == 0 ? "lordos" : "none";
         if (!strcmp(type, "wireguard") || !strcmp(type, "tun")) {
-            /* those of LordOS's VPNs */
+            /* those of Insane OS's VPNs */
             char meta[128];
             snprintf(meta, sizeof meta, NET_RUN_DIR "/vpn/%s", k->name);
             if (access(meta, F_OK) == 0) managed = "lordos";

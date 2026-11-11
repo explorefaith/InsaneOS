@@ -1,4 +1,4 @@
-/* bench_test.c — the measurement pieces shared by lordos-testbench and LordBench (src/bench/bench.c). */
+/* bench_test.c — the measurement pieces shared by lordos-testbench and InsaneBench (src/bench/bench.c). */
 #define _XOPEN_SOURCE 700
 #define _DARWIN_C_SOURCE
 #include "../src/bench/bench.h"

@@ -6,7 +6,7 @@ import {
   View, Text, Image, useTheme, useSettings, shortcutList, shortcutsRev, themes, session, keyboard, admin, languages, setLanguage, useLocale,
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
   spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
-  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry,
+  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, lordosWallpapers,
 } from '@lordos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { SoundSettings } from './Sound.jsx';
@@ -32,7 +32,15 @@ import { NotificationsSettings } from './Notifications.jsx';
 import { DateTimeSettings } from './DateTime.jsx';
 import { DefaultAppsSettings } from './DefaultApps.jsx';
 import { FirmwareSettings } from './Firmware.jsx';
-import { Stack, Section, SettingRow, ValueRow, Badge, Note, Message, Actions, PopUp, shade } from './ui.jsx';
+import { Stack, Section, SettingRow, ValueRow, Badge, Note, Message, Actions, PopUp, TimeField, shade } from './ui.jsx';
+
+// Adds one token → phrase pair to settings.textReplace (the text-replacement map
+// sdk/components.jsx expands while typing).
+function addRepl(s, set, tok, val, done) {
+  if (!tok || !val) return;
+  set({ textReplace: { ...(s.textReplace || {}), [tok]: val } });
+  done();
+}
 
 export function Icon({ size: s }) {
   const dark = '#3b3e46';
@@ -127,7 +135,7 @@ function StyleThumb({ id, accent, dark }) {
   );
 }
 
-// Desktop style: every installed theme (Lord Flow and Lord Classic first; the login screen's is hidden),
+// Desktop style: every installed theme (Insane Flow and Insane Classic first; the login screen's is hidden),
 // switched live. The open app windows come back in the new one (sdk/index.js themes.use), Settings on
 // this page. Since 0.8.5 this is the only place to choose a theme (there is no separate Themes page).
 function StylePicker() {
@@ -177,6 +185,33 @@ function Appearance() {
             </View>
           ))}
         </View>
+      </Section>
+      <Section title={tOptional('settings.auto.title') || 'Automatic Appearance'} footer={tOptional('settings.auto.hint') || 'Dark at night, light by day — and a wallpaper for each, if you like.'}>
+        <SettingRow label={tOptional('settings.auto.autoDark') || 'Dark mode on a schedule'}>
+          <Toggle on={!!s.autoDark?.on} onChange={(on) => set({ autoDark: { from: 1140, to: 420, ...(s.autoDark || {}), on } })} />
+        </SettingRow>
+        {s.autoDark?.on ? (
+          <SettingRow label={tOptional('settings.auto.nightHours') || 'Dark hours'}>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <TimeField value={s.autoDark.from ?? 1140} onChange={(v) => set({ autoDark: { ...s.autoDark, from: v } })} />
+              <Text style={{ color: t.textDim }}>→</Text>
+              <TimeField value={s.autoDark.to ?? 420} onChange={(v) => set({ autoDark: { ...s.autoDark, to: v } })} />
+            </View>
+          </SettingRow>
+        ) : null}
+        <SettingRow label={tOptional('settings.auto.wallpaper') || 'Wallpaper follows the schedule'} stack>
+          <Toggle on={!!s.dynamicWallpaper?.on} onChange={(on) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), on } })} />
+        </SettingRow>
+        {s.dynamicWallpaper?.on ? (
+          <>
+            <SettingRow label={tOptional('settings.auto.dayWall') || 'Day wallpaper'}>
+              <PopUp value={s.dynamicWallpaper.day || ''} options={lordosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), day: v } })} />
+            </SettingRow>
+            <SettingRow label={tOptional('settings.auto.nightWall') || 'Night wallpaper'}>
+              <PopUp value={s.dynamicWallpaper.night || ''} options={lordosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), night: v } })} />
+            </SettingRow>
+          </>
+        ) : null}
       </Section>
       <Section>
         <SettingRow label={tr('shell.cc.accent')}>
@@ -572,7 +607,7 @@ function LanguageRegion() {
   );
 }
 
-// Preferred languages (docs/LANGUAGES.md): the first one is LordOS's language (its apps too; the
+// Preferred languages (docs/LANGUAGES.md): the first one is Insane OS's language (its apps too; the
 // login screen keeps its own); when a text isn't translated the next ones are used, in order, then English. A row is
 // selected by clicking it; + adds a language (it becomes the first), − removes the selected one,
 // ↑ ↓ move it. Without a saved list: the current language, then English, Spanish and Portuguese.
@@ -636,7 +671,7 @@ function PreferredLanguages({ langs, onPrimary }) {
 }
 
 // The + popover: a search field, the languages ready to use (bundled or installed packs not in the
-// list yet) and the ones LordOS isn't translated into, which can't be added: picking one says so and
+// list yet) and the ones Insane OS isn't translated into, which can't be added: picking one says so and
 // how to ask for it.
 function AddLanguage({ langs, have, onAdd }) {
   const t = useTheme();
@@ -675,7 +710,7 @@ function AddLanguage({ langs, have, onAdd }) {
   );
 }
 
-// LordOS language pack (built by tools/i18n-pack.mjs): lordos-lang-<id>.json in Downloads.
+// Insane OS language pack (built by tools/i18n-pack.mjs): lordos-lang-<id>.json in Downloads.
 function PackImport({ onDone }) {
   const { t: tr } = useLocale();
   const found = [];
@@ -731,9 +766,13 @@ function ShortcutsList() {
 
 function Keyboard() {
   const { t: tr } = useLocale();
+  const t = useTheme();
   const [s, set] = useSettings();
   const [sample, setSample] = useState('');
   const [adding, setAdding] = useState(false);
+  const [addingRepl, setAddingRepl] = useState(false);
+  const [replTok, setReplTok] = useState('');
+  const [replVal, setReplVal] = useState('');
   const all = keyboard.list();
   const mine = keyboard.configured();
   const nameOf = (k) => {
@@ -774,6 +813,30 @@ function Keyboard() {
             {!mine.some((x) => x.ime === e.id) && <Button small label={tr('settings.ime.add')} onClick={() => addIme(e.id)} />}
           </SettingRow>
         ))}
+      </Section>
+      <Section title={tOptional('settings.kb.replacements') || 'Text Replacement'} footer={tOptional('settings.kb.replHint') || 'Type the token, then a space — it expands in Insane OS apps.'}>
+        {Object.entries(s.textReplace || {}).map(([k, v]) => (
+          <SettingRow key={k} label={k}>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <TextInput value={v} onChange={(nv) => set({ textReplace: { ...s.textReplace, [k]: nv } })} style={{ width: 240 }} />
+              <Button small label="−" onClick={() => { const n = { ...s.textReplace }; delete n[k]; set({ textReplace: n }); }} />
+            </View>
+          </SettingRow>
+        ))}
+        {addingRepl ? (
+          <SettingRow label={tOptional('settings.kb.token') || 'Token'}>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <TextInput value={replTok} onChange={setReplTok} style={{ width: 90 }} placeholder="omw" />
+              <Text style={{ color: t.textDim }}>→</Text>
+              <TextInput value={replVal} onChange={setReplVal} style={{ width: 220 }} placeholder="on my way"
+                onSubmit={() => addRepl(s, set, replTok, replVal, () => { setReplTok(''); setReplVal(''); setAddingRepl(false); })} />
+              <Button small label="+" onClick={() => addRepl(s, set, replTok, replVal, () => { setReplTok(''); setReplVal(''); setAddingRepl(false); })} />
+            </View>
+          </SettingRow>
+        ) : null}
+        <Actions>
+          <Button small label={addingRepl ? '✕' : tr('settings.kb.add')} onClick={() => setAddingRepl(!addingRepl)} />
+        </Actions>
       </Section>
       {keyboard.active()?.ime && keyboard.missingDictionary() && <Note tone="warn">{tr('settings.ime.noDict')}</Note>}
       <Section title={tr('settings.osk.title')} footer={tr('settings.osk.hint')}>

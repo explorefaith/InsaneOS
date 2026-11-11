@@ -1,4 +1,4 @@
-# GPU in LordOS: composition, dmabuf and games
+# GPU in Insane OS: composition, dmabuf and games
 
 lord-server has two paths for building the screen:
 
@@ -16,7 +16,7 @@ and its buffers and the apps' dmabufs become framebuffers with `DRM_IOCTL_MODE_A
 | | |
 |---|---|
 | ![ui](gpu-ui.png) | ![gtk](gpu-gtk.png) |
-| The LordOS UI composited by EGL/GLES2 | GTK Demo (shm) under the Dock: the stacking order between app windows and LordOS windows is respected |
+| The Insane OS UI composited by EGL/GLES2 | GTK Demo (shm) under the Dock: the stacking order between app windows and Insane OS windows is respected |
 | ![menu](gpu-menu.png) | ![dmabuf](gpu-dmabuf.png) |
 | GTK menu (xdg_popup) on the top layer | `dmabuf-client`: an app's dmabuf buffers (udmabuf, linear) at 72 FPS, 400/400 presented |
 | ![fs](gpu-fullscreen.png) | |
@@ -62,7 +62,7 @@ Chromium showed up to a second late. Measurements and the key latency trace are 
 list of plain drivers, so Mesa is loaded: with the machine's 3D acceleration on, Mesa's `svga`
 driver (`vmwgfx_dri.so`, in `libgl1-mesa-dri`, which the ISO ships) is the renderer and lord-server
 composites on the GPU (`GL_RENDERER` starts with `SVGA3D`); with 3D off, Mesa falls back to
-llvmpipe and lord-server to the CPU path. Which one ran is in the session log: in a LordOS
+llvmpipe and lord-server to the CPU path. Which one ran is in the session log: in a Insane OS
 Terminal, `grep gpu: ~/.cache/lordos/session.log` (for example `gpu: GPU composition (SVGA3D; …)`
 or `gpu: the renderer is software (llvmpipe …): CPU composition`). Not verified: the Proxmox test
 machines' "VMware compatible" display is QEMU's 2D-only `vmware-svga`, which `vmwgfx` refuses
@@ -93,7 +93,7 @@ milliseconds no longer turns 60 frames a second into 57.
   2. on top, the UI with its premultiplied alpha;
   3. on top of everything, the apps' menus, fullscreen and the cursor (layer 1).
 
-  If a LordOS window (or the Dock) covers an app's window, it really covers it. If one app covers
+  If a Insane OS window (or the Dock) covers an app's window, it really covers it. If one app covers
   another, too: the hole was opened later.
 - **The canvas keeps alpha.** Our own blends (`canvas.c`, `term_paint.c`) now compute the output
   alpha. Nothing changes on the CPU path (KMS is XRGB).
@@ -270,13 +270,13 @@ and the `layer` refusals by cause (`GDRAG_L_*` in `ui/ui.h`: `gone`, `invalid`, 
   menu bar and the Dock leave free, 7 of 153 along a figure of eight that reaches them; `LORD_GPU_VERIFY=1`
   over 160 GPU drag frames (W up to 462 × 592): 0 pixels differ. The nodes painted after the window are kept
   as a list that grows as needed (up to 65,536 boxes; a box inside the one noted before it is skipped, so
-  the menu bar and the Dock are 2 boxes): a fixed list of 128 was full with LordOS's own shell and GPU drag
-  refused every frame. LordBench's Desktop impact at 1280 × 800 gets 1 GPU drag frame of 2,024: its window,
+  the menu bar and the Dock are 2 boxes): a fixed list of 128 was full with Insane OS's own shell and GPU drag
+  refused every frame. InsaneBench's Desktop impact at 1280 × 800 gets 1 GPU drag frame of 2,024: its window,
   with its shadow, always reaches the Dock's or the menu bar's blurred backdrop, and its turning square
   makes the layer be painted whole. Its numbers with GPU drag on and with `LORD_GPU_DRAG=0` are the same within
   llvmpipe's noise.
 
-**On the Raspberry Pi 5** (V3D, its 1920×1080 monitor; LordBench's Desktop impact, 2026-10-28, with the build
+**On the Raspberry Pi 5** (V3D, its 1920×1080 monitor; InsaneBench's Desktop impact, 2026-10-28, with the build
 before the uploads in slices and the phase timing): with GPU drag on, 52.2–52.9 fps alone (build p99 21.3–21.7 ms,
 13.5–15.0 % late) and 25.8–27.5 fps under load, against 59.8–60.0 and 30.1–30.3 fps with `LORD_GPU_DRAG=0` in the
 same build (`docs/BENCHMARK.md`, "The drag frame's cost"). It stalled; the whole uploads inside a frame (V3D tiles
@@ -284,7 +284,7 @@ the texture on the CPU) are the likely cause and the reason for the slices above
 the phases did not exist yet.
 
 **The final run on the Pi 5** (2026-10-29, the build with the uploads in slices, the phase timing and the frame
-pipeline; LordBench's Desktop impact, with the pipeline off unless said; `docs/BENCHMARK.md`, "The drag frame's cost"):
+pipeline; InsaneBench's Desktop impact, with the pipeline off unless said; `docs/BENCHMARK.md`, "The drag frame's cost"):
 - The self-test passes on V3D: `gpu: GPU drag on: … self-test: 11373321 pixels, every valid premultiplied
   combination and a 4096x2048 placement pass, the same as the CPU's, 341 ms`.
 - `LORD_GPU_VERIFY=1` over a whole Desktop impact run (alone and under load): 138 GPU drag frames compared, all
@@ -302,7 +302,7 @@ under load, with no clock or thermal throttling; "The frame pipeline" below), wh
 
 ## The frame pipeline (0.8.6)
 
-Until now a display's next frame was started only after its page flip completed: pointer input, LordBench's
+Until now a display's next frame was started only after its page flip completed: pointer input, InsaneBench's
 scripted step, the JS frame callbacks, layout, paint, the texture upload, the GPU's draw and the flip ran one after
 another, one frame in flight. When that whole chain takes more than a refresh period, every frame waits for the
 second vblank and the rate locks at half the refresh. That is the Raspberry Pi 5 under an all-core load
@@ -310,7 +310,7 @@ second vblank and the rate locks at half the refresh. That is the Raspberry Pi 5
 98 % of the frames late, 30 fps; alone it builds in 7 ms and shows 60.
 
 **What changed** (`main.c`; the decisions in `fpipe.c`, without I/O, tested by `build/fpipe-test`): while the flip
-of frame N is pending, the CPU part of frame N+1 is done ahead (it is *prepared*): pointer input and LordBench's
+of frame N is pending, the CPU part of frame N+1 is done ahead (it is *prepared*): pointer input and InsaneBench's
 scripted step are dispatched, the JS frame callbacks and the layout run (`paint_ui`) and its damage is painted into
 the display's scene (`paint_out`, `out_prepare`), keeping what the submission needs on the display (`Out`): the rect
 it painted, its painted rectangles for the CPU path, its GPU drag result (`gdragtaken`, `gdrag`), the cursor and app flags
@@ -384,7 +384,7 @@ before the flips themselves came every other vblank) and the rate can double.
   (`gdrag_stale`, and its join in `paint_out`), join the next frame's damage like a frame gathered while a flip was
   pending, so `paint_out` applies the blur rule again to them (`paint_damage_settle`, `docs/LAYERS.md`).
 
-**LordBench's phases** (`docs/BENCHMARK.md`, "Frame phases") record a prepared frame at its submission:
+**InsaneBench's phases** (`docs/BENCHMARK.md`, "Frame phases") record a prepared frame at its submission:
 `paintMs` is its prepare's, `uploadMs`, `swapMs` and `flipIoctlMs` its submission's, `renderMs` both, the new
 `heldMs` the time it waited for the flip, and the synthetic pointer's latency ends at its own presentation
 (`lbf_painted`, `lbf_submitted`).
@@ -393,7 +393,7 @@ VM 116 has no free DRM card (its virtio-gpu card belongs to lord-sessiond, and i
 anyway), so on it only the headless path ran (unchanged: `prepared 0`), with the unit tests and `engine-test`'s
 pipelined drag runs.
 
-**Measured on the Raspberry Pi 5 with its monitor** (2026-10-29, LordBench's Desktop impact, two runs each, GPU drag
+**Measured on the Raspberry Pi 5 with its monitor** (2026-10-29, InsaneBench's Desktop impact, two runs each, GPU drag
 on in both; `docs/BENCHMARK.md`, "The drag frame's cost"):
 
 | Pi 5, monitor | Alone | Pointer to screen p50 alone | Under load | Late under load | Pointer to screen p50 / p99 under load |
@@ -435,9 +435,9 @@ path through uinput, over the Dock and under the menu bar):
 | **On, under load** | **34.4–35.1 fps** | **13.03–13.39 ms** | **44.9–45.9 %** | 536–547 of 548–559 |
 
 The 57 fps is the test's: its path stands still for 165 ms in the middle ("Measuring a drag", `docs/BENCHMARK.md`).
-The window reached 60 fps either way. `LORD_GPU_VERIFY=1` compared all 1,662 frames of a LordBench run and four real drags
+The window reached 60 fps either way. `LORD_GPU_VERIFY=1` compared all 1,662 frames of a InsaneBench run and four real drags
 through the service's environment: every line `differ=0 worst=0`. The read-back is what slows that run (29.3 fps alone).
-LordBench's Desktop impact doesn't see the gain (5 runs each): alone 60.0 fps both ways, the build's p50 falls from 8.1 to 6.9
+InsaneBench's Desktop impact doesn't see the gain (5 runs each): alone 60.0 fps both ways, the build's p50 falls from 8.1 to 6.9
 ms and the GPU's part rises from 1.51 to 2.12 ms; under load 30.1–31.8 fps off and 30.2–31.7 on, the build's p50 falls from
 13.1 to 9.7 ms and the GPU's part rises from about 13.5 to about 16 ms. Pointer to screen doesn't change.
 
@@ -448,7 +448,7 @@ GPU a frame during a drag. It is verified on V3D and SVGA3D only: on any other G
 **On SVGA3D** (2026-10-31, a VMware virtual machine composing on the GPU, a development build, 14 s real drags): `LORD_GPU_VERIFY=1` compared 2,102 frames over four drags, every one `differ=0`. The session's CPU over a clear area went from 7.5–7.7 % to 3.9–4.3 % of a core and the work per frame from 1.3 to 0.5 ms, with 766 of about 771 frames composed; across the Dock from 13.0–13.1 % to 11.2–11.4 %, with 284 of about 770 frames composed and the rest refused as `after`; a tall window went 0 of about 773, refused as `after`, at the old cost. So the cut around later nodes reaches less there than on the Pi 5, and nothing is lost.
 
 On v087.23 with no switch set, so with the default as it now stands (2 runs of each): 4.96–4.99 ms a frame and 27.0–27.6 % alone, 35.3–36.5 fps, 12.28–12.71 ms
-and 44.0–44.4 % under load; LordBench 60.0 and 30.8–30.9 fps. A drag on the Performance tab composed 0 of 906 frames (refused: `size`) at the old cost, and the next
+and 44.0–44.4 % under load; InsaneBench 60.0 and 30.8–30.9 fps. A drag on the Performance tab composed 0 of 906 frames (refused: `size`) at the old cost, and the next
 drag in the same session composed 893 of 905. `LORD_GPU_VERIFY` was not repeated on that build; v087.23 differs from v087.22 in the `size` refusal and the default.
 
 ## The buffer-age scissor (0.8.7, measured on the Pi 5, off by default)
@@ -475,7 +475,7 @@ is memory traffic the frame doesn't need. `LORD_GPU_SCISSOR=1` turns on the alte
   saves anything is unknown: a scissor still loads the tiles it touches, and llvmpipe's numbers say nothing about a tiler.
   That was the state before the Raspberry Pi 5 run below; PBO uploads or a linear canvas are still not done.
 
-**On the Raspberry Pi 5 (2026-10-31, v087.22, LordBench's Desktop impact, 3 runs with `LORD_GPU_SCISSOR=1`, 5 without, a
+**On the Raspberry Pi 5 (2026-10-31, v087.22, InsaneBench's Desktop impact, 3 runs with `LORD_GPU_SCISSOR=1`, 5 without, a
 reboot for each set, the sets without it taken before and after it):** it costs more than it saves, so it **stays off**.
 
 | Pi 5, monitor | GPU's part alone | Frames under load | GPU's part under load | Pointer to screen p99 under load |
@@ -638,7 +638,7 @@ compositing is the GPU's work, and the CPU only uploads what changed in the UI.
 
 To test it on the AMD PC (live ISO):
 1. Boot.
-2. In the LordOS Terminal, `grep gpu: ~/.cache/lordos/session.log` (or System Information →
+2. In the Insane OS Terminal, `grep gpu: ~/.cache/lordos/session.log` (or System Information →
    Hardware → Graphics, 0.8.5): it must say
    `GPU composition (AMD Radeon …)` and `cursor by hardware (cursor plane, …)` (the plane's size, the driver's).
 3. `vkcube`, `glmark2-es2-wayland`, a game (SuperTuxKart, 0 A.D.).

@@ -345,7 +345,7 @@ static void get_one(Conn *c, const FetchItem *it, uint32_t idx, uint64_t from) {
         }
         /* a resumed download asks for the rest (resume): 206 from there, or the whole file again (200) */
         if (from) snprintf(range, sizeof range, "Range: bytes=%llu-\r\n", (unsigned long long)from);
-        int rl = snprintf(req, sizeof req, "GET %s HTTP/1.1\r\nHost: %s%s%s\r\nUser-Agent: LordOS-pkg/0.7\r\n"
+        int rl = snprintf(req, sizeof req, "GET %s HTTP/1.1\r\nHost: %s%s%s\r\nUser-Agent: Insane OS-pkg/0.7\r\n"
                           "Accept-Encoding: identity\r\nConnection: keep-alive\r\n%s%s\r\n",
                           epath, host, strcmp(port, defport) ? ":" : "", strcmp(port, defport) ? port : "", ims, range);
         if (rl >= (int)sizeof req || conn_write(c, req, (size_t)rl) || conn_line(c, line, sizeof line)) {
@@ -510,7 +510,7 @@ int fetch_batch_in(FetchItem *items, int n, FetchProgress cb, void *ud, const ch
         prctl(PR_SET_PDEATHSIG, SIGKILL);
         /* (0.8.5) in lordos-net-store.scope, so the Store and the updates are their own app for the
          * firewall and Monitor → Network (lordos:store); Machines' downloads in lordos-net-machines.scope
-         * (0.8.9, lordos:machines); outside a LordOS session, where it is */
+         * (0.8.9, lordos:machines); outside a Insane OS session, where it is */
         if (getenv("LORDOS_SESSIOND")) cgroup_enter_root(scope);
         if (drop_to_nobody()) _exit(2);
         static Conn c;

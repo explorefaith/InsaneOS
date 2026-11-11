@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hb_compare.py — compares LordOS shaping (build/shape-test, otf.c + shape.c +
+"""hb_compare.py — compares Insane OS shaping (build/shape-test, otf.c + shape.c +
 shape_indic.c, shape_khmer.c, shape_myanmar.c, shape_use.c) with HarfBuzz, glyph by glyph and position by position.
 
     python3 hb_compare.py <fonts folder> [shape-test] [-v]

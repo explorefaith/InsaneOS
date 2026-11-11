@@ -58,7 +58,7 @@ static u32 crc32(const unsigned char *p, int n) {
     }
     return ~c;
 }
-EXPORT(crc_demo) int crc_demo(int unused) { (void)unused; return (int)crc32((const unsigned char *)"LordOS", 6); }
+EXPORT(crc_demo) int crc_demo(int unused) { (void)unused; return (int)crc32((const unsigned char *)"Insane OS", 6); }
 
 static int f0(int x) { return x; }
 static int f1(int x) { return x + 1; }

@@ -1,4 +1,4 @@
-// Terminal — LordOS's native terminal.
+// Terminal — Insane OS's native terminal.
 //
 // La emulación (xterm-256color, color directo, mouse, imágenes en línea, marcas del shell)
 // y el dibujo están en C (server/src/term); esta app arma pestañas, paneles divididos,
@@ -338,7 +338,7 @@ export default function TerminalApp() {
     if (action) { run(wid, action); return; }
     if (MODIFIER_CODES.has(e.code) || e.meta || s == null) return;
     // Ctrl+V in Claude Code with an image on the clipboard: its path goes in. Claude Code looks for the image
-    // with xclip or wl-paste, which don't reach LordOS's clipboard; it attaches a pasted image path the same way.
+    // with xclip or wl-paste, which don't reach Insane OS's clipboard; it attaches a pasted image path the same way.
     if (e.ctrl && !e.alt && !e.shift && e.code === 47 && isClaude(term.info(s)?.process)) {
       const img = clipboardImage(lord.clipboard.state());
       if (img) { sendTo(cur, (x) => term.paste(x, pathsText([img]))); return; }

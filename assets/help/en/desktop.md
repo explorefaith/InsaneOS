@@ -10,8 +10,8 @@ keywords: menu bar, dock, launchpad, control center, wallpaper, widgets
 
 At the very top:
 
-- **The LordOS logo:** About, Settings, Apps, lock the screen, switch user and log out.
-- **Reopening windows:** the apps open when you log out, restart or shut down come back in place at the next login. After a power cut LordOS asks first. Choose Always, Ask first or Off in Settings → Session.
+- **The Insane OS logo:** About, Settings, Apps, lock the screen, switch user and log out.
+- **Reopening windows:** the apps open when you log out, restart or shut down come back in place at the next login. After a power cut Insane OS asks first. Choose Always, Ask first or Off in Settings → Session.
 - **The menus of the app in front** (for example File, Edit, View), plus the Window and Help menus.
 - **On the right:** status icons (like the Clock timer or next alarm), the privacy indicators
   (camera, microphone, screen), the keyboard layout, the Search magnifier, **Control Center**
@@ -20,7 +20,7 @@ At the very top:
 ## The Dock and Apps
 
 - The **Dock** shows pinned and running apps (a dot underneath). Right-click an icon for its options.
-- **Apps** (**F4** or tap the ❖ key alone), the app launcher, shows every app by category, with search: LordOS
+- **Apps** (**F4** or tap the ❖ key alone), the app launcher, shows every app by category, with search: Insane OS
   apps, apps installed from the Store and Linux apps.
 
 ## Control Center
@@ -35,10 +35,10 @@ Change the wallpaper in [Settings → Wallpaper](settings:wallpaper). Notes from
 
 ## Themes
 
-LordOS ships two themes: **Lord Flow** (menu bar and Dock) and **Lord Classic** (taskbar and start
+Insane OS ships two themes: **Insane Flow** (menu bar and Dock) and **Insane Classic** (taskbar and start
 menu). Switch them live in [Settings → Appearance](settings:appearance).
 
-In **Lord Classic**: the start button (or Super) opens the start menu, where typing searches apps,
+In **Insane Classic**: the start button (or Super) opens the start menu, where typing searches apps,
 settings and files; right click an app there to pin it to Start or to the taskbar. The network and
 volume icons open quick settings, the clock opens the notifications and a calendar. Drag a window to
 the left or right edge to fill half the screen, to a corner for a quarter, or to the top to maximize

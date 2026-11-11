@@ -110,7 +110,7 @@ static const char *format(MpRole role, const char *dev) {
     if (!run_ok(w)) return fail[role];
     int ok = 0;
     switch (role) {
-    case MP_ROOT: { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "LordOS", dev, NULL }; ok = run_ok(a); break; }
+    case MP_ROOT: { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "Insane OS", dev, NULL }; ok = run_ok(a); break; }
     case MP_HOME: { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "home", dev, NULL }; ok = run_ok(a); break; }
     case MP_SWAP: { const char *const a[] = { "/usr/sbin/mkswap", "-q", "-L", "swap", dev, NULL }; ok = run_ok(a); break; }
     case MP_ESP:  { const char *const a[] = { "/usr/sbin/mkfs.vfat", "-F", "32", "-n", "EFI", dev, NULL }; ok = run_ok(a); break; }

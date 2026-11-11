@@ -1,4 +1,4 @@
-/* lbgpu.h — LordBench's GPU workloads, offscreen on a render node fd (lbgpu.c). */
+/* lbgpu.h — InsaneBench's GPU workloads, offscreen on a render node fd (lbgpu.c). */
 #ifndef LORD_BENCH_LBGPU_H
 #define LORD_BENCH_LBGPU_H
 

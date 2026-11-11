@@ -23,7 +23,7 @@
  *                               current rules deny is dropped (counted as "blocked") and its socket
  *                               is reported once, so lord-netperm destroys it (SOCK_DESTROY).
  *
- * The same programs are also attached to the user@<uid>.service of each LordOS session, to
+ * The same programs are also attached to the user@<uid>.service of each Insane OS session, to
  * close the `systemd-run --user` escape (the process ends up there, outside lordos.service). A
  * process that isn't in any app's scope (ancestor at level cfg.level) falls into the strict union
  * of the restrictions of the user's restricted apps (np_union, keyed by the user@<uid> at level

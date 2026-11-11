@@ -174,10 +174,10 @@ static void test_crypto(void) {
     CHECK(ed25519_verify(pk, sg, (const uint8_t *)"", 0) == 1, "ed25519 valid");
     sg[10] ^= 1;
     CHECK(ed25519_verify(pk, sg, (const uint8_t *)"", 0) == 0, "ed25519 alterada");
-    /* RSA-2048 generated for the test (tests: e = 65537, message "LordOS pkg test") */
+    /* RSA-2048 generated for the test (tests: e = 65537, message "Insane OS pkg test") */
     static const uint8_t e[] = { 1, 0, 1 };
     uint8_t dig[32];
-    sha256("LordOS pkg test", 15, dig);
+    sha256("Insane OS pkg test", 15, dig);
     CHECK(rsa_verify(rsa_n, sizeof rsa_n, e, 3, rsa_sig, sizeof rsa_sig, HASH_SHA256, dig) == 1, "rsa valid");
     dig[0] ^= 1;
     CHECK(rsa_verify(rsa_n, sizeof rsa_n, e, 3, rsa_sig, sizeof rsa_sig, HASH_SHA256, dig) == 0, "rsa with another hash");
@@ -334,12 +334,12 @@ static const char *PI_RPI =
 static const char *PI_LORDOS =
     "Package: rpi-eeprom\nVersion: 28.3-1\nArchitecture: all\nFilename: pool/rpi/r/rpi-eeprom.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: r\n\n";
 static const char *PI_PREFS =
-    "# LordOS on Raspberry Pi\n"
+    "# Insane OS on Raspberry Pi\n"
     "Package: *\nPin: origin archive.raspberrypi.com\nPin-Priority: 100\n\n"
     "Package: raspi-firmware linux-image-rpi-* linux-image-*-rpi-* rpi-eeprom raspi-utils* raspberrypi-archive-keyring\n"
     "Pin: origin archive.raspberrypi.com\nPin-Priority: 990\n";
 static const char *PI_KERNEL =
-    "Explanation: LordOS's own kernel\nPackage: linux-image-rpi-2712 linux-image-*+rpt-rpi-2712\nPin: version *\nPin-Priority: -1\n";
+    "Explanation: Insane OS's own kernel\nPackage: linux-image-rpi-2712 linux-image-*+rpt-rpi-2712\nPin: version *\nPin-Priority: -1\n";
 
 static void write_text(const char *path, const char *text) {
     FILE *f = fopen(path, "w");
@@ -379,7 +379,7 @@ static void test_hwdata(const char *dir) {
     CHECK(ver_cmp("2026.11.05.1", "2026.11.05") > 0 && ver_cmp("2026.11.05", "2026.10.29.9") > 0 && ver_cmp("2026.10.29", "2026.10.27") > 0,
           "snapshot versions: the date, then .N for a second one that day");
     IdxBuilder *b = idxb_new();
-    int s = idxb_source(b, "https://lordos.org/apt", "stable", "main", "stable", "LordOS", "LordOS", 0, 0, 500);
+    int s = idxb_source(b, "https://lordos.org/apt", "stable", "main", "stable", "Insane OS", "Insane OS", 0, 0, 500);
     idxb_packages(b, s, HW_REPO, strlen(HW_REPO), "amd64");
     CHECK(!idxb_write(b, idir, "amd64", err, sizeof err), "write hwdata index: %s", err);
     idxb_free(b);
@@ -388,7 +388,7 @@ static void test_hwdata(const char *dir) {
     Status st = { 0 };
     Plan p;
     PlanOpts o = { 0 };
-    /* Store → Updates' LordOS card: pkg-install lordos brings the new dependency, its newest version */
+    /* Store → Updates' Insane OS card: pkg-install lordos brings the new dependency, its newest version */
     snprintf(sp, sizeof sp, "%s/hwstatus-old", dir);
     write_text(sp, HW_OLD);
     CHECK(!status_load(&st, sp, "amd64") && st.n == 2, "old status");
@@ -426,7 +426,7 @@ static void test_pins(const char *dir) {
     IdxBuilder *b = idxb_new();
     int deb = idxb_source(b, "http://deb.debian.org/debian", "stable", "main", "trixie", "Debian", "Debian", 0, 0, 500);
     int rpi = idxb_source(b, "http://archive.raspberrypi.com/debian", "trixie", "main", "trixie", "Raspberry Pi Foundation", "Raspberry Pi Foundation", 0, 0, 500);
-    int lord = idxb_source(b, "https://lordos.org/apt", "stable", "rpi", "lordos", "LordOS", "LordOS", 0, 0, 500);
+    int lord = idxb_source(b, "https://lordos.org/apt", "stable", "rpi", "lordos", "Insane OS", "Insane OS", 0, 0, 500);
     idxb_packages(b, deb, PI_DEBIAN, strlen(PI_DEBIAN), "arm64");
     idxb_packages(b, rpi, PI_RPI, strlen(PI_RPI), "arm64");
     idxb_packages(b, lord, PI_LORDOS, strlen(PI_LORDOS), "arm64");

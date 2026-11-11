@@ -13,15 +13,15 @@ You can have up to nine.
 
 The Overview shows the windows of this desktop and, along the top, all your desktops.
 
-- **Lord Flow:** ⌃↑, or Overview in the Window menu.
-- **Lord Classic:** ❖Tab, or the button next to search.
+- **Insane Flow:** ⌃↑, or Overview in the Window menu.
+- **Insane Classic:** ❖Tab, or the button next to search.
 
 Click a window to go to it. Click a desktop to see it. Press **+** to add a desktop, and the × on a desktop
 to close it: its windows move to the next one. Drag a window onto a desktop to move it there.
 
 ## Switching
 
-| | Lord Flow | Lord Classic |
+| | Insane Flow | Insane Classic |
 |---|---|---|
 | Previous or next desktop | ⌃← ⌃→ · ❖⌃← ❖⌃→ | ❖⌃← ❖⌃→ |
 | New desktop | In the Overview | ❖⌃D |

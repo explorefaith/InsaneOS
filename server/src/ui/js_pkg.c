@@ -432,7 +432,7 @@ static JSValue f_apps(JSContext *c, JSValueConst this_val, int argc, JSValueCons
     return arr;
 }
 
-/* Dependencies installed by LordOS that nobody uses anymore (what pkg-autoremove would remove). */
+/* Dependencies installed by Insane OS that nobody uses anymore (what pkg-autoremove would remove). */
 static JSValue f_orphans(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     refresh();
@@ -590,7 +590,7 @@ static JSValue f_release_notes(JSContext *c, JSValueConst this_val, int argc, JS
 }
 
 /* lord.pkg.rebootRequired() → null, or the packages that asked for a restart ([] if none named):
- * the Debian convention /run/reboot-required(.pkgs), written by LordOS's postinst and its kernel hook. */
+ * the Debian convention /run/reboot-required(.pkgs), written by Insane OS's postinst and its kernel hook. */
 static JSValue f_reboot_required(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     if (access("/run/reboot-required", F_OK)) return JS_NULL;

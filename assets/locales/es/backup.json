@@ -22,7 +22,7 @@
   "bytes": "{done} de {total}",
   "cancel": "Cancelar",
   "dest": "Destino",
-  "destHelp": "Un disco externo (recomendado: ext4) o una carpeta. Las copias se guardan en LordOS-Backups.",
+  "destHelp": "Un disco externo (recomendado: ext4) o una carpeta. Las copias se guardan en Insane OS-Backups.",
   "volFree": "{free} libres de {total} · {fs}",
   "noLinks": "sin enlaces duros: cada copia ocupa todo",
   "noDisks": "No hay discos externos montados. Conectá uno o elegí una carpeta.",

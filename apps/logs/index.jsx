@@ -1,7 +1,7 @@
 // Logs — a log viewer (see docs/SYSTEM.md, «Logs»).
 //
 // Sources (sidebar):
-//   - LordOS: the session logs (~/.cache/lordos/<name>.log: session.log…);
+//   - Insane OS: the session logs (~/.cache/lordos/<name>.log: session.log…);
 //   - My logs: the user's journal (user-<uid>.journal), read by lord-server as the user with our
 //     own reader (server/src/logs/journal.c);
 //   - System and Kernel: the system journal. If the user is in systemd-journal or adm it is read
@@ -44,15 +44,15 @@ const pad = (n, w = 2) => String(n).padStart(w, '0');
 export function levelOf(p) { return p == null || p < 0 ? 'info' : p <= 3 ? 'error' : p === 4 ? 'warning' : p === 7 ? 'debug' : 'info'; }
 function clock(ms) { const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`; }
 
-// Lines of a LordOS .log (they have no timestamp): level by keywords.
-export function parseLordLog(text, file) {
+// Lines of a Insane OS .log (they have no timestamp): level by keywords.
+export function parseInsaneLog(text, file) {
   const out = [];
   const lines = text.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i];
     if (!m) continue;
     const low = m.toLowerCase();
-    // the Spanish words match lines written by older LordOS builds, which logged in Spanish
+    // the Spanish words match lines written by older Insane OS builds, which logged in Spanish
     const p = /\b(error|err|fail|failed|falla|fallo|abort|crash|segfault)\b/.test(low) ? 3 : /\b(warning|warn|could not|cannot|aviso|sin |no se pudo)\b/.test(low) ? 4 : 6;
     const src = /^([a-z][\w.-]{1,30})(\[\d+\])?:/i.exec(m);
     out.push({ t: 0, line: i + 1, p, id: src ? src[1] : file.replace(/\.log$/, ''), u: '', pid: -1, uid: -1, k: 0, b: '', m });
@@ -173,7 +173,7 @@ export default function Registros() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const { args } = useAppWindow() || {};
-  // opened on one LordOS log (Settings → Cloud → Show Log: { file: 'cloud.log' })
+  // opened on one Insane OS log (Settings → Cloud → Show Log: { file: 'cloud.log' })
   const [src, setSrc] = useState(() => (/^[a-z0-9._-]+\.log$/.test(args?.file || '') ? { kind: 'lordos', file: args.file } : { kind: 'user' }));        // { kind: 'user'|'system'|'kernel'|'lordos', file }
   const [items, setItems] = useState([]);
   const [level, setLevel] = useState('all');
@@ -223,7 +223,7 @@ export default function Registros() {
         if (isJournal) rows = await runJournal(buildQuery(0));
         else {
           const text = src.file ? logs.tail(src.file, 512 * 1024) || '' : '';
-          rows = parseLordLog(text, src.file || '');
+          rows = parseInsaneLog(text, src.file || '');
           const s = search.toLowerCase(), max = LEVELS[level];
           rows = rows.filter((r) => (max == null || r.p <= max) && (!s || r.m.toLowerCase().includes(s)) && (!proc || r.id === proc));
         }
@@ -257,7 +257,7 @@ export default function Registros() {
         let more;
         if (isJournal) more = await runJournal(buildQuery(newest.current));
         else {
-          const all = parseLordLog(logs.tail(src.file, 512 * 1024) || '', src.file || '');
+          const all = parseInsaneLog(logs.tail(src.file, 512 * 1024) || '', src.file || '');
           const s = search.toLowerCase(), max = LEVELS[level];
           setItems(all.filter((r) => (max == null || r.p <= max) && (!s || r.m.toLowerCase().includes(s))));
           more = null;

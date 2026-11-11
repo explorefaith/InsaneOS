@@ -1,4 +1,4 @@
-# LordOS roadmap
+# Insane OS roadmap
 
 Every milestone is verified on the `lordos-dev` VM (see `VM-SETUP.md`) with real
 screenshots (QEMU `screendump`) and documented.
@@ -19,7 +19,7 @@ screenshots (QEMU `screendump`) and documented.
 - [x] Text with `stb_truetype` and the Inter font (OFL); PNG/JPEG images with `stb_image`.
 - [x] React 18 renderer (`runtime/`, `react-reconciler` 0.29) that creates and updates native nodes.
 - [x] Mouse events with bubbling (enter/leave/click), keyboard, timers, `requestAnimationFrame`.
-- [x] "Lord Flow" theme: menu bar with blur, dock with magnification and tooltip, draggable
+- [x] "Insane Flow" theme: menu bar with blur, dock with magnification and tooltip, draggable
       windows with traffic lights, Files/Settings/About apps, light/dark mode and live accents.
 - [x] Cached shadows, reduced-resolution blur, damage tracking.
 
@@ -49,12 +49,12 @@ input (keyboard → characters per layout), copying only the damaged region to t
       (`ThemeProvider`/`useTheme`), `TextInput`, `ScrollView`, controls, system hooks.
 - [x] Apps as packages (`apps/<id>/manifest.json`): Files (real FS), Settings, About
       (real data), Calculator, Terminal (M4 notice).
-- [x] "Lord Flow" theme: app launcher with search, Control Center (live CPU/RAM),
+- [x] "Insane Flow" theme: app launcher with search, Control Center (live CPU/RAM),
       drop-down menus, context menu, 4 wallpapers of our own.
-- [x] "Lord Classic" theme as a template (taskbar + start menu, a single file).
+- [x] "Insane Classic" theme as a template (taskbar + start menu, a single file).
 - [x] Live theme switching from Settings, persistent, with protection against broken themes.
 
-Measured on the VM: server RAM 24–26 MB with Lord Flow, 11 MB with Lord Classic; theme
+Measured on the VM: server RAM 24–26 MB with Insane Flow, 11 MB with Insane Classic; theme
 switch ~30 ms + first frame ~60 ms.
 
 Left over from M3 and moved to later: volume and brightness (no audio or backlight on the VM),
@@ -62,7 +62,7 @@ real per-app isolation by permissions, a development environment in the developm
 
 ## M4 — Native terminal ✅ (2026-10-15)
 
-Moved ahead of Wayland at the project's request: the LordOS terminal is our own, not a Linux
+Moved ahead of Wayland at the project's request: the Insane OS terminal is our own, not a Linux
 app. Full details, shortcuts and the parity table with popular terminal emulators in `TERMINAL.md`.
 
 - [x] C engine (`server/src/term/`): xterm-256color emulator (VT500 parser, direct color,
@@ -101,7 +101,7 @@ Details in `LANGUAGES.md`. It comes before Wayland so GTK/Qt apps receive the sa
       windows or terminals; English fallback. 391 keys.
 - [x] Spanish, English and Portuguese complete; `tools/i18n-check.mjs` and `tools/i18n-pack.mjs`;
       test French pack installed from Settings.
-- [x] Language packs: LordOS catalogs (user, no root) + glibc region + the language's Debian
+- [x] Language packs: Insane OS catalogs (user, no root) + glibc region + the language's Debian
       packages (manpages, hunspell, aspell, hyphen, mythes, fonts for the script).
 - [x] Keyboard with libxkbcommon + xkb-data: every layout and variant, up to 4 at
       once, dead keys and compose.
@@ -137,7 +137,7 @@ Details in `WAYLAND.md`.
       (windows and popups), `wl_seat` (pointer and XKB keyboard), `wl_output`.
 - [x] GTK4 (own frame) and Qt6 (theme frame) app windows inside both themes:
       title, focus, move, resize, maximize, minimize, close, Dock.
-- [x] Clipboard shared with LordOS in both directions, `xdg-decoration`.
+- [x] Clipboard shared with Insane OS in both directions, `xdg-decoration`.
 - [ ] Launching `.desktop` apps from the app launcher (needs an approved exception to "the server
       doesn't execute commands"), `linux-dmabuf`, app cursors, drag and drop,
       `text-input`, Xwayland. (Later: the launcher in M7, `linux-dmabuf` with the GPU path, app
@@ -146,7 +146,7 @@ Details in `WAYLAND.md`.
 
 ## M7 — Apps, packages and system services ✅ (2026-10-16)
 
-Defined with the user on 2026-10-16: our own store (Debian apps and native LordOS apps),
+Defined with the user on 2026-10-16: our own store (Debian apps and native Insane OS apps),
 our own installer, and network, VPN, sound and clipboard with our own interface.
 
 - [x] Launcher for installed Linux apps (`.desktop`) in the app launcher, the start menu and the
@@ -173,7 +173,7 @@ our own installer, and network, VPN, sound and clipboard with our own interface.
       Trash, Quick Preview, Get Info, background copy/move (`fsops.c`),
       drag and drop, tags, search, mounted disks and «Open With» (`launchWith`).
 - [ ] Left over from M7: OpenConnect and IPsec (strongSwan), WPA3/Enterprise, real per-app
-      permissions (done in M8, `PRIVACY.md`), a signed LordOS app repository. (OpenConnect and IPsec/IKEv2
+      permissions (done in M8, `PRIVACY.md`), a signed Insane OS app repository. (OpenConnect and IPsec/IKEv2
       came in M9, `NETWORK.md`; WPA-Enterprise is still missing.)
 - [x] `flexWrap` in our own layout engine (`layout.c`).
 - [x] Notes: sticky notes on the desktop (widgets), markdown with reading view and index, images,
@@ -221,7 +221,7 @@ our own installer, and network, VPN, sound and clipboard with our own interface.
     kernel) with allowed/denied counters (`MONITOR.md`, "Phase 2"); Settings → Privacy: mode,
     Trusted apps and Restricted apps;
   - [x] non-network restrictions (camera, microphone, screen, USB, files, clipboard, Bluetooth,
-    notifications) enforced for LordOS apps in the broker, `js_media.c` and `sdk/notify.js`, with
+    notifications) enforced for Insane OS apps in the broker, `js_media.c` and `sdk/notify.js`, with
     live revocation (`FIREWALL.md`, "Non-network restrictions"); Linux apps: network only (later
     also devices, files and notifications, `FIREWALL.md`, "Linux apps");
   - [x] root-owned scopes: `lord-sessiond` places every app process and a Linux app can't move
@@ -246,7 +246,7 @@ our own installer, and network, VPN, sound and clipboard with our own interface.
   `SESSIONS.md`; multiple monitors: done in M9, `DISPLAYS.md`.)
 - [ ] A native browser. (The text editor and the image viewer are done: `EDITOR.md`, Photos in
   `MEDIA.md`.)
-- [x] Installable image based on minimal Debian 13, with LordOS as `.deb` packages: the live ISO
+- [x] Installable image based on minimal Debian 13, with Insane OS as `.deb` packages: the live ISO
   with its installer (`ISO.md`), and since 0.8.1 updates from the signed APT repository (`UPDATES.md`).
 - [ ] **ARM64 / Raspberry Pi 5 as an official platform** (`RASPBERRY.md`):
   - [x] Portability audit of `server/` for aarch64: unsigned char, 16K pages,
@@ -263,7 +263,7 @@ our own installer, and network, VPN, sound and clipboard with our own interface.
     - the partition grows by itself;
     - first boot with `lordos-user.txt`/`userconf.txt` (login screen) or setup
       mode.
-  - [x] LordOS build of the Raspberry Pi kernel with Landlock (`tools/rpi/build-kernel.sh`,
+  - [x] Insane OS build of the Raspberry Pi kernel with Landlock (`tools/rpi/build-kernel.sh`,
     `6.18.57-lordos-rpi-2712`), pinned over the archive kernel.
   - [x] Switch files on the boot partition: `ssh`, `remote-desktop`, Wi-Fi in `lordos-user.txt`;
     `tools/rpi/verify-board.sh` after flashing.
@@ -389,7 +389,7 @@ with screenshots (`backup-*`, `disks-*`, `logs-*`, `clock-*`, `help-*` `.png` fi
 - [x] **Backups** (`apps/backup`): scheduled hard-link snapshots of the home, hourly/daily/weekly
   retention, browse by date and restore, exclusions, optional encryption with Monocypher; a
   lord-server thread at nice 19 and idle I/O, paused on battery (`build/backup-test`).
-- [x] **Logs** (`apps/logs`): our own systemd journal reader, the user's own journal and LordOS
+- [x] **Logs** (`apps/logs`): our own systemd journal reader, the user's own journal and Insane OS
   logs, system logs for admins through a closed action, filters, search, live follow and export
   (`build/journal-test`).
 - [x] **Clock** (`apps/clock`): world clock with our own TZif reader (`build/tzif-test`), alarms that
@@ -527,7 +527,7 @@ Raspberry Pi 5 image `lordos-0.8.5-rpi5-arm64.img.xz`). Updated in place from 0.
 no migration (`UPDATES.md`). What it delivered, each item described in its own document:
 
 - [x] Monitor → Network, second generation, the menu bar network item, blocklists and the "Deny
-  silently" mode; LordOS's own components (mail, Store, printing, Terminal, blocklists) in their own
+  silently" mode; Insane OS's own components (mail, Store, printing, Terminal, blocklists) in their own
   firewall scopes (`MONITOR.md`, `FIREWALL.md`; item below).
 - [x] The Store: a new look, the Artificial Intelligence catalog and the Commercial page (vendor
   repositories added with `pkg-source-add`), a signed featured banner, downloads over HTTPS
@@ -538,8 +538,8 @@ no migration (`UPDATES.md`). What it delivered, each item described in its own d
 - [x] Files: This Computer and every disk (item below; `FILES.md`, `SYSTEM.md`).
 - [x] Root over SSH as an advanced option (`REMOTE.md`, "Root over SSH").
 - [x] Settings → Displays: numbers, Identify and snapping; one place to choose the desktop style;
-  the themes renamed Lord Flow and Lord Classic; the app menu and Force Quit, a fuller Window menu,
-  menus inside the window in Lord Classic, Dock Open at Login and Assign To (`SETTINGS.md`,
+  the themes renamed Insane Flow and Insane Classic; the app menu and Force Quit, a fuller Window menu,
+  menus inside the window in Insane Classic, Dock Open at Login and Assign To (`SETTINGS.md`,
   `WINDOWS.md`); a guide to building an appearance (`THEMES-GUIDE.md`); a version per native app
   (`NATIVE-APPS.md`).
 - [x] The login screen runs only while it is shown, follows a monitor plugged in after boot, and lock
@@ -554,14 +554,14 @@ Released 2026-10-30 (`CHANGELOG.md`, "0.8.6-beta"; ISO `lordos-live-0.8.6-amd64.
 Raspberry Pi 5 image `lordos-0.8.6-rpi5-arm64.img.xz`). Updated in place from 0.8.5 with no migration
 (`UPDATES.md`).
 
-LordBench and a desktop that stays smooth under load. Each item is described in its own document.
+InsaneBench and a desktop that stays smooth under load. Each item is described in its own document.
 
-**LordBench** (`BENCHMARK.md`; the item under "Before 1.0" has the details):
+**InsaneBench** (`BENCHMARK.md`; the item under "Before 1.0" has the details):
 - [x] The sandboxed `lord-bench` helper: CPU, memory, GPU, storage and sustained workloads; the thermal, throttle
   and battery guards; versioned results and System Information → Performance.
 - [x] Video workloads (software decoding, the remote desktop's encoders), the desktop-impact mode, the
   pointer-to-screen latency, the N-boot test, `lordos-sysreport bench` and the Pi 5 reference.
-- [x] LordOS's own interface work as workloads (`cpu.ui`, `cpu.shape`, fonts built into the helper) and the
+- [x] Insane OS's own interface work as workloads (`cpu.ui`, `cpu.shape`, fonts built into the helper) and the
   helper-sandbox self-test inside `lord-bench` (2026-10-28).
 - [x] The interface workloads measured on the Pi 5 for its reference. *Two Quick runs from a terminal (2026-10-29):*
   layout and paint 39.3–39.4 fps on one core, 45.4 fps with the paint threads; shaping 630–632 runs/s on one core,
@@ -572,8 +572,8 @@ LordBench and a desktop that stays smooth under load. Each item is described in 
 - The x86 PC reference and hardware video decoding moved to 0.8.7 (decided by the maintainer on 2026-10-29;
   "Release 0.8.7-beta" below).
 - [x] Detecting the Pi 5 firmware's throttling. *Built (2026-10-28/29), checked on the Pi 5 on 2026-10-29:* the
-  LordOS kernel (`rpi-6.18.y`) only exposes the firmware's under-voltage alarm (`rpi_volt`'s `in0_lcrit_alarm`, the
-  last 2 s), not its capped, throttled or soft-limit bits, so LordBench watches that alarm and `get_throttled` where
+  Insane OS kernel (`rpi-6.18.y`) only exposes the firmware's under-voltage alarm (`rpi_volt`'s `in0_lcrit_alarm`, the
+  last 2 s), not its capped, throttled or soft-limit bits, so InsaneBench watches that alarm and `get_throttled` where
   an older kernel has it, and counts 80 °C on a Pi as the firmware's limit (peak tests stop as throttled); System
   Information's Raspberry Pi rows read the same way through the shared `hw/rpifw.c`. Tested on fake sysfs trees, and
   on the Pi 5: the `rpi_volt` alarm is present and reads 0 with the official supply (`piFirmware.voltageAlarm` true,
@@ -587,10 +587,10 @@ desktop fell to 24 fps under an all-core load:
   frames too): the corner restore on the drag layer now mixes both pixels alpha included (`mix_px` in `canvas.c`),
   checked against a full repaint by `test_drag_corners` on both paths (`WINDOWS.md`).
 - [x] The frame-cost work (`WINDOWS.md`, `GPU.md`, `BENCHMARK.md` "The drag frame's cost"): steps 0–11, pixel-identical
-  (golden hashes of 2,417 drag frames per path) except the approved 1-level corner change of step 9; LordBench's
+  (golden hashes of 2,417 drag frames per path) except the approved 1-level corner change of step 9; InsaneBench's
   square and the Cooling fans turn (the `rotate` key); a transformed node repaints when its own style changes; GPU
   composition without `GL_EXT_unpack_subimage`; the dragged window composited on the GPU ("GPU drag", step 10) with
-  its self-test, `LORD_GPU_DRAG` (only `1` turns it on) and `LORD_GPU_VERIFY`; LordBench's per-frame phase timing (CPU-late or GPU-late per
+  its self-test, `LORD_GPU_DRAG` (only `1` turns it on) and `LORD_GPU_VERIFY`; InsaneBench's per-frame phase timing (CPU-late or GPU-late per
   frame, GPU drag's refusals by cause); GPU drag's textures catching up in slices between frames; the paint pool
   turning on for slow whole frames; `lord.stats()` in O(1) (a QuickJS patch, `THIRD_PARTY.md`). Pi 5 with its monitor,
   GPU drag off: alone 53–58 → 59.8–60 fps, under load 24–25 → 30 fps; with GPU drag on it stalled (52 fps alone; that
@@ -615,7 +615,7 @@ desktop fell to 24 fps under an all-core load:
   numbers and the frame pipeline and GPU drag off by default.
 
 **Release:**
-- [ ] Re-measure the references after the release (results compare only within one LordOS version; the engine
+- [ ] Re-measure the references after the release (results compare only within one Insane OS version; the engine
   references stay tagged 0.8.5-beta until then).
 - [x] Release cleanup, packages, the Pi 5 image and the ISO, as for 0.8.5 (2026-10-30).
 
@@ -628,7 +628,7 @@ wallpapers (`WALLPAPERS.md`), Desktops and Overview (`DESKTOPS.md`), Remote Desk
 
 Decided by the maintainer on 2026-10-30: everything below goes in 0.8.7, with **Cleaner** added. Items still open below did not reach this release.
 
-Community hardware reports (the item under "Before 1.0", `BENCHMARK.md`), what LordBench and the desktop under load
+Community hardware reports (the item under "Before 1.0", `BENCHMARK.md`), what InsaneBench and the desktop under load
 left for after 0.8.6, and the new native app:
 - [x] An arm64 live ISO (decided by the maintainer on 2026-10-30): generic UEFI arm64 machines and virtual machines, so
   they no longer need a Debian install plus the script. `tools/iso/build.sh` takes the architecture from the host and
@@ -639,11 +639,11 @@ left for after 0.8.6, and the new native app:
   are read-only, and every change goes through a reviewed plan the user confirms. Nothing is copied from other
   projects. Design: `CLEANER-ARCHITECTURE.md`, in phases: the core, then system care, then the optional modules. The
   Phase 1 and the rows of Phase 2 shipped in 0.8.7; each feature's state is in `CLEANER-ROADMAP.md`.
-- [ ] The x86 PC reference for LordBench (a modest PC still to be chosen; moved from 0.8.6 on 2026-10-29).
+- [ ] The x86 PC reference for InsaneBench (a modest PC still to be chosen; moved from 0.8.6 on 2026-10-29).
 - [ ] Hardware video decoding (VA-API on PCs; the Pi 5's HEVC decoder needs FFmpeg's `v4l2request`, which Debian's
-  FFmpeg lacks), in `lord-media` and LordBench's video workloads (moved from 0.8.6 on 2026-10-29). In 0.8.7: the Pi 5's
+  FFmpeg lacks), in `lord-media` and InsaneBench's video workloads (moved from 0.8.6 on 2026-10-29). In 0.8.7: the Pi 5's
   HEVC decoder in `lord-media` through Raspberry Pi's FFmpeg (`WALLPAPERS.md`), and the player leaves a failing hardware
-  decoder (`MEDIA.md`), not run on real hardware. Left: LordBench's video workloads, whose job's sandbox waits for the
+  decoder (`MEDIA.md`), not run on real hardware. Left: InsaneBench's video workloads, whose job's sandbox waits for the
   maintainer.
 - [x] Step 12: GPU drag for the whole drag, also where the Dock or the menu bar overlap the window (moved from 0.8.6
   on 2026-10-30). Built and measured on the Pi 5 on 2026-10-31, and on by default since (`GPU.md`, "The whole drag").
@@ -671,7 +671,7 @@ Released 2026-11-02 (`CHANGELOG.md`, "0.8.8-beta"; ISOs `lordos-live-0.8.8-amd64
 - [x] Settings: your own wallpaper picture (desktop and login screen), Desktops in Desktop & Dock, Mouse & Trackpad always
   shown, the app switcher's keys and look in Keyboard.
 - [x] The system file dialog looks and works like Files, and answers the FileChooser portal for Linux apps.
-- [x] Administrator rights for Linux apps through `pkexec`, with LordOS's own prompt (`lord-pkexec`).
+- [x] Administrator rights for Linux apps through `pkexec`, with Insane OS's own prompt (`lord-pkexec`).
 - [x] `lordos-issue` for bug reports, Broadcom Wi-Fi firmware and the regulatory database on the images, and `.local`
   names through `libnss-mdns`.
 - [x] Fixes from the community reports: Firefox's input, Wi-Fi after a reboot, the volume and brightness keys,
@@ -722,15 +722,15 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
 - [x] **Screenshots: copy the text** in a selection and the markup editor's Transcribe, through the new sandboxed
   `lord-ocr` (Tesseract).
 - [x] Fixes from the community reports and new requests: automatic screen rotation and the touchscreen on a turned panel
-  ([#60](https://github.com/lordbasex/LordOS/issues/60), [#61](https://github.com/lordbasex/LordOS/issues/61)), the
-  region's formats ([#45](https://github.com/lordbasex/LordOS/issues/45),
-  [#53](https://github.com/lordbasex/LordOS/issues/53)), the keyboard layout
-  ([#55](https://github.com/lordbasex/LordOS/issues/55)), empty emoji boxes
-  ([#56](https://github.com/lordbasex/LordOS/issues/56)), Mail's passwords with a locked keyring
-  ([#63](https://github.com/lordbasex/LordOS/issues/63)), the remote desktop's stuck Ctrl
-  ([#44](https://github.com/lordbasex/LordOS/issues/44)), Cloud's panel ([#71](https://github.com/lordbasex/LordOS/issues/71)),
-  Tailscale and RustDesk in Store → Remote access ([#66](https://github.com/lordbasex/LordOS/issues/66),
-  [#68](https://github.com/lordbasex/LordOS/issues/68)), and the rest in `CHANGELOG.md`, "Fixed".
+  ([#60](https://github.com/lordbasex/Insane OS/issues/60), [#61](https://github.com/lordbasex/Insane OS/issues/61)), the
+  region's formats ([#45](https://github.com/lordbasex/Insane OS/issues/45),
+  [#53](https://github.com/lordbasex/Insane OS/issues/53)), the keyboard layout
+  ([#55](https://github.com/lordbasex/Insane OS/issues/55)), empty emoji boxes
+  ([#56](https://github.com/lordbasex/Insane OS/issues/56)), Mail's passwords with a locked keyring
+  ([#63](https://github.com/lordbasex/Insane OS/issues/63)), the remote desktop's stuck Ctrl
+  ([#44](https://github.com/lordbasex/Insane OS/issues/44)), Cloud's panel ([#71](https://github.com/lordbasex/Insane OS/issues/71)),
+  Tailscale and RustDesk in Store → Remote access ([#66](https://github.com/lordbasex/Insane OS/issues/66),
+  [#68](https://github.com/lordbasex/Insane OS/issues/68)), and the rest in `CHANGELOG.md`, "Fixed".
 - [x] The CPU's microcode updates on amd64, and the same command-line tools on every image (below, under 0.8.9).
 
 ## Release 0.8.8.7-beta (planned)
@@ -744,8 +744,8 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   data, and per-device actions in Settings → Keyboard and Mouse & Trackpad (work on branch `feat/special-keys`).
   HID++ (battery, DPI, SmartShift, gesture button) is a design for review first (`docs/drafts/HIDPP.md`, needs an
   AGENTS.md exception).
-- [ ] The LordOS Imager 0.8.8.6 for the Mac (built and signed on the maintainer's Mac) and
-  [#73](https://github.com/lordbasex/LordOS/issues/73) closed once it is published.
+- [ ] The Insane OS Imager 0.8.8.6 for the Mac (built and signed on the maintainer's Mac) and
+  [#73](https://github.com/lordbasex/Insane OS/issues/73) closed once it is published.
 
 ## Release 0.8.9 (planned)
 
@@ -756,7 +756,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   optional 720p stream. The asynchronous capture is on the branch `v089-capture-work` (drops went from 36 % to 23 %).
 - [ ] **Unattended install, the rest:** the boot entry on the new ISOs, and tests of the free space mode, UEFI, a USB
   stick, `ssh_key`, `after = poweroff` and the arm64 ISO.
-- [x] **Manual partitioning in the installer** ([#31](https://github.com/lordbasex/LordOS/issues/31), built 2026-11-05 on
+- [x] **Manual partitioning in the installer** ([#31](https://github.com/lordbasex/Insane OS/issues/31), built 2026-11-05 on
   `i31-parts`; reaches people with the new ISOs): **Choose partitions** on a GPT disk booted through UEFI, with `/`,
   `/home` kept or formatted, the EFI partition kept or formatted on request, swap, delete and create in free space,
   every change listed and confirmed (`ISO.md`, "Manual partitioning"). Tested on images and with a full install
@@ -770,23 +770,23 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   `fdisk`, `rfkill` and `jq`, are in one list both images read (`tools/iso/packages-tools.sh`) and are Recommends of
   `lordos`; `dnsutils` is not in it yet.
 - [ ] The boot menu's font draws parentheses as braces ("{live}" for "(live)") in every entry: seen on the 0.8.8 ISO.
-- [ ] **LordOS Imager 0.8.8 with French** (French reached the Imager's code after Imager 0.8.6): the Mac build signed
+- [ ] **Insane OS Imager 0.8.8 with French** (French reached the Imager's code after Imager 0.8.6): the Mac build signed
   and notarized by the maintainer, Windows and Linux built too, then `"lordos": {"imager"}` in `package.json` moves so
   the site and the release notes point at it. It can ship on its own before 0.8.9.
 - [ ] Mail attachments, a real USB disk and a real Linux app tested with the system file dialog; the portal tested when
   two sessions start at once; `results-<version>.tar.gz` collected and attached with the next images.
 - [ ] Keys of laptops whose top row sends desktop actions instead of F3 and F4 (the overview, the app launcher):
-  [#12](https://github.com/lordbasex/LordOS/issues/12).
+  [#12](https://github.com/lordbasex/Insane OS/issues/12).
 - [x] **A thumbnail view in the system file dialog** (`sdk/filepicker.jsx`): a switch between the list and small
   pictures, remembered, and thumbnails by default when the dialog only accepts images (wallpaper, Notes). One change
-  for every app, since 0.8.8.1 they all share the dialog: [#13](https://github.com/lordbasex/LordOS/issues/13),
-  [#22](https://github.com/lordbasex/LordOS/issues/22). Done for 0.8.8.3 (`FILES.md`, "The system file dialog").
+  for every app, since 0.8.8.1 they all share the dialog: [#13](https://github.com/lordbasex/Insane OS/issues/13),
+  [#22](https://github.com/lordbasex/Insane OS/issues/22). Done for 0.8.8.3 (`FILES.md`, "The system file dialog").
 
 ## Before 1.0
 
 - [x] **Monitor → Network, second generation (0.8.5)** — done 2026-10-19 on VM 118, see
   `MONITOR.md` ("Network, second generation", "The menu bar network item", "Blocklists") and
-  `FIREWALL.md` ("LordOS components in their own scopes", "The essential system services",
+  `FIREWALL.md` ("Insane OS components in their own scopes", "The essential system services",
   "Blocklists", "The modes"). Our own design; same function as the
   best per-app firewalls, no copied look or names.
   - **Native apps as their own rows:** every built-in component that uses the network gets a row
@@ -796,7 +796,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     their own scope, shown as "Terminal" with the program's name). Apps that never touch the
     network (Calculator) don't appear. Essential system traffic (DNS, time, DHCP) is shown but
     can't be blocked; blocking Store and updates warns that security updates stop. Goal: the
-    "LordOS" row near zero; anything left gets its own process.
+    "Insane OS" row near zero; anything left gets its own process.
   - **A tree with traffic everywhere:** app → its domains and IPs (and ports under them), each row
     with sent and received bytes, a small up/down activity meter and its allow/deny switch
     (domain rules from the row, e.g. deny one tracker and keep the site). "N more…" folds long
@@ -842,7 +842,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     the app quits, until restart, once, for N minutes); actions beyond allow/deny: notify, play a
     sound (optionally scaled by traffic volume).
   - **Identity that survives updates:** Linux apps identified by their Debian package and
-    `.desktop` id (not a versioned path); system code by LordOS's signed manifest; rules don't
+    `.desktop` id (not a versioned path); system code by Insane OS's signed manifest; rules don't
     break when an app updates.
   - **Rule groups:** local groups by topic, and subscriptions to remote rule-group files over
     HTTPS (validated, size-limited, unprivileged fetcher, never able to allow what a local deny
@@ -860,7 +860,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     allow/deny events, through the same validated API as the Monitor (no root shortcut).
 
 - [x] **System Information (released in 0.8.5-beta, 2026-10-27; the open sub-items remain)** — design in `BENCHMARK.md`. A native app (`apps/sysinfo`,
-  also About LordOS → System Report…) with every piece of hardware detected and what LordOS uses:
+  also About Insane OS → System Report…) with every piece of hardware detected and what Insane OS uses:
   each GPU as separate layers (device, driver, DRM, render node, EGL context, composition, scanout,
   video decode and encode), the services, a Compatibility panel, and the paper's claims checked on
   this machine, each marked *configured* or *effective* (a probe app tries what must fail). JSON
@@ -875,7 +875,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   - [x] Checks part 2: the Sandbox Probe tries what must fail (app sandbox, helper sandbox, broker, scope; 2026-10-26);
   - [ ] a connection refused by the per-app firewall (an app with network access and a temporary rule);
   - [x] reports: the Report tab with the exact text, Copy and Save to Documents (2026-10-26);
-  - [ ] first real reports from the RX 580 PC, and a full report from the Pi 5 with a monitor (LordBench has measured
+  - [ ] first real reports from the RX 580 PC, and a full report from the Pi 5 with a monitor (InsaneBench has measured
     the Pi 5 on its monitor, `BENCHMARK.md`; System Information's report from it is not published yet).
   - [ ] from the live USB without installing: a *Check this computer* boot entry, reports marked
     live, nothing written to the computer's disks, saved to a removable drive; the installer shows
@@ -907,37 +907,37 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   would add complexity (bubblewrap, OSTree, portals, seven new exceptions to `AGENTS.md`) and future problems. The
   design review is kept as documentation (`FLATPAK.md`); nothing is built until the maintainer decides whether to
   do it at all.
-  2026-10-27) and waits for approval. Today LordOS neither uses nor integrates
-  Flatpak, and its rules keep isolation as LordOS's own code (no bubblewrap/flatpak for `.lpk`). What
-  has to be solved so Flatpak apps follow LordOS's security model:
+  2026-10-27) and waits for approval. Today Insane OS neither uses nor integrates
+  Flatpak, and its rules keep isolation as Insane OS's own code (no bubblewrap/flatpak for `.lpk`). What
+  has to be solved so Flatpak apps follow Insane OS's security model:
   - **Identity and the firewall:** `flatpak run` moves the app into its own transient
     `app-flatpak-<id>-*.scope` under `user@`, where `lord-netperm` treats it as an escape and applies
-    the per-user union, not that app's rules. Flatpak apps must start through LordOS's launcher in
-    LordOS's app scope (or a root-owned `lordos-flatpak-<id>` scope) so Monitor, the firewall and the
+    the per-user union, not that app's rules. Flatpak apps must start through Insane OS's launcher in
+    Insane OS's app scope (or a root-owned `lordos-flatpak-<id>` scope) so Monitor, the firewall and the
     device restrictions see them as themselves; device-restricted apps have no session bus, which
     `flatpak run` needs today.
   - **The launcher:** their `.desktop` files live in `/var/lib/flatpak/exports/share/applications`
     and `~/.local/share/flatpak/exports/share/applications`; adding a launch path is an `AGENTS.md`
     exception that needs its own review.
   - **Permissions:** each app declares its own (often the whole home, X11, every device) and asks
-    through xdg-desktop-portal, which LordOS doesn't run; they would need to be shown and limited in
-    Settings → Privacy, and a LordOS portal backend would route file, screen, camera and microphone
-    requests to LordOS's own prompts.
+    through xdg-desktop-portal, which Insane OS doesn't run; they would need to be shown and limited in
+    Settings → Privacy, and a Insane OS portal backend would route file, screen, camera and microphone
+    requests to Insane OS's own prompts.
   - **Installing:** per user (`--user`, no root), so no new admin action; the Flathub remote pinned by
     its key, and its signed appstream data (not the website's API) as the Store's catalog, through a
     network path that needs approval like `lord-fetch`.
 
 - [ ] **Steam in the Store's Commercial section (needs multiarch)** — Debian 13's `steam-installer`
   (contrib) depends on `steam-libs-i386`: 72 i386 packages with `--no-install-recommends`, after
-  `dpkg --add-architecture i386` (checked in a `debian:trixie` container, 2026-10-27). LordOS's package
+  `dpkg --add-architecture i386` (checked in a `debian:trixie` container, 2026-10-27). Insane OS's package
   engine is native-architecture only today (`binary-<native>` and `binary-all` indexes, foreign
   packages skipped, `:i386` qualifiers dropped). Needs: a closed admin action for the one fixed value
   (`pkg-foreign-arch i386`), an index and status keyed by (name, arch), the Multi-Arch rules in the
   resolver (same arch by default; `foreign`, `allowed` with `:any`, explicit `:i386`), co-installable
   `Multi-Arch: same` packages and dpkg called with `name:arch`.
 
-- [x] **LordBench (first part released in 0.8.6-beta, 2026-10-30; the open items moved to 0.8.7)** — `BENCHMARK.md`. Workloads in the sandboxed `lord-bench` helper
-  (CPU and LordOS's own work, memory, GPU, compositor, video, storage, sustained load); peak
+- [x] **InsaneBench (first part released in 0.8.6-beta, 2026-10-30; the open items moved to 0.8.7)** — `BENCHMARK.md`. Workloads in the sandboxed `lord-bench` helper
+  (CPU and Insane OS's own work, memory, GPU, compositor, video, storage, sustained load); peak
   performance and desktop impact measured apart; frame times against the refresh rate actually in
   use; stops on the hardware's trip points and throttling; every result records its conditions;
   three verdicts (performance against several reference machines, compatibility, stability), no
@@ -947,7 +947,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   (`BENCHMARK.md`, "Built so far"), and so are the video workloads (software decoding, the remote desktop's
   encoders), the desktop-impact mode (the compositor's frame times alone and under a low-priority load), the N-boot
   test, the pointer-to-screen latency, `lordos-sysreport bench` and the Pi 5 reference. *(2026-10-28)* Also built:
-  LordOS's own interface work as workloads (layout and paint of a fixed 1920×1080 scene with the engine's real
+  Insane OS's own interface work as workloads (layout and paint of a fixed 1920×1080 scene with the engine's real
   code, one core and with the paint threads, and shaping fixed paragraphs in five scripts, with the fonts built
   into the helper; VM 116: 37.0 and 39.9 fps, 619 and 3,595 runs/s), and the helper-sandbox self-test inside
   `lord-bench` (six tries that must fail, checked by the Stability verdict and `lordos-sysreport bench`). The Pi 5's
@@ -962,7 +962,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   reference moved to 0.8.7 (2026-10-29, "Release 0.8.7-beta"), and so did GPU drag for the whole drag and the
   rest of the Pi 5 under load (fewer pixels per frame, what slows V3D; 2026-10-30).
 - [ ] **Community hardware reports (0.8.7)** — `BENCHMARK.md`. Share on GitHub with the
-  `hardware-report` template (the user submits it, LordOS sends nothing), schema validation and
+  `hardware-report` template (the user submits it, Insane OS sends nothing), schema validation and
   labels in a workflow, and a tested-hardware catalogue on lordos.org that the Compatibility panel
   reads as a signed snapshot. Released in 0.8.7-beta, except the open items:
   - [x] The report format: a versioned JSON Schema that is an allow-list (`apps/sysinfo/hwreport.schema.json`),
@@ -1051,7 +1051,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     move and resize, titles, `WM_CLASS` → `.desktop`, override-redirect menus and tooltips,
     fullscreen, minimize, close, our window frame and cursor);
   - [x] clipboard and primary selection bridged both ways (and `zwp_primary_selection_v1` for
-    Wayland apps); drag and drop X11 ↔ Wayland: not yet (LordOS has no Wayland drag and drop yet);
+    Wayland apps); drag and drop X11 ↔ Wayland: not yet (Insane OS has no Wayland drag and drop yet);
   - [x] HiDPI policy (scale 1, scaled by the compositor) and positions across displays; not tested on
     a HiDPI display;
   - [x] the same per-app identity as Wayland apps (scope, firewall, Dock grouping); restricted apps
@@ -1061,7 +1061,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   - [x] tests with real X11 apps (XTerm, xeyes, a Swing app, Neverball), CPU and GPU paths.
   - [ ] later: a separate or "untrusted" X display for restricted apps; X11 ↔ Wayland drag and drop;
     sharp X11 apps on HiDPI displays.
-- [x] **Turn the "Lord Classic" theme into a second full appearance** (0.8.3; Settings → Appearance → Desktop style, see `DESIGN.md`, "Lord Classic"), for people coming from the
+- [x] **Turn the "Insane Classic" theme into a second full appearance** (0.8.3; Settings → Appearance → Desktop style, see `DESIGN.md`, "Insane Classic"), for people coming from the
   most common desktop layout: a centered taskbar with a start menu, pinned and running apps, a
   system tray with quick settings and a notification panel, snap layouts for windows, rounded
   corners and translucent materials. Until 0.8.3 `themes/classic` was only a template (taskbar and
@@ -1073,7 +1073,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   - shell pieces of its own: taskbar, start menu with search and pinned apps, tray, quick settings,
     notification panel, window snapping (halves, quarters), task view;
   - switchable at runtime, in light and dark, RTL, and with the same accent colors;
-  - **our own design and assets only:** inspired by the familiar layout, but with LordOS icons,
+  - **our own design and assets only:** inspired by the familiar layout, but with Insane OS icons,
     fonts (Inter / Plus Jakarta Sans), wallpapers and names. No copied logos, icons, wallpapers,
     fonts, sounds or product names from any company, and no third-party "clone" projects' assets
     (they often bundle copyrighted material). See `docs/LORDOS-BRAND.md` and the no-brand rule;
@@ -1091,7 +1091,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     `lord-server`; the refresh token stored in the system keyring (Passwords), never in the account
     file; `AUTHENTICATE XOAUTH2` in `imap.c` and `smtp.c`; token refresh and revoke on account removal;
   - Google calendars and contacts (CalDAV/CardDAV) with the same sign-in;
-  - **needs iPERFEX to register LordOS with each provider** (only the project owners can do this):
+  - **needs iPERFEX to register Insane OS with each provider** (only the project owners can do this):
     a Microsoft Entra app registration (public client, personal and work accounts,
     `IMAP.AccessAsUser.All`, `SMTP.Send`, `offline_access`; publisher verification optional) and a
     Google Cloud OAuth client of type "Desktop app" with the `https://mail.google.com/` scope and the
@@ -1101,7 +1101,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
 
 - [x] **Browsers with their own bar (0.8.4)** — lord-server honors the decoration mode an app asks
   for (xdg-decoration and KDE's server-decoration), also while the window is open; Chromium and
-  Firefox draw their own bar by default, with LordOS's window buttons (traffic lights from LordOS's
+  Firefox draw their own bar by default, with Insane OS's window buttons (traffic lights from Insane OS's
   GTK theme in Chromium), and the window menu, resize edges and snap layouts keep working. See
   `docs/WAYLAND.md`, "Who draws the frame".
 - [x] **Settings → Appearance: "Browsers: tabs in the title bar" (0.8.4)** — one switch, on by
@@ -1122,8 +1122,8 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   itself (not with the GTK theme), so it would need a per-profile `chrome/userChrome.css` plus
   `toolkit.legacyUserProfileCustomizations.stylesheets`; weigh it against touching browser profiles
   before doing it.
-- [x] **LordOS Imager (0.8.4)** — our own card and stick writer with a first-run experience for the
-  Raspberry Pi 5, in LordOS (`apps/imager`) and as a Tauri app for other computers
+- [x] **Insane OS Imager (0.8.4)** — our own card and stick writer with a first-run experience for the
+  Raspberry Pi 5, in Insane OS (`apps/imager`) and as a Tauri app for other computers
   (`desktop/imager`, one UI for both): signed releases downloaded and cached with resume, only
   removable drives, verified writes (read back and compared), the first-run file
   (`lordos-firstrun.txt`: computer name, language, user, Wi-Fi with the derived key, SSH, remote
@@ -1137,7 +1137,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
 ## After the final ISO
 
 - [ ] **AI assistants through MCP, with permissions** (study first, then build). Let an AI
-  assistant, local or remote, use LordOS through the Model Context Protocol only as far as the
+  assistant, local or remote, use Insane OS through the Model Context Protocol only as far as the
   user allows, following the same rules as the rest of the distribution. Today there is no
   automation API at all (see `PAPER.md`, "Automation").
   - **Study before code:** a design document (`docs/MCP.md`) reviewed like the security review:
@@ -1149,9 +1149,9 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
   - **Off by default.** A switch in Settings → Privacy, and every assistant appears as its own
     client with a name and an identity, like an app.
   - **Ask, then grant, like camera and microphone:** each assistant requests the capabilities it
-    wants and the user approves them in a LordOS prompt, per assistant, with "once", "while
+    wants and the user approves them in a Insane OS prompt, per assistant, with "once", "while
     connected" or "always", revocable at any time in Settings. Nothing is granted silently, and
-    a request text written by the assistant is never shown as if LordOS wrote it.
+    a request text written by the assistant is never shown as if Insane OS wrote it.
   - **Closed, validated tools only:** a fixed catalogue of actions with typed arguments (open an
     app or a file the user picked, read the system or network state, create a calendar event,
     draft a mail, change a named setting, take a screenshot of one window), each mapped to an
@@ -1169,26 +1169,26 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     design and the code before it ships.
 
 - [ ] **Lumo, the local assistant (after 0.8.7)** — an assistant that
-  runs on the machine, talks with the user and uses LordOS only through the closed tools of the
+  runs on the machine, talks with the user and uses Insane OS only through the closed tools of the
   MCP item above. Input: the maintainer's design notes and the results of a prototype on another system (Qwen3 1.7B and
   4B with llama.cpp; on the test PC the CPU beat the RX 580 offload by 2.5×, so nothing is assumed
-  per vendor). Adapted to LordOS's rules:
+  per vendor). Adapted to Insane OS's rules:
   - **Inference in a sandboxed helper** (`lord-ai`, like `lord-media`): the only binary that links
     llama.cpp; no network, the model file as an fd, a private channel to `lord-server` (no TCP port,
     no HTTP API another app could reach). The Python prototype is reference only and doesn't ship.
   - **Models only with consent:** a signed catalogue on lordos.org (hash and licence per model),
     downloaded through the package engine's checks, loaded on demand and unloaded when idle.
-  - **AutoTune** on `server/src/sysreport/` and LordBench: the CPU always measured as the baseline,
+  - **AutoTune** on `server/src/sysreport/` and InsaneBench: the CPU always measured as the baseline,
     thread counts, partial and full GPU offload where the backend allows it (Vulkan in `lord-ai`
     only), prompt and generation speed, memory; the choice and its reason stored per machine,
     re-measured after a kernel, driver or engine change; the desktop keeps its share of the CPU.
   - **Permission levels mapped to what exists:** reading (level 0) through the SDK's read-only
-    calls; user actions (level 1) behind a LordOS prompt like camera and microphone; administrator
+    calls; user actions (level 1) behind a Insane OS prompt like camera and microphone; administrator
     actions (level 2) only through existing closed admin actions, with the password typed in a
     system dialog checked by the root side, never in the chat or the model's context. The level is
-    LordOS's policy, never something the model declares.
+    Insane OS's policy, never something the model declares.
   - **First demo:** "Lumo, open the calculator" opens it through `lord.apps.launch(id)` with an id
-    LordOS offered, and the result shown is the launcher's real result.
+    Insane OS offered, and the result shown is the launcher's real result.
   - **For the benchmark:** explain a report in plain words, compare it with published community
     reports, suggest what to try (a driver, a setting) and draft the issue text the user sends.
   - **Tests:** `lumo-agent-bench`, 50–100 scenarios (right tool, valid arguments, unknown tools,
@@ -1211,7 +1211,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     mouse and keyboard, network, sound, USB, disks, printers, TPM, boot), Security, Backup;
   - **profiles** when creating the VM (Productivity, Software Development, Testing, Design, Games)
     that tune CPU, memory and options automatically;
-  - the guest's apps in the app launcher and the Dock, opening LordOS files with a guest
+  - the guest's apps in the app launcher and the Dock, opening Insane OS files with a guest
     app, clipboard and dragging files between the two;
   - the **KVM** hypervisor (the kernel's); **QEMU** as the device engine, with **swtpm** (TPM)
     and **OVMF** (UEFI and secure boot) for guests that require them;
@@ -1224,7 +1224,7 @@ An update through the Store and `apt` (`CHANGELOG.md`, "0.8.8.6-beta"); no new I
     install and installs the tools at the end), snapshots, cloning, host USB passthrough to the
     VM, shared folders (virtiofs), resolution that follows the window;
   - the VM's display inside our compositor via dmabuf (no QEMU windows);
-  - **Seamless** mode: apps of a Linux guest as standalone LordOS windows (forwarding
+  - **Seamless** mode: apps of a Linux guest as standalone Insane OS windows (forwarding
     Wayland); other guests with our own agent, later;
   - accelerated 3D in Linux guests (virgl/venus); on other guests only 2D for now (there is no good free
     3D driver);

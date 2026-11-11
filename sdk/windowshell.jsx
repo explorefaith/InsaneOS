@@ -9,7 +9,7 @@
 //     <AppHost id={w.id} focused={focused} />
 //   </WindowShell>
 //
-// A window of a hidden desktop that is still mounted (a LordOS app, useWindows mounted) stays here with
+// A window of a hidden desktop that is still mounted (a Insane OS app, useWindows mounted) stays here with
 // display: none, so it keeps its state; in the overview the window takes its place in the grid.
 import { createElement as h, useEffect, useRef } from 'react';
 import { View } from '@lordos/runtime';

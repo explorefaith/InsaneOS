@@ -1,4 +1,4 @@
-/* lm_vbench.c — LordBench's video measurement (MK_VBENCH; docs/BENCHMARK.md, "Workloads").
+/* lm_vbench.c — InsaneBench's video measurement (MK_VBENCH; docs/BENCHMARK.md, "Workloads").
  *
  * No files and no devices: the test clips are made here, in memory. A synthetic picture (gradients, moving
  * blocks and a little noise, the same every time) is encoded with this system's FFmpeg into H.264, HEVC,

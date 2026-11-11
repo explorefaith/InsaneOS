@@ -1,6 +1,6 @@
-# Sound in LordOS
+# Sound in Insane OS
 
-The sound server is **PipeWire**, the same one GTK, Qt and Firefox apps use. LordOS doesn't ship
+The sound server is **PipeWire**, the same one GTK, Qt and Firefox apps use. Insane OS doesn't ship
 another server or use libpipewire or libpulse: lord-server talks to PipeWire with its own C
 client (`server/src/sound/`). With that client, the UI shows and changes:
 
@@ -47,7 +47,7 @@ That code was only read to follow the format: it isn't linked or copied.
   `$PULSE_SERVER` (`unix:/path`) or to `$XDG_RUNTIME_DIR/pulse/native`. If `XDG_RUNTIME_DIR`
   isn't set, it uses `/run/user/<uid>`. It only connects if the socket belongs to the user.
 - **Handshake.** It sends `AUTH` (protocol 32, without shared memory, so the data goes over the
-  socket) and `SET_CLIENT_NAME` ("LordOS", `org.lordos.Server`).
+  socket) and `SET_CLIENT_NAME` ("Insane OS", `org.lordos.Server`).
 - **State.** It subscribes to changes of sinks, sources, apps, server and cards, and requests the
   four lists. With each notification it requests only what changed.
 - **Notifications to JS.** When something changed and all the replies have arrived, JS is
@@ -59,7 +59,7 @@ That code was only read to follow the format: it isn't linked or copied.
 - **System sounds.** `pop`, `notify` and `error` are synthesized on the fly: sine waves with an
   envelope, with no files or OGG decoder. They're uploaded once to the server's sample cache and
   then played with `PLAY_SAMPLE` on the default output, with `media.role=event`.
-- **Our own streams.** LordOS's streams (the meter and the sounds) don't show up in the app
+- **Our own streams.** Insane OS's streams (the meter and the sounds) don't show up in the app
   lists. Otherwise, the microphone meter would make it look like someone is recording.
 
 ## API: `lord.sound`
@@ -176,7 +176,7 @@ Chromium's audio (YouTube) stuttered on the live ISO.
 
 **Cause.** PipeWire ran at normal priority (`SCHED_OTHER`, nice 0), the same as lord-server, which
 composites on the CPU, and as the browser. It asks for real time in two ways, and neither worked
-in LordOS:
+in Insane OS:
 
 - **Through the user's limits (`RLIMIT_RTPRIO`).** It didn't have them.
 - **Through RealtimeKit (`rtkit`).** The ISO ships it, but rtkit asks polkit. rtkit's rule is
@@ -188,7 +188,7 @@ On a PC the quantum is small (browsers ask for ~5–10 ms). With PipeWire compet
 any delay longer than that is a dropout. In a VM you don't notice, because PipeWire raises the
 minimum to 1024 (21 ms) when it detects a VM (`vm.overrides`).
 
-**Fix.** LordOS users are in the **`pipewire`** group:
+**Fix.** Insane OS users are in the **`pipewire`** group:
 - The `pipewire` package already ships `/etc/security/limits.d/25-pw-rlimits.conf` (`@pipewire`:
   rtprio 95, nice -19, memlock 4 MB).
 - `pam_limits` is in the `systemd --user` session (`/usr/lib/pam.d/systemd-user`).

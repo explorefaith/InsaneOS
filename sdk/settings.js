@@ -24,7 +24,7 @@ const DEFAULTS = {
   theme: null,           // id of the chosen theme (folder in themes/)
   desktopCount: 1,            // 0.8.7, how many desktops (sdk/desktops.js)
   desktopNames: null,         // 0.8.8.3, their names by position, '' for the default (sdk/desktops.js)
-  desktopArrows: true,        // 0.8.7, Settings → Keyboard: Lord Flow's ⌃ arrows are the Desktops keys
+  desktopArrows: true,        // 0.8.7, Settings → Keyboard: Insane Flow's ⌃ arrows are the Desktops keys
   switcher: null,             // 0.8.7.1, Settings → Keyboard: the app switcher (switchermodel.js)
   sessionRestore: 'always',   // 0.8.7, Settings → Session: 'off' | 'ask' | 'always' (sessionrestore.jsx)
   sessionBrowsers: true,      // browsers reopen their tabs too (the browser-restore admin action)

@@ -12,7 +12,7 @@ int app_main(const char *id, const char *theme_bundle, const char *fonts);
  * broker. 0 if it started. The id must be an installed package (it is validated). */
 int app_spawn(const char *id);
 
-/* Package folder of app <id>. A system app shipped with LordOS (<assets>/sysapps/<id>, owned by
+/* Package folder of app <id>. A system app shipped with Insane OS (<assets>/sysapps/<id>, owned by
  * root or the user and not writable by others) wins over a user-installed .lpk
  * (lpk_root()/<id>), so an installed package can never shadow it. out receives the real path.
  * A packaged app (sec/pkgapp.h) comes second, so a home .lpk can't shadow it either.

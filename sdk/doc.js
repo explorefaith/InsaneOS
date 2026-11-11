@@ -23,6 +23,9 @@ export const docAvailable = () => has() && lord.doc.available();
 
 const waiting = new Map();        // `${sid}:${req}` → { resolve, reject, onPart, onProgress }
 let timer = null;
+// Idle backoff (see vault.js): a stalled transfer otherwise keeps the 8 ms poller spinning forever.
+let lastAct = 0, timerPeriod = 8;
+const DOC_FAST_MS = 8, DOC_BACKOFF_MS = 60, DOC_BACKOFF_AFTER = 10000;
 
 function dispatch(e) {
   if (e.type === 'ready') return;
@@ -50,8 +53,17 @@ function dispatch(e) {
 function pump() {
   let evs = null;
   try { evs = lord.doc.poll(); } catch (e) { evs = null; }
-  if (evs) for (const e of evs) { try { dispatch(e); } catch (err) { console.log(`doc: ${err.message}`); } }
+  if (evs) {
+    for (const e of evs) { try { dispatch(e); } catch (err) { console.log(`doc: ${err.message}`); } }
+    if (evs.length) {
+      lastAct = Date.now();
+      if (timer && timerPeriod !== DOC_FAST_MS) { clearInterval(timer); timer = setInterval(pump, DOC_FAST_MS); timerPeriod = DOC_FAST_MS; }
+    }
+  }
   if (!waiting.size && !lord.doc.pending() && timer) { clearInterval(timer); timer = null; }
+  else if (timer && lastAct && Date.now() - lastAct > DOC_BACKOFF_AFTER && timerPeriod !== DOC_BACKOFF_MS) {
+    clearInterval(timer); timer = setInterval(pump, DOC_BACKOFF_MS); timerPeriod = DOC_BACKOFF_MS;
+  }
 }
 
 const crashListeners = new Map();
@@ -66,7 +78,9 @@ export function waitFor(sid, req, { onPart, onProgress } = {}) {
   if (req == null || req < 0) return Promise.reject(docError('unavailable'));
   return new Promise((resolve, reject) => {
     waiting.set(`${sid}:${req}`, { resolve, reject, onPart, onProgress });
-    if (!timer) timer = setInterval(pump, 8);
+    lastAct = Date.now();
+    if (!timer) { timer = setInterval(pump, DOC_FAST_MS); timerPeriod = DOC_FAST_MS; }
+    else if (timerPeriod !== DOC_FAST_MS) { clearInterval(timer); timer = setInterval(pump, DOC_FAST_MS); timerPeriod = DOC_FAST_MS; }
   });
 }
 

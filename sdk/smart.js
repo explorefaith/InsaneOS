@@ -11,7 +11,7 @@
 //   useSmartSummaries()               { [disk]: { health, reasons, temp, wear, hours, standby, t } }
 //
 // All of it runs as the root helper's closed smart-* actions: fixed /usr/sbin/smartctl, a validated
-// whole disk, JSON back in LOG lines. Without smartmontools the summary comes from LordOS's own
+// whole disk, JSON back in LOG lines. Without smartmontools the summary comes from Insane OS's own
 // reader (disk-smart), only for disks that will not be woken up by it.
 import { admin } from './admin.js';
 import { createStore, useStore } from './store.js';
@@ -24,7 +24,7 @@ export const SUMMARY_MS = 5 * 60 * 1000;      // the Monitor asks a disk at most
 export const smartSummaries = createStore({});
 export const useSmartSummaries = () => useStore(smartSummaries);
 
-const hasLord = () => typeof lord !== 'undefined' && !!lord.disks;
+const hasDisksApi = () => typeof lord !== 'undefined' && !!lord.disks;
 const smartable = (name) => /^(sd[a-z]{1,3}|hd[a-z]{1,3}|nvme\d{1,3}n\d{1,3})$/.test(name || '');
 
 // The helper sends the JSON in pieces; OK says "<lines> <smartctl exit status>".
@@ -40,7 +40,7 @@ function runJson(action, arg) {
 
 export const smart = {
   smartable,
-  installed: () => { try { return hasLord() && !!lord.disks.tools().smartctl; } catch (e) { return false; } },
+  installed: () => { try { return hasDisksApi() && !!lord.disks.tools().smartctl; } catch (e) { return false; } },
   install(onLog) {
     const go = () => admin.run('pkg-install', SMART_PACKAGE, onLog);
     return go().catch((e) => {

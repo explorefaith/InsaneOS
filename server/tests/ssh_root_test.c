@@ -1,4 +1,4 @@
-/* ssh_root_test.c — root over SSH (src/remote/ssh_root.c): public key lines LordOS accepts or refuses,
+/* ssh_root_test.c — root over SSH (src/remote/ssh_root.c): public key lines Insane OS accepts or refuses,
  * fingerprints as ssh-keygen -l prints them, and the fixed drop-in text per mode.
  *
  *   build/ssh-root-test [keyfile.pub fingerprint]   (make -C server test runs it) */

@@ -1,4 +1,4 @@
-// windows.js — window manager for LordOS apps (independent of the theme).
+// windows.js — window manager for Insane OS apps (independent of the theme).
 // The theme decides how they look; the SDK decides which windows exist, their order and geometry.
 //
 // Each window has its own `id` and the `app` that shows it. An app can have several
@@ -37,7 +37,7 @@ export function workAreaOf(d) {
   if (areaFn) return areaFn(d);
   return d.main ? area : { x: d.x, y: d.y, w: d.w, h: d.h };
 }
-// The display under the pointer (the main one before the pointer moves): Lord Classic opens the start menu there
+// The display under the pointer (the main one before the pointer moves): Insane Classic opens the start menu there
 // from the keyboard.
 export const pointerDisplay = () => (pointer.x >= 0 ? displayAt(pointer.x, pointer.y) : mainDisplay());
 // Work area of the display under the pointer (where a new window opens).
@@ -131,7 +131,7 @@ onScreenChange((now, old) => {
 
 // Every window inside its display's work area: one left on a display that is gone (or outside every display) moves
 // to the main one; the others stay on their display, below its bar and within reach. Run when the screen changes and
-// when a theme changes what the work areas reserve (Lord Flow's menu bar on every display turned on).
+// when a theme changes what the work areas reserve (Insane Flow's menu bar on every display turned on).
 export function keepWindowsInWorkAreas() {
   // a window left on a display that is gone (or outside every display) moves to the main one; the
   // others stay on their display, inside its work area
@@ -178,7 +178,7 @@ export const windowChrome = () => chrome;
 
 export const appIdOf = (id) => String(id ?? '').split('#')[0];
 export const getApp = (id) => registry.get(appIdOf(id));
-// A system app: built into LordOS (apps/), verified with it and not removable (docs/SIGNING.md,
+// A system app: built into Insane OS (apps/), verified with it and not removable (docs/SIGNING.md,
 // "Verified system code"). Packages (.lpk) and Linux apps never are.
 export const isSystemApp = (id) => { const a = getApp(id); return !!(a && a.system && !a.package); };
 // Live system (ISO) or the OVA's first boot: apps with "live": true in their manifest (the installer) only exist there.
@@ -481,7 +481,7 @@ export const wm = {
   // xdg_toplevel.show_window_menu): the theme draws it from w.windowMenu; null closes it.
   showWindowMenu: (id, x, y) => patch(id, { windowMenu: { x: Math.round(x), y: Math.round(y) } }),
   closeWindowMenu: (id) => patch(id, { windowMenu: null }),
-  // Fullscreen for a LordOS app (Player, Photos): the SDK draws it above everything,
+  // Fullscreen for a Insane OS app (Player, Photos): the SDK draws it above everything,
   // without the theme's frame. Esc or wm.setFullscreen(id, false) goes back.
   // { capture: true }: Screenshots' area selection, a still of the screen. It goes in the capture layer,
   // above every other one (sheets, menus, prompts, Live Speech), and Esc is the selection's own.
@@ -497,7 +497,7 @@ export const wm = {
   frameRef,
   beginMove: (id) => beginGrab(id, 0),
   beginResize: (id, edges) => beginGrab(id, edges & 15),
-  // LordBench's desktop scene (apps/sysinfo/scene.jsx): lord-server moves the window along a figure of
+  // InsaneBench's desktop scene (apps/sysinfo/scene.jsx): lord-server moves the window along a figure of
   // eight (rx × ry px, one turn every periodMs) through the drag's own path, one step per frame, until
   // stopScript() or pointer input. The store keeps the old place: the scene's window is closed after.
   scriptMove(id, { rx, ry, periodMs }) {
@@ -517,7 +517,7 @@ export const wm = {
 };
 
 // windows: all of them, every desktop. visible: what shows on this desktop. focused: its front window.
-// mounted: what the theme draws, in stacking order: visible, plus the LordOS apps of hidden desktops
+// mounted: what the theme draws, in stacking order: visible, plus the Insane OS apps of hidden desktops
 // (WindowShell keeps those display: none so they keep their state) and, in the overview, the minimized.
 export function useWindows() {
   const list = useStore(windows);
@@ -559,3 +559,36 @@ export const useAppMenus = (id) => useStore(appMenus, (m) => (id ? m[id] : null)
 
 // Display name of a window: its title or the app's name.
 export const windowTitle = (w) => w?.title || appName(getApp(w?.id)) || '';
+
+// ---- Smoothness: report the pids behind visible windows (pressure-freeze helper) ----
+// A small user helper (lordos-smooth-freeze) stops background processes when memory or CPU
+// pressure gets high, and wakes them when it drops or they come back to the front. It must
+// know which processes are on screen: visible Linux/isolated app windows here, through
+// lord.wm.nodePid (our own process always answers 0, so lord-server is never listed).
+const smoothFile = () => {
+  try { return (lord.fs.home() || '') + '/.cache/lordos/fgpids.json'; } catch { return null; }
+};
+let smoothLast = '';
+let smoothTimer = 0;
+function reportSmoothPids() {
+  smoothTimer = 0;
+  try {
+    if (typeof lord === 'undefined' || !lord.fs?.write || !lord.wm?.nodePid) return;
+    const fg = new Set();
+    for (const w of windows.get()) {
+      if (w.minimized) continue;
+      const fr = frameNodes.get(w.id);
+      const pid = fr ? lord.wm.nodePid(fr.node) : 0;
+      if (pid > 1) fg.add(pid);
+    }
+    const key = [...fg].sort((a, b) => a - b).join(',');
+    if (key === smoothLast) return;
+    smoothLast = key;
+    const file = smoothFile();
+    if (file) lord.fs.write(file, JSON.stringify({ ts: Date.now(), fg: [...fg] }));
+  } catch (e) { console.log(`smooth: ${e.message}`); }
+}
+windows.subscribe(() => {
+  if (smoothTimer) clearTimeout(smoothTimer);
+  smoothTimer = setTimeout(reportSmoothPids, 800);
+});

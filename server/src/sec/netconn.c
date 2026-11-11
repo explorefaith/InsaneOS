@@ -1,4 +1,4 @@
-/* netconn.c — sockets for LordOS's own components, created in their own scopes (see netconn.h). */
+/* netconn.c — sockets for Insane OS's own components, created in their own scopes (see netconn.h). */
 #include "netconn.h"
 #include "cgroup.h"
 #include "../fw/rules.h"
@@ -163,7 +163,7 @@ static int ask(NcComponent c, const NcReq *r, int *out) {
 int netconn_socket(NcComponent comp, int fam, int type, const struct sockaddr *to, socklen_t tolen) {
     NcReq r;
     if ((unsigned)comp >= NC_COUNT || netconn_req_make(&r, fam, type, to, tolen)) { errno = EINVAL; return -1; }
-    /* outside a LordOS session there are no scopes to put the sockets in (development, the
+    /* outside a Insane OS session there are no scopes to put the sockets in (development, the
      * tests): the socket is made here, as before */
     if (!getenv("LORDOS_SESSIOND")) {
         int fd = netconn_serve_one(&r);

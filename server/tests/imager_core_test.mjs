@@ -1,4 +1,4 @@
-// imager_core_test.mjs — the LordOS Imager's shared logic (apps/imager/core): validators, the
+// imager_core_test.mjs — the Insane OS Imager's shared logic (apps/imager/core): validators, the
 // first-run file it writes, profiles without secrets, and the GitHub release list. Every file the
 // serializer writes is also checked by the C parser the board uses (build/firstrun-test check), so
 // the two can't drift apart.
@@ -120,7 +120,7 @@ ok('point release (four numbers)', point.length === 1 && point[0].version === '0
 ok('five numbers dropped', rel.parseReleases([{ tag_name: 'v0.8.4.1.2', assets: [{ name: 'lordos-0.8.4.1.2-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5').length === 0);
 ok('bad tag dropped', rel.parseReleases([{ tag_name: 'v1.0.0/../x', assets: [] }], 'rpi5').length === 0);
 ok('fits', rel.fits(2.8e9, 4e9) === 'yes' && rel.fits(2.8e9, 2.9e9) === 'tight' && rel.fits(3e9, 2e9) === 'no');
-ok('download url', rel.downloadUrl('v0.8.3-beta', 'SHA256SUMS') === 'https://github.com/lordbasex/LordOS/releases/download/v0.8.3-beta/SHA256SUMS');
+ok('download url', rel.downloadUrl('v0.8.3-beta', 'SHA256SUMS') === 'https://github.com/lordbasex/Insane OS/releases/download/v0.8.3-beta/SHA256SUMS');
 
 console.log(`imager-core-test: ${n} checks, ${bad} failed`);
 process.exit(bad ? 1 : 0);

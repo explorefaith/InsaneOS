@@ -31,7 +31,7 @@ const { COMPONENTS, isSystemId, filterFlows, groupFlows, sortTree, machinesLabel
 // (0.8.5) a socket made in an app's scope is that app's (conn.c "cgApp"), whoever holds it: the ones
 // Mail's connector made are Mail's, a program in the Terminal is the Terminal's
 export const appKeyOf = netModel.connAppKey;
-// The row's name: LordOS's own components by their label, LordOS itself, or the app's name.
+// The row's name: Insane OS's own components by their label, Insane OS itself, or the app's name.
 // (0.8.8.6) The Machines row also names the running machines whose guests are on the network.
 export const labelOf = (tr, g) => (COMPONENTS[g.key]
   ? (g.key === 'lordos:machines' && g.machines?.size ? machinesLabel(tr(COMPONENTS[g.key].label), g.machines, g.machineNames)
@@ -775,7 +775,7 @@ function flowsOf(apps, names, tr) {
   return out;
 }
 
-// The VPN tunnels as one row (0.8.5): LordOS's own VPN interfaces (Settings → Network), their
+// The VPN tunnels as one row (0.8.5): Insane OS's own VPN interfaces (Settings → Network), their
 // interface counters and rates. Shown, not blockable: the tunnel is the system's network.
 function useVpnGroup(tr) {
   const [st, setSt] = useState({ at: 0, list: [] });

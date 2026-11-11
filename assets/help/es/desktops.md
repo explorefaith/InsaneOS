@@ -13,15 +13,15 @@ Podés tener hasta nueve.
 
 La vista general muestra las ventanas de este escritorio y, arriba, todos tus escritorios.
 
-- **Lord Flow:** ⌃↑, o Vista general en el menú Ventana.
-- **Lord Classic:** ❖Tab, o el botón al lado de la búsqueda.
+- **Insane Flow:** ⌃↑, o Vista general en el menú Ventana.
+- **Insane Classic:** ❖Tab, o el botón al lado de la búsqueda.
 
 Hacé clic en una ventana para ir a ella y en un escritorio para verlo. Con **+** agregás un escritorio, y con la ×
 de un escritorio lo cerrás: sus ventanas pasan al siguiente. Arrastrá una ventana a un escritorio para moverla.
 
 ## Cambiar de escritorio
 
-| | Lord Flow | Lord Classic |
+| | Insane Flow | Insane Classic |
 |---|---|---|
 | Escritorio anterior o siguiente | ⌃← ⌃→ · ❖⌃← ❖⌃→ | ❖⌃← ❖⌃→ |
 | Nuevo escritorio | En la vista general | ❖⌃D |

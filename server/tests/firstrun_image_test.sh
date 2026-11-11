@@ -1,5 +1,5 @@
 #!/bin/sh
-# firstrun_image_test.sh — lordos-firstrun end to end on a real LordOS Raspberry Pi image written to a
+# firstrun_image_test.sh — lordos-firstrun end to end on a real Insane OS Raspberry Pi image written to a
 # VIRTUAL USB stick (docs/IMAGER.md, "Tests"). Root; the stick is checked to be the USB gadget first.
 #
 #   sudo tests/firstrun_image_test.sh <sdX> <backing file> <lordos-firstrun.txt>

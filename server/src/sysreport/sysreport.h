@@ -10,7 +10,7 @@
  * none reaches the JSON or the Markdown.
  *
  * `root` prefixes every path ("" for this machine; tests point it at a fake tree). Facts that only
- * the running system can give (the Landlock ABI, which LordOS services are up) are left unknown
+ * the running system can give (the Landlock ABI, which Insane OS services are up) are left unknown
  * under a fake root. */
 #ifndef LORD_SYSREPORT_H
 #define LORD_SYSREPORT_H
@@ -134,7 +134,7 @@ typedef struct {
 typedef struct {
     char os[SR_NAME], os_id[24], os_version[24];
     char kernel[64];
-    char lordos[48];                    /* LordOS version, filled by the caller */
+    char lordos[48];                    /* Insane OS version, filled by the caller */
     char lsm[96];                       /* /sys/kernel/security/lsm */
     int landlock_abi;                   /* -1 unknown, 0 unavailable */
     int bpf_lsm;                        /* "bpf" in the LSM list */
@@ -154,7 +154,7 @@ typedef struct {
     char bootloader_version[44];        /* the running bootloader's git hash (device tree, chosen/bootloader), "" unknown */
     char bootloader_date[12];           /* its build date, YYYY-MM-DD, "" unknown */
     int throttled;                      /* get_throttled bits (hw/rpifw.h), -1 unknown (no such file: the
-                                         * LordOS rpi-6.18.y kernel has none) */
+                                         * Insane OS rpi-6.18.y kernel has none) */
     int uv_alarm;                       /* rpi_volt's under-voltage alarm: 1 in the last 2 s, 0 none, -1 unknown */
     int is_pi;
 } SrPi;

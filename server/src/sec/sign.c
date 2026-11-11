@@ -150,7 +150,7 @@ static int verify_signed(const void *cd, size_t cn, const void *sd, size_t sn, c
     }
     if (!r) {
         if (!sd) out->trust = LPK_UNSIGNED;
-        else if (sig_official(out->key)) { out->trust = LPK_OFFICIAL; snprintf(out->signer, sizeof out->signer, "LordOS"); }
+        else if (sig_official(out->key)) { out->trust = LPK_OFFICIAL; snprintf(out->signer, sizeof out->signer, "Insane OS"); }
         else {
             const char *a = catalog_author(out->key);
             out->trust = a ? LPK_VERIFIED : LPK_SIGNED;

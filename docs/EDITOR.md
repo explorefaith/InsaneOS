@@ -1,6 +1,6 @@
 # Text Editor
 
-LordOS's own code editor, TextMate-style (`apps/editor`). It is a native LordOS app in React on
+Insane OS's own code editor, TextMate-style (`apps/editor`). It is a native Insane OS app in React on
 top of the SDK: it doesn't use CodeMirror or Monaco, nor vendored TextMate grammars.
 
 | | |
@@ -10,7 +10,7 @@ top of the SDK: it doesn't use CodeMirror or Monaco, nor vendored TextMate gramm
 | ![cursors](editor-multiple-cursors.png) | ![replace](editor-replace.png) |
 | Several cursors with ❖D: one word edited on several lines at once | Find and replace all (case-sensitive): «Map» → «Registry» |
 | ![go to file](editor-go-to-file.png) | ![japanese](editor-japanese.png) |
-| ❖T: open a project file by letters in order («wjs» → windows.js) | Japanese with LordOS's input method: 日本語を書きます |
+| ❖T: open a project file by letters in order («wjs» → windows.js) | Japanese with Insane OS's input method: 日本語を書きます |
 | ![python](editor-python.png) | ![light](editor-light.png) |
 | Python: comment, duplicate and move line; Indic scripts use the font fallback | Light mode (classic IDE-style palette) |
 | ![close](editor-save-changes.png) | ![files](editor-open-from-files.png) |
@@ -46,7 +46,7 @@ top of the SDK: it doesn't use CodeMirror or Monaco, nor vendored TextMate gramm
   double click on a file that isn't an image, sound, video or archive opens it here
   (`wm.open('editor', { args: { path } })`). Closing the window or a tab with changes asks first.
   It rejects binary files and files larger than 8 MB.
-- **App menus** (in the theme's bar; in Lord Classic, since 0.8.5, in a strip under the window's title
+- **App menus** (in the theme's bar; in Insane Classic, since 0.8.5, in a strip under the window's title
   bar): File, Edit, View and Go, with their shortcuts.
 - **Input methods:** the editor registers with `ime.attach`, so Japanese, Chinese and Korean
   type at the cursor (the composition and the candidates show up there).

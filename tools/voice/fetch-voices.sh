@@ -6,7 +6,7 @@
 #
 #   <lang>/hd/{model.safetensors,tokenizer.model,embeddings/<voice>.safetensors}  Kyutai's 24-layer models (gated:
 #       accept the conditions at https://huggingface.co/kyutai/pocket-tts and keep a read token in
-#       ~/.cache/huggingface/token; LordOS's users never need one: they download LordOS's packages)
+#       ~/.cache/huggingface/token; Insane OS's users never need one: they download Insane OS's packages)
 #   <lang>/standard.gguf, <lang>/embeddings/<voice>.safetensors  audio.cpp's Q8_0 conversions (audio-cpp/audio.cpp-gguf)
 #
 # Only sdk/voicecatalog.js's voices. Each file is checked against the SHA-256 Hugging Face publishes for it; a file

@@ -12,7 +12,7 @@ nothing about go-link. It's the only way third-party code gets to run a binary f
   group or others, and never set-id.
 - It's looked for after `assets/sysapps` and before the home folder, so a home `.lpk` can't shadow it, and installing one with the same id is refused. It's never `system: true` and
   never in `code-manifest.json`, and it runs as `lord-server --app <id>` in the usual sandbox, under the id `lpk:<id>`.
-- **At every load,** before the sandbox goes on: `firma.json` over `contenido.json`, every file hashed, none missing or extra, and the key must be a **Verified author's** in LordOS's
+- **At every load,** before the sandbox goes on: `firma.json` over `contenido.json`, every file hashed, none missing or extra, and the key must be a **Verified author's** in Insane OS's
   signed catalog, not revoked. A key the catalog doesn't list, no catalog, and the official key all fail. It's installed and removed by dpkg, so Remove isn't offered.
 
 A refused app doesn't open, and the reason is in `~/.cache/lordos/session.log`.

@@ -1,4 +1,4 @@
-// kit.jsx — the LordOS Imager's small building blocks, shared by the native app and the desktop
+// kit.jsx — the Insane OS Imager's small building blocks, shared by the native app and the desktop
 // app (desktop/imager builds the same files against a DOM version of the few SDK primitives used).
 // Only View, Text, Image, ScrollView, TextInput, Button, Toggle, Segmented, SearchField, Lumo,
 // useTheme, useKeyboard, t, typeScale and spacing come from the SDK.

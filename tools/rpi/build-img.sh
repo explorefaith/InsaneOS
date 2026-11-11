@@ -1,5 +1,5 @@
 #!/bin/sh
-# build-img.sh — LordOS image for Raspberry Pi 5 (arm64; Pi 4 where possible), to write to
+# build-img.sh — Insane OS image for Raspberry Pi 5 (arm64; Pi 4 where possible), to write to
 # an SD card or an NVMe with Raspberry Pi Imager, dd or balenaEtcher. See docs/RASPBERRY.md.
 #
 # Usage (as root, on Debian 13, from the repository root with the themes already built):
@@ -16,12 +16,12 @@
 # Variables: MIRROR (Debian), RPI_MIRROR (Raspberry Pi archive), IMG_EXTRA_MB (free space in the
 # image before it grows on boot, 512), RPI_SSH=1 (SSH server on from the start, for development;
 # otherwise it ships off and the `ssh` switch file turns it on), RPI_KEY_NOCHECK=1 (do not verify
-# the Raspberry Pi archive key fingerprint; not recommended), KERNEL_DEBS (folder with the LordOS
+# the Raspberry Pi archive key fingerprint; not recommended), KERNEL_DEBS (folder with the Insane OS
 # kernel packages from tools/rpi/build-kernel.sh, default /var/tmp/lordos-kernel/out), CODE_CHECK_SERVER
 # (an x86-64 host with an aarch64 server/build: a lord-server built for the host from the same tree,
 # used only to check the signed system code; docs/SIGNING.md).
 #
-# Kernel: the LordOS build of the Raspberry Pi kernel (with Landlock, the BPF LSM and BTF) when its
+# Kernel: the Insane OS build of the Raspberry Pi kernel (with Landlock, the BPF LSM and BTF) when its
 # .debs are in $KERNEL_DEBS; otherwise Raspberry Pi's archive kernel, which has none of them (a loud
 # warning).
 set -eu
@@ -64,7 +64,7 @@ case "$(uname -m)" in
            echo "build-img.sh: host $(uname -m) without aarch64 binfmt: install qemu-user-static (and binfmt-support)" >&2; exit 1; } ;;
 esac
 
-# Packages. LordOS's and the sample apps are the same as the ISO's (tools/iso/build.sh); the
+# Packages. Insane OS's and the sample apps are the same as the ISO's (tools/iso/build.sh); the
 # kernel and firmware change (Raspberry Pi) and there is no live-boot, grub or disk installer.
 PKGS_BASE="initramfs-tools systemd-sysv udev kmod dbus dbus-user-session sudo locales tzdata
  iproute2 iputils-ping less nano ca-certificates apt dpkg passwd procps e2fsprogs fdisk dosfstools util-linux
@@ -80,7 +80,7 @@ PKGS_LORDOS="libwayland-server0 libxkbcommon0 xkb-data pipewire pipewire-pulse p
 # network at boot (Settings → Date & Time, "Automatic time"); without it the clock starts months
 # behind and every signed package index is refused as "not valid yet". The rest is the same as the
 # ISO (printing, exFAT/NTFS drives, power profiles, the MIME database, and the GSettings schemas GTK
-# apps need to read LordOS's GTK theme).
+# apps need to read Insane OS's GTK theme).
 # Raspberry Pi: boot firmware (start*.elf are not used on the Pi 5: its firmware lives in the
 # EEPROM) and Wi-Fi (CYW43455, firmware-brcm80211); kernels below
 PKGS_RPI="raspi-firmware firmware-brcm80211 rsync pciutils usbutils wireless-regdb"
@@ -101,11 +101,11 @@ done
 # Debian 13 Mesa: v3d (OpenGL ES 3.1 on the Pi 5), v3dv (Vulkan 1.2/1.3) and kmsro (vc4 + v3d)
 PKGS_GPU="libgl1-mesa-dri libegl1 libgles2 libgbm1 mesa-vulkan-drivers mesa-utils vulkan-tools glmark2-es2-wayland"
 # the same apps as the ISO, browsers included (Debian's arm64 builds; they draw their own bar with
-# LordOS's window buttons: tools/iso/browser-defaults.sh, docs/WAYLAND.md)
+# Insane OS's window buttons: tools/iso/browser-defaults.sh, docs/WAYLAND.md)
 PKGS_APPS="foot featherpad qt6-wayland chromium firefox-esr"
 # the SSH server ships off; the `ssh` switch file on the boot partition (rpi/firstboot) or RPI_SSH=1 turns it on
 PKGS_SSH="openssh-server"
-# the boot splash (the LordOS Plymouth theme comes in the lordos package; plymouth-label draws the
+# the boot splash (the Insane OS Plymouth theme comes in the lordos package; plymouth-label draws the
 # password prompt's text for encrypted disks). See docs/RASPBERRY.md, "Boot splash".
 PKGS_SPLASH="plymouth plymouth-label"
 # to build lord-server (only in the build chroot, not in the image)
@@ -116,17 +116,17 @@ PKGS_BUILD="build-essential pkg-config libxkbcommon-dev libwayland-dev wayland-p
  libpoppler-glib-dev libarchive-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libva-dev
  libtesseract-dev cmake glslc libvulkan-dev spirv-headers"
 
-echo "== LordOS $VERSION: Raspberry Pi image in $WORK (host $(uname -m))"
+echo "== Insane OS $VERSION: Raspberry Pi image in $WORK (host $(uname -m))"
 kernel_warning() {
     echo "##########################################################################################" >&2
-    echo "## WARNING: no LordOS kernel for rpi-$1 in $KERNEL_DEBS: using Raspberry Pi's archive kernel." >&2
+    echo "## WARNING: no Insane OS kernel for rpi-$1 in $KERNEL_DEBS: using Raspberry Pi's archive kernel." >&2
     echo "## It has NO Landlock: app and helper isolation will be seccomp-only on that board and" >&2
     echo "## doc_evil.sh / sandbox-test fail; and no BPF LSM or BTF: \"No Bluetooth\" for Linux apps" >&2
     echo "## isn't enforced. Build it first: tools/rpi/build-kernel.sh (docs/RASPBERRY.md)." >&2
     echo "##########################################################################################" >&2
 }
 for fl in 2712 v8; do
-    case " $OWN_FLAVOURS " in *" $fl "*) echo "   kernel rpi-$fl: LordOS build ($(basename "$(ls "$KERNEL_DEBS"/linux-image-*-lordos*-rpi-${fl}_*_arm64.deb | sort -V | tail -1)"))" ;;
+    case " $OWN_FLAVOURS " in *" $fl "*) echo "   kernel rpi-$fl: Insane OS build ($(basename "$(ls "$KERNEL_DEBS"/linux-image-*-lordos*-rpi-${fl}_*_arm64.deb | sort -V | tail -1)"))" ;;
         *) kernel_warning "$fl" ;; esac
 done
 umount_tree() {
@@ -198,29 +198,29 @@ else
     else
         mount_ch "$BR"
     fi
-    rm -rf "$BR/src/LordOS"; mkdir -p "$BR/src/LordOS"
+    rm -rf "$BR/src/Insane OS"; mkdir -p "$BR/src/Insane OS"
     # code-manifest.json (+ .sig for a release): the verified system code (docs/SIGNING.md); the
     # ls is split on purpose (zero, one or two file names)
     # shellcheck disable=SC2046
     tar -C "$ROOT" --exclude=server/build --exclude=node_modules -cf - \
         package.json README.md server third_party assets themes tools packaging apt \
-        $(cd "$ROOT" && ls code-manifest.json code-manifest.sig 2>/dev/null) | tar -C "$BR/src/LordOS" -xf -
+        $(cd "$ROOT" && ls code-manifest.json code-manifest.sig 2>/dev/null) | tar -C "$BR/src/Insane OS" -xf -
     J=$(nproc)
     sh "$ROOT/tools/tts/fetch-audiocpp.sh" >> "$WORK/build.log" 2>&1 || { echo "build-img.sh: can't fetch audio.cpp (tools/tts/fetch-audiocpp.sh)" >&2; exit 1; }
-    in_root "$BR" sh -c "cd /src/LordOS && make -C server -j$J GPU=1 RELEASE=${RELEASE:-0} && make -C server build/canvas-test" > "$WORK/build.log" 2>&1 || {
+    in_root "$BR" sh -c "cd /src/Insane OS && make -C server -j$J GPU=1 RELEASE=${RELEASE:-0} && make -C server build/canvas-test" > "$WORK/build.log" 2>&1 || {
         tail -40 "$WORK/build.log"; exit 1; }
-    is_aarch64 "$BR/src/LordOS/server/build/lord-server" || { echo "build-img.sh: the binary is not aarch64" >&2; exit 1; }
+    is_aarch64 "$BR/src/Insane OS/server/build/lord-server" || { echo "build-img.sh: the binary is not aarch64" >&2; exit 1; }
     # canvas-test: NEON against C, bit for bit (under qemu it measures nothing, but it checks)
-    in_root "$BR" /src/LordOS/server/build/canvas-test > "$WORK/canvas-test.log" 2>&1 || {
+    in_root "$BR" /src/Insane OS/server/build/canvas-test > "$WORK/canvas-test.log" 2>&1 || {
         cat "$WORK/canvas-test.log"; echo "build-img.sh: canvas-test failed (NEON ≠ C); build with NEON=0" >&2; exit 1; }
-    in_root "$BR" sh -c "cd /src/LordOS && DEB_ARCH=$ARCH REQUIRE_SIGNED_CODE=${REQUIRE_SIGNED_CODE:-0} sh tools/iso/mkdeb.sh /tmp/lordos.deb" >> "$WORK/build.log" 2>&1 || {
+    in_root "$BR" sh -c "cd /src/Insane OS && DEB_ARCH=$ARCH REQUIRE_SIGNED_CODE=${REQUIRE_SIGNED_CODE:-0} sh tools/iso/mkdeb.sh /tmp/lordos.deb" >> "$WORK/build.log" 2>&1 || {
         tail -20 "$WORK/build.log"; exit 1; }
     cp "$BR/tmp/lordos.deb" "$DEB"
     # the package must be complete: the documents and media helpers and the firewall's BPF programs
     for f in lord-doc lord-media lord-ocr lord-tts; do
         dpkg-deb -c "$DEB" | grep -q "/usr/lib/lordos/bin/$f\$" || { echo "build-img.sh: $f missing from the package (build packages, see $WORK/build.log)" >&2; exit 1; }
     done
-    [ -s "$BR/src/LordOS/server/build/gen/np_bpf.h" ] || { echo "build-img.sh: lord-netperm built without its BPF programs (clang)" >&2; exit 1; }
+    [ -s "$BR/src/Insane OS/server/build/gen/np_bpf.h" ] || { echo "build-img.sh: lord-netperm built without its BPF programs (clang)" >&2; exit 1; }
     umount_ch "$BR"
 fi
 # mkdeb.sh (the same as the ISO's) takes the architecture from DEB_ARCH
@@ -281,7 +281,7 @@ in_root "$CH" apt-get update -q > "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.
 # shellcheck disable=SC2086
 in_root "$CH" apt-get install -y -q --no-install-recommends $PKGS_BASE $PKGS_TOOLS $PKGS_LORDOS $PKGS_RPI $PKGS_BT $ARCHIVE_K $PKGS_GPU $PKGS_APPS $PKGS_SSH $PKGS_SPLASH \
     >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
-# the LordOS kernels (same hooks as Raspberry Pi's: initramfs, raspi-firmware copies kernel_2712.img,
+# the Insane OS kernels (same hooks as Raspberry Pi's: initramfs, raspi-firmware copies kernel_2712.img,
 # device trees and overlays), and an apt pin so the archive kernel of that flavour never replaces them
 if [ -n "$OWN_KDEBS" ]; then
     mkdir -p "$CH/tmp/kernel"
@@ -291,9 +291,9 @@ if [ -n "$OWN_KDEBS" ]; then
         tail -30 "$WORK/apt.log"; exit 1; }
     rm -rf "$CH/tmp/kernel"
     {
-        echo "# LordOS on Raspberry Pi: the kernel is LordOS's build of the Raspberry Pi kernel (Landlock, BPF LSM,"
+        echo "# Insane OS on Raspberry Pi: the kernel is Insane OS's build of the Raspberry Pi kernel (Landlock, BPF LSM,"
         echo "# tools/rpi/build-kernel.sh, docs/RASPBERRY.md). Raspberry Pi's kernel packages for the same"
-        echo "# board are never installed over it; LordOS updates ship as new linux-image-*-lordos*-rpi-* packages."
+        echo "# board are never installed over it; Insane OS updates ship as new linux-image-*-lordos*-rpi-* packages."
         for fl in $OWN_FLAVOURS; do
             echo
             echo "Package: linux-image-rpi-$fl linux-image-*+rpt-rpi-$fl linux-headers-rpi-$fl linux-headers-*+rpt-rpi-$fl"
@@ -331,15 +331,15 @@ echo 'net.ipv4.ping_group_range = 0 2147483647' > "$CH/etc/sysctl.d/50-lordos-pi
 
 # setup user (first-boot setup mode, see rpi/firstboot): same as the
 # live user. If lordos-user.txt/userconf.txt is present on first boot, it is deleted right away.
-in_root "$CH" useradd -m -s /bin/bash -c "LordOS" -G sudo,audio,video,input,render lordos
+in_root "$CH" useradd -m -s /bin/bash -c "Insane OS" -G sudo,audio,video,input,render lordos
 in_root "$CH" passwd -d lordos > /dev/null
-printf '# LordOS on Raspberry Pi: only during setup mode (removed by rpi/firstboot)\nlordos ALL=(ALL) NOPASSWD: ALL\n' > "$CH/etc/sudoers.d/lordos-setup"
+printf '# Insane OS on Raspberry Pi: only during setup mode (removed by rpi/firstboot)\nlordos ALL=(ALL) NOPASSWD: ALL\n' > "$CH/etc/sudoers.d/lordos-setup"
 chmod 440 "$CH/etc/sudoers.d/lordos-setup"
 mkdir -p "$CH/var/lib/systemd/linger"; : > "$CH/var/lib/systemd/linger/lordos"
 mkdir -p "$CH/etc/lordos"
 # until first boot nobody logs in automatically; rpi/firstboot decides (login screen or lordos)
 printf '# Raspberry Pi: set by /usr/lib/lordos/rpi/firstboot on first boot.\nAUTOLOGIN=\n' > "$CH/etc/lordos/session.conf"
-in_root "$CH" useradd --system --home-dir /var/lib/lordos-greeter --create-home --shell /usr/sbin/nologin --comment LordOS lordos-greeter
+in_root "$CH" useradd --system --home-dir /var/lib/lordos-greeter --create-home --shell /usr/sbin/nologin --comment Insane OS lordos-greeter
 in_root "$CH" usermod -aG render,video lordos-greeter
 in_root "$CH" systemctl --global enable pipewire.socket pipewire-pulse.socket wireplumber.service > /dev/null 2>&1 || true
 
@@ -383,21 +383,21 @@ for kv in $KV2712 $KV8; do
         echo "   kernel $kv: sock_diag SOCK_DESTROY built in"
     else echo "   WARNING: kernel $kv has no INET_DIAG_DESTROY/INET_UDP_DIAG (blocked connections stall instead of closing)" >&2; fi
 done
-# boot splash: the LordOS theme, and vc4 (HDMI) with DRM in the initramfs so Plymouth draws from the
+# boot splash: the Insane OS theme, and vc4 (HDMI) with DRM in the initramfs so Plymouth draws from the
 # first seconds instead of waiting for the root file system. Plymouth's own hook adds the rest of
 # kernel/drivers/gpu/drm (MODULES=most), its plugins, the theme and a font for the password prompt.
 in_root "$CH" plymouth-set-default-theme lordos
 install -d "$CH/etc/initramfs-tools/conf.d"
 grep -qx vc4 "$CH/etc/initramfs-tools/modules" 2>/dev/null || {
-    echo "# LordOS: the display driver early, for the boot splash (docs/RASPBERRY.md, \"Boot splash\")"
+    echo "# Insane OS: the display driver early, for the boot splash (docs/RASPBERRY.md, \"Boot splash\")"
     echo vc4
 } >> "$CH/etc/initramfs-tools/modules"
-printf '# LordOS: the boot splash needs the DRM drivers in the initramfs (docs/RASPBERRY.md)\nMODULES=most\n' \
+printf '# Insane OS: the boot splash needs the DRM drivers in the initramfs (docs/RASPBERRY.md)\nMODULES=most\n' \
     > "$CH/etc/initramfs-tools/conf.d/lordos-splash.conf"
 in_root "$CH" update-initramfs -u -k all > "$WORK/initramfs.log" 2>&1 || { tail -20 "$WORK/initramfs.log"; exit 1; }
 for kv in $KV2712 $KV8; do
     in_root "$CH" lsinitramfs "/boot/initrd.img-$kv" 2>/dev/null | grep -q 'plymouth/themes/lordos/lordos.script' ||
-        { echo "build-img.sh: the initramfs of $kv has no LordOS splash (see $WORK/initramfs.log)" >&2; exit 1; }
+        { echo "build-img.sh: the initramfs of $kv has no Insane OS splash (see $WORK/initramfs.log)" >&2; exit 1; }
 done
 place_kernel() {     # version, kernel name on the FAT, initramfs name
     [ -n "$1" ] || return 0
@@ -412,7 +412,7 @@ place_kernel "$KV2712" kernel_2712.img initramfs_2712
 place_kernel "$KV8" kernel8.img initramfs8
 install -m 644 "$RPI/boot/firmware/config.txt" "$CH/boot/firmware/config.txt"
 # case accessories (Settings → Cooling, admin action rpi-case); config.txt includes it
-printf '# lordos-case.txt: written by LordOS (Settings, Cooling). No case accessories.\n' > "$CH/boot/firmware/lordos-case.txt"
+printf '# lordos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n' > "$CH/boot/firmware/lordos-case.txt"
 install -m 644 "$RPI/boot/firmware/lordos-user.txt.example" "$CH/boot/firmware/lordos-user.txt.example"
 
 rm -f "$CH/usr/sbin/policy-rc.d" "$CH/usr/bin/qemu-aarch64-static"
@@ -453,7 +453,7 @@ cp -r "$CH/boot/firmware/." "$WORK/mnt/boot/firmware/"
 PARTUUID_BOOT="$DISKID-01"
 PARTUUID_ROOT="$DISKID-02"
 cat > "$WORK/mnt/etc/fstab" <<EOF
-# LordOS on Raspberry Pi (tools/rpi/build-img.sh)
+# Insane OS on Raspberry Pi (tools/rpi/build-img.sh)
 PARTUUID=$PARTUUID_ROOT  /              ext4  defaults,noatime  0 1
 PARTUUID=$PARTUUID_BOOT  /boot/firmware vfat  defaults,umask=0077  0 2
 EOF
@@ -461,7 +461,7 @@ EOF
 # The boot splash: quiet splash (Plymouth), no serial console for it, no kernel logo or blinking cursor;
 # the console is tty1, where Plymouth draws and where Esc shows the boot messages. Removing "splash"
 # boots in text as before (docs/RASPBERRY.md, "Boot splash").
-# lsm=: the same list as the LordOS kernel's CONFIG_LSM (Landlock for app isolation, server/src/sec;
+# lsm=: the same list as the Insane OS kernel's CONFIG_LSM (Landlock for app isolation, server/src/sec;
 # Yama for ptrace_scope; bpf for lord-netperm's "No Bluetooth" program); those the kernel lacks are
 # ignored, so the active list is "capability,landlock,yama,bpf".
 printf 'console=serial0,115200 console=tty1 root=PARTUUID=%s rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3 cgroup_enable=memory lsm=landlock,lockdown,yama,integrity,bpf lordos.lang=en\n' \

@@ -1,5 +1,5 @@
 // checks.js — System Information's Checks tab (docs/BENCHMARK.md, "Checks: configured versus
-// effective"): each claim LordOS makes, checked on this machine, at one of two levels, never claiming
+// effective"): each claim Insane OS makes, checked on this machine, at one of two levels, never claiming
 // the stronger one without the test:
 //   configured  the mechanism is present (a kernel feature, a service running, an owner);
 //   effective   something was tried and gave the right answer;
@@ -44,7 +44,7 @@ export function evaluate(ctx) {
   else if (kc.CONFIG_CGROUP_BPF === 'n' || !sw.bpfLsm) out.push(row('netperm', '§6.6', 'configured', 'warn', !sw.bpfLsm ? 'netpermNoLsm' : 'netpermNoCgroupBpf'));
   else out.push(row('netperm', '§6.6', 'configured', 'pass', 'netpermOk'));
 
-  // LordOS's own code (§6.9): every bundle loaded this session matched the signed manifest
+  // Insane OS's own code (§6.9): every bundle loaded this session matched the signed manifest
   const code = c.code || {};
   if (code.refused && code.refused.length) out.push(row('code', '§6.9', 'effective', 'fail', 'codeRefused', { count: code.refused.length }));
   else if (code.state === 'verified') out.push(row('code', '§6.9', 'effective', 'pass', 'codeVerified', { count: code.files || 0 }));
@@ -59,7 +59,7 @@ export function evaluate(ctx) {
   else out.push(row('remoteClosed', '§11.4', 'effective', listening ? 'fail' : 'pass', listening ? 'remoteOffListening' : 'remoteOffClosed', { port: LIMITS.remotePort }));
 
   // the session's cgroup tree belongs to root (§11.4): an app can't leave its scope
-  // (only LordOS's own tree counts: a lord-server started from a terminal sits in that terminal's cgroup)
+  // (only Insane OS's own tree counts: a lord-server started from a terminal sits in that terminal's cgroup)
   if (f.leafRoot == null || f.parentRoot == null) out.push(row('cgroups', '§11.4', 'configured', 'unknown'));
   else if (!/\/lordos-session-\d+\/server$/.test(f.cgroup || '')) out.push(row('cgroups', '§11.4', 'configured', 'info', 'cgroupsNotSession'));
   else out.push(row('cgroups', '§11.4', 'configured', f.leafRoot && f.parentRoot ? 'pass' : 'fail',
@@ -70,7 +70,7 @@ export function evaluate(ctx) {
   else if (['headless', 'no-display', 'capture'].includes(s.composition)) out.push(row('gpu', '§7.3', 'configured', 'info', `gpuNot.${s.composition}`));
   else out.push(row('gpu', '§7.3', 'configured', 'warn', `gpuNot.${s.gpuInit || s.composition || 'unknown'}`));
 
-  // memory (§7.1): what this session uses now; the idle measurement belongs to LordBench (0.8.6)
+  // memory (§7.1): what this session uses now; the idle measurement belongs to InsaneBench (0.8.6)
   const st = c.stats || {};
   if (st.rssKB) out.push(row('memory', '§7.1', 'measured', 'info', 'memoryNow', { mb: Math.round(st.rssKB / 1024) }));
 

@@ -222,7 +222,7 @@ EOF
     # the Store's "Suggested for your computer" rules (assets/store/suggestions.json)
     if have node; then run "suggest-engine-test (sdk/suggestengine.js)" node tests/suggest_engine_test.mjs
     else skip "suggest-engine-test" "node"; fi
-    # the LordOS Imager's shared logic (apps/imager/core) and its first-run files checked by the C parser
+    # the Insane OS Imager's shared logic (apps/imager/core) and its first-run files checked by the C parser
     if have node; then run "imager-core-test (apps/imager/core)" node tests/imager_core_test.mjs
     else skip "imager-core-test" "node"; fi
     # the overlay scroll bar's model (sdk/scrollbar.js): geometry, thumb hit-test and drag, fade timing
@@ -252,14 +252,14 @@ EOF
     # (0.8.8.6) Monitor → Memory: the processes grouped by app (apps/monitor/memtop.js)
     if have node; then run "monitor-memtop-test (apps/monitor/memtop.js)" node tests/monitor_memtop_test.mjs
     else skip "monitor-memtop-test" "node"; fi
-    # (0.8.6) LordBench's model (apps/sysinfo/perf.js): references, verdicts, comparisons
+    # (0.8.6) InsaneBench's model (apps/sysinfo/perf.js): references, verdicts, comparisons
     if have node; then run "sysinfo-perf-test (apps/sysinfo/perf.js)" node tests/sysinfo_perf_test.mjs
     else skip "sysinfo-perf-test" "node"; fi
     # (0.8.7) community hardware reports: the schema, Share on GitHub (apps/sysinfo/share.js), the workflow's
     # checks (tools/hwreport/lib.mjs), the catalogue and its snapshot, the Compatibility panel's community data
     if have node; then run "hwreport-test (tools/hwreport, apps/sysinfo/share.js)" node tests/hwreport_test.mjs
     else skip "hwreport-test" "node"; fi
-    # (0.8.7) Store → Updates' names for LordOS's data packages (apps/store/syspkg.js): lordos-hwdata as a dated list
+    # (0.8.7) Store → Updates' names for Insane OS's data packages (apps/store/syspkg.js): lordos-hwdata as a dated list
     if have node; then run "store-syspkg-test (apps/store/syspkg.js)" node tests/store_syspkg_test.mjs
     else skip "store-syspkg-test" "node"; fi
     # (0.8.8.4, #37) the Store's search (apps/store/search.js): words in any order, joined or apart, accents, keywords
@@ -283,15 +283,15 @@ EOF
     if have node && [ -d ../node_modules/esbuild ] && [ -d ../node_modules/react-reconciler ]; then
         run "capture-layer-test (sdk/components.jsx, sdk/layers.js)" node tests/capture_layer_test.mjs
     else skip "capture-layer-test" "node and the repository's node_modules (npm install)"; fi
-    # (0.8.8.6, #48) Lord Classic's power menu: a click on Lock Screen or Switch User reaches the session
+    # (0.8.8.6, #48) Insane Classic's power menu: a click on Lock Screen or Switch User reaches the session
     if have node && [ -d ../node_modules/esbuild ] && [ -d ../node_modules/react-reconciler ]; then
         run "classic-startmenu-power-test (themes/classic StartMenu)" node tests/classic_startmenu_power_test.mjs
     else skip "classic-startmenu-power-test" "node and the repository's node_modules (npm install)"; fi
-    # (0.8.8.6, #58) what the bar shows: Lord Flow's Control Center tiles, the output list, the clock's calendar
+    # (0.8.8.6, #58) what the bar shows: Insane Flow's Control Center tiles, the output list, the clock's calendar
     if have node && [ -d ../node_modules/esbuild ] && [ -d ../node_modules/react-reconciler ]; then
         run "menubar-test (themes/default ControlCenter, NotificationCenter, MenuBars on every display, sdk/soundoutputs.js)" node tests/menubar_test.mjs
     else skip "menubar-test" "node and the repository's node_modules (npm install)"; fi
-    # (0.8.8.6) Lord Classic's taskbar on every display: three monitors, panels on the clicked bar's display, one timer
+    # (0.8.8.6) Insane Classic's taskbar on every display: three monitors, panels on the clicked bar's display, one timer
     if have node && [ -d ../node_modules/esbuild ] && [ -d ../node_modules/react-reconciler ]; then
         run "classic-taskbar-test (themes/classic on every display, sdk/dock.js drop targets)" node tests/classic_taskbar_test.mjs
     else skip "classic-taskbar-test" "node and the repository's node_modules (npm install)"; fi

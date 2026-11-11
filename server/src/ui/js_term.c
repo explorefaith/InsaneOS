@@ -616,7 +616,7 @@ static JSValue f_info(JSContext *c, JSValueConst this_val, int argc, JSValueCons
     return o;
 }
 
-/* ---- clipboard (of the LordOS session, in memory) ---- */
+/* ---- clipboard (of the Insane OS session, in memory) ---- */
 
 static JSValue f_clip_get(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;

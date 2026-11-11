@@ -34,7 +34,7 @@ void grab_motion(float x, float y);         /* once per frame, with the accumula
 /* Finished (the button was released): 1 and the node's change relative to the start. */
 int  grab_finish(int *node, int *edges, float *dx, float *dy, float *dw, float *dh);
 void grab_cancel(void);
-/* LordBench's desktop scene (bench/lbframes.h, docs/BENCHMARK.md): the window's node moves along a
+/* InsaneBench's desktop scene (bench/lbframes.h, docs/BENCHMARK.md): the window's node moves along a
  * figure of eight (rx, ry px; one turn every period_ms) through the same path as a drag, one step per
  * frame, with no button held and no JS per frame. Pointer input or grab_cancel() stops it. 0 if it
  * started. main.c calls grab_script_tick() before deciding whether to draw. */

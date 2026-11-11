@@ -1,6 +1,6 @@
-/* lm.h — lord-media: the LordOS media helper (see docs/MEDIA.md).
+/* lm.h — lord-media: the Insane OS media helper (see docs/MEDIA.md).
  *
- * It's the only LordOS program that links FFmpeg (libavcodec, libavformat, libswscale,
+ * It's the only Insane OS program that links FFmpeg (libavcodec, libavformat, libswscale,
  * libswresample) and libva, and only to decode and encode: the player, the
  * synchronization and the UI are our own. lord-server launches it on demand, with a fixed path and no
  * arguments; it runs as the user, in the helpers' shared sandbox
@@ -104,7 +104,7 @@ void lm_camera(const char *params, int dev, int render);                /* lm_ca
 void lm_audiorec(const char *params, int out, int pulse);               /* lm_rec.c */
 void lm_hwprobe(const int *render, int n_render);                       /* lm_hwprobe.c */
 void lm_stream(const char *params, int ring, int render);               /* lm_stream.c */
-/* the remote desktop's software encoder with its own settings (libx264, or libvpx for VP8), for LordBench */
+/* the remote desktop's software encoder with its own settings (libx264, or libvpx for VP8), for InsaneBench */
 AVCodecContext *lm_stream_sw_encoder(int vp8, int w, int h, int fps, unsigned kbps);
 void lm_live(const char *params, int link, int ring);                   /* lm_live.c */
 void lm_vbench(const char *params);                                     /* lm_vbench.c */

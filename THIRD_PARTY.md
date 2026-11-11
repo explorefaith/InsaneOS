@@ -1,6 +1,6 @@
 # Third-party components
 
-LordOS's own code is released under the MIT License (see `LICENSE`). It bundles or links
+Insane OS's own code is released under the MIT License (see `LICENSE`). It bundles or links
 the components below, each under its own license.
 
 ## Bundled in this repository (`third_party/`)
@@ -33,13 +33,13 @@ its Pocket TTS family only, and the `lordos` package installs the libraries in `
 | Natural Earth (`assets/monitor/land.bin`) | world map in Monitor | public domain |
 | Unicode Character Database / CLDR (generated tables) | text, bidi, emoji names | Unicode License v3 |
 | Inter (`assets/fonts/Inter-*.ttf`) | UI text | SIL OFL 1.1 (`assets/fonts/Inter-LICENSE.txt`) |
-| Plus Jakarta Sans 2.7.1 (`assets/fonts/PlusJakartaSans-ExtraBold.ttf`, `-Medium.ttf`) | the LordOS wordmark: live text in the UI (fontFamily `brand`) and outlined in `assets/brand/*.svg` | SIL OFL 1.1 (`assets/fonts/PlusJakartaSans-LICENSE.txt`) |
+| Plus Jakarta Sans 2.7.1 (`assets/fonts/PlusJakartaSans-ExtraBold.ttf`, `-Medium.ttf`) | the Insane OS wordmark: live text in the UI (fontFamily `brand`) and outlined in `assets/brand/*.svg` | SIL OFL 1.1 (`assets/fonts/PlusJakartaSans-LICENSE.txt`) |
 | JetBrains Mono (`assets/fonts/JetBrainsMono-*.ttf`) | terminal and code text | SIL OFL 1.1 (`assets/fonts/JetBrainsMono-LICENSE.txt`) |
-| Noto Sans Arabic, Devanagari, Thai and CJK SC, subset (`server/src/bench/fonts/`) | built into `lord-bench` for LordBench's shaping workload (subset by `tools/gen-lbfonts.py`) | SIL OFL 1.1 (`server/src/bench/fonts/OFL.txt`) |
+| Noto Sans Arabic, Devanagari, Thai and CJK SC, subset (`server/src/bench/fonts/`) | built into `lord-bench` for InsaneBench's shaping workload (subset by `tools/gen-lbfonts.py`) | SIL OFL 1.1 (`server/src/bench/fonts/OFL.txt`) |
 
 ### Local changes to bundled components
 
-Each change is marked `LordOS patch` in the source and has to be applied again when the component is
+Each change is marked `Insane OS patch` in the source and has to be applied again when the component is
 updated. Nothing else in `third_party/` differs from upstream.
 
 | Component (upstream version) | Change | Files | Why | Since |
@@ -49,7 +49,7 @@ updated. Nothing else in `third_party/` differs from upstream.
 ## Moving wallpapers
 
 Downloaded on demand, not in this repository; each clip's author, license and source are in Settings → Wallpaper → Credits
-and in the README of the `LordOS-wallpapers` repository. NASA material (public domain), CC0, CC BY 3.0 and CC BY-SA 4.0
+and in the README of the `Insane OS-wallpapers` repository. NASA material (public domain), CC0, CC BY 3.0 and CC BY-SA 4.0
 works; see `docs/WALLPAPERS.md`. The built-in clip is the project's own.
 
 ## Voices
@@ -67,7 +67,7 @@ into `/usr/share/lordos/voice`. The voices offered and the license of each one's
 | The recorded previews (`lordos-voice-previews`) | hearing a voice before downloading it | made with the models and voices above, under their licenses |
 
 Kyutai forbids cloning a voice without the person's explicit consent, impersonation and presenting generated speech as
-a real recording; LordOS shows that notice where voices are created. Voices whose recording does not allow
+a real recording; Insane OS shows that notice where voices are created. Voices whose recording does not allow
 redistribution and commercial use are left out (jean, from EARS: non-commercial only; cosette, javert and marius: their
 recordings' origin isn't documented).
 
@@ -96,7 +96,7 @@ These are not part of this repository; they are installed from Debian.
 
 Note: `lord-doc` and `lord-media` are separate helper processes. Because they link Poppler and
 Debian's FFmpeg build, those two binaries as distributed are covered by the GPL; the MIT-licensed
-LordOS source they are built from is GPL-compatible. `lord-server` itself does not link them.
+Insane OS source they are built from is GPL-compatible. `lord-server` itself does not link them.
 `lord-tts` links audio.cpp and ggml (above) in the same way: a separate sandboxed helper.
 On the Raspberry Pi image, and on a Pi updated to 0.8.7, `lord-media` runs on Raspberry Pi's build of FFmpeg (`+rpt`, the
 same package names), pinned from its archive for the Pi 5's hardware HEVC (`docs/WALLPAPERS.md`).
@@ -109,7 +109,7 @@ New on the images in 0.8.8 (installed from Debian, not linked; each keeps its ow
 
 | Package | Images | What for | License |
 |---|---|---|---|
-| `polkitd`, `pkexec` | both ISOs and the Raspberry Pi image; dependencies of `lordos` | administrator rights for Linux apps that run `pkexec`, answered by LordOS's own prompt (`docs/PRIVACY.md`) | LGPL-2.0-or-later |
+| `polkitd`, `pkexec` | both ISOs and the Raspberry Pi image; dependencies of `lordos` | administrator rights for Linux apps that run `pkexec`, answered by Insane OS's own prompt (`docs/PRIVACY.md`) | LGPL-2.0-or-later |
 | `libnss-mdns` | both ISOs and the Raspberry Pi image; recommended by `lordos` | `.local` names | LGPL-2.1-or-later |
 | `wireless-regdb` | both ISOs and the Raspberry Pi image | Wi-Fi's country rules for the kernel | ISC |
 | `firmware-brcm80211` | both ISOs (the Raspberry Pi image already had it, from Raspberry Pi's archive) | Broadcom Wi-Fi cards such as the BCM43602 | **non-free firmware** (Debian's `non-free-firmware`): Broadcom's binary licence, which allows redistribution unmodified; no source |
@@ -121,8 +121,8 @@ New on the images in 0.8.8.6 (installed from Debian, not linked):
 | `libtesseract5`, `tesseract-ocr-eng`, `-spa`, `-por`, `-fra`, `-ita` | both ISOs and the Raspberry Pi image; `libtesseract5` and English are dependencies of `lordos` when it ships `lord-ocr`, the other four are Recommends | text recognition (lord-ocr, above) | Apache-2.0 |
 | `intel-microcode`, `amd64-microcode` | the amd64 ISO; a dependency of `lordos` on amd64 | the processor's microcode updates, loaded at boot | **non-free firmware** (Debian's `non-free-firmware`): Intel's and AMD's binary licences, which allow redistribution unmodified; no source |
 
-## Tools used to make website media (not shipped in LordOS)
+## Tools used to make website media (not shipped in Insane OS)
 
 | Tool | Used for | License |
 |---|---|---|
-| Kokoro-82M (model and voices, run with kokoro-onnx) | the English narration of the LordOS Imager guide video on lordos.org/imager (voice `am_michael`) | Apache-2.0 |
+| Kokoro-82M (model and voices, run with kokoro-onnx) | the English narration of the Insane OS Imager guide video on lordos.org/imager (voice `am_michael`) | Apache-2.0 |

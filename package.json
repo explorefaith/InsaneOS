@@ -2,7 +2,7 @@
   "name": "lordos",
   "private": true,
   "version": "0.8.8.6",
-  "description": "LordOS — React themes and apps for lord-server",
+  "description": "Insane OS — React themes and apps for lord-server",
   "lordos": {
     "channel": "beta",
     "media": "0.8.8",

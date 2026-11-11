@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     snprintf(out, sizeof out, "%s/mia.lpk", home);
     unlink(out);
     int ml = snprintf(manifest, sizeof manifest,
-        "{\"id\":\"%s\",\"version\":\"1.0.0+mia\",\"name\":\"Mia\",\"icon\":\"icon.png\",\"basedOn\":\"%s@1.0.0 by LordOS\"}", id, id);
+        "{\"id\":\"%s\",\"version\":\"1.0.0+mia\",\"name\":\"Mia\",\"icon\":\"icon.png\",\"basedOn\":\"%s@1.0.0 by Insane OS\"}", id, id);
     OK(pkg_share(id, manifest, (size_t)ml, out, err, sizeof err) == 0, "share my version: %s", err[0] ? err : "ok");
     /* the derivative verifies with the user's key */
     Lpk dv;

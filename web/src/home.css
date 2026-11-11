@@ -145,7 +145,7 @@ pre::-webkit-scrollbar-thumb,.table::-webkit-scrollbar-thumb{background:#4A4775;
 .dl-hint{margin:-4px 0 8px!important;font-size:13.5px!important;color:var(--night-note)!important}
 .dl-hint a{color:#FFD60A}
 .dl-hint code{font:600 13px var(--mono);white-space:nowrap}
-/* how to write LordOS to a USB stick or SD card: the LordOS Imager (recommended) and your usual tool */
+/* how to write Insane OS to a USB stick or SD card: the Insane OS Imager (recommended) and your usual tool */
 .dl-write{display:flex;flex-direction:column;gap:22px;scroll-margin-top:80px}
 .dl-write-h{margin:0;font-size:clamp(24px,2.8vw,32px);letter-spacing:-.02em;font-weight:800}
 .dl-write .sub{margin-top:8px}

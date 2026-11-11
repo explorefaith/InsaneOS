@@ -294,7 +294,7 @@ function Body() {
 
   const failed = info.state === 'failed' && info.error ? tr(`cleaner.error.${info.error}`) : '';
 
-  // own frame: the window moves from the top edge and the sidebar's row, which stay free of controls. Lord Classic
+  // own frame: the window moves from the top edge and the sidebar's row, which stay free of controls. Insane Classic
   // draws its own buttons at the end of the top edge (themes/classic/components/Window.jsx), so that edge is taller.
   const classic = s.theme === 'classic', topEdge = classic ? 34 : 14;
   const move = () => wm.beginMove(winId), zoom = () => wm.toggleMaximize(winId);

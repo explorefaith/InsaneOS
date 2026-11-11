@@ -8,7 +8,7 @@
 // static HTML (View -> div, Text -> span, numbers -> px, the same layout defaults as the engine:
 // flex column, relative position) and screenshots it in headless Chromium with a transparent
 // background. ICON_DEPS must contain react, react-dom and playwright (dev-only tools, not
-// dependencies of LordOS).
+// dependencies of Insane OS).
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';

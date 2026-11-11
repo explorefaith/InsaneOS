@@ -100,7 +100,7 @@ static void test_sockets(int via_process) {
     if (fd >= 0) close(fd);
     errno = 0;
     CHECK(netconn_socket(NC_COUNT, AF_INET, SOCK_STREAM, NULL, 0) == -1 && errno == EINVAL);
-    printf("netconn-test: sockets %s: ok\n", via_process ? "from the connector processes" : "made in place (no LordOS session)");
+    printf("netconn-test: sockets %s: ok\n", via_process ? "from the connector processes" : "made in place (no Insane OS session)");
 }
 
 /* the connector's own checks: only a known component, only with a SEQPACKET channel on fd 3 */

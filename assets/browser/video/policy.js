@@ -1,6 +1,6 @@
-// policy.js — reads the settings LordOS writes for this extension (docs/VIDEO.md).
+// policy.js — reads the settings Insane OS writes for this extension (docs/VIDEO.md).
 //
-// LordOS writes them as the browser's managed policy for this extension (Chromium:
+// Insane OS writes them as the browser's managed policy for this extension (Chromium:
 // /etc/chromium/policies/managed/lordos-video.json, "3rdparty" → "extensions" → this id), so the
 // extension never touches the network or the user's files and nothing is reported anywhere.
 //
@@ -8,9 +8,9 @@
 //              "always": hold back VP9 and AV1 everywhere the extension runs
 //              "never": do nothing (the stutter notice stays)
 //   autoLower  lower the quality one step by itself when the video keeps dropping frames
-//   hwVp9, hwAv1  what LordOS found at boot (VA-API profiles, V4L2 stateless decoders, virtual GPU)
+//   hwVp9, hwAv1  what Insane OS found at boot (VA-API profiles, V4L2 stateless decoders, virtual GPU)
 //
-// Without a policy (another distribution, or LordOS hasn't written it yet) nothing is held back.
+// Without a policy (another distribution, or Insane OS hasn't written it yet) nothing is held back.
 /* global chrome, browser */
 var lordosVideo = (() => {
   const api = typeof browser !== 'undefined' ? browser : chrome;

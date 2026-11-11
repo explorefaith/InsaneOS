@@ -53,7 +53,7 @@ int  rt_addr_flush(int fd, int ifindex, int family);
 /* gw may be NULL; table 0 = main. */
 int  rt_route(int fd, int add, int family, const void *dst, int prefix, const void *gw, int ifindex, uint32_t metric, uint32_t table);
 /* Routing rule like wg-quick: "not fwmark M table T" (invert) or "table main suppress_prefixlength 0". */
-#define RTPROT_LORDOS 76                /* routes of LordOS's VPNs (so they can always be cleaned up) */
+#define RTPROT_LORDOS 76                /* routes of Insane OS's VPNs (so they can always be cleaned up) */
 int  rt_route_proto(int fd, int add, int family, const void *dst, int prefix, const void *gw, int ifindex, uint32_t metric, uint32_t table, int proto);
 int  rt_get(int fd, int family, const void *dst, uint8_t gw[16], int *has_gw, int *oif);   /* ip route get */
 int  rt_flush_proto(int fd, int proto, int family, const void *dst);

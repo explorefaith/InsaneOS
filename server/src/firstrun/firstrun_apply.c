@@ -1,5 +1,5 @@
 /* firstrun_apply.c — lordos-firstrun: applies lordos-firstrun.txt once, as root, on the first boot of
- * a LordOS Raspberry Pi image (called by /usr/lib/lordos/rpi/firstboot). See docs/IMAGER.md.
+ * a Insane OS Raspberry Pi image (called by /usr/lib/lordos/rpi/firstboot). See docs/IMAGER.md.
  *
  *   lordos-firstrun check <file>                         parse only; prints "ok" or the reason
  *   lordos-firstrun apply <file> [--root DIR --boot DIR] parse, apply, shred the file
@@ -431,7 +431,7 @@ static int apply_user(const FirstRun *fr) {
     rp(conf, sizeof conf, "/etc/lordos");
     mkdirs(conf, 0755);
     rp(conf, sizeof conf, "/etc/lordos/session.conf");
-    pathf(txt, sizeof txt, "# Set by lordos-firstrun (LordOS Imager); Settings → Users changes it.\nAUTOLOGIN=%s\n", fr->autologin ? fr->user : "");
+    pathf(txt, sizeof txt, "# Set by lordos-firstrun (Insane OS Imager); Settings → Users changes it.\nAUTOLOGIN=%s\n", fr->autologin ? fr->user : "");
     write_str(conf, txt, 0644);
     say("user %s created (administrator)%s", fr->user, fr->autologin ? ", logs in automatically" : "");
     return 0;
@@ -466,7 +466,7 @@ static void apply_ssh(const FirstRun *fr) {
     if (access(sshd, X_OK)) { say("this image has no SSH server: SSH not turned on"); return; }
     if (fr->ssh == FR_SSH_KEYS) {
         mkdirs(d, 0755);
-        if (write_str(p, "# LordOS Imager: key logins only (docs/IMAGER.md). Remove this file to allow passwords.\n"
+        if (write_str(p, "# Insane OS Imager: key logins only (docs/IMAGER.md). Remove this file to allow passwords.\n"
                          "PasswordAuthentication no\nKbdInteractiveAuthentication no\n", 0644)) say("could not write the SSH drop-in");
     } else unlink(p);
     if (systemctl("enable", "ssh.service")) say("could not enable ssh.service");
@@ -485,7 +485,7 @@ static void apply_remote(const FirstRun *fr) {
     }
     mkdirs(d, 0755);
     /* the same file and keys as Settings → Sharing (remote_admin.c): local network only by default */
-    if (write_str(p, "# LordOS · remote desktop (Settings → Sharing). See docs/REMOTE.md\n"
+    if (write_str(p, "# Insane OS · remote desktop (Settings → Sharing). See docs/REMOTE.md\n"
                      "enabled=1\nport=5673\nallow=all\nnet=lan\ninsecure_dev=0\n", 0644)) say("could not write the remote desktop config");
     else say("remote desktop: on, port 5673, local network only");
 }
@@ -514,7 +514,7 @@ static void config_block(const char *body) {
     size_t len;
     char *b = read_small(p, 1 << 20, &len);
     if (!b) { say("no config.txt: clock settings not written"); return; }
-    static const char BEGIN[] = "# >>> lordos-firstrun (LordOS Imager) >>>", END[] = "# <<< lordos-firstrun <<<";
+    static const char BEGIN[] = "# >>> lordos-firstrun (Insane OS Imager) >>>", END[] = "# <<< lordos-firstrun <<<";
     size_t cap = len + strlen(body) + 512, o = 0;
     char *out = malloc(cap);
     if (!out) { free(b); return; }
@@ -566,7 +566,7 @@ static void apply_cooling(const FirstRun *fr) {
     rp(tf, sizeof tf, "/etc/tmpfiles.d/lordos-cpu-governor.conf");
     if (fan && perf == FR_PERF_PERFORMANCE) {
         mkdirs(td, 0755);
-        write_str(tf, "# LordOS Imager: performance profile (docs/IMAGER.md). Delete this file to go back to the default.\n"
+        write_str(tf, "# Insane OS Imager: performance profile (docs/IMAGER.md). Delete this file to go back to the default.\n"
                       "w /sys/devices/system/cpu/cpufreq/policy*/scaling_governor - - - - performance\n", 0644);
     } else unlink(tf);
     /* clocks in config.txt (read by the firmware at the next boot) */
@@ -646,7 +646,7 @@ int main(int argc, char **argv) {
         fr_free(&fr);
         return 1;
     }
-    say("applying %s (written by the LordOS Imager)", file);
+    say("applying %s (written by the Insane OS Imager)", file);
     apply_hostname(&fr);
     apply_locale(&fr);
     apply_wifi_country(&fr);

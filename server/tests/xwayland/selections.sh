@@ -1,5 +1,5 @@
 #!/bin/sh
-# selections.sh — clipboard/primary checks for X11 apps, run inside a LordOS session on a test VM
+# selections.sh — clipboard/primary checks for X11 apps, run inside a Insane OS session on a test VM
 # (DISPLAY and WAYLAND_DISPLAY of the session; needs xclip, wl-clipboard, xterm and
 # build/clip-offers). See docs/WAYLAND.md, "X11 apps (Xwayland)", and docs/PRIVACY.md.
 #

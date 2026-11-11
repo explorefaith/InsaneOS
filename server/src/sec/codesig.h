@@ -1,10 +1,10 @@
 /* codesig.h — verified system code (0.8.2, "System apps immutable", phase 1; see docs/SIGNING.md,
  * "Verified system code").
  *
- * The JavaScript that LordOS runs as its own code — the theme bundles (the shell, the SDK, the
+ * The JavaScript that Insane OS runs as its own code — the theme bundles (the shell, the SDK, the
  * runtime and every native app), the login screen, the app host of isolated apps and the system
  * apps in assets/sysapps — is listed with its size and SHA-256 in <root>/code-manifest.json, and
- * that file is signed with the LordOS release key (Ed25519) in <root>/code-manifest.sig (base64 of
+ * that file is signed with the Insane OS release key (Ed25519) in <root>/code-manifest.sig (base64 of
  * the 64-byte signature over the exact bytes of the manifest). <root> is the folder that holds
  * assets/ and themes/ (/usr/lib/lordos when installed).
  *
@@ -80,17 +80,17 @@ const CodeManifest *codesig_manifest(void);      /* NULL without a manifest */
 int codesig_release_build(void);                 /* 1 if built with RELEASE=1 */
 double codesig_ms(void);                         /* time spent verifying in this process */
 
-/* Reads one file of LordOS's code. On success returns a malloc'd, NUL-terminated buffer with exactly
+/* Reads one file of Insane OS's code. On success returns a malloc'd, NUL-terminated buffer with exactly
  * the bytes that were hashed (len set). On refusal returns NULL, records the refusal (see below),
  * logs it and fills why. max: largest size accepted. */
 char *codesig_load(const char *path, size_t max, size_t *len, char *why, size_t whylen);
 
-/* Refusals of this process, for the "This LordOS component was modified" notification. */
+/* Refusals of this process, for the "This Insane OS component was modified" notification. */
 typedef struct { char path[CODE_PATH_MAX + 1]; char reason[96]; int reported; } CodeRefusal;
 int codesig_refused_count(void);
 CodeRefusal *codesig_refused(int i);
 
-/* The LordOS release key (tools/release/lordos-release.pub.pem), raw 32 bytes. */
+/* The Insane OS release key (tools/release/lordos-release.pub.pem), raw 32 bytes. */
 extern const uint8_t codesig_release_key[32];
 /* The key this build trusts: the release key, or a test build's CODE_PUBKEY. */
 const uint8_t *codesig_key(void);

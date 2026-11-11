@@ -1,4 +1,4 @@
-// voicecatalog.js — the voices and models LordOS offers for reading aloud (docs/VOICE.md, phase 3), and the names of
+// voicecatalog.js — the voices and models Insane OS offers for reading aloud (docs/VOICE.md, phase 3), and the names of
 // the packages that carry them. Pure data: Settings → AI → Voice (apps/settings/AI.jsx) and the package builder
 // (tools/voice/mkdeb-voice.mjs) read it, so the two never disagree. Tested by server/tests/voicecatalog_test.mjs.
 //
@@ -20,11 +20,11 @@
 // language itself, not the interface's. mb: download sizes, rounded up
 export const VOICE_LANGS = [
   { id: 'es', hd: 'spanish_24l', standard: 'spanish', own: 'lola', mb: { standard: 128, hd: 672, voice: 7, voiceHd: 32 },
-    sample: 'Hola, soy una de las voces de LordOS. Puedo leerte en voz alta cualquier texto que selecciones.' },
+    sample: 'Hola, soy una de las voces de Insane OS. Puedo leerte en voz alta cualquier texto que selecciones.' },
   { id: 'en', hd: 'english_2026-09_24l', standard: 'english', own: 'alba', mb: { standard: 128, hd: 1304, voice: 7, voiceHd: 32 },
-    sample: 'Hello, I am one of the LordOS voices. I can read aloud any text you select.' },
+    sample: 'Hello, I am one of the Insane OS voices. I can read aloud any text you select.' },
   { id: 'pt', hd: 'portuguese_24l', standard: 'portuguese', own: 'rafael', mb: { standard: 128, hd: 672, voice: 7, voiceHd: 32 },
-    sample: 'Olá, eu sou uma das vozes do LordOS. Posso ler em voz alta qualquer texto que você selecionar.' },
+    sample: 'Olá, eu sou uma das vozes do Insane OS. Posso ler em voz alta qualquer texto que você selecionar.' },
 ];
 
 // gender as Kyutai's demo lists it; source: where the recording comes from (its license above)

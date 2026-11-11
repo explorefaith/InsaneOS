@@ -322,7 +322,7 @@ const char *fsp_decide(const FspFacts *f, FspChoice *c) {
     if (!f->esp_fat) return "install.free.espNotFat";
     if (!f->esp_read) return "install.free.espUnreadable";
     if (f->esp_free < FSP_ESP_MIN_FREE) return "install.free.espFull";
-    if (f->esp_has_ours) return "install.free.espHasLordOS";
+    if (f->esp_has_ours) return "install.free.espHasInsane OS";
     if (fsp_largest_free(t, &c->region)) return "install.free.tableDamaged";
     if (c->region.bytes < FSP_MIN_BYTES) return "install.free.noRoom";
     if (!(c->num = fsp_free_number(t))) return "install.free.tableFull";

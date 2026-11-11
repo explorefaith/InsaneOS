@@ -1,23 +1,23 @@
 # License compliance and the SBOM
 
-How LordOS keeps track of what it ships and under which licenses, and the software bill of
+How Insane OS keeps track of what it ships and under which licenses, and the software bill of
 materials (SBOM) published with each release. The website summary is at
 [lordos.org/legal/standards](https://lordos.org/legal/standards/); the user-facing license page is
 [lordos.org/legal/licenses](https://lordos.org/legal/licenses/).
 
 ## The license inventory
 
-- `LICENSE`: LordOS's own code, MIT.
+- `LICENSE`: Insane OS's own code, MIT.
 - `THIRD_PARTY.md`: every component bundled in the repository (`third_party/`), the fonts and data
   files in `assets/`, the npm packages bundled into the theme JavaScript, and the Debian libraries
-  LordOS links dynamically, each with its license. A new bundled component, font or data file is
+  Insane OS links dynamically, each with its license. A new bundled component, font or data file is
   added there in the same change that adds it.
 - The `.deb` carries a machine-readable `usr/share/doc/lordos/copyright` (Debian copyright format,
   written by `tools/iso/mkdeb.sh`), and each font ships its license text next to it
   (`assets/fonts/*-LICENSE.txt`). The Noto subsets built into `lord-bench` have no files of their own:
   their license is `usr/share/doc/lordos/OFL-Noto.txt`.
 - Debian packages keep their own `/usr/share/doc/<package>/copyright` on the installed system.
-- **Raspberry Pi packages mirrored in the LordOS APT repository** (arm64, since 0.8.4.1;
+- **Raspberry Pi packages mirrored in the Insane OS APT repository** (arm64, since 0.8.4.1;
   `tools/release/rpi-mirror.list`, [UPDATES.md](UPDATES.md), "Raspberry Pi firmware packages") are
   copied byte for byte, each with its own `copyright` inside: `rpi-eeprom` (scripts BSD-3-Clause;
   bootloader images under Raspberry Pi's binary licence, which allows redistribution of unmodified
@@ -41,10 +41,10 @@ materials (SBOM) published with each release. The website summary is at
 - **The app catalog (0.8.5, Store → Artificial Intelligence and Commercial;** `apt/catalog.json`,
   `apt/README.md`, [UPDATES.md](UPDATES.md), "Mirrored apps (catalog)") records each app's licence.
   Apps delivered `direct` (Claude Code, Claude Desktop, Visual Studio Code, Cursor, Google Chrome,
-  Microsoft Edge, Spotify, all proprietary) are not redistributed by LordOS: the Store adds the
+  Microsoft Edge, Spotify, all proprietary) are not redistributed by Insane OS: the Store adds the
   vendor's own signed APT repository with a pinned key, and the package comes from there under the
   vendor's terms. The packages published in `pool/catalog/` are goose (Apache-2.0) and opencode (MIT),
-  the vendors' `.deb` files unmodified with a pinned SHA-256, and three LordOS builds: `llama.cpp` and
+  the vendors' `.deb` files unmodified with a pinned SHA-256, and three Insane OS builds: `llama.cpp` and
   `whisper.cpp` (MIT), built from the upstream source tarball pinned by URL and SHA-256 in the
   catalog, and `codex-cli` (Apache-2.0), OpenAI's static binary with its sigstore signature checked.
 

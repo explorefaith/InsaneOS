@@ -49,9 +49,9 @@
         },
         {
           "label": {
-            "en": "LordOS Imager guide",
-            "es": "Guía de LordOS Imager",
-            "pt": "Guia do LordOS Imager"
+            "en": "Insane OS Imager guide",
+            "es": "Guía de Insane OS Imager",
+            "pt": "Guia do Insane OS Imager"
           },
           "href": "/imager/"
         },
@@ -93,7 +93,7 @@
             "es": "Notas de versión",
             "pt": "Notas de versão"
           },
-          "href": "https://github.com/lordbasex/LordOS/releases"
+          "href": "https://github.com/lordbasex/Insane OS/releases"
         }
       ]
     },
@@ -126,7 +126,7 @@
             "es": "Kit de marca",
             "pt": "Kit de marca"
           },
-          "href": "https://github.com/lordbasex/LordOS/blob/main/docs/LORDOS-BRAND.md"
+          "href": "https://github.com/lordbasex/Insane OS/blob/main/docs/LORDOS-BRAND.md"
         },
         {
           "label": {
@@ -134,7 +134,7 @@
             "es": "Comunidad (Reddit)",
             "pt": "Comunidade (Reddit)"
           },
-          "href": "https://www.reddit.com/r/LordOS/"
+          "href": "https://www.reddit.com/r/Insane OS/"
         },
         {
           "label": {
@@ -142,7 +142,7 @@
             "es": "GitHub",
             "pt": "GitHub"
           },
-          "href": "https://github.com/lordbasex/LordOS"
+          "href": "https://github.com/lordbasex/Insane OS"
         },
         {
           "label": {
@@ -315,8 +315,8 @@
     "pt": "© 2026 iPERFEX · Pablo Miranda e Federico Pereira"
   },
   "note": {
-    "en": "LordOS is free software under the MIT license.",
-    "es": "LordOS es software libre bajo la licencia MIT.",
-    "pt": "LordOS é software livre sob a licença MIT."
+    "en": "Insane OS is free software under the MIT license.",
+    "es": "Insane OS es software libre bajo la licencia MIT.",
+    "pt": "Insane OS é software livre sob a licença MIT."
   }
 }

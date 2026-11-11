@@ -1,4 +1,4 @@
-// "Minimal" — an example LordOS theme (docs/THEMES-GUIDE.md). It is deliberately small: a bar at
+// "Minimal" — an example Insane OS theme (docs/THEMES-GUIDE.md). It is deliberately small: a bar at
 // the bottom of the main display with an apps menu, one button per open window and a clock; a plain
 // window frame; menus from the SDK's item lists. Everything an app needs from a theme is here
 // (tokens, frames, both kinds of window, the work area, layers); the polish of the bundled themes

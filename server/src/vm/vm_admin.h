@@ -2,7 +2,7 @@
  * implementation", The app). Nothing in the argument names a program, a package or a path: only words checked here.
  *
  *   vm-enable  "amd64" | "arm64" | "amd64 arm64"   installs what Machines needs for those guest architectures and
- *              isn't there yet, through LordOS's package engine (pkg-install): QEMU's emulator for each, its
+ *              isn't there yet, through Insane OS's package engine (pkg-install): QEMU's emulator for each, its
  *              UEFI firmware, the D-Bus display module, qemu-utils, passt                                   admin
  *   vm-kvm     ""                                    lets the session user use /dev/kvm: adds them to the kvm
  *              group (for the next sessions) and gives them read and write on /dev/kvm now with an access

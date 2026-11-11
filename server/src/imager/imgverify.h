@@ -1,8 +1,8 @@
-/* imgverify.h — pure checks for the LordOS Imager's admin actions (imager_admin.c) and its tests
+/* imgverify.h — pure checks for the Insane OS Imager's admin actions (imager_admin.c) and its tests
  * (tests/imager_test.c). No I/O except through the read callback; see docs/IMAGER.md.
  *
  *   - the release signature: SHA256SUMS.sig is base64 of the Ed25519 signature over the exact bytes
- *     of SHA256SUMS, made with the LordOS release key (docs/SIGNING.md, "Release files");
+ *     of SHA256SUMS, made with the Insane OS release key (docs/SIGNING.md, "Release files");
  *   - SHA256SUMS lines: "<64 hex>  <name>" (also "<hex> *<name>");
  *   - image names: what a release ships and what the imager writes;
  *   - the uncompressed size of an .xz file, from its index (to refuse a card that is too small

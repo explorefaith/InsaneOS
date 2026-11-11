@@ -2,7 +2,7 @@
 // unit tested with node: server/tests/dock_model_test.mjs).
 //
 // A pinned item is a typed id, so the three kinds of app can never collide:
-//   "app:<id>"      a LordOS app bundled with the theme (apps/<id>), opened with wm.open
+//   "app:<id>"      a Insane OS app bundled with the theme (apps/<id>), opened with wm.open
 //   "lpk:<id>"      an installed .lpk package, launched with lord.apps.launchPackage(id)
 //   "desktop:<id>"  a Linux app's .desktop entry, launched with lord.apps.launch(id)
 // Lists written before 0.8.1 hold untyped ids ("files", "store"); normalizePinned() migrates them.
@@ -48,7 +48,7 @@ export const dockId = (kind, key) => (DOCK_KINDS.includes(kind) && typeof key ==
 export const isDockId = (id) => parseDockId(id) !== null;
 
 // One stored entry → a typed id, or null to drop it. classify(untypedId) says what an old untyped
-// id is now: 'app', 'lpk' or null (unknown: kept as a LordOS app id if it looks like one).
+// id is now: 'app', 'lpk' or null (unknown: kept as a Insane OS app id if it looks like one).
 export function toTypedId(id, classify = () => null) {
   if (typeof id !== 'string' || !id) return null;
   if (parseDockId(id)) return id;
@@ -146,7 +146,7 @@ export function cleanActions(list, max = 40) {
 }
 
 // ---- Hiding (Settings → Desktop & Dock; issue #46) ----
-// Three modes, stored as two booleans so that a settings file read by an older LordOS still means
+// Three modes, stored as two booleans so that a settings file read by an older Insane OS still means
 // something close (it doesn't know dockIntellihide: the Dock just hides, as with 'always'):
 //   'never'    dockAutohide false                        the Dock stays; windows don't go under it
 //   'overlap'  dockAutohide true, dockIntellihide true   it hides only while a window covers its place

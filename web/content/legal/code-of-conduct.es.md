@@ -1,8 +1,8 @@
-LordOS lo hacen personas de distintos países, idiomas y orígenes, y queremos que todas se sientan bienvenidas. Este código de conducta se aplica a todas las personas que participan en el proyecto.
+Insane OS lo hacen personas de distintos países, idiomas y orígenes, y queremos que todas se sientan bienvenidas. Este código de conducta se aplica a todas las personas que participan en el proyecto.
 
 ## Nuestro compromiso
 
-Como integrantes, colaboradores y mantenedores, nos comprometemos a que participar en la comunidad de LordOS sea una experiencia libre de acoso para todas las personas, sin importar su edad, tamaño corporal, discapacidad visible o invisible, etnia, características sexuales, identidad y expresión de género, nivel de experiencia, educación, nivel socioeconómico, nacionalidad, apariencia personal, raza, casta, color, religión, ni identidad u orientación sexual.
+Como integrantes, colaboradores y mantenedores, nos comprometemos a que participar en la comunidad de Insane OS sea una experiencia libre de acoso para todas las personas, sin importar su edad, tamaño corporal, discapacidad visible o invisible, etnia, características sexuales, identidad y expresión de género, nivel de experiencia, educación, nivel socioeconómico, nacionalidad, apariencia personal, raza, casta, color, religión, ni identidad u orientación sexual.
 
 Nos comprometemos a actuar e interactuar de maneras que contribuyan a una comunidad abierta, acogedora, diversa, inclusiva y sana.
 
@@ -26,13 +26,13 @@ Ejemplos de comportamientos inaceptables:
 
 ## Responsabilidades de aplicación
 
-Los mantenedores de LordOS son responsables de aclarar y hacer cumplir estas normas, y van a tomar medidas correctivas apropiadas y justas ante cualquier comportamiento que consideren inapropiado, amenazante, ofensivo o dañino.
+Los mantenedores de Insane OS son responsables de aclarar y hacer cumplir estas normas, y van a tomar medidas correctivas apropiadas y justas ante cualquier comportamiento que consideren inapropiado, amenazante, ofensivo o dañino.
 
 Los mantenedores tienen el derecho y la responsabilidad de quitar, editar o rechazar comentarios, commits, código, ediciones de la wiki, issues y otras contribuciones que no sigan este código de conducta, y van a explicar los motivos de sus decisiones de moderación cuando corresponda.
 
 ## Alcance
 
-Este código de conducta se aplica en todos los espacios de la comunidad: el repositorio de LordOS y sus issues, pull requests y discusiones, el sitio web y cualquier otro espacio que gestione el proyecto. También se aplica cuando alguien representa oficialmente a la comunidad en espacios públicos, por ejemplo usando una dirección de correo oficial, publicando desde una cuenta oficial o actuando como representante en un evento, en línea o presencial.
+Este código de conducta se aplica en todos los espacios de la comunidad: el repositorio de Insane OS y sus issues, pull requests y discusiones, el sitio web y cualquier otro espacio que gestione el proyecto. También se aplica cuando alguien representa oficialmente a la comunidad en espacios públicos, por ejemplo usando una dirección de correo oficial, publicando desde una cuenta oficial o actuando como representante en un evento, en línea o presencial.
 
 ## Aplicación
 
@@ -70,6 +70,6 @@ Los mantenedores van a seguir estas pautas de impacto en la comunidad para decid
 
 ## Atribución
 
-Este código de conducta está adaptado del [Contributor Covenant](https://www.contributor-covenant.org), versión 2.1, disponible en [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html), y está bajo la [licencia Creative Commons Atribución 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.es). Los cambios son: el alcance y el canal de reporte se adaptaron a LordOS, y el texto se tradujo al español y al portugués.
+Este código de conducta está adaptado del [Contributor Covenant](https://www.contributor-covenant.org), versión 2.1, disponible en [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html), y está bajo la [licencia Creative Commons Atribución 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.es). Los cambios son: el alcance y el canal de reporte se adaptaron a Insane OS, y el texto se tradujo al español y al portugués.
 
 Las pautas de impacto en la comunidad se inspiraron en la [escalera de aplicación del código de conducta de Mozilla](https://github.com/mozilla/diversity).

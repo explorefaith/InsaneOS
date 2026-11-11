@@ -75,7 +75,7 @@ export const ctrlArrowsOn = () => settings.get().desktopArrows !== false;
 const arrowDir = (e) => (e.code === 105 ? 'left' : 'right');
 const onStep = (e) => stepArrow(arrowDir(e));
 
-// Lord Flow. ⌃ arrows are word movement in a Linux app, so Settings → Keyboard can turn them off
+// Insane Flow. ⌃ arrows are word movement in a Linux app, so Settings → Keyboard can turn them off
 // (then the 'flow' key table keeps them from nobody); ❖⌃ arrows always work.
 export const flowDesktopKeys = [
   { id: 'overview', keys: ['Ctrl+ArrowUp'], run: () => toggleOverview(), when: ctrlArrowsOn, listed: ctrlArrowsOn, label: 'shell.shortcuts.overview', group: 'desktops' },
@@ -85,7 +85,7 @@ export const flowDesktopKeys = [
 ];
 export const flowGrabs = () => (ctrlArrowsOn() ? 'flow-desktops' : 'flow');
 
-// Lord Classic.
+// Insane Classic.
 export const classicDesktopKeys = [
   { id: 'overview', keys: ['Meta+Tab'], run: () => toggleOverview(), label: 'shell.shortcuts.overview', group: 'desktops' },
   { id: 'newDesktop', keys: ['Meta+Ctrl+D'], run: addDesktopAndShow, label: 'shell.shortcuts.newDesktop', group: 'desktops' },

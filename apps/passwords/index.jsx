@@ -1,4 +1,4 @@
-// Passwords — the LordOS password manager: items by category (a tree, with field templates) and
+// Passwords — the Insane OS password manager: items by category (a tree, with field templates) and
 // tags, favorites, archived, trash, history, 2FA codes, Wi-Fi with QR, secure notes, cards, the
 // security report, the generator, import/export and the session keyring. Everything decrypted is
 // handled by lord-vault, sandboxed and without network; this window is protected (black in

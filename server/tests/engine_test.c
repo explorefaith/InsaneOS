@@ -6,7 +6,7 @@
  *   build/engine-test            runs the tests
  *   build/engine-test bench      times layout and paint of a 2000-row list and a window drag
  *   make drag-golden             writes test_drag_exact's golden hashes (only on the reference code)
- * Fallback fonts are looked up as in LordOS (DejaVu Sans covers Arabic and Hebrew in the build
+ * Fallback fonts are looked up as in Insane OS (DejaVu Sans covers Arabic and Hebrew in the build
  * container); the checks don't depend on which font draws a script. */
 #include <math.h>
 #include <stdio.h>
@@ -1828,9 +1828,9 @@ static void test_overlay_scrollbar(void) {
 }
 
 /* ---- The dragged window, pixel for pixel (test_drag_exact) ----
- * LordBench's desktop scene (apps/sysinfo/scene.jsx: a 760×480 window, a 72 px square turning inside
+ * InsaneBench's desktop scene (apps/sysinfo/scene.jsx: a 760×480 window, a 72 px square turning inside
  * it, six cards with shadows and text; a rounded window below; a menu bar and a Dock with backdrop
- * blur) moved along LordBench's figure of eight (lbi_path, one step a frame as grab_script_tick does
+ * blur) moved along InsaneBench's figure of eight (lbi_path, one step a frame as grab_script_tick does
  * by the clock) for 480 frames, the square turning 6° a frame through lord.setStyle's C path
  * (node_restyled with 'rotate', as scene.jsx sends it), and painted as main.c paints a frame
  * (paint_ui, then paint_out on one display).
@@ -2174,7 +2174,7 @@ static void dshadow(Node *n, uint32_t color, float y, float blur) {
     sn(n, "shadowBlur", blur);
 }
 
-/* The desktop and LordBench's scene window at (x, y), with what case dc adds to it. */
+/* The desktop and InsaneBench's scene window at (x, y), with what case dc adds to it. */
 static DScene drag_scene(int dc, float x, float y) {
     static const uint32_t accents[6] = { 0xff0a84ff, 0xff30d158, 0xffff9f0a, 0xffbf5af2, 0xffff453a, 0xff64d2ff };
     DScene s = { 0 };
@@ -2330,7 +2330,7 @@ static DScene drag_scene(int dc, float x, float y) {
     sn(dock, "borderRadius", 16);
     sn(dock, "backdropBlur", 20);
     for (int i = 0; i < 6; i++) dview(dock, 48, 48, accents[i], 12);
-    /* pause: 300 more nodes painted after the window, each in its own box below the Dock (LordOS's real
+    /* pause: 300 more nodes painted after the window, each in its own box below the Dock (Insane OS's real
      * menu bar and Dock are a few hundred; GPU drag's list of them once held 128 and refused every frame) */
     if (dc == DC_PAUSE) for (int i = 0; i < 300; i++) box_in(dockl, 12 + 3 * i, DH - 6, 2, 2, accents[i % 6]);
     ss(dock, "flexDirection", "row"); ss(dock, "alignItems", "center"); ss(dock, "justifyContent", "center");
@@ -2340,7 +2340,7 @@ static DScene drag_scene(int dc, float x, float y) {
     sn(bar, "backdropBlur", 20);
     ss(bar, "flexDirection", "row"); ss(bar, "alignItems", "center");
     sn(bar, "paddingLeft", 14); sn(bar, "gap", 18);
-    dtext(bar, "LordOS", 13, 700, 0xffffffff);
+    dtext(bar, "Insane OS", 13, 700, 0xffffffff);
     dtext(bar, "File", 13, 0, 0xffffffff);
     s.mtext = dtext(bar, "Edit", 13, 0, 0xffffffff);
     return s;

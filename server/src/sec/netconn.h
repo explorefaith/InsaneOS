@@ -1,4 +1,4 @@
-/* netconn.h — sockets for LordOS's own components, created in their own scopes (0.8.5).
+/* netconn.h — sockets for Insane OS's own components, created in their own scopes (0.8.5).
  *
  * lord-server opens connections for several of its parts: Mail and the calendar sync (for
  * lord-maild, which has no sockets of its own), printers and scanners, and the blocklist
@@ -12,9 +12,9 @@
  * The connector only does what lord-server could do itself (same user): socket(), and connect()
  * to the address lord-server already chose (non-blocking: lord-server waits for the result). It
  * takes no paths or names, runs nothing, and its request is a fixed-size struct validated on its
- * side too. In a LordOS session a connector that can't be placed in its scope exits, and the
+ * side too. In a Insane OS session a connector that can't be placed in its scope exits, and the
  * request fails (fail closed: otherwise the traffic would count, and be decided, as lord-server's
- * own). Outside a LordOS session (no LORDOS_SESSIOND: development, the tests) there are no scopes,
+ * own). Outside a Insane OS session (no LORDOS_SESSIOND: development, the tests) there are no scopes,
  * and netconn_socket() makes the socket in lord-server itself, as before. */
 #ifndef LORD_SEC_NETCONN_H
 #define LORD_SEC_NETCONN_H

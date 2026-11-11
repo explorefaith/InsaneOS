@@ -34,7 +34,7 @@ static uint32_t next_req = 1;
 static char app_id[48];
 static char pkg_dir[PATH_MAX];   /* carpeta del paquete (solo lectura); se fija antes de la caja de arena */
 
-static int pkg_system;           /* 1: a system app (assets/sysapps): its app.js is LordOS code, checked */
+static int pkg_system;           /* 1: a system app (assets/sysapps): its app.js is Insane OS code, checked */
 static int code_refused;         /* its app.js was refused by the verified-code check */
 
 void js_broker_set_pkgdir(const char *dir, int system) { snprintf(pkg_dir, sizeof pkg_dir, "%s", dir); pkg_system = system == 1; }
@@ -645,7 +645,7 @@ static JSValue f_broker_state(JSContext *c, JSValueConst t, int argc, JSValueCon
     return r;
 }
 
-/* ---- lord.locale (solo lectura): catálogos de LordOS (assets/locales, solo lectura por Landlock)
+/* ---- lord.locale (solo lectura): catálogos de Insane OS (assets/locales, solo lectura por Landlock)
  * y los de la propia app (locales/<idioma>.json del paquete) ---- */
 
 static int safe_name(const char *s) {

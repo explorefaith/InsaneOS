@@ -98,7 +98,7 @@ int main(void) {
     check(sig_fn && owner_fn && matches == 1, "subscribed to logind's PrepareForSleep and its owner");
     check(inhibit_calls == 0, "no inhibitor before logind has an owner");
     owner_fn("org.freedesktop.login1", ":1.4");
-    check(inhibit_calls == 1 && !strcmp(inhibit_args, "sleep|LordOS|Locking the screen before sleep|delay"),
+    check(inhibit_calls == 1 && !strcmp(inhibit_args, "sleep|Insane OS|Locking the screen before sleep|delay"),
           "a delay sleep inhibitor is asked for");
     int wr = -1;
     check(give_inhibitor(&wr) == 0 && sleeplock_inhibitor() >= 0 && !closed(wr), "the inhibitor's fd is kept");

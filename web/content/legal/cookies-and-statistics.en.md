@@ -9,7 +9,7 @@ lordos.org sets **no cookies**: no session, analytics, advertising or tracking c
 We don't collect statistics of any kind:
 
 - **On the website:** no analytics service, no counters, no tracking pixels, no fingerprinting, no social media widgets, and no fonts or scripts loaded from other servers.
-- **In the LordOS distribution:** no telemetry, no usage statistics, no crash reports and no device identifiers. The network connections LordOS makes are listed in the [Privacy policy](/legal/privacy/).
+- **In the Insane OS distribution:** no telemetry, no usage statistics, no crash reports and no device identifiers. The network connections Insane OS makes are listed in the [Privacy policy](/legal/privacy/).
 
 ## What the website keeps in your browser
 
@@ -28,7 +28,7 @@ The website is served by a content delivery network. To deliver each page, your 
 
 ## Download counts
 
-The release files are hosted on GitHub Releases. GitHub keeps a download counter for each release file; it is public, it is a single total per file, and it says nothing about who downloaded it. If we mention how many times LordOS was downloaded, that number comes from those counters.
+The release files are hosted on GitHub Releases. GitHub keeps a download counter for each release file; it is public, it is a single total per file, and it says nothing about who downloaded it. If we mention how many times Insane OS was downloaded, that number comes from those counters.
 
 ## Donation sites
 

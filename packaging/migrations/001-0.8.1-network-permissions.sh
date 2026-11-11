@@ -1,4 +1,4 @@
-# 0.8.1: per-app network permissions (lord-netperm) on wherever LordOS starts at boot.
+# 0.8.1: per-app network permissions (lord-netperm) on wherever Insane OS starts at boot.
 # The ISO, the Raspberry Pi image and install.sh enable lord-netperm.service, but the 0.8.0 package
 # itself did not, so a system set up with apt alone had the firewall off. Runs once: if an
 # administrator disables it afterwards, it stays disabled.

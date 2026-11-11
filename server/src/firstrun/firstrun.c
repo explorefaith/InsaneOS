@@ -288,7 +288,7 @@ static int value(FirstRun *fr, int k, const char *v, char *why, size_t whyn) {
         return 0;
     case K_LANG: {
         static const char *const L[] = { "en", "es", "pt", "fr", "it" };
-        if (pick(v, L, 5) < 0) BAD("not a LordOS language");
+        if (pick(v, L, 5) < 0) BAD("not a Insane OS language");
         copy_to(fr->lang, sizeof fr->lang, v);
         fr->has_lang = 1;
         return 0;
@@ -392,7 +392,7 @@ static int value(FirstRun *fr, int k, const char *v, char *why, size_t whyn) {
         return 0;
     }
     case K_ACCENT:
-        if (!fr_valid_accent(v)) BAD("not a LordOS accent");
+        if (!fr_valid_accent(v)) BAD("not a Insane OS accent");
         copy_to(fr->accent, sizeof fr->accent, v);
         fr->has_accent = 1;
         return 0;

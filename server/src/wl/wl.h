@@ -1,4 +1,4 @@
-/* wl.h — lord-server's Wayland compositor: GTK and Qt apps as LordOS windows (see wl.c). */
+/* wl.h — lord-server's Wayland compositor: GTK and Qt apps as Insane OS windows (see wl.c). */
 #ifndef LORD_WL_H
 #define LORD_WL_H
 
@@ -29,7 +29,7 @@ int  wl_pointer(float x, float y, struct Node *hit, int moved, int nbuttons, con
  * (they are sent leave) and only the button count is tracked. */
 void wl_pointer_grab(int nbuttons, const int *down);
 /* 0: the key is the shell's; 1: it went to the focused app; 2: it went to the app as another key
- * (Lord Flow's ❖ → Ctrl): the shell is only told, so ❖ does not count as pressed alone. */
+ * (Insane Flow's ❖ → Ctrl): the shell is only told, so ❖ does not count as pressed alone. */
 int  wl_key(int code, int value, const KeyInfo *k);
 void wl_keymap_changed(void);
 int  wl_send_paste(void);               /* synthetic Ctrl+V to the Linux app with the keyboard */
@@ -38,6 +38,9 @@ int  wl_focus_protected(void);          /* is that app's window a protected one?
 const char *wl_focus_app(void);         /* the isolated app with the keyboard, or NULL */
 const char *wl_focus_primary(size_t *n);    /* the text the app with the keyboard selected (primary selection), or NULL */
 const char *wl_node_app(int node);      /* the isolated app whose window that node is, or NULL */
+int  wl_node_pid(int node);             /* the Wayland client pid of that node's toplevel, or 0
+                                           (never lord-server's own pid; X11 windows give Xwayland's
+                                           pid, which callers must skip by name) */
 
 /* From JS (lord.wayland) */
 void wl_set_focus(int id);              /* 0: no Wayland app has the keyboard */
@@ -93,7 +96,7 @@ void wl_set_drm_device(dev_t dev);          /* DRM device for linux-dmabuf (CPU 
 void wl_pointer_relative(double dx, double dy);
 int  wl_pointer_locked(void);
 void wl_pointer_confine(int *x, int *y);
-/* Cursor requested by the app under the pointer: 0 = LordOS's, 1 = image (ARGB px), 2 = hidden.
+/* Cursor requested by the app under the pointer: 0 = Insane OS's, 1 = image (ARGB px), 2 = hidden.
  * gen changes when it must be redrawn. */
 int  wl_cursor(const uint32_t **px, int *w, int *h, int *hx, int *hy, unsigned *gen);
 

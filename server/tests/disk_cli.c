@@ -6,7 +6,7 @@
  *   sudo build/disk-cli [-u user] [-n] <action> '<arg with \n>'
  *        -n: as a user who is not an administrator
  *
- * The LordOS Imager's imager-* actions too (docs/IMAGER.md), with the real release key.
+ * The Insane OS Imager's imager-* actions too (docs/IMAGER.md), with the real release key.
  *
  * admin_say/admin_run are minimal versions of the ones in admin.c (they print to stdout). */
 #include "disk/disk.h"

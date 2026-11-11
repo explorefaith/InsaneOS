@@ -219,7 +219,7 @@ function relTime(ms) {
   if (s < 86400) return t('shell.clipboard.hours', { count: Math.floor(s / 3600) });
   return formatDate(new Date(ms), 'short');
 }
-const originLabel = (o) => (!o || o === 'lordos' ? 'LordOS' : o === 'terminal' ? t('shell.clipboard.fromTerminal') : o === 'linux' ? 'Linux' : o.replace(/^.*\./, ''));
+const originLabel = (o) => (!o || o === 'lordos' ? 'Insane OS' : o === 'terminal' ? t('shell.clipboard.fromTerminal') : o === 'linux' ? 'Linux' : o.replace(/^.*\./, ''));
 
 function Swatch({ color, size = 14 }) {
   return h(View, { style: { width: size, height: size, borderRadius: 3, backgroundColor: color, border: '1px solid rgba(128,128,128,0.5)' } });

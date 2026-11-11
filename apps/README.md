@@ -1,4 +1,4 @@
-# LordOS apps
+# Insane OS apps
 
 Each app is a folder `apps/<id>/` with two files. Apps don't depend on the theme: any theme shows
 them with its own colors (via `useTheme()`).
@@ -25,9 +25,9 @@ apps/quicknotes/
 
 `version` is required: the app's own version, in semver (`major.minor.patch`, optionally with a
 `-beta.1` or `~rc1` suffix). The build refuses an app without one (`tools/build-theme.mjs`), and the
-Store shows it next to the app (Installed: "LordOS app · 0.8.5"). The native apps started at `0.8.5`,
-the LordOS version they first shipped in; from then on an app's version changes when the app changes,
-apart from LordOS's, so the apps can later live in repositories of their own. An app added later starts
+Store shows it next to the app (Installed: "Insane OS app · 0.8.5"). The native apps started at `0.8.5`,
+the Insane OS version they first shipped in; from then on an app's version changes when the app changes,
+apart from Insane OS's, so the apps can later live in repositories of their own. An app added later starts
 at the release it first ships in (`cleaner` and `remote-desk`, 0.8.7).
 
 Optional fields: `"transparent": true` (the theme paints no background under the content; the
@@ -79,7 +79,7 @@ Store (see `docs/NATIVE-APPS.md`).
 | System | `useSystemInfo()`, `useCpuUsage()`, `useServerStats()`, `formatBytes`, `formatDuration` |
 | Settings | `useSettings()` → `[settings, update]`, stored in `~/.config/lordos/settings.json` |
 | Session | `session.quit()`, `themes.list()`, `themes.use(id)` |
-| Apps | `useLauncherApps()` (LordOS, packages and Linux apps), `launchApp(id)`, `packages.*`, `windowIcon(w)` — see `docs/NATIVE-APPS.md` |
+| Apps | `useLauncherApps()` (Insane OS, packages and Linux apps), `launchApp(id)`, `packages.*`, `windowIcon(w)` — see `docs/NATIVE-APPS.md` |
 | Clipboard | `clipboard.get/set(text, { secure })/use/pin/remove/clear`, `clipboardHistory` and `clipboardKind` (saved history; ❖V and ❖⇧V panels) — see `docs/SPOTLIGHT.md` |
 | Search | `spotlight.open/close/toggle` (❖Space; `open(display)` and `toggle(display)` open it on that display); `spotlightCalc(text)` and `spotlightConvert(text)` |
 | Sound | `useSound()`, `sound.setVolume/setMute/setDefault/setPort/move/meter/play`, `defaultSink(s)`, `microphones(s)` — see `docs/SOUND.md` |

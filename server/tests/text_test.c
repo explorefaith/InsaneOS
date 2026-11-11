@@ -2,7 +2,7 @@
  * PPM image, headless. Useful for checking bidi, Arabic, CJK and font fallback.
  *   build/text-test out.ppm "text" ["text"…]
  *   LORD_WRAP=220 build/text-test …   instead, each text in a 220 px box (line breaking)
- * Fallback fonts are looked up as in LordOS (/usr/share/fonts, ~/.fonts…). */
+ * Fallback fonts are looked up as in Insane OS (/usr/share/fonts, ~/.fonts…). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

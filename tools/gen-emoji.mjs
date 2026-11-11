@@ -1,4 +1,4 @@
-// gen-emoji.mjs — builds the data for the LordOS emoji picker from Unicode and CLDR.
+// gen-emoji.mjs — builds the data for the Insane OS emoji picker from Unicode and CLDR.
 //
 //   node tools/gen-emoji.mjs <folder>
 //

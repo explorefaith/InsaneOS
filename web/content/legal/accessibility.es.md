@@ -1,4 +1,4 @@
-Queremos que lordos.org lo pueda usar todo el mundo, incluidas las personas que usan solo el teclado, un lector de pantalla, ampliación o alto contraste. Nuestro objetivo son las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, nivel AA. Esta declaración cubre el sitio; la accesibilidad de la distribución LordOS se describe al final.
+Queremos que lordos.org lo pueda usar todo el mundo, incluidas las personas que usan solo el teclado, un lector de pantalla, ampliación o alto contraste. Nuestro objetivo son las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, nivel AA. Esta declaración cubre el sitio; la accesibilidad de la distribución Insane OS se describe al final.
 
 ## Qué hace el sitio hoy
 
@@ -16,9 +16,9 @@ Queremos que lordos.org lo pueda usar todo el mundo, incluidas las personas que 
 - Puede que el PDF del paper no esté completamente etiquetado para lectores de pantalla; el mismo contenido está disponible como página web.
 - Las páginas de donación son de PayPal y Mercado Pago, y su accesibilidad no depende de nosotros.
 
-## La distribución LordOS
+## La distribución Insane OS
 
-La accesibilidad del escritorio todavía está en desarrollo: LordOS tiene el ajuste **Reducir movimiento** (Ajustes → Apariencia), atajos de teclado y escala por pantalla de 100 a 200 %, pero un lector de pantalla, el zoom de pantalla y un tema de alto contraste **todavía no están disponibles**. Están en la hoja de ruta.
+La accesibilidad del escritorio todavía está en desarrollo: Insane OS tiene el ajuste **Reducir movimiento** (Ajustes → Apariencia), atajos de teclado y escala por pantalla de 100 a 200 %, pero un lector de pantalla, el zoom de pantalla y un tema de alto contraste **todavía no están disponibles**. Están en la hoja de ruta.
 
 ## Reportar un problema
 

@@ -1,5 +1,5 @@
 [
-  {"file":"docs/brand/screenshots/about-light.png","category":"desktop","theme":"light","caption":{"en":"Desktop with About LordOS","es":"Escritorio con Acerca de LordOS","pt":"Desktop com Sobre o LordOS"}},
+  {"file":"docs/brand/screenshots/about-light.png","category":"desktop","theme":"light","caption":{"en":"Desktop with About Insane OS","es":"Escritorio con Acerca de Insane OS","pt":"Desktop com Sobre o Insane OS"}},
   {"file":"docs/brand/screenshots/about-dark.png","category":"desktop","theme":"dark","caption":{"en":"Desktop in dark mode","es":"Escritorio en modo oscuro","pt":"Desktop no modo escuro"}},
   {"file":"docs/brand/screenshots/greeter.png","category":"desktop","theme":"light","caption":{"en":"Login screen","es":"Pantalla de inicio de sesión","pt":"Tela de login"}},
   {"file":"docs/brand/mascot/screens/installer-welcome-light.png","category":"desktop","theme":"light","caption":{"en":"Installer welcome","es":"Bienvenida del instalador","pt":"Boas-vindas do instalador"}},

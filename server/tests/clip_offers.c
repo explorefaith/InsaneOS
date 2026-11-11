@@ -1,7 +1,7 @@
 /* clip_offers.c — a Wayland client that checks that clipboard and primary-selection offers are
  * bound to the selection they were made for (docs/PRIVACY.md, "X11 apps"; wl.c clip_offer_gen and
  * prim_gen): after the selection changes, reading through an OLD offer must give nothing, and the
- * new offer must give the new text. Run by tests/xwayland/clip_offers.sh inside a LordOS session,
+ * new offer must give the new text. Run by tests/xwayland/clip_offers.sh inside a Insane OS session,
  * which changes both selections from an X11 app (xclip) while this window keeps the keyboard.
  *
  *   make -C server build/clip-offers

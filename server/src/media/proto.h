@@ -35,7 +35,7 @@ enum {
                            with JSON {"vaapi":bool,"vendor":"…","vp9":bool,"av1":bool,"h264":bool,"hevc":bool} */
     MK_STREAM,          /* remote desktop live encoder (docs/REMOTE.md, "Video (WebRTC)"): fds = audio ring
                            (or -1), render node (or -1); params codec=h264|vp8, width, height, fps, kbps */
-    MK_VBENCH,          /* LordBench's video measurement (lm_vbench.c, docs/BENCHMARK.md): no fds; params full=0|1.
+    MK_VBENCH,          /* InsaneBench's video measurement (lm_vbench.c, docs/BENCHMARK.md): no fds; params full=0|1.
                            Clips generated in memory; answers MM_BENCH records, then MM_STATE MS_DONE */
     MK_LIVE,            /* a packaged app's live stream (lm_live.c, live.h): fds = link to its companion, audio ring (or
                            none). Encoded pictures and Opus in; frame slots, sound and, with MM_RECORD, the microphone out */

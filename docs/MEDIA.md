@@ -1,6 +1,6 @@
 # Media: Photos, Player, Screenshots, Camera and Recorder (M9)
 
-Five preinstalled native LordOS apps, plus a sandboxed helper, `lord-media`. It is the only LordOS
+Five preinstalled native Insane OS apps, plus a sandboxed helper, `lord-media`. It is the only Insane OS
 program that links FFmpeg, and only to decode and encode. The player, audio/video sync, the
 interface and compositing are our own.
 
@@ -107,7 +107,7 @@ We took the way the apps of popular desktop systems work, never their logos or t
   the background; images, edits and exports in the foreground). Workers exit on their own after
   20 s without work. A one-shot `MK_HWPROBE` helper lists, once per boot, which codecs VA-API
   decodes on the render nodes it gets (`lm_hwprobe.c`, for "Video in the browser": see
-  [VIDEO.md](VIDEO.md)). A one-shot `MK_VBENCH` helper (0.8.6, LordBench) gets no fds at all: it makes
+  [VIDEO.md](VIDEO.md)). A one-shot `MK_VBENCH` helper (0.8.6, InsaneBench) gets no fds at all: it makes
   its test clips in memory and answers only fixed `MM_BENCH` records (`lm_vbench.c`, lord-server's side in
   `bench/lbvideo.c`; see [BENCHMARK.md](BENCHMARK.md)).
 - **It never receives a path.** lord-server validates each path with the same rules as `lord.fs`
@@ -254,7 +254,7 @@ Screen, microphone and camera go through the system permissions (`sec/perms.c`, 
 | Recorder: R, Space | Record or stop, play |
 
 ❖⇧3/4/5 weren't used by anyone (see `FILES.md`, `NOTES.md`, `TERMINAL.md`). The compositor
-passes the media keys and Print Screen to LordOS even when a Wayland app has focus (`wl_key`).
+passes the media keys and Print Screen to Insane OS even when a Wayland app has focus (`wl_key`).
 
 ## API
 
@@ -388,7 +388,7 @@ something changes), 0 dropped frames.
 
 - **VA-API measured on real hardware**, and dmabuf → EGL **zero-copy** on the GPU path. Test them
   on the AMD PC.
-- **LordBench's video workloads with hardware decoding (maintainer's decision):** `MK_VBENCH` gets no fds and no ioctl
+- **InsaneBench's video workloads with hardware decoding (maintainer's decision):** `MK_VBENCH` gets no fds and no ioctl
   classes; a hardware workload needs the render node and `SANDBOX_IOCTL_DRM` for that job, which widens its sandbox.
 - **Image subtitles** (PGS, DVD): only text ones today.
 - **Playback speed** and saved **playlists**.

@@ -1,4 +1,4 @@
-// spotlight.js — LordOS Search, the global search. ❖Space or Ctrl+Space open it
+// spotlight.js — Insane OS Search, the global search. ❖Space or Ctrl+Space open it
 // from anywhere; <SpotlightPanel /> is mounted by startShell, so every theme has it.
 //
 // Searches apps, files in the home folder, Settings sections, notes, the clipboard

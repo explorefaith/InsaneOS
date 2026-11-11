@@ -20,7 +20,7 @@ typedef enum {
     LPK_UNSIGNED = 0,                   /* "Unsigned" */
     LPK_SIGNED = 1,                     /* "Signed by <name>" (unknown key) */
     LPK_VERIFIED = 2,                   /* "Verified author" (key from the catalog) */
-    LPK_OFFICIAL = 3,                   /* "LordOS" (official key) */
+    LPK_OFFICIAL = 3,                   /* "Insane OS" (official key) */
 } LpkTrust;
 
 typedef struct {
@@ -46,7 +46,7 @@ int sig_verify_tree(int dirfd, const char *id, const char *version, const char *
 /* Verifies a firma.json (alg, key, sig) over data. 0 on success; key (65) gets the key. */
 int sig_verify_detached(const char *sig_json, size_t siglen, const void *data, size_t len, char key[65], char *err, size_t errlen);
 
-/* Is it an official LordOS key? (keys.h) */
+/* Is it an official Insane OS key? (keys.h) */
 int sig_official(const char *keyhex);
 
 /* firma.json text for data with seed `seed` (used by "Share my version"). */

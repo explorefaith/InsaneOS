@@ -6,7 +6,7 @@
  * Locking the screen does not lock it (the Passwords vault does lock).
  *
  * It stores two kinds of items (vault entries with an "x" that says whose they are):
- *   - from the LordOS keyring (lord.keyring / sdk keyring): x.kr = {owner, service, account, shared};
+ *   - from the Insane OS keyring (lord.keyring / sdk keyring): x.kr = {owner, service, account, shared};
  *     an app only sees its own, unless the user shares them with it (shared);
  *   - from Secret Service (D-Bus, Linux apps): x.ss = {attrs, ctype}; as in gnome-keyring,
  *     any app of the session that speaks D-Bus can read them while the keyring is open. */
@@ -220,7 +220,7 @@ void keyring_session_password(const char *pass) {
         }
         return;
     }
-    /* the session password changed outside LordOS (passwd): the interface asks for the old one */
+    /* the session password changed outside Insane OS (passwd): the interface asks for the old one */
     char ev[160];
     snprintf(ev, sizeof ev, "{\"ev\":\"keyring-mismatch\",\"error\":\"%s\"}", err);
     broadcast_event(ev);

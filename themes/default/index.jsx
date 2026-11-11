@@ -1,4 +1,4 @@
-// "Lord Flow" theme (id default) — a menu bar and dock layout, with its own assets.
+// "Insane Flow" theme (id default) — a menu bar and dock layout, with its own assets.
 // The theme builds the desktop (wallpaper, bar, dock, app launcher, Control Center) and the
 // window frames. Apps come from apps/ through the SDK.
 import {
@@ -18,6 +18,7 @@ import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
 import { ControlCenter } from './components/ControlCenter.jsx';
+import './components/DesktopWidgets.jsx';   // registers the glass clock + stats cards (sdk/widgets.js)
 import { NotificationCenter } from './components/NotificationCenter.jsx';
 import { Menu } from './components/Menu.jsx';
 
@@ -77,7 +78,7 @@ function useMinimizing(windows) {
     .filter((x) => x.win && x.win.minimized);
 }
 
-// Lord Flow's own shortcuts (the common ones are in sdk/shortcuts.js).
+// Insane Flow's own shortcuts (the common ones are in sdk/shortcuts.js).
 const onFront = (fn) => () => { const id = wm.focused(); if (id) fn(id); };
 const minimizeFront = onFront(wm.minimize);
 const hideFront = onFront(hideApp);

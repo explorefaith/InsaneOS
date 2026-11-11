@@ -1,4 +1,4 @@
-/* sessiond.h — lord-sessiond: the LordOS session manager (see sessiond.c,
+/* sessiond.h — lord-sessiond: the Insane OS session manager (see sessiond.c,
  * docs/SESSIONS.md and docs/REMOTE.md). A root process with three parts:
  *   - the main one (sessiond.c): configuration, session list, login screen;
  *   - the monitor (monitor.c): lends the card and input to the session being shown;

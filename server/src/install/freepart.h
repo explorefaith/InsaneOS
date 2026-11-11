@@ -5,7 +5,7 @@
 
 #include "freespace.h"
 
-#define FP_BOOT_FOLDER "LordOS"                 /* EFI/LordOS on the existing ESP */
+#define FP_BOOT_FOLDER "Insane OS"                 /* EFI/Insane OS on the existing ESP */
 
 /* A disk's boot structures, byte for byte. */
 typedef struct {

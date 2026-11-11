@@ -1,4 +1,4 @@
-// voice.js — reading text aloud (docs/VOICE.md, phase 2): lord.voice starts lord-say, LordOS's `say`.
+// voice.js — reading text aloud (docs/VOICE.md, phase 2): lord.voice starts lord-say, Insane OS's `say`.
 //
 //   speak(text, voice?, source?)  reads it (source: what the player names, else the window in front), in the language it is written in (lord-say tells); ends any reading before;
 //                            voice: one installed (say's -v), else the language's chosen one
@@ -12,7 +12,7 @@
 //   speaking                 a store: true while reading or saving
 //   player                   a store: what the player shows ({ state: 'playing'|'paused'|'done', source }), or null
 //   speakSelection()         ❖Esc (sdk/shortcuts.js): reads what the window in front has selected, or stops reading
-//   registerSelection(wid, fn)   a LordOS app's window says what it has selected (fn() → text); returns the undo
+//   registerSelection(wid, fn)   a Insane OS app's window says what it has selected (fn() → text); returns the undo
 //   speechItems(getText)     [speechMenu(getText), '-'], or [] when it is off: to spread into a menu's items
 //   speechMenu(getText)      the Speech submenu (Start Speaking, Stop Speaking, Save as Audio…) for an Edit menu or a
 //                            context menu; null when reading aloud is off in Settings → AI
@@ -147,7 +147,7 @@ export function registerSelection(wid, fn) {
   return () => { if (providers.get(wid) === fn) providers.delete(wid); };
 }
 
-// what a LordOS window has selected; undefined for a Linux app's (lord-server reads it)
+// what a Insane OS window has selected; undefined for a Linux app's (lord-server reads it)
 function selectionOf(wid) {
   const fn = wid && providers.get(wid);
   if (!fn) return undefined;

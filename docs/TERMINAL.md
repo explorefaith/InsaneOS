@@ -1,7 +1,7 @@
-# LordOS Terminal
+# Insane OS Terminal
 
-LordOS's native terminal, inspired by popular terminal emulators. It isn't a Linux app running inside LordOS:
-the emulation, the PTY and the drawing are LordOS's own C code inside `lord-server`,
+Insane OS's native terminal, inspired by popular terminal emulators. It isn't a Linux app running inside Insane OS:
+the emulation, the PTY and the drawing are Insane OS's own C code inside `lord-server`,
 and the UI (tabs, panes, profiles, menus) is a React app like the others.
 
 ```
@@ -43,7 +43,7 @@ that changed) is repainted.
 | ![regex](terminal-regex-search.png) | ![replay](terminal-session-replay.png) |
 | Regular-expression search | Instant Replay |
 | ![colors](terminal-true-color.png) | ![theme](terminal-theme-switch.png) |
-| SGR: bold, italic, underline, strikethrough, direct color | The same shell (PID 4126) is still alive after switching to the Lord Classic theme |
+| SGR: bold, italic, underline, strikethrough, direct color | The same shell (PID 4126) is still alive after switching to the Insane Classic theme |
 | ![ligatures](terminal-ligatures.png) | ![emoji](terminal-emoji.png) |
 | Profile imported from another terminal emulator: Fira Code with ligatures, Dracula, a trigger that highlights "ERROR" | Ligatures, combining marks and color emoji; below, with mode 2027 (👍🏽 🇦🇷 👨‍👩‍👧 as one glyph) |
 | ![import](terminal-import-color-scheme.png) | ![keys](terminal-key-bindings.png) |
@@ -65,7 +65,7 @@ that changed) is repainted.
 
 ## Parity with popular terminal emulators
 
-Status: ✅ done and tested in the VM · 🟡 partial · ⏳ pending · — doesn't apply to LordOS.
+Status: ✅ done and tested in the VM · 🟡 partial · ⏳ pending · — doesn't apply to Insane OS.
 
 ### Emulation
 
@@ -161,10 +161,10 @@ Status: ✅ done and tested in the VM · 🟡 partial · ⏳ pending · — does
 |---|---|
 | Passwords when a program asks for one (ssh, sudo, git, gpg), and saving one typed by hand | ✅ since 0.8.8.6: a bar offers the Passwords logins (the host's first; it names the asking program, read from /proc); a typed password the program accepted is offered for saving. The value goes between lord-vault and the pty in C, never through JS (`src/term/termfill.c`, `tcapture.c`, docs/PASSWORDS.md) |
 | Python API, AI assistant | — no scripting is exposed to the theme |
-| Triggers that run scripts or coprocesses, custom per-profile commands | — LordOS only opens the user's shell; an imported "command" is typed into the shell on open |
+| Triggers that run scripts or coprocesses, custom per-profile commands | — Insane OS only opens the user's shell; an imported "command" is typed into the shell on open |
 | Background image, horizontal spacing | ⏳ |
 | COLR/SVG emoji, ligatures with GPOS positioning (more precise marks over letters) | ⏳ |
-| Automatic updates, Sparkle | — it's updated with LordOS |
+| Automatic updates, Sparkle | — it's updated with Insane OS |
 
 ## Claude Code in the status bar
 
@@ -184,8 +184,8 @@ A click on a percentage shows the exact tokens, when each limit resets and the s
   the command it wraps. It keeps the JSON as `~/.cache/lordos/claude/<session_id>.json` (session ids are checked;
   0600 in a 0700 folder of the user's; no links followed; written whole and renamed; files older than a week removed),
   then runs the wrapped command with the same stdin, so the status line shows exactly what it did before. With no
-  command to wrap (the user had no status line) it prints LordOS's own, the footer's numbers in one line:
-  `Opus 5.5 | LordOS | main | ctx 11% | 5h 37% | sem 5%` (model, folder, git branch read from `.git/HEAD` without
+  command to wrap (the user had no status line) it prints Insane OS's own, the footer's numbers in one line:
+  `Opus 5.5 | Insane OS | main | ctx 11% | 5h 37% | sem 5%` (model, folder, git branch read from `.git/HEAD` without
   running git, context used, the plan's limits, the labels in the user's language; control characters and `|` from the
   input are left out). A subscriber's 5-hour window shows as `5h –` while Claude Code leaves it out (it drops a window
   once it resets), here and in the footer. lord-server runs nothing: the Terminal only reads those files.
@@ -247,7 +247,7 @@ Before 0.8.8.7 this was the `"terminal"` key of `settings.json`.
   removed from `settings.json`. Every field is kept as it was (`itermGuid` too). If `terminal.json` is already there it
   wins and nothing is overwritten.
 - **Another place**: Preferences → **Config File** → *Choose Location…* (a `.json` file in the home folder or on a
-  mounted disk, for example `~/Backups/LordOS-Terminal/terminal.json`). If no file is there the configuration is moved
+  mounted disk, for example `~/Backups/Insane OS-Terminal/terminal.json`). If no file is there the configuration is moved
   to it; if one is, *Use the File That Is There* or *Replace It*. `settings.json` keeps only `"terminalConfigPath"`;
   every later change (profiles, colors, shortcuts, an import) is written there. *Back to the Default Location* moves
   it back. *Show in Files* opens its folder.
@@ -290,7 +290,7 @@ Converted: colors (sRGB and Display P3, with light/dark variants), font and size
 font, ligatures, line spacing, cursor, bold/italic, minimum contrast, transparency and blur,
 columns × rows, history, mouse reporting, Option as Esc+, bell, confirm on close, initial
 directory, badge, tab color, "Bound Hosts" (automatic switching), triggers, profile and global
-keys, initial text. What LordOS doesn't have is listed as a warning before importing.
+keys, initial text. What Insane OS doesn't have is listed as a warning before importing.
 Re-importing a profile with the same GUID updates it instead of duplicating it. Verified in the
 VM with real `.itermcolors` files (Dracula, Catppuccin) and with a binary preferences plist.
 
@@ -317,7 +317,7 @@ Running `tmux -CC` (or `tmux -CC attach -t session`) in a tab turns it into the 
 tmux's control mode: another window opens where each tmux window is a tab and each pane a native
 pane (with its history, colors and cursor). In that window:
 
-| Action in LordOS | tmux command |
+| Action in Insane OS | tmux command |
 |---|---|
 | ❖T / ❖D / ❖⇧D | `new-window` / `split-window -h` / `split-window -v` |
 | ❖W / ❖⇧W | `kill-pane` / `kill-window` |
@@ -349,7 +349,7 @@ RemoteHost (user@host, for automatic profile switching) and define
 
 ## Security
 
-- `lord.term.create()` is the only LordOS API that starts a process. It only launches the login
+- `lord.term.create()` is the only Insane OS API that starts a process. It only launches the login
   shell of the user already running the session, with no arguments chosen by JS (apart from the
   initial directory).
 - The child doesn't inherit capabilities (cleared with `capset`), blocked signals, server
@@ -364,7 +364,7 @@ RemoteHost (user@host, for automatic profile switching) and define
 - Fonts are only looked up in font folders; those in `~/.fonts` belong to the user.
 - (0.8.5) The shell enters `lordos-net-terminal.scope` before exec (`pty.c`), so it and every
   program it starts are the firewall app "Terminal" (`lordos:terminal`): its own row in Monitor →
-  Network, with each program's name, and its own rules (`FIREWALL.md`, "LordOS components in their
+  Network, with each program's name, and its own rules (`FIREWALL.md`, "Insane OS components in their
   own scopes"). Best effort: a terminal that can't be placed still opens.
 
 ## Tests

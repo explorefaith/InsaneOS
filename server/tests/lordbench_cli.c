@@ -1,4 +1,4 @@
-/* lordbench_cli.c — runs LordBench from a terminal through lord-server's own code (bench/lbrun.c), with
+/* lordbench_cli.c — runs InsaneBench from a terminal through lord-server's own code (bench/lbrun.c), with
  * build/lord-bench next to it: `build/lordbench-cli quick|full [sustained_s]`. For checking the helper
  * and its sandbox on a machine without a session; prints the result JSON. */
 #include "../src/bench/lbrun.h"

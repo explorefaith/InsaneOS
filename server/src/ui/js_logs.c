@@ -2,7 +2,7 @@
  *
  * Everything is read-only and runs as the session user: the journal files that the kernel and
  * journald's ACLs let them read (their user-<uid>.journal; the system one only if they are in
- * systemd-journal or adm) and their LordOS logs (~/.cache/lordos/<name>.log). The system journal
+ * systemd-journal or adm) and their Insane OS logs (~/.cache/lordos/<name>.log). The system journal
  * for an administrator goes through the helper's logs-system action (logs/logs_admin.c).
  *
  *   sources()                  { user: n files, system: bool (readable directly), uid }
@@ -166,7 +166,7 @@ void logs_dispatch(void (*fn)(const char *kind, int id, const char *name)) {
             pthread_mutex_unlock(&mu);
             for (int j = 0; j < k; j++) fn("result", ids[j], "");
         } else if (ino >= 0 && evs[i].data.fd == ino) {
-            /* coalesce all events of this round: one per kind (and per LordOS file) */
+            /* coalesce all events of this round: one per kind (and per Insane OS file) */
             char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
             int journal = 0;
             char files[4][72];

@@ -13,7 +13,7 @@
 # lord-server reads the two files on every lord.sysinfo.community() call and verifies the signature in C before
 # parsing (server/src/sysreport/hwsnap.c), so the package is only a way to deliver them: the lordos package
 # Depends on it, and a newer one published alone in the signed APT repository reaches every system through the
-# daily update check and Store → Updates, between LordOS releases (docs/RELEASING.md, "A newer hardware snapshot").
+# daily update check and Store → Updates, between Insane OS releases (docs/RELEASING.md, "A newer hardware snapshot").
 #
 # Version: the snapshot's "generated" date (its newest report) as YYYY.MM.DD, plus .N from HWDATA_SERIAL=N
 # (1..99) for a second, different snapshot with the same date. The package is reproducible: the same snapshot
@@ -76,15 +76,15 @@ install -m 644 "$SNAP" "$H/snapshot.json"
 [ -f "$SIG" ] && install -m 644 "$SIG" "$H/snapshot.json.sig"
 cat > "$D/copyright" <<'C'
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: LordOS
-Source: https://github.com/lordbasex/LordOS
+Upstream-Name: Insane OS
+Source: https://github.com/lordbasex/Insane OS
 
 Files: *
-Copyright: 2026 iPERFEX and the LordOS contributors
+Copyright: 2026 iPERFEX and the Insane OS contributors
 License: Expat
  The snapshot is built by tools/hwreport/catalog.mjs from the hardware reports
- accepted in the LordOS repository (web/content/hardware/reports); it holds
- device keys, LordOS versions and counts, no personal data.
+ accepted in the Insane OS repository (web/content/hardware/reports); it holds
+ device keys, Insane OS versions and counts, no personal data.
  .
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,7 @@ License: Expat
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 C
-printf 'lordos-hwdata (%s) trixie; urgency=medium\n\n  * The tested-hardware snapshot of %s, built by tools/iso/mkdeb-hwdata.sh.\n\n -- LordOS <lord.basex@gmail.com>  %s\n' \
+printf 'lordos-hwdata (%s) trixie; urgency=medium\n\n  * The tested-hardware snapshot of %s, built by tools/iso/mkdeb-hwdata.sh.\n\n -- Insane OS <lord.basex@gmail.com>  %s\n' \
     "$VERSION" "$GEN" "$RFC" | gzip -9n > "$D/changelog.gz"
 chmod 644 "$D/copyright" "$D/changelog.gz"
 (cd "$PKG" && find usr -type f | LC_ALL=C sort | xargs md5sum) > "$PKG/DEBIAN/md5sums"
@@ -114,17 +114,17 @@ Package: lordos-hwdata
 Version: $VERSION
 Architecture: all
 Multi-Arch: foreign
-Maintainer: LordOS <lord.basex@gmail.com>
+Maintainer: Insane OS <lord.basex@gmail.com>
 Installed-Size: $SIZE
 Section: misc
 Priority: optional
-Homepage: https://github.com/lordbasex/LordOS
-Description: tested-hardware snapshot for LordOS System Information
- The signed snapshot of the hardware reports accepted for LordOS: for each
- device and LordOS version, how many reports say it works, works with limits
+Homepage: https://github.com/lordbasex/Insane OS
+Description: tested-hardware snapshot for Insane OS System Information
+ The signed snapshot of the hardware reports accepted for Insane OS: for each
+ device and Insane OS version, how many reports say it works, works with limits
  or doesn't work. System Information's Compatibility panel shows it only after
- checking its Ed25519 signature with the LordOS release key. Updated between
- LordOS releases through the LordOS repository.
+ checking its Ed25519 signature with the Insane OS release key. Updated between
+ Insane OS releases through the Insane OS repository.
 C
 chmod 644 "$PKG/DEBIAN/control" "$PKG/DEBIAN/md5sums"
 find "$PKG" -type d -exec chmod 755 {} +

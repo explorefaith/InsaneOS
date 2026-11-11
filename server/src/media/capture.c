@@ -72,7 +72,7 @@ void media_scene_painted(const Canvas *scene) {
     else repaint_cap(scene->clip);
 }
 
-/* ---- cursor in the recording (the LordOS arrow or the app's image) ---- */
+/* ---- cursor in the recording (the Insane OS arrow or the app's image) ---- */
 static const char *const arrow[] = {
     "X", "XX", "XoX", "XooX", "XoooX", "XooooX", "XoooooX", "XooooooX", "XoooooooX",
     "XooooooooX", "XoooooooooX", "XooooooooooX", "XooooooXXXXX", "XoooXooX",

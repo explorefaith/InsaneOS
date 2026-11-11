@@ -5,7 +5,7 @@
  *   lord.help.read(lang, id)  → the article text, or null
  *   lord.time.zoneOffset(zone, unixSeconds) → { offset, abbr, dst } or null (our own TZif reader, tzif.c)
  *
- * Read-only and only from LordOS's assets/help folder: the language and the id are validated
+ * Read-only and only from Insane OS's assets/help folder: the language and the id are validated
  * ([a-z0-9-], no dots or slashes), so nothing outside it can be reached. English (assets/help/en)
  * is the default; the SDK (sdk/help.js) falls back to it when an article is not translated. */
 #include "js_help.h"

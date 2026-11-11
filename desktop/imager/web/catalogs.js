@@ -1,4 +1,4 @@
-// catalogs.js — the imager's texts in the desktop app: the same catalogs LordOS ships
+// catalogs.js — the imager's texts in the desktop app: the same catalogs Insane OS ships
 // (assets/locales/<lang>/), so both apps say the same thing in the same languages.
 import enImager from '../../../assets/locales/en/imager.json';
 import esImager from '../../../assets/locales/es/imager.json';

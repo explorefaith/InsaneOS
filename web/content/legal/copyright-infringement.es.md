@@ -1,8 +1,8 @@
-Respetamos los derechos de los autores y esperamos lo mismo de todas las personas que contribuyen a LordOS. Si creés que algo en lordos.org, en una versión de LordOS o en el repositorio de LordOS infringe tus derechos de autor, avisanos y lo vamos a revisar.
+Respetamos los derechos de los autores y esperamos lo mismo de todas las personas que contribuyen a Insane OS. Si creés que algo en lordos.org, en una versión de Insane OS o en el repositorio de Insane OS infringe tus derechos de autor, avisanos y lo vamos a revisar.
 
 ## La ley que se aplica
 
-LordOS lo lleva adelante desde Argentina iPERFEX (Pablo Miranda y Federico Pereira), y tratamos estos reclamos según la ley argentina, principalmente la Ley 11.723 de propiedad intelectual. No somos un proveedor de servicios de Estados Unidos y no prometemos los procedimientos de la Digital Millennium Copyright Act (DMCA) estadounidense. El aviso que pedimos se parece a un aviso DMCA, así que podés usar uno que ya tengas.
+Insane OS lo lleva adelante desde Argentina iPERFEX (Pablo Miranda y Federico Pereira), y tratamos estos reclamos según la ley argentina, principalmente la Ley 11.723 de propiedad intelectual. No somos un proveedor de servicios de Estados Unidos y no prometemos los procedimientos de la Digital Millennium Copyright Act (DMCA) estadounidense. El aviso que pedimos se parece a un aviso DMCA, así que podés usar uno que ya tengas.
 
 ## Cómo enviar un aviso
 
@@ -31,7 +31,7 @@ Dejamos de aceptar contribuciones de quienes infringen reiteradamente los derech
 
 ## Otras plataformas
 
-El material alojado en otros servicios sigue sus reglas. Para contenido en GitHub, incluidos el repositorio de LordOS y sus versiones, también podés usar la [política de retiro por DMCA de GitHub](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Los paquetes de Debian los gestiona Debian.
+El material alojado en otros servicios sigue sus reglas. Para contenido en GitHub, incluidos el repositorio de Insane OS y sus versiones, también podés usar la [política de retiro por DMCA de GitHub](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Los paquetes de Debian los gestiona Debian.
 
 ## Controversias
 

@@ -6280,7 +6280,7 @@ static void compute_value_size(JSValueConst val, JSMemoryUsage_helper *hp)
     }
 }
 
-/* LordOS patch: the malloc_size that JS_ComputeMemoryUsage reports, without
+/* Insane OS patch: the malloc_size that JS_ComputeMemoryUsage reports, without
    walking every object (lord.stats() polls it) */
 size_t JS_GetMallocSize(JSRuntime *rt)
 {

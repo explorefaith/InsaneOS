@@ -7,7 +7,7 @@ static int fails;
 #define CHECK(x) do { if (!(x)) { printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #x); fails++; } } while (0)
 
 int main(void) {
-    /* the media row stays with LordOS; the F keys and Esc are the app's */
+    /* the media row stays with Insane OS; the F keys and Esc are the app's */
     static const int kept[] = { KEY_MUTE, KEY_VOLUMEDOWN, KEY_VOLUMEUP, KEY_BRIGHTNESSDOWN, KEY_BRIGHTNESSUP, KEY_KBDILLUMDOWN,
                                 KEY_KBDILLUMUP, KEY_PLAYPAUSE, KEY_NEXTSONG, KEY_PREVIOUSSONG, KEY_SYSRQ };
     for (size_t i = 0; i < sizeof kept / sizeof kept[0]; i++) CHECK(keygrab_system_key(kept[i]));
@@ -57,7 +57,7 @@ int main(void) {
     CHECK(!keygrab_set(NULL));
     CHECK(keygrab_match(KEY_TAB, 0, KG_ALT) == KG_HOLD);
 
-    /* Lord Classic */
+    /* Insane Classic */
     CHECK(keygrab_match(KEY_TAB, 0, KG_ALT | KG_SHIFT) == KG_HOLD);
     CHECK(keygrab_match(KEY_TAB, 0, KG_CTRL) == KG_PASS);                  /* Ctrl+Tab stays with the apps */
     CHECK(keygrab_match(KEY_F4, 0, KG_ALT) == KG_TAKE);
@@ -73,7 +73,7 @@ int main(void) {
     CHECK(keygrab_match(KEY_Q, 'q', KG_CTRL) == KG_PASS);                  /* Ctrl+Q is never global */
     CHECK(!keygrab_is_remap('c', KG_META));                                /* no ❖ → Ctrl here */
 
-    /* Lord Flow */
+    /* Insane Flow */
     CHECK(keygrab_set("flow"));
     CHECK(keygrab_match(KEY_TAB, 0, KG_ALT) == KG_PASS);
     CHECK(keygrab_match(KEY_TAB, 0, KG_META) == KG_HOLD);

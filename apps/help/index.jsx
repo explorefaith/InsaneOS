@@ -1,5 +1,5 @@
 // Help — help articles for every app and feature, with search, and the first-login "Welcome to
-// LordOS" tour (docs/SYSTEM.md). Articles are markdown in assets/help/<lang>/ (English is the
+// Insane OS" tour (docs/SYSTEM.md). Articles are markdown in assets/help/<lang>/ (English is the
 // default) and are read by the SDK (sdk/help.js → lord.help). The links settings:<section>,
 // app:<id> and help:<article> open Settings, an app or another article.
 import {

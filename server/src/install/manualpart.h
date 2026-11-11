@@ -19,7 +19,7 @@ typedef struct {
     char dev[MP_ROLES][48];     /* /dev/... of each role, "" when not used */
     char home_fs[16];           /* the file system /home ends up with */
     unsigned esp_num;
-    int esp_formatted;          /* the EFI partition is new or was formatted: it holds only LordOS */
+    int esp_formatted;          /* the EFI partition is new or was formatted: it holds only Insane OS */
     int table_changed;
     int kept_new_table;         /* deletions were formatted over: a failure from here on keeps the new table */
 } MppResult;

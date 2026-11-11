@@ -319,7 +319,7 @@ static JSValue f_sys_info(JSContext *c, JSValueConst this_val, int argc, JSValue
     boot_time_load();
     JS_SetPropertyStr(c, o, "bootSeconds", JS_NewFloat64(c, boot_secs));
     JS_SetPropertyStr(c, o, "bootShown", JS_NewString(c, boot_shown));
-    /* LordOS itself: package.json's version and channel ("beta"; empty for a stable release) and the build */
+    /* Insane OS itself: package.json's version and channel ("beta"; empty for a stable release) and the build */
     JS_SetPropertyStr(c, o, "version", JS_NewString(c, LORD_VERSION));
     JS_SetPropertyStr(c, o, "channel", JS_NewString(c, LORD_CHANNEL));
     JS_SetPropertyStr(c, o, "build", JS_NewString(c, LORD_BUILD));
@@ -652,7 +652,7 @@ static JSValue f_locale_available(JSContext *c, JSValueConst this_val, int argc,
 
 /* lord.locale.formats("lt_LT") → { dfmt, tfmt, am, pm, decimal, group } from glibc's own data for the
  * region (LC_TIME, LC_NUMERIC), or null when that locale isn't generated. sdk/regionformat.js turns it
- * into a format.json: the clock, date order and separators of a region whose language LordOS has no
+ * into a format.json: the clock, date order and separators of a region whose language Insane OS has no
  * format.json for (#45). Only reads the compiled locale; no file name is built from the argument. */
 static JSValue f_locale_formats(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -755,7 +755,7 @@ static JSValue f_locale_languages(JSContext *c, JSValueConst this_val, int argc,
     return arr;
 }
 
-/* lord.locale.installPack(language, { namespace: JSONtext }) → copies a LordOS language pack
+/* lord.locale.installPack(language, { namespace: JSONtext }) → copies a Insane OS language pack
  * to ~/.local/share/lordos/locales/<language>/ (doesn't need root). */
 static JSValue f_locale_install(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1694,11 +1694,11 @@ static JSValue f_apps_last_error(JSContext *c, JSValueConst this_val, int argc, 
     return JS_NewString(c, apps_last_error());
 }
 
-/* ---- lord.apps: native LordOS app packages (.lpk, lpk.c) ---- */
+/* ---- lord.apps: native Insane OS app packages (.lpk, lpk.c) ---- */
 
 #define LPK_JS_MAX (16 * 1024 * 1024)
 
-/* A package id cannot overwrite LordOS's string namespaces (shell, files, terminal…). */
+/* A package id cannot overwrite Insane OS's string namespaces (shell, files, terminal…). */
 static int lpk_reserved(const char *id) {
     static const char *const fixed[] = { "shell", "apps", "common", "linux", "desktop", "lordos", "sdk", "store", NULL };
     for (int i = 0; fixed[i]; i++) if (!strcmp(id, fixed[i])) return 1;

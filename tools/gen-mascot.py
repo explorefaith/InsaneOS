@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# gen-mascot.py — Lumo, the LordOS mascot (assets/brand/mascot/*.svg) and its PNG renders.
+# gen-mascot.py — Lumo, the Insane OS mascot (assets/brand/mascot/*.svg) and its PNG renders.
 #
 #   python3 tools/gen-mascot.py           assemble every view and pose from the parts file, render the PNGs
 #   python3 tools/gen-mascot.py --parts   first rewrite the parts file from the geometry in this script
@@ -286,7 +286,7 @@ def write_parts():
     groups = '\n'.join(f'<g id="{k}">{v}</g>' for k, v in PARTS.items())
     text = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">\n'
             '<title>Lumo parts (source of tools/gen-mascot.py)</title>\n'
-            '<!-- Lumo, the LordOS guardian: the shared parts every view and pose is assembled from.\n'
+            '<!-- Lumo, the Insane OS guardian: the shared parts every view and pose is assembled from.\n'
             '     Front-view coordinates on a 512 x 512 canvas, centred on x = 256, feet on y = 490.\n'
             '     Each top-level <g id> is a part; edit it here and run `python3 tools/gen-mascot.py`.\n'
             '     data-mirror="256": the path is the left half of a symmetric shape (completed by the script).\n'
@@ -479,7 +479,7 @@ def view(name, title, desc):
     return deco
 
 
-DESC = 'Lumo, the LordOS guardian: a small celestial fox with white fur, the LordOS crown and a violet cape'
+DESC = 'Lumo, the Insane OS guardian: a small celestial fox with white fur, the Insane OS crown and a violet cape'
 
 
 @view('lumo-front', 'Lumo', DESC + ', front view.')
@@ -554,7 +554,7 @@ def v_confused(p):
     p.add('qmark')
 
 
-@view('lumo-avatar', 'Lumo', 'Lumo, the LordOS guardian: avatar.')
+@view('lumo-avatar', 'Lumo', 'Lumo, the Insane OS guardian: avatar.')
 def v_avatar(p):
     p.raw('<radialGradient id="l-av" cx=".35" cy=".25" r=".9"><stop offset="0" stop-color="#9A7DFF"/><stop offset=".6" stop-color="#7C5CFF"/><stop offset="1" stop-color="#5B3FE0"/></radialGradient>'
           '<clipPath id="l-avc"><circle cx="256" cy="256" r="256"/></clipPath>'
@@ -569,7 +569,7 @@ def v_avatar(p):
     p.out.append('</g>')
 
 
-@view('lumo-avatar-small', 'Lumo', 'Lumo, the LordOS guardian: small avatar.')
+@view('lumo-avatar-small', 'Lumo', 'Lumo, the Insane OS guardian: small avatar.')
 def v_avatar_small(p):
     k = f'stroke="{INK}" stroke-width="16" stroke-linejoin="round"'
     p.raw('<radialGradient id="l-av" cx=".35" cy=".25" r=".9"><stop offset="0" stop-color="#9A7DFF"/><stop offset=".6" stop-color="#7C5CFF"/><stop offset="1" stop-color="#5B3FE0"/></radialGradient>'

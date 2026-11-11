@@ -23,7 +23,7 @@
  *     they move on purpose.
  *
  * When released, a fast scroll keeps going on its own (inertia) with phase TP_MOMENTUM; Wayland apps do their
- * own inertia (they receive axis_stop), so the one here is for the LordOS UI.
+ * own inertia (they receive axis_stop), so the one here is for the Insane OS UI.
  *
  * A touchscreen (INPUT_PROP_DIRECT) sends touches to the Wayland app underneath
  * (wl_touch); if there is none, it emulates the pointer: tap = click, drag = drag, two fingers =

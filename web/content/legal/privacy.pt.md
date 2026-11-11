@@ -1,4 +1,4 @@
-O LordOS não tem contas, publicidade nem rastreamento, nem no site nem na distribuição. Ninguém vende, compartilha ou guarda os seus dados, porque nunca os coletamos. Esta política tem duas partes: o **site lordos.org** e a **distribuição LordOS** que você instala no seu computador.
+O Insane OS não tem contas, publicidade nem rastreamento, nem no site nem na distribuição. Ninguém vende, compartilha ou guarda os seus dados, porque nunca os coletamos. Esta política tem duas partes: o **site lordos.org** e a **distribuição Insane OS** que você instala no seu computador.
 
 ## Parte 1: o site
 
@@ -33,15 +33,15 @@ Os botões de doação levam você ao PayPal ou ao Mercado Pago (e, mais adiante
 
 Se você nos escrever pelo [nosso formulário de contato](https://www.iperfex.com/contacto/?lang=pt), no site da iPERFEX, guardamos a sua mensagem e os dados de contato que você informar apenas para responder e acompanhar o assunto.
 
-## Parte 2: a distribuição LordOS
+## Parte 2: a distribuição Insane OS
 
 ### Sem telemetria
 
-O LordOS **não envia telemetria**: nada de estatísticas de uso, relatórios de falhas, identificadores do dispositivo, verificações que "ligam para casa" ou login em contas. Nada sobre você ou o seu computador é enviado para nós.
+O Insane OS **não envia telemetria**: nada de estatísticas de uso, relatórios de falhas, identificadores do dispositivo, verificações que "ligam para casa" ou login em contas. Nada sobre você ou o seu computador é enviado para nós.
 
-### A que o LordOS se conecta por padrão
+### A que o Insane OS se conecta por padrão
 
-Estas são as únicas conexões de rede que uma instalação nova do LordOS faz sem que você peça algo:
+Estas são as únicas conexões de rede que uma instalação nova do Insane OS faz sem que você peça algo:
 
 | Conexão | Quando | Por quê | Como desligar |
 |---|---|---|---|
@@ -49,13 +49,13 @@ Estas são as únicas conexões de rede que uma instalação nova do LordOS faz 
 | **Hora pela rede (NTP)** via `systemd-timesyncd`, para o pool público de NTP do Debian | quando o computador está on-line | para manter o relógio certo | Ajustes → Data e hora → desligue a hora automática |
 | **mDNS** (`avahi-daemon`, nas ISOs e na imagem para Raspberry Pi, com `libnss-mdns` para que os nomes `.local` sejam resolvidos) | apenas na rede local | anuncia o nome do computador para que outros dispositivos da sua rede o encontrem, e responde a consultas de nomes locais | `sudo systemctl disable --now avahi-daemon` |
 
-O fuso horário nunca é deduzido pela rede. Nada nesta tabela vai para o projeto LordOS.
+O fuso horário nunca é deduzido pela rede. Nada nesta tabela vai para o projeto Insane OS.
 
 ### Só quando você pede
 
 Estas conexões acontecem só depois de uma ação sua:
 
-- **Loja e atualizações:** as listas de pacotes e os pacotes vêm dos espelhos do Debian configurados nas suas fontes do apt (`deb.debian.org` e `security.debian.org` por padrão; no Raspberry Pi, o kernel e o firmware vêm de `archive.raspberrypi.com`). A Loja só as atualiza quando você toca em **Procurar atualizações** (na Loja ou em Ajustes → Atualizações) ou instala algo, e confere cada lista com as assinaturas do Debian. As atualizações do LordOS vêm do repositório assinado do LordOS em `lordos.org/apt`, consultado ao mesmo tempo. Desde a 0.8.5 esse repositório também traz o banner em destaque da Loja (só aceito de uma fonte cujo índice assinado diz que é do LordOS, e conferido com seus hashes) e a lista de apps de Loja → Inteligência Artificial; as fontes `https://` são baixadas por HTTPS. Os apps `.lpk` do LordOS são instalados a partir de arquivos que você escolhe; não existe um catálogo on-line de apps `.lpk`.
+- **Loja e atualizações:** as listas de pacotes e os pacotes vêm dos espelhos do Debian configurados nas suas fontes do apt (`deb.debian.org` e `security.debian.org` por padrão; no Raspberry Pi, o kernel e o firmware vêm de `archive.raspberrypi.com`). A Loja só as atualiza quando você toca em **Procurar atualizações** (na Loja ou em Ajustes → Atualizações) ou instala algo, e confere cada lista com as assinaturas do Debian. As atualizações do Insane OS vêm do repositório assinado do Insane OS em `lordos.org/apt`, consultado ao mesmo tempo. Desde a 0.8.5 esse repositório também traz o banner em destaque da Loja (só aceito de uma fonte cujo índice assinado diz que é do Insane OS, e conferido com seus hashes) e a lista de apps de Loja → Inteligência Artificial; as fontes `https://` são baixadas por HTTPS. Os apps `.lpk` do Insane OS são instalados a partir de arquivos que você escolhe; não existe um catálogo on-line de apps `.lpk`.
 - **Apps dos repositórios dos fabricantes** (desde a 0.8.5): instalar um app de Loja → Inteligência Artificial ou Loja → Comerciais cujo fabricante tem repositório próprio primeiro diz de quem é o repositório que será adicionado e a impressão digital da chave, e depois o adiciona, então a partir daí a Loja e o apt também baixam as listas de pacotes desse fabricante. Remover o app remove esse repositório, a menos que outro app instalado o use. Ao que o próprio app se conecta depende do fabricante.
 - **Pacotes de idioma:** adicionar um idioma em Ajustes pode instalar os dicionários e as fontes dele a partir dos mesmos espelhos do Debian.
 - **Impressoras e scanners:** Ajustes → Impressoras e scanners pergunta à rede local (mDNS) quais impressoras e scanners existem nela, e só fala com endereços locais.
@@ -63,7 +63,7 @@ Estas conexões acontecem só depois de uma ação sua:
 - **Listas de bloqueio** (desde a 0.8.5, todas desligadas por padrão): cada lista que você liga em Ajustes → Privacidade → Listas de bloqueio, ou adiciona pelo endereço https, é baixada por HTTPS uma vez por dia a partir do endereço https de quem a publica, por um baixador isolado. Nada sobre você é enviado no pedido além do que qualquer download leva.
 - **Arquivos → Rede e servidores** (desde a 0.8.7): Arquivos → Rede fica desligado até você abrir essa página. Então faz uma passada limitada pela rede local, com mDNS e tentando as portas SMB e NFS nas redes privadas deste computador, e só fala com endereços locais. Conectar ao servidor e o Remote Desk só se conectam aos servidores que você indicar.
 - **Fundos em movimento** (desde a 0.8.7): um clipe é baixado do repositório do projeto em `raw.githubusercontent.com` quando você o escolhe, e é conferido com um SHA-256 do pacote. O GitHub vê esse pedido como vê qualquer download.
-- **Relatórios de hardware** (desde a 0.8.7): o LordOS não envia nada por conta própria. Compartilhar no GitHub salva um relatório e uma página no seu computador; se você enviar o formulário do GitHub, com a sua própria conta, o relatório fica público lá. Ele não tem campos para números de série, endereços nem nomes de computador, de usuário ou de rede.
+- **Relatórios de hardware** (desde a 0.8.7): o Insane OS não envia nada por conta própria. Compartilhar no GitHub salva um relatório e uma página no seu computador; se você enviar o formulário do GitHub, com a sua própria conta, o relatório fica público lá. Ele não tem campos para números de série, endereços nem nomes de computador, de usuário ou de rede.
 - **Wi-Fi, Bluetooth e VPNs:** apenas as redes, os dispositivos e os servidores VPN que você escolhe.
 - **A área de trabalho remota** vem **desligada** por padrão (porta 5673 fechada). Ela só escuta depois que você a liga em Ajustes → Compartilhar. No Raspberry Pi, a área de trabalho remota e o servidor SSH também ficam desligados, a menos que você coloque um arquivo de ativação `remote-desktop` ou `ssh` na partição de boot.
 - **Navegadores e outros apps:** o Firefox ESR, o Chromium e qualquer app Linux que você instalar são programas separados, de seus próprios projetos. Eles fazem as conexões que as configurações deles permitem, sob as políticas de privacidade deles. Os apps `.lpk` isolados só acessam a rede se você der a permissão, e o firewall por app mostra e controla a que cada app se conecta.
@@ -71,7 +71,7 @@ Estas conexões acontecem só depois de uma ação sua:
 
 ### O que fica no seu computador
 
-- **O mapa-múndi do Monitor** usa um banco de dados offline de IP para país (DB-IP Lite) que vem com o LordOS. Descobrir para onde vai uma conexão nunca consulta um servidor.
+- **O mapa-múndi do Monitor** usa um banco de dados offline de IP para país (DB-IP Lite) que vem com o Insane OS. Descobrir para onde vai uma conexão nunca consulta um servidor.
 - **O mapa de armazenamento da Limpeza** guarda nomes e tamanhos de pastas entre sessões só neste computador, legível só pelo seu usuário. Você pode desligá-lo nos Ajustes da Limpeza ou apagá-lo na Atividade dele.
 - **Senhas:** o cofre fica criptografado no seu disco e o processo dele não tem acesso à rede. A verificação de "senha vazada" é apenas offline.
 - **Configurações, e-mails, arquivos e registros** ficam no seu computador. Os registros não são enviados para lugar nenhum.
@@ -88,4 +88,4 @@ Dúvidas ou pedidos sobre privacidade: [nosso formulário de contato](https://ww
 
 ### Alterações
 
-Se o LordOS ou o site passar a fazer um novo tipo de conexão, ou se esta política mudar de qualquer outra forma, atualizaremos esta página antes e mudaremos a data no topo.
+Se o Insane OS ou o site passar a fazer um novo tipo de conexão, ou se esta política mudar de qualquer outra forma, atualizaremos esta página antes e mudaremos a data no topo.

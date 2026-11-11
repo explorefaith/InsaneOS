@@ -1,10 +1,10 @@
 # Installable native apps (.lpk)
 
-Besides the apps bundled with the theme (`apps/`), LordOS installs third-party native apps from
+Besides the apps bundled with the theme (`apps/`), Insane OS installs third-party native apps from
 **.lpk** packages:
 
 - they install without root, in the home folder (`~/.local/share/lordos/apps/<id>/`);
-- they open like any other LordOS app (app launcher, Dock, start menu);
+- they open like any other Insane OS app (app launcher, Dock, start menu);
 - they can ship **WebAssembly** modules for code that has to be fast (see `WASM.md`).
 
 They are installed from the Store, or by double-clicking the `.lpk` in Files.
@@ -45,7 +45,7 @@ Manifest rules:
 
 - `id`: 2 to 40 characters, using a-z, 0-9 and `-`. It is also the namespace for the texts:
   `t('fractal.reset')` looks it up in the package's `locales/<lang>.json`.
-- The id cannot be one of LordOS's own (`files`, `terminal`, `shell`, `store`…).
+- The id cannot be one of Insane OS's own (`files`, `terminal`, `shell`, `store`…).
 - `name` and `description` can be a string or an object keyed by language.
 - `version` starts with a digit.
 - `icon` is required: every app has its own icon. Without it, `tools/lpk.mjs` won't package and
@@ -97,17 +97,17 @@ The rest of the SDK is the same as for the bundled apps (see `apps/README.md`).
 
 The apps in `apps/` are **system apps**: they are built into the theme bundles (or, for those that
 run as their own process, `"process": "isolated"`, into `assets/sysapps/<id>/`: Passwords, Mail,
-Calendar, Contacts, Reminders and, in 0.8.5, the hidden Sandbox Probe), which LordOS checks
+Calendar, Contacts, Reminders and, in 0.8.5, the hidden Sandbox Probe), which Insane OS checks
 against its signed manifest before running them (see [SIGNING.md](SIGNING.md), "Verified system
-code"), and the Store never offers to remove them ("System app — part of LordOS"). An installed
+code"), and the Store never offers to remove them ("System app — part of Insane OS"). An installed
 `.lpk` is never a system app, even with the same id: the theme's app wins and the package is not
 listed. `isSystemApp(id)` from `@lordos/sdk` tells them apart.
 
 **Each system app has its own version (0.8.5).** Every `apps/<id>/manifest.json` carries a `version`
 (all start at `0.8.5`); `tools/build-theme.mjs` refuses an app without a valid semver one
 (`MAJOR.MINOR.PATCH`, optionally `-` or `~` and a suffix). Store → Installed shows it next to the app
-("LordOS app · 0.8.5") and About <app> shows it too, so the apps can later be versioned and released
-apart from LordOS. A system app moves to a new version when it changes: in 0.8.6, System Information and
+("Insane OS app · 0.8.5") and About <app> shows it too, so the apps can later be versioned and released
+apart from Insane OS. A system app moves to a new version when it changes: in 0.8.6, System Information and
 Settings. A new app starts at the release it first ships in: Cleaner and Remote Desk at 0.8.7.
 
 ## Permissions and trust (M8)
@@ -115,9 +115,9 @@ Settings. A new app starts at the release it first ships in: Cleaner and Remote 
 Since M8 there is **package signing** and a **permissions and isolation** model (see
 [SIGNING.md](SIGNING.md) and [PRIVACY.md](PRIVACY.md)):
 
-- **Signing**: each `.lpk` can be signed with Ed25519; LordOS verifies the hashes and the
+- **Signing**: each `.lpk` can be signed with Ed25519; Insane OS verifies the hashes and the
   signature in C at install time and detects modifications. The Store and the install dialog show
-  the trust level (LordOS / Verified author / Signed by <name> / Unsigned), a revoked package
+  the trust level (Insane OS / Verified author / Signed by <name> / Unsigned), a revoked package
   doesn't install, and there are «Modified by you», «Restore original» and «Share my version».
 - **An item by the clock**: `statusItem.set({ icon, title, alert, menu })` with the `status-item` permission; see [PACKAGED-APPS.md](PACKAGED-APPS.md), which also covers what only a packaged app has.
 - **Permissions**: the manifest's `permissions` are declared and shown; the system asks the
@@ -141,4 +141,4 @@ live theme tokens and language, menus in the menu bar and several windows are do
 
 Pending:
 
-- a LordOS app repository for the Store, with a signed catalog (see `SIGNING.md`).
+- a Insane OS app repository for the Store, with a signed catalog (see `SIGNING.md`).

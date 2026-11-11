@@ -1,17 +1,17 @@
 [
  {
-  "chapter": "LordOS",
+  "chapter": "Insane OS",
   "chapter_es": "Instalación y recorrido completo · versión 0.7",
-  "en": "This is LordOS, a desktop environment built from scratch: its own display server in C, its own React engine, and its own apps, on top of Debian. Let's install it.",
-  "es": "Esto es LordOS, un escritorio hecho desde cero: servidor gráfico propio en C, motor de React propio y apps propias, sobre Debian. Vamos a instalarlo.",
+  "en": "This is Insane OS, a desktop environment built from scratch: its own display server in C, its own React engine, and its own apps, on top of Debian. Let's install it.",
+  "es": "Esto es Insane OS, un escritorio hecho desde cero: servidor gráfico propio en C, motor de React propio y apps propias, sobre Debian. Vamos a instalarlo.",
   "actions": [],
   "min": 4
  },
  {
   "chapter": "Arranque",
   "chapter_es": "Desde el ISO, como un pendrive",
-  "en": "We boot a new virtual machine from the LordOS ISO, exactly as you would from a USB stick. In about fifteen seconds you are in a live LordOS desktop, and the installer opens on its own.",
-  "es": "Arrancamos una máquina virtual nueva desde el ISO de LordOS, igual que desde un pendrive. En unos quince segundos estás en LordOS en vivo, y el instalador se abre solo.",
+  "en": "We boot a new virtual machine from the Insane OS ISO, exactly as you would from a USB stick. In about fifteen seconds you are in a live Insane OS desktop, and the installer opens on its own.",
+  "es": "Arrancamos una máquina virtual nueva desde el ISO de Insane OS, igual que desde un pendrive. En unos quince segundos estás en Insane OS en vivo, y el instalador se abre solo.",
   "actions": [
    [
     "host",
@@ -75,8 +75,8 @@
   "min": 6
  },
  {
-  "en": "Then the keyboard layout. LordOS supports every layout, plus Japanese, Chinese and Korean input methods.",
-  "es": "Después, la distribución del teclado. LordOS trae todas, más métodos de entrada para japonés, chino y coreano.",
+  "en": "Then the keyboard layout. Insane OS supports every layout, plus Japanese, Chinese and Korean input methods.",
+  "es": "Después, la distribución del teclado. Insane OS trae todas, más métodos de entrada para japonés, chino y coreano.",
   "actions": [
    [
     "click",
@@ -241,9 +241,9 @@
  },
  {
   "chapter": "Primer arranque",
-  "chapter_es": "LordOS instalado en el disco",
-  "en": "We take out the installation media and reboot. LordOS starts from the disk and logs in automatically with the user we just created.",
-  "es": "Sacamos el medio de instalación y reiniciamos. LordOS arranca desde el disco y entra solo con el usuario que creamos.",
+  "chapter_es": "Insane OS instalado en el disco",
+  "en": "We take out the installation media and reboot. Insane OS starts from the disk and logs in automatically with the user we just created.",
+  "es": "Sacamos el medio de instalación y reiniciamos. Insane OS arranca desde el disco y entra solo con el usuario que creamos.",
   "actions": [
    [
     "host",

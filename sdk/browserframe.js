@@ -1,6 +1,6 @@
 // browserframe.js — Settings → Appearance → "Browsers: tabs in the title bar" (docs/WAYLAND.md,
 // "The switch in Settings"). On (the default): Chromium, Brave (0.8.8.4, #39) and Firefox draw one bar
-// with their tabs and LordOS's window buttons. Off: they use LordOS's frame.
+// with their tabs and Insane OS's window buttons. Off: they use Insane OS's frame.
 //
 // lord.browserFrame (server/src/hw/brframe.c) writes that one preference in the user's own
 // profiles, and only when the switch is turned (never at login on its own):

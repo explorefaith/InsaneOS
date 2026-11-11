@@ -5,7 +5,7 @@
 // four times per second.
 import {
   View, Text, Image, ScrollView, Segmented, Toolbar, typeScale, useTheme, useLocale, useStore, useSettings, useAppWindow,
-  useMonitor, monitor, monitorSamples, monitorProcesses, formatBytes, formatNumber, LordOSLogo, iconFromFile, getApp, appName,
+  useMonitor, monitor, monitorSamples, monitorProcesses, formatBytes, formatNumber, InsaneLogo, iconFromFile, getApp, appName,
 } from '@lordos/sdk';
 import { registerDockActions } from '@lordos/sdk';
 import * as sdk from '@lordos/sdk';
@@ -196,7 +196,7 @@ function Overview({ s, last, onTab }) {
             format={(v) => fmt.rate(tr, v)} times={s.times} height={86} bg={card.bg} />
         </Card>
       </View>
-      {/* (0.8.8.6) the GPU, LordOS's AI and the virtual machines: read once per second while the Overview is on screen */}
+      {/* (0.8.8.6) the GPU, Insane OS's AI and the virtual machines: read once per second while the Overview is on screen */}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <OverviewGpu onOpen={() => onTab?.('gpu')} style={{ flex: 2 }} />
         <OverviewAiVms style={{ flex: 1, flexDirection: 'column' }} />
@@ -372,11 +372,11 @@ export function Cell({ col, children, color, bold }) {
 
 // ---- Processes ----
 
-// An isolated LordOS app (its own process and scope, "lpk:<id>"): a package or a built-in app such
+// An isolated Insane OS app (its own process and scope, "lpk:<id>"): a package or a built-in app such
 // as Mail or Passwords; the process is shown with the app's name and icon.
 export const isolatedAppOf = (item) => (typeof item?.app === 'string' && item.app.startsWith('lpk:') ? getApp(item.app.slice(4)) : null);
 
-// (0.8.5) LordOS's own components: the built-in app's icon (Mail, Store, Terminal) or a glyph
+// (0.8.5) Insane OS's own components: the built-in app's icon (Mail, Store, Terminal) or a glyph
 function ComponentGlyph({ comp, size }) {
   const t = useTheme();
   const a = comp.icon ? getApp(comp.icon) : null;
@@ -389,7 +389,7 @@ function ComponentGlyph({ comp, size }) {
 }
 
 export function AppGlyph({ item, size = 16 }) {
-  if (item.app === 'lordos') return <LordOSLogo size={size} />;
+  if (item.app === 'lordos') return <InsaneLogo size={size} />;
   const comp = sdk.netModel?.COMPONENTS?.[item.app];
   if (comp) return <ComponentGlyph comp={comp} size={size} />;
   if (item.app === 'remote-desktop') return <RemoteGlyph size={size} />;

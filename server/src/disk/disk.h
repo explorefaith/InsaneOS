@@ -105,7 +105,7 @@ void smart_act_health(const AdminReq *r, const char *arg, size_t len);
 void smart_act_test(const AdminReq *r, const char *arg, size_t len);
 void smart_act_abort(const AdminReq *r, const char *arg, size_t len);
 
-/* ---- for the LordOS Imager's actions (imager/imager_admin.c), the same checks as disk-* ---- */
+/* ---- for the Insane OS Imager's actions (imager/imager_admin.c), the same checks as disk-* ---- */
 typedef struct {
     char name[32], disk[32], dev[48];
     int part, removable;

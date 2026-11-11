@@ -15,7 +15,7 @@ app's network connections.
 - **Network:** one row per app with its traffic and connections, and a **map** with arcs to each
   server's country. The country comes from a local database: nobody is asked.
 - **GPU:** each graphics card drawn live, its load, temperature, fan, memory, clocks and power, the apps using it
-  (and which graphics APIs they use), the APIs installed, and whether LordOS's voice is running on it. An
+  (and which graphics APIs they use), the APIs installed, and whether Insane OS's voice is running on it. An
   administrator can set an AMD card's fan by hand; it goes back to automatic if the card gets too hot and when
   you log out.
 - **Privacy:** which apps used the camera, microphone or screen.

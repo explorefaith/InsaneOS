@@ -27,7 +27,7 @@ drop, color tags and search. Disk operations belong to the server (`server/src/f
 | ![search](files-search.png) | ![recents](files-recents.png) |
 | Search in «Documents» or in Home, with each result's folder | Recents, by date |
 | ![group](files-group-by.png) | ![applications](files-applications.png) |
-| Grouped by kind | Applications (LordOS, packages and Linux) |
+| Grouped by kind | Applications (Insane OS, packages and Linux) |
 | ![light](files-icons-light.png) | ![light list](files-list-light.png) |
 | Light theme | List in the light theme |
 | ![rtl](files-rtl.png) | ![background](files-background-menu.png) |
@@ -92,19 +92,19 @@ drop, color tags and search. Disk operations belong to the server (`server/src/f
   `lord.apps.launchWith(id, path)` (see below).
 - **Recents:** the files in the home folder modified in the last 30 days. It is a bounded walk: 5
   levels, 60,000 entries, no hidden files and no `node_modules`.
-- **Applications:** those from `useLauncherApps()` (LordOS, packages and Linux); double-click
+- **Applications:** those from `useLauncherApps()` (Insane OS, packages and Linux); double-click
   opens them.
 - **Tags:** red, orange, yellow, green, blue, purple and gray, stored in
   `~/.local/share/lordos/tags.json` (path → colors).
 - **Path bar** at the bottom, clickable on each segment, and **status bar** («N items, X
   available», «N of M selected» or a copy's progress).
-- **App menus** in the theme's bar: File, Edit, View and Go (in Lord Classic, since 0.8.5, in a strip
+- **App menus** in the theme's bar: File, Edit, View and Go (in Insane Classic, since 0.8.5, in a strip
   under the window's title bar). In a folder the user can't write (This Computer), the menus and the
   context menu leave out or disable the actions that would change it.
 
 ## Settings (0.8.7)
 
-**Files → Settings** (❖,), kept in `settings.json` under `files` (`apps/files/prefs.js`). General: what a new window shows, and a double click opening a folder in a new tab. Tags: a name for each color and which show in the sidebar. Sidebar: each item. Advanced: show extensions (the name shown only; renaming still works on the real one), warn before changing an extension or emptying the Trash, remove items over 30 days old from the Trash when Files opens (there is no background job), folders first, and where a search looks. What the reference has and LordOS doesn't (desktop icons, cloud sync) isn't offered.
+**Files → Settings** (❖,), kept in `settings.json` under `files` (`apps/files/prefs.js`). General: what a new window shows, and a double click opening a folder in a new tab. Tags: a name for each color and which show in the sidebar. Sidebar: each item. Advanced: show extensions (the name shown only; renaming still works on the real one), warn before changing an extension or emptying the Trash, remove items over 30 days old from the Trash when Files opens (there is no background job), folders first, and where a search looks. What the reference has and Insane OS doesn't (desktop icons, cloud sync) isn't offered.
 
 **List columns** are data in `apps/files/columns.js`, tested without a screen. Extra columns read `lord.fs.stat`, once per file until something changes. Date Changed is the inode's. Comments live in `~/.local/share/lordos/comments.json`, like tags. There is no Version column, and no "date added", because Linux keeps neither.
 
@@ -132,7 +132,7 @@ Tested against a real Windows 11 Pro server with a local account: the sign-in, t
 
 ## Remote desktop (0.8.7)
 
-Remote Desk (`apps/remote-desk`, `sdk/remotedesk.jsx`), one app for RDP and VNC with a switch between them, draws the remote screen with LordOS's own engine, as a media node. There is no client window, X11, Xwayland or toolkit. `lord.rdesk` (`ui/js_rdesk.c`) starts `lord-rdesk` (`rdesk/`) in `app-lordos-lordos-rdesk.scope`; it resolves and connects, then applies the helper sandbox (no new sockets, no exec, read-only `/etc/ssl` and `/usr/lib` for RDP), and paints BGRA into a memfd lord-server shares. The picture's size is sealed (`F_SEAL_SHRINK`, `F_SEAL_GROW`), lord-server takes at most 256 messages per poll and never blocks on the helper, and the scope has lord-server's memory limits (256 MB high, 512 MB max). VNC is our own RFB 3.8 client (`rdesk/rfb.c`: None and VNC auth, refusing a server that offers only None when a password was given, password wiped after the handshake, Raw, CopyRect, Hextile, resize; `tests/rdesk_test.c` with a fuzz run). VNC auth's DES is required by the protocol and is weak: the traffic is not encrypted. RDP allows only TLS and NLA (`FreeRDP_RdpSecurity` off, proved by `tests/rdesk_rdp_test.c`: no credentials go to a server that picks RDP's own security). A certificate that differs from the accepted one gets its own warning with both fingerprints (`sdk/remotecert.js`). RDP is libfreerdp's core with its software GDI, and its client library only for shared folders, handed the connected socket; `libfreerdp3-3`, `libfreerdp-client3-3` and `libwinpr3-3` are dependencies of `lordos`. An unknown or changed certificate shows its fingerprint and the person decides; a trusted one is kept in settings with the address. Passwords reach the helper in one message and go to the keyring only if asked.
+Remote Desk (`apps/remote-desk`, `sdk/remotedesk.jsx`), one app for RDP and VNC with a switch between them, draws the remote screen with Insane OS's own engine, as a media node. There is no client window, X11, Xwayland or toolkit. `lord.rdesk` (`ui/js_rdesk.c`) starts `lord-rdesk` (`rdesk/`) in `app-lordos-lordos-rdesk.scope`; it resolves and connects, then applies the helper sandbox (no new sockets, no exec, read-only `/etc/ssl` and `/usr/lib` for RDP), and paints BGRA into a memfd lord-server shares. The picture's size is sealed (`F_SEAL_SHRINK`, `F_SEAL_GROW`), lord-server takes at most 256 messages per poll and never blocks on the helper, and the scope has lord-server's memory limits (256 MB high, 512 MB max). VNC is our own RFB 3.8 client (`rdesk/rfb.c`: None and VNC auth, refusing a server that offers only None when a password was given, password wiped after the handshake, Raw, CopyRect, Hextile, resize; `tests/rdesk_test.c` with a fuzz run). VNC auth's DES is required by the protocol and is weak: the traffic is not encrypted. RDP allows only TLS and NLA (`FreeRDP_RdpSecurity` off, proved by `tests/rdesk_rdp_test.c`: no credentials go to a server that picks RDP's own security). A certificate that differs from the accepted one gets its own warning with both fingerprints (`sdk/remotecert.js`). RDP is libfreerdp's core with its software GDI, and its client library only for shared folders, handed the connected socket; `libfreerdp3-3`, `libfreerdp-client3-3` and `libwinpr3-3` are dependencies of `lordos`. An unknown or changed certificate shows its fingerprint and the person decides; a trusted one is kept in settings with the address. Passwords reach the helper in one message and go to the keyring only if asked.
 
 ### Remote Desk's window, credentials and pictures (0.8.8.4)
 
@@ -193,13 +193,13 @@ Each folder keeps its view and sort in `settings.files.folderViews` (400 at most
 
 ### Zoom (0.8.8.4)
 
-The icon and list views have a **zoom** ([#33](https://github.com/lordbasex/LordOS/issues/33)): the icon (or thumbnail) and the name grow or shrink together, in seven steps from −2 to +4, with 0 the usual size. Icons go from 32 to 160 px, with cards from 76 to 196 px wide and names from 10 to 16 px; list rows go from 20 to 48 px, with icons from 12 to 40 px (thumbnails from 32 px up, as in the icon view) and names from 11 to 19 px, the other columns one size smaller. Ways to change it: the slider between a small and a large square at the end of the status bar (the squares step; a double click on the slider goes back to 0; narrow windows keep only the squares), View → Zoom In / Zoom Out / Actual Size, Ctrl and + (or =), Ctrl and −, Ctrl and 0, and Ctrl with the mouse wheel or a two-finger touchpad scroll over the files. The columns and gallery views don't zoom, and the control isn't shown there.
+The icon and list views have a **zoom** ([#33](https://github.com/lordbasex/Insane OS/issues/33)): the icon (or thumbnail) and the name grow or shrink together, in seven steps from −2 to +4, with 0 the usual size. Icons go from 32 to 160 px, with cards from 76 to 196 px wide and names from 10 to 16 px; list rows go from 20 to 48 px, with icons from 12 to 40 px (thumbnails from 32 px up, as in the icon view) and names from 11 to 19 px, the other columns one size smaller. Ways to change it: the slider between a small and a large square at the end of the status bar (the squares step; a double click on the slider goes back to 0; narrow windows keep only the squares), View → Zoom In / Zoom Out / Actual Size, Ctrl and + (or =), Ctrl and −, Ctrl and 0, and Ctrl with the mouse wheel or a two-finger touchpad scroll over the files. The columns and gallery views don't zoom, and the control isn't shown there.
 
 The step is kept **per place and per view** with the place's view and sort (`folderViews[path].zoom`, e.g. `{ "icons": 2, "list": -1 }`), so a picture folder can keep big icons and a small list while every other folder stays at the usual size; a step of 0 isn't stored. It lives in `settings.json`, like the rest of the view settings: nothing is written into the folder itself (no hidden file), so read-only folders, disks of other systems and servers keep it too and their contents don't change. The sizes and the stored value are checked by `server/tests/files_model_test.mjs` (`iconMetrics`, `listMetrics`, `zoomWith`).
 
 ## Disks' file systems (0.8.7)
 
-NTFS, exFAT, FAT, HFS+ and APFS come as one Store item, **Disk Formats** (`lordos-disk-formats`, Commercial group, label "Commercial format"), installed and removed as one after a page lists each driver with its license and source. All of them are free software at no cost. The package adds a marker, `/usr/lib/lordos/disk-formats.enabled`, that `disk-mount` checks, and depends on ntfs-3g, exfatprogs and dosfstools, plus apfs-dkms and kernel headers on amd64 (323 MB, not on the Pi, whose kernel is LordOS's own).
+NTFS, exFAT, FAT, HFS+ and APFS come as one Store item, **Disk Formats** (`lordos-disk-formats`, Commercial group, label "Commercial format"), installed and removed as one after a page lists each driver with its license and source. All of them are free software at no cost. The package adds a marker, `/usr/lib/lordos/disk-formats.enabled`, that `disk-mount` checks, and depends on ntfs-3g, exfatprogs and dosfstools, plus apfs-dkms and kernel headers on amd64 (323 MB, not on the Pi, whose kernel is Insane OS's own).
 
 APFS is a switch on that page and not a dependency: its driver is `apfs-dkms`, built for the running kernel with compilers and headers (about 500 MB, measured on VM 125 and the VMware guest), on Debian's amd64 kernel only. The item alone is about 2 MB. Without the switch an APFS volume doesn't mount; Files, Disks and the notice then lead to the same page, which offers the driver again once the item is installed. On the Pi, without the driver, the error says so and sends nowhere. `dpkg -i` on the package alone stops at missing dependencies, as with any package: the Store and `apt` resolve them.
 
@@ -317,7 +317,7 @@ thumbnail of a file already downloaded, Quick Preview's text, and Go to Folder.
 **The traffic of a mounted share isn't in the firewall.** The kernel's client opens its own sockets, outside any
 app's cgroup, and reconnects from a kernel thread, so it can't be a firewall app as `ROADMAP.md` first said.
 
-**What was tested** (2026-10-31; everything outside a LordOS session, before the connector, as said above):
+**What was tested** (2026-10-31; everything outside a Insane OS session, before the connector, as said above):
 
 | What | Where | Seen |
 |---|---|---|
@@ -376,7 +376,7 @@ mocks (Files, FilesMenu, ShareLink, GetInfo, States); the code is `apps/files/cl
   account, and the status bar ends with "… of … used in <account> · … on this computer" instead of the disk's free space.
 - **Move to Trash** on items of an account (the menu, ❖⌫, Delete, dragging onto the Trash) asks "Delete from
   <provider>?" and deletes them in the cloud (`cloud.delete`): they go to the provider's own trash where it has one,
-  otherwise for good. Nothing goes to LordOS's Trash and no `.Trash-<uid>` folder is made in the cloud, so Restore isn't
+  otherwise for good. Nothing goes to Insane OS's Trash and no `.Trash-<uid>` folder is made in the cloud, so Restore isn't
   offered for them. Local items chosen with them go to the Trash as usual (docs/CLOUD.md 17.2, 18.1).
 - **Offline**: opening a file only in the cloud while its account is offline shows "<name> isn't on this computer",
   with OK and Keep on This Computer.
@@ -384,7 +384,7 @@ mocks (Files, FilesMenu, ShareLink, GetInfo, States); the code is `apps/files/cl
 - **File dialog**: a Cloud section with the accounts (not one whose keyring is locked), between Favorites and
   Locations (`cloudPlaces` in `sdk/filepickermodel.js`).
 
-Which providers are verified on LordOS, Add Account's **Not verified yet** part and **Check This Account** (Settings →
+Which providers are verified on Insane OS, Add Account's **Not verified yet** part and **Check This Account** (Settings →
 Cloud → an account) are in docs/CLOUD.md section 19; Files shows every account the same way, verified or not.
 
 Tests: `server/tests/cloud_model_test.mjs` (in `run_suites.sh`). Screenshots of every screen, light and dark, were taken
@@ -474,8 +474,8 @@ powerbox) the dialog looks and works like Files, built from Files' own pieces
   under the cursor (with none, it is the primary button); Esc cancels; the arrows move. Saving asks before replacing
   a file.
 - **List or Thumbnails (0.8.8.3):** two buttons at the end of the toolbar switch the files between the list and
-  tiles with small pictures ([#13](https://github.com/lordbasex/LordOS/issues/13),
-  [#22](https://github.com/lordbasex/LordOS/issues/22)). A dialog that takes only pictures (Settings → Wallpaper,
+  tiles with small pictures ([#13](https://github.com/lordbasex/Insane OS/issues/13),
+  [#22](https://github.com/lordbasex/Insane OS/issues/22)). A dialog that takes only pictures (Settings → Wallpaper,
   Notes' images, a contact's photo, a Linux app's `image/*` filter) opens in Thumbnails, any other in the list; the
   person's choice is remembered in `settings.json` (`pickerView`, `{ files, images }`, one for each kind of dialog).
   The pictures are lord-media's thumbnails, the same `~/.cache/lordos/thumbs` cache Files and Photos use

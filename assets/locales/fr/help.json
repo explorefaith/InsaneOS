@@ -4,7 +4,7 @@
   "notFound": "Cet article est introuvable.",
   "openApp": "Ouvrir {app}",
   "unavailable": "L’aide n’est pas disponible.",
-  "tour.open": "Bienvenue dans LordOS",
+  "tour.open": "Bienvenue dans Insane OS",
   "tour.skip": "Ignorer",
   "tour.back": "Retour",
   "tour.next": "Suivant",
@@ -14,7 +14,7 @@
   "section.apps": "Apps",
   "section.system": "Système",
   "section.settings": "Réglages",
-  "tour.0.title": "Bienvenue dans LordOS",
+  "tour.0.title": "Bienvenue dans Insane OS",
   "tour.0.body": "Un bureau à part entière, rapide et léger. En une minute, nous vous montrons l’essentiel ; vous pouvez ignorer cette visite et la revoir depuis le menu Aide.",
   "tour.1.title": "Le bureau",
   "tour.1.body": "En haut se trouve la barre de menus, avec les menus de l’app au premier plan, le centre de contrôle et l’horloge. En bas, le Dock avec vos apps ; F4 ouvre Apps, le lanceur qui les réunit toutes.",
@@ -23,7 +23,7 @@
   "tour.3.title": "Personnalisez votre bureau",
   "tour.3.body": "Dans Réglages, choisissez le mode sombre, la couleur d’accentuation, le fond d’écran, le réseau, les utilisateurs et bien plus. Ces boutons ouvrent certaines sections.",
   "tour.4.title": "Apps système",
-  "tour.4.body": "Fichiers, Terminal, Boutique, Moniteur, Horloge, Disques, Sauvegardes et Journaux sont préinstallées. Les apps Linux (GTK et Qt) s’ouvrent aussi dans des fenêtres LordOS.",
+  "tour.4.body": "Fichiers, Terminal, Boutique, Moniteur, Horloge, Disques, Sauvegardes et Journaux sont préinstallées. Les apps Linux (GTK et Qt) s’ouvrent aussi dans des fenêtres Insane OS.",
   "tour.5.title": "Toujours à portée de main",
   "tour.5.body": "Si vous avez des questions, ouvrez Aide depuis le menu Aide de la barre ou lancez une recherche avec ❖Espace. Profitez bien !"
 }

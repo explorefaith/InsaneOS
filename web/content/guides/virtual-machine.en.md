@@ -1,4 +1,4 @@
-LordOS comes as a ready virtual machine for amd64: `lordos-<version>-amd64.ova`. It is already installed, so there is no installer to run. You open it in your hypervisor, start it and create your account.
+Insane OS comes as a ready virtual machine for amd64: `lordos-<version>-amd64.ova`. It is already installed, so there is no installer to run. You open it in your hypervisor, start it and create your account.
 
 ## What you need
 
@@ -11,7 +11,7 @@ All the figures for every image are in [System requirements](/requirements/).
 
 ## 1. Download and check it
 
-Download `lordos-<version>-amd64.ova`, `SHA256SUMS` and `SHA256SUMS.sig` from the [latest release](https://github.com/lordbasex/LordOS/releases). In the folder with the files:
+Download `lordos-<version>-amd64.ova`, `SHA256SUMS` and `SHA256SUMS.sig` from the [latest release](https://github.com/lordbasex/Insane OS/releases). In the folder with the files:
 
 ```sh
 shasum -a 256 -c SHA256SUMS --ignore-missing
@@ -43,9 +43,9 @@ On **VMware Workstation**: File → Open, choose the `.ova`. If VMware says the 
 
 ## 3. Create your account
 
-Start the machine. It opens **Set up LordOS** by itself:
+Start the machine. It opens **Set up Insane OS** by itself:
 
-![Set up LordOS on its first start](docs/vm/virtualbox-welcome.png "The first start: Set up LordOS opens by itself")
+![Set up Insane OS on its first start](docs/vm/virtualbox-welcome.png "The first start: Set up Insane OS opens by itself")
 
 1. **Language & region** and **Keyboard**.
 2. **User**: your name, user name, password and the computer's name.
@@ -78,4 +78,4 @@ With the machine off, in its settings:
 - **A black screen or a small window:** check the display controller (above) and give the machine at least 4 GB of memory.
 - **It's slow:** check that it has 4 CPUs or more and that hardware virtualization is on in the host's firmware.
 
-For a bug report, run `lordos-issue` in the machine's Terminal and attach the file it writes to the [issue](https://github.com/lordbasex/LordOS/issues).
+For a bug report, run `lordos-issue` in the machine's Terminal and attach the file it writes to the [issue](https://github.com/lordbasex/Insane OS/issues).

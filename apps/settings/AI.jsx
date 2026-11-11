@@ -7,7 +7,7 @@ import {
   View, Text, Button, Toggle, Segmented, TextInput, Layer, FilePicker, useTheme, useLocale, useSettings, useStore, useAppWindow,
   wm, media, formatBytes, spacing, typeScale, VOICE_DEFAULTS, speakAvailable, previewVoice, tryVoice, player as voicePlayer,
   VOICE_LANGS, VOICES, voiceLabel, voicePackage, modelPackage, hasVoice, PREVIEWS_PACKAGE, scanVoices, installVoices, removeVoices,
-  packagesFor, voiceConf, setVoiceConf, addOwnVoice, removeOwnVoice, ownVoiceName, takeName, errorText, fs,
+  packagesFor, voiceConf, setVoiceConf, addOwnVoice, removeOwnVoice, ownVoiceName, takeName, errorText, fs, tOptional,
 } from '@lordos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, Note } from './ui.jsx';

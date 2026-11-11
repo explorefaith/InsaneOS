@@ -128,7 +128,7 @@ static void roles(void) {
     setup(); facts.esp_free = FSP_ESP_MIN_FREE - 1; plan(&p); p.part[MP_ROOT] = 4; p.part[MP_ESP] = 1; WHY(&facts, &p, "install.manual.espFull");
     setup(); facts.esp_fat = facts.esp_read = 0; facts.esp_free = 0; plan(&p); p.part[MP_ROOT] = 4; p.part[MP_ESP] = 1; p.esp_format = 1; WHY(&facts, &p, NULL);
     T(p.slot[MP_ESP].format);
-    /* an earlier LordOS's folder on it doesn't stop a reinstall */
+    /* an earlier Insane OS's folder on it doesn't stop a reinstall */
     setup(); facts.esp_has_ours = 1; plan(&p); p.part[MP_ROOT] = 4; p.part[MP_ESP] = 1; WHY(&facts, &p, NULL);
     setup(); table.p[0].end = table.p[0].start + 64 * MIB - 2; plan(&p); p.part[MP_ROOT] = 4; p.part[MP_ESP] = 1; p.esp_format = 1; WHY(&facts, &p, "install.manual.espTooSmall");
     /* swap: a partition or a file, not both; a sensible size */
@@ -211,7 +211,7 @@ static void argv_built(void) {
              (unsigned long long)(101 * MIB + 18 * GIB), (unsigned long long)(101 * MIB + 20 * GIB - 1)); mp_parse_create(s, &p);
     WHY(&facts, &p, NULL);
     int n = mp_sgdisk_argv(&p, "/usr/sbin/sgdisk", "/dev/sda", "8304", buf, sizeof buf, argv);
-    static const char *const want[] = { "/usr/sbin/sgdisk", "-d", "3", "-n", "2:206848:37955583", "-t", "2:8304", "-c", "2:LordOS",
+    static const char *const want[] = { "/usr/sbin/sgdisk", "-d", "3", "-n", "2:206848:37955583", "-t", "2:8304", "-c", "2:Insane OS",
                                         "-n", "5:37955584:42149887", "-t", "5:8200", "-c", "5:swap", "/dev/sda", NULL };
     T(n == 16);
     for (int i = 0; want[i] && i < n; i++) if (strcmp(argv[i], want[i])) { fails++; printf("FAILED argv[%d]: %s, wanted %s\n", i, argv[i], want[i]); }

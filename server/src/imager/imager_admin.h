@@ -1,4 +1,4 @@
-/* imager_admin.h — the LordOS Imager's admin actions (imager_admin.c, docs/IMAGER.md). */
+/* imager_admin.h — the Insane OS Imager's admin actions (imager_admin.c, docs/IMAGER.md). */
 #ifndef LORD_IMAGER_ADMIN_H
 #define LORD_IMAGER_ADMIN_H
 

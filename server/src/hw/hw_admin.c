@@ -172,7 +172,7 @@ void hw_act_suspend(const AdminReq *r, const char *arg, size_t len) {
 /* ---- power button and lid (logind) ---- */
 
 /* The same short list for the power button and the lid (lid = 1): what logind can do without a
- * session lock of its own (LordOS locks from the theme). */
+ * session lock of its own (Insane OS locks from the theme). */
 int hw_button_action_valid(const char *a, int lid) {
     static const char *const ok[] = { "poweroff", "suspend", "hibernate", "ignore", NULL };
     (void)lid;
@@ -191,7 +191,7 @@ void hw_act_buttons(const AdminReq *r, const char *arg, size_t len) {
     mkdir("/etc/systemd/logind.conf.d", 0755);
     char text[400];
     snprintf(text, sizeof text,
-             "# Written by LordOS (Settings → Battery). Changes here are overwritten.\n"
+             "# Written by Insane OS (Settings → Battery). Changes here are overwritten.\n"
              "[Login]\nHandlePowerKey=%s\nHandleLidSwitch=%s\nHandleLidSwitchExternalPower=%s\n", power, lid, lidac);
     const char *tmp = "/etc/systemd/logind.conf.d/.lordos.conf.tmp", *dst = "/etc/systemd/logind.conf.d/lordos.conf";
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
@@ -256,13 +256,13 @@ void hw_act_bt_unblock(const AdminReq *r, const char *arg, size_t len) {
 
 /* ---- Raspberry Pi 5 case accessories (docs/FANS.md, "Argon ONE V5 case") ---- */
 
-/* The cases LordOS knows. The text is fixed here; the file is included from config.txt
+/* The cases Insane OS knows. The text is fixed here; the file is included from config.txt
  * ("include lordos-case.txt", tools/rpi). Never user text. */
 const char *hw_rpi_case_text(const char *id) {
     if (!strcmp(id, "none"))
-        return "# lordos-case.txt: written by LordOS (Settings, Cooling). No case accessories.\n";
+        return "# lordos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n";
     if (!strcmp(id, "argon-one-v5"))
-        return "# lordos-case.txt: written by LordOS (Settings, Cooling). Do not edit by hand.\n"
+        return "# lordos-case.txt: written by Insane OS (Settings, Cooling). Do not edit by hand.\n"
                "# Argon ONE V5 case: its board puts the two front USB 2.0 ports and the audio chip\n"
                "# (USB) on the USB-C controller, which has to work as a host. Its fan is on the fan\n"
                "# header and is driven by lord-fand: nothing to set for it.\n"
@@ -751,7 +751,7 @@ int hw_video_files(const char *arg, char *chromium, size_t cn, char *firefox, si
      * has no such switch without turning off all of WebM, so it stays */
     int no_av1 = !strcmp(mode, "always") || (!strcmp(mode, "auto") && !hw_av1);
     snprintf(firefox, fn,
-             "// Written by LordOS (Settings → Displays → Video in the browser). Changes here are overwritten.\n"
+             "// Written by Insane OS (Settings → Displays → Video in the browser). Changes here are overwritten.\n"
              "// See docs/VIDEO.md.\n%s",
              no_av1 ? "pref(\"media.av1.enabled\", false);\n" : "");
     return 0;
@@ -817,14 +817,14 @@ void hw_act_browser_restore(const AdminReq *r, const char *arg, size_t len) {
     mkdir("/etc/chromium/policies/recommended", 0755);
     if (write_atomic(cp, "{\n  \"RestoreOnStartup\": 1\n}\n")) { admin_err("sys.writeFailed", "path", cp, NULL); return; }
     struct stat st;
-    if (stat("/etc/firefox-esr", &st) == 0 && S_ISDIR(st.st_mode) && write_atomic(fp, "// LordOS: Settings -> Session\npref(\"browser.startup.page\", 3);\n")) {
+    if (stat("/etc/firefox-esr", &st) == 0 && S_ISDIR(st.st_mode) && write_atomic(fp, "// Insane OS: Settings -> Session\npref(\"browser.startup.page\", 3);\n")) {
         admin_err("sys.writeFailed", "path", fp, NULL);
         return;
     }
     admin_say("OK", "%s", a);   /* i18n-ok */
 }
 
-/* ---- LordBench's boot time test (bench/boottest.h, docs/BENCHMARK.md "Boot") ---- */
+/* ---- InsaneBench's boot time test (bench/boottest.h, docs/BENCHMARK.md "Boot") ---- */
 
 /* boot-test <n>: n restarts in a row (BT_MIN..BT_MAX), each boot's time recorded by lord-sessiond. Only
  * writes the fixed-format state file; the restart itself is asked by the session as any other (Restart). */

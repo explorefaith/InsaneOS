@@ -80,7 +80,7 @@ static void test_small(void) {
     CHECK(!rs_valid_host("") && !rs_valid_host("a b") && !rs_valid_host("a:0") && !rs_valid_host("a:65536") && !rs_valid_host("[zz]"));
     CHECK(!rs_valid_host("a..b") && !rs_valid_host("-a") && !rs_valid_host("a:5673x") && !rs_valid_host("a/b"));
     CHECK(rs_same_origin("https://10.0.0.5:5673", "10.0.0.5:5673"));
-    CHECK(rs_same_origin("https://LordOS.local:5673", "lordos.local:5673"));
+    CHECK(rs_same_origin("https://Insane OS.local:5673", "lordos.local:5673"));
     CHECK(!rs_same_origin("http://10.0.0.5:5673", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://evil.example", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://10.0.0.5:5673.evil", "10.0.0.5:5673"));
@@ -366,7 +366,7 @@ static void test_ipnet(void) {
     rs_cidr_parse("10.9.9.9", &c);
     CHECK(rs_access_add(acc.block, &acc.nblock, &c) == -1);
     CHECK(rs_net_mode("lan") == RS_NET_LAN && rs_net_mode("any") == RS_NET_ANY && rs_net_mode("list") == RS_NET_LIST && rs_net_mode("all") < 0);
-    /* VPN interfaces: only the names LordOS's VPN manager gives */
+    /* VPN interfaces: only the names Insane OS's VPN manager gives */
     CHECK(rs_vpn_ifname("wg-home") && rs_vpn_ifname("ovpn-work") && rs_vpn_ifname("ips-office") && rs_vpn_ifname("ppp-pptp") &&
           rs_vpn_ifname("oc-corp") && rs_vpn_ifname("fvpn-x"));
     CHECK(!rs_vpn_ifname("ppp0") && !rs_vpn_ifname("tun0") && !rs_vpn_ifname("wg0") && !rs_vpn_ifname("eth0") &&

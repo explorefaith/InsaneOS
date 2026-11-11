@@ -1,8 +1,8 @@
 /* cups.h — our own IPP client for CUPS over its local socket (/run/cups/cups.sock), without libcups.
  *
- * CUPS manages the queue and the drivers; LordOS only speaks IPP to it. Administration
+ * CUPS manages the queue and the drivers; Insane OS only speaks IPP to it. Administration
  * operations (add, remove, choose the default) are authorized by CUPS's own policy:
- * the user has to be in the lpadmin group (LordOS administrators are) and
+ * the user has to be in the lpadmin group (Insane OS administrators are) and
  * identifies with «PeerCred» (CUPS looks at the socket credentials). There is no root action in
  * admin.c for this. See docs/PRINTING.md.
  *

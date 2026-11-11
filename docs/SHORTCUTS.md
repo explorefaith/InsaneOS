@@ -21,7 +21,7 @@ never fires twice.
 - A theme's table, given to `useShortcuts({ grabs, table, onSuperTap, appsPaste })` from its root component
   (`flowTable` in `themes/default/index.jsx`, `classicTable` in `themes/classic/index.jsx`).
 - `addShortcuts(entries)` from a module: Screenshots and the Terminal's drop-down window. `runShortcut(id)`
-  runs one of those from a table: Lord Classic's ❖⇧S is Screenshots' area capture.
+  runs one of those from a table: Insane Classic's ❖⇧S is Screenshots' area capture.
 
 Lookup order is modules, theme, base, and the first entry whose `when(e)` allows it wins. When none does the
 key goes on to the listeners, so `when` is how a key stays with an app (⌃Space in the Terminal).
@@ -36,7 +36,7 @@ their position. `label` lists the entry in Settings → Keyboard (`shortcutList(
 replaces its keys there; an entry with no `label` is not listed. A held key runs once unless the entry says
 `repeat: true`, and its repeats and its release are taken as well.
 
-❖ pressed and released alone calls the theme's `onSuperTap`: Lord Flow's launcher, Lord Classic's start menu.
+❖ pressed and released alone calls the theme's `onSuperTap`: Insane Flow's launcher, Insane Classic's start menu.
 
 ## The keys kept from apps
 
@@ -50,10 +50,10 @@ so a theme that asks for none keeps none.
 | Table | Keys |
 |---|---|
 | `flow` | ❖Tab, ❖⇧Tab (hold), ❖M, ❖H, ❖⌥H, ❖⌥D, ❖,, ❖⌃← ❖⌃→ |
-| `flow-desktops` | The same plus ⌃ ← → ↑ ↓: Lord Flow with Settings → Keyboard's Desktops arrows on |
+| `flow-desktops` | The same plus ⌃ ← → ↑ ↓: Insane Flow with Settings → Keyboard's Desktops arrows on |
 | `classic` | ⌥Tab, ⌥⇧Tab (hold), ⌥F4, ⌃⇧Esc, ❖A, N, D, E, I, R, ❖⇧S, ❖ arrows, ❖1…9, ❖⌃D, ❖⌃F4, ❖⌃← ❖⌃→ |
 
-A Linux app never gets a ❖ combination, so for ❖ the table matters to isolated LordOS apps: without it those
+A Linux app never gets a ❖ combination, so for ❖ the table matters to isolated Insane OS apps: without it those
 would receive the key and the theme would act as well. `system_meta_key` in `wl.c` still lists the ❖ keys
 every theme keeps.
 
@@ -71,11 +71,11 @@ opens on the previous app, and the dispatcher gives it every key while open. Whi
 **Z, the key under Esc, or ↓** move through the selected app's windows in a row below it (↑ goes back), Enter or letting go switches, Esc cancels. The keys go by position, so they're the same in every layout.
 A Linux or isolated app's window in that row is its real surface, drawn smaller and live; a window the shell draws itself shows its app's icon.
 Switching brings the app's top window, on this desktop if it has one. Listing apps from every desktop shows each one's desktop
-name, and choosing one elsewhere jumps there. ❖\` and ❖⇧\` in Lord Flow go through the visible windows of the app in front on this
+name, and choosing one elsewhere jumps there. ❖\` and ❖⇧\` in Insane Flow go through the visible windows of the app in front on this
 desktop.
 
 Settings → Keyboard (`settings.switcher`): which keys open it (the theme's, ❖Tab, ⌥Tab or both; the grab profile gets `+tab-meta`, `+tab-alt` or `+tab-both`), apps from everywhere, this desktop or this display,
-leaving out apps with everything minimized, numbers, the windows row, size, a look (System, Glass, Solid, High contrast, Custom colors) and apps that never show. In Lord Classic, when ❖Tab opens the switcher, the Overview moves to ❖W.
+leaving out apps with everything minimized, numbers, the windows row, size, a look (System, Glass, Solid, High contrast, Custom colors) and apps that never show. In Insane Classic, when ❖Tab opens the switcher, the Overview moves to ❖W.
 
 ## Stopping a screen share
 
@@ -83,7 +83,7 @@ leaving out apps with everything minimized, numbers, the windows row, size, a lo
 in C, before any JavaScript, so it works with the shell hung. Only a physical key gets there: what the API, the remote desktop or the
 on-screen keyboard injects takes another path and can't press it. With no share running the key goes on as usual.
 
-## ❖ as Ctrl in Linux apps (Lord Flow)
+## ❖ as Ctrl in Linux apps (Insane Flow)
 
 With the `flow` table, ❖C, V, X, A, Z, F, T, W, N, L, R, P and S with no other modifier reach the focused Linux
 app as Ctrl+key, or Ctrl+Shift+key if its `.desktop` lists the `TerminalEmulator` category (`sdk/wayland.js`
@@ -91,15 +91,15 @@ passes that with `lord.wayland.focus`). `send_remapped` follows `wl_send_paste`:
 Super taken out of the modifiers it sees, and the real press and release, so the app repeats on its own.
 `wl_key` returns 2, which the shell receives as `forwarded`: nothing runs, but ❖ no longer counts as pressed
 alone. So with a Linux app in front ❖L is that app's, and the screen locks with ❖⌃Q; ❖V pastes and the
-clipboard is ❖⇧V. Isolated LordOS apps keep their real ❖ keys.
+clipboard is ❖⇧V. Isolated Insane OS apps keep their real ❖ keys.
 
-With `appsPaste` (Lord Flow) ❖V also goes to a LordOS app inside the session, where it pastes, and opens the
+With `appsPaste` (Insane Flow) ❖V also goes to a Insane OS app inside the session, where it pastes, and opens the
 clipboard panel only with no window in front. Isolated apps never receive ❖V, so there it stays the panel.
 
 ## Desktops
 
 `flowDesktopKeys` and `classicDesktopKeys` in `sdk/desktops.js` are part of each theme's table; [DESKTOPS.md](DESKTOPS.md)
-has the keys. In Lord Flow ⌃ arrows are word movement in apps, so they are an option, on by default: off, their
+has the keys. In Insane Flow ⌃ arrows are word movement in apps, so they are an option, on by default: off, their
 entries stop applying and leave Settings → Keyboard's list (`listed`), and `useShortcuts` asks for the `flow` table
 (its `grabs` can change while the theme runs), so the keys reach the apps. ⌃⇧ arrows always stay with the app.
 

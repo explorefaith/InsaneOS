@@ -47,7 +47,7 @@ typedef struct {
     const FspTable *table;      /* only read when table_ok */
     int esp_fat;                /* the ESP really is FAT */
     int esp_read;               /* it could be mounted read-only and measured */
-    int esp_has_ours;           /* EFI/LordOS already exists on it */
+    int esp_has_ours;           /* EFI/Insane OS already exists on it */
     uint64_t esp_free;
 } FspFacts;
 

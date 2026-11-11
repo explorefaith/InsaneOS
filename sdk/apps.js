@@ -1,6 +1,6 @@
 // apps.js — every app that can be opened, for the app launcher, the start menu and the Store:
-//   - the LordOS apps bundled with the theme (apps/),
-//   - the LordOS apps installed as a package (.lpk, see docs/NATIVE-APPS.md),
+//   - the Insane OS apps bundled with the theme (apps/),
+//   - the Insane OS apps installed as a package (.lpk, see docs/NATIVE-APPS.md),
 //   - the installed Linux apps (.desktop files; they open as Wayland windows).
 //
 //   const list = useLauncherApps();      // [{ id, name, Icon, kind, comment, categories }]
@@ -70,7 +70,7 @@ export function useLauncherApps() {
 }
 
 // Main freedesktop standard categories (the same as AppStream's in the Store).
-// A Linux app takes it from the Categories field of its .desktop; a LordOS one, from "category" in its
+// A Linux app takes it from the Categories field of its .desktop; a Insane OS one, from "category" in its
 // manifest.
 export const APP_CATEGORIES = ['AudioVideo', 'Development', 'Education', 'Game', 'Graphics', 'Network', 'Office', 'Science', 'Settings', 'System', 'Utility'];
 const ALIASES = { Audio: 'AudioVideo', Video: 'AudioVideo', TerminalEmulator: 'System', FileManager: 'System', WebBrowser: 'Network', TextEditor: 'Utility' };
@@ -142,7 +142,7 @@ function prettyAppId(appId) {
   return s ? s[0].toUpperCase() + s.slice(1) : '';
 }
 
-// The app name of a window, never its title: a LordOS app's name; for a Linux window, the isolated
+// The app name of a window, never its title: a Insane OS app's name; for a Linux window, the isolated
 // app's package name, its .desktop's short name or its app_id.
 export function windowAppName(w) {
   if (!w) return '';

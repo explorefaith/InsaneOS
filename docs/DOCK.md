@@ -10,7 +10,7 @@ In **Settings → Desktop & Dock** you choose:
 
 Which apps are in the Dock, and in which order, is up to you: see "Customizing the Dock" below.
 
-In the Lord Classic theme, the same section chooses the taskbar position: bottom, top, left or right.
+In the Insane Classic theme, the same section chooses the taskbar position: bottom, top, left or right.
 Everything is applied live, without restarting, and is saved in
 `~/.config/lordos/settings.json`.
 
@@ -23,7 +23,7 @@ Everything is applied live, without restarting, and is saved in
 | ![menu](dock-right-menu.png) | ![revealed](dock-hidden-revealed.png) |
 | Right click with the Dock on the right: the menu opens inward | Auto-hide: it appears when the pointer reaches the edge (without the Dock: [`dock-hidden.png`](dock-hidden.png)) |
 | ![classic](dock-classic-left-with-bar.png) | ![classic, start](dock-classic-left.png) |
-| Lord Classic theme with the bar on the left (only icons, and the time at the bottom) | Its start menu opens next to the bar |
+| Insane Classic theme with the bar on the left (only icons, and the time at the bottom) | Its start menu opens next to the bar |
 
 ## Settings (`sdk/dock.js`: `DOCK_DEFAULTS`, `dockPrefs(settings)`)
 
@@ -36,8 +36,8 @@ Everything is applied live, without restarting, and is saved in
 | `dockAutohide` | `true`/`false`: the Dock hides | `false` |
 | `dockIntellihide` | `true`/`false`: with `dockAutohide`, it hides only while a window covers it (0.8.8.6) | `false` |
 | `dockRecents` | `true`/`false`: the last 3 used apps that are not pinned, after a separator line | `false` |
-| `taskbarPosition` | `bottom`, `top`, `left`, `right` (Lord Classic theme) | `bottom` |
-| `taskbarAlign` | `center`, `start`: where the taskbar's buttons go when it is at the bottom or top (Lord Classic theme, 0.8.3) | `center` |
+| `taskbarPosition` | `bottom`, `top`, `left`, `right` (Insane Classic theme) | `bottom` |
+| `taskbarAlign` | `center`, `start`: where the taskbar's buttons go when it is at the bottom or top (Insane Classic theme, 0.8.3) | `center` |
 | `loginApps` | Dock item ids opened when the session starts (Options › Open at Login, 0.8.5) | `[]` |
 | `appDisplays` | app → display connector (`HDMI-A-1`, `DP-2`…) its new windows open on (Options › Assign To, 0.8.5) | `{}` |
 
@@ -46,7 +46,7 @@ The SDK records recent apps in `dockRecentApps` every time an app opens a window
 
 ## Customizing the Dock (0.8.1)
 
-Every app can go in the Dock: LordOS apps, installed `.lpk` packages and Linux apps from their
+Every app can go in the Dock: Insane OS apps, installed `.lpk` packages and Linux apps from their
 `.desktop` files (Firefox, Chromium, GTK and Qt apps). The arrangement is saved per user in
 `~/.config/lordos/settings.json` → `dockPinned`.
 
@@ -61,7 +61,7 @@ Every app can go in the Dock: LordOS apps, installed `.lpk` packages and Linux a
 | ![left](dock-customize-left.png) | ![rtl](dock-customize-rtl.png) |
 | Reordering with the Dock on the left | Arabic: the bottom Dock reads right to left (Files on the right, the Trash on the left) |
 | ![classic](dock-customize-classic.png) | |
-| Lord Classic theme: Firefox dragged from the start menu, with the drop line | |
+| Insane Classic theme: Firefox dragged from the start menu, with the drop line | |
 
 **Adding an app:**
 
@@ -104,7 +104,7 @@ an unpinned running item until it quits.
 
 | Id | What | Opened with |
 |---|---|---|
-| `app:<id>` | a LordOS app bundled with the theme | `wm.open` (`launchApp`) |
+| `app:<id>` | a Insane OS app bundled with the theme | `wm.open` (`launchApp`) |
 | `lpk:<id>` | an installed `.lpk` package | `lord.apps.launchPackage(id)` |
 | `desktop:<desktop id>` | a Linux app's `.desktop` | `lord.apps.launch(id)` |
 | `shell:launcher` | the theme's app launcher | the theme |
@@ -126,7 +126,7 @@ dock.isPinned(id) · dock.canRemove(id) · dock.canMove(id)
 
 The methods take a typed id or a plain launcher id. Both themes use the same calls and the same
 drag logic (`beginDockDrag`, `registerDockTarget`, `dockDrag`, `dockPoof`): the Dock draws the gap
-and the poof; the Lord Classic taskbar draws a drop line, unpins with the same drag-out-and-hold, pins
+and the poof; the Insane Classic taskbar draws a drop line, unpins with the same drag-out-and-hold, pins
 from the start menu (drag, or right click → Pin to taskbar) and keeps its Start button fixed (the
 launcher item isn't shown there). The model is tested by `server/tests/dock_model_test.mjs` (in
 `make test` when node is installed).
@@ -190,7 +190,7 @@ arguments). A Linux app shows its `.desktop`'s desktop actions, run through the 
   permanent and can't be undone.
 - **Drives:** dropping a removable drive to eject it isn't supported: Files has no draggable drive
   items, so there is nothing to drop; eject stays in Files and Disks.
-- **Lord Classic theme:** the Trash is the last button of the taskbar, with the same click, drop, menu
+- **Insane Classic theme:** the Trash is the last button of the taskbar, with the same click, drop, menu
   and confirmation.
 
 ## Work area
@@ -224,14 +224,14 @@ already worked this way: its state belongs to the Dock component.
 
 Settings → Desktop & Dock → **Hide the Dock** has three choices: **Never**, **When covered** and
 **Always**. They are stored as two booleans (`dockAutohide`, `dockIntellihide`; `dockHideMode()` and
-`dockHideSettings()` in `sdk/dockmodel.js`), so an older LordOS reading the file just hides the Dock,
+`dockHideSettings()` in `sdk/dockmodel.js`), so an older Insane OS reading the file just hides the Dock,
 and ❖⌥D (which flips `dockAutohide`) goes back to the mode that was chosen.
 
 With **When covered** the Dock stays in view while no window is where it rests and slides away 300 ms
 after one gets there. `dockCovered()` (`sdk/dockmodel.js`, tested in `server/tests/dock_model_test.mjs`)
 decides it from the window list: windows on the desktop in view, not minimized, not picture-in-picture,
 with the frame they are drawn at (`wm.frame`: a maximized window fills its work area), and a fullscreen
-window covering its whole display. LordOS apps and Linux windows (Wayland and X11) are in the same list.
+window covering its whole display. Insane OS apps and Linux windows (Wayland and X11) are in the same list.
 The Dock is only on the main display, so a window on another display never covers it. The pointer at
 the edge still brings it over the windows, and it goes again 500 ms after the pointer leaves. A window
 moved by the mouse is moved by lord-server with no JS per frame, so the Dock answers when it is dropped.
@@ -253,17 +253,17 @@ left stays on the left.
 - On the sides, the order is always top to bottom.
 - The Dock's menus open toward the inside of the screen with `side` (in `Menu.jsx`), without the
   flip that other menus do in RTL.
-- In the Lord Classic theme the bar is also physical; the start menu and the jump list stick to the
+- In the Insane Classic theme the bar is also physical; the start menu and the jump list stick to the
   side of the bar.
 
 Settings says so below "Position on screen".
 
 ## Pending
 
-- A genie minimize effect: the Lord Flow theme's is a scale towards the Dock (`useMinimizing` in
+- A genie minimize effect: the Insane Flow theme's is a scale towards the Dock (`useMinimizing` in
   `themes/default/index.jsx`, `transform: scale` from a cached raster; `DESIGN.md`).
-- Auto-hide (and hiding only when covered) for the Lord Classic theme's bar.
+- Auto-hide (and hiding only when covered) for the Insane Classic theme's bar.
 - Dragging the Dock to another edge with the mouse (⇧ on the separator).
 - Quick actions for `.lpk` apps (they would need to reach the isolated process through the broker).
 - Ejecting a drive by dropping it on the Trash (Files has no draggable drive items yet).
-- The Lord Classic taskbar shows a drop line, without the Dock's sliding neighbours.
+- The Insane Classic taskbar shows a drop line, without the Dock's sliding neighbours.

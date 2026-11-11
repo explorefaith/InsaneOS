@@ -24,5 +24,5 @@
   "time.synced": "Sinchronizuota su tinklo laiko serveriais (systemd-timesyncd).",
   "time.syncing": "Laukiama pirmojo sinchronizavimo…",
   "time.zone": "Laiko juosta",
-  "time.zoneFooter": "Pasirinkta rankiniu būdu: LordOS niekada neieško jūsų buvimo vietos tinkle."
+  "time.zoneFooter": "Pasirinkta rankiniu būdu: Insane OS niekada neieško jūsų buvimo vietos tinkle."
 }

@@ -34,7 +34,7 @@ eq('a window without a desktop is on the first', ids(visibleOn([{ id: 'old' }], 
 eq('pip is sticky', [onDesktop(list[5], 1), onDesktop(list[5], 2), onDesktop(list[5], 3)], [true, true, true]);
 eq('hidden', [windowHidden(list[0], 2), windowHidden(list[0], 1), windowHidden(list[3], 1), windowHidden(null, 1)], [true, false, true, true]);
 
-// a LordOS app stays mounted when it is minimized or on a hidden desktop, a Linux window doesn't
+// a Insane OS app stays mounted when it is minimized or on a hidden desktop, a Linux window doesn't
 eq('mounted on 1', ids(mountedOn(list, 1)), ['a', 'b', 'm']);
 eq('mounted on 2', ids(mountedOn(list, 2)), ['a', 'linux#5', 'b', 'm']);
 const iconic = [L(5, 1, { minimized: true }), L(6, 2, { minimized: true }), L(7, 1)];
@@ -55,7 +55,7 @@ eq('pip alone is not in front', focusedOn([win('p', 1, { pip: {} })], 1), null);
   eq('keyboard: active desktop 2', keyboardSurface(top, 2, false, surf), 7);
   eq('keyboard: empty desktop has nobody', keyboardSurface(top, 3, false, surf), 0);
   eq('keyboard: shell surface open', keyboardSurface(top, 1, true, surf), 0);
-  eq('keyboard: a LordOS app in front of a Linux one', keyboardSurface([L(8, 1), win('files', 1)], 1, false, surf), 0);
+  eq('keyboard: a Insane OS app in front of a Linux one', keyboardSurface([L(8, 1), win('files', 1)], 1, false, surf), 0);
   eq('keyboard: pip above does not take it', keyboardSurface([L(8, 1), win('p', 2, { pip: {} })], 1, false, surf), 8);
   // every order of windows on 3 desktops: the surface chosen is always on the active desktop or 0
   const pool = [L(1, 1), L(2, 2), L(3, 3), win('x', 2), L(4, 1, { minimized: true }), L(6, 2, { minimized: true })];
@@ -225,7 +225,7 @@ eq('index clamped', [moveDesktopTo([1, 2, 3], 1, 99), moveDesktopTo([1, 2, 3], 3
   eq('nothing sends transform to setStyle', ['sdk', 'themes', 'apps', 'runtime'].flatMap((d) => sent(path.join(root, d))).map((p) => path.relative(root, p)), []);
 }
 
-// a minimized Linux window has a placeholder behind its body in the overview, and only there; a LordOS app's body would show it through
+// a minimized Linux window has a placeholder behind its body in the overview, and only there; a Insane OS app's body would show it through
 const lin = { minimized: true, args: { surface: 5 } };
 eq('placeholder: minimized Linux window, in the overview', [overviewPlaceholder(lin, true), overviewPlaceholder(lin, false), overviewPlaceholder({ args: { surface: 5 } }, true), overviewPlaceholder({ minimized: true }, true)], [true, false, false, false]);
 

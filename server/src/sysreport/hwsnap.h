@@ -2,7 +2,7 @@
  * hardware reports"): what System Information's Compatibility panel shows as community data.
  *
  * tools/hwreport/catalog.mjs builds <assets>/hwreport/snapshot.json from the accepted reports;
- * tools/release/sign-hwsnapshot.sh signs it on the maintainer's machine with the LordOS release key (Ed25519,
+ * tools/release/sign-hwsnapshot.sh signs it on the maintainer's machine with the Insane OS release key (Ed25519,
  * the same key and the same file format as code-manifest.sig: base64 of the 64-byte signature over the exact
  * bytes) into snapshot.json.sig. Both ship in the lordos package and update with it through the signed APT
  * repository; downloading a newer snapshot by itself is left for later.

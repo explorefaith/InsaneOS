@@ -1,4 +1,4 @@
-// controls.jsx — shared building blocks for the layout of LordOS apps: toolbar buttons
+// controls.jsx — shared building blocks for the layout of Insane OS apps: toolbar buttons
 // with tooltips, toolbars, a "more" menu button, a search field, empty states and grouped
 // ("inset") forms. The spacing and type scale they follow is in docs/DESIGN.md.
 import { View, Text, addListener } from '@lordos/runtime';

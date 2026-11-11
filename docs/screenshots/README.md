@@ -1,6 +1,6 @@
 # Screenshots
 
-A curated set of LordOS screenshots for the website and the repository: English interface,
+A curated set of Insane OS screenshots for the website and the repository: English interface,
 default wallpaper and theme, sample data only (no personal data). Full-screen captures at
 1440 × 900 or 1280 × 800, taken from a headless `lord-server` (the remote-desktop frame stream).
 
@@ -9,10 +9,10 @@ and Portuguese, in [`gallery.json`](gallery.json). A full-screen Passwords shot 
 
 | File | Caption |
 | --- | --- |
-| [`desktop-overview-light.png`](desktop-overview-light.png) | The LordOS desktop with Calendar, Photos, Files and Player open over the Dock, light mode. |
+| [`desktop-overview-light.png`](desktop-overview-light.png) | The Insane OS desktop with Calendar, Photos, Files and Player open over the Dock, light mode. |
 | [`desktop-overview-dark.png`](desktop-overview-dark.png) | The same desktop in dark mode. |
 | [`files.png`](files.png) | Files browsing the Documents folder, with favorites, locations and tags in the sidebar. |
-| [`settings-general.png`](settings-general.png) | Settings → General: the LordOS version and details about this computer. |
+| [`settings-general.png`](settings-general.png) | Settings → General: the Insane OS version and details about this computer. |
 | [`monitor-network-map.png`](monitor-network-map.png) | Monitor's network map: where each app's connections go, country by country. |
 | [`monitor-cooling.png`](monitor-cooling.png) | Monitor → Cooling: temperature, fan speed and the fan curve, live. |
 | [`mail.png`](mail.png) | Mail with an inbox of messages and a newsletter open in the reading pane. |
@@ -21,7 +21,7 @@ and Portuguese, in [`gallery.json`](gallery.json). A full-screen Passwords shot 
 | [`terminal.png`](terminal.png) | Terminal running a few everyday commands in the Documents folder. |
 | [`photos.png`](photos.png) | Photos showing the whole library, grouped by month. |
 | [`player.png`](player.png) | Player playing an album, with the playback bar at the bottom. |
-| [`about.png`](about.png) | About LordOS: version, system, hardware and the UI engine. |
+| [`about.png`](about.png) | About Insane OS: version, system, hardware and the UI engine. |
 | [`greeter.png`](greeter.png) | The login screen. |
 | [`remote-desktop.png`](remote-desktop.png) | Settings → Sharing: remote desktop turned on (it is off by default), with its address and fingerprint. |
 | [`firewall-rules.png`](firewall-rules.png) | Settings → Privacy → app network access: trusted apps and per-app restrictions (LAN only, no incoming connections…). |

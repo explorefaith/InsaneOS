@@ -1,5 +1,5 @@
 #!/bin/sh
-# apt-repo.sh — the signed LordOS APT repository on lordos.org (docs/UPDATES.md, docs/RELEASING.md).
+# apt-repo.sh — the signed Insane OS APT repository on lordos.org (docs/UPDATES.md, docs/RELEASING.md).
 #
 #   tools/release/apt-repo.sh build   <target> [--notes VERSION=SECTION]… [--rpi] [--catalog] <file.deb>…
 #   tools/release/apt-repo.sh publish <target>
@@ -7,12 +7,12 @@
 #   tools/release/apt-repo.sh rpi-fetch <target>     (only fetches and verifies the --rpi packages)
 #
 # <target> is "staging" (https://lordos.org/apt-staging, for tests) or "live" (https://lordos.org/apt,
-# what every LordOS system reads). Both have one suite, "stable", component "main", for amd64 and arm64.
+# what every Insane OS system reads). Both have one suite, "stable", component "main", for amd64 and arm64.
 #
 #   build    copies the published pool down from S3, adds the .debs, writes the indexes with Debian's
 #            apt-ftparchive (in a debian:trixie container when this machine has none), the release notes
 #            of each lordos version from CHANGELOG.md (main/notes/ReleaseNotes), and signs Release
-#            with the LordOS archive key: InRelease and Release.gpg. Then it checks the signatures.
+#            with the Insane OS archive key: InRelease and Release.gpg. Then it checks the signatures.
 #   publish  uploads the pool first, then the indexes, the signed files last; the archive keyring to
 #            lordos.org/keys/ and lordos.sources next to the repository; invalidates the CDN.
 #   verify   downloads InRelease over https AND http (the Store's package engine has no TLS of its
@@ -27,9 +27,9 @@
 # packages (MPL-2.0 kms++) go to pool/rpi/source/<letter>/<name>/, checked the same way against the
 # signed Sources index, so their source is offered next to the binaries.
 #
-# --catalog also adds the curated apps of apt/catalog.json that LordOS mirrors (apt/README.md): it runs
+# --catalog also adds the curated apps of apt/catalog.json that Insane OS mirrors (apt/README.md): it runs
 # `apt/build.sh fetch`, which downloads every pinned vendor file, verifies it (pinned SHA-256, sigstore,
-# a vendor's signed APT index) and builds LordOS's own packages from apt/recipes/ in debian:trixie
+# a vendor's signed APT index) and builds Insane OS's own packages from apt/recipes/ in debian:trixie
 # containers (amd64 and arm64), keeping everything in $WORKDIR/catalog-cache. Those .debs go to
 # pool/catalog/<letter>/<name>/ and into the indexes of their architectures, like pool/main. Apps whose
 # vendor has its own signed APT repository ("delivery": "direct") are only checked, never mirrored: the
@@ -362,7 +362,7 @@ do_build() {
         fi
         xz -9 -k -f "$TREE/$D/main/binary-$a/Packages"
         gzip -9 -n -k -f "$TREE/$D/main/binary-$a/Packages"
-        printf 'Archive: %s\nOrigin: LordOS\nLabel: LordOS\nComponent: main\nArchitecture: %s\n' "$SUITE" "$a" > "$TREE/$D/main/binary-$a/Release"
+        printf 'Archive: %s\nOrigin: Insane OS\nLabel: Insane OS\nComponent: main\nArchitecture: %s\n' "$SUITE" "$a" > "$TREE/$D/main/binary-$a/Release"
     done
 
     # release notes of every lordos version in the pool (Store → Updates shows the candidate's)
@@ -398,13 +398,13 @@ do_build() {
     fi
 
     debtool apt-ftparchive \
-        -o APT::FTPArchive::Release::Origin=LordOS \
-        -o APT::FTPArchive::Release::Label=LordOS \
+        -o APT::FTPArchive::Release::Origin=Insane OS \
+        -o APT::FTPArchive::Release::Label=Insane OS \
         -o APT::FTPArchive::Release::Suite="$SUITE" \
         -o APT::FTPArchive::Release::Codename="$SUITE" \
         -o APT::FTPArchive::Release::Architectures="$ARCHES" \
         -o APT::FTPArchive::Release::Components=main \
-        -o APT::FTPArchive::Release::Description="LordOS updates for Debian 13 (trixie)" \
+        -o APT::FTPArchive::Release::Description="Insane OS updates for Debian 13 (trixie)" \
         -o APT::FTPArchive::Release::Patterns::=ReleaseNotes -o APT::FTPArchive::Release::Patterns::=ReleaseNotes.xz \
         -o APT::FTPArchive::Release::Patterns::=Featured -o APT::FTPArchive::Release::Patterns::=Banner \
         release "$D" > "$TREE/Release.new"

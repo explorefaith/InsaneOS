@@ -7,7 +7,7 @@
  *   net-up / net-down <if>
  *   net-config <if>\n<lines>    method=dhcp|static|off, address=ip/prefix (several),
  *                               gateway=ip, dns=ip (several)
- *   net-manage / net-unmanage <if>   hand an interface from systemd-networkd to LordOS and back
+ *   net-manage / net-unmanage <if>   hand an interface from systemd-networkd to Insane OS and back
  *   net-wifi-scan <if>          LOG per network (JSON) and OK <count>
  *   net-wifi-connect <if>\n<ssid>\n<password>
  *   net-wifi-disconnect <if> / net-wifi-forget <ssid>
@@ -520,11 +520,11 @@ void net_act_config(const AdminReq *r, const char *arg, size_t len) {
 void net_act_manage(const AdminReq *r, const char *arg, size_t len) {
     (void)r; (void)len;
     if (check_if(arg, 0)) return;
-    if (!managed_by_system(arg)) { admin_ok("net.alreadyLordos", "name", arg, NULL); return; }
+    if (!managed_by_system(arg)) { admin_ok("net.alreadyManaged", "name", arg, NULL); return; }
     char path[160];
     snprintf(path, sizeof path, "/etc/systemd/network/00-lordos-%s.network", arg);
     char body[200];
-    int n = snprintf(body, sizeof body, "# LordOS manages this interface (net-manage)\n[Match]\nName=%s\n\n[Link]\nUnmanaged=yes\n", arg);
+    int n = snprintf(body, sizeof body, "# Insane OS manages this interface (net-manage)\n[Match]\nName=%s\n\n[Link]\nUnmanaged=yes\n", arg);
     if (write_file_atomic(path, body, (size_t)n, 0644)) { admin_err("sys.writeFailed", "path", path, NULL); return; }
     char out[256];
     const char *argv[] = { NETWORKCTL, "reload", NULL };
@@ -900,7 +900,7 @@ void net_act_vpn_status(const AdminReq *r, const char *arg, size_t len) {
     admin_say("OK", "%d", n); /* i18n-ok: a count (data) */
 }
 
-/* net-vpn-enable openconnect|fortinet: installs the (optional) program with LordOS's package
+/* net-vpn-enable openconnect|fortinet: installs the (optional) program with Insane OS's package
  * engine (pkg-install, see pkg/pkg.c). Runs in a separate process (A_FORK). */
 void net_act_vpn_enable(const AdminReq *r, const char *arg, size_t len) {
     (void)len;

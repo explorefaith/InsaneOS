@@ -3,7 +3,7 @@
 // explains it. Pure functions with no UI and no SDK, tested by server/tests/hwreport_test.mjs; the workflow's
 // validator and the catalogue (tools/hwreport) use the same summary, kind and vendor rules.
 //
-// LordOS sends nothing by itself and holds no token: the app writes the report and the page to the user's
+// Insane OS sends nothing by itself and holds no token: the app writes the report and the page to the user's
 // Documents, opens the page with the default browser (lord.apps.launchWith('', path)), and the user attaches
 // the file to the issue and submits it with their own account.
 //
@@ -12,7 +12,7 @@
 // added to the schema.
 
 export const FORMAT = 'lordos-hwreport';
-export const REPO_URL = 'https://github.com/lordbasex/LordOS';
+export const REPO_URL = 'https://github.com/lordbasex/Insane OS';
 export const ISSUE_TEMPLATE = 'hardware-report.yml';
 export const TITLE_MAX = 100;
 export const SUMMARY_MAX = 600;
@@ -88,8 +88,8 @@ export function pick(v, s, root = s) {
 const baseVersion = (v) => { const m = /^(\d+\.\d+\.\d+(?:\.\d+)?)/.exec(String(v || '')); return m ? m[1] : ''; };
 export const sameVersion = (a, b) => !!baseVersion(a) && baseVersion(a) === baseVersion(b);
 
-// report: lord.sysinfo.report(); bench / desktop: the last LordBench peak and desktop results (or null);
-// compat: model.js compatibility(report). A bench result is kept only when it was measured with this LordOS
+// report: lord.sysinfo.report(); bench / desktop: the last InsaneBench peak and desktop results (or null);
+// compat: model.js compatibility(report). A bench result is kept only when it was measured with this Insane OS
 // version, so the catalogue never files an old version's numbers under the new one.
 export function buildShareReport({ report, bench = null, desktop = null, compat = [], schema, date, source = 'community' }) {
   const rep = report || {};
@@ -177,7 +177,7 @@ export function bootText(rep) {
 }
 
 // The short, non-identifying summary that goes into the issue's link: the machine, CPU, GPU, memory,
-// LordOS version, live or installed, the boot medium's class, and the compatibility states. Nothing else of the report travels in
+// Insane OS version, live or installed, the boot medium's class, and the compatibility states. Nothing else of the report travels in
 // the URL; the full JSON is attached by the user.
 export function summaryRows(rep) {
   const s = (rep && rep.system) || {};
@@ -202,7 +202,7 @@ export function summaryRows(rep) {
 
 export function issueTitle(rep) {
   const name = machineLabel(rep) || 'unknown machine';
-  return oneLine(`Hardware report: ${name} (LordOS ${rep && rep.lordos ? rep.lordos : '?'}${rep && rep.live ? ', live' : ''})`, TITLE_MAX);
+  return oneLine(`Hardware report: ${name} (Insane OS ${rep && rep.lordos ? rep.lordos : '?'}${rep && rep.live ? ', live' : ''})`, TITLE_MAX);
 }
 
 export function summaryText(rep) {

@@ -1,4 +1,4 @@
-/* idx.h — LordOS's compact package index (/var/lib/lordos/pkg/index.bin).
+/* idx.h — Insane OS's compact package index (/var/lib/lordos/pkg/index.bin).
  *
  * The root helper builds it in pkg-update from the already verified Packages, Translation-en and
  * DEP-11; lord-server (no root) opens it with mmap: nothing is copied into memory until it's

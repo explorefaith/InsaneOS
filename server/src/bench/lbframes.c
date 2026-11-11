@@ -44,7 +44,7 @@ typedef struct {
     int built, par, gdrag_tried, gdrag_taken, gdrag_refused[LBF_GDRAG_R], gdrag_layer[LBF_GDRAG_L], gdrag_full, unshown, piped;
     double up_px, gdrag_px, feed_px, gdrag_full_px;
 } Rec;
-static Rec rec_lb, rec_drag;            /* LordBench's recording, the scripted drag's */
+static Rec rec_lb, rec_drag;            /* InsaneBench's recording, the scripted drag's */
 static LbPhase pend;                    /* the main display's frame waiting for its flip */
 static int have_pend;
 
@@ -188,7 +188,7 @@ static void rec_stats(const Rec *r, LbPhaseStats *st) {
     st->piped = r->piped;
 }
 
-/* lbf_begin and lbf_end start and stop LordBench's recorder with the frame times */
+/* lbf_begin and lbf_end start and stop InsaneBench's recorder with the frame times */
 static void lbf_phases_begin(void) {
     pthread_mutex_lock(&mu);
     rec_clear(&rec_lb);

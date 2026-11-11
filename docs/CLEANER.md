@@ -14,7 +14,7 @@ The rule is **analyse, review, plan, confirm, execute, verify**. A scan only rea
 | Large files | Files found by a tree scan, filtered by size, age by modification time and type |
 | Storage | Volumes (`/`, the home folder, the user's mounts); bubbles of the largest folders (the default, 14 at most, the rest grouped), each a glass sphere with an icon and colour for what the folder is, a map, a folder list with logical and allocated sizes, a summary by type. A selected folder goes to Large files to be reviewed. In the map, bands in each tile show what rebuilds by itself and what to check first, and a line above gives free space, both amounts and what wasn't scanned (`Storage map` below) |
 | Duplicates | Exact copies in chosen folders, or similar images: resized and recompressed versions of a picture. Nothing is selected for the user |
-| Apps | Installed apps, largest first, each removed by the package engine with its plan shown first; what removed LordOS apps left behind |
+| Apps | Installed apps, largest first, each removed by the package engine with its plan shown first; what removed Insane OS apps left behind |
 | Activity | What ran: counts and sizes, never a path |
 | Settings | Excluded folders, the large file threshold, the look, the item by the clock, whether the storage map is kept |
 
@@ -24,7 +24,7 @@ Compiled in `server/src/clean/rules.c`: 61 rules. Every rule applies only if its
 
 | Category | Rules | Risk | Action |
 |---|---|---|---|
-| Caches | image thumbnails, LordOS thumbnails, font cache, shader cache and database, media plugin list | regenerable | deleted |
+| Caches | image thumbnails, Insane OS thumbnails, font cache, shader cache and database, media plugin list | regenerable | deleted |
 | Caches | Flatpak app caches (`.var/app/*/cache`) | review | Trash: no lock of the running app can be read |
 | Developer tools | pip, npm, yarn, Go build cache, browsers kept by Playwright and Puppeteer, Go module download cache (only `go/pkg/mod/cache/download`: extracted modules are read-only) | regenerable | deleted |
 | Developer tools | pnpm store | review | Trash: projects hard-link into it |
@@ -38,7 +38,7 @@ Compiled in `server/src/clean/rules.c`: 61 rules. Every rule applies only if its
 | AI models | Hugging Face and LM Studio models, a folder each | review | Trash, chosen one by one and named in the confirmation |
 | AI models | unfinished Hugging Face downloads | regenerable | deleted, chosen one by one |
 | AI models | Ollama | review | shown only: models share their blobs, so moving files can't remove one model |
-| Apps | the data folder of a LordOS app that is no longer installed | review | Trash, chosen one by one and named in the confirmation; reviewed in Apps |
+| Apps | the data folder of a Insane OS app that is no longer installed | review | Trash, chosen one by one and named in the confirmation; reviewed in Apps |
 | Information | Downloads over 90 days, Rust registry, Gradle caches, container storage | review | shown only |
 | Information | your own files in `/tmp` over 7 days | review | shown only: other programs may still use them; left out of the estimate |
 | Trash | the home Trash, the Trash on mounted disks | review | measured; the real empty is one confirmed action |
@@ -93,7 +93,7 @@ The file is replaced at each scan. A scan of another disk doesn't save a map, an
 
 ## Apps
 
-Only apps the package index knows as desktop applications appear, plus LordOS `.lpk` apps. Essential packages and `lordos`
+Only apps the package index knows as desktop applications appear, plus Insane OS `.lpk` apps. Essential packages and `lordos`
 itself are left out, and a plan that would take `lordos` is refused. So is a removal the engine won't do alone because other packages need that app: Cleaner shows a message and doesn't offer to take them too. Without administrator rights, Linux apps are listed with no
 Remove button.
 

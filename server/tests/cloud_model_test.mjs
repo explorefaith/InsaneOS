@@ -318,15 +318,15 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
     aboutFields: aboutFields({ total: 1, used: 2, email: 'ana@example.test' }), linksSupported: true,
     steps: [...steps, { id: 'secret', result: 'pass', ms: 1, note: 'x' }, { id: 'free', result: 'fail', note: '/home/ana/Cloud/taxes.pdf' }] });
   eq('report: nothing personal', ['Ana', 'Secret', 'ana@', 'example.test', 'abc123', 'XZk4', 'taxes', '/home'].filter((w) => rep.includes(w)), []);
-  eq('report: what it says', ['LordOS: 0.8.8.5 (x86_64)', 'rclone: v1.75.2', 'Provider: pCloud (pcloud)', 'Verified on LordOS: no', 'Own app: yes', 'Space info: total, used', 'Links supported: yes',
+  eq('report: what it says', ['Insane OS: 0.8.8.5 (x86_64)', 'rclone: v1.75.2', 'Provider: pCloud (pcloud)', 'Verified on Insane OS: no', 'Own app: yes', 'Space info: total, used', 'Links supported: yes',
     '  link      skipped  70 ms      noLinks', 'Result: 9 passed, 1 failed, 1 skipped'].filter((l) => !rep.includes(l)), []);
   eq('report: only the check\'s steps', rep.includes('secret'), false);
   eq('report: an odd version or label stays plain', buildReport({ version: 'x\nEvil: 1', label: 'A\nB', steps: [] }).split('\n').length, 10);
   eq('works', [checkWorks(steps), checkWorks([{ result: 'fail' }]), checkWorks([{ result: 'fail' }, { result: 'fail' }, { result: 'fail' }])], ['yes', 'partly', 'no']);
   const u = issueUrl({ label: 'pCloud', report: rep, version: '0.8.8.5 · Beta' });
-  eq('issue url', [u.startsWith('https://github.com/lordbasex/LordOS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20pCloud&provider=pCloud&version=0.8.8.5%20%C2%B7%20Beta&report='),
+  eq('issue url', [u.startsWith('https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20pCloud&provider=pCloud&version=0.8.8.5%20%C2%B7%20Beta&report='),
     decodeURIComponent(u.split('&report=')[1]) === rep], [true, true]);
-  eq('issue url without a report (Add Account\'s line)', issueUrl({ label: 'Box' }), 'https://github.com/lordbasex/LordOS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20Box&provider=Box');
+  eq('issue url without a report (Add Account\'s line)', issueUrl({ label: 'Box' }), 'https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20Box&provider=Box');
   eq('special characters encoded', issueUrl({ label: 'A&B=C #1' }).includes('provider=A%26B%3DC%20%231'), true);
   const long = Array.from({ length: 900 }, (_, i) => `  line ${i} ä€`).join('\n');
   const lu = issueUrl({ label: 'X', report: long });

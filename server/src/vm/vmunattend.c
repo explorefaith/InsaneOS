@@ -160,7 +160,7 @@ static void bput(Buf *b, const char *fmt, ...) {
 
 static char *preseed(const VmUnattend *u) {
     Buf b = { 0 };
-    bput(&b, "#_preseed_V1\n# Made by Machines (LordOS) for an unattended install: the account's password is only a hash here.\n");
+    bput(&b, "#_preseed_V1\n# Made by Machines (Insane OS) for an unattended install: the account's password is only a hash here.\n");
     bput(&b, "d-i debian-installer/locale string %s\n", u->locale);
     bput(&b, "d-i keyboard-configuration/xkb-keymap select %s\n", u->keymap);
     /* the installed system's keyboard-configuration asks for a layout again when only the keymap is given (seen with
@@ -197,7 +197,7 @@ static char *preseed(const VmUnattend *u) {
 
 static char *autoinstall(const VmUnattend *u) {
     Buf b = { 0 };
-    bput(&b, "#cloud-config\n# Made by Machines (LordOS) for an unattended install: the account's password is only a hash here.\n");
+    bput(&b, "#cloud-config\n# Made by Machines (Insane OS) for an unattended install: the account's password is only a hash here.\n");
     bput(&b, "autoinstall:\n  version: 1\n  locale: \"%s\"\n  keyboard:\n    layout: \"%s\"\n    variant: \"%s\"\n", u->locale, u->keymap, u->variant);
     bput(&b, "  timezone: \"%s\"\n", u->timezone);
     bput(&b, "  identity:\n    hostname: \"%s\"\n    realname: \"%s\"\n    username: \"%s\"\n    password: \"%s\"\n",
@@ -215,7 +215,7 @@ static char *autoinstall(const VmUnattend *u) {
 static char *kickstart(const VmUnattend *u) {
     Buf b = { 0 };
     const char *a = !strcmp(u->arch, "arm64") ? "aarch64" : "x86_64";
-    bput(&b, "# Made by Machines (LordOS) for an unattended install: the account's password is only a hash here.\n");
+    bput(&b, "# Made by Machines (Insane OS) for an unattended install: the account's password is only a hash here.\n");
     bput(&b, "text\nlang %s\n", u->locale);
     bput(&b, "keyboard --xlayouts='%s%s%s%s'\n", u->keymap, u->variant[0] ? " (" : "", u->variant, u->variant[0] ? ")" : "");
     bput(&b, "timezone %s --utc\n", u->timezone);

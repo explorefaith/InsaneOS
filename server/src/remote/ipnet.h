@@ -57,9 +57,9 @@ enum { RS_ACC_OK = 0, RS_ACC_BLOCKED = 1, RS_ACC_NOT_ALLOWED = 2 };
  * only the listed networks, net=lan (the default) local ranges or a connection that arrived on a
  * VPN interface (via_vpn). */
 int  rs_access_decide(const RsAccess *acc, int mode, const RsAddr *peer, int via_vpn);
-/* Interface names LordOS's VPN manager creates: wg-, ovpn-, ips-, ppp-, oc-, fvpn- + a name. */
+/* Interface names Insane OS's VPN manager creates: wg-, ovpn-, ips-, ppp-, oc-, fvpn- + a name. */
 int  rs_vpn_ifname(const char *name);
-/* Does a connection count as "over a LordOS VPN" for net=lan? Only if the interface is one of those,
+/* Does a connection count as "over a Insane OS VPN" for net=lan? Only if the interface is one of those,
  * the connection's local address is that interface's address, and the peer is inside the interface's
  * own subnet (prefix over the mapped form; at least /8 for IPv4, /16 for IPv6) or is its
  * point-to-point peer (ptp, may be NULL). */

@@ -22,7 +22,7 @@
   "bytes": "{done} di {total}",
   "cancel": "Annulla",
   "dest": "Destinazione",
-  "destHelp": "Un disco esterno (ext4 consigliato) o una cartella. I backup vengono salvati in LordOS-Backups.",
+  "destHelp": "Un disco esterno (ext4 consigliato) o una cartella. I backup vengono salvati in Insane OS-Backups.",
   "volFree": "{free} liberi su {total} · {fs}",
   "noLinks": "nessun hard link: ogni backup occupa lo spazio completo",
   "noDisks": "Nessun disco esterno montato. Collegane uno o scegli una cartella.",

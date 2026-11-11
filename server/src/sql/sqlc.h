@@ -40,7 +40,7 @@ typedef struct {
 /* Finds favorite id in a (valid) favorites file. 0 found, -1 not. Pure: used by the tests. */
 int  sql_fav_find(const char *json, size_t len, const char *id, SqlFav *f);
 /* May lord-server connect to this Unix socket (already resolved with realpath)? Not the session's
- * or the system's own sockets (runtime dir, D-Bus, systemd, X11, LordOS). */
+ * or the system's own sockets (runtime dir, D-Bus, systemd, X11, Insane OS). */
 int  sql_socket_ok(const char *real, const char *runtime_dir);
 
 /* A request {"op":…} from JS. → request id (its answer comes through sql_poll), or -1 when

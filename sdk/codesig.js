@@ -2,7 +2,7 @@
 //
 //   codeStatus() → { state: 'verified' | 'development' | 'invalid' | 'unchecked', signed, release,
 //                    version, files, ms, reason, refused: [{ path, reason }] }
-//   reportRefusedCode()   one notification for each LordOS component that lord-server refused to load
+//   reportRefusedCode()   one notification for each Insane OS component that lord-server refused to load
 //                         because it no longer matches the signed manifest (called by startShell)
 //
 // lord-server does the checking (server/src/sec/codesig.c); this only shows the result.

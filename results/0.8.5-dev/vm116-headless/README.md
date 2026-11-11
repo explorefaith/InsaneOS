@@ -1,4 +1,4 @@
-# vm116-headless — LordOS 0.8.5-dev
+# vm116-headless — Insane OS 0.8.5-dev
 
 Collected 2026-10-26T19:34Z with `tools/results/collect.sh vm116-headless` (docs/RESULTS.md); the report's
 own version field says `0.8.4.1-beta`.
@@ -14,7 +14,7 @@ Reproduce:
 
 ```sh
 lordos-sysreport report --json > sysreport.json
-lordos-testbench --gl --auto 10 > testbench.json      # inside a LordOS session
+lordos-testbench --gl --auto 10 > testbench.json      # inside a Insane OS session
 free -m                                                  # whole system
 sudo sh -c 'for f in /proc/[0-9]*/smaps_rollup; do ...'  # PSS per process: see tools/results/collect.sh
 systemd-analyze

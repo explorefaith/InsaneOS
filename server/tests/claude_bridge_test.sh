@@ -11,14 +11,14 @@ J='{"session_id":"e9be29c2-84cd-4d07-b0e2-348c94977132","model":{"display_name":
 D="$T/h1/.cache/lordos/claude"
 mkdir -p "$T/h1"
 out=$(printf '%s' "$J" | HOME="$T/h1" LANG=es_AR.UTF-8 "$B")
-check "no command: LordOS's own status line" '[ "$out" = "Opus 5.5 | ctx 24% | 5h 37%" ]'
+check "no command: Insane OS's own status line" '[ "$out" = "Opus 5.5 | ctx 24% | 5h 37%" ]'
 check "keeps the JSON by session" '[ "$(cat "$D/e9be29c2-84cd-4d07-b0e2-348c94977132.json")" = "$J" ]'
 check "only the owner reads it" '[ "$(stat -c %a "$D/e9be29c2-84cd-4d07-b0e2-348c94977132.json")" = 600 ] && [ "$(stat -c %a "$D")" = 700 ]'
 check "no temporary file left" '[ "$(ls -A "$D" | wc -l)" = 1 ]'
 out=$(printf '%s' "$J" | HOME="$T/h1" "$B" sh -c 'cat | wc -c')
 check "the user status line gets the same input" '[ "$out" = "$(printf "%s" "$J" | wc -c)" ]'
-out=$(printf '%s' "$J" | HOME="$T/h1" "$B" sh -c 'echo "Opus | LordOS | 76%"')
-check "and its output is what Claude Code shows" '[ "$out" = "Opus | LordOS | 76%" ]'
+out=$(printf '%s' "$J" | HOME="$T/h1" "$B" sh -c 'echo "Opus | Insane OS | 76%"')
+check "and its output is what Claude Code shows" '[ "$out" = "Opus | Insane OS | 76%" ]'
 printf '%s' "$J" | HOME="$T/h1" "$B" sh -c 'exit 3'
 check "and its exit status" '[ $? = 3 ]'
 mkdir -p "$T/repo/.git" "$T/repo/a/b" "$T/wt"

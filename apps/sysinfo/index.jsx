@@ -1,12 +1,12 @@
-// System Information (0.8.5, docs/BENCHMARK.md): every piece of hardware detected and what LordOS
+// System Information (0.8.5, docs/BENCHMARK.md): every piece of hardware detected and what Insane OS
 // makes of it. (0.8.7) Report → Share on GitHub (share.js) and community data in Compatibility (community.js). Overview, Hardware (a source list and a detail pane) and Compatibility. The report
 // comes from lord.sysinfo.report() (server/src/sysreport, the same collector as lordos-sysreport and
 // lordos-fetch), read once on open and again with Refresh; model.js works out the GPU layers and the
-// Compatibility panel; Performance (0.8.6, performance.jsx) runs LordBench. The report holds no serial numbers, addresses or names.
+// Compatibility panel; Performance (0.8.6, performance.jsx) runs InsaneBench. The report holds no serial numbers, addresses or names.
 // Two things on the Hardware tab are not part of it and never go into it: the serial numbers (SerialNumbers, on request) and
 // the peripherals' names (Peripherals). Both live in their own component's state; nothing here hands them to `r`.
 import {
-  View, Text, ScrollView, Button, useTheme, useLocale, LordOSLogo, systemReport, systemInfo, lordosVersion, formatBytes, formatNumber,
+  View, Text, ScrollView, Button, useTheme, useLocale, InsaneLogo, systemReport, systemInfo, lordosVersion, formatBytes, formatNumber,
   Toolbar, ToolbarSpacer, ToolbarButton, Segmented, SidebarItem, GroupBox, FormRow, EmptyState, Hairline, spacing, typeScale,
   fs, userDirs, clipboard, wm, admin, remote, codeStatus, launchApp, useAppWindow, useBluetooth, formatDate,
 } from '@lordos/sdk';
@@ -105,7 +105,7 @@ function Overview({ r, info }) {
     <ScrollView style={{ flex: 1 }}>
       <View style={{ padding: spacing.xl, gap: spacing.xl }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.l }}>
-          <LordOSLogo size={64} />
+          <InsaneLogo size={64} />
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text style={{ fontSize: typeScale.largeTitle, fontWeight: 600, color: t.text, textAlign: 'start' }}>{machineName(r) || tr('sysinfo.thisComputer')}</Text>
             <Text style={{ fontSize: typeScale.callout, color: t.textDim, textAlign: 'start' }}>
@@ -286,7 +286,7 @@ function BootloaderRows({ pi }) {
   ];
 }
 
-// The chosen case, as Settings → Cooling keeps it (lord.fan.caseConfig): null when this isn't a LordOS Raspberry Pi image.
+// The chosen case, as Settings → Cooling keeps it (lord.fan.caseConfig): null when this isn't a Insane OS Raspberry Pi image.
 function chosenCase() {
   try { return (typeof lord !== 'undefined' && lord.fan && lord.fan.caseConfig()) || null; } catch (e) { return null; }
 }
@@ -459,7 +459,7 @@ function useCommunity(r) {
   }, [r]);
 }
 
-// what other LordOS users confirmed for this row's devices with this version, marked as community data
+// what other Insane OS users confirmed for this row's devices with this version, marked as community data
 function communityNote(tr, s) {
   if (!s) return '';
   if (s.onlyReferences) return tr(`sysinfo.community.reference.${s.state}`);
@@ -665,7 +665,7 @@ function shareRows(tr, rep) {
 }
 
 // Preview first, explicit consent on every share (nothing is remembered); then the report and the page are saved to
-// Documents and the page opens in the default browser through lord.apps.launchWith('', path). LordOS sends nothing.
+// Documents and the page opens in the default browser through lord.apps.launchWith('', path). Insane OS sends nothing.
 function Share({ r, onClose }) {
   const t = useTheme();
   const { t: tr, lang, dir } = useLocale();
@@ -763,7 +763,7 @@ function ReportText({ r, onShare }) {
 
 export default function SystemInformation() {
   const { args } = useAppWindow() || {};
-  if (args && args.scene) return <Scene />;      // LordBench's desktop scene (scene.jsx)
+  if (args && args.scene) return <Scene />;      // InsaneBench's desktop scene (scene.jsx)
   return <SystemInformationMain startTab={args && args.tab} />;
 }
 

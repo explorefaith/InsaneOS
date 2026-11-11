@@ -328,7 +328,7 @@ static int proc_cgroup(pid_t pid, char *out, size_t n) {
     return r;
 }
 
-/* The executable of the peer must be a LordOS binary from bindir (lord-server, lord-media,
+/* The executable of the peer must be a Insane OS binary from bindir (lord-server, lord-media,
  * lord-doc…). A binary replaced while it runs shows up as "<path> (deleted)": still accepted. */
 static int exe_trusted(pid_t pid, const char *bindir, int insecure) {
     char p[64], exe[PATH_MAX];

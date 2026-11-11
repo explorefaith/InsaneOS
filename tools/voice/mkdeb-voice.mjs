@@ -52,7 +52,7 @@ function copyright(extra) {
   return `Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Pocket TTS
 Source: https://huggingface.co/kyutai/pocket-tts
-Comment: Packaged by LordOS (https://lordos.org). ${PROHIBITED.replace(/\n /g, ' ')}
+Comment: Packaged by Insane OS (https://lordos.org). ${PROHIBITED.replace(/\n /g, ' ')}
 
 Files: *
 Copyright: Kyutai
@@ -84,7 +84,7 @@ function build(name, { depends, description, long, files, extraCopyright }) {
     fs.mkdirSync(path.join(root, 'DEBIAN'));
     fs.writeFileSync(path.join(root, 'DEBIAN/control'), [
       `Package: ${name}`, `Version: ${version}`, 'Architecture: all', 'Section: sound', 'Priority: optional',
-      'Maintainer: LordOS <lordos@lordos.org>', `Installed-Size: ${size}`, depends ? `Depends: ${depends}` : null,
+      'Maintainer: Insane OS <lordos@lordos.org>', `Installed-Size: ${size}`, depends ? `Depends: ${depends}` : null,
       'Homepage: https://lordos.org', `Description: ${description}`, ...long.split('\n').map((l) => ` ${l || '.'}`),
     ].filter(Boolean).join('\n') + '\n');
     // every directory 755, every time the version's date
@@ -111,7 +111,7 @@ for (const L of VOICE_LANGS) {
   const lang = L.id, name = LANG_NAMES[lang];
   made.push(build(modelPackage(lang, false), {
     description: `${name} voice model for reading aloud (standard)`,
-    long: `Kyutai's Pocket TTS model for ${name}, as a Q8_0 GGUF (audio.cpp), for LordOS's \`say\` and Read Aloud.\nFast on any processor. Voices come in their own packages (lordos-voice-${lang}-<voice>).`,
+    long: `Kyutai's Pocket TTS model for ${name}, as a Q8_0 GGUF (audio.cpp), for Insane OS's \`say\` and Read Aloud.\nFast on any processor. Voices come in their own packages (lordos-voice-${lang}-<voice>).`,
     files: [[path.join(src, lang, 'standard.gguf'), `models/${lang}/standard.gguf`]],
   }));
   made.push(build(modelPackage(lang, true), {
@@ -137,7 +137,7 @@ for (const L of VOICE_LANGS) {
 }
 made.push(build(PREVIEWS_PACKAGE, {
   description: 'recorded samples of the voices for reading aloud',
-  long: 'A short recording of every LordOS voice in Spanish, English and Portuguese, made with the HD models,\nso a voice can be heard in Settings → AI → Voice before it is downloaded.',
+  long: 'A short recording of every Insane OS voice in Spanish, English and Portuguese, made with the HD models,\nso a voice can be heard in Settings → AI → Voice before it is downloaded.',
   files: VOICE_LANGS.flatMap((L) => VOICES.map((v) => [path.join(src, 'previews', L.id, `${v.id}.wav`), `previews/${L.id}/${v.id}.wav`])),
   extraCopyright: ['alba-mackenna', 'voice-zero', 'vctk'].map((k) => `\nFiles: previews/*\nComment: voices ${VOICES.filter((v) => v.source === k).map((v) => v.id).join(', ')} were prepared by Kyutai from recordings by ${SOURCE_NAMES[k]}\nLicense: ${SOURCE_LICENSES[k]}\n`).join(''),
 }));

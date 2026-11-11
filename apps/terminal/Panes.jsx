@@ -12,7 +12,7 @@ import { pathsText } from './paths.js';
 export const paneNodes = new Map();     // sid → instancia del nodo (para navegar entre paneles)
 
 // Ctrl/❖+clic: carpetas y archivos de la carpeta personal se abren en Archivos ("semantic
-// history"); web links are copied (LordOS has no browser yet).
+// history"); web links are copied (Insane OS has no browser yet).
 function openLink(wid, sid, url) {
   const web = /^https?:\/\//i.test(url) ? url : url.startsWith('www.') ? `https://${url}` : '';
   if (web && openUrl(web)) return;

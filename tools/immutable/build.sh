@@ -1,5 +1,5 @@
 #!/bin/sh
-# build.sh — EXPERIMENTAL immutable (A/B) LordOS disk image: the prototype of docs/IMMUTABLE.md.
+# build.sh — EXPERIMENTAL immutable (A/B) Insane OS disk image: the prototype of docs/IMMUTABLE.md.
 #
 # It does not touch the regular ISO (tools/iso) or Raspberry Pi (tools/rpi) builds. What it makes:
 # a GPT disk image for UEFI PCs (virtual machines) with
@@ -10,9 +10,9 @@
 # and the update artifacts (usr image, verity hash, UKI, signed SHA256SUMS) that
 # /usr/lib/lordos/immutable/update installs into the other slot.
 #
-# The payload is a minimal Debian 13 with systemd, NOT the LordOS desktop yet (see docs/IMMUTABLE.md,
+# The payload is a minimal Debian 13 with systemd, NOT the Insane OS desktop yet (see docs/IMMUTABLE.md,
 # "The prototype"). Updates are signed with a throwaway test key made in the work folder, never with
-# a LordOS release key.
+# a Insane OS release key.
 #
 # Usage (as root, on Debian 13 amd64, from the repository root):
 #   sudo tools/immutable/build.sh base    [work]            # debootstrap + kernel + initrd (cached)
@@ -36,7 +36,7 @@ BASE="$WORK/base"
 OUT="$WORK/out"
 KEYS="$WORK/keys"
 # Slot sizes are fixed for the life of an installation: a later release must fit. The usr image of
-# this prototype is ~0.3 GB; the LordOS desktop's is ~2.5 GB (docs/IMMUTABLE.md, "Disk layouts").
+# this prototype is ~0.3 GB; the Insane OS desktop's is ~2.5 GB (docs/IMMUTABLE.md, "Disk layouts").
 SLOT_MB=${SLOT_MB:-1024}
 HASH_MB=${HASH_MB:-64}
 ROOT_MB=${ROOT_MB:-1024}
@@ -63,7 +63,7 @@ test_key() {
     say "throwaway update signing key (TEST ONLY) in $KEYS"
     mkdir -p "$KEYS"; chmod 700 "$KEYS"
     GNUPGHOME="$KEYS/gnupg"; export GNUPGHOME; mkdir -p "$GNUPGHOME"; chmod 700 "$GNUPGHOME"
-    gpg --batch --quiet --passphrase '' --quick-gen-key 'LordOS immutable prototype TEST key' ed25519 sign 1y
+    gpg --batch --quiet --passphrase '' --quick-gen-key 'Insane OS immutable prototype TEST key' ed25519 sign 1y
     gpg --batch --export > "$KEYS/update-keyring.gpg"
 }
 
@@ -108,7 +108,7 @@ EOF
     mkdir -p "$BASE/efi"
     printf 'PARTLABEL=lordos-esp /efi vfat umask=0077,x-systemd.automount 0 2\n' > "$BASE/etc/fstab"
 
-    # LordOS's pieces: updater, health check (boot assessment), the update key
+    # Insane OS's pieces: updater, health check (boot assessment), the update key
     install -D -m 0755 "$HERE/files/update" "$BASE/usr/lib/lordos/immutable/update"
     install -D -m 0755 "$HERE/files/health-check" "$BASE/usr/lib/lordos/immutable/health-check"
     install -D -m 0644 "$HERE/files/lordos-health.service" "$BASE/usr/lib/systemd/system/lordos-health.service"
@@ -147,7 +147,7 @@ cmd_release() {
     # identity of this image version (os-release IMAGE_ID / IMAGE_VERSION, as systemd expects)
     sed -i '/^IMAGE_ID=/d;/^IMAGE_VERSION=/d' "$T/usr/lib/os-release"
     printf 'IMAGE_ID=lordos-immutable\nIMAGE_VERSION=%s\n' "$V" >> "$T/usr/lib/os-release"
-    printf 'LordOS immutable prototype, image version %s, built %s\n' "$V" "$(date -u +%FT%TZ)" \
+    printf 'Insane OS immutable prototype, image version %s, built %s\n' "$V" "$(date -u +%FT%TZ)" \
         > "$T/usr/lib/lordos/immutable/VERSION"
     if [ "$BAD" = bad ]; then : > "$T/usr/lib/lordos/immutable/simulate-broken-release"; fi
 

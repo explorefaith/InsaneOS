@@ -1,7 +1,7 @@
 #!/bin/sh
-# build-kernel.sh — the LordOS Raspberry Pi kernel: Raspberry Pi's own kernel source and defconfig,
-# plus what LordOS needs that it lacks (Landlock, the BPF LSM and BTF). See docs/RASPBERRY.md,
-# "The LordOS kernel".
+# build-kernel.sh — the Insane OS Raspberry Pi kernel: Raspberry Pi's own kernel source and defconfig,
+# plus what Insane OS needs that it lacks (Landlock, the BPF LSM and BTF). See docs/RASPBERRY.md,
+# "The Insane OS kernel".
 #
 # Usage (on an arm64 Debian 13, e.g. the Pi itself, about 75 min per flavour on a Pi 5; or cross on
 # an x86-64 Debian 13 with gcc-aarch64-linux-gnu; ~10 GB free in the work folder while one flavour
@@ -92,7 +92,7 @@ for FL in $FLAVOURS; do
     # shellcheck disable=SC2086
     make -s -C "$SRC" O="$B" ARCH=arm64 $CROSS "$DEFCONFIG"
     cp "$B/.config" "$B/config.defconfig"
-    # ---- the LordOS changes (documented in docs/RASPBERRY.md; keep them in sync) ----
+    # ---- the Insane OS changes (documented in docs/RASPBERRY.md; keep them in sync) ----
     # Landlock: filesystem and TCP confinement of apps (.lpk) and helpers (lord-doc, lord-media,
     # lord-maild): server/src/sec/sandbox.c. Raspberry Pi's defconfig leaves it out. Yama: the
     # lordos package's kernel.yama.ptrace_scope = 1 (as on a PC). The BPF LSM: see below.
@@ -107,7 +107,7 @@ for FL in $FLAVOURS; do
         --enable SECURITY_YAMA \
         --set-str LOCALVERSION "$LV" \
         --disable LOCALVERSION_AUTO
-    # already in the defconfig, required by LordOS; enforced so a future defconfig can't drop them:
+    # already in the defconfig, required by Insane OS; enforced so a future defconfig can't drop them:
     # seccomp (sandbox.c), cgroup v2 + BPF (per-app limits, lord-netperm's cgroup/connect hooks)
     "$SRC/scripts/config" --file "$B/.config" \
         --enable SECCOMP --enable SECCOMP_FILTER \

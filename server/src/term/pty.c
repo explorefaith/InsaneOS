@@ -5,7 +5,7 @@
  * The child inherits no capabilities, blocked signals or descriptors from the server. */
 #include "term.h"
 #include "../sec/cgroup.h"
-#include "lord_version.h"           /* build/gen: LordOS version (Makefile, from package.json) */
+#include "lord_version.h"           /* build/gen: Insane OS version (Makefile, from package.json) */
 
 #include <errno.h>
 #include <fcntl.h>
@@ -88,7 +88,7 @@ static void child(int fd, const char *cwd, int id) {
     for (int i = 0; drop[i]; i++) unsetenv(drop[i]);
     setenv("TERM", "xterm-256color", 1);
     setenv("COLORTERM", "truecolor", 1);
-    setenv("TERM_PROGRAM", "LordTerminal", 1);
+    setenv("TERM_PROGRAM", "InsaneTerminal", 1);
     setenv("TERM_PROGRAM_VERSION", LORD_VERSION, 1);
     setenv("LORD_TERMINAL_SESSION", idbuf, 1);
     setenv("SHELL", shell, 1);

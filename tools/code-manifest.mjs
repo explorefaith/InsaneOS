@@ -1,6 +1,6 @@
-// Writes code-manifest.json: the size and SHA-256 of every file LordOS runs as its own code (see
+// Writes code-manifest.json: the size and SHA-256 of every file Insane OS runs as its own code (see
 // docs/SIGNING.md, "Verified system code"). lord-server checks each file against it before loading
-// it (server/src/sec/codesig.c); tools/release/sign-code.sh signs it with the LordOS release key.
+// it (server/src/sec/codesig.c); tools/release/sign-code.sh signs it with the Insane OS release key.
 //
 //   node tools/code-manifest.mjs [--root <dir>] [--check]
 //

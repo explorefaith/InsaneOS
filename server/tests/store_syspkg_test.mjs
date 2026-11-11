@@ -1,4 +1,4 @@
-// store_syspkg_test.mjs — Store → Updates' names for LordOS's data packages (apps/store/syspkg.js):
+// store_syspkg_test.mjs — Store → Updates' names for Insane OS's data packages (apps/store/syspkg.js):
 // which packages get a label, and lordos-hwdata versions read as dates.
 //
 //   node tests/store_syspkg_test.mjs        (from server/; run_suites.sh runs it when node exists)

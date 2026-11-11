@@ -1,11 +1,11 @@
-LordOS signs what it publishes so that you can tell a file comes from the project and was not changed on the way. This page explains what is signed, with which keys, and how to check it yourself. For reporting a problem with a signature, see the [Security policy](/legal/security/).
+Insane OS signs what it publishes so that you can tell a file comes from the project and was not changed on the way. This page explains what is signed, with which keys, and how to check it yourself. For reporting a problem with a signature, see the [Security policy](/legal/security/).
 
 ## Release files
 
-Every file of a GitHub release (the ISO image, the Raspberry Pi 5 image and the `.deb` package) is listed with its SHA-256 in a file called `SHA256SUMS`. `SHA256SUMS` is signed with the **LordOS release key**:
+Every file of a GitHub release (the ISO image, the Raspberry Pi 5 image and the `.deb` package) is listed with its SHA-256 in a file called `SHA256SUMS`. `SHA256SUMS` is signed with the **Insane OS release key**:
 
 - `SHA256SUMS.sig` is the base64 of the 64-byte **Ed25519** signature over the exact bytes of `SHA256SUMS`.
-- Public key: [lordos-release.pub.pem](/lordos-release.pub.pem), also in the repository as [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/LordOS/blob/main/tools/release/lordos-release.pub.pem).
+- Public key: [lordos-release.pub.pem](/lordos-release.pub.pem), also in the repository as [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/Insane OS/blob/main/tools/release/lordos-release.pub.pem).
 - Fingerprint (SHA-256 of the DER public key):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
@@ -25,24 +25,24 @@ The first command decodes the signature, the second must print `Signature Verifi
 openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum
 ```
 
-## LordOS apps (.lpk) and the Store
+## Insane OS apps (.lpk) and the Store
 
-LordOS native apps come as `.lpk` packages. A signed `.lpk` carries the list of all its files with their SHA-256 and an **Ed25519** signature over that list. LordOS verifies it in its own C code when the app is installed and every time it is loaded, so a changed file is detected.
+Insane OS native apps come as `.lpk` packages. A signed `.lpk` carries the list of all its files with their SHA-256 and an **Ed25519** signature over that list. Insane OS verifies it in its own C code when the app is installed and every time it is loaded, so a changed file is detected.
 
 The Store and the install dialog show one of these trust levels:
 
 | Level | When |
 |---|---|
-| **LordOS** | signed with the official LordOS key, which is compiled into the system (no file in your home folder can add an official key) |
-| **Verified author** | signed with a key listed in the signed LordOS catalog |
-| **Signed by <name>** | signed with a key LordOS doesn't know |
+| **Insane OS** | signed with the official Insane OS key, which is compiled into the system (no file in your home folder can add an official key) |
+| **Verified author** | signed with a key listed in the signed Insane OS catalog |
+| **Signed by <name>** | signed with a key Insane OS doesn't know |
 | **Unsigned** | no signature: the Store warns you to install it only from people you trust |
 
 More rules protect you after installation:
 
 - **Same key for updates.** A new version must be signed with the same key as the installed one; an update signed with another key is rejected.
-- **Signed catalog and revocation.** The LordOS catalog is signed with the LordOS key and carries the keys of verified authors and a **revocation list** of keys and packages. A revoked package is not installed, and an installed one is disabled with a clear message.
-- **Modified by you.** If you edit an installed app, LordOS marks it as modified, shows which files changed and can restore the original. If you share your version, it is signed with your own key and credits the original author.
+- **Signed catalog and revocation.** The Insane OS catalog is signed with the Insane OS key and carries the keys of verified authors and a **revocation list** of keys and packages. A revoked package is not installed, and an installed one is disabled with a clear message.
+- **Modified by you.** If you edit an installed app, Insane OS marks it as modified, shows which files changed and can restore the original. If you share your version, it is signed with your own key and credits the original author.
 
 ## Debian packages
 
@@ -50,7 +50,7 @@ The base system and every package in the Store's Debian section come from Debian
 
 - The package index (`InRelease`) must carry a valid OpenPGP signature from a key in the source's keyring, installed by Debian's `debian-archive-keyring` package. Expired, revoked or replayed indexes are rejected.
 - Every package list and every `.deb` is checked against the SHA-256 in that signed index before it is stored or passed to `dpkg`.
-- LordOS does these checks with its own package engine, and `apt` keeps working alongside it with the same keys.
+- Insane OS does these checks with its own package engine, and `apt` keeps working alongside it with the same keys.
 
 Downloads go over HTTP when the source asks for HTTPS, as with `apt` and `deb.debian.org`: security comes from the signatures and hashes, so someone on the network can see which packages you download but cannot change them.
 
@@ -65,7 +65,7 @@ On the Raspberry Pi 5, the kernel and firmware come from the Raspberry Pi archiv
 ## How we keep the keys
 
 - The **release key**'s private half lives only on the maintainer's computer, readable only by its owner, with an offline backup. It is never stored in the repository, on a build machine or on a server.
-- The private half of the **LordOS key** for `.lpk` packages is also kept outside the repository, on the maintainer's computer. Today it is a development key; the final key for public releases will replace it in the system and the change will be announced.
+- The private half of the **Insane OS key** for `.lpk` packages is also kept outside the repository, on the maintainer's computer. Today it is a development key; the final key for public releases will replace it in the system and the change will be announced.
 - Public keys are published in the repository and on this website, so anyone can check them.
 
 ## If a key is compromised

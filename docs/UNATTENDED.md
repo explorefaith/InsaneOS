@@ -1,6 +1,6 @@
 # Unattended install
 
-The live ISO can install LordOS with nobody at the keyboard, from a configuration file. It is meant for test
+The live ISO can install Insane OS with nobody at the keyboard, from a configuration file. It is meant for test
 machines and for installing the same setup many times. It is never the default: it starts only from its own
 boot menu entry, and it stops, touching nothing, at the first thing that is missing or doesn't match.
 
@@ -55,7 +55,7 @@ a misspelled key stops the install instead of falling back to a default.
 An example:
 
 ```
-# LordOS unattended install
+# Insane OS unattended install
 disk = vda
 disk_bytes = 34359738368
 mode = erase
@@ -72,7 +72,7 @@ autologin = yes
 after = reboot
 ```
 
-Making the hash, on any Debian or LordOS system: `mkpasswd -m yescrypt` (package `whois`) or
+Making the hash, on any Debian or Insane OS system: `mkpasswd -m yescrypt` (package `whois`) or
 `openssl passwd -6`. Both ask for the password without showing it.
 
 ## What it checks before touching anything

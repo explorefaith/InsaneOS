@@ -1,8 +1,8 @@
-Found something that doesn't work, or have an idea that would make LordOS better? This page explains where to tell us and what to include, so we can act on it quickly.
+Found something that doesn't work, or have an idea that would make Insane OS better? This page explains where to tell us and what to include, so we can act on it quickly.
 
 ## Where to report
 
-Use [GitHub Issues](https://github.com/lordbasex/LordOS/issues). Choose the bug report or feature request template; blank issues are turned off so that every report has the information we need.
+Use [GitHub Issues](https://github.com/lordbasex/Insane OS/issues). Choose the bug report or feature request template; blank issues are turned off so that every report has the information we need.
 
 Before you write, check the [FAQ](/faq/) and the existing issues: someone may have reported it already.
 
@@ -13,7 +13,7 @@ Before you write, check the [FAQ](/faq/) and the existing issues: someone may ha
 ## What to include in a bug report
 
 - **The output of `lordos-issue`** (from 0.8.8 on): run `lordos-issue` in a terminal. It writes `~/lordos-issue-<date>.txt` with names and addresses replaced, and sends nothing. Read it, then paste it into the report: it already holds the version and the hardware details below.
-- **The LordOS version**, as shown in the About LordOS app (for example "0.8.8 · Beta").
+- **The Insane OS version**, as shown in the About Insane OS app (for example "0.8.8 · Beta").
 - **How you installed it:** the ISO (live or installed), the Raspberry Pi 5 image, or the `.deb` on Debian 13.
 - **Your hardware:** the computer or board model, the graphics card, the amount of memory, and any device involved (printer, touchpad, Wi-Fi adapter, monitor).
 - **Steps to reproduce:** what you did, one step per line, starting from a fresh start if you can.
@@ -43,7 +43,7 @@ We are a small team, so these are goals, not guarantees:
 
 - we acknowledge reports sent through the contact form within about **5 business days**;
 - we triage each report: we try to reproduce it, ask for more information if needed, and give it labels and a priority;
-- fixes ship in the next release that can include them, and the release notes on [GitHub Releases](https://github.com/lordbasex/LordOS/releases) mention them.
+- fixes ship in the next release that can include them, and the release notes on [GitHub Releases](https://github.com/lordbasex/Insane OS/releases) mention them.
 
 ## Labels
 

@@ -1,4 +1,4 @@
-/* lord_pkexec.c — /usr/bin/pkexec on LordOS (a link; the real one is /usr/bin/pkexec.distrib, by
+/* lord_pkexec.c — /usr/bin/pkexec on Insane OS (a link; the real one is /usr/bin/pkexec.distrib, by
  * dpkg-divert). It has no privilege and sees no secret: it asks the session's agent to answer for the
  * process that called it (hw/pkagent.c says why) and becomes the real pkexec, same pid, arguments and
  * environment. If anything fails it still does, and pkexec reports what it always did. From a terminal

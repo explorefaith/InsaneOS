@@ -1,10 +1,10 @@
 # Code of conduct
 
-LordOS follows the **Contributor Covenant, version 2.1**. We want the project's spaces (the
+Insane OS follows the **Contributor Covenant, version 2.1**. We want the project's spaces (the
 repository, issues, pull requests and any community channel) to be welcoming, respectful and free
 of harassment for everyone.
 
-The full text, adapted for LordOS, is at
+The full text, adapted for Insane OS, is at
 **[lordos.org/legal/code-of-conduct](https://lordos.org/legal/code-of-conduct/)**.
 
 ## Reporting

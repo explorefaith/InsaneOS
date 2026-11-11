@@ -18,7 +18,7 @@ const appsPlugin = {
       const dir = path.join(root, 'apps');
       const ids = fs.readdirSync(dir).filter((d) => fs.existsSync(path.join(dir, d, 'manifest.json'))).sort();
       // every native app carries its own version (semver, apps/README.md), shown in the Store; apps may
-      // move to repositories of their own and be versioned apart from LordOS
+      // move to repositories of their own and be versioned apart from Insane OS
       for (const id of ids) {
         const v = JSON.parse(fs.readFileSync(path.join(dir, id, 'manifest.json'), 'utf8')).version;
         if (typeof v !== 'string' || !/^\d+\.\d+\.\d+(?:[-~][0-9A-Za-z.]+)?$/.test(v)) throw new Error(`apps/${id}/manifest.json: "version" must be semver (e.g. "0.8.5"), got ${JSON.stringify(v)}`);
@@ -31,7 +31,7 @@ const appsPlugin = {
       // "process": "isolated": a built-in app that runs as its own sandboxed process (its window in
       // the theme only starts it; see sdk/packages.js isolatedApp and buildSysApps below)
       const iso = ids.map((id) => JSON.parse(fs.readFileSync(path.join(dir, id, 'manifest.json'), 'utf8')).process === 'isolated');
-      // every app in apps/ is a system app (system: true): part of LordOS, verified with it and never
+      // every app in apps/ is a system app (system: true): part of Insane OS, verified with it and never
       // removable from the Store (docs/SIGNING.md, "Verified system code")
       const list = ids.map((_, i) => (iso[i]
         ? `{ ...M${i}, system: true, isolated: true, Component: isolatedApp(M${i}.id, A${i}.default), Icon: A${i}.Icon }`

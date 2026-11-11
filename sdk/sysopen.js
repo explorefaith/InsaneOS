@@ -25,7 +25,7 @@ export function openUrl(url) {
   } catch (e) { return false; }
 }
 
-// The calendar app from the clock's panel (issue #58): Settings → Default Apps → Calendar, LordOS Calendar unless the
+// The calendar app from the clock's panel (issue #58): Settings → Default Apps → Calendar, Insane OS Calendar unless the
 // user chose another one (Thunderbird…). `at` (ms) is the day clicked; only our own Calendar can go to it.
 export function openCalendarApp(at) {
   let def = null;

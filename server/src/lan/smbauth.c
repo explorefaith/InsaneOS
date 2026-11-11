@@ -1,5 +1,5 @@
 /* smbauth.c — see smbauth.h. MD4, MD5 and RC4 are here because the protocol requires them for NTLMv2; nothing
- * else in LordOS may use them. Only the helper links this. */
+ * else in Insane OS may use them. Only the helper links this. */
 #include "smbauth.h"
 #include "../pkg/crypto.h"
 

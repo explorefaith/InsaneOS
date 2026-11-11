@@ -9,7 +9,7 @@
 #define PA_CHANNELS_MAX   32
 #define PA_INVALID_INDEX  0xffffffffu
 #define PA_VOLUME_NORM    0x10000u
-#define PA_VOLUME_MAX     (PA_VOLUME_NORM * 3 / 2)   /* the most LordOS lets it go up: 150 % */
+#define PA_VOLUME_MAX     (PA_VOLUME_NORM * 3 / 2)   /* the most Insane OS lets it go up: 150 % */
 #define PA_DESCRIPTOR_SIZE 20                        /* length, channel, offset (2), flags */
 #define PA_FRAME_MAX      (16u * 1024 * 1024)
 

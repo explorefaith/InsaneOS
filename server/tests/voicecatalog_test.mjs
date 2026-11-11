@@ -1,4 +1,4 @@
-// voicecatalog_test.mjs — the voices LordOS offers and their package names (sdk/voicecatalog.js).
+// voicecatalog_test.mjs — the voices Insane OS offers and their package names (sdk/voicecatalog.js).
 //
 //   node tests/voicecatalog_test.mjs        (from server/; run_suites.sh runs it when node exists)
 import path from 'node:path';

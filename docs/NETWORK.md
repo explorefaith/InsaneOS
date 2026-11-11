@@ -1,6 +1,6 @@
-# Network and VPN in LordOS
+# Network and VPN in Insane OS
 
-LordOS's networking is its own and runs directly on top of the kernel. It doesn't use NetworkManager, libnl, wg-quick or wireguard-tools, and it uses D-Bus for one thing only: `lord-netd` listens for logind's sleep and wake signal (see "After waking from sleep"). The code is in `server/src/net/` and has two sides:
+Insane OS's networking is its own and runs directly on top of the kernel. It doesn't use NetworkManager, libnl, wg-quick or wireguard-tools, and it uses D-Bus for one thing only: `lord-netd` listens for logind's sleep and wake signal (see "After waking from sleep"). The code is in `server/src/net/` and has two sides:
 
 | Side | What it does | Files |
 |---|---|---|
@@ -96,7 +96,7 @@ until the card is turned off and on by hand (reported with the built-in card of 
 `lord-netd` now does what the person had to do:
 
 - **How it hears the wake.** logind's `PrepareForSleep(b)` signal on the system bus (`true` before
-  sleeping, `false` after waking), with LordOS's own D-Bus client (`server/src/vault/dbus.c`, libc
+  sleeping, `false` after waking), with Insane OS's own D-Bus client (`server/src/vault/dbus.c`, libc
   only) in `net/sleepbus.c`. It is subscribed to that one signal and believes it only from the
   connection that owns `org.freedesktop.login1` (the bus sets the sender). It owns no name, exports
   nothing and calls nothing else. Without a system bus it tries again (5 s, 10 s… up to 80 s), and a
@@ -135,8 +135,8 @@ until the card is turned off and on by hand (reported with the built-in card of 
 ### Test (VM 119, October 17)
 
 VM 119 runs `lord-sessiond` installed like the `.deb`; it was not installed from the ISO (see
-`VM-SETUP.md`, step 23). `eth0` is managed by systemd-networkd (netplan) and LordOS leaves it
-alone, so the test uses a LordOS-managed NIC: the veth `lnt0`, whose peer is in the netns `lnt`
+`VM-SETUP.md`, step 23). `eth0` is managed by systemd-networkd (netplan) and Insane OS leaves it
+alone, so the test uses a Insane OS-managed NIC: the veth `lnt0`, whose peer is in the netns `lnt`
 with a `dnsmasq` there (`lordos-test-netns.service`, which starts before `lordos.service`), and
 `/etc/lordos/net/if/lnt0.conf` with `method=dhcp`.
 
@@ -171,7 +171,7 @@ enabled. `lordos.service` now has `DelegateSubgroup=supervisor`.
 | DHCPv4 | Our own client (RFC 2131). Uses AF_PACKET, renews at T1 by unicast and asks again at T2. DHCPRELEASE when stopping. | ✅ against dnsmasq: lease, renewal and release |
 | Static IP | address/prefix, gateway and DNS | ✅ |
 | DNS | With systemd-resolved: `resolvectl` per interface. Without resolved: `/etc/resolv.conf`. | ✅ resolved |
-| Coexistence with systemd-networkd | System interfaces are shown but not touched. `net-manage` hands them to LordOS and `net-unmanage` gives them back. | ✅ with a test interface |
+| Coexistence with systemd-networkd | System interfaces are shown but not touched. `net-manage` hands them to Insane OS and `net-unmanage` gives them back. | ✅ with a test interface |
 | Coexistence with NetworkManager | Interfaces with `managed=true` in `/run/NetworkManager/devices/<ifindex>` (read without D-Bus) are system interfaces too: lord-netd doesn't start DHCP or wpa_supplicant on them. `net-manage` only knows how to take them from systemd-networkd. | ✅ code; found on a Raspberry Pi OS board (2026-10-18), where lord-netd had started a second DHCP client and wpa_supplicant |
 | Wi-Fi WPA2-Personal and open networks | wpa_supplicant (Debian) through its control socket. The PSK is computed with PBKDF2. | ✅ scan, wrong key, connection and DHCP, reconnection on restart, forget (with mac80211_hwsim + hostapd) |
 | Wi-Fi WPA3 (SAE) | `sae_password` and `key_mgmt WPA-PSK SAE` | ⚠️ untested: the test hostapd is WPA2 |
@@ -179,8 +179,8 @@ enabled. `lordos.service` now has `DelegateSubgroup=supervisor`.
 | OpenVPN | Debian's program, with the config filtered by a list of allowed options and the management interface | ✅ against an openvpn 2.6 server: inline certificates, username and password (including the wrong password), pushed routes and DNS |
 | IPsec/IKEv2 (included) | strongSwan: Debian's `charon`, one per VPN, driven over VICI with our own client (`vici.c`, without swanctl). XFRM interface `ips-<n>` with `if_id`. | ✅ against a charon 6.0.1 in a netns: EAP-MSCHAPv2 (correct and wrong password), PSK, virtual IP, pushed DNS, split tunnel (host) and full tunnel (netns) |
 | IPsec with client certificate (`auth=cert`) | the same, with `load-key` | ⚠️ implemented, untested |
-| PPTP (included, **insecure**) | Debian's `pppd` + `pptp` with the pppd config LordOS writes | ✅ against `pptpd` in a netns: MS-CHAPv2, mandatory MPPE 128 negotiated, routes, DNS, wrong password |
-| OpenConnect (optional: `net-vpn-enable openconnect`) | Debian's `openconnect` with our own fixed-content script | ✅ AnyConnect against `ocserv` 1.3 in a netns: certificate pin, split routes and DNS/domain sent by the server, wrong password, unknown certificate without pin (fails correctly). Installation with LordOS's package engine was tested too. GlobalProtect and Pulse: ⚠️ no test server |
+| PPTP (included, **insecure**) | Debian's `pppd` + `pptp` with the pppd config Insane OS writes | ✅ against `pptpd` in a netns: MS-CHAPv2, mandatory MPPE 128 negotiated, routes, DNS, wrong password |
+| OpenConnect (optional: `net-vpn-enable openconnect`) | Debian's `openconnect` with our own fixed-content script | ✅ AnyConnect against `ocserv` 1.3 in a netns: certificate pin, split routes and DNS/domain sent by the server, wrong password, unknown certificate without pin (fails correctly). Installation with Insane OS's package engine was tested too. GlobalProtect and Pulse: ⚠️ no test server |
 | Fortinet (optional: `net-vpn-enable fortinet`) | Debian's `openfortivpn` | User name and password, or **single sign-on** (the organization's sign-in page, see "Fortinet with single sign-on"). An untrusted certificate is a prompt (fingerprint, subject, issuer, **Trust**). Tested: installation, generated config, startup, the readable errors, and against a real gateway up to the organization's sign-in page and the certificate prompt. ⚠️ A complete sign-in and the tunnel coming up with single sign-on: not yet (it needs the organization's account) |
 | DHCPv6, 802.1X/WPA-Enterprise | — | pending |
 
@@ -193,7 +193,7 @@ and whether there are active VPNs, and opens that section.
 | | |
 |---|---|
 | ![network](settings-network.png) | ![vpn](vpn-wireguard.png) |
-| eth0, managed by systemd-networkd: LordOS shows it and doesn't touch it, unless it's handed to LordOS on purpose | WireGuard imported from `~/Descargas/oficina.conf` and connected: last handshake and traffic. The peer was in a test netns; ping through the tunnel answered and eth0's DNS didn't change |
+| eth0, managed by systemd-networkd: Insane OS shows it and doesn't touch it, unless it's handed to Insane OS on purpose | WireGuard imported from `~/Descargas/oficina.conf` and connected: last handshake and traffic. The peer was in a test netns; ping through the tunnel answered and eth0's DNS didn't change |
 | ![cc](control-center-network.png) | |
 | Control Center: network and active VPNs | |
 
@@ -204,7 +204,7 @@ and whether there are active VPNs, and opens that section.
 | `lord.net.interfaces()` | `[{ name, index, type, kind, up, carrier, operstate, mac, mtu, master, managed, rxBytes, txBytes, rxPackets, txPackets, rxErrors, txErrors, addresses: [{ family: 4\|6, address, prefix, scope: 'global'\|'link'\|'host', dynamic, validLifetime }], config }]` |
 | `lord.net.routes()` | `[{ family, dst: 'default'\|'a.b.c.d/n', gateway, dev, metric, table, protocol: 'kernel'\|'boot'\|'static'\|'dhcp'\|'ra'\|n }]` (without the local table or the fe80::/64 routes) |
 | `lord.net.dns()` | `{ source: 'systemd-resolved'\|'resolv.conf', servers: [...], search: [...] }` |
-| `lord.net.config(if)` | `{ method, addresses: [], gateway, dns: [] }` or `null` (what LordOS saved) |
+| `lord.net.config(if)` | `{ method, addresses: [], gateway, dns: [] }` or `null` (what Insane OS saved) |
 | `lord.net.vpnList()` | No secrets. `[{ name, type: 'wireguard', ifname, server, address, fullTunnel, publicKey, peers }` \| `{ name, type: 'openvpn', ifname, server, needsAuth, hasCredentials }` \| `{ name, type: 'ipsec', ifname, server, auth: 'eap'\|'psk'\|'cert', user, fullTunnel, insecure: false }` \| `{ name, type: 'pptp'\|'openconnect'\|'fortinet', ifname, server, user, fullTunnel, insecure }]` (`insecure: true` only for PPTP) |
 | `lord.net.vpnTypes()` | `[{ type, available, optional, package, insecure }]` for the six types: `wireguard`, `openvpn`, `ipsec`, `pptp` (included) and `openconnect`, `fortinet` (`optional: true`: if `available` is `false`, the UI shows "Enable" → `net-vpn-enable`). `package`: the Debian packages needed. |
 | `lord.net.wifiKnown()` | `[{ ssid, security: 'psk'\|'open' }]` |
@@ -214,8 +214,8 @@ and whether there are active VPNs, and opens that section.
 Field values:
 - `type`: `ethernet`, `wifi`, `wireguard`, `tun`, `bridge`, `loopback`, `other` or the kernel's `kind` (`veth`, `vlan`, `bond`, `dummy`…).
 - `managed`:
-  - `system`: managed by systemd-networkd or ifupdown. LordOS doesn't touch it.
-  - `lordos`: it has a LordOS configuration, or it is a LordOS VPN.
+  - `system`: managed by systemd-networkd or ifupdown. Insane OS doesn't touch it.
+  - `lordos`: it has a Insane OS configuration, or it is a Insane OS VPN.
   - `none`: free.
 - Counters: `interfaces()` does a fresh dump on every call, so for live traffic it is enough to call it every one or two seconds.
 
@@ -237,7 +237,7 @@ replies carry only data (a count, a public key).
 | `net-wifi-disconnect` | `if` | anyone | |
 | `net-wifi-forget` | `ssid` | admin | |
 | `net-vpn-import` | `type\nname\nconfig`, type `wireguard\|openvpn\|ipsec\|pptp\|openconnect\|fortinet` | admin | WireGuard: `OK <public key>`; with `PrivateKey = generate` it creates it. The others: `OK vpn.imported`. For OpenVPN, first `lord.net.prepareOvpn`. The formats are below. If the program is missing: `ERR vpn.missingProgram type=<type> package=<package>` |
-| `net-vpn-enable` | `openconnect\|fortinet` | admin | Installs `openconnect` or `openfortivpn` with LordOS's package engine (the same as `pkg-install`): `LOG progress …` and the package engine's `OK`. If it was already there: `OK vpn.alreadyInstalled`. |
+| `net-vpn-enable` | `openconnect\|fortinet` | admin | Installs `openconnect` or `openfortivpn` with Insane OS's package engine (the same as `pkg-install`): `LOG progress …` and the package engine's `OK`. If it was already there: `OK vpn.alreadyInstalled`. |
 | `net-vpn-credentials` | `name\nuser\npassword` | admin | OpenVPN only. Stored with mode 0600. |
 | `net-vpn-trust` | `name\nsha256[\nhost]` | admin | Fortinet: the certificate the person accepted (64 hex digits, `:` allowed) becomes that server's trusted certificate (`trusted-cert=host@hex`), replacing an earlier one for the same server; without `host`, the untagged ones. `OK vpn.trusted`. Settings then calls `net-vpn-up` again. |
 | `net-vpn-config` | `name` | admin | IPsec, PPTP, OpenConnect, Fortinet: `LOG {name, type, values: {key: value}, secrets: ["password"…], files: ["cert", "key"…], trustedServers: [host…]}` — the saved settings without passwords, keys or PEM contents (to fill Settings' **Edit…** form), then `OK 1`. WireGuard / OpenVPN: `ERR vpn.editFromFile`. |
@@ -295,14 +295,14 @@ Routes and DNS are sent by the server. If it sends no routes, all traffic goes t
 Settings' Fortinet form follows what the vendor's own client offers, as far as openfortivpn
 1.23.1 (Debian 13) can do it:
 
-| Option | In LordOS |
+| Option | In Insane OS |
 |---|---|
 | Connection name, description | **Name** and **Description** (`description`, shown under the name in the VPN row). |
 | Several remote gateways | **More servers** (`+ Add server`, one `host` or `host:port` per row, up to 4 after the main one). `forti_run` tries them in order: an unreachable server, a name that doesn't resolve or a failed TLS handshake moves on to the next; a certificate to trust, a refused sign-in or a tunnel that came up stops there. `net vpn <name> gateway <host:port>` says which one answered, and the row shows "via …" while connected. A certificate trusted from the prompt is saved for that server only (`trusted-cert=host@hex`; `net-vpn-trust name\nsha256\nhost`). Edit… lists the servers with a trusted certificate and can **Forget** them. |
 | Custom port | **Port** (and `host:port` for the other servers). |
 | Single sign-on | **Authentication → Single sign-on** (see below). |
-| "Use external browser as user agent" | The only way LordOS can do it: the SDK has no web view, so the page always opens in the default browser. The form shows it as a fixed line ("Sign-in page opens in: Default browser"), not as a choice. |
-| Auto-login with the identity provider from the OS account | Not applicable: LordOS accounts aren't directory accounts. The browser keeps the identity provider's session, so after the first sign-in the page usually goes straight through (or only asks for the authenticator approval), which is the same effect. |
+| "Use external browser as user agent" | The only way Insane OS can do it: the SDK has no web view, so the page always opens in the default browser. The form shows it as a fixed line ("Sign-in page opens in: Default browser"), not as a choice. |
+| Auto-login with the identity provider from the OS account | Not applicable: Insane OS accounts aren't directory accounts. The browser keeps the identity provider's session, so after the first sign-in the page usually goes straight through (or only asks for the authenticator approval), which is the same effect. |
 | Client certificate | **Client certificate → Choose…**: the system file dialog; one PEM file with both, or the certificate and the key separately (`.pem`, `.crt`, `.cer`, `.key`). Settings takes the first `CERTIFICATE` block and the first private-key block (RSA, EC, PKCS#8, encrypted or not) and sends them to lord-netd, which keeps root-only copies (`/etc/lordos/net/vpn/<n>.cert.pem` and `.key.pem`, 0600) and passes them to openfortivpn as `user-cert` / `user-key` in its 0600 config. The key's pass phrase (**Key password**) goes into that same 0600 config as `pem-passphrase`, never on the command line. **PKCS#12 (`.p12`, `.pfx`) is not supported**: lord-netd has no PKCS#12 decoder (it needs ASN.1 plus RC2/3DES/AES and PBKDF), and adding one means a crypto library in the root network service; Settings says to export the certificate and key as PEM. A smartcard (`pkcs11:`) isn't offered either. A key that can't be loaded (wrong pass phrase, key of another certificate) is `vpn.fortiClientCert`. |
 | Dual-stack IPv4/IPv6 | **Not offered**: openfortivpn 1.23.1 only brings up IPv4 inside the tunnel (it has no IPv6 address or route handling), so a switch would do nothing. |
 
@@ -325,13 +325,13 @@ sign-in page (an identity provider over SAML, often with an authenticator-app ap
    without opening the browser. The wait lasts 5 minutes (`vpn.fortiSsoTimeout`).
 3. **The return.** After the sign-in, the gateway redirects the browser to
    `http://127.0.0.1:<sso-port>/?id=<id>`. The port is set on the gateway (its "SAML redirect port",
-   8020 unless the organization changed it), which is why it isn't a random free port. LordOS
+   8020 unless the organization changed it), which is why it isn't a random free port. Insane OS
    answers with a short "Signed in" page, checks the id (letters, digits and `-`, like
    openfortivpn), closes its listener, starts `openfortivpn --saml-login=<sso-port>` and, as soon as
    it says "Listening for SAML login", hands it the same request. openfortivpn exchanges the id for
    the session cookie and brings the tunnel up as usual ("Tunnel is up and running" → `connected`).
 
-Why LordOS listens itself instead of leaving it to `--saml-login`: openfortivpn 1.23 waits only
+Why Insane OS listens itself instead of leaving it to `--saml-login`: openfortivpn 1.23 waits only
 5 × 10 s for the browser, too little for a person typing a password and approving on a phone.
 
 The per-app firewall doesn't get in the way: lord-netd is a system service, not an app, and the
@@ -396,33 +396,33 @@ daemon <process> exit <code>   (end of "if:<if>", "wpa:<if>", "vpn:<name>")
   - Networks are loaded through that socket: the SSID goes in hex and the WPA2 key as an already computed PSK.
   - The WPA3 password travels in quotes and is rejected if it contains control characters.
 - **WireGuard.**
-  - `PostUp`/`PreUp`/`PostDown`/`PreDown`/`SaveConfig`/`Table`/`FwMark` are ignored with a warning: LordOS doesn't run commands.
+  - `PostUp`/`PreUp`/`PostDown`/`PreDown`/`SaveConfig`/`Table`/`FwMark` are ignored with a warning: Insane OS doesn't run commands.
   - An unknown key rejects the file.
 - **OpenVPN.**
   - Only the client options in `ovpn.c`'s `allowed` list pass.
   - `up`, `down`, `script-security`, `plugin`, `route-up`, `config`, `cd`, `setenv`, `management`, `log`, `<connection>`, `auth-user-pass file`, certificates as files, etc. reject the file (tested).
-  - LordOS adds `script-security 1` (only openvpn's own programs, such as `ip`), its own management interface and `verb 3`.
-  - DNS servers pushed by the server are read from the `PUSH_REPLY` and applied by LordOS, because OpenVPN doesn't apply them without scripts.
+  - Insane OS adds `script-security 1` (only openvpn's own programs, such as `ip`), its own management interface and `verb 3`.
+  - DNS servers pushed by the server are read from the `PUSH_REPLY` and applied by Insane OS, because OpenVPN doesn't apply them without scripts.
 - **IPsec.**
   - Each VPN has its own `charon` with a generated `strongswan.conf`. The file goes in `/etc/strongswan.d/lordos/<n>.conf` (0600) and the VICI socket in `/run/charon.lordos-<n>.vici`.
   - Those paths are the ones Debian's AppArmor profile allows for charon: with others, charon doesn't start ("invalid configuration"). The system's `strongswan.conf` doesn't include that folder.
-  - charon loads only the plugins LordOS names: no `updown` (scripts) or `stroke`.
+  - charon loads only the plugins Insane OS names: no `updown` (scripts) or `stroke`.
   - Keys, passwords and certificates travel over VICI with our own client. swanctl isn't used because its AppArmor profile only lets it talk to `/run/charon.vici`.
   - The DNS pushed by the server is taken from charon's log. The `resolve` plugin points to `resolvconf` at `/nonexistent`, so it touches nothing.
   - It uses random ports (`port = 0`), so it doesn't clash with a system strongSwan.
 - **PPTP** is insecure: MS-CHAPv2 is broken and MPPE is RC4. It's there because old networks ask for it, and `vpnList`/`vpnTypes` mark it with `insecure: true`.
-  - LordOS writes the pppd config. The `pty` is the only command: `/usr/sbin/pptp <already resolved IP> --nolaunchpppd`.
+  - Insane OS writes the pppd config. The `pty` is the only command: `/usr/sbin/pptp <already resolved IP> --nolaunchpppd`.
   - `ip-up`/`ip-down` point to a file that doesn't exist, and there is no way to add `plugin`, `connect` or any other option.
   - Only MS-CHAPv2 is accepted: PAP, CHAP, MS-CHAP and EAP are rejected.
 - **OpenConnect.**
-  - Its `--script` is `/etc/lordos/net/oc-script`, with fixed content. It only records in `/run/lordos/oc/<if>.connect` the variables the server sends (address, routes, DNS), and LordOS validates and applies them. vpnc-script isn't used.
+  - Its `--script` is `/etc/lordos/net/oc-script`, with fixed content. It only records in `/run/lordos/oc/<if>.connect` the variables the server sends (address, routes, DNS), and Insane OS validates and applies them. vpnc-script isn't used.
   - The server certificate is validated against the system CAs or the `servercert` (pin) from the import.
-- **Fortinet.** openfortivpn runs with `set-routes = 0`, `set-dns = 0` and `pppd-use-peerdns = 0`: LordOS sets routes and DNS. With `set-routes` it would change the system's default route. The pppd that openfortivpn launches does run the system's `/etc/ppp/ip-up.d` scripts; they don't belong to the user.
+- **Fortinet.** openfortivpn runs with `set-routes = 0`, `set-dns = 0` and `pppd-use-peerdns = 0`: Insane OS sets routes and DNS. With `set-routes` it would change the system's default route. The pppd that openfortivpn launches does run the system's `/etc/ppp/ip-up.d` scripts; they don't belong to the user.
 - **Secrets.**
   - They go in `/etc/lordos/net/vpn/<n>.conf|.ovpn|.auth|.ipsec|.pptp|.openconnect|.fortinet|.<ca|cert|key>.pem` and `/etc/lordos/net/wifi/<ssid-hex>.key`, root 0600.
   - Also in the generated configs: `/etc/lordos/net/ppp/<n>.options` and `/etc/lordos/net/fortinet/<n>.conf`, 0600.
   - The UI only sees the public `.json` files (0644). No action returns a private key; the public one, yes.
-- **DNS.** It is only changed on LordOS interfaces (never on `managed: system` ones) and only from the system's network namespace (`sys.c`).
+- **DNS.** It is only changed on Insane OS interfaces (never on `managed: system` ones) and only from the system's network namespace (`sys.c`).
   - Why the namespace matters: `resolvectl` talks to the system's systemd-resolved with the interface number from its own namespace. Launched from another netns, that number may be eth0's.
   - This happened in a test: the tunnel's DNS ended up on eth0 and the VM was left without name resolution until running `resolvectl revert eth0`.
   - When a VPN goes down its DNS is reverted with `resolvectl revert`, while the interface still exists.
@@ -496,10 +496,10 @@ There you get rules 32764 (`main suppress_prefixlength 0`) and 32765 (`not fwmar
 ```sh
 sudo modprobe mac80211_hwsim radios=2
 sudo iw phy phy1 set netns name lnw
-# in lnw: hostapd with WPA2 "LordTest" and dnsmasq on wlan1
+# in lnw: hostapd with WPA2 "InsaneTest" and dnsmasq on wlan1
 sudo ./build/net-test act net-restore ''           # wpa_supplicant on wlan0
 sudo ./build/net-test act net-wifi-scan wlan0
-sudo ./build/net-test act net-wifi-connect 'wlan0\nLordTest\nclave-segura-1'
+sudo ./build/net-test act net-wifi-connect 'wlan0\nInsaneTest\nclave-segura-1'
 ```
 
 **IPsec**
@@ -548,9 +548,9 @@ Then `net-vpn-import` and `net-vpn-up`. Result: `connected 10.20.0.1`, ping to 1
 
 | Package | What for |
 |---|---|
-| `wpasupplicant` | Wi-Fi (LordOS launches it). It ships `wpa_supplicant.service`, which in D-Bus mode doesn't touch interfaces; on a LordOS image it should be disabled. |
-| `openvpn` | OpenVPN VPN (LordOS launches it). `openvpn.service` is an empty service. |
-| `strongswan-charon`, `libcharon-extauth-plugins` | IPsec/IKEv2: the `charon` daemon and the EAP-MSCHAPv2 plugin. This is the minimum: `charon-systemd` and `strongswan-swanctl` aren't needed. `strongswan-charon` pulls in `strongswan-starter`, which enables itself and was disabled (`systemctl disable --now strongswan-starter`); on a LordOS image it ships disabled. |
+| `wpasupplicant` | Wi-Fi (Insane OS launches it). It ships `wpa_supplicant.service`, which in D-Bus mode doesn't touch interfaces; on a Insane OS image it should be disabled. |
+| `openvpn` | OpenVPN VPN (Insane OS launches it). `openvpn.service` is an empty service. |
+| `strongswan-charon`, `libcharon-extauth-plugins` | IPsec/IKEv2: the `charon` daemon and the EAP-MSCHAPv2 plugin. This is the minimum: `charon-systemd` and `strongswan-swanctl` aren't needed. `strongswan-charon` pulls in `strongswan-starter`, which enables itself and was disabled (`systemctl disable --now strongswan-starter`); on a Insane OS image it ships disabled. |
 | `pptp-linux`, `ppp` | PPTP |
 | `openconnect`, `openfortivpn` | **Optional.** Not in the image: `net-vpn-enable` installs them. In the VM they were installed that way and removed again so the UI could test "Enable". |
 | `hostapd`, `dnsmasq-base`, `iw`, `wireguard-tools` | Tests only: access point, DHCP server, moving radios between namespaces and the "official" WireGuard peer to compare against. |

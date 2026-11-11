@@ -105,7 +105,7 @@ const char *proc_protect_reason(int pid, unsigned flags, const char *comm, const
     }
     if (in_system(comm) || in_system(eb)) return "system";
     /* lord-server: an isolated app (`lord-server --app <id>`) may be quit; any other instance
-     * (another session, a terminal holder) is part of LordOS */
+     * (another session, a terminal holder) is part of Insane OS */
     if (!strcmp(eb, "lord-server") || (!eb[0] && comm && !strcmp(comm, "lord-server")))
         return argv1 && !strcmp(argv1, "--app") ? NULL : "system";
     return NULL;

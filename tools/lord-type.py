@@ -3,7 +3,7 @@
 
 Usage (on the Proxmox host):  python3 lord-type.py 115 'ls -la\n'
 Special keys in braces: {ret} {tab} {esc} {up} {down} {left} {right} {f12}
-{ctrl-c} {meta_l-t} … (any `sendkey` name). Requires LordOS to use the
+{ctrl-c} {meta_l-t} … (any `sendkey` name). Requires Insane OS to use the
 US layout (ES/US button in the menu bar)."""
 import subprocess
 import sys

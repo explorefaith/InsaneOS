@@ -706,7 +706,7 @@ static void test_ical(void) {
 
 static const char *VCF =
     "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:urn:uuid:c-1\r\nFN:José Pérez\r\nN:Pérez;José;María;Dr.;\r\n"
-    "ORG:LordOS;Ingeniería\r\nTITLE:Jefe\\, técnico\r\n"
+    "ORG:Insane OS;Ingeniería\r\nTITLE:Jefe\\, técnico\r\n"
     "item1.EMAIL;TYPE=INTERNET,WORK,pref:jose@lordos.test\r\nEMAIL;TYPE=HOME:jose@casa.test\r\n"
     "TEL;TYPE=CELL:+54 11 5555-0000\r\nTEL;TYPE=WORK,VOICE:+54 11 4444-0000\r\n"
     "ADR;TYPE=HOME:;Depto 4;Calle Falsa 123;Springfield;BA;1000;Argentina\r\n"

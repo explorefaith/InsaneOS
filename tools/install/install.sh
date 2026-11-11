@@ -1,24 +1,24 @@
 #!/bin/sh
-# LordOS installer for an existing Debian 13 (trixie) system.
+# Insane OS installer for an existing Debian 13 (trixie) system.
 #
 #   curl -fsSL https://lordos.org/install.sh | sh
 #   curl -fsSL https://lordos.org/install.sh | sh -s -- --uninstall
 #   curl -fsSL https://lordos.org/install.sh | sh -s -- --remote-desktop    (servers and VPS)
 #
-# Canonical copy: tools/install/install.sh in https://github.com/lordbasex/LordOS.
+# Canonical copy: tools/install/install.sh in https://github.com/lordbasex/Insane OS.
 # https://lordos.org/install.sh must stay byte-identical to the file in the release tag.
 # Documentation: docs/INSTALL-DEBIAN.md. No telemetry: the only network requests are to
 # api.github.com (to find the latest release), github.com (the release files) and the
-# Debian mirrors that apt already uses. The package then adds the signed LordOS repository
+# Debian mirrors that apt already uses. The package then adds the signed Insane OS repository
 # (lordos.org/apt), so later versions arrive through Store → Updates or apt (docs/UPDATES.md).
-# Running it again on an installed LordOS (from the ISO, the Raspberry Pi image or this script)
+# Running it again on an installed Insane OS (from the ISO, the Raspberry Pi image or this script)
 # upgrades it in place: files, settings and the login setup are kept.
 #
 # Everything lives inside main(), called on the last line, so a truncated download runs nothing.
 set -eu
 
 INSTALLER_VERSION=1
-REPO="lordbasex/LordOS"
+REPO="lordbasex/Insane OS"
 API_URL="https://api.github.com/repos/$REPO"
 DL_URL="https://github.com/$REPO/releases/download"
 STATE_DIR=/var/lib/lordos-installer
@@ -70,7 +70,7 @@ changed() { CHANGES="$CHANGES
 
 usage() {
     cat <<EOF
-LordOS installer for Debian 13 (trixie), version $INSTALLER_VERSION
+Insane OS installer for Debian 13 (trixie), version $INSTALLER_VERSION
 
 Usage:
   curl -fsSL https://lordos.org/install.sh | sh
@@ -85,19 +85,19 @@ Options:
                             lordos-hwdata_<date>_all.deb and lordos-rclone_<version>_<arch>.deb
                             it needs are taken from the same folder
   --user NAME               the user to set up (default: the user who ran sudo)
-  --keep-display-manager    do not disable the current display manager (LordOS is not
+  --keep-display-manager    do not disable the current display manager (Insane OS is not
                             enabled at boot then; see the final message)
   --no-extras               do not install the extra sound/font packages the ISO has
-  --boot-splash             also set up the LordOS boot splash (Plymouth) without asking;
+  --boot-splash             also set up the Insane OS boot splash (Plymouth) without asking;
                             without it, it is only offered (and skipped with --yes)
   --no-boot-splash          do not offer the boot splash
   --no-systemd-check        continue without a running systemd (containers, chroots):
                             the systemd steps are skipped
-  --remote-desktop          also turn on LordOS remote desktop (servers and VPS without a
+  --remote-desktop          also turn on Insane OS remote desktop (servers and VPS without a
                             screen): https://<this machine's IP>:5673 in a browser, TLS and a
                             user's password; asks first unless --yes
   --remote-port N           with --remote-desktop: the port, 1024-65535 (default 5673)
-  --uninstall               remove LordOS and restore the previous login setup (also
+  --uninstall               remove Insane OS and restore the previous login setup (also
                             removes the remote desktop configuration)
   --purge                   with --uninstall: purge the package and its /etc files
   -h, --help                this help
@@ -199,11 +199,11 @@ check_os() {
     case " $like " in
         *" debian "*)
             if [ "$code" = trixie ] || [ "$dcode" = trixie ]; then
-                warn "$name is a Debian derivative, not Debian itself. LordOS is tested on Debian 13 (trixie) only; continuing."
+                warn "$name is a Debian derivative, not Debian itself. Insane OS is tested on Debian 13 (trixie) only; continuing."
                 return
             fi ;;
     esac
-    die "LordOS needs Debian 13 (trixie); this system is ${name:-unknown} (ID=$os_id, VERSION_CODENAME=${code:-none})."
+    die "Insane OS needs Debian 13 (trixie); this system is ${name:-unknown} (ID=$os_id, VERSION_CODENAME=${code:-none})."
 }
 
 check_arch() {
@@ -211,13 +211,13 @@ check_arch() {
     ARCH=$(dpkg --print-architecture)
     case "$ARCH" in
         amd64|arm64) ok "architecture: $ARCH" ;;
-        *) die "LordOS is built for amd64 and arm64 only; this system is $ARCH." ;;
+        *) die "Insane OS is built for amd64 and arm64 only; this system is $ARCH." ;;
     esac
     model=""
     if [ -r /proc/device-tree/model ]; then model=$(tr -d '\000' </proc/device-tree/model); fi
     case "$model" in
         *"Raspberry Pi 5"*)
-            warn "This is a $model. The LordOS Raspberry Pi image is the recommended way to run it there (it brings the tested kernel and boot configuration); continuing with the package." ;;
+            warn "This is a $model. The Insane OS Raspberry Pi image is the recommended way to run it there (it brings the tested kernel and boot configuration); continuing with the package." ;;
     esac
 }
 
@@ -236,7 +236,7 @@ check_disk() {
     free_kb=$(df -Pk /var 2>/dev/null | awk 'NR == 2 { print $4 }')
     [ -n "$free_kb" ] || { warn "could not measure the free disk space"; return; }
     if [ "$free_kb" -lt 2097152 ]; then
-        die "LordOS needs at least 2 GB free on /var (for the package and its dependencies); there are $((free_kb / 1024)) MB."
+        die "Insane OS needs at least 2 GB free on /var (for the package and its dependencies); there are $((free_kb / 1024)) MB."
     fi
     ok "free disk space: $((free_kb / 1024)) MB"
 }
@@ -251,7 +251,7 @@ check_systemd() {
         warn "systemd is not running (container or chroot): services, the display manager, getty and linger will NOT be configured."
         return
     fi
-    die "LordOS needs systemd as the init system (/run/systemd/system is missing). Use --no-systemd-check only in containers or chroots."
+    die "Insane OS needs systemd as the init system (/run/systemd/system is missing). Use --no-systemd-check only in containers or chroots."
 }
 
 pick_user() {
@@ -276,7 +276,7 @@ pick_user() {
 }
 
 # Installing and updating need an administrator (a member of sudo, admin or wheel: is_admin in
-# server/src/admin.c). A Debian installed with a root password has none, and LordOS has no way to
+# server/src/admin.c). A Debian installed with a root password has none, and Insane OS has no way to
 # name one from inside, so without this nobody could use the Store.
 pick_admin() {
     has_admin_user && return 0
@@ -310,7 +310,7 @@ resolve_tag() {
         if [ -z "$TAG" ] && fetch "$API_URL/releases?per_page=1" "$out" 2>/dev/null; then
             TAG=$(sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' "$out" | head -n 1)
         fi
-        [ -n "$TAG" ] || die "could not find the latest LordOS release on GitHub ($API_URL). Check the connection, or use --version X or --deb FILE."
+        [ -n "$TAG" ] || die "could not find the latest Insane OS release on GitHub ($API_URL). Check the connection, or use --version X or --deb FILE."
     fi
     case "$TAG" in *[!A-Za-z0-9._-]*|"") die "invalid release name: $TAG" ;; esac
 }
@@ -354,7 +354,7 @@ verify_signature() {
 
 check_deb_file() {
     pkg=$(dpkg-deb -f "$1" Package 2>/dev/null || true)
-    [ "$pkg" = lordos ] || die "$1 is not the LordOS package (Package: ${pkg:-unreadable})"
+    [ "$pkg" = lordos ] || die "$1 is not the Insane OS package (Package: ${pkg:-unreadable})"
     darch=$(dpkg-deb -f "$1" Architecture 2>/dev/null || true)
     [ "$darch" = "$ARCH" ] || die "$(basename "$1") is built for $darch, but this system is $ARCH"
     DEB_VERSION=$(dpkg-deb -f "$1" Version)
@@ -392,7 +392,7 @@ get_package() {
         fetch "$base_url/SHA256SUMS.sig" "$TMP/SHA256SUMS.sig" 2>/dev/null || rm -f "$TMP/SHA256SUMS.sig"
         base=$(awk '{ n = $2; sub(/^\*/, "", n); print n }' "$TMP/SHA256SUMS" \
             | grep -E "^lordos_[A-Za-z0-9.+~-]+_${ARCH}\.deb\$" | head -n 1 || true)
-        [ -n "$base" ] || die "release $TAG has no LordOS package for $ARCH"
+        [ -n "$base" ] || die "release $TAG has no Insane OS package for $ARCH"
         # check the signature before trusting anything else the file says
         verify_signature "$TMP/SHA256SUMS" "$TMP/SHA256SUMS.sig"
         say "  Downloading $base..."
@@ -425,7 +425,7 @@ get_package() {
 
 # (0.8.7) lordos depends on lordos-hwdata, the signed tested-hardware snapshot of System Information
 # (docs/BENCHMARK.md): an Architecture: all package in the same release, checked like the main one. On a
-# Debian system the LordOS repository is not there yet, so apt can only take it from here.
+# Debian system the Insane OS repository is not there yet, so apt can only take it from here.
 get_hwdata() {
     HW_PATH=""
     HW_NEEDED=0
@@ -444,7 +444,7 @@ get_hwdata() {
         hwbase=$(for f in "$hwdir"/lordos-hwdata_*_all.deb; do [ -f "$f" ] && basename "$f"; done \
             | grep -E '^lordos-hwdata_[0-9][0-9.]*_all\.deb$' | sort -t _ -k 2,2 -V | tail -n 1 || true)
     fi
-    # an upgrade with the LordOS repository already configured: apt takes it from there (install_package)
+    # an upgrade with the Insane OS repository already configured: apt takes it from there (install_package)
     [ -n "$hwbase" ] || return 0
     if [ -n "$LOCAL_DEB" ]; then
         [ -f "$hwdir/$hwbase" ] || return 0
@@ -493,7 +493,7 @@ get_rclone() {
         rcbase=$(for f in "$rcdir"/lordos-rclone_*_"$ARCH".deb; do [ -f "$f" ] && basename "$f"; done \
             | grep -E "^lordos-rclone_[0-9][0-9.]*-[0-9]+_${ARCH}\\.deb\$" | sort -t _ -k 2,2 -V | tail -n 1 || true)
     fi
-    # an upgrade with the LordOS repository already configured: apt takes it from there (install_package)
+    # an upgrade with the Insane OS repository already configured: apt takes it from there (install_package)
     [ -n "$rcbase" ] || return 0
     if [ -n "$LOCAL_DEB" ]; then
         [ -f "$rcdir/$rcbase" ] || return 0
@@ -543,7 +543,7 @@ install_package() {
     # an old (validly signed) release served as "latest" must not downgrade a newer install
     if [ -n "$was" ] && [ -z "$WANT_VERSION" ] && [ -z "$LOCAL_DEB" ] \
         && dpkg --compare-versions "$DEB_VERSION" lt "$was"; then
-        die "the release offered ($DEB_VERSION) is older than the installed LordOS ($was): refusing to downgrade (use --version X to choose a version)"
+        die "the release offered ($DEB_VERSION) is older than the installed Insane OS ($was): refusing to downgrade (use --version X to choose a version)"
     fi
     if [ "$HW_NEEDED" = 1 ] && [ -z "$HW_PATH" ] && ! apt-cache show lordos-hwdata >/dev/null 2>&1; then
         die "this release's lordos needs lordos-hwdata, which is neither next to it nor in a configured repository. Nothing was changed."
@@ -552,7 +552,7 @@ install_package() {
         die "this release's lordos needs lordos-rclone, which is neither next to it nor in a configured repository. Nothing was changed."
     fi
     # shellcheck disable=SC2086 # $extras is a list of package names; $HW_PATH is one path or empty
-    apt_install $HW_PATH $RC_PATH "$DEB_PATH" $extras || die "apt-get could not install LordOS (see the messages above). Nothing else was changed."
+    apt_install $HW_PATH $RC_PATH "$DEB_PATH" $extras || die "apt-get could not install Insane OS (see the messages above). Nothing else was changed."
     if [ -n "$was" ]; then changed "package lordos $was replaced by $DEB_VERSION"
     else changed "package lordos $DEB_VERSION installed (with its Debian dependencies)"; fi
     if [ -n "$extras" ]; then changed "extra packages ensured:$extras"; fi
@@ -565,7 +565,7 @@ setup_greeter_user() {
         return
     fi
     as_root useradd --system --home-dir /var/lib/lordos-greeter --create-home \
-        --shell /usr/sbin/nologin --comment LordOS "$GREETER_USER"
+        --shell /usr/sbin/nologin --comment Insane OS "$GREETER_USER"
     state_set GREETER_CREATED 1
     changed "system user $GREETER_USER created (the login screen's user)"
     # the login screen composes on the GPU and may decode its wallpaper in hardware (docs/WALLPAPERS.md)
@@ -589,7 +589,7 @@ setup_groups() {
         state_set GROUPS_ADDED "$(printf '%s %s' "$prev" "$added" | tr ' ' '\n' | sed '/^$/d' | sort -u | tr '\n' ' ' | sed 's/ $//')"
         changed "user $TARGET_USER added to:$added (takes effect after a reboot: the user's services keep their old groups across a logout)"
     else
-        ok "user $TARGET_USER already has the groups LordOS uses"
+        ok "user $TARGET_USER already has the groups Insane OS uses"
     fi
 }
 
@@ -620,7 +620,7 @@ setup_session_conf() {
         return
     fi
     as_root mkdir -p /etc/lordos
-    printf '# LordOS: empty AUTOLOGIN shows the login screen. Settings > Users changes it.\nAUTOLOGIN=\n' \
+    printf '# Insane OS: empty AUTOLOGIN shows the login screen. Settings > Users changes it.\nAUTOLOGIN=\n' \
         | as_root tee "$SESSION_CONF" >/dev/null
     state_set SESSION_CONF_CREATED 1
     changed "$SESSION_CONF written: the login screen, no automatic login"
@@ -642,15 +642,15 @@ setup_systemd() {
     DM_SWITCHED=0
     if [ -n "$DM_UNIT" ] && [ "$DM_UNIT" != lordos.service ]; then
         if [ "$KEEP_DM" = 1 ]; then
-            warn "keeping $DM_UNIT as the display manager (--keep-display-manager): LordOS is not enabled at boot"
-        elif ask "Disable $DM_UNIT so LordOS shows its own login screen at boot?" 0; then
+            warn "keeping $DM_UNIT as the display manager (--keep-display-manager): Insane OS is not enabled at boot"
+        elif ask "Disable $DM_UNIT so Insane OS shows its own login screen at boot?" 0; then
             as_root systemctl disable "$DM_UNIT" >/dev/null 2>&1 || die "could not disable $DM_UNIT"
             state_set PREV_DM "$DM_UNIT"
             changed "display manager $DM_UNIT disabled (still installed; --uninstall turns it back on)"
             DM_SWITCHED=1
         else
             KEEP_DM=1
-            warn "kept $DM_UNIT: LordOS is installed but not enabled at boot"
+            warn "kept $DM_UNIT: Insane OS is installed but not enabled at boot"
         fi
     fi
     if [ "$KEEP_DM" = 1 ] && [ -n "$DM_UNIT" ]; then
@@ -660,7 +660,7 @@ setup_systemd() {
         ok "lordos.service already enabled"
     else
         as_root systemctl enable lordos.service >/dev/null 2>&1 || die "could not enable lordos.service"
-        changed "lordos.service enabled: LordOS starts on tty1 at boot"
+        changed "lordos.service enabled: Insane OS starts on tty1 at boot"
     fi
     if [ "$(systemctl is-enabled getty@tty1.service 2>/dev/null || true)" != masked ]; then
         as_root systemctl mask getty@tty1.service >/dev/null 2>&1
@@ -695,15 +695,15 @@ grub_settings() {
     ) 2>/dev/null
 }
 
-# The LordOS boot splash: Plymouth with the lordos theme (it ships in the package) and, when this
-# system boots with an unmodified GRUB, "splash" on the kernel command line and the LordOS boot menu,
+# The Insane OS boot splash: Plymouth with the lordos theme (it ships in the package) and, when this
+# system boots with an unmodified GRUB, "splash" on the kernel command line and the Insane OS boot menu,
 # through a drop-in of our own that --uninstall removes. A custom bootloader setup is never edited:
 # then only the theme is set and the final message says what to add. See docs/INSTALL-DEBIAN.md.
 setup_splash() {
     [ "$BOOT_SPLASH" = no ] && return 0
     [ -f /usr/share/plymouth/themes/lordos/lordos.plymouth ] || return 0
     if [ "$BOOT_SPLASH" != yes ]; then
-        ask "Also show the LordOS boot splash (logo and progress bar) at boot? It installs Plymouth" 1 || {
+        ask "Also show the Insane OS boot splash (logo and progress bar) at boot? It installs Plymouth" 1 || {
             ok "boot splash: not set up (run again with --boot-splash to add it)"; return 0; }
     fi
     step "Setting up the boot splash"
@@ -714,7 +714,7 @@ setup_splash() {
     if [ "$prev" = lordos ]; then
         set_theme=0
     elif [ -n "$prev" ] && ! printf '%s\n' $STOCK_PLYMOUTH_THEMES | grep -qx "$prev"; then
-        ask "Your boot splash theme is \"$prev\". Replace it with LordOS's?" 1 || set_theme=0
+        ask "Your boot splash theme is \"$prev\". Replace it with Insane OS's?" 1 || set_theme=0
     fi
     if [ "$set_theme" = 1 ]; then
         state_set PREV_PLYMOUTH_THEME "${prev:-none}"
@@ -744,7 +744,7 @@ EOF
     fi
     as_root mkdir -p /etc/default/grub.d
     {
-        echo "# LordOS boot splash and boot menu, written by the LordOS installer (install.sh)."
+        echo "# Insane OS boot splash and boot menu, written by the Insane OS installer (install.sh)."
         echo "# Remove this file and run update-grub to undo (install.sh --uninstall does it)."
         # shellcheck disable=SC2016 # expanded by GRUB's own shell, not here
         if [ "$add_splash" = 1 ]; then echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT splash"'; fi
@@ -753,7 +753,7 @@ EOF
     } | as_root tee "$GRUB_DROPIN" >/dev/null
     state_set GRUB_DROPIN 1
     if as_root update-grub >/dev/null 2>&1; then
-        changed "GRUB: $GRUB_DROPIN ($( [ "$add_splash" = 1 ] && printf 'splash' )$( [ "$add_splash" = 1 ] && [ "$add_theme" = 1 ] && printf ' and ' )$( [ "$add_theme" = 1 ] && printf 'the LordOS boot menu' )) and update-grub"
+        changed "GRUB: $GRUB_DROPIN ($( [ "$add_splash" = 1 ] && printf 'splash' )$( [ "$add_splash" = 1 ] && [ "$add_theme" = 1 ] && printf ' and ' )$( [ "$add_theme" = 1 ] && printf 'the Insane OS boot menu' )) and update-grub"
     else
         warn "update-grub failed; $GRUB_DROPIN was removed again"
         as_root rm -f "$GRUB_DROPIN"
@@ -836,7 +836,7 @@ setup_remote() {
         as_root groupadd --system lordos-remote 2>/dev/null || true
     fi
     as_root install -d -m 755 /etc/lordos "$REMOTE_DIR"
-    printf '# LordOS · remote desktop (Settings → Sharing). See docs/REMOTE.md\nenabled=1\nport=%s\nallow=%s\ninsecure_dev=%s\n' \
+    printf '# Insane OS · remote desktop (Settings → Sharing). See docs/REMOTE.md\nenabled=1\nport=%s\nallow=%s\ninsecure_dev=%s\n' \
         "$port" "$allow" "$dev" | as_root tee "$REMOTE_CONF.lordos" >/dev/null
     as_root chmod 644 "$REMOTE_CONF.lordos"
     as_root mv -f "$REMOTE_CONF.lordos" "$REMOTE_CONF"
@@ -899,7 +899,7 @@ network_note() {
         ifu=" ifupdown"
     fi
     if [ -n "$nm$ifu$nd" ]; then
-        ok "network: managed by$nm$ifu$nd and left untouched (LordOS shows those interfaces as system ones)"
+        ok "network: managed by$nm$ifu$nd and left untouched (Insane OS shows those interfaces as system ones)"
     else
         ok "network: configuration untouched"
     fi
@@ -925,9 +925,9 @@ do_install() {
     say ""
     step "This will:"
     if [ -n "$LOCAL_DEB" ]; then say "  1. Use the local package $LOCAL_DEB"
-    elif [ -n "$WANT_VERSION" ]; then say "  1. Download LordOS v${WANT_VERSION#v} for $ARCH from github.com/$REPO and verify its SHA-256"
-    else say "  1. Download the latest LordOS release for $ARCH from github.com/$REPO and verify its SHA-256"; fi
-    case "$installed" in ii*) say "     (LordOS ${installed#ii } is already installed: it will be upgraded or reinstalled)" ;; esac
+    elif [ -n "$WANT_VERSION" ]; then say "  1. Download Insane OS v${WANT_VERSION#v} for $ARCH from github.com/$REPO and verify its SHA-256"
+    else say "  1. Download the latest Insane OS release for $ARCH from github.com/$REPO and verify its SHA-256"; fi
+    case "$installed" in ii*) say "     (Insane OS ${installed#ii } is already installed: it will be upgraded or reinstalled)" ;; esac
     say "  2. Install it with apt-get; its dependencies come from your Debian mirrors"
     [ "$NO_EXTRAS" = 0 ] && say "     plus sudo, PipeWire, fonts and the user D-Bus session if missing"
     say "  3. Create the $GREETER_USER system user (if missing) and generate the en/es/pt/fr/it locales"
@@ -939,7 +939,7 @@ do_install() {
             say "  6. Offer to disable your current display manager, $DM_UNIT (you can switch back)"
         fi
     fi
-    [ "$BOOT_SPLASH" != no ] && say "  Then it offers the LordOS boot splash (Plymouth; never changes a customised bootloader)"
+    [ "$BOOT_SPLASH" != no ] && say "  Then it offers the Insane OS boot splash (Plymouth; never changes a customised bootloader)"
     if [ "$REMOTE" = 1 ]; then
         plan_port=$REMOTE_PORT
         if [ -z "$plan_port" ]; then
@@ -973,7 +973,7 @@ do_install() {
     step "Getting the package"
     get_package
     install_package
-    step "Setting up LordOS"
+    step "Setting up Insane OS"
     setup_greeter_user
     setup_groups
     setup_locales
@@ -986,7 +986,7 @@ do_install() {
     state_set INSTALLER_VERSION "$INSTALLER_VERSION"
 
     say ""
-    step "${C_G}LordOS $DEB_VERSION is installed.${C_0}"
+    step "${C_G}Insane OS $DEB_VERSION is installed.${C_0}"
     say "What changed:$CHANGES"
     say ""
     if [ -n "$SIG_NOTE" ]; then say "Signature: $SIG_NOTE."; say ""; fi
@@ -1010,22 +1010,22 @@ do_install() {
         say ""
     fi
     if [ "$LORDOS_RUNNING" = 1 ]; then
-        say "LordOS is running and was upgraded in place. The running session keeps working; restart"
+        say "Insane OS is running and was upgraded in place. The running session keeps working; restart"
         say "the computer when it suits you to start the new version:  ${C_B}sudo reboot${C_0}"
         say "(or Store → Updates → Restart). Files, settings and accounts were kept."
     elif ! has_systemd; then
         say "No systemd here, so nothing was set to start. On a real system run the installer again."
     elif [ "$KEEP_DM" = 1 ] && [ -n "$DM_UNIT" ]; then
-        say "LordOS is installed but $DM_UNIT is still your display manager. To switch later:"
+        say "Insane OS is installed but $DM_UNIT is still your display manager. To switch later:"
         say "  sudo systemctl disable $DM_UNIT"
         say "  sudo systemctl enable lordos.service && sudo systemctl mask getty@tty1.service"
         say "  sudo reboot"
     elif [ "$REMOTE_RUNNING" = 1 ]; then
-        say "LordOS is running (lordos.service) and starts at every boot; without a screen, the login"
+        say "Insane OS is running (lordos.service) and starts at every boot; without a screen, the login"
         say "screen and the sessions are reached through the remote desktop."
     else
-        say "To start LordOS:"
-        say "  - reboot:  ${C_B}sudo reboot${C_0}  (LordOS's login screen appears on the screen)"
+        say "To start Insane OS:"
+        say "  - reboot:  ${C_B}sudo reboot${C_0}  (Insane OS's login screen appears on the screen)"
         if [ "$dm_active" = 1 ]; then
             say "  - $DM_UNIT is still running this session, so rebooting is the safe way."
         else
@@ -1070,10 +1070,10 @@ do_uninstall() {
     fi
     [ -n "$(state_get GROUPS_ADDED)" ] && say "  - remove $(state_get GROUPS_USER) from the groups the installer added: $(state_get GROUPS_ADDED)"
     [ "$(state_get GREETER_CREATED)" = 1 ] && say "  - delete the $GREETER_USER system user"
-    [ "$(state_get GRUB_DROPIN)" = 1 ] && say "  - remove the LordOS GRUB settings ($GRUB_DROPIN) and run update-grub"
+    [ "$(state_get GRUB_DROPIN)" = 1 ] && say "  - remove the Insane OS GRUB settings ($GRUB_DROPIN) and run update-grub"
     [ -n "$(state_get PREV_PLYMOUTH_THEME)" ] && say "  - put back the previous boot splash theme"
     [ -e "$REMOTE_CONF" ] && say "  - remove the remote desktop configuration ($REMOTE_CONF)"
-    say "  Your home folder and LordOS settings in it (~/.config/lordos) are kept."
+    say "  Your home folder and Insane OS settings in it (~/.config/lordos) are kept."
     say ""
     ask "Continue?" 0 || die "cancelled; nothing was changed"
 
@@ -1145,7 +1145,7 @@ do_uninstall() {
     as_root rm -rf "$STATE_DIR"
 
     say ""
-    step "LordOS was uninstalled."
+    step "Insane OS was uninstalled."
     say "What changed:${CHANGES:-
   - nothing}"
     say ""
@@ -1198,7 +1198,7 @@ main() {
     fi
     if [ "$REMOTE" = 1 ] && [ "$MODE" = uninstall ]; then die "--remote-desktop does not go with --uninstall"; fi
 
-    say "${C_B}LordOS installer for Debian 13${C_0} (installer v$INSTALLER_VERSION)"
+    say "${C_B}Insane OS installer for Debian 13${C_0} (installer v$INSTALLER_VERSION)"
     if [ "$MODE" = uninstall ]; then do_uninstall; else do_install; fi
 }
 

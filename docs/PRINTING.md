@@ -1,6 +1,6 @@
 # Printing and scanning (M9)
 
-**CUPS manages the queue and the drivers. LordOS doesn't use libcups**: it speaks IPP to it over
+**CUPS manages the queue and the drivers. Insane OS doesn't use libcups**: it speaks IPP to it over
 its local socket with our own C client. Network printers and scanners are found over mDNS with our
 own code, and scanners are used over eSCL, without SANE. The interface is native: Settings →
 Printers & Scanners, the system print dialog and the Scanner app.
@@ -47,7 +47,7 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
 
 ### Why without libcups
 
-- **IPP is enough:** it's a simple binary format, and what LordOS needs is eight operations
+- **IPP is enough:** it's a simple binary format, and what Insane OS needs is eight operations
   (CUPS-Get-Printers, CUPS-Get-Default, Get-Jobs, Print-Job, Cancel-Job, CUPS-Add-Modify-Printer,
   CUPS-Delete-Printer and CUPS-Set-Default). libcups would also bring its DNS-SD (avahi-client),
   GnuTLS and PPD management, which aren't used.
@@ -68,7 +68,7 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
   credentials (SO_PEERCRED);
 - no password travels and no new code runs as root.
 
-**Who has `lpadmin`:** LordOS **administrators**, as in Ubuntu.
+**Who has `lpadmin`:** Insane OS **administrators**, as in Ubuntu.
 - The installer (`server/src/install/install.c`) gives it to the first user.
 - Settings → Users adds and removes it together with `sudo` when checking or unchecking
   "Administrator" (`users_admin.c`). If CUPS isn't installed, the group doesn't exist and it's
@@ -103,7 +103,7 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
 **Their own firewall app** (0.8.5): the IPP and eSCL connections to network printers and scanners,
 and the mDNS discovery socket, are made by the printers' connector (`lord-server --net-connector
 print`, `lordos-net-print.scope`), so they are "Printers and scanners" (`lordos:print`) in Monitor →
-Network, with their own rules (`FIREWALL.md`, "LordOS components in their own scopes"). The local
+Network, with their own rules (`FIREWALL.md`, "Insane OS components in their own scopes"). The local
 CUPS socket is a Unix socket and isn't affected.
 
 ### Scanner (eSCL, `apps/scanner`)
@@ -183,7 +183,7 @@ Inputs are validated on the C side:
 **"Network" printer, IPP Everywhere:**
 
 ```sh
-ippeveprinter -p 8631 -M LordOS -m "Impresora IPP de prueba" -l "Oficina 2" \
+ippeveprinter -p 8631 -M Insane OS -m "Impresora IPP de prueba" -l "Oficina 2" \
   -f application/pdf,image/pwg-raster,image/jpeg -d /tmp/ippeve "Impresora de la oficina"
 ```
 
@@ -203,7 +203,7 @@ DejaVu Sans Mono, embedded).
 Python's standard library:
 - it returns capabilities and delivers a drawn sheet (PNG) of the requested area and resolution;
 - it's announced with
-  `avahi-publish -s "Escáner de prueba" _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba LordOS"`.
+  `avahi-publish -s "Escáner de prueba" _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba Insane OS"`.
 
 Results:
 - preview at 75 dpi (637×877);

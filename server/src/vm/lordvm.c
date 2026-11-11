@@ -2024,7 +2024,7 @@ static int inhibit(const char *what, const char *why, const char *mode) {
     sd_bus_error e = SD_BUS_ERROR_NULL;
     int fd = -1, got = -1;
     if (sd_bus_call_method(sysbus, "org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager", "Inhibit", &e, &rep,
-                           "ssss", what, "LordOS Machines", why, mode) >= 0 && sd_bus_message_read(rep, "h", &got) >= 0)
+                           "ssss", what, "Insane OS Machines", why, mode) >= 0 && sd_bus_message_read(rep, "h", &got) >= 0)
         fd = fcntl(got, F_DUPFD_CLOEXEC, 3);
     else vlog("logind: no %s inhibitor: %s", what, e.message ? e.message : "?");
     sd_bus_error_free(&e);
@@ -2364,7 +2364,7 @@ static void on_qga_reply(const JVal *root, int ok) {
         ag_set(VAS_CONNECTED);
         if (S.keep_awake && (S.ag_caps & VAC_EXEC) && !S.inhibit_done) {
             S.inhibit_done = 1;
-            qga_do("guest-exec", "{\"path\":\"systemd-inhibit\",\"arg\":[\"--what=sleep:idle\",\"--who=LordOS Machines\","
+            qga_do("guest-exec", "{\"path\":\"systemd-inhibit\",\"arg\":[\"--what=sleep:idle\",\"--who=Insane OS Machines\","
                    "\"--why=The machine is kept awake while it runs\",\"--mode=block\",\"sleep\",\"infinity\"]}", AQ_INHIBIT);
         }
         id_begin();
@@ -2437,7 +2437,7 @@ static void on_qga_reply(const JVal *root, int ok) {
 static const char INSTALL_SH[] =
     "set -e; mv -f /usr/local/bin/.lordos-guest.new /usr/local/bin/lordos-guest; chmod 755 /usr/local/bin/lordos-guest; "
     "printf '%s\\n' 'SUBSYSTEM==\"virtio-ports\", ATTR{name}==\"org.lordos.agent\", TAG+=\"uaccess\"' > /etc/udev/rules.d/71-lordos-guest.rules; "
-    "mkdir -p /etc/systemd/user; printf '%s\\n' '[Unit]' 'Description=LordOS Machines clipboard' 'After=graphical-session.target' "
+    "mkdir -p /etc/systemd/user; printf '%s\\n' '[Unit]' 'Description=Insane OS Machines clipboard' 'After=graphical-session.target' "
     "'[Service]' 'ExecStart=/usr/local/bin/lordos-guest' 'Restart=on-failure' 'RestartSec=3' '[Install]' 'WantedBy=graphical-session.target' "
     "> /etc/systemd/user/lordos-guest.service; udevadm control --reload || true; udevadm trigger --subsystem-match=virtio-ports || true; "
     "systemctl --global enable lordos-guest.service || true";

@@ -134,7 +134,7 @@ eq('estimated from apps', [vi.cards[0].busy, vi.cards[0].busySource, vi.cards[0]
 near('power from energy', vi.cards[0].powerW, 12);
 eq('nothing reported', gpuStep(createGpuState(), { ...raw1, cards: [{ ...intel, energyUj: null }], list: [] }).cards[0].busy, null);
 eq('not an answer', gpuStep(createGpuState(), null), null);
-// lord-server itself is LordOS
+// lord-server itself is Insane OS
 eq('self', gpuStep(createGpuState(), { ...raw1, list: [{ ...proc(10, 0), self: true }] }).apps[0].key, 'app:lordos');
 
 // ---- history and the Overview ----

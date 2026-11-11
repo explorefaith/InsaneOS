@@ -1,4 +1,4 @@
-// @lordos/sdk — everything a LordOS theme or app needs.
+// @lordos/sdk — everything a Insane OS theme or app needs.
 import { createElement, cloneElement, Fragment } from 'react';
 import { render, onScreenChange } from '@lordos/runtime';
 import { settings } from './settings.js';
@@ -21,6 +21,7 @@ export { VOICE_LANGS, VOICES, voiceLabel, voicePackage, modelPackage, hasVoice, 
 export { parseWav, levelDb, quietEnough, roomCheck, takeName, trimSilence, joinPhrases, phraseDone } from './voicerecmodel.js';
 export { scanVoices, installVoices, removeVoices, packagesFor, voiceConf, setVoiceConf, addOwnVoice, removeOwnVoice, ownVoiceName } from './voicemanager.js';
 import { resetShortcuts } from './shortcuts.js';
+import { startSmooth } from './smooth.js';
 export { AppSwitcher, openSwitcher, cycleAppWindows, switcherKeys, switcherGrabs, switcherHold } from './appswitcher.jsx';
 export { switcherPrefs, SWITCHER_DEFAULTS, validColor } from './switchermodel.js';
 export { RemoteDeskApp } from './remotedesk.jsx';
@@ -68,7 +69,7 @@ import { startCleanerStatus } from './cleanerstatus.jsx';
 import { startCloud } from './cloudstatus.jsx';
 export { errorText, statusText, codeError, parseCode } from './errors.js';
 export { logs } from './logs.js';
-export { LordOSLogo, LordOSGlyph, LordOSWordmark } from './logo.js';
+export { InsaneLogo, InsaneGlyph, InsaneWordmark } from './logo.js';
 export { Lumo, lumoSource } from './mascot.js';
 export { DesktopWidgets, registerWidgetType, setWidgets, desktopWidgets } from './widgets.js';
 export { Markdown, markdownHeadings, parseMarkdown, parseInline, toggleTask } from './markdown.jsx';
@@ -148,7 +149,7 @@ export { cleaner } from './cleaner.js';   // Cleaner (docs/CLEANER-ARCHITECTURE.
 export { statusWord } from './cleanerstatus.jsx';
 export { cleanerPalette, CLEANER_THEMES } from './cleanertheme.js';
 export { oldKernels, kernelPlanOk } from './oldkernels.js';
-export { lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs, UPDATE_DEFAULTS } from './updates.js';   // updating LordOS in place (docs/UPDATES.md)
+export { lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs, UPDATE_DEFAULTS } from './updates.js';   // updating Insane OS in place (docs/UPDATES.md)
 // Store → Discover, "Suggested for your computer": packages for the detected hardware (docs/PACKAGES.md)
 export { suggestions, refreshSuggestions, reevaluate as reevaluateSuggestions, dismissSuggestion, markSuggestionsSeen, unseenSuggestions } from './suggestions.js';
 export { vaultAvailable, vaultRequest, onVaultEvent, keyring, autofill, autofillReveal, KeyringPrompt, AutofillButton, askKeyringUnlock } from './vault.js';   // Passwords and keyring (docs/PASSWORDS.md)
@@ -194,7 +195,7 @@ export const themes = {
       description: tOptional(`shell.theme.${t.id}.description`) || meta.description || '' };
   }).filter((t) => !t.hidden),         // the login screen (themes/greeter) can't be chosen
   current: () => lord.themes.list().find((t) => t.current)?.id || null,
-  // Switches theme live: the server discards this JS context and loads the new one. The LordOS
+  // Switches theme live: the server discards this JS context and loads the new one. The Insane OS
   // app windows that are open come back in the new theme (themeReopen, read once by startShell);
   // Linux app windows stay connected and simply get the new theme's frame.
   use(id) {
@@ -251,10 +252,11 @@ export function startShell(element) {
   startAlarms();                        // Clock alarms and timer, with the app closed
   startMail();                          // new-mail notifications and passwords on demand (docs/MAIL.md)
   startReminders();                     // calendar and reminder alarms, with the apps closed
-  maybeStartTour();                     // "Welcome to LordOS", the first time
+  maybeStartTour();                     // "Welcome to Insane OS", the first time
   startHardware();                      // Night Light, idle timers, battery in the menu bar (hardware.jsx)
   startDiskWatch();                     // notices when a disk gets too hot or its health gets worse
   startVideo();                         // browser video without hardware decoding (video.js, docs/VIDEO.md)
+  startSmooth();                        // hot corners, auto dark, dynamic wallpaper, login chime (smooth.js)
   startBrowserFrame();                  // "Browsers: tabs in the title bar" left for Chromium to quit (browserframe.js)
   setTimeout(sweepUninstalledGrants, 5000); // a screen-share grant doesn't outlive its app (share.js)
   startCleanerStatus();                 // Cleaner's still item by the clock; its panel reads only while open
@@ -265,7 +267,7 @@ export function startShell(element) {
   watchPackaged();                      // an app dpkg installed or removed shows without a new session
   startWindowMemory();                  // each app reopens where it was (windowmemory.js, docs/WINDOWS.md)
   startSessionRestore();                // the apps that were open come back (sessionrestore.jsx, docs/SESSIONS.md)
-  setTimeout(reportRefusedCode, 800);   // "This LordOS component was modified and was not loaded" (docs/SIGNING.md)
+  setTimeout(reportRefusedCode, 800);   // "This Insane OS component was modified and was not loaded" (docs/SIGNING.md)
 }
 
 // A screen-share grant doesn't outlive its app, even one removed with dpkg behind the shell's back.
@@ -323,7 +325,7 @@ function LocaleRoot({ children }) {
     at('system', PermissionPrompt, SharePrompt, Powerbox, KeyringPrompt, BluetoothPrompt, PolkitPrompt, PortalFilePrompt, VoiceSavePrompt, DisplayConfirm),
     at('input', OskPanel, ImeOverlay));
 }
-export { setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, MotionWallpaper, MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionPoster, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor } from './motion.jsx';
+export { setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, MotionWallpaper, MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionPoster, motionDownloads, wallpaperMedia, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor } from './motion.jsx';
 export { userVideoProblem, motionCodecs, MAX_SECONDS } from './motionmodel.js';
 export { lordosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, findWallpaper, DEFAULT_WALLPAPER, GREETER_WALLPAPER, WALLPAPER_CATEGORIES } from './wallpapers.js';
 export { appGroup, appMenuItems, runningApps, forceQuit, recentItems, storeUpdates, hideApp, hideOthers, toggleShowDesktop, appSettingsItem } from './appcontrol.js';

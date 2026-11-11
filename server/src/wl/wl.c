@@ -1,10 +1,10 @@
-/* wl.c — LordOS's own Wayland compositor: Linux apps (GTK, Qt, foot…) open as LordOS
+/* wl.c — Insane OS's own Wayland compositor: Linux apps (GTK, Qt, foot…) open as Insane OS
  * windows. It only uses libwayland-server (it serializes the protocol; the dependency policy
  * allows it since M1) and the code wayland-scanner generates for xdg-shell and xdg-decoration.
  *
  * Globals: wl_compositor 6, wl_subcompositor, wl_shm (from libwayland), wl_output 4, wl_seat 7
  * (pointer and keyboard with the XKB keymap from keyboard.c), wl_data_device_manager 3 (clipboard
- * shared with LordOS's), xdg_wm_base 6 and zxdg_decoration_manager_v1.
+ * shared with Insane OS's), xdg_wm_base 6 and zxdg_decoration_manager_v1.
  *
  * Each surface copies its shared-memory buffer on commit (and releases it right away):
  * the UI draws it as one more node (NODE_SURFACE) inside the theme's window frame. Windows
@@ -14,7 +14,7 @@
  *
  * X11 apps go through Xwayland (xwayland.c starts it on demand, xwm.c is the X window manager):
  * its X windows are surfaces of one more client, with the toplevel or popup role given here
- * (wlx_attach). Not there yet: drag and drop, text-input (LordOS input methods inside Wayland apps). */
+ * (wlx_attach). Not there yet: drag and drop, text-input (Insane OS input methods inside Wayland apps). */
 #include "wl.h"
 #include "keygrab.h"
 #include "../keylag.h"
@@ -188,7 +188,7 @@ static void fs_rect(float *x, float *y, float *w, float *h) {
     *x = 0; *y = 0; *w = ui.width; *h = ui.height;
 }
 
-/* cursor of the app with the pointer: 0 LordOS arrow, 1 app image, 2 hidden */
+/* cursor of the app with the pointer: 0 Insane OS arrow, 1 app image, 2 hidden */
 static Surf *cursor_surf;
 static int cursor_mode;
 static unsigned cursor_gen;
@@ -768,7 +768,7 @@ static void bind_subcompositor(struct wl_client *c, void *data, uint32_t ver, ui
  * Each display is a slot with its own global. Resources keep the slot index + 1 as user data (0
  * once the display is gone). Geometry and xdg-output carry the position in the global logical
  * space; mode is the physical one; scale is the integer one for legacy clients (they render at it
- * and LordOS downscales), and fractional-scale-v1 tells the others the exact one. */
+ * and Insane OS downscales), and fractional-scale-v1 tells the others the exact one. */
 typedef struct {
     WlOutput o;
     struct wl_global *global;
@@ -791,7 +791,7 @@ static OutSlot *slot_of(struct wl_resource *r) {
 
 static void send_output(struct wl_resource *r, const WlOutput *o) {
     int ver = wl_resource_get_version(r);
-    wl_output_send_geometry(r, o->x, o->y, o->mm_w, o->mm_h, WL_OUTPUT_SUBPIXEL_UNKNOWN, "LordOS", o->desc[0] ? o->desc : "lord-server",
+    wl_output_send_geometry(r, o->x, o->y, o->mm_w, o->mm_h, WL_OUTPUT_SUBPIXEL_UNKNOWN, "Insane OS", o->desc[0] ? o->desc : "lord-server",
                             WL_OUTPUT_TRANSFORM_NORMAL);
     wl_output_send_mode(r, WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, o->pw, o->ph, o->refresh > 0 ? o->refresh : 60000);
     if (ver >= 2) wl_output_send_scale(r, int_scale(o->scale));
@@ -1003,7 +1003,7 @@ static void ptr_set_cursor(struct wl_client *c, struct wl_resource *r, uint32_t 
 }
 static void res_release(struct wl_client *c, struct wl_resource *r) { (void)c; wl_resource_destroy(r); }
 
-/* cursor-shape-v1: the app asks for a shape by name (Chromium, GTK 4, Qt 6) and LordOS draws its own
+/* cursor-shape-v1: the app asks for a shape by name (Chromium, GTK 4, Qt 6) and Insane OS draws its own
  * (cursor.c); cursor_mode 3. Only valid if the pointer is over a surface of that app. */
 static unsigned cursor_shape;
 static void csd_set_shape(struct wl_client *c, struct wl_resource *r, uint32_t serial, uint32_t shape) {
@@ -1135,21 +1135,21 @@ void wl_keymap_changed(void) {
 }
 
 /* ---- clipboard (wl_data_device_manager) ----
- * An app's text selection is read in full (text/plain) and goes to the LordOS
+ * An app's text selection is read in full (text/plain) and goes to the Insane OS
  * clipboard; if it is only an image (image/png), it is kept here, so it stays available when the app
- * closes and LordOS shows it in the history. While the owning app lives, the other apps
- * receive from it any format it offers (the request is forwarded to it). The LordOS
+ * closes and Insane OS shows it in the history. While the owning app lives, the other apps
+ * receive from it any format it offers (the request is forwarded to it). The Insane OS
  * selection (terminal, text fields, an image from the history) is offered to the focused app. */
 
 #define MAX_MIMES 32
 #define CLIP_MAX (16u << 20)
 typedef struct { struct wl_resource *res; char mimes[MAX_MIMES][256]; int nmimes; } Source;
-static Source *selection;           /* source of the app owning the selection, or NULL (LordOS) */
+static Source *selection;           /* source of the app owning the selection, or NULL (Insane OS) */
 /* Bumped whenever the selection changes: an offer is only good for the selection it was made for,
  * and only while its client has the keyboard (an app can't keep an old offer to read later copies). */
 static unsigned clip_offer_gen = 1;
 typedef struct { Source *src; unsigned gen; } OfferRef;
-static unsigned clip_seen;          /* LordOS clipboard generation already offered */
+static unsigned clip_seen;          /* Insane OS clipboard generation already offered */
 static unsigned char *clip_png;     /* last copied image */
 static size_t clip_png_len;
 static unsigned clip_img_gen;
@@ -1188,7 +1188,7 @@ static void src_gone(struct wl_resource *r) {
     if (selection == s) {
         selection = NULL;
         clip_offer_gen++;
-        if (clip_is_image) offer_to_focus();    /* the image stays, now LordOS offers it */
+        if (clip_is_image) offer_to_focus();    /* the image stays, now Insane OS offers it */
     }
     free(s);
 }
@@ -1225,7 +1225,7 @@ static void html_adopt(char *h, size_t n) {
     clip_html_gen = h ? term_clipboard_gen() : 0;
 }
 
-/* reading an app's selection into LordOS */
+/* reading an app's selection into Insane OS */
 typedef struct { int fd, image, sensitive, primary, html, html_only; pid_t pid; unsigned offer; struct wl_event_source *ev; char *buf; size_t len, cap; char origin[128]; } Reader;
 static void prim_store(const char *t, size_t n, pid_t pid);
 
@@ -1287,7 +1287,7 @@ static int reader_ready(int fd, uint32_t mask, void *data) {
     } else if (rd->len) {
         term_set_clipboard(rd->buf, rd->len);
         term_clipboard_mark(rd->origin, rd->sensitive);
-        clip_seen = term_clipboard_gen();       /* not a change from LordOS */
+        clip_seen = term_clipboard_gen();       /* not a change from Insane OS */
         clip_is_image = 0;
         clip_text_offer = rd->offer;
         if (clip_html_pend && clip_html_pend_offer == rd->offer && !rd->sensitive) { html_adopt(clip_html_pend, clip_html_pend_len); clip_html_pend = NULL; }
@@ -1377,7 +1377,7 @@ static void send_bytes(int fd, const void *data, size_t n) {
     if (!w->ev) { close(fd); free(w->buf); free(w); }
 }
 
-/* offers: from another app (forwarded) or from the LordOS clipboard (written) */
+/* offers: from another app (forwarded) or from the Insane OS clipboard (written) */
 static void ofr_accept(struct wl_client *c, struct wl_resource *r, uint32_t serial, const char *mime) {
     (void)c; (void)r; (void)serial; (void)mime;
 }
@@ -1427,7 +1427,7 @@ static void offer_selection(struct wl_resource *dev) {
         wl_data_offer_send_offer(o, "UTF8_STRING");
         size_t hn = 0;
         if (wl_clip_html(&hn)) wl_data_offer_send_offer(o, "text/html");
-        /* a secret copied in LordOS (Passwords, password fields): Linux clipboard managers must not keep it */
+        /* a secret copied in Insane OS (Passwords, password fields): Linux clipboard managers must not keep it */
         if (term_clipboard_sensitive()) wl_data_offer_send_offer(o, "x-kde-passwordManagerHint");
     }
     wl_data_device_send_selection(dev, o);
@@ -2207,7 +2207,7 @@ static void surface_commit_role(Surf *s) {
  * CPU path: each surface's pixels are copied into the UI canvas.
  * GPU path: the UI leaves a transparent hole where each window goes and the surface is noted;
  * when presenting, their textures are drawn below the UI (layer 0). App menus and
- * fullscreen go on top (layer 1). This keeps the order between LordOS windows and
+ * fullscreen go on top (layer 1). This keeps the order between Insane OS windows and
  * app windows, and app content does not go through the CPU. */
 
 /* "Structural" clip of a node (overflow of its ancestors), without the frame's damage. */
@@ -2712,7 +2712,7 @@ void wl_pointer_grab(int nbuttons, const int *down) {
     if (buttons_held < 0) buttons_held = 0;
 }
 
-/* Pastes into the Linux app with the keyboard: a synthetic Ctrl+V only for that app (the LordOS
+/* Pastes into the Linux app with the keyboard: a synthetic Ctrl+V only for that app (the Insane OS
  * clipboard panel uses it after copying something again). Control is XKB core
  * modifier 2 in all keymaps. 1 if there was an app with the keyboard. */
 int wl_has_key_focus(void) { return dpy && key_focus; }
@@ -2738,6 +2738,23 @@ const char *wl_node_app(int node) {
     return NULL;
 }
 
+/* The Wayland client pid behind a window node, for the shell's foreground-report
+ * (the pressure-freeze helper must never stop lord-server itself, so our own pid
+ * comes back as 0; X11 windows answer with Xwayland's pid and are skipped by name). */
+int wl_node_pid(int node) {
+    if (!dpy || !node) return 0;
+    for (int i = 0; i < MAX_SURF; i++) if (surfs[i] && surfs[i]->node == node) {
+        if (!surfs[i]->top) return 0;
+        pid_t pid = 0;
+        uid_t uid;
+        gid_t gid;
+        wl_client_get_credentials(wl_resource_get_client(surfs[i]->top), &pid, &uid, &gid);
+        if (pid <= 1 || pid == getpid()) return 0;
+        return (int)pid;
+    }
+    return 0;
+}
+
 int wl_send_paste(void) {
     if (!dpy || !key_focus) return 0;
     unsigned t = now_ms();
@@ -2758,7 +2775,7 @@ static int focus_is_lord_app(void);
 static int node_protected(int node);
 static Surf *toplevel_of(Surf *s);
 
-/* Key latency trace (keylag.h): only keys for a Linux app, never an isolated LordOS app or a
+/* Key latency trace (keylag.h): only keys for a Linux app, never an isolated Insane OS app or a
  * protected window. */
 static int keylag_traceable(void) {
     Surf *top = toplevel_of(key_focus);
@@ -2780,7 +2797,7 @@ static void send_key_to_focus(int code, int value) {
     mods_sent[0] = d; mods_sent[1] = l; mods_sent[2] = lk; mods_sent[3] = g;
 }
 
-/* The client with the keyboard is an isolated LordOS app (`lord-server --app`): its pid is the one
+/* The client with the keyboard is an isolated Insane OS app (`lord-server --app`): its pid is the one
  * lord-server registered when it spawned it (brokersrv). A Linux app never matches. */
 static int focus_is_lord_app(void) {
     pid_t pid = 0;
@@ -2791,7 +2808,7 @@ static int focus_is_lord_app(void) {
     return brokersrv_app_of_pid((int)pid) != NULL;
 }
 
-/* ❖ shortcuts that stay with LordOS even when an isolated app has the keyboard: lock (❖L, ❖⌃Q),
+/* ❖ shortcuts that stay with Insane OS even when an isolated app has the keyboard: lock (❖L, ❖⌃Q),
  * quit (❖Q), search and keyboard layout (❖Space, ❖⌥Space), clipboard history (❖V, ❖⇧V), emoji
  * (❖.), window switching (❖Tab, ❖`), screenshots (❖⇧3/4/5) and ❖Esc. */
 static int system_meta_key(int code, const KeyInfo *k) {
@@ -2805,7 +2822,7 @@ static int system_meta_key(int code, const KeyInfo *k) {
     }
 }
 
-/* Keys the shell keeps (keygrab.c) and the ❖ → Ctrl of Lord Flow. grabbed[code]: its press went to
+/* Keys the shell keeps (keygrab.c) and the ❖ → Ctrl of Insane Flow. grabbed[code]: its press went to
  * the shell, so its release does too. remapped[code]: its press went to the app as Ctrl+key.
  * grab_hold: the modifier of a switcher in progress; until it is released every key is the shell's,
  * while modifiers still reach the app too, so it never keeps one stuck. */
@@ -2886,7 +2903,7 @@ int wl_key(int code, int value, const KeyInfo *k) {
     }
     int super = code == KEY_LEFTMETA || code == KEY_RIGHTMETA;
     if (k->meta || super) {
-        /* ❖ + key: LordOS shortcuts. An isolated LordOS app also gets the ones that are not the
+        /* ❖ + key: Insane OS shortcuts. An isolated Insane OS app also gets the ones that are not the
          * system's (❖N, ❖C, ❖A, ❖W…), with the ❖ key itself so it knows the modifier, as an app in
          * the theme would; the theme still sees them (it tracks ❖ pressed alone). A Linux app only
          * gets the release of ❖, as before. */
@@ -3389,7 +3406,7 @@ void wl_pointer_confine(int *x, int *y) {
     if (*y > y1) *y = y1;
 }
 
-/* Cursor requested by the app with the pointer: 0 = LordOS arrow, 1 = image, 2 = hidden. */
+/* Cursor requested by the app with the pointer: 0 = Insane OS arrow, 1 = image, 2 = hidden. */
 void wl_set_pointer_scale(int pct) { if (pct != pointer_scale) { pointer_scale = pct; cursor_gen++; } }
 
 int wl_cursor(const uint32_t **px, int *w, int *h, int *hx, int *hy, unsigned *gen) {
@@ -3442,7 +3459,7 @@ void wl_set_focus(int id) {
         prim_offer_focus();
         clip_seen = term_clipboard_gen();
     }
-    /* X11: the X focus follows (and with it whether X apps may read LordOS's clipboard) */
+    /* X11: the X focus follows (and with it whether X apps may read Insane OS's clipboard) */
     xwm_focus(s && s->xw ? s->xw : NULL);
     constraint_update();                /* a pointer lock holds only with the keyboard (ptrlock.h) */
     wl_display_flush_clients(dpy);
@@ -3564,7 +3581,7 @@ void wl_set_parked(int id, int parked) {
 void wl_output_resized(void) {
     if (!dpy) return;
     int w = (int)ui.width, h = (int)ui.height;
-    WlOutput o = { 0, 0, w, h, w, h, 60000, 100, w * 254 / 960, h * 254 / 960, "LORD-1", "LordOS display" };
+    WlOutput o = { 0, 0, w, h, w, h, 60000, 100, w * 254 / 960, h * 254 / 960, "LORD-1", "Insane OS display" };
     wl_set_outputs(&o, 1, 0);
 }
 
@@ -3633,10 +3650,10 @@ int wl_start(void) {
     wl_global_create(dpy, &kde_mgr_interface, 1, NULL, bind_kde_deco);   /* theme frame for GTK 3 (Firefox) */
     wl_input_globals(dpy);              /* zwp_pointer_gestures_v1 (wl_input.c) */
     wl_textinput_globals(dpy, text_field_report);    /* zwp_text_input_v3 (wl_textinput.c) */
-    /* inherited by apps opened from the LordOS terminal */
+    /* inherited by apps opened from the Insane OS terminal */
     setenv("WAYLAND_DISPLAY", socket_name, 1);
     setenv("XDG_SESSION_TYPE", "wayland", 1);
-    setenv("XDG_CURRENT_DESKTOP", "LordOS", 1);
+    setenv("XDG_CURRENT_DESKTOP", "Insane OS", 1);
     setenv("GDK_BACKEND", "wayland", 1);
     setenv("QT_QPA_PLATFORM", "wayland", 1);
     setenv("MOZ_ENABLE_WAYLAND", "1", 1);
@@ -3660,7 +3677,7 @@ void wl_dispatch(void) { if (dpy) wl_event_loop_dispatch(loop, 0); }
 
 void wl_flush(void) {
     if (!dpy) return;
-    /* LordOS copied something (terminal, text field): the focused app sees it as the selection */
+    /* Insane OS copied something (terminal, text field): the focused app sees it as the selection */
     unsigned g = term_clipboard_gen();
     if (g != clip_seen) {
         clip_seen = g;
@@ -3777,7 +3794,7 @@ void wlx_fullscreen_rect(int *x, int *y, int *w, int *h) {
     *x = (int)fx; *y = (int)fy; *w = (int)fw; *h = (int)fh;
 }
 
-/* What an X11 app copied: LordOS's clipboard (the next wl_flush offers it to the focused Wayland app
+/* What an X11 app copied: Insane OS's clipboard (the next wl_flush offers it to the focused Wayland app
  * and cancels a Wayland app's selection). */
 void wlx_clip_text(const char *t, size_t n, const char *origin) {
     term_set_clipboard(t, n);

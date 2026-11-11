@@ -10,7 +10,7 @@
  *    drm-driver, drm-pdev, drm-client-id, drm-engine-*, drm-engine-capacity-*, drm-cycles-*, drm-total-cycles-*,
  *    drm-memory-*, drm-total-*, drm-resident-*, drm-shared-*). Raw counters only: rates are made in JS
  *    (apps/monitor/gpumodel.js), which also dedupes clients shared between processes.
- *  - /proc/<pid>/stat of every process, for LordOS's AI helpers (lord-tts, lord-ocr, lord-say) and the virtual
+ *  - /proc/<pid>/stat of every process, for Insane OS's AI helpers (lord-tts, lord-ocr, lord-say) and the virtual
  *    machines (qemu-system-*, the user's own), and lord-say's status note (~/.cache/lordos/say/<pid>, written by
  *    say.c: the backend, quality and language it chose).
  *

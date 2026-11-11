@@ -1,4 +1,4 @@
-// mascot.js — Lumo, the LordOS guardian (docs/brand/README.md, "Lumo").
+// mascot.js — Lumo, the Insane OS guardian (docs/brand/README.md, "Lumo").
 //
 //   <Lumo pose="confused" size={96} />   a pose: 'wave' (welcome), 'shield' (security), 'run' (busy), 'celebrate'
 //                                        (done), 'confused' (error, unavailable), 'sleep' (idle)

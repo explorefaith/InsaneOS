@@ -243,17 +243,17 @@ const STATUS_TEXT = {
 };
 
 export function commentBody(result, { fileName = '' } = {}) {
-  const L = [MARKER, '### LordOS hardware report check', '', STATUS_TEXT[result.status] || STATUS_TEXT.invalid, ''];
+  const L = [MARKER, '### Insane OS hardware report check', '', STATUS_TEXT[result.status] || STATUS_TEXT.invalid, ''];
   if (fileName) L.push(`File: ${code(fileName)}`, '');
   if (result.summary) {
     const s = result.summary;
     L.push('| | |', '|---|---|',
       `| Machine | ${code(s.machine)} (${code(s.kind)}) |`,
-      `| LordOS | ${code(s.lordos)}${s.live ? ' — live session' : ''}${s.boot ? ` — started from ${code(s.boot)}` : ''} |`,
+      `| Insane OS | ${code(s.lordos)}${s.live ? ' — live session' : ''}${s.boot ? ` — started from ${code(s.boot)}` : ''} |`,
       `| CPU | ${code(s.cpu)}${s.threads ? ` — ${s.threads} threads` : ''} |`,
       `| GPU | ${code(s.gpu)} |`,
       `| Compatibility | ${s.compat.length ? s.compat.slice(0, 12).map(code).join(' ') : '—'} |`,
-      `| LordBench | ${s.bench ? code(s.bench) : 'not included'} |`, '');
+      `| InsaneBench | ${s.bench ? code(s.bench) : 'not included'} |`, '');
   }
   if (result.errors && result.errors.length) {
     L.push('**What doesn’t match the format:**', '');

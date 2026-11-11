@@ -44,7 +44,7 @@
 #define RUN_DIR "/run/lordos"
 #define RESCUE_LOCK RUN_DIR "/admin-rescue.lock"
 #define RESCUE_FAIL_DELAY 2             /* seconds, with the lock held: one try at a time, machine-wide */
-/* Printers (M9, docs/PRINTING.md): CUPS lets the lpadmin group administer printers. LordOS
+/* Printers (M9, docs/PRINTING.md): CUPS lets the lpadmin group administer printers. Insane OS
  * administrators get it too; if CUPS isn't installed the group doesn't exist and it's
  * skipped without error. */
 #define PRINT_GROUP "lpadmin"
@@ -178,7 +178,7 @@ static void autologin_get(char *out, size_t n) {
 static int autologin_set(const char *user) {
     mkdir("/etc/lordos", 0755);
     char text[256];
-    snprintf(text, sizeof text, "# Written by LordOS (Settings → Users). See docs/SESSIONS.md\n"
+    snprintf(text, sizeof text, "# Written by Insane OS (Settings → Users). See docs/SESSIONS.md\n"
              "# AUTOLOGIN=user logs in automatically at boot; empty: login screen\nAUTOLOGIN=%s\n", user);
     return write_file(SESSION_CONF, text, strlen(text), 0644);
 }

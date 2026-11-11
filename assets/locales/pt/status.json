@@ -23,7 +23,7 @@
   "imager.verifiedImage": "A imagem confere com o seu SHA-256 assinado",
   "imager.written": "Gravada e verificada",
   "install.chownWarning": "Aviso: não foi possível alterar o dono de um arquivo",
-  "install.done": "O LordOS foi instalado em {dev}",
+  "install.done": "O Insane OS foi instalado em {dev}",
   "install.homedirsWarning": "Aviso: não foi possível criar as pastas do usuário",
   "install.installingTo": "Instalando em {dev}",
   "install.rebooting": "Reiniciando",
@@ -33,14 +33,14 @@
     "one": "{count} pacote instalado para “{lang}”",
     "other": "{count} pacotes instalados para “{lang}”"
   },
-  "lang.noDebianPackages": "Não há pacotes Debian para “{lang}”: só a região e os textos do LordOS",
+  "lang.noDebianPackages": "Não há pacotes Debian para “{lang}”: só a região e os textos do Insane OS",
   "lang.package": "Pacote: {name}",
   "locale.generated": "Região {name} instalada",
   "locale.systemSet": "Região do sistema: {name}",
-  "net.alreadyLordos": "{name} já era administrada pelo LordOS",
+  "net.alreadyManaged": "{name} já era administrada pelo Insane OS",
   "net.configured": "{name}: {method}",
   "net.down": "{name} desligada",
-  "net.managed": "{name} agora é administrada pelo LordOS",
+  "net.managed": "{name} agora é administrada pelo Insane OS",
   "net.otherSession": "A rede é administrada por outra sessão",
   "net.restoreSystem": "A rede é administrada pelo sistema",
   "net.restored": {
@@ -136,8 +136,8 @@
   "vpn.imported": "VPN importada",
   "vpn.saved": "Salvo",
   "wg.ignoredLines": {
-    "one": "{count} linha ignorada (PostUp, PreDown, Table…): o LordOS não executa comandos",
-    "other": "{count} linhas ignoradas (PostUp, PreDown, Table…): o LordOS não executa comandos"
+    "one": "{count} linha ignorada (PostUp, PreDown, Table…): o Insane OS não executa comandos",
+    "other": "{count} linhas ignoradas (PostUp, PreDown, Table…): o Insane OS não executa comandos"
   },
   "wifi.connecting": "Conectando a {ssid}…",
   "wifi.disconnected": "Desconectado",
@@ -147,7 +147,7 @@
   "install.free.rollingBack": "Restaurando a tabela de partições",
   "install.free.rolledBack": "A tabela de partições ficou como estava",
   "install.free.rollbackFailed": "Não foi possível restaurar a tabela de partições: há uma cópia em {path}. Não reinicie: salve-a primeiro",
-  "install.manual.installing": "Instalando o LordOS em {dev} com as partições que você escolheu",
+  "install.manual.installing": "Instalando o Insane OS em {dev} com as partições que você escolheu",
   "install.manual.tableKept": "A instalação parou depois de apagar partições: a tabela nova fica, porque o espaço delas já pode ter sido gravado. As outras partições não foram tocadas",
   "install.creatingAccount": "Criando a conta {user}",
   "install.accountDone": "A conta está pronta",

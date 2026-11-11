@@ -2,10 +2,10 @@
 //
 // When the computer can't decode VP9 or AV1 in hardware (most virtual machines, older PCs, the
 // Raspberry Pi 5), video sites that send those codecs make the browser decode them on the CPU and
-// the video stutters. LordOS then asks the browsers for H.264 instead:
+// the video stutters. Insane OS then asks the browsers for H.264 instead:
 //   - lord.media.hwDecode() says what the hardware decodes (src/media/hwdec.c, once per boot);
 //   - the closed admin action video-optimize writes the browsers' settings from fixed text
-//     (Chromium: the managed policy of LordOS's own extension, assets/browser/video; Firefox ESR:
+//     (Chromium: the managed policy of Insane OS's own extension, assets/browser/video; Firefox ESR:
 //     a default pref), at login and whenever the setting changes.
 // settings.video = { mode: 'auto' | 'always' | 'never', autoLower: false }. Nothing leaves the computer.
 import { settings } from './settings.js';

@@ -52,7 +52,7 @@ int app_spawn(const char *id) {
     char dir[PATH_MAX];
     int sys = app_package_dir(id, js_sys_assets(), dir, sizeof dir);
     if (sys < 0) return -1;
-    if (sys == 2 && js_sys_reserved_id(id)) return -1;    /* LordOS's own string namespaces, as for a home .lpk */
+    if (sys == 2 && js_sys_reserved_id(id)) return -1;    /* Insane OS's own string namespaces, as for a home .lpk */
     /* one process per app: if it is already running, it opens another window instead */
     if (!brokersrv_new_window(id)) { fprintf(stderr, "lord-server: app '%s' already running: new window\n", id); return 0; }
 

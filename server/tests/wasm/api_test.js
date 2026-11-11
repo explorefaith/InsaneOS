@@ -1,4 +1,4 @@
-// api_test.js — the LordOS WebAssembly global (src/ui/js_wasm.c). Run by build/wasm-js-test.
+// api_test.js — the Insane OS WebAssembly global (src/ui/js_wasm.c). Run by build/wasm-js-test.
 let fails = 0, oks = 0;
 const ok = (cond, what) => { if (cond) oks++; else { fails++; print('FAIL ' + what); } };
 const throwsAs = (fn, cls, what) => { try { fn(); ok(false, what + ' (did not throw)'); } catch (e) { ok(e instanceof cls, what + ' (threw ' + e + ')'); } };

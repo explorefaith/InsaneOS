@@ -154,7 +154,7 @@ int bkc_derive(const char *pass, const uint8_t salt[BKC_SALT], uint8_t key[BKC_K
 }
 
 void bkc_check(const uint8_t key[BKC_KEY], uint8_t out[16]) {
-    static const char label[] = "LordOS-Backups key check v1";
+    static const char label[] = "Insane OS-Backups key check v1";
     crypto_blake2b_keyed(out, 16, key, BKC_KEY, (const uint8_t *)label, sizeof label - 1);
 }
 

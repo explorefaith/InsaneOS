@@ -24,7 +24,7 @@
 #define FWS_URL_MAX     400
 #define FWS_STALE_S     (20 * 3600)     /* "daily": older than this is downloaded again */
 
-/* home: the user's real home folder; assets: LordOS's assets folder; bindir: where lord-fetch is. */
+/* home: the user's real home folder; assets: Insane OS's assets folder; bindir: where lord-fetch is. */
 int   fws_init(const char *home, const char *assets, const char *bindir);
 /* {"catalog":[…],"custom":[…],"enabled":[…],"state":{id:{…}},"busy":bool,"domains":N,"nets":N} (malloc'd) */
 char *fws_json(void);

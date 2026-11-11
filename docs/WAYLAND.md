@@ -1,7 +1,7 @@
-# Linux apps in LordOS (Wayland)
+# Linux apps in Insane OS (Wayland)
 
 lord-server is also a **Wayland compositor**: GTK, Qt and any other app that speaks Wayland open
-as LordOS windows, inside the theme, next to the native apps. There's no X server of its own, Weston,
+as Insane OS windows, inside the theme, next to the native apps. There's no X server of its own, Weston,
 wlroots or Mutter: only `libwayland-server` (it serializes the protocol; it's been in the dependency policy
 since M1) and the code `wayland-scanner` generates from the `wayland-protocols` XML files. The
 compositor lives in `server/src/wl/wl.c`.
@@ -13,13 +13,13 @@ Apps that only speak X11 open through Xwayland, started on demand, with our own 
 | | |
 |---|---|
 | ![foot](wayland-foot-terminal.png) | ![gtk](wayland-gtk4-demo.png) |
-| foot (Wayland terminal) with the theme's frame: it asks for server-side decoration | GTK Demo (GTK 4.18): draws its own frame; LordOS clips its shadow |
+| foot (Wayland terminal) with the theme's frame: it asks for server-side decoration | GTK Demo (GTK 4.18): draws its own frame; Insane OS clips its shadow |
 | ![gtk-menu](wayland-gtk-menu.png) | ![gtk-drag](wayland-gtk-drag.png) |
 | GTK popup menu (xdg_popup), placed with its positioner | Dragged from its own bar (xdg_toplevel.move): it follows the pointer |
 | ![qt](wayland-qt6-editor.png) | ![qt-menu](wayland-qt-menu.png) |
-| FeatherPad (Qt 6.8) opened from the LordOS Terminal, with the theme's frame | Qt's File menu |
+| FeatherPad (Qt 6.8) opened from the Insane OS Terminal, with the theme's frame | Qt's File menu |
 | ![clipboard](wayland-clipboard.png) | ![dock](wayland-three-apps-dock.png) |
-| Copied in FeatherPad (Ctrl+C) and pasted in the LordOS Terminal | Three Linux apps open; each with its icon in the Dock |
+| Copied in FeatherPad (Ctrl+C) and pasted in the Insane OS Terminal | Three Linux apps open; each with its icon in the Dock |
 
 ## What's there
 
@@ -31,13 +31,13 @@ Apps that only speak X11 open through Xwayland, started on demand, with our own 
 | `wl_output` | 4 | one per display: logical position, physical mode, scale rounded up, name and description (`DISPLAYS.md`) |
 | `zxdg_output_manager_v1` | 3 | logical position and size of each display |
 | `wp_fractional_scale_v1` | 1 | the exact scale of the display(s) a surface is on (GTK 4, Qt 6, Chromium render sharp at 125–175 %) |
-| `wl_seat` | 9 | pointer (enter, leave, motion, buttons, wheel with `axis_source` and `axis_value120`; fine touchpad scrolling with `axis_source finger`, `axis_stop` and `axis_relative_direction` for natural scrolling), keyboard with LordOS's XKB keymap (`keyboard.c`), modifiers and repeat, and `wl_touch` if there's a touchscreen |
+| `wl_seat` | 9 | pointer (enter, leave, motion, buttons, wheel with `axis_source` and `axis_value120`; fine touchpad scrolling with `axis_source finger`, `axis_stop` and `axis_relative_direction` for natural scrolling), keyboard with Insane OS's XKB keymap (`keyboard.c`), modifiers and repeat, and `wl_touch` if there's a touchscreen |
 | `zwp_pointer_gestures_v1` | 3 | touchpad gestures: pinch (zoom in Chromium, GTK, Firefox), swipe and hold (`wl_input.c`, see `TRACKPAD.md`) |
-| `wl_data_device_manager` | 3 | clipboard shared with LordOS's in both directions (see below) |
+| `wl_data_device_manager` | 3 | clipboard shared with Insane OS's in both directions (see below) |
 | `zwp_primary_selection_device_manager_v1` | 1 | primary selection: select to copy, middle click to paste (0.8.3, see "X11 apps") |
 | `xdg_wm_base` | 6 | windows (`xdg_toplevel`: title, move, resize, maximize, minimize, close) and popup menus (`xdg_popup` with `xdg_positioner`: anchor, gravity, flip and slide within the screen) |
 | `zxdg_decoration_manager_v1` | 1 | the app picks who draws the frame: server side (Qt, foot, Kitty, Alacritty: the theme's frame) or client side (Chromium with its own bar), also while it's open (0.8.4) |
-| `wp_cursor_shape_manager_v1` | 1 | the app asks for the cursor by name (Chromium, GTK 4, Qt 6) and LordOS draws its own (`cursor.c`, see `WINDOWS.md`) |
+| `wp_cursor_shape_manager_v1` | 1 | the app asks for the cursor by name (Chromium, GTK 4, Qt 6) and Insane OS draws its own (`cursor.c`, see `WINDOWS.md`) |
 | `org_kde_kwin_server_decoration_manager` | 1 | GTK 3's way to ask for the frame (Firefox, Mousepad; see "Who draws the frame") |
 | `zwp_idle_inhibit_manager_v1` | 1 | a video or presentation keeps the screen on while its surface is mapped (0.8.5, see the end of this page) |
 | `zwp_text_input_manager_v3` | 1 | a text field took focus and where its caret is: only a hint for the on-screen keyboard; text keeps arriving on `wl_keyboard` (0.8.7, `wl_textinput.c`, see `ON-SCREEN-KEYBOARD.md`) |
@@ -49,16 +49,16 @@ minimize and Dock. Those that draw their own frame (GTK, and the browsers with t
 with `args.csd` and the theme shows only the content (both bundled themes already do); an app that
 switches while open sends `deco` and the same window changes presentation (see "Who draws the
 frame" below). The keyboard goes to the frontmost Linux
-app; ❖ combinations still belong to LordOS.
+app; ❖ combinations still belong to Insane OS.
 
 ## How to open an app
 
-From the LordOS Terminal: every new tab has `WAYLAND_DISPLAY`, `XDG_SESSION_TYPE=wayland`,
+From the Insane OS Terminal: every new tab has `WAYLAND_DISPLAY`, `XDG_SESSION_TYPE=wayland`,
 `GDK_BACKEND=wayland` and `QT_QPA_PLATFORM=wayland`, so `featherpad &`, `gtk4-demo &` or
-`foot &` is enough. Apps also receive LordOS's language and region (`LANG`, `LC_*`, see
+`foot &` is enough. Apps also receive Insane OS's language and region (`LANG`, `LC_*`, see
 `LANGUAGES.md`).
 
-They also appear in the **app launcher**, in the Lord Classic theme's start menu and in the Store (see
+They also appear in the **app launcher**, in the Insane Classic theme's start menu and in the Store (see
 `NATIVE-APPS.md` and `PACKAGES.md`): they are the apps with a `.desktop` in
 `/usr/share/applications` or `~/.local/share/applications`. They open with one click, and their
 window carries the same icon in the Dock as in the app launcher (they're recognized by the Wayland
@@ -67,9 +67,9 @@ app id or by `StartupWMClass`).
 | | |
 |---|---|
 | ![launchpad](app-launcher-linux-apps.png) | ![launched](app-launched-from-launcher.png) |
-| The app launcher with the installed Linux apps next to the LordOS apps, each with its own icon | FeatherPad opened with one click; it carries the same icon in the Dock |
+| The app launcher with the installed Linux apps next to the Insane OS apps, each with its own icon | FeatherPad opened with one click; it carries the same icon in the Dock |
 | ![classic](classic-theme-start-menu.png) | ![classic2](classic-theme-linux-app.png) |
-| Lord Classic theme: the start menu with LordOS apps and Linux apps, grouped by category | FeatherPad running in the Lord Classic theme, with its icon in the taskbar |
+| Insane Classic theme: the start menu with Insane OS apps and Linux apps, grouped by category | FeatherPad running in the Insane Classic theme, with its icon in the taskbar |
 
 ### The launcher (`server/src/apps.c`)
 
@@ -80,7 +80,7 @@ shell. The user approved it for M7. Limits:
   also pass the filters:
   - `Type=Application`;
   - no `NoDisplay` or `Hidden`;
-  - `OnlyShowIn`/`NotShowIn` with `LordOS`;
+  - `OnlyShowIn`/`NotShowIn` with `Insane OS`;
   - the `TryExec` exists;
   - it isn't a terminal app.
 - The command is that file's `Exec` line, re-read at launch time:
@@ -113,9 +113,9 @@ shell. The user approved it for M7. Limits:
   - `.lpk` packages are installed in another folder.
 
   So the interface can't invent a command: it can only pick an app that's already installed.
-- **File names with spaces (0.8.5):** a package may name its `.desktop` freely (`LordOS
+- **File names with spaces (0.8.5):** a package may name its `.desktop` freely (`Insane OS
   Imager.desktop`). Its id is the file name with every character other than letters, digits, `.`, `_`
-  and `-` turned into `-` (`LordOS-Imager`), and the app is listed and launched from its real file;
+  and `-` turned into `-` (`Insane OS-Imager`), and the app is listed and launched from its real file;
   the id rules above are unchanged. The two folders' modification times are compared in nanoseconds,
   so an app installed in the same second the list was last read also shows up.
 - **Force Quit (0.8.5):** `lord.wayland.kill(surface)` sends SIGKILL only to the Wayland client that
@@ -125,17 +125,17 @@ shell. The user approved it for M7. Limits:
 Icons: the `hicolor` PNG (64, 48, 128… px) or the one in `/usr/share/pixmaps` is used. Apps that
 only ship SVG (FeatherPad, GTK Demo) use the 64 px PNG Debian publishes in AppStream, which the
 package engine already downloads (`/var/lib/lordos/pkg/icons/64`, see `PACKAGES.md`). If it's not
-there either, the initial is shown: LordOS doesn't draw SVG yet.
+there either, the initial is shown: Insane OS doesn't draw SVG yet.
 
 ## Clipboard
 
 There's a single one for the whole session:
 
-- **Text.** What's copied in a Linux app goes to LordOS (Terminal, text fields), and what's
-  copied in LordOS is received by the focused app.
+- **Text.** What's copied in a Linux app goes to Insane OS (Terminal, text fields), and what's
+  copied in Insane OS is received by the focused app.
 - **Other formats (images, HTML…).** While the app that copied is still open, the other Linux
   apps receive from it any format it offers (up to 32).
-- **Images.** If what was copied is only an image (`image/png`), LordOS stores it: it stays
+- **Images.** If what was copied is only an image (`image/png`), Insane OS stores it: it stays
   available after the source app is closed and shows up in the history.
 - **No blocking.** Large copies (up to 16 MB) are sent in chunks, without a slow-reading app
   stalling the server.
@@ -143,7 +143,7 @@ There's a single one for the whole session:
 | | |
 |---|---|
 | ![history](clipboard-history-image.png) | ![paste](clipboard-paste-image.png) |
-| Image copied in GTK Demo, now closed: it's still in the history (❖V) | GTK Demo opened again: «Paste» receives it from LordOS |
+| Image copied in GTK Demo, now closed: it's still in the history (❖V) | GTK Demo opened again: «Paste» receives it from Insane OS |
 
 **History (❖V quick, ❖⇧V full):** it keeps everything copied anywhere: text, links, colors,
 code, paths and images, with the source (the app_id of the Linux app that copied). It's stored in
@@ -172,7 +172,7 @@ Memory: with foot, FeatherPad and GTK Demo open, lord-server goes from ~51 to 53
 (each window keeps a copy of its buffer).
 
 **Moving and resizing** (`xdg_toplevel.move`/`resize`) is tracked by lord-server in C, with no JS
-per frame, just like LordOS windows; while it lasts, the app doesn't receive the pointer. All
+per frame, just like Insane OS windows; while it lasts, the app doesn't receive the pointer. All
 Linux windows, including those with their own frame, have the theme's invisible borders for
 resizing (see `WINDOWS.md`).
 
@@ -181,17 +181,17 @@ resizing (see `WINDOWS.md`).
 | | |
 |---|---|
 | ![chromium light](chromium-csd-light.png) | ![chromium dark](chromium-csd-dark.png) |
-| Chromium with its own bar (0.8.4 default): tabs in the title bar and LordOS's traffic lights on the left, from LordOS's GTK theme | The same in dark: it follows the mode live |
+| Chromium with its own bar (0.8.4 default): tabs in the title bar and Insane OS's traffic lights on the left, from Insane OS's GTK theme | The same in dark: it follows the mode live |
 | ![before](chromium-csd-before.png) | ![classic](chromium-csd-classic.png) |
-| Before 0.8.4: Chromium asked to draw its own bar and LordOS put its frame on top anyway (two bars) | The Lord Classic theme: the buttons go to the right (`:minimize,maximize,close`), switched live |
+| Before 0.8.4: Chromium asked to draw its own bar and Insane OS put its frame on top anyway (two bars) | The Insane Classic theme: the buttons go to the right (`:minimize,maximize,close`), switched live |
 | ![firefox](firefox-csd.png) | ![own theme](chromium-own-theme.png) |
-| Firefox ESR with its own bar: LordOS's order and side, drawn in Firefox's own style | Chromium with its «Classic» theme (not GTK): LordOS's order and side, Chromium's own buttons |
+| Firefox ESR with its own bar: Insane OS's order and side, drawn in Firefox's own style | Chromium with its «Classic» theme (not GTK): Insane OS's order and side, Chromium's own buttons |
 | ![gtk dark](decorations-gtk-dark.png) | ![gtk light](decorations-gtk3-light.png) |
-| Mousepad (GTK 3, «LordOS-dark» theme) and GNOME Calculator (GTK 4/libadwaita, green accent and buttons on the left), dark | The same in light: they change live when the mode is switched in Settings |
+| Mousepad (GTK 3, «Insane OS-dark» theme) and GNOME Calculator (GTK 4/libadwaita, green accent and buttons on the left), dark | The same in light: they change live when the mode is switched in Settings |
 
 ### Who draws the frame (0.8.4)
 
-An app chooses; LordOS **prefers** its own frame and honors the app's answer.
+An app chooses; Insane OS **prefers** its own frame and honors the app's answer.
 
 - **xdg-decoration** (Chromium, Qt, foot): the first `configure` says `SERVER_SIDE`. If the app then
   asks `set_mode(CLIENT_SIDE)` it gets `CLIENT_SIDE` and draws its own bar; `set_mode(SERVER_SIDE)`
@@ -205,12 +205,12 @@ An app chooses; LordOS **prefers** its own frame and honors the app's answer.
   the content grows or shrinks by the theme's bar and the app gets a `configure`), maximized state,
   focus and Dock entry don't change.
 - **Before 0.8.4** lord-server answered `SERVER_SIDE` whatever the app asked. Chromium with its own
-  bar then drew its tab strip and buttons and LordOS put its frame on top: two bars.
+  bar then drew its tab strip and buttons and Insane OS put its frame on top: two bars.
 - Tested with `build/deco-client` (`server/tests/deco_client.c`, run inside a session): every mode
   request in both protocols, before and after mapping, with the `xdg_surface.configure` that must
   follow; `build/deco-client hold 6` keeps switching a window to watch the theme.
 
-What a window with its own bar still gets from LordOS (both themes, `WINDOWS.md`):
+What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.md`):
 
 - the invisible resize edges around it and the theme's shadow (the app's own shadow is clipped
   with its window geometry);
@@ -218,59 +218,59 @@ What a window with its own bar still gets from LordOS (both themes, `WINDOWS.md`
   maximize, restore and minimize from its own buttons, double click on its bar (the app asks to
   maximize);
 - **the window menu**: a right click on a GTK headerbar asks `xdg_toplevel.show_window_menu`, and
-  the theme shows its menu at that point (`w.windowMenu`, `wm.showWindowMenu`): Lord Flow the
-  menu bar's Window items (Minimize, Zoom, Close Window), Lord Classic its title bar menu plus **Snap
+  the theme shows its menu at that point (`w.windowMenu`, `wm.showWindowMenu`): Insane Flow the
+  menu bar's Window items (Minimize, Zoom, Close Window), Insane Classic its title bar menu plus **Snap
   layouts**, which opens the same flyout its maximize button shows on hover (an app's own maximize
   button can't). Chromium shows its own menu on its tab strip instead (with «Use system title bar
   and borders» in it);
-- the window-button layout LordOS publishes to GTK (`button-layout`, below), which Chromium and
+- the window-button layout Insane OS publishes to GTK (`button-layout`, below), which Chromium and
   Firefox follow live when the theme changes;
-- the things LordOS draws that never lived in the frame: the «Remote desktop: user · IP» badge is a
+- the things Insane OS draws that never lived in the frame: the «Remote desktop: user · IP» badge is a
   screen overlay (`sdk/remote.js`, notification layer) and a protected window is black in captures
   through its content node (`AppHost`), so both work the same for these windows.
 
 | | |
 |---|---|
 | ![window menu](csd-window-menu.png) | ![snap layouts](csd-snap-layouts.png) |
-| GTK Demo (own frame): right click on its bar, Lord Flow's window menu | Lord Classic: the window menu's «Snap layouts» on an app with its own bar |
+| GTK Demo (own frame): right click on its bar, Insane Flow's window menu | Insane Classic: the window menu's «Snap layouts» on an app with its own bar |
 
 ### The browsers by default
 
 - **Chromium.** The ISO ships `/etc/chromium/master_preferences` with
   `"browser": { "custom_chrome_frame": true }` (its own bar) and
   `"extensions": { "theme": { "system_theme": 1 } }` (the **GTK** theme): new profiles draw the tab
-  strip in the title bar with the window buttons from LordOS's GTK theme, so they are LordOS's
+  strip in the title bar with the window buttons from Insane OS's GTK theme, so they are Insane OS's
   traffic lights (13 px circles, 8 px apart, glyph on hover, grey when the window isn't focused).
-  Tested: a new profile starts that way. Back to the LordOS frame: Settings → Appearance → «Use
+  Tested: a new profile starts that way. Back to the Insane OS frame: Settings → Appearance → «Use
   system title bar and borders» (or right click on the tab strip). With Chromium's «Classic» theme
-  the buttons keep LordOS's order and side but are Chromium's own.
+  the buttons keep Insane OS's order and side but are Chromium's own.
 - **Brave and other Chromium-based browsers** (0.8.8.4, #39). They don't read Debian
-  Chromium's `/etc/chromium/master_preferences`, where LordOS puts its defaults (a new Brave profile
-  has neither key; LordOS doesn't write into the vendor's `/opt/brave.com/brave`), so it starts with
-  Chromium's defaults for a desktop it doesn't know (`XDG_CURRENT_DESKTOP=LordOS`): its own bar
+  Chromium's `/etc/chromium/master_preferences`, where Insane OS puts its defaults (a new Brave profile
+  has neither key; Insane OS doesn't write into the vendor's `/opt/brave.com/brave`), so it starts with
+  Chromium's defaults for a desktop it doesn't know (`XDG_CURRENT_DESKTOP=Insane OS`): its own bar
   (`custom_chrome_frame` on) with the **Classic** theme, whose window buttons are Chromium's own
-  (minimize, maximize and close glyphs, on LordOS's side and in its order), not LordOS's traffic
-  lights; next to native windows they look like the Lord Classic theme's. Not a LordOS frame or
+  (minimize, maximize and close glyphs, on Insane OS's side and in its order), not Insane OS's traffic
+  lights; next to native windows they look like the Insane Classic theme's. Not a Insane OS frame or
   decoration bug: lord-server answers Brave's `xdg-decoration` request (it runs as a native Wayland
   client, `--ozone-platform=wayland`) exactly as Chromium's, and with the GTK theme the same Brave
   draws the traffic lights. The switch below now also writes Brave's profiles
   (`~/.config/BraveSoftware/Brave-Browser`), and Store → Third-party apps installs it; in Brave
   itself: ☰ → Settings → Appearance → Theme → **GTK** (traffic lights in its bar) or «Use system title
-  bar and borders» (the LordOS frame). Checked on VM 116 with Brave 1.99.55 in an isolated session: a
+  bar and borders» (the Insane OS frame). Checked on VM 116 with Brave 1.99.55 in an isolated session: a
   new profile with the Classic buttons, then Settings → Appearance → «Change them» and Brave reopened
-  with LordOS's traffic lights.
+  with Insane OS's traffic lights.
 
   | | |
   |---|---|
   | ![brave classic](brave-classic-theme.png) | ![brave gtk](brave-gtk-theme.png) |
-  | A new Brave profile: its own bar with the Classic theme's buttons | After the switch («Change them»): the same profile with LordOS's traffic lights |
+  | A new Brave profile: its own bar with the Classic theme's buttons | After the switch («Change them»): the same profile with Insane OS's traffic lights |
 - **Firefox ESR.** `/etc/firefox-esr/lordos.js` has `pref("browser.tabs.inTitlebar", 1)`: its own
-  bar, with the window buttons in LordOS's order and side (it reads the same `button-layout`), drawn
+  bar, with the window buttons in Insane OS's order and side (it reads the same `button-layout`), drawn
   in Firefox's own style: Firefox draws those buttons itself, not with the GTK theme, so they aren't
-  traffic lights. Back to the LordOS frame: Customize Toolbar → «Title Bar». Firefox draws with GTK
+  traffic lights. Back to the Insane OS frame: Customize Toolbar → «Title Bar». Firefox draws with GTK
   3, which doesn't speak xdg-decoration: lord-server also advertises
   **`org_kde_kwin_server_decoration_manager`** (KDE's), with «server» as the default mode, so GTK 3
-  windows without their own bar (Firefox with «Title Bar», Mousepad) ask LordOS for the frame. The
+  windows without their own bar (Firefox with «Title Bar», Mousepad) ask Insane OS for the frame. The
   protocol tables are hand-written in `wl.c`, without plasma-wayland-protocols' XML.
 - **Upgrades** (migration `005-0.8.4-browser-frames`): where the files are still what the 0.8.3 ISO
   wrote, they change to the new defaults. Firefox's is a default pref, so every profile follows it
@@ -278,10 +278,10 @@ What a window with its own bar still gets from LordOS (both themes, `WINDOWS.md`
   get them; an existing profile keeps its frame until its user flips the switch below (Settings
   shows how many Chromium profiles don't follow it, with a «Change them» button). The root
   migration never touches home folders.
-- **The LordOS GTK theme's title buttons** (`assets/gtk/LordOS*/gtk-3.0/gtk.css`): GTK sizes a title
+- **The Insane OS GTK theme's title buttons** (`assets/gtk/Insane OS*/gtk-3.0/gtk.css`): GTK sizes a title
   button by its 16 px icon, and Chromium does the same when it draws its tab strip with the GTK
   theme, so the button stays 16 px and the circle is a 13 px radial gradient inside it; measured on
-  the VM: 12–13 px circles, 21 px from center to center, like LordOS's own frame.
+  the VM: 12–13 px circles, 21 px from center to center, like Insane OS's own frame.
 - **GTK 4 / libadwaita (GNOME).** They read the mode, the accent and the button order from
   **`org.freedesktop.portal.Settings`**, and **`org.freedesktop.portal.FileChooser`** for apps with no file dialog of their own (`OpenFile`, `SaveFile`, version 2 so browsers keep theirs; the dialog is the shell's, inside the home folder, and the answer goes only to the app that asked). lord-server itself serves both (`server/src/ui/portal.c`)
   on the session bus, without xdg-desktop-portal, with Passwords' own D-Bus client
@@ -291,27 +291,27 @@ What a window with its own bar still gets from LordOS (both themes, `WINDOWS.md`
   - `org.gnome.desktop.wm.preferences`: `button-layout`.
 
   When they change, `SettingChanged` is sent. If another program already owns the name
-  `org.freedesktop.portal.Desktop`, LordOS doesn't take it over and says so in the log.
+  `org.freedesktop.portal.Desktop`, Insane OS doesn't take it over and says so in the log.
 - **GTK 3.** Outside Flatpak it doesn't read the portal: it reads GSettings.
   - lord-server passes `GSETTINGS_BACKEND=keyfile` to the apps and writes the same keys to
     `~/.config/glib-2.0/settings/keyfile`, without deleting what the apps store. GLib watches that
     file, so GTK 3 also changes live.
-  - The `LordOS`/`LordOS-dark` theme (`assets/gtk/`, installed in `/usr/share/themes`) is Adwaita
-    with LordOS's colors, bar and traffic lights.
+  - The `Insane OS`/`Insane OS-dark` theme (`assets/gtk/`, installed in `/usr/share/themes`) is Adwaita
+    with Insane OS's colors, bar and traffic lights.
   - GTK 3 has no accent: its own stays blue.
-- **The buttons** go on the left in traffic-light order (`close,minimize,maximize:`). The Lord Classic
+- **The buttons** go on the left in traffic-light order (`close,minimize,maximize:`). The Insane Classic
   theme asks for them on the right with the `gtkButtons` token (`:minimize,maximize,close`). GTK
   apps, Chromium and Firefox move them live when the theme changes.
 - **Where the session can't reach** (0.8.8.6, #52). Debian's default `button-layout` is
   `appmenu:close`: a lone close button on the right, which is what an app shows when it reads neither
   the keyfile nor the portal: one restricted to «no access to your files» (its view has no
   `~/.config/glib-2.0` and no session bus), one started outside the session, or one on X11 (Xwayland),
-  where GTK reads only XSETTINGS, which LordOS doesn't serve. The `lordos` package now ships
+  where GTK reads only XSETTINGS, which Insane OS doesn't serve. The `lordos` package now ships
   `/usr/share/glib-2.0/schemas/90_lordos.gschema.override` (GLib's dpkg trigger compiles it) and
   `/etc/gtk-3.0/settings.ini` and `/etc/gtk-4.0/settings.ini` (`gtk-decoration-layout`), both with
-  Lord Flow's `close,minimize,maximize:`. They are defaults only: a value stored by the user or the
+  Insane Flow's `close,minimize,maximize:`. They are defaults only: a value stored by the user or the
   theme (the keyfile) wins, and `~/.config/gtk-3.0/settings.ini` wins over `/etc`. Those apps don't
-  follow a theme change to Lord Classic live. `server/tests/gtk_defaults_test.mjs` compiles the
+  follow a theme change to Insane Classic live. `server/tests/gtk_defaults_test.mjs` compiles the
   override next to Debian's schema and checks that it, `settings.ini`, `sdk/theme.js` and `portal.c`
   agree.
 - **Qt/KDE.** They use the theme's frame (xdg-decoration). Qt 6 also reads `color-scheme` from the
@@ -322,18 +322,18 @@ What a window with its own bar still gets from LordOS (both themes, `WINDOWS.md`
 ### The switch in Settings (0.8.4)
 
 **Settings → Appearance → «Browsers: tabs in the title bar»**, on by default. On: Chromium and
-Firefox draw one bar with their tabs and LordOS's window buttons. Off: they use the LordOS frame.
+Firefox draw one bar with their tabs and Insane OS's window buttons. Off: they use the Insane OS frame.
 It replaces each browser's own setting for the user, and writes that one preference in the user's
 own profiles, only when the switch is turned (never by itself at login):
 
 | | |
 |---|---|
 | ![switch](browser-switch.png) | ![pending](browser-switch-pending.png) |
-| The switch; a profile made before 0.8.4 still has the LordOS frame, «Change them» applies the switch to it | Turned off while Chromium is open: it waits, and applies as soon as Chromium quits |
+| The switch; a profile made before 0.8.4 still has the Insane OS frame, «Change them» applies the switch to it | Turned off while Chromium is open: it waits, and applies as soon as Chromium quits |
 
 ![off](browser-switch-off.png)
 
-*Switch off: the same Chromium profile with the LordOS frame.*
+*Switch off: the same Chromium profile with the Insane OS frame.*
 
 - **Who writes:** `lord-server`, as the user, in C (`server/src/hw/brframe.c`, exposed as
   `lord.browserFrame` in `ui/js_hw.c`; the page is `apps/settings/BrowserFrame.jsx`, the logic
@@ -362,7 +362,7 @@ own profiles, only when the switch is turned (never by itself at login):
   `user_pref("browser.tabs.inTitlebar", 1|0); // lordos: …` in `user.js`, which Firefox reads at
   start, so it can be written while Firefox runs (it applies when Firefox restarts). Not needed
   when `prefs.js` already holds the value. A `user.js` line the user wrote themselves is never
-  touched («kept», and the page says so). At login `lord.browserFrame.tidy()` removes LordOS's line
+  touched («kept», and the page says so). At login `lord.browserFrame.tidy()` removes Insane OS's line
   again once Firefox has started with it (its `lock` link or `.parentlock` newer than `user.js`,
   the profile not open: a live `.parentlock` lock or a `lock` link to a live `firefox` process), so
   a later choice in Firefox's own «Title Bar» sticks. `prefs.js` is only read, never written.
@@ -388,7 +388,7 @@ Firefox ESR 153, GTK Demo (GTK 4) and foot, both themes, light and dark.
 
 Apps that only speak X11 (xterm, Java/Swing, many games and older tools) open through **Xwayland**
 (Debian's `xwayland` package), started only when one of them connects. They get the theme's frame,
-their icon in the Dock, LordOS's cursor and the shared clipboard, and they run in their app's scope
+their icon in the Dock, Insane OS's cursor and the shared clipboard, and they run in their app's scope
 like any other Linux app.
 
 | | |
@@ -437,7 +437,7 @@ asynchronously, so lord-server never waits on Xwayland while Xwayland waits on t
 
 - **Windows.** It redirects the root's children (Composite, manual: rootless Xwayland then gives each
   top-level window a `wl_surface` and says which with `WL_SURFACE_ID`), takes SubstructureRedirect
-  and maps the windows that ask. A normal window becomes a LordOS window (`linux#<surface>`, like
+  and maps the windows that ask. A normal window becomes a Insane OS window (`linux#<surface>`, like
   Wayland apps) with its title (`_NET_WM_NAME` or `WM_NAME`, Latin-1 converted), and its app from
   `WM_CLASS`: the class, or the instance if only that names a `.desktop` (`StartupWMClass` or the
   desktop id), so the Dock groups it with its launcher icon. Motif "no decorations" (or a splash)
@@ -453,7 +453,7 @@ asynchronously, so lord-server never waits on Xwayland while Xwayland waits on t
   asked by apps that draw their own frame (`_NET_WM_MOVERESIZE`) go to the theme like a Wayland
   app's. A resize of the frame becomes `ConfigureWindow`; an app may change its own size, never its
   place.
-- **Cursor.** The root window's cursor is LordOS's arrow (a Render ARGB cursor), so X apps that
+- **Cursor.** The root window's cursor is Insane OS's arrow (a Render ARGB cursor), so X apps that
   don't set one show ours; those that do (xterm's I-beam) show theirs, like Wayland apps.
 - **Java.** AWT guesses the insets of a reparenting window manager; ours doesn't reparent, so
   `_JAVA_AWT_WM_NONREPARENTING=1` is set for the session's apps (without it Swing windows are blank).
@@ -462,12 +462,12 @@ asynchronously, so lord-server never waits on Xwayland while Xwayland waits on t
 
 Both ways, for **CLIPBOARD** and **PRIMARY** (select to copy, middle click to paste):
 
-- **X11 → LordOS.** XFixes tells when an X app takes a selection; the window manager reads it once
+- **X11 → Insane OS.** XFixes tells when an X app takes a selection; the window manager reads it once
   (`TARGETS`, then the best text — `UTF8_STRING`, `text/plain;charset=utf-8`, `STRING` — or
-  `image/png`; `INCR` for large ones, up to 16 MB) and it becomes LordOS's: the Wayland apps, the
+  `image/png`; `INCR` for large ones, up to 16 MB) and it becomes Insane OS's: the Wayland apps, the
   Terminal and the history (with the X app's class as its source) see it.
-- **LordOS → X11.** LordOS's selection is put in X **only while an X window has the keyboard** and
-  only if it's newer than what an X app copied; when the keyboard goes to a LordOS or Wayland
+- **Insane OS → X11.** Insane OS's selection is put in X **only while an X window has the keyboard** and
+  only if it's newer than what an X app copied; when the keyboard goes to a Insane OS or Wayland
   window, the window manager gives the selection up. Large pastes go in `INCR` chunks.
 - **Secrets never go to X.** What Passwords (or a password field) copies is marked sensitive and is
   not offered to X11 apps at all: in X, the pasted text is written to a window property any X client
@@ -477,7 +477,7 @@ Both ways, for **CLIPBOARD** and **PRIMARY** (select to copy, middle click to pa
 - **Offers are bound to their selection.** A `wl_data_offer` (and a primary offer) carries the
   generation it was made for and only gives data for that selection, and only to its client while
   it has the keyboard: an app can't keep an old offer to read later copies (`build/clip-offers`).
-- **Drag and drop** between X11 and Wayland apps: not yet (LordOS has no Wayland drag and drop
+- **Drag and drop** between X11 and Wayland apps: not yet (Insane OS has no Wayland drag and drop
   yet). Inside X (X app to X app) it's X's own protocol; not tested.
 
 ### HiDPI and displays
@@ -508,7 +508,7 @@ display.
 - **Firefox ESR 153 ignored mouse clicks on VM 119** (October 19, QEMU's USB tablet through QMP):
   the pointer reaches it (`enter`, `motion`, `button` on its content subsurface, checked with
   `WAYLAND_DEBUG`) and the keyboard works, but buttons, menus and pages don't react; the same with
-  the build installed before (October 18) and with the LordOS frame, so it isn't the frame. To
+  the build installed before (October 18) and with the Insane OS frame, so it isn't the frame. To
   investigate (two `wl_seat` bindings from the same client get the events twice).
 - SVG app icons (most modern GTK/Qt apps only ship SVG).
 - Terminal apps (`Terminal=true`: neither listed nor launched). (Opening files with a Linux app,
@@ -516,7 +516,7 @@ display.
 - Already done (see `GPU.md`): `linux-dmabuf` v4, GPU composition (Mesa, optional), direct
   fullscreen scanout, `wp_presentation`, `wp_viewporter`, `relative-pointer`,
   `pointer-constraints`, real fullscreen (❖Esc exits) and app cursors (image or hidden).
-- Drag and drop, `text-input` (LordOS input methods inside Wayland apps), activation
+- Drag and drop, `text-input` (Insane OS input methods inside Wayland apps), activation
   (`xdg-activation`). (Fractional scale and several outputs: done, see `DISPLAYS.md`; primary
   selection and Xwayland: done in 0.8.3, above.)
 

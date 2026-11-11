@@ -18,7 +18,7 @@ export const windowHidden = (w, active) => !w || !!w.minimized || !onDesktop(w, 
 // The windows the theme frames on this desktop (fullscreen and picture-in-picture are the SDK's).
 export const visibleOn = (list, active) => list.filter((w) => !w.minimized && !w.fullscreen && !w.pip && onDesktop(w, active));
 
-// What the theme keeps in its tree, in stacking order. A LordOS app minimized or on a hidden desktop
+// What the theme keeps in its tree, in stacking order. A Insane OS app minimized or on a hidden desktop
 // stays mounted (and display: none, WindowShell), so it keeps its state, unsaved text included. A Linux
 // window has its state in its own process, and with no node it can't be reached or painted. In the
 // overview, the minimized windows of this desktop are shown too.
@@ -32,7 +32,7 @@ export function mountedOn(list, active, overview = false) {
 
 // In the overview a minimized surface window may have nothing to draw: an X11 window is iconic, and only
 // a Wayland app keeps its last buffer. So a placeholder goes behind the body: what the window does have
-// covers it, and otherwise it is seen. A LordOS app in the session has its body, and the clear parts of
+// covers it, and otherwise it is seen. A Insane OS app in the session has its body, and the clear parts of
 // that body would show the placeholder through it.
 export const overviewPlaceholder = (w, inOverview) => !!inOverview && !!w.minimized && !!w.args?.surface;
 

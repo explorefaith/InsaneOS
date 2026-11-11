@@ -1,4 +1,4 @@
-We want lordos.org to be usable by everyone, including people who use a keyboard only, a screen reader, magnification or high contrast. Our goal is the Web Content Accessibility Guidelines (WCAG) 2.2, level AA. This statement covers the website; the accessibility of the LordOS distribution is described at the end.
+We want lordos.org to be usable by everyone, including people who use a keyboard only, a screen reader, magnification or high contrast. Our goal is the Web Content Accessibility Guidelines (WCAG) 2.2, level AA. This statement covers the website; the accessibility of the Insane OS distribution is described at the end.
 
 ## What the website does today
 
@@ -16,9 +16,9 @@ We want lordos.org to be usable by everyone, including people who use a keyboard
 - The paper's PDF may not be fully tagged for screen readers; the same content is available as a web page.
 - Donation pages are run by PayPal and Mercado Pago, and their accessibility is outside our control.
 
-## The LordOS distribution
+## The Insane OS distribution
 
-Accessibility in the desktop is still in progress: LordOS has a **Reduce motion** setting (Settings → Appearance), keyboard shortcuts and per-display scaling from 100 to 200 %, but a screen reader, screen zoom and a high-contrast theme are **not available yet**. They are on the roadmap.
+Accessibility in the desktop is still in progress: Insane OS has a **Reduce motion** setting (Settings → Appearance), keyboard shortcuts and per-display scaling from 100 to 200 %, but a screen reader, screen zoom and a high-contrast theme are **not available yet**. They are on the roadmap.
 
 ## Report a problem
 

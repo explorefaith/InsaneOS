@@ -31,13 +31,13 @@ if [ -n "$CAP" ]; then dbus-monitor --session --binary "type='method_call',desti
 start
 owner && pass "the demo owns org.freedesktop.secrets" || fail "the demo did not take the name"
 build/secretsvc-demo --seconds 2 >>"$LOG" 2>&1; [ $? -eq 3 ] && pass "a second service sees the name taken (ss_start = 1)" || fail "second service"
-printf 'contraseña ñandú 123' | secret-tool store --label="Prueba LordOS" service lordos-demo user ana && pass "secret-tool store" || fail "secret-tool store"
+printf 'contraseña ñandú 123' | secret-tool store --label="Prueba Insane OS" service lordos-demo user ana && pass "secret-tool store" || fail "secret-tool store"
 v=$(secret-tool lookup service lordos-demo user ana); [ "$v" = "contraseña ñandú 123" ] && pass "secret-tool lookup" || fail "secret-tool lookup ($v)"
 printf 'otra' | secret-tool store --label="Segunda" service lordos-demo user beto
 secret-tool search --all service lordos-demo >/tmp/ss-search.$$ 2>&1
-grep -q "label = Prueba LordOS" /tmp/ss-search.$$ && grep -q "label = Segunda" /tmp/ss-search.$$ && pass "secret-tool search --all (2 items)" || { fail "secret-tool search"; cat /tmp/ss-search.$$; }
+grep -q "label = Prueba Insane OS" /tmp/ss-search.$$ && grep -q "label = Segunda" /tmp/ss-search.$$ && pass "secret-tool search --all (2 items)" || { fail "secret-tool search"; cat /tmp/ss-search.$$; }
 grep -q "secret = contraseña ñandú 123" /tmp/ss-search.$$ && pass "search returns the secrets" || fail "search without secrets"
-printf 'cambiada' | secret-tool store --label="Prueba LordOS" service lordos-demo user ana
+printf 'cambiada' | secret-tool store --label="Prueba Insane OS" service lordos-demo user ana
 v=$(secret-tool lookup service lordos-demo user ana); [ "$v" = "cambiada" ] && pass "storing again replaces" || fail "replace ($v)"
 secret-tool clear service lordos-demo user ana; v=$(secret-tool lookup service lordos-demo user ana); [ -z "$v" ] && pass "secret-tool clear" || fail "clear ($v)"
 secret-tool lock --collection=login && pass "secret-tool lock" || fail "secret-tool lock"

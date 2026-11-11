@@ -1,4 +1,4 @@
-O LordOS vem como uma máquina virtual pronta para amd64: `lordos-<versão>-amd64.ova`. Ela já está instalada, então não há instalador: você a abre no seu hipervisor, liga e cria sua conta.
+O Insane OS vem como uma máquina virtual pronta para amd64: `lordos-<versão>-amd64.ova`. Ela já está instalada, então não há instalador: você a abre no seu hipervisor, liga e cria sua conta.
 
 ## O que você precisa
 
@@ -11,7 +11,7 @@ Todos os números de cada imagem estão em [Requisitos do sistema](/pt/requireme
 
 ## 1. Baixe e confira
 
-Baixe `lordos-<versão>-amd64.ova`, `SHA256SUMS` e `SHA256SUMS.sig` da [versão mais recente](https://github.com/lordbasex/LordOS/releases). Na pasta com os arquivos:
+Baixe `lordos-<versão>-amd64.ova`, `SHA256SUMS` e `SHA256SUMS.sig` da [versão mais recente](https://github.com/lordbasex/Insane OS/releases). Na pasta com os arquivos:
 
 ```sh
 shasum -a 256 -c SHA256SUMS --ignore-missing
@@ -43,9 +43,9 @@ No **VMware Workstation**: Arquivo → Abrir, escolha o `.ova`. Se o VMware diss
 
 ## 3. Crie sua conta
 
-Ligue a máquina. Ela abre sozinha **Configurar o LordOS** (nas capturas, em inglês):
+Ligue a máquina. Ela abre sozinha **Configurar o Insane OS** (nas capturas, em inglês):
 
-![Configurar o LordOS na primeira inicialização](docs/vm/virtualbox-welcome.png "A primeira inicialização: a configuração abre sozinha")
+![Configurar o Insane OS na primeira inicialização](docs/vm/virtualbox-welcome.png "A primeira inicialização: a configuração abre sozinha")
 
 1. **Idioma e região** e **Teclado**.
 2. **Usuário**: seu nome, o nome de usuário, a senha e o nome do computador.
@@ -78,4 +78,4 @@ Com a máquina desligada, nas configurações dela:
 - **Tela preta ou janela pequena:** verifique o controlador de tela (acima) e dê à máquina pelo menos 4 GB de memória.
 - **Está lenta:** confira se ela tem 4 CPUs ou mais e se a virtualização por hardware está ativada no firmware do computador.
 
-Para relatar um erro, rode `lordos-issue` no Terminal da máquina e anexe o arquivo que ele grava ao [issue](https://github.com/lordbasex/LordOS/issues).
+Para relatar um erro, rode `lordos-issue` no Terminal da máquina e anexe o arquivo que ele grava ao [issue](https://github.com/lordbasex/Insane OS/issues).

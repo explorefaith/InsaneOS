@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "LordOS Imager",
+  "productName": "Insane OS Imager",
   "version": "0.8.86",
   "identifier": "org.lordos.imager",
   "build": {
@@ -9,7 +9,7 @@
   "app": {
     "windows": [
       {
-        "title": "LordOS Imager",
+        "title": "Insane OS Imager",
         "width": 980,
         "height": 680,
         "minWidth": 840,
@@ -26,8 +26,8 @@
     "active": true,
     "targets": ["app", "dmg", "deb", "appimage", "nsis"],
     "category": "Utility",
-    "shortDescription": "Write LordOS to SD cards and USB sticks",
-    "longDescription": "Writes LordOS to SD cards and USB sticks, checks the release signature and reads the drive back, and prepares the Raspberry Pi's first boot.",
+    "shortDescription": "Write Insane OS to SD cards and USB sticks",
+    "longDescription": "Writes Insane OS to SD cards and USB sticks, checks the release signature and reads the drive back, and prepares the Raspberry Pi's first boot.",
     "copyright": "Copyright © 2026 iPERFEX",
     "license": "MIT",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],

@@ -1,6 +1,6 @@
 # Documents (M9)
 
-PDFs, archives, fonts and emoji in LordOS. This document covers:
+PDFs, archives, fonts and emoji in Insane OS. This document covers:
 
 - the **PDF Viewer**;
 - in **Files**, archives and **Quick Preview**;
@@ -55,7 +55,7 @@ In the style of a classic document viewer:
 - **Text:** dragging selects (letter by letter, a word with double click) and ❖C copies. ❖A
   selects the page.
 - **Go to a page:** with a click on "Page N of M" or with ❖⌥G.
-- **Links:** internal ones go to the page; external ones are copied to the clipboard (LordOS doesn't
+- **Links:** internal ones go to the page; external ones are copied to the clipboard (Insane OS doesn't
   have its own browser yet).
 - **Annotations:**
   - highlight ▬ (five colors);
@@ -219,7 +219,7 @@ lord-server (no Poppler or libarchive)
 - **How it's launched:**
   - `doc.c` launches it with a **fixed path**: `lord-server`'s own folder + `/lord-doc`;
   - it must be owned by root or by the same owner as lord-server, and not writable by others;
-  - with no arguments and a minimal environment: HOME, `LANG=C.UTF-8` and the LordOS fonts folder;
+  - with no arguments and a minimal environment: HOME, `LANG=C.UTF-8` and the Insane OS fonts folder;
   - the channel is a SOCK_SEQPACKET `socketpair` on fd 3.
 - **Files:** the helper **opens nothing by path**. lord-server validates the path (home folder or
   the user's mounts; for fonts, also `/usr/share/fonts`) and passes it the fd with SCM_RIGHTS:

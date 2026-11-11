@@ -2,7 +2,7 @@
 // sleep after N minutes, what the power button and the lid do (logind, closed admin action
 // power-buttons), the low-battery notice and the percentage in the menu bar. See docs/SETTINGS.md.
 import {
-  View, Text, useTheme, useLocale, useSettings, Toggle, Segmented, admin, useBattery, usePowerProfiles, onPowerProfileResult,
+  View, Text, useTheme, useLocale, useSettings, Toggle, Segmented, admin, useBattery, usePowerProfiles, onPowerProfileResult, tOptional,
   BatteryGlyph, powerPrefs,
 } from '@lordos/sdk';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,26 @@ import { GroupBox, SettingRow, PageHeader, PopUp, Stack, Badge } from './ui.jsx'
 
 const mins = (m) => m * 60;
 const duration = (tr, m) => (m >= 60 ? tr('prefs.power.hm', { h: Math.floor(m / 60), m: m % 60 }) : tr('prefs.power.m', { m }));
+
+// Charge limit (macOS's Optimized Battery Charging, the manual version): a root admin action
+// writes charge_control_end_threshold on every battery that exposes it (ThinkPads and most
+// modern laptops) and keeps the value in /etc/lordos/battery-limit for the boot service.
+function ChargeLimitRow({ tr }) {
+  const [s, set] = useSettings();
+  const [err, setErr] = useState('');
+  const cur = s.chargeLimit ?? 80;
+  const setLimit = (v) => {
+    set({ chargeLimit: v });
+    admin.run('battery-limit', String(v)).then(() => setErr(''), (e) => setErr(e.message));
+  };
+  return (
+    <SettingRow label={tOptional('prefs.power.chargeLimit') || 'Charge limit'}
+      hint={err || (tOptional('prefs.power.chargeLimitHint') || 'Stop charging at this percentage to keep the battery healthy.')}>
+      <PopUp value={cur} onChange={setLimit} width={130}
+        options={[[80, '80%'], [85, '85%'], [90, '90%'], [95, '95%'], [100, tOptional('prefs.power.limitOff') || 'Full']]} />
+    </SettingRow>
+  );
+}
 
 function BatteryCard({ b, tr }) {
   const t = useTheme();
@@ -94,6 +114,13 @@ export function PowerSettings() {
         : <PageHeader icon={<Badge glyph="⚡" color="#30d158" size={44} />} title={tr('prefs.power.onPower')} subtitle={tr('prefs.power.noBattery')} />}
       <GroupBox>
         <ProfileRow tr={tr} />
+        {hasBattery ? <ChargeLimitRow tr={tr} /> : null}
+        {hasBattery ? (
+          <SettingRow label={tOptional('prefs.power.autoSwitch') || 'Switch power mode automatically'}
+            hint={tOptional('prefs.power.autoSwitchHint') || 'Power-saver on battery, balanced on AC.'}>
+            <Toggle small on={s.autoPowerProfile?.on !== false} onChange={(v) => set({ autoPowerProfile: { on: v } })} />
+          </SettingRow>
+        ) : null}
       </GroupBox>
       <GroupBox title={tr('prefs.power.screenSleep')} footer={tr('prefs.power.screenSleepHint')}>
         <SettingRow label={hasBattery ? tr('prefs.power.offAC') : tr('prefs.power.off')}>

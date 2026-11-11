@@ -1,16 +1,16 @@
-# go-link Desk on LordOS
+# go-link Desk on Insane OS
 
-The design of **go-link Desk for LordOS** and of the public **screen-sharing API** it needs. go-link Desk (desk.go-link.org) is the
-maintainer's own remote desktop project, MIT, in a separate repository. On LordOS it is an optional third-party app in the Store:
-recommended, not privileged, not part of LordOS. The person installs it or doesn't.
+The design of **go-link Desk for Insane OS** and of the public **screen-sharing API** it needs. go-link Desk (desk.go-link.org) is the
+maintainer's own remote desktop project, MIT, in a separate repository. On Insane OS it is an optional third-party app in the Store:
+recommended, not privileged, not part of Insane OS. The person installs it or doesn't.
 The screen-sharing API, packaged apps with a companion and live media are built: [SCREEN-SHARING.md](SCREEN-SHARING.md) and [PACKAGED-APPS.md](PACKAGED-APPS.md), with what was tested. Section 11 says where each stage stands.
 
 How to read it:
 
 - **Read** means checked in the code or documents of both repositories on 2026-11-01, with the place given. It says what the code
-  says, not that anyone ran it. **Measured** means a number already published in LordOS's documents, on the machine named. **To test**
+  says, not that anyone ran it. **Measured** means a number already published in Insane OS's documents, on the machine named. **To test**
   means nobody has run it. Any number under "target" or "estimate" is a goal or a guess, not a result.
-- Paths without a prefix are LordOS's, on branch `desk-go-link`. Paths starting `go-link:` are in the go-link Desk repository, under
+- Paths without a prefix are Insane OS's, on branch `desk-go-link`. Paths starting `go-link:` are in the go-link Desk repository, under
   `backend-device/` unless they start with `docs/`.
 
 ## 1. Decisions already taken
@@ -22,13 +22,13 @@ These are the maintainer's, final, and this document builds on them.
 | Two solutions | go-link does not replace remote desktop on port 5673. 5673 is inbound, on LAN or VPN, with machine credentials. go-link is outbound, no open ports, a code plus acceptance on screen, through signalhub and TURN. |
 | One or the other | Per session, one door at a time. The system enforces it at the API (section 5). Neither ever kicks the other out. |
 | Separate door | The API is not 5673's path exposed. It reuses only the composed frame, the `mstream` encoder, Opus and the input message formats. |
-| Interface | A native LordOS app in React and JavaScript, drawn by our compositor. No Fyne, X11, Xwayland, portal or PipeWire capture. |
+| Interface | A native Insane OS app in React and JavaScript, drawn by our compositor. No Fyne, X11, Xwayland, portal or PipeWire capture. |
 | Everything else | Stays Go: signaling, WebRTC (Pion), control, connections. Same functions as the Linux version, its own privacy policy. |
 | Engine | Split from the Fyne UI: a headless engine talking to the app over a local socket, including the acceptance request. |
 | API | Public and general, not go-link-specific: permission prompt on first use, always-visible indicator with a stop control, encoded frames plus Opus, input, protected windows black. |
 | Two consents | The system permission (this app may use the API) and the acceptance of each visitor (this person may come in) are separate things. |
-| Delivery | `.deb` for amd64 and arm64 published first at desk.go-link.org with a signature, verified and mirrored byte for byte to the LordOS APT repository, a Store item, updates through APT, the app's own updater off, a published version never re-uploaded. |
-| Schedule | The API ships in **LordOS 0.8.7.1**, a package update through the Store and APT with no new ISO, before Machines in 0.8.9. Live media came with 0.8.8, so the app requires 0.8.8 or later. |
+| Delivery | `.deb` for amd64 and arm64 published first at desk.go-link.org with a signature, verified and mirrored byte for byte to the Insane OS APT repository, a Store item, updates through APT, the app's own updater off, a published version never re-uploaded. |
+| Schedule | The API ships in **Insane OS 0.8.7.1**, a package update through the Store and APT with no new ISO, before Machines in 0.8.9. Live media came with 0.8.8, so the app requires 0.8.8 or later. |
 
 Non-goal: replacing 5673. Earlier versions of this document also left out a native viewer and the video call; the maintainer asked for both, and section 7 has them. A call is the visitor's to start, as on every platform: this viewer doesn't place calls.
 
@@ -47,7 +47,7 @@ Five findings shaped the rest. All **Read**.
 4. **Two 5673 habits are wrong for a third party.** A new client gets the clipboard as it is at connection (`mirror.c:207`), and
    go-link's rule is that only what is copied afterwards leaves (go-link:`docs/security.md:43`). And `mirror_clipboard` doesn't look at
    the sensitive mark Passwords sets (`mirror.c:762`, `server/src/term/term.c:202`). The API applies both rules; 5673 stays as it is.
-5. **The engine can be pure Go here.** The encoders are the only reason the Linux host needs cgo for the picture, and on LordOS frames
+5. **The engine can be pure Go here.** The encoders are the only reason the Linux host needs cgo for the picture, and on Insane OS frames
    arrive encoded. go-link already vets a `CGO_ENABLED=0 -tags headless` build (go-link:`Makefile:93`) and has the no-cgo stubs
    (go-link:`pkg/encoder/nocgo.go:3`). So no libvpx, libopus, X11 or wayland-client, which also makes the sandbox simple. To test.
 
@@ -57,11 +57,11 @@ Five findings shaped the rest. All **Read**.
 
 | Route | Result |
 |---|---|
-| System app in `assets/sysapps/<id>/` | Refused by design: every file LordOS runs as JavaScript is in a manifest signed with the LordOS release key (`docs/SIGNING.md:167-176`). It would also make go-link privileged. |
+| System app in `assets/sysapps/<id>/` | Refused by design: every file Insane OS runs as JavaScript is in a manifest signed with the Insane OS release key (`docs/SIGNING.md:167-176`). It would also make go-link privileged. |
 | `.lpk` in the home folder | The JS works, with no helper: files are written 0644 (`server/src/lpk.c:219`), JS can't run commands (`docs/PAPER.md:33`), and the seccomp filter refuses `execve` and `AF_UNIX` sockets (`docs/PRIVACY.md:185-190`, `server/src/sec/sandbox.c:561-568`). A user-writable binary shouldn't run anyway. |
 | `.deb` with a `.desktop` file | The engine runs through the launcher in `app-lordos-<id>.scope`, unsandboxed by default (`docs/PRIVACY.md:40`). No native UI, and it couldn't talk to an isolated app. |
 | `.deb` that adds a native app | Not possible: `app_package_dir` looks only in `assets/sysapps` and the home root (`server/src/app/appspawn.c:27-40`). |
-| `lord-rdesk` model | The right shape, but for LordOS's own binary, found next to `lord-server` (`server/src/ui/js_rdesk.c:39-47`). `sandbox_apply_helper` also forbids all sockets (`docs/PRIVACY.md:283`), which an engine can't live with. |
+| `lord-rdesk` model | The right shape, but for Insane OS's own binary, found next to `lord-server` (`server/src/ui/js_rdesk.c:39-47`). `sandbox_apply_helper` also forbids all sockets (`docs/PRIVACY.md:283`), which an engine can't live with. |
 
 **Answer: the rules didn't allow it.** The changes below are the smallest safe set found, and D1 approved them. They're built:
 [PACKAGED-APPS.md](PACKAGED-APPS.md) says what was built where it differs from this design. The new command exception is in `docs/PAPER.md`.
@@ -71,10 +71,10 @@ Five findings shaped the rest. All **Read**.
 1. **A third root for apps, read-only.** `/usr/lib/lordos-apps/<id>/`, installed by a `.deb`, with the same layout as an unpacked
    `.lpk`. `app_package_dir` accepts it only if owned by root and not writable by group or others, the stricter form of the sysapps
    check. It is never in `code-manifest.json`, never `system: true`, and runs as `lord-server --app <id>` in the usual sandbox.
-2. **Checked at every load as a package, not as LordOS.** `contenido.json` and `firma.json` are verified with the existing code
-   (`server/src/sec/sign.c`). A packaged app loads only if its key is a **Verified author** in LordOS's signed catalog
-   (`docs/SIGNING.md:64`, `:77`). So LordOS says "this key may ship a packaged app", and go-link signs its own releases.
-   An app update needs no LordOS release. The key can be revoked with the catalog's list (`catalog_revoked`).
+2. **Checked at every load as a package, not as Insane OS.** `contenido.json` and `firma.json` are verified with the existing code
+   (`server/src/sec/sign.c`). A packaged app loads only if its key is a **Verified author** in Insane OS's signed catalog
+   (`docs/SIGNING.md:64`, `:77`). So Insane OS says "this key may ship a packaged app", and go-link signs its own releases.
+   An app update needs no Insane OS release. The key can be revoked with the catalog's list (`catalog_revoked`).
 3. **The manifest may name one companion:** `"companion": "engine"`, honored only in that root. The binary is listed in `contenido.json`,
    so go-link's signature covers it. A `.lpk` in the home folder saying the same is ignored.
 4. **One new broker op, `BOP_COMPANION`.** The app asks; `lord-server` takes the id from the verified connection, never from the
@@ -170,7 +170,7 @@ in the manifest, or by a Linux app at its first `SHARE_START`. Existing `screen`
 - **One holder per session.** A second app gets `busy`. How many people watch through that holder is the holder's business, and they all
   get the same stream. go-link allows one viewer at a time (go-link:`docs/architecture.md:64`).
 - **Size:** the session's, without scaling. `mstream` has none, and a resize starts a new encoder (`server/src/media/mstream.c:255`).
-  go-link's size steps on low bandwidth therefore don't apply on LordOS, and only the bit rate moves. `RP_RESIZE` works only on a session
+  go-link's size steps on low bandwidth therefore don't apply on Insane OS, and only the bit rate moves. `RP_RESIZE` works only on a session
   with no monitor, within 640×480 to 3840×2400 (`server/src/main.c:640`); the monitor wins, as for 5673.
 - **Rate:** `RP_VIDEO`'s rate, 24 to 240 Hz as in `mstream`, and 300 kbit/s to 20 Mbit/s (`mstream.c:180`). A new rate restarts the encoder
   (`mstream.c:176`), so the client should keep it stable.
@@ -255,7 +255,7 @@ runs, whichever door uses it.
 - x264 took **12–13 ms per frame** on VM 116 (**Measured**, 1280–1568 px wide, `docs/REMOTE.md:512`), a ceiling of about 75–80 fps.
 - **The Raspberry Pi 5 has no H.264 hardware encoder:** x264 there too, with no measurement (`docs/REMOTE.md:527-528`).
 - **VA-API is unmeasured** (`docs/REMOTE.md:492`, `:527`).
-- **VP8** cost is unmeasured on LordOS. The bridge's dragging test had the encoder at 26–28 % of a core on VM 122 (**Measured**, H.264,
+- **VP8** cost is unmeasured on Insane OS. The bridge's dragging test had the encoder at 26–28 % of a core on VM 122 (**Measured**, H.264,
   `docs/REMOTE.md:471`).
 - **"Capture is free" has limits.** On the GPU path each frame is read back, and a fullscreen app is composed instead of scanned out
   (`docs/REMOTE.md:280`). With a protected window, composition moves to the CPU. A session with no monitor starts drawing at all
@@ -268,9 +268,9 @@ All on 2026-11-02, with software encoders and decoders, on test builds. No claim
 
 | | VM 116 / VM 125 (Xeon Silver 4108, 1.8 GHz, virtual, no GPU acceleration) | Raspberry Pi 5, 16 GB, HDMI monitor, GPU composition |
 |---|---|---|
-| H.264 encoder, LordBench's clip | 104.6 fps | 73.7 fps |
-| VP8 encoder, LordBench's clip | not run (quick mode) | 52.9 fps |
-| H.264 decoder, LordBench's 1080p clip | 381 fps | 250 fps |
+| H.264 encoder, InsaneBench's clip | 104.6 fps | 73.7 fps |
+| VP8 encoder, InsaneBench's clip | not run (quick mode) | 52.9 fps |
+| H.264 decoder, InsaneBench's 1080p clip | 381 fps | 250 fps |
 | x264 per frame in a real share | 7.00 ms, 1280×800, a mostly still desktop, 1,758 frames, VM 125 | 17.45 ms, 1920×1080, a moving card in a window, 534 frames |
 | A share running | `lord-server` 6.5 %, engine 3.7 %, `lord-media` 1.0 % of a core, still screen, VM 125 | `lord-server` 97 %, `lord-media` 52 %, engine 7 %, with a live session in a window on screen; the visitor got about 21 fps |
 | Viewing another computer, 640×480 at 30 fps in the window | `lord-media` 9 %, engine 9 %, 2.26 ms a picture, scaled, VM 125 | `lord-media` 22 %, `lord-server` 9 %, engine 3 %, 6.69 ms a picture, scaled |
@@ -284,9 +284,9 @@ So one core and 512 MB are plenty (D8 can stay closed), and the Pi at 1080p is l
 
 ## 7. The app
 
-The app is called **Desk go-link**. It has nothing to do with Remote Desk, LordOS's RDP and VNC client: separate app, separate icon, separate
+The app is called **Desk go-link**. It has nothing to do with Remote Desk, Insane OS's RDP and VNC client: separate app, separate icon, separate
 code. It's a complete native copy of go-link's window: every view of the Fyne interface (`backend-device/internal/gui`, about 6,500 lines of
-Go) rebuilt in React with `@lordos/sdk`, pixel-faithful to go-link's window on the desktop systems it runs on, in layout, colors, sizes, spacing and texts, drawn natively by LordOS's engine, rather than LordOS's own style: the bar with the 9-digit code,
+Go) rebuilt in React with `@lordos/sdk`, pixel-faithful to go-link's window on the desktop systems it runs on, in layout, colors, sizes, spacing and texts, drawn natively by Insane OS's engine, rather than Insane OS's own style: the bar with the 9-digit code,
 Session selector, Connect and the demo; the tabs; this computer's card with its code, link, copy, new code and status; My devices, Favorites
 and Recent sessions with their thumbnails and views; Settings; the connection request with its scam warning; the session panel, chat,
 calls, files, remote panels, network test and About. Texts come from go-link's catalogs.
@@ -294,7 +294,7 @@ calls, files, remote panels, network test and About. Texts come from go-link's c
 The acceptance is drawn by the app, not the system: it's the visitor's consent, and it belongs to go-link. The system's part is the
 permission and the indicator.
 
-| Function of the Linux version | On LordOS |
+| Function of the Linux version | On Insane OS |
 |---|---|
 | Code, new code, acceptance, permissions live, session panel, chat | same |
 | Picture, sound, control, clipboard | through the API |
@@ -302,7 +302,7 @@ permission and the indicator.
 | Files | home folder only; what arrives goes to `~/Downloads`, D2 |
 | Sound, chat, voice and video calls | same. Sound through the API; the microphone and camera only during a call, through the system's permissions |
 | Keep the display awake | `SHARE_AWAKE`; `pkg/awake`'s D-Bus services aren't ours, and only while a viewer is accepted |
-| Lock when a session ends | `SHARE_LOCK`, because `loginctl` can't work here: LordOS sessions have no logind seat (`docs/SESSIONS.md:465`, go-link:`internal/services/session_end.go:98`) |
+| Lock when a session ends | `SHARE_LOCK`, because `loginctl` can't work here: Insane OS sessions have no logind seat (`docs/SESSIONS.md:465`, go-link:`internal/services/session_end.go:98`) |
 | Open at login | not available to this app today, D4 |
 | Icon in the top bar, by the clock | same menu as on the other platforms: the code, Disconnect, Open, Settings, Check for updates (opens the Store), Test my connection, About, Quit; red while a session lasts. The API is `statusItem` with the `status-item` permission ([PACKAGED-APPS.md](PACKAGED-APPS.md)) |
 | Visible as an app | in Applications and the Dock, with go-link's icon |
@@ -335,7 +335,7 @@ build is `CGO_ENABLED=0 -tags headless,lordos`. Today's tags make that a small s
 
 ## 9. Packaging, Store and updates
 
-What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to fill, and Store → Remote access, which appears once the catalog has an entry with that section. How it reaches a person: the maintainer builds both `.deb`s with `lordos/`'s recipe and go-link's author key, whose public half LordOS's signed catalog lists as a Verified author; they go up at desk.go-link.org; the entry gets the version, URLs and hashes and moves into `apt/catalog.json`; `apt/build.sh` fetches, checks the hash and control fields and adds them to the pool; the Store offers it. Without the author key in the catalog the app doesn't open: the local builds carry a catalog of their own for that reason, and it must not reach a release.
+What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to fill, and Store → Remote access, which appears once the catalog has an entry with that section. How it reaches a person: the maintainer builds both `.deb`s with `lordos/`'s recipe and go-link's author key, whose public half Insane OS's signed catalog lists as a Verified author; they go up at desk.go-link.org; the entry gets the version, URLs and hashes and moves into `apt/catalog.json`; `apt/build.sh` fetches, checks the hash and control fields and adds them to the pool; the Store offers it. Without the author key in the catalog the app doesn't open: the local builds carry a catalog of their own for that reason, and it must not reach a release.
 
 1. **Published first at desk.go-link.org:** both `.deb` files with `SHA256SUMS` and its Ed25519 signature by the go-link update key
    (go-link:`docs/security.md:37`). Today releases live on the release host, so this is new hosting. Never re-uploaded: a fix is a new version.
@@ -346,7 +346,7 @@ What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to f
    (`docs/UPDATES.md:334-336`). Vendor packages are never modified (`apt/README.md:101`).
 4. **Store:** a new catalog section, `remote`, since it's neither AI nor commercial (`apps/store/ai.js:137`, `apps/store/index.jsx:345`), with
    the go-link name and vendor and a line saying it's a third-party app and how it differs from 5673. Recommended there and nowhere else: no
-   preinstall, no dependency of `lordos`, no first-run nudge. On a system below 0.8.8 the page says to update LordOS first.
+   preinstall, no dependency of `lordos`, no first-run nudge. On a system below 0.8.8 the page says to update Insane OS first.
 5. **Updates:** through APT and Store → Updates, as for any catalog app.
 6. **Privacy policy:** its own page at desk.go-link.org, linked from the Store item and from the app's About. It says what signalhub
    and TURN see, what stays on the computer, and that the app has no analytics.
@@ -366,7 +366,7 @@ What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to f
 | An app hides or fakes the indicator | Drawn by the shell, `notification` layer, frames only after it shows | A fullscreen surface's own drawing can imitate one; it can't remove the real one. `xdg_popup`s paint above everything (`docs/LAYERS.md`): to test that one can't sit on the badge |
 | Same-uid access to `remote.sock` | Refused since `2825555c` (D6) | Root |
 | Links in `device.json` | Under the app's data folder, 0600, written by the engine (D10) | An unsandboxed app of the same user can add one. D3 weighs this |
-| A forged package | Signature at desk.go-link.org, pinned hash, LordOS archive signature, Verified author check at each load, revocation | The go-link release computer, and the catalog's reviewer |
+| A forged package | Signature at desk.go-link.org, pinned hash, Insane OS archive signature, Verified author check at each load, revocation | The go-link release computer, and the catalog's reviewer |
 | A locked session seen | Ended in `lord-server`, not by the client | A frame already in a socket or a viewer's decoder |
 | Secrets through the clipboard | Sensitive items and earlier copies never go | What the person copies during the session |
 | A viewer recording | go-link's own rule: a notice for honest viewers (go-link:`docs/security.md:71`) | A dishonest one records anyway |
@@ -401,7 +401,7 @@ The stages run in order except where noted. Percentages are of what each stage's
 
 **Needs the maintainer:** the 5673 refusal with a real bridge sign-in; the pixel comparison on their Mac; signing with real keys; publishing; the website's `in_use` text.
 
-**Read, and relied on:** everything cited above, as of commit `a621d38e` of LordOS and `1203f15` of go-link Desk.
+**Read, and relied on:** everything cited above, as of commit `a621d38e` of Insane OS and `1203f15` of go-link Desk.
 
 ## 13. Open decisions
 

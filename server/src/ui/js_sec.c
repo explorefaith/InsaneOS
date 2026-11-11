@@ -250,7 +250,7 @@ static const JSCFunctionListEntry broker_funcs[] = {
  *   lord.code.status() → { state: 'verified'|'development'|'invalid'|'unchecked', signed, release,
  *                          version, files, ms, reason, refused: [{ path, reason }] }
  *   lord.code.takeRefused() → the refusals not reported yet ([{ path, reason }]); each is returned once
- *                          per session, for the "This LordOS component was modified" notification. */
+ *                          per session, for the "This Insane OS component was modified" notification. */
 static JSValue refusal_obj(JSContext *c, const CodeRefusal *r) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyStr(c, o, "path", JS_NewString(c, r->path));

@@ -1,6 +1,6 @@
 # Signing `.lpk` packages (M8)
 
-Every LordOS app package (`.lpk`) can be **signed**. LordOS verifies the signature in C, at
+Every Insane OS app package (`.lpk`) can be **signed**. Insane OS verifies the signature in C, at
 install time and at load time, to detect modifications and to show where the app comes from. See
 also [NATIVE-APPS.md](NATIVE-APPS.md) and [PRIVACY.md](PRIVACY.md).
 
@@ -15,7 +15,7 @@ Besides its files (`manifest.json`, `app.js`, `icon.png`…), a signed `.lpk` ca
     "format": 1,
     "id": "fractal",
     "version": "1.0.0",
-    "signer": { "name": "LordOS (desarrollo)", "key": "3deb6836…" },
+    "signer": { "name": "Insane OS (desarrollo)", "key": "3deb6836…" },
     "files": [
       { "path": "manifest.json", "size": 321, "sha256": "…" },
       { "path": "app.js",        "size": 2411, "sha256": "…" }
@@ -60,7 +60,7 @@ They are shown in the Store and in the install dialog:
 
 | Level | When | Text |
 |---|---|---|
-| **LordOS** | signed with the official key (`server/src/sec/keys.h`) | "LordOS" (green) |
+| **Insane OS** | signed with the official key (`server/src/sec/keys.h`) | "Insane OS" (green) |
 | **Verified author** | key listed in the signed catalog | "Verified author: <name>" (blue) |
 | **Signed by <name>** | signed with an unknown key | "Signed by <name>" (gray) |
 | **Unsigned** | has no `firma.json` | "Unsigned — only install from people you trust" (orange, warning) |
@@ -77,7 +77,7 @@ A **packaged app** in `/usr/lib/lordos-apps/<id>/` must be a Verified author's: 
 
 - **Updates**: a new version must be signed with the **same key** as the installed one (like
   Android). An update with a different key is rejected (`pkg_check_update`).
-- **Signed catalog** (`catalog.json` + `catalog.sig`): signed by the LordOS key, it carries the
+- **Signed catalog** (`catalog.json` + `catalog.sig`): signed by the Insane OS key, it carries the
   versions, sizes, hashes, the keys of verified authors and a **revocation list** of keys and
   packages. A revoked package is disabled with a clear message (`catalog_revoked`). The catalog in
   force is the valid one with the highest `serial` between `/usr/share/lordos/catalog.json` and
@@ -86,7 +86,7 @@ A **packaged app** in `/usr/lib/lordos-apps/<id>/` must be a Verified author's: 
 ## Modify, restore and share (the "business" idea)
 
 - At install time, the **original `.lpk` is kept** in `~/.local/share/lordos/apps/.orig/<id>.lpk`.
-- If the user **edits** the installed app, LordOS detects it through the hashes and marks it
+- If the user **edits** the installed app, Insane OS detects it through the hashes and marks it
   "**Modified by you**", showing which files changed (`pkg_status`).
 - "**Restore original**" puts it back exactly as it was (`pkg_restore`).
 - "**Share my version**" builds a new `.lpk` signed with the **user's own key** (generated the
@@ -112,9 +112,9 @@ node tools/lpk.mjs catalog <fuente.json> --key oficial.json [carpeta]   # signed
 `~/.config/lordos/lpk-key.json` exists. With `--unsigned` the result is "Unsigned" (still with
 hashes).
 
-### The LordOS key
+### The Insane OS key
 
-Official packages (bundled apps, catalog) are signed with the **LordOS key**. Today there is only
+Official packages (bundled apps, catalog) are signed with the **Insane OS key**. Today there is only
 one, the **development** key:
 
 - its **public key** is in the repository: `packaging/keys/lordos-dev.pub`, and compiled into the
@@ -128,7 +128,7 @@ For a public release, the final key is added to `keys.h` and the development one
 ### Release files
 
 Every GitHub release file (the `.deb`, the ISO, the Raspberry Pi image) is listed with its SHA-256
-in `SHA256SUMS`, and `SHA256SUMS` is signed with the LordOS release key:
+in `SHA256SUMS`, and `SHA256SUMS` is signed with the Insane OS release key:
 
 - `SHA256SUMS.sig` = base64 of the 64-byte Ed25519 signature over the exact bytes of `SHA256SUMS`.
 - Public key: `tools/release/lordos-release.pub.pem`, also embedded as `RELEASE_PUBKEY_PEM` in
@@ -162,15 +162,15 @@ The whole release process (changelog, tag, build, SBOM, signing and `gh release 
 
 ## Verified system code (0.8.2)
 
-The `.lpk` signing above covers apps installed by the user. LordOS's **own** code — the desktop,
+The `.lpk` signing above covers apps installed by the user. Insane OS's **own** code — the desktop,
 the login screen and every native app — is checked too: lord-server refuses to run a bundle that no
 longer matches the signed copy. This is phase 1 of 3 of "System apps immutable" (phase 3 brings
 fs-verity and A/B system images).
 
 ### What is signed
 
-`code-manifest.json`, at the root of the LordOS folder (`/usr/lib/lordos`; the repository root in a
-development tree), lists the size and SHA-256 of every file LordOS runs as JavaScript:
+`code-manifest.json`, at the root of the Insane OS folder (`/usr/lib/lordos`; the repository root in a
+development tree), lists the size and SHA-256 of every file Insane OS runs as JavaScript:
 
 | File | What it is |
 |---|---|
@@ -191,7 +191,7 @@ development tree), lists the size and SHA-256 of every file LordOS runs as JavaS
 ```
 
 `code-manifest.sig` is the base64 of the Ed25519 signature over the exact bytes of the manifest,
-made with the **LordOS release key** (the same key as `SHA256SUMS.sig`, see "Release files" below).
+made with the **Insane OS release key** (the same key as `SHA256SUMS.sig`, see "Release files" below).
 The public key is compiled into lord-server (`codesig_release_key` in `server/src/sec/codesig.c`;
 `build/codesig-test` checks it against `tools/release/lordos-release.pub.pem`), so no file on disk
 can add a trusted key. The `kind` field keeps a signature made for another purpose from passing as
@@ -208,11 +208,11 @@ but cannot run anything; phase 3 (fs-verity over the whole system image) covers 
 ### How lord-server checks it (`server/src/sec/codesig.c`)
 
 - **Once per process**, before the first bundle: read `code-manifest.json` and `.sig` from the
-  LordOS folder, verify the signature with the compiled-in key, then parse the manifest with the
+  Insane OS folder, verify the signature with the compiled-in key, then parse the manifest with the
   strict JSON reader (format 1, the right kind, relative paths without `.`/`..`, sorted and unique,
   64 lowercase hex digits, at most 4096 files and 1 MB). An isolated app's process does this before
   its sandbox is applied.
-- **Per bundle, lazily, when it is loaded:** the file is opened under the LordOS folder with
+- **Per bundle, lazily, when it is loaded:** the file is opened under the Insane OS folder with
   `openat2(RESOLVE_BENEATH)` (no `..`, no link out of it), read whole from that one descriptor, and
   the SHA-256 of **exactly those bytes** is compared with the manifest; the same buffer is what
   QuickJS evaluates. Nothing is read twice, so there is no window to swap the file between the check
@@ -227,8 +227,8 @@ but cannot run anything; phase 3 (fs-verity over the whole system image) covers 
 
 | State | When | About shows |
 |---|---|---|
-| **Verified** | signed manifest, good signature, every loaded bundle matches | "Verified" (green) and "Signed by LordOS · N components" |
-| **Development build** | no `.sig` (a development tree, `npm run build`), or no manifest at all, in a development build of lord-server | "Development build" (orange) and "Development build: the system code is not signed by LordOS." |
+| **Verified** | signed manifest, good signature, every loaded bundle matches | "Verified" (green) and "Signed by Insane OS · N components" |
+| **Development build** | no `.sig` (a development tree, `npm run build`), or no manifest at all, in a development build of lord-server | "Development build" (orange) and "Development build: the system code is not signed by Insane OS." |
 | **Modified** | a bundle does not match, or the manifest or its signature is bad | "Modified — not loaded" (red) |
 
 In a development build with an unsigned manifest the hashes are still checked, so a modified bundle
@@ -238,12 +238,12 @@ development state: without a valid signature nothing is loaded.
 ### When something does not match
 
 - The bundle is **not run**. The refusal is logged (`code: REFUSED themes/default/theme.bundle.js:
-  SHA-256 differs from the manifest — this LordOS component was modified and was not loaded` in the
+  SHA-256 differs from the manifest — this Insane OS component was modified and was not loaded` in the
   session log or the journal) and remembered for the session.
-- **A theme:** at session start lord-server falls back to Lord Flow (`default`), then Lord Classic
+- **A theme:** at session start lord-server falls back to Insane Flow (`default`), then Insane Classic
   (`classic`); on a theme switch it keeps the last theme that loaded (since 0.8.5, so two refused
   switches in a row no longer leave the session without a theme). The desktop
-  shows a notification: **"This LordOS component was modified and was not loaded"**, naming the file,
+  shows a notification: **"This Insane OS component was modified and was not loaded"**, naming the file,
   with a Details button (About). The broken theme is not offered again in this session.
 - **Nothing left to load** (every theme, the login screen, or a bad manifest/signature): the built-in
   **recovery screen** — compiled into lord-server, so it is as trusted as lord-server itself — says
@@ -259,7 +259,7 @@ troubleshooting: `sudo /usr/lib/lordos/bin/lord-server --check-code`).
 | | |
 |---|---|
 | ![modified](system-apps-modified.png) | ![recovery](system-apps-recovery.png) |
-| One byte changed in the default theme: the Lord Classic theme loads and says so | Every theme modified: the recovery screen |
+| One byte changed in the default theme: the Insane Classic theme loads and says so | Every theme modified: the recovery screen |
 | ![about verified](system-apps-about-verified-dark.png) | ![about development](system-apps-about-dev-light.png) |
 | About: System app, Verified | About: Development build |
 | ![app recovery](system-apps-app-recovery.png) | |
@@ -269,7 +269,7 @@ troubleshooting: `sudo /usr/lib/lordos/bin/lord-server --check-code`).
 
 Every app in `apps/` is a **system app** (`system: true`, set by `tools/build-theme.mjs`; a
 package can never claim it, `sdk/windows.js` `isSystemApp`). Store → Installed shows "System app —
-part of LordOS" where a Linux app has Remove, and About shows a "System app" badge. The `lordos`
+part of Insane OS" where a Linux app has Remove, and About shows a "System app" badge. The `lordos`
 Debian package is marked `Protected: yes` (Debian's field for packages the system needs), so the
 Store's package engine refuses to remove it (`pkg.removeEssential`, the same rule as essential
 packages) and dpkg wants `--force-remove-protected`. This part was checked in the code
@@ -284,7 +284,7 @@ packages) and dpkg wants `--force-remove-protected`. This part was checked in th
 ### Threat model
 
 - **Protects against** a process running as the user (or as any non-root account) changing
-  LordOS's code: it can't write `/usr/lib/lordos` anyway, and a copy elsewhere is never loaded
+  Insane OS's code: it can't write `/usr/lib/lordos` anyway, and a copy elsewhere is never loaded
   (lord-server only runs files under its own folder, checked against the signed list). It also
   catches **offline modification** of the bundles or the manifest — a disk edited from another
   system, a corrupted or tampered image — and plain corruption, and it tells the user instead of

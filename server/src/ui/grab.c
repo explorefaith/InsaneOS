@@ -38,7 +38,7 @@ int grab_cursor(void) { return g.edges ? cursor_for_edges(g.edges) : CUR_MOVE; }
 
 static float dim_or(Dim d, float fallback) { return d.unit == UNIT_PX ? d.v : fallback; }
 
-/* LordBench's scripted move (grab_script_begin): the node follows the synthetic pointer (bench/lbinput.h), or
+/* InsaneBench's scripted move (grab_script_begin): the node follows the synthetic pointer (bench/lbinput.h), or
  * without it the same path by the clock, one step per frame */
 static struct { int on; double t0; float rx, ry, period; } sc;
 

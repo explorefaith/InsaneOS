@@ -1,4 +1,4 @@
-// langnames.js — languages LordOS isn't translated into yet, for Settings → Language & Region → +:
+// langnames.js — languages Insane OS isn't translated into yet, for Settings → Language & Region → +:
 // [id, name in its own language, English name]. A language whose catalogs are installed (bundled
 // or a pack) is listed from its meta.json instead, so this list only names the ones still missing.
 // Asking for one: docs/LANGUAGES.md, "Language packs".

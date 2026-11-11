@@ -35,12 +35,12 @@ const CONTENT = process.env.CONTENT_DIR ? path.resolve(process.env.CONTENT_DIR) 
 // headless Chromium for the paper PDFs: a folder whose node_modules has playwright
 const TOOLS = process.env.WEB_TOOLS || process.env.ICON_DEPS || '';
 const FINGERPRINT = 'c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e';
-const GITHUB = 'https://github.com/lordbasex/LordOS';
-// the community forum (r/LordOS): questions, feedback and every release announced
-const COMMUNITY = 'https://www.reddit.com/r/LordOS/';
+const GITHUB = 'https://github.com/lordbasex/Insane OS';
+// the community forum (r/Insane OS): questions, feedback and every release announced
+const COMMUNITY = 'https://www.reddit.com/r/Insane OS/';
 // the GitHub mark for the header's repository link (the menu has no "GitHub" text link since 0.8.8.1)
 const GH_MARK = '<svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
-// the LordOS Imager downloads of the current release (package.json's version and channel)
+// the Insane OS Imager downloads of the current release (package.json's version and channel)
 const PKG = JSON.parse(fs.readFileSync(path.join(REPO, 'package.json'), 'utf8'));
 // a package-only update (0.8.4.1) leaves the live ISO and the Imager on an earlier release: lordos.media
 const CHANNEL = PKG.lordos && PKG.lordos.channel ? '-' + PKG.lordos.channel : '';
@@ -195,7 +195,7 @@ const shotImgs = shots.map((s) => ({ thumb: webp(s.file, 720), full: webp(s.file
 log(`gallery: ${shots.length} images converted`);
 
 // ---------- apps data ----------
-// thirdparty: suites from other projects that the Store offers (apt/catalog.json, section "suites"); not made by LordOS
+// thirdparty: suites from other projects that the Store offers (apt/catalog.json, section "suites"); not made by Insane OS
 const APP_CATS = ['productivity', 'media', 'system', 'privacy', 'thirdparty'];
 const appsFile = path.join(WEB, 'i18n/apps.json');
 const apps = fs.existsSync(appsFile)
@@ -299,7 +299,7 @@ if (faqJson && !ALLOW_PH) {
   faqJson.categories = (faqJson.categories || []).filter((c) => c.items.length);
 }
 const HAS_FAQ = !!(faqJson && (faqJson.categories || []).length);
-// the LordOS Imager guide (/imager/) and the download section's "How to write LordOS" block
+// the Insane OS Imager guide (/imager/) and the download section's "How to write Insane OS" block
 const imagerDir = path.join(CONTENT, 'imager');
 const HAS_GUIDE = LANGS.every((l) => fs.existsSync(path.join(imagerDir, `guide.${l}.json`)));
 const guideText = HAS_GUIDE ? Object.fromEntries(LANGS.map((l) => [l, readJson(path.join(imagerDir, `guide.${l}.json`))])) : {};
@@ -357,7 +357,7 @@ ${alts}
 <link rel="preload" href="${fontMedium}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${cssUrl}">${doc ? `\n<link rel="stylesheet" href="${doc === 'home' ? homeCssUrl : doc === 'imager' ? imagerCssUrl : docCssUrl}">` : ''}
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="LordOS">
+<meta property="og:site_name" content="Insane OS">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
@@ -366,7 +366,7 @@ ${LANGS.filter((l) => l !== t.lang).map((l) => `<meta property="og:locale:altern
 <meta property="og:image" content="${SITE}/social-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="LordOS">
+<meta property="og:image:alt" content="Insane OS">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
@@ -432,7 +432,7 @@ function header(t, page) {
   return `<input type="checkbox" id="nav-cb" class="nav-cb" aria-label="${esc(t.pages.menu)}">
 <header class="top">
 <nav class="wrap wide nav" aria-label="${esc(t.navLabel)}">
-<a class="nav-home" href="${home}" aria-label="${esc(t.homeLabel)}"><img class="logo-l" src="${img.logoLight}" alt="LordOS" width="122" height="36"><img class="logo-d" src="${img.logoDark}" alt="LordOS" width="122" height="36"></a>
+<a class="nav-home" href="${home}" aria-label="${esc(t.homeLabel)}"><img class="logo-l" src="${img.logoLight}" alt="Insane OS" width="122" height="36"><img class="logo-d" src="${img.logoDark}" alt="Insane OS" width="122" height="36"></a>
 <div class="nav-links">
 ${links}
 </div>
@@ -449,7 +449,7 @@ ${searchDialog(t)}
 <div class="drawer" id="drawer" aria-label="${esc(t.pages.menu)}">
 <label for="nav-cb" class="scrim" aria-hidden="true"></label>
 <div class="dpanel">
-<div class="dhead"><a href="${home}" aria-label="${esc(t.homeLabel)}"><img src="${img.logoDark}" alt="LordOS" width="115" height="34"></a><label for="nav-cb" class="dclose" aria-hidden="true" data-label="${esc(t.pages.closeMenu)}">${X}</label></div>
+<div class="dhead"><a href="${home}" aria-label="${esc(t.homeLabel)}"><img src="${img.logoDark}" alt="Insane OS" width="115" height="34"></a><label for="nav-cb" class="dclose" aria-hidden="true" data-label="${esc(t.pages.closeMenu)}">${X}</label></div>
 <ul class="dlist">
 ${dl}
 </ul>
@@ -501,7 +501,7 @@ function footer(t, page = 'home') {
   if (!footerJson) {
     return `<footer class="foot">
 <div class="wrap">
-<img src="${img.logoDark}" alt="LordOS" width="108" height="32" loading="lazy">
+<img src="${img.logoDark}" alt="Insane OS" width="108" height="32" loading="lazy">
 <div class="foot-links">
 <a href="${GITHUB}">GitHub</a>
 <a href="${GITHUB}/blob/main/LICENSE">${esc(t.license)}</a>
@@ -521,7 +521,7 @@ ${(c.links || []).filter((k) => linkBuilt(k.href)).map((k) => `<li><a href="${es
   return `<footer class="foot">
 <div class="wrap fcols">
 <div class="fbrand">
-<img src="${img.logoDark}" alt="LordOS" width="108" height="32" loading="lazy">
+<img src="${img.logoDark}" alt="Insane OS" width="108" height="32" loading="lazy">
 <p>${esc(loc(footerJson.tagline, l) || t.meta.description)}</p>
 </div>
 ${cols}
@@ -738,7 +738,7 @@ ${apps.filter((a) => a.category === c).sort((x, y) => appName(x, l).localeCompar
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(t.explore.title)} · LordOS</title>
+<title>${esc(t.explore.title)} · Insane OS</title>
 <meta name="robots" content="noindex">
 <link rel="canonical" href="${SITE + pageUrl(l, 'explore')}">
 <meta http-equiv="refresh" content="0; url=${dest}">
@@ -759,12 +759,12 @@ ${apps.filter((a) => a.category === c).sort((x, y) => appName(x, l).localeCompar
     const thumb = webp(f, 720), full = webp(f, 1600);
     return `<figure class="${cls}"><a class="g-card" href="${full.url}" data-w="${full.w}" data-h="${full.h}" data-cap="${esc(cap)}" aria-label="${esc(t.gallery.open + ': ' + cap)}"><img src="${thumb.url}" width="${thumb.w}" height="${thumb.h}" alt="${esc(cap)}" loading="lazy" decoding="async"></a>${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`;
   };
-  // Raspberry Pi: the boards, the Argon ONE V5 case, screenshots, LordBench and the terminal tools
+  // Raspberry Pi: the boards, the Argon ONE V5 case, screenshots, InsaneBench and the terminal tools
   {
     const P = t.pi;
     const aria = (svg, label) => svg.replace(/role="img" aria-label="[^"]*"/, `role="img" aria-label="${esc(label)}"`);
     const rows = (list) => `<dl>${list.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
-    const card = (title, ver, list, extra = '') => `<article class="pi-card"><div class="pi-card-h"><h3>${esc(title)}</h3><span class="pi-ver">LordOS ${ver}</span></div>${rows(list)}${extra}</article>`;
+    const card = (title, ver, list, extra = '') => `<article class="pi-card"><div class="pi-card-h"><h3>${esc(title)}</h3><span class="pi-ver">Insane OS ${ver}</span></div>${rows(list)}${extra}</article>`;
     const cards = card(P.pi5Title, '0.8.8.1', P.pi5Rows) + '\n' + card(P.pi500Title, '0.8.8', P.pi500Rows,
       `<p class="pi-thanks">${esc(P.thanks).replace('{name}', '<strong>Steve Sande</strong>')}</p>`);
     const shotList = Object.keys(P.shots)
@@ -836,7 +836,7 @@ ${shotList.join('\n')}
       : '';
     const pose = (m.lumo && m.lumo.pose) || 'front';
     write(path.join(pageUrl(l, page), 'index.html'), render(tpl.feature, {
-      ...common(page, [`${title} · LordOS`, loc(m.tagline, l) || t.meta.description], true),
+      ...common(page, [`${title} · Insane OS`, loc(m.tagline, l) || t.meta.description], true),
       lumo: LUMO[pose] || LUMO.front || img.lumoWave,
       title: esc(title), tagline: esc(loc(m.tagline, l)), intro: inline(loc(m.lumo && m.lumo.intro, l)),
       body: bodyHtml, shots, sources, prevnext: pn,
@@ -916,7 +916,7 @@ ${rels.join('\n')}
     }
     let { html: bodyHtml, headings } = renderMd(body, paperDiagrams.diagrams || [], paperDiagrams.screenshots || meta.screenshots || []);
     if (changelog.length) ({ html: bodyHtml, headings } = addChangelog(bodyHtml, headings));
-    const title = loc(meta.title, l) || fm.title || 'LordOS';
+    const title = loc(meta.title, l) || fm.title || 'Insane OS';
     const subtitle = loc(meta.subtitle, l) || fm.subtitle || '';
     // two-level table of contents from ## and ###
     let toc = '<ol>', open = false;
@@ -933,7 +933,7 @@ ${rels.join('\n')}
     ].filter(Boolean).join('');
     const pdf = HAS_PDF ? `<a class="btn btn-primary" href="${pageUrl(l, 'paper')}lordos-paper-${l}.pdf" download><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>${esc(t.pages.paper.pdf)}</a>` : '';
     write(path.join(pageUrl(l, 'paper'), 'index.html'), render(tpl.paper, {
-      ...common('paper', [`${title} · LordOS`, t.pages.paper.metaDescription], true),
+      ...common('paper', [`${title} · Insane OS`, t.pages.paper.metaDescription], true),
       title: esc(title), subtitle: esc(subtitle), meta: metaLine, pdf, toc, body: bodyHtml,
     }, t));
   }
@@ -951,7 +951,7 @@ ${rels.join('\n')}
       return ps.length ? `<h2>${esc(t.pages.legal.groups[g])}</h2>\n<ul>\n${ps.map((x) => `<li><a href="${pageUrl(l, 'legal/' + x.slug)}"${x.slug === lp.slug ? ' aria-current="page"' : ''}>${esc(loc(x.title, l) || x.slug)}</a></li>`).join('\n')}\n</ul>` : '';
     }).join('\n');
     write(path.join(pageUrl(l, page), 'index.html'), render(tpl.legal, {
-      ...common(page, [`${title} · LordOS`, loc(lp.description, l) || `${title} — lordos.org`], true),
+      ...common(page, [`${title} · Insane OS`, loc(lp.description, l) || `${title} — lordos.org`], true),
       title: phOut(esc(phIn(title, 'legal/pages.json'))), updated: esc(fmtDate(updated)), updatedIso: esc(updated), nav, body: bodyHtml, indexUrl: pageUrl(l, 'legal'),
     }, t));
   }
@@ -963,7 +963,7 @@ ${rels.join('\n')}
     const title = loc(gp.title, l) || gp.slug;
     const nav = `<ul>\n${guidePages.map((x) => `<li><a href="${pageUrl(l, x.slug)}"${x.slug === gp.slug ? ' aria-current="page"' : ''}>${esc(loc(x.title, l) || x.slug)}</a></li>`).join('\n')}\n</ul>`;
     write(path.join(pageUrl(l, gp.slug), 'index.html'), render(tpl.guide, {
-      ...common(gp.slug, [`${title} · LordOS`, loc(gp.description, l) || `${title} — lordos.org`], true),
+      ...common(gp.slug, [`${title} · Insane OS`, loc(gp.description, l) || `${title} — lordos.org`], true),
       title: esc(title), lead: esc(loc(gp.description, l) || ''), nav, body: bodyHtml,
     }, t));
   }
@@ -975,7 +975,7 @@ ${rels.join('\n')}
       if (!ps.length) return '';
       return `<section aria-labelledby="lg-${g}"><h2 id="lg-${g}">${esc(t.pages.legal.groups[g])}</h2><ul class="lcards">${ps.map((x) => `<li><a href="${pageUrl(l, 'legal/' + x.slug)}"><strong>${esc(loc(x.title, l) || x.slug)}</strong><span>${esc(legalDesc(x, l))}</span></a></li>`).join('')}</ul></section>`;
     }).join('\n');
-    write(path.join(pageUrl(l, 'legal'), 'index.html'), render(tpl.legalIndex, { ...common('legal', [`${t.pages.legal.indexTitle} · LordOS`, t.pages.legal.metaIndex], true), groups }, t));
+    write(path.join(pageUrl(l, 'legal'), 'index.html'), render(tpl.legalIndex, { ...common('legal', [`${t.pages.legal.indexTitle} · Insane OS`, t.pages.legal.metaIndex], true), groups }, t));
     for (const [from, to] of LEGAL_MOVED) {
       if (legalPages.some((x) => x.slug === from) || !legalPages.some((x) => x.slug === to)) continue;
       const dest = SITE + pageUrl(l, 'legal/' + to);
@@ -984,7 +984,7 @@ ${rels.join('\n')}
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(loc(legalPages.find((x) => x.slug === to).title, l))} · LordOS</title>
+<title>${esc(loc(legalPages.find((x) => x.slug === to).title, l))} · Insane OS</title>
 <meta name="robots" content="noindex">
 <link rel="canonical" href="${dest}">
 <meta http-equiv="refresh" content="0; url=${dest}">
@@ -1014,7 +1014,7 @@ ${(c.items || []).map((it) => {
 </section>`).join('\n');
     const jsonld = `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`;
     write(path.join(pageUrl(l, 'faq'), 'index.html'), render(tpl.faq, {
-      ...common('faq', [`${t.pages.faq.title} · LordOS`, t.pages.faq.lead], true), chips, sections, jsonld,
+      ...common('faq', [`${t.pages.faq.title} · Insane OS`, t.pages.faq.lead], true), chips, sections, jsonld,
     }, t));
   }
 
@@ -1027,7 +1027,7 @@ ${(c.items || []).map((it) => {
     add('page', t.navExplore, pageUrl(l, 'explore'), t.explore.lead);
     add('page', t.pi.title, pageUrl(l, 'raspberry-pi'), `Raspberry Pi 5 Raspberry Pi 500 ${t.pi.lead}`);
     add('page', t.pi.argonTitle, pageUrl(l, 'raspberry-pi') + '#pi-argon', t.pi.argonText);
-    add('page', t.pi.benchTitle, pageUrl(l, 'raspberry-pi') + '#pi-bench', `LordBench benchmark ${t.pi.benchLead}`);
+    add('page', t.pi.benchTitle, pageUrl(l, 'raspberry-pi') + '#pi-bench', `InsaneBench benchmark ${t.pi.benchLead}`);
     add('page', t.pi.toolsTitle, pageUrl(l, 'raspberry-pi') + '#pi-tools', t.pi.tools.map((x) => x[0]).join(' '));
     add('page', t.navDownload, pageUrl(l, 'home') + '#download', t.dlLead || '');
     add('page', t.navSupport, pageUrl(l, 'home') + '#support', '');
@@ -1035,7 +1035,7 @@ ${(c.items || []).map((it) => {
     if (HAS_PAPER) add('page', t.pages.navPaper, pageUrl(l, 'paper'), '');
     if (HAS_FAQ) add('page', t.pages.faq.title, pageUrl(l, 'faq'), t.pages.faq.lead);
     if (HAS_HW) add('page', t.pages.hardware.title, pageUrl(l, 'hardware'), t.pages.hardware.lead);
-    if (HAS_GUIDE) add('guide', 'LordOS Imager', pageUrl(l, 'imager'), '');
+    if (HAS_GUIDE) add('guide', 'Insane OS Imager', pageUrl(l, 'imager'), '');
     for (const m of featureList) add('feature', loc(m.title, l), pageUrl(l, 'features/' + m.slug), loc(m.tagline, l));
     for (const g of guidePages) add('guide', loc(g.title, l), pageUrl(l, g.slug), loc(g.description || g.lead, l));
     if (HAS_FAQ) for (const c of faqJson.categories) for (const it of c.items || []) add('faq', loc(it.q, l), pageUrl(l, 'faq') + '#' + it.id, loc(it.a, l));
@@ -1049,7 +1049,7 @@ ${(c.items || []).map((it) => {
     const H = t.pages.hardware;
     const sec = renderSections(hwModel, H, esc, (k) => `${GITHUB}/issues/${k}`);
     write(path.join(pageUrl(l, 'hardware'), 'index.html'), render(tpl.hardware, {
-      ...common('hardware', [`${H.title} · LordOS`, H.lead], true), ...sec,
+      ...common('hardware', [`${H.title} · Insane OS`, H.lead], true), ...sec,
       status: HW_IN_DEV ? esc(H.statusDev.replace('{release}', `${PKG.version}${CHANNEL}`)) : '',
       newIssue: `${GITHUB}/issues/new?template=hardware-report.yml`,
     }, t));
@@ -1078,7 +1078,7 @@ ${(c.items || []).map((it) => {
   }
 }
 
-// the LordOS Imager guide, per language
+// the Insane OS Imager guide, per language
 if (HAS_GUIDE) {
   for (const l of LANGS) {
     const t = dict[l];
@@ -1094,7 +1094,7 @@ write('404.html', render(tpl.notFound, {
   img, js: jsUrl, toTop: toTop(dict.en),
   head: `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found · LordOS</title>
+<title>Page not found · Insane OS</title>
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light dark">
 <script src="${themeUrl}"></script>

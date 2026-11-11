@@ -252,7 +252,7 @@ const captureFull = () => capture.full();
 const captureArea = () => capture.area('area');
 const openPanelOrStop = () => { if (recording.get()) capture.record(); else wm.open(APP); };
 addShortcuts([
-  { id: 'capture.full', keys: ['Meta+Shift+3', 'PrintScreen'], when: hasMedia, run: captureFull, label: 'shell.shortcuts.captureFull', group: 'system' },
+  { id: 'capture.full', keys: ['Meta+Shift+3', 'PrintScreen', 'Ctrl+Shift+S'], when: hasMedia, run: captureFull, label: 'shell.shortcuts.captureFull', group: 'system' },
   { id: 'capture.area', keys: ['Meta+Shift+4'], when: hasMedia, run: captureArea, label: 'shell.shortcuts.captureArea', group: 'system' },
   { id: 'capture.panel', keys: ['Meta+Shift+5'], when: hasMedia, run: openPanelOrStop, label: 'shell.shortcuts.capturePanel', group: 'system' },
   { id: 'capture.cancel', keys: ['Escape'], when: selecting, run: () => endArea(), listed: () => false },
@@ -287,7 +287,10 @@ function Overlay({ index }) {
     const offUp = addListener('pointerup', (e) => {
       const cur = area.get();
       if (!cur?.start) return;
-      areaDone(dragRect(cur.start, e.x, e.y, cur.start.display), cur.start.display);
+      const r = dragRect(cur.start, e.x, e.y, cur.start.display);
+      // a click (no real drag) over a window captures that window, macOS-style
+      if (cur.mode === 'area' && r.w < 6 && r.h < 6 && cur.hover) { areaDone(cur.hover, cur.hover.display); return; }
+      areaDone(r, cur.start.display);
     });
     return () => { offMove(); offUp(); };
   }, [list, index]);
@@ -298,7 +301,7 @@ function Overlay({ index }) {
     else if (a.hover) areaDone(a.hover, a.hover.display);
   };
   const dim = 'rgba(0,0,0,0.35)';
-  const g = a.mode === 'window' ? a.hover : a.rect;
+  const g = a.mode === 'window' ? a.hover : (a.rect || a.hover);
   const r = g ? { x: g.x - ox, y: g.y - oy, w: g.w, h: g.h, title: g.title } : null;
   const p = a.pointer ? { x: a.pointer.x - ox, y: a.pointer.y - oy } : null;
   const here = p && (!d || (p.x >= 0 && p.y >= 0 && p.x < d.w && p.y < d.h));

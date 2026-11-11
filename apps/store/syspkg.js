@@ -1,6 +1,6 @@
-// syspkg.js — how Store → Updates (and its plans) name LordOS's own data packages: in words instead of
+// syspkg.js — how Store → Updates (and its plans) name Insane OS's own data packages: in words instead of
 // the package name. Only presentation; what gets installed is the same. The lordos package itself has
-// its own card (LordOSCard in debian.js). No imports, so tests/store_syspkg_test.mjs can load it.
+// its own card (InsaneCard in debian.js). No imports, so tests/store_syspkg_test.mjs can load it.
 //
 //   sysPkgKey(name)       the t() key prefix for a known system package, or null
 //   snapshotDate(version) the date of a lordos-hwdata version (YYYY.MM.DD or YYYY.MM.DD.N,

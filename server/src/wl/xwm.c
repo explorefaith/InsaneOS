@@ -1,4 +1,4 @@
-/* xwm.c — LordOS's X window manager for Xwayland (see xwm.h).
+/* xwm.c — Insane OS's X window manager for Xwayland (see xwm.h).
  *
  * It speaks the X11 protocol itself (x11wire.c), on the connection Xwayland opened for it with
  * `-wm`, fully asynchronously: it never waits for a reply, so lord-server can't stall on
@@ -11,7 +11,7 @@
  *     (MapRequest); reads their
  *     title, class (WM_CLASS → the app's .desktop), protocols, hints, Motif decorations, window type
  *     and transient parent; WL_SURFACE_ID tells which wl_surface shows each one;
- *   - keeps every X window where LordOS shows it (the X position is the content's position on
+ *   - keeps every X window where Insane OS shows it (the X position is the content's position on
  *     screen, so Xwayland routes the pointer right), and stacks the focused one on top;
  *   - focus (SetInputFocus / WM_TAKE_FOCUS), close (WM_DELETE_WINDOW or KillClient), fullscreen,
  *     maximize and minimize requests (_NET_WM_STATE, WM_CHANGE_STATE), moves and resizes asked by
@@ -19,13 +19,13 @@
  *   - an X app may not move the keyboard focus to another X app's window (FocusIn from another
  *     client is reverted);
  *   - the clipboard: CLIPBOARD and PRIMARY both ways (XFixes tells when an X app copies; the copy is
- *     read once and becomes LordOS's; LordOS's is offered to X only while an X window has the
+ *     read once and becomes Insane OS's; Insane OS's is offered to X only while an X window has the
  *     keyboard, so a background X app can't read what was copied elsewhere, and a secret copied in
  *     Passwords never is);
- *   - the root window's cursor is LordOS's arrow (Render cursor);
+ *   - the root window's cursor is Insane OS's arrow (Render cursor);
  *   - 10 s after the last X window closes, if X-Resource shows no other client, Xwayland stops.
  * X11 apps on one display can always see each other; what this guards is the border with Wayland
- * apps and LordOS (docs/PRIVACY.md, "X11 apps").
+ * apps and Insane OS (docs/PRIVACY.md, "X11 apps").
  * See docs/WAYLAND.md, "X11 apps (Xwayland)". */
 #include "xwm.h"
 #include "x11wire.h"
@@ -109,9 +109,9 @@ typedef struct Xfer {
 
 enum { SEL_CLIP, SEL_PRIM, NSEL };
 typedef struct {
-    int owned;                          /* the window manager owns it in X (LordOS's selection) */
+    int owned;                          /* the window manager owns it in X (Insane OS's selection) */
     unsigned owned_gen;
-    unsigned x_gen;                     /* LordOS generation that belongs to an X app's copy */
+    unsigned x_gen;                     /* Insane OS generation that belongs to an X app's copy */
     int stage;                          /* import: 0 idle, 1 TARGETS, 2 data, 3 INCR chunks */
     uint32_t owner, target;
     int image, latin1;
@@ -394,7 +394,7 @@ static uint32_t sel_atom(int k) { return k == SEL_CLIP ? AT(CLIPBOARD) : XA_PRIM
 static uint32_t sel_prop(int k) { return k == SEL_CLIP ? AT(LORD_SEL_CLIPBOARD) : AT(LORD_SEL_PRIMARY); }
 static int sel_index(uint32_t a) { return a == AT(CLIPBOARD) ? SEL_CLIP : a == XA_PRIMARY ? SEL_PRIM : -1; }
 
-/* LordOS's current selection, as a generation (any change → another value). */
+/* Insane OS's current selection, as a generation (any change → another value). */
 static unsigned lord_gen(int k) {
     if (k == SEL_PRIM) { size_t n; unsigned g; wlx_primary(&n, &g); return g; }
     return term_clipboard_gen() * 2654435761u + wl_clip_image_gen() * 40503u + 1;
@@ -407,7 +407,7 @@ static int lord_has(int k) {
     return term_clipboard()[0] && !term_clipboard_sensitive();
 }
 
-/* LordOS's selection is offered to X only while an X window has the keyboard, and only if it is
+/* Insane OS's selection is offered to X only while an X window has the keyboard, and only if it is
  * newer than what an X app copied. */
 static void clip_sync(void) {
     for (int k = 0; k < NSEL; k++) {
@@ -586,7 +586,7 @@ static void sel_request(const uint8_t *p) {
              target = x11_get32(p + 20), prop = x11_get32(p + 24);
     int k = sel_index(selection);
     if (!prop) prop = target;                               /* obsolete clients */
-    /* LordOS's selection is in X only while an X window has the keyboard (clip_sync). Asking from
+    /* Insane OS's selection is in X only while an X window has the keyboard (clip_sync). Asking from
      * a window of the focused client is a hint, not a boundary: the requestor id isn't
      * authenticated in X11 and X apps on one display can read each other's selections anyway
      * (docs/PRIVACY.md, "X11 apps") */
@@ -698,7 +698,7 @@ static void on_configure_request(const uint8_t *p) {
         border = x11_get16(p + 24);
     XWin *w = find(id);
     if (!w || !w->managed || w->override || is_popup_type(w->wtype)) {
-        /* not one of LordOS's windows (yet): as asked */
+        /* not one of Insane OS's windows (yet): as asked */
         int32_t v[5];
         int n = 0;
         uint16_t m = mask & (XCF_X | XCF_Y | XCF_W | XCF_H | XCF_Border);
@@ -710,7 +710,7 @@ static void on_configure_request(const uint8_t *p) {
         if (m) configure(id, m, v, n);
         return;
     }
-    /* a LordOS window: it may change its size (not while maximized or fullscreen), never its place */
+    /* a Insane OS window: it may change its size (not while maximized or fullscreen), never its place */
     int nw = (mask & XCF_W) && !w->maximized && !w->fullscreen ? w_ : w->w;
     int nh = (mask & XCF_H) && !w->maximized && !w->fullscreen ? h : w->h;
     if (nw != w->w || nh != w->h) {
@@ -873,7 +873,7 @@ static int idle_fired(void *data) {
 
 static void ignore_reply(const uint8_t *r, size_t n, uint32_t a, uint32_t b) { (void)r; (void)n; (void)a; (void)b; }
 
-/* The root window's cursor: LordOS's arrow, through the Render extension (ARGB). */
+/* The root window's cursor: Insane OS's arrow, through the Render extension (ARGB). */
 static void pictfmt_reply(const uint8_t *r, size_t n, uint32_t a, uint32_t b) {
     (void)a; (void)b;
     if (!r || n < 32) return;
@@ -926,7 +926,7 @@ static void init_done(void) {
     xo_end(&X.out);
     change_prop(X.wmwin, AT(NET_SUPPORTING_WM_CHECK), XA_WINDOW, 32, &X.wmwin, 1);
     change_prop(root, AT(NET_SUPPORTING_WM_CHECK), XA_WINDOW, 32, &X.wmwin, 1);
-    change_prop(X.wmwin, AT(NET_WM_NAME), AT(UTF8_STRING), 8, "LordOS", 6);
+    change_prop(X.wmwin, AT(NET_WM_NAME), AT(UTF8_STRING), 8, "Insane OS", 6);
     uint32_t sup[] = { AT(NET_WM_STATE), AT(NET_WM_STATE_FULLSCREEN), AT(NET_WM_STATE_MAXIMIZED_VERT), AT(NET_WM_STATE_MAXIMIZED_HORZ),
                        AT(NET_WM_STATE_HIDDEN), AT(NET_WM_STATE_FOCUSED), AT(NET_ACTIVE_WINDOW), AT(NET_WM_MOVERESIZE),
                        AT(NET_CLIENT_LIST), AT(NET_SUPPORTING_WM_CHECK), AT(NET_WM_NAME), AT(NET_FRAME_EXTENTS),

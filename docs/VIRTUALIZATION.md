@@ -1,7 +1,7 @@
 # Virtualization
 
-The design of **Machines** (working name), LordOS's desktop virtualization app: run other operating systems in windows of the
-LordOS desktop, on the machine you have, at native speed where the hardware allows it, for free and with open source parts.
+The design of **Machines** (working name), Insane OS's desktop virtualization app: run other operating systems in windows of the
+Insane OS desktop, on the machine you have, at native speed where the hardware allows it, for free and with open source parts.
 This is the design, and it follows the Virtual machines item in [ROADMAP.md](ROADMAP.md). Phases 0 to 2 and the import of Phase 3
 are built (see "Status and how to continue" below).
 
@@ -36,7 +36,7 @@ mocks), `assets/machines/systems.json` and `packaging/keys/machines/` (download 
   `node tools/brand-check.mjs`.
 - Release gates (12): `server/tests/vm_isolation.sh`, `vm_integrity.sh`, `vm_recovery.sh`, `vm_leak.sh` (helpers in
   `vm_gate_lib.sh`); on a physical PC `tools/vm/bare-metal-gates.sh` runs them and writes one results file.
-- On screen in a real session: the bench in `tools/vm/e2e/` (README there): a headless LordOS session, a driver bundle, clicks and
+- On screen in a real session: the bench in `tools/vm/e2e/` (README there): a headless Insane OS session, a driver bundle, clicks and
   screenshots over `remote.sock`.
 - Never on the maintainer's daily desktop without asking; the build VM (VM 116) and the Pi 5 may be used.
 
@@ -106,7 +106,7 @@ Still open in Phase 2:
   Fusion): NVMe disk, vmxnet3, the SMBIOS UUID and MAC kept, no TPM, Secure Boot off; activation checked.
 - [ ] USB passthrough of a device to a machine.
 - [ ] Bridged and Host-only networks (`vhost-net` for Bridged).
-- [ ] File copy panel with flow control and resume, Send to LordOS, drag in and out (7, target 300 MB/s).
+- [ ] File copy panel with flow control and resume, Send to Insane OS, drag in and out (7, target 300 MB/s).
 - [ ] UEFI secure boot and TPM (swtpm, its state in snapshots: To test).
 - [ ] virtio-win guests on both architectures with automatic driver setup (4.3; pinned virtio-win version, answer-file edition
   selection, the generic key only as fallback).
@@ -128,7 +128,7 @@ Still open in Phase 2:
 ### Phase 5, later: decided then
 
 - [ ] Own agent for other guests' windows; a lightweight engine for Linux guests; GPU passthrough on PCs; reaching a machine from
-  another computer over LordOS's remote desktop.
+  another computer over Insane OS's remote desktop.
 
 ### Measurements and checks still open (any phase)
 
@@ -149,9 +149,9 @@ The bar is section 16: the most complete desktop virtualization app, and visuall
    guests. Nobody has to know the word "emulation" unless they ask for another architecture.
 2. **One app, no assembly.** No XML, no command lines, no second window from another toolkit. Creating a VM, installing its system
    and getting its drivers is one flow.
-3. **LordOS's own desktop.** The VM's picture is a node in our compositor, with no QEMU window, no X11, no toolkit. Moving, resizing,
+3. **Insane OS's own desktop.** The VM's picture is a node in our compositor, with no QEMU window, no X11, no toolkit. Moving, resizing,
    full screen, Picture in Picture, desktops and the theme all work as for any app.
-4. **Same security model as the rest of LordOS.** `lord-server` never runs as root. Each VM is one sandboxed process tree. Privileged
+4. **Same security model as the rest of Insane OS.** `lord-server` never runs as root. Each VM is one sandboxed process tree. Privileged
    steps are closed admin actions. A guest gets nothing of the host unless the person gives it.
 5. **Both architectures, same features where the hardware allows.** Where it doesn't, the app says so instead of offering a switch
    that fails.
@@ -197,7 +197,7 @@ works: a guest inside a desktop hypervisor's VM ran at 0.98 of that VM's CPU spe
 GPU passthrough (VFIO) exists on PCs with a second GPU and proper IOMMU groups. It is an advanced option for a later phase; it takes
 a device away from the host and can't work with the only GPU that draws the desktop.
 
-### 2.2 Raspberry Pi 5 (measured on our board, Model B Rev 1.1, 16 GB, LordOS kernel 6.18.57)
+### 2.2 Raspberry Pi 5 (measured on our board, Model B Rev 1.1, 16 GB, Insane OS kernel 6.18.57)
 
 | Fact | Value | Source |
 |---|---|---|
@@ -220,14 +220,14 @@ What this means:
   kernel patches). So a 4K Debian guest on a 16K host should run. A public project boots an arm64 virtio-win guest under KVM on Pi 5 with plain `-M virt -cpu
   host` and contains no page-size check (**Measured** by reading its script, not by running it), which suggests that the 16K default
   kernel is fine. **Measured on 2026-11-04 on our Pi 5:** a Debian 13 guest with a 4K-page kernel (6.12.115) boots and runs under KVM
-  on the 16K LordOS kernel, with GICv2 and `-cpu host`, at native CPU speed (guest/host 1.00–1.01 on SHA-256, 2.4 % slower on a
+  on the 16K Insane OS kernel, with GICv2 and `-cpu host`, at native CPU speed (guest/host 1.00–1.01 on SHA-256, 2.4 % slower on a
   Python loop). Details in section 13.
 - **The price of 16K.** The vGIC warning comes from a kernel check of the GICV region's alignment (**Reported**, the 2016 patch series).
   When it fails, each guest access to the virtual CPU interface traps and is emulated: interrupt-heavy work costs more. Whether the
   firmware's 4K kernel (`kernel8.img`) avoids it is still **To test**: Phase 0 measured no interrupt-heavy work under either kernel.
   If it does, the app can recommend, never force, a 4K boot for people
-  who use VMs a lot. Our LordOS kernel has no 4K twin at this moment: the board only has the Debian-style `rpi-v8` kernel, and a
-  4K LordOS build would be new work, and Pi 4 path differences apply (no Landlock on the archive kernel).
+  who use VMs a lot. Our Insane OS kernel has no 4K twin at this moment: the board only has the Debian-style `rpi-v8` kernel, and a
+  4K Insane OS build would be new work, and Pi 4 path differences apply (no Landlock on the archive kernel).
 - **4 vCPUs, always.** The board has 4 Cortex-A76 cores; GICv2 itself stops at 8 CPUs, so it's not the limit here. The default for a
   guest is 3, leaving one for the desktop. **Measured on 2026-11-04:** with a guest busy on 3 vCPUs, dragging a window stayed at
   59.3 FPS (58.0 idle); with 4 busy vCPUs it fell to 2.4 FPS, with stalls of about 1000 ms. The same collapse happens with no VM when
@@ -410,7 +410,7 @@ can't be opened.
 ```
 
 Phase 1 keeps the NVRAM as `disks/nvram.qcow2` and adds `lock` and `run.json` (3.9), because QEMU may write only in `disks/`.
-Files shows the folder as one item. It moves to another LordOS computer only under the conditions of 3.6. `machine.json` never holds passwords.
+Files shows the folder as one item. It moves to another Insane OS computer only under the conditions of 3.6. `machine.json` never holds passwords.
 Keys go to the keyring.
 
 ### 3.6 Contracts and compatibility
@@ -631,7 +631,7 @@ spot; the lights and bars show only real numbers.
   On arm64 a **This Computer** page (PiView) says what the board runs natively, emulated or not at all, warns about an emulated machine
   and about machines on a microSD card (the library's device, from `/sys/dev/block`).
 - **New Machine assistant** (full window, five steps: Choose, Profile, Name, Review, Create). Choose: *Download and install* tiles
-  (LordOS, Debian, Ubuntu, Fedora) are *Coming later*, like *Migrate from another computer*; *Install from an ISO file* and *Import a
+  (Insane OS, Debian, Ubuntu, Fedora) are *Coming later*, like *Migrate from another computer*; *Install from an ISO file* and *Import a
   machine* open the file dialog. The system is recognized from the ISO 9660 volume label (`lord.vm.isoInfo`) and the file's name
   (`systemOf`, `versionOf`), the architecture from the name (`archOf`), with *Other architecture…* to switch; an emulated choice says
   it's much slower. Profile: Light, Standard, Development (`profileSize`, kept within this computer). Name: prefilled
@@ -654,7 +654,7 @@ spot; the lights and bars show only real numbers.
 - `lord.vm.stop(dir, how)` (the library's menu, through the runtime socket) takes `shutdown`, `poweroff`, `pause`, `resume` and
   `reset`, and waits up to half a second for lord-vm's answer before closing the socket.
 
-**On screen** (VM 125: LordOS 0.8.8.3 amd64, nested VT-x, 4 cores, 3.8 GB, no QEMU at the start), 2026-11-05: the banner installed
+**On screen** (VM 125: Insane OS 0.8.8.3 amd64, nested VT-x, 4 cores, 3.8 GB, no QEMU at the start), 2026-11-05: the banner installed
 the packages in about 15 s and *Allow* gave `alex` the kvm group and an access-list entry on `/dev/kvm` with no new login; Debian 13's
 official nocloud qcow2 (SHA512 checked) was imported (2 vCPU, 1 GB, 20 GB) and started with KVM; firmware, kernel and login appeared in
 the window, the guest followed the window's size, the root login and a shell worked from the host keyboard (`nproc` 2, 961 MB,
@@ -726,10 +726,10 @@ its memory within that. On VM 125 (2,897 MB for machines) with the emulated mach
 machine isn't part of the saved state): VM 125 had collected twelve. Machines is now a single-window app (manifest `singleWindow`):
 only its library is saved, and a saved list that names it more than once opens it once.
 
-**The Raspberry Pi 5 with the app** (2026-11-05, the user's board, 16 GB, LordOS built from `pi-machines` = `next-0884` with this
+**The Raspberry Pi 5 with the app** (2026-11-05, the user's board, 16 GB, Insane OS built from `pi-machines` = `next-0884` with this
 branch). *Allow* gave the account the kvm group and an access-list entry on `/dev/kvm`, but the first start failed with QEMU's *Failed to
 retrieve host CPU features*: `/dev/kvm` carries udev's `uaccess` tag, and systemd-logind rewrote its access list at the next login of any
-kind (an SSH login was enough), keeping only the active seat session's user, which a LordOS session isn't. `vm-kvm` now writes
+kind (an SSH login was enough), keeping only the active seat session's user, which a Insane OS session isn't. `vm-kvm` now writes
 `/etc/udev/rules.d/71-lordos-kvm.rules` (`TAG-="uaccess"` for kvm) so the entry stays until the next boot, and from the next login the
 kvm group covers it; after a reboot the session had group 992 (kvm) and machines started with KVM. Under GPU composition the machine's
 picture was see-through: QEMU's x8r8g8b8 leaves the fourth byte 0, which the CPU composition never reads but the GPU's takes as the UI's
@@ -760,7 +760,7 @@ messages of 3.9 grew (`vmproto.h` is the contract: `VM_CDROM`, `VM_SUSPEND`, `VM
 to lord-vm; `VM_NOTICE`, `VM_JOB`, `VM_CONSOLE_FD`, `VM_AGENT_STATE`, `VM_CLIP_DATA` from it; reasons `suspended` and `resume-failed`); the
 version number is unchanged, since both ends ship together and an older peer drops what it doesn't know. `machine.json` is schema 2 (`base`,
 `agent`, `clipboard`): a schema 1 file is read as is and written as 2 with `machine.json.schema1` kept, as 3.6 says. Measured on the amd64
-build VM (**nested**, Debian 13 nocloud guest, 512 MB to 1 GB) and on screen on VM 125 (LordOS amd64, nested) unless said otherwise.
+build VM (**nested**, Debian 13 nocloud guest, 512 MB to 1 GB) and on screen on VM 125 (Insane OS amd64, nested) unless said otherwise.
 
 *Phase 1's open items.*
 
@@ -834,7 +834,7 @@ or `xclip`, as the desktop user, and never runs anything the host names; frames 
 Clipboard Helper copies it in through `guest-file-write` and one fixed script (udev rule, user unit). The agent's light is on the card and
 first on the bar, with a popover of what works now. Seen on VM 125: *Debian GNU/Linux 13 (trixie), agent 10.0.13*, journal in Logs, guest
 kept awake, the helper installed in 60 ms (build VM) and from the popover, and the clipboard both ways (a guest with Xvfb and xclip: text
-copied in the guest was in LordOS's clipboard history; a report copied in LordOS was in the guest's clipboard after the window came to the
+copied in the guest was in Insane OS's clipboard history; a report copied in Insane OS was in the guest's clipboard after the window came to the
 front). Not tried: a guest desktop session starting the helper by itself (the unit waits for `graphical-session.target`), Wayland guests.
 
 *Release gates (12).* Scripts in `server/tests/`, each `sh tests/<gate>.sh BUILD_DIR …`, run on the amd64 build VM (**nested**, ext4):
@@ -851,13 +851,13 @@ started with `PR_SET_PDEATHSIG`), and the build VM's 2 GB `/tmp` ran out of spac
 `/var/tmp`). Some kills land after the operation finished; the gate then says so and skips the "interrupted" checks rather than
 pass them.
 
-*On the Pi 5 (arm64, LordOS kernel, KVM).* The arm64 package of this branch, merged with 0.8.8.4's work so Remote Desk, the
+*On the Pi 5 (arm64, Insane OS kernel, KVM).* The arm64 package of this branch, merged with 0.8.8.4's work so Remote Desk, the
 single sign-on VPN and the Sound balance stayed (checked after the install), was installed and the Pi rebooted once. With the
 Debian guest made in Phase 1: suspend 6.6 s for 393 MB of state, start from it 0.43 s (state loaded in 216 ms), a snapshot with
 memory 6.5 s, going back to it 1.4 s, and delete. The gates weren't run on the Pi, and its windows weren't driven (it's the
 user's desktop).
 
-*The beta's open items, closed (2026-11-05).* Each its own commit on `machines-beta`; seen on VM 125 (LordOS amd64, nested) from the
+*The beta's open items, closed (2026-11-05).* Each its own commit on `machines-beta`; seen on VM 125 (Insane OS amd64, nested) from the
 app, measured on the build VM, and on the Pi 5 below.
 
 - *The network heals itself (6.5).* The card sits on a QEMU hub (`-netdev hubport,id=nic0`) and passt on another port of it (`pst0` on
@@ -881,7 +881,7 @@ app, measured on the build VM, and on the Pi 5 below.
   `text/html` to Wayland and X11 apps, and read from apps that offer it, also from one that offers only HTML. `lordos-guest` 2 reads the
   guest's `TARGETS` (`xclip`, or `wl-paste -l`) and writes one form back (the tools hold one type each). After a resume, lord-vm asks the
   helper to say hello again. Seen on VM 125 with an X guest (Xorg on its screen, `xclip`, `feh`): a picture copied in the guest was in
-  LordOS's clipboard history, re-encoded (573 bytes in, 784 out); a picture copied with `wl-copy` on the host arrived in the guest with
+  Insane OS's clipboard history, re-encoded (573 bytes in, 784 out); a picture copied with `wl-copy` on the host arrived in the guest with
   the same MD5 and was shown by `feh`; rich text with a `<script>`, an `onerror`, a `javascript:` link and a `url()` background went both
   ways without them. 33 unit checks (`vm_test.c`) cover the layout, the PNG header and the sanitizer. Files by copy and paste or drag
   aren't in the beta: 6.21, below.
@@ -913,7 +913,7 @@ app, measured on the build VM, and on the Pi 5 below.
 - *Idle sleep held off (6.14).* While a machine runs and *Keep this computer awake* is on, lord-vm holds a logind *idle block*
   inhibitor, let go when the machine pauses or stops. The session's idle sleep asks `lord.vm.awake()`, says so in the session log, and
   tries again every 30 s, sleeping once no machine runs; the login screen's sleep deadline (lord-sessiond) reads logind's
-  `BlockInhibited`. `systemd-inhibit --list` on VM 125 with two machines: two *LordOS Machines* idle blocks and two shutdown delays;
+  `BlockInhibited`. `systemd-inhibit --list` on VM 125 with two machines: two *Insane OS Machines* idle blocks and two shutdown delays;
   none once they stopped. Seen on VM 125 with *Sleep when inactive* at 10 minutes and a machine running: at the deadline the session
   log said *idle: sleep held off: 1 running machine(s) keep this computer awake* and the computer stayed up (12:53 to 13:04, uptime
   rising); 19 s after the machine was shut down: *no running machine holds sleep off any more: going to sleep*, and the journal has
@@ -927,7 +927,7 @@ app, measured on the build VM, and on the Pi 5 below.
   failed three times in a row before, passes now).
 
 *Release gates after these changes* (build VM, nested amd64): integrity **46 passed**; recovery **32 passed** (22 before, plus the
-network and host-stop cases); leaks **10 passed**, 100 cycles in 146 s, 1464 ms each on average, the slowest 5251 ms. On the Pi 5 (arm64, LordOS kernel 6.18.57, KVM, the Debian 13 arm64 nocloud image copied from VM 125
+network and host-stop cases); leaks **10 passed**, 100 cycles in 146 s, 1464 ms each on average, the slowest 5251 ms. On the Pi 5 (arm64, Insane OS kernel 6.18.57, KVM, the Debian 13 arm64 nocloud image copied from VM 125
 over the LAN): integrity **45 passed** (the one fewer is a linked clone that finished before its kill on amd64, a conditional check),
 recovery **32 passed** (passt killed: the guest's next fetch 110 ms after, then 1.1 s and 2.5 s; SIGTERM saved the machine and the next
 start resumed it), leaks **10 passed**, 100 cycles in 147 s, 1476 ms each, the slowest 5441 ms.
@@ -947,7 +947,7 @@ recordings take the guest's sound).
 
 *Release gates on the Pi 5 with `machines-089`* (2026-11-06; 0.8.8.4 with the beta and the import merged; `lord-vm`
 built for arm64 in the arm64 build root and run from a scratch folder, the installed packages untouched, Debian 13's
-nocloud arm64 image, KVM, QEMU 10.0.13, LordOS kernel 6.18.57): integrity **45 passed**, 0 failed (296 s); recovery
+nocloud arm64 image, KVM, QEMU 10.0.13, Insane OS kernel 6.18.57): integrity **45 passed**, 0 failed (296 s); recovery
 **41 passed**, 0 failed (301 s; the 32 of the beta plus the 9 of the import case; passt killed: the guest's next fetch
 542 ms after, then 1,068 ms and 2,609 ms after two more kills, lord-vm gave up after five in a minute and said so; the
 host-stop case saved the machine and the next start resumed it); leaks **10 passed** (152 s), 100 cycles in 151 s,
@@ -1144,7 +1144,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   qemu-guest-agent first when it answers and presses the button 10 s later if the guest still runs (without the
   agent, the button first); the card's installs bring the standard task or a desktop (`dbus`, logind),
   `qemu-guest-agent` with the machine's agent on, and, on a console Debian, `acpid` and `acpi-support-base`.
-- *Deviation from the mock:* the mock's first card is LordOS; LordOS publishes no ISO as a release file yet (its
+- *Deviation from the mock:* the mock's first card is Insane OS; Insane OS publishes no ISO as a release file yet (its
   releases carry the `.deb` packages and the Pi image is written by the Imager), so its card is left out until one is,
   and the fourth card is Kali (in 4.1's list). The mock's step names stay (*Install* is shown as *Create*, as in the
   alpha).
@@ -1182,7 +1182,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   Kali's key pinned in its place was refused (`vm.listBadSignature`, `pkg.pgp.unknownKeys`), with a signature name
   that isn't published (`vm.listUnsigned`).
 
-  *The cards driven on screen (2026-11-06).* A real headless LordOS session built from this branch on VM 116
+  *The cards driven on screen (2026-11-06).* A real headless Insane OS session built from this branch on VM 116
   (`tools/vm/e2e`, the Cloud bench's approach: a test-only theme bundle with a driver, input and pictures over the
   session's `remote.sock`; lord-server started as root with `--user` so the session has its administration helper),
   screenshots in `out/final/machines-e2e/`: the Debian 13 card read Debian's list and checked its signature in 2.3 s
@@ -1208,17 +1208,17 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
 
   *Still open for the beta:* the cards' unattended install (4.1: Debian preseed, Ubuntu autoinstall, Fedora
   kickstart; the bench types the preseed's address at the boot menu, which a person won't); the console guest's
-  ACPI shutdown above; the signatures and resume on the Pi 5 (not run now; the code paths are the same); a LordOS
-  card once LordOS publishes an ISO.
+  ACPI shutdown above; the signatures and resume on the Pi 5 (not run now; the code paths are the same); a Insane OS
+  card once Insane OS publishes an ISO.
 
 
 ## 4. Guest systems
 
 ### 4.1 Linux
 
-Every current Linux has virtio drivers in its kernel. Cards: Ubuntu, Fedora, Debian, Kali and LordOS, each for the host's architecture, plus **any ISO of that architecture** from a file. arm64 images exist for all of them; on a Pi the UEFI arm64 ISO is the one to use, not the Pi's image.
+Every current Linux has virtio drivers in its kernel. Cards: Ubuntu, Fedora, Debian, Kali and Insane OS, each for the host's architecture, plus **any ISO of that architecture** from a file. arm64 images exist for all of them; on a Pi the UEFI arm64 ISO is the one to use, not the Pi's image.
 
-**Always the newest image of a release.** The catalog doesn't pin a file. An entry names a release, the maker's list that names its images (a `SHA256SUMS` file, a directory listing, a releases file) and a file-name pattern, so "Ubuntu 26.04" keeps working when 26.04.2 appears. The app reads the list, takes the newest matching name, checks that it can really be downloaded (lists sometimes name removed files), and verifies the download against that same list, whose signature it checks with the maker's key (confirmed for all four cards on 2026-11-06: every maker signs its list, with the keys pinned in 3.9, "The Linux download cards"). So the catalog stays small and rarely needs an update, and our own signature covers only the entry: which list and which key are trusted. LordOS itself is a guest too, since we build UEFI ISOs for both architectures.
+**Always the newest image of a release.** The catalog doesn't pin a file. An entry names a release, the maker's list that names its images (a `SHA256SUMS` file, a directory listing, a releases file) and a file-name pattern, so "Ubuntu 26.04" keeps working when 26.04.2 appears. The app reads the list, takes the newest matching name, checks that it can really be downloaded (lists sometimes name removed files), and verifies the download against that same list, whose signature it checks with the maker's key (confirmed for all four cards on 2026-11-06: every maker signs its list, with the keys pinned in 3.9, "The Linux download cards"). So the catalog stays small and rarely needs an update, and our own signature covers only the entry: which list and which key are trusted. Insane OS itself is a guest too, since we build UEFI ISOs for both architectures.
 
 Automatic install: Debian preseed, Ubuntu autoinstall, Fedora kickstart. The person gives a name and password once, in the assistant;
 it reaches the guest through a small seed disk (Debian: inside the installer's initrd) that is deleted after the first boot, and only
@@ -1289,12 +1289,12 @@ Guests whose license restricts them to their maker's hardware. Guests needing a 
 **Alpha (Phase 1):** a minimal library, the New Machine sheet and the machine window, described in 3.9 (The app); everything below
 is Phase 2 and later.
 
-Name and icon: a generic name, ours (open decision 1). The icon is a screen holding a smaller rounded tile, on the LordOS shape (radius
+Name and icon: a generic name, ours (open decision 1). The icon is a screen holding a smaller rounded tile, on the Insane OS shape (radius
 0.225). Mocks: https://claude.ai/artifact/WNiELGEazSqnr68SFWuyPz (private until shared).
 
 ### 5.1 Control Center (main window)
 
-The library. A **summary header**, then a grid of machines, each with a **live picture** while running and the last picture when off. All in LordOS's own flat, modern style: real data in calm type, no imitation of physical equipment.
+The library. A **summary header**, then a grid of machines, each with a **live picture** while running and the last picture when off. All in Insane OS's own flat, modern style: real data in calm type, no imitation of physical equipment.
 
 **Header:** machines running of total, memory used of host total, free space on the library's volume, and two actions: **Disk** (the Storage window) and **New**.
 
@@ -1330,7 +1330,7 @@ A light never carries meaning by color alone: each has a tooltip and the state i
 Steps, each one screen, with Back always available:
 
 1. **Choose:** cards.
-   - Download: Debian, Ubuntu, Fedora, Kali (built 2026-11-06, 3.9, "The Linux download cards"); LordOS once it publishes an ISO; Android (later).
+   - Download: Debian, Ubuntu, Fedora, Kali (built 2026-11-06, 3.9, "The Linux download cards"); Insane OS once it publishes an ISO; Android (later).
    - "Install from an ISO file" (drag a file on it).
    - "Migrate from another app": a machine of another virtualization app (6.22). Built 2026-11-05; it took the tile the mock gave
      "Migrate from another PC" (6.11), which comes later.
@@ -1350,7 +1350,7 @@ Unattended where the guest supports it, walked through otherwise: the assistant 
 
 ### 5.3 The VM window
 
-A normal LordOS window, with a bar:
+A normal Insane OS window, with a bar:
 
 | Group | Items |
 |---|---|
@@ -1376,7 +1376,7 @@ Quick actions stay on the bar itself, icons with tooltips, in this order: **agen
 | **Window** | The guest's desktop in a window; the guest's resolution follows the window | Guest agent or virtio-gpu resize |
 | **Full Screen** | Takes one display, its own desktop | Nothing |
 | **All Displays** | One head per display | virtio-gpu multi-head |
-| **Apps** (seamless) | Guest apps as LordOS windows, no guest desktop | See 7.2 |
+| **Apps** (seamless) | Guest apps as Insane OS windows, no guest desktop | See 7.2 |
 | **Picture in Picture** | Small floating view, input optional; live control off by default | Our `setPip` |
 | **Thumbnail** | Paused at last frame, one click to resume | Suspend |
 
@@ -1442,7 +1442,7 @@ A screen in the app's Help and first run lists, per host, what's native, slow, l
 
 ### 5.8 Menus, shortcuts
 
-Follows `docs/SHORTCUTS.md`: app menus, ❖ shortcuts for the host while the app has focus outside capture, all passed to the guest while captured. The release combination is shown in the bar and is configurable. In Lord Classic the same table.
+Follows `docs/SHORTCUTS.md`: app menus, ❖ shortcuts for the host while the app has focus outside capture, all passed to the guest while captured. The release combination is shown in the bar and is configurable. In Insane Classic the same table.
 
 ## 6. Features
 
@@ -1543,7 +1543,7 @@ TAG /mnt/TAG`; mounting it by itself through the agent is still to do.
 - **Linux guests on both architectures** mount it with `mount -t virtiofs`; a 200 MB file reads back with the host's SHA-256, and writing
   fails with "Read-only file system". On arm64 virtio-win guests it's still **To test**.
 - **The host kernel needs no FUSE or virtiofs option:** virtiofsd works entirely in user space, and the guest's kernel has the driver
-  built in. What the host needs is `memfd_create`, which LordOS's Pi kernel has. The earlier "Pi kernels need `CONFIG_FUSE_FS`" was wrong.
+  built in. What the host needs is `memfd_create`, which Insane OS's Pi kernel has. The earlier "Pi kernels need `CONFIG_FUSE_FS`" was wrong.
 - **Speed:** copying the 200 MB file inside the guest takes 0.23 s (about 870–900 MB/s) on the Pi and on amd64. On amd64 (**nested**) the
   first read of each boot was about 25× slower (5.5 s), cause not found; to check on bare metal.
 - **Cost:** the shared memory backend counts in full once the guest touches it: peak QEMU RSS 803 MB against 444 MB without a share, and
@@ -1582,13 +1582,13 @@ A small agent runs on the old PC, or the disk is read from a backup image, or th
 ### 6.12 Guest app integration
 
 - Guest's apps in the launcher and Dock, with icons, marked with a small badge. Launching starts or resumes the VM.
-- Open a LordOS file with a guest app: Files' Open With, through the shared folder.
+- Open a Insane OS file with a guest app: Files' Open With, through the shared folder.
 - Reverse: open a link or file from the guest on the host: optional.
 - Guest notifications to the host: optional, off by default.
 
 ### 6.13 Nested virtualization
 
-Inside a guest: amd64: on by default for Software Development (`kvm_intel nested`, `kvm_amd nested`). arm64: kernel 6.16 enabled it for hardware that has it, off by default, through `KVM_ARM_VCPU_HAS_EL2` (**Reported**); needs FEAT_NV2, so not on Pi 5 or Pi 4 (Pi 5: `KVM_CAP_ARM_EL2` = 0, **Measured**, 2026-11-04). LordOS itself as a guest gets this for free where the host does.
+Inside a guest: amd64: on by default for Software Development (`kvm_intel nested`, `kvm_amd nested`). arm64: kernel 6.16 enabled it for hardware that has it, off by default, through `KVM_ARM_VCPU_HAS_EL2` (**Reported**); needs FEAT_NV2, so not on Pi 5 or Pi 4 (Pi 5: `KVM_CAP_ARM_EL2` = 0, **Measured**, 2026-11-04). Insane OS itself as a guest gets this for free where the host does.
 
 ### 6.14 Monitor and system ties
 
@@ -1639,7 +1639,7 @@ The first icon on the bar shows its state: gray (not installed), amber (machine 
 
 ### 6.18 Shell
 
-The Shell icon opens LordOS's Terminal with a shell inside the guest: over the agent, not the network, so it works with no SSH and with Isolated network. **The signed-in user by default**, in a Linux shell or PowerShell. Root or an administrator shell only with an explicit switch, per machine, in Security. The same rule covers `lordvm exec` and the MCP server's `run_command`. The tab is titled with the machine's name and marked, so that a guest's shell can't be mistaken for a host's. Terminal size follows the tab.
+The Shell icon opens Insane OS's Terminal with a shell inside the guest: over the agent, not the network, so it works with no SSH and with Isolated network. **The signed-in user by default**, in a Linux shell or PowerShell. Root or an administrator shell only with an explicit switch, per machine, in Security. The same rule covers `lordvm exec` and the MCP server's `run_command`. The tab is titled with the machine's name and marked, so that a guest's shell can't be mistaken for a host's. Terminal size follows the tab.
 
 ### 6.19 Logs
 
@@ -1669,7 +1669,7 @@ A panel along the bottom of the window shows file name, size, a bar, speed, time
 - Flow control by acknowledgement keeps memory flat for any file size. **Target:** 300 MB/s on Linux guests with NVMe on a PC, measured in Phase 3.
 - Resume after a dropped connection, by offset and hash. Optional end-to-end check, on by default for files over 1 GB.
 - Names are sanitized for the guest's rules. Symbolic links aren't followed; permissions and dates carry over where the file system can.
-- **Out of the guest:** in Apps mode, windows are ours, so dragging out works. From a Linux guest's own desktop, no agent can see the drag, so the agent adds **Send to LordOS** to the guest's file manager, plus `lordvm cp`. The panel says this when someone tries. Virtio-win guests allow drag-out through the agent, **To test**.
+- **Out of the guest:** in Apps mode, windows are ours, so dragging out works. From a Linux guest's own desktop, no agent can see the drag, so the agent adds **Send to Insane OS** to the guest's file manager, plus `lordvm cp`. The panel says this when someone tries. Virtio-win guests allow drag-out through the agent, **To test**.
 - Scanning: files coming out of a guest get the same quarantine marking as downloads.
 
 ### 6.22 Import
@@ -1793,7 +1793,7 @@ secret file in no new disk. Merges byte for byte: a split VMDK with two snapshot
 | `config.pvs` (`SystemUuid {feedface-1111-4222-8333-444455556666}`) | `feedface-1111-4222-8333-444455556666` | `00:1c:42:ab:cd:ef/e1000e` | UEFI |
 | a loose VHDX | a new one | a new one | booted from SATA |
 
-**On screen** (VM 125, LordOS 0.8.8.3 amd64 with this branch, 2026-11-05; `machines-shots5`): the assistant's *Migrate from another
+**On screen** (VM 125, Insane OS 0.8.8.3 amd64 with this branch, 2026-11-05; `machines-shots5`): the assistant's *Migrate from another
 app* tile, the file dialog into a `.vmwarevm` bundle (Debian's nocloud image as a split VMDK, a data disk with a snapshot, two cards,
 UEFI, a vTPM, Secure Boot, a disc image, a shared folder), the plan sheet (`01-plan-sheet.png`, `02-plan-sheet-lost.png`: name, system,
 CPU and memory, two disks, both MACs, firmware, the UUID kept, the devices; the TPM warning; what won't come along; the license line; space),
@@ -1825,7 +1825,7 @@ plan's space estimate counts the source's files, not what the guest wrote; libvi
 
 On its own computer a machine's picture comes by dmabuf and its input, clipboard and sound through the D-Bus display and the agent: no network, no encoder, no VNC. Compressing it for WebRTC there would only add delay.
 
-From another computer, a running machine is offered by LordOS's own remote desktop over WebRTC, with video and a data channel for input, clipboard and files. It uses the same pairing, stays off by default per machine, shows who is connected, grants input, clipboard, files and sound one by one, and no VNC or SPICE port is ever opened by a machine. Phase 5: **To test**.
+From another computer, a running machine is offered by Insane OS's own remote desktop over WebRTC, with video and a data channel for input, clipboard and files. It uses the same pairing, stays off by default per machine, shows who is connected, grants input, clipboard, files and sound one by one, and no VNC or SPICE port is ever opened by a machine. Phase 5: **To test**.
 
 ### 6.24 Reproducible machines
 
@@ -1864,7 +1864,7 @@ Copy and paste, drag, resolution and shell are **agents**: ordinary programs in 
 
 ### 7.2 Apps mode (seamless)
 
-**Linux guests:** apps speak Wayland to a small compositor proxy in the guest (`lordos-guest`), which forwards surfaces over vsock to the host, as `waypipe` does. On the host each surface is a native LordOS Wayland client, so it's a real window with its own Dock entry. Zero-copy with virtio-gpu cross-domain is the target; a first version copies. Guest X11 apps need the guest's Xwayland. Host keeps no X11.
+**Linux guests:** apps speak Wayland to a small compositor proxy in the guest (`lordos-guest`), which forwards surfaces over vsock to the host, as `waypipe` does. On the host each surface is a native Insane OS Wayland client, so it's a real window with its own Dock entry. Zero-copy with virtio-gpu cross-domain is the target; a first version copies. Guest X11 apps need the guest's Xwayland. Host keeps no X11.
 
 **virtio-win guests:** no free way exists. Our own agent would enumerate windows and stream regions. Phase 5 at the earliest, and only if real demand exists. Until then Apps mode is off there, and the setting says so.
 
@@ -1879,7 +1879,7 @@ Each forwarded window carries a thin marker in the frame with the machine's name
 - `lordos-guest` traffic is treated as untrusted: strict parser, size limits, fuzz target. A guest can't start a host process, read host files beyond its folder, or inject input into other windows.
 - **An encrypted machine has to be encrypted whole,** or the disk is the only safe part. Disks use qcow2 LUKS, with the key in the keyring. Also covered: suspended state and snapshot memory, written inside the encrypted qcow2 and never as a separate file (**To test**); TPM state, through swtpm's own state encryption (**To test**, to confirm in Debian's build); NVRAM; recordings and screenshots stay out of the folder. Thumbnails, and persistent logs, are off, and logs stay in memory. Host swap can still hold guest memory, and only encrypted swap solves that, so Security says so. Bridged mode and encrypted disks each state what they mean in one line.
 - `vm-enable`, `vm-bridge-on/off`, `vm-usb-allow` are closed actions with fixed arguments, added to the list maintainers review.
-- Catalog of images and tools: signed with the LordOS release key path, verified before use.
+- Catalog of images and tools: signed with the Insane OS release key path, verified before use.
 - A hostile ISO can only attack the guest, then QEMU, which is why the sandbox exists. QEMU updates arrive with Debian's.
 
 ## 9. Performance targets, and what Phase 0 measured
@@ -1910,7 +1910,7 @@ real link. The Pi's boot misses its target with UEFI firmware, which takes two t
 - **Pi 5, V3D:** `ScanoutDMABUF` with `XB24` (XBGR8888), the V3D tiled modifier `0x0700000000000006`, one plane, a descriptor longer than stride × height (padding for the tiles), and `UpdateDMABUF` at up to 194 a second, with the helper at 2 % CPU since it copies nothing (**Measured**, 2026-11-04, direct kernel boot only, see 3.2). Import into the compositor, direct scanout, sync and correctness of the picture: **To test**.
 - **amd64:** not measured: the Phase 0 host had no render node. **To test** on a bare-metal PC with Mesa, and with a vendor's proprietary driver.
 
-The LordOS rule holds: this app must not slow the desktop. It's idle until opened and runs nothing in the background without a running VM.
+The Insane OS rule holds: this app must not slow the desktop. It's idle until opened and runs nothing in the background without a running VM.
 
 ## 10. Packaging
 
@@ -1918,7 +1918,7 @@ The LordOS rule holds: this app must not slow the desktop. It's idle until opene
 - Package: `lordos-machines` (app, `lord-vm`), with `Depends: qemu-system-<native arch>`, `qemu-system-modules-opengl`, `qemu-utils`, `swtpm`, `virtiofsd`, UEFI firmware.
 - Emulation: a second switch on the Store page, as Disk Formats has for APFS: `qemu-system-<other arch>`.
 - Sizes: `qemu-system-x86` is 68 MB (**Measured**). The whole set, with dependencies, is **To measure**: plan on 300 to 500 MB, not including any image. Each guest wants 20 to 64 GB.
-- **LordOS 1.0 doesn't depend on Machines.** It's an optional Store package that follows the roadmap's place, after the final ISO. Its first public form is an **experimental, reduced release**, Phase 2's scope, and it ships only after passing isolation, disk integrity and failure recovery tests (section 12).
+- **Insane OS 1.0 doesn't depend on Machines.** It's an optional Store package that follows the roadmap's place, after the final ISO. Its first public form is an **experimental, reduced release**, Phase 2's scope, and it ships only after passing isolation, disk integrity and failure recovery tests (section 12).
 - Debian's QEMU is used, not a fork, so security updates come from Debian. If a feature needs a newer one, backport with care: open decision 5.
 - Licenses: QEMU GPL-2.0, swtpm BSD-3-Clause, virtiofsd Apache-2.0/BSD-3-Clause, EDK2 BSD-2-Clause-Patent, passt BSD-3-Clause; all stated on the Store page.
 
@@ -1931,7 +1931,7 @@ All text in en, es and pt from the first commit, a `machines.json` per language.
 - **Unit:** settings → QEMU arguments in a table test, for each architecture; `machine.json` schema and migration.
 - **Sandbox:** a test that a hostile `lord-vm` child can't open `~/.ssh`, another VM's folder, or `/dev/kvm` again.
 - **Fuzz:** `lordos-guest` parser and D-Bus listener in `lord-server`.
-- **Boot matrix** in CI where KVM exists: Debian, Ubuntu, Fedora, LordOS on amd64; same on arm64 (Pi).
+- **Boot matrix** in CI where KVM exists: Debian, Ubuntu, Fedora, Insane OS on amd64; same on arm64 (Pi).
 - **Real hardware matrix before each claim:** Pi 5 16 KiB kernel; Pi 5 4 KiB kernel; Pi 4; Intel; AMD; a nested amd64 VM (TCG path and refused KVM).
 - **Install test** of each pinned virtio-win version before the catalog moves.
 - **E2E** with `vm.sh`: the assistant to first boot, snapshot and revert, folder, USB, clipboard.
@@ -1946,16 +1946,16 @@ All text in en, es and pt from the first commit, a `machines.json` per language.
 and on the Pi 5 (3.9); on a physical amd64 PC they run with `tools/vm/bare-metal-gates.sh`, which checks the PC first
 (amd64, not a virtual machine, VT-x or AMD-V, `/dev/kvm` usable by the account, the engine, about 15 GB free on a real
 disk, 2 GB of memory), downloads Debian 13's nocloud image (SHA-512 checked) unless given one, runs the gates one after
-the other and writes one file with the PC's details (CPU, board, memory, disk, kernel, QEMU, passt, LordOS, `lord-vm`'s
-SHA-256) and every gate's log. Exit 0 when the three pass. On the PC, from the LordOS live USB or an installed LordOS,
+the other and writes one file with the PC's details (CPU, board, memory, disk, kernel, QEMU, passt, Insane OS, `lord-vm`'s
+SHA-256) and every gate's log. Exit 0 when the three pass. On the PC, from the Insane OS live USB or an installed Insane OS,
 as the normal user (not root), with the network:
 
 ```
 # 1. Machines → What's Missing → Install, then Turn On (the kvm group: log out and in once if it says so)
 # 2. the source tree on the PC (a clone, or the branch copied on a USB stick)
-git clone https://github.com/lordbasex/LordOS.git && cd LordOS && git checkout machines-089
+git clone https://github.com/lordbasex/Insane OS.git && cd Insane OS && git checkout machines-089
 # 3. on the live USB, /var/tmp is in memory: give a folder on an internal disk or a USB SSD with 15 GB free
-sh tools/vm/bare-metal-gates.sh --work /media/$USER/<disk>        # installed LordOS: sh tools/vm/bare-metal-gates.sh
+sh tools/vm/bare-metal-gates.sh --work /media/$USER/<disk>        # installed Insane OS: sh tools/vm/bare-metal-gates.sh
 # 4. attach the printed results file (machines-gates-<host>-<date>.txt) to the release notes or the issue
 ```
 
@@ -1979,7 +1979,7 @@ the end with the kit (0 processes left). Results: integrity **47 passed** (216 s
 killed: 390 ms to the guest's next fetch, then 1,102 and 2,583 ms), leaks **10 passed** (152 s; 100 cycles in 151 s,
 1,512 ms each, the slowest 5,286 ms); exit 0. pve-qemu 11.1 has `ScanoutDMABUF2` (Debian's 10.0.13 doesn't), but these
 gates run without a display, so the numbers are for the engine, the disks and the network, not for the picture. Logs
-kept outside the repository (`out/final/gates-proxmox/`). A physical PC with LordOS installed on its own disk (the
+kept outside the repository (`out/final/gates-proxmox/`). A physical PC with Insane OS installed on its own disk (the
 maintainer's i9) is still to run the script as above, for Debian's QEMU and a real display.
 
 
@@ -1994,7 +1994,7 @@ runs unless it says otherwise. The scripts are in `tools/vm0/` (not committed ye
 | | Pi 5 | amd64 (**nested**) |
 |---|---|---|
 | Hardware | Raspberry Pi 5, 16 GB, 4 × Cortex-A76 | A VM with 8 vCPUs and 16 GB, on a desktop hypervisor running on a 10-core amd64 desktop CPU at 2.8 GHz base, AVX2, no SHA instructions |
-| Host kernel | LordOS `6.18.57-lordos.3-rpi-2712`, 16K pages | Debian `6.12.115+deb13.1-cloud-amd64`, nested KVM on in the kernel module, no DRM drivers |
+| Host kernel | Insane OS `6.18.57-lordos.3-rpi-2712`, 16K pages | Debian `6.12.115+deb13.1-cloud-amd64`, nested KVM on in the kernel module, no DRM drivers |
 | QEMU | Debian `1:10.0.13+ds-0+deb13u1` | same |
 | Other parts | virtiofsd 1.13.2, passt (Debian 13), AAVMF from `qemu-efi-aarch64` 2025.02, virglrenderer 1.1.0 | virtiofsd `1.13.2-1+deb13u1`, passt `0.0~git20250503.587980c-2+deb13u1`, same AAVMF, SeaBIOS |
 | Guests | Debian 13.7 nocloud images, arm64 and amd64, kernel `6.12.115+deb13.1` with 4K pages, checked against Debian's `SHA512SUMS` | same |
@@ -2197,7 +2197,7 @@ networking, virtiofs on both architectures, the desktop under a 3-vCPU load. Sti
 **Decided on 2026-11-01, moved on 2026-11-02 and 2026-11-03:** the MVP starts in **0.8.9**, with `lord-vm` and direct QMP, on this stack:
 
 ```
-Machines (React + LordOS SDK)
+Machines (React + Insane OS SDK)
   → lord-vm in C (supervisor, QMP, limits, sandbox)
     → QEMU + KVM
       → Debian 13 guest, amd64 and arm64
@@ -2209,7 +2209,7 @@ Machines (React + LordOS SDK)
 |---|---|---|
 | **0, Technical proof** | No app. KVM, QEMU, QMP and D-Bus display: a Debian 13 guest with picture and input on amd64 and Pi 5, over direct QMP. Answers 2.2's open items: 4K guest on 16K host, Pi GICv2, GICV trapping by kernel, TCG numbers, `ui-dbus` on arm64, nested checks, `device=/dev/fdset`, formats and modifiers per GPU, desktop under load. No agent, no 3D, no USB, no snapshots | Done 2026-11-04: numbers in section 13, open items in 13.8 |
 | **1, Alpha** | `lord-vm`, `lord-vmdisplay`, sandbox, native window, qcow2 with qcow2 NVRAM, Shared network, schema and contracts (3.6), resource budget. Create, start, stop and recover without a terminal | Isolation test passes on Pi 5 and amd64 |
-| **2, Beta** | Control Center, assistant with Linux cards, requirements check, one-screen settings, profiles, snapshots, suspend, clones, Storage window, agent with state popover, Shell, Logs, unified diagnostics, screenshot and recording, resolution menu, Keep Running, clipboard. The experimental release | Full install and failure recovery are repeatable; release gates pass. Built on `machines-beta` (3.9, Phase 2, the beta) and merged with the import on `machines-089`: the gates pass on nested amd64 and, with `machines-089`, on the Pi 5 (45, 41 and 10 passed, 2026-11-06); the Linux download cards are built (3.9, "The Linux download cards"), with the makers' signatures checked, resumed downloads and removal in Storage, and driven on screen in a LordOS session through a whole Debian install (2026-11-06); the gates pass on bare-metal amd64 too. Unattended install built (3.9, "Install without questions") and seen into Debian's base system install on VM 116; still open: its end to end (Debian to login, Ubuntu, Fedora) and the power-button check, waiting for the build VM |
+| **2, Beta** | Control Center, assistant with Linux cards, requirements check, one-screen settings, profiles, snapshots, suspend, clones, Storage window, agent with state popover, Shell, Logs, unified diagnostics, screenshot and recording, resolution menu, Keep Running, clipboard. The experimental release | Full install and failure recovery are repeatable; release gates pass. Built on `machines-beta` (3.9, Phase 2, the beta) and merged with the import on `machines-089`: the gates pass on nested amd64 and, with `machines-089`, on the Pi 5 (45, 41 and 10 passed, 2026-11-06); the Linux download cards are built (3.9, "The Linux download cards"), with the makers' signatures checked, resumed downloads and removal in Storage, and driven on screen in a Insane OS session through a whole Debian install (2026-11-06); the gates pass on bare-metal amd64 too. Unattended install built (3.9, "Install without questions") and seen into Debian's base system install on VM 116; still open: its end to end (Debian to login, Ubuntu, Fedora) and the power-button check, waiting for the build VM |
 | **3, Advanced** | UEFI secure boot, TPM, virtio-win flow on both architectures with automatic setup, virgl, venus, shared folders, USB, file copy panel, Bridged, Host only, Picture in Picture, multi-head, export and import (import of other apps' machines built, 6.22), backups, Monitor, `lordvm` with shell, exec, logs and cp | A real compatibility and security matrix per architecture |
 | **4, Integration** | Linux Apps mode, guest apps in the Dock, reproducible machines, local MCP server, Migrate, Android card if the image exists | Each on tested hardware |
 | **5, Later** | Our own agent for other guests' windows; a lightweight engine for Linux guests, like crosvm; GPU passthrough on PCs; reaching a machine from another computer | Decided then |
@@ -2225,7 +2225,7 @@ Machines (React + LordOS SDK)
 | Scope | It's the biggest app on the roadmap | Phases ship on their own; 1.0 doesn't wait for it |
 | A compromised QEMU attacks the compositor | Whole desktop falls | `lord-vmdisplay`, fence timeouts, tolerant import |
 | A failure midway through a snapshot or clone | Machine damaged | Intent file, rename, release gates |
-| Desktop stutters while a machine works | Fails the LordOS rule | Budget, measured target, fewer default cores on a Pi |
+| Desktop stutters while a machine works | Fails the Insane OS rule | Budget, measured target, fewer default cores on a Pi |
 | Dependence on 16 KiB behaviour | Pi path rests on To test items | Phase 0 measured a 4K guest working on the 16K kernel at native CPU speed; the GICV trapping cost is still open (13.8) |
 | A guest aborts its own QEMU (3D on arm64, QEMU 10.0.13) | The machine dies on every UEFI boot or by the guest's choice | 3D off on arm64 until fixed (6.10) |
 | Host page and swap pressure | Host starves | Memory limits, balloon, warning at 80 % |
@@ -2243,7 +2243,7 @@ The bar: **the most complete desktop virtualization app there is, and the best l
 | Capability | M | Linux today | Note |
 |---|---|---|---|
 | Native speed through KVM, amd64 and arm64 | 1 | Yes | Pi 5 details in 2.2 |
-| Reach a machine from another computer, over LordOS's remote | 5 | Work | WebRTC, paired, off by default; see 6.23 |
+| Reach a machine from another computer, over Insane OS's remote | 5 | Work | WebRTC, paired, off by default; see 6.23 |
 | Other architecture by emulation, labelled | 1 | Yes | 2.4 |
 | Pause, saved sessions (suspend to disk), resume | 2 | Yes | May not resume across QEMU updates |
 | Keep running after closing the window, start with no window | 2 | Yes | |
@@ -2299,7 +2299,7 @@ The bar: **the most complete desktop virtualization app there is, and the best l
 | Shared folders for all guests, read-only by default | 3 | Yes | virtiofs; on arm64 virtio-win guests, a host-only SMB share if that fails |
 | Drag and drop into any guest, with progress, speed, time left | 3 | Work | Our agent |
 | Drag out of virtio-win guests | 3 | Work | To test |
-| Drag out of a Linux guest's own desktop | none | No | No agent can see the drag. Send to LordOS instead; Apps mode can |
+| Drag out of a Linux guest's own desktop | none | No | No agent can see the drag. Send to Insane OS instead; Apps mode can |
 | USB attach, auto-connect rules | 3 | Yes | usbredir |
 | Sound | 2 | Yes | |
 | Microphone and camera on request | 3 | Yes | |
@@ -2328,7 +2328,7 @@ The bar: **the most complete desktop virtualization app there is, and the best l
 
 ### Beyond the usual
 
-What people don't normally get from a desktop virtualization app, and the reason for LordOS's to exist:
+What people don't normally get from a desktop virtualization app, and the reason for Insane OS's to exist:
 
 | Capability | M | Linux today | Why it's better |
 |---|---|---|---|

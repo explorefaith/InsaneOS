@@ -232,7 +232,7 @@ static int send_playback(LmPulse *p) {
     ts_bool(&t, 1);                                  /* adjust_latency */
     /* state.restore-props=false: the session manager keeps volume and mute per media.role, so one video muted in
      * Settings → Sound once muted every later stream of that role (players, Remote Desk, the remote camera) for
-     * good. LordOS sets each stream's volume itself; nothing is restored or saved for ours. */
+     * good. Insane OS sets each stream's volume itself; nothing is restored or saved for ours. */
     const char *kv[] = { "media.name", media_name, "media.role", role, "state.restore-props", "false" };
     ts_proplist(&t, kv, 3);
     ts_bool(&t, 0);                                  /* volume_set */

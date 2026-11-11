@@ -1,4 +1,4 @@
-// Packages and signs LordOS apps (.lpk = tar.gz; see docs/NATIVE-APPS.md and docs/SIGNING.md).
+// Packages and signs Insane OS apps (.lpk = tar.gz; see docs/NATIVE-APPS.md and docs/SIGNING.md).
 //
 //   node tools/lpk.mjs <folder> [output.lpk] [--key key.json | --unsigned]
 //       packages the app; signs it with --key, with $LPK_KEY or with ~/.config/lordos/lpk-key.json
@@ -13,7 +13,7 @@
 //   node tools/lpk.mjs verify <package.lpk>
 //       shows the signature, the key and whether the files match.
 //   node tools/lpk.mjs catalog <source.json> --key official.json [folder]
-//       writes signed catalog.json + catalog.sig (only valid with an official LordOS key).
+//       writes signed catalog.json + catalog.sig (only valid with an official Insane OS key).
 //
 // An app folder has manifest.json and index.jsx like the ones in apps/, and optionally
 // icon.png, locales/<language>.json and assets/. React, @lordos/sdk and @lordos/runtime are NOT included.
@@ -211,7 +211,7 @@ function sign() {
   if (!inp || !key) die('usage: node tools/lpk.mjs sign <package.lpk> --key key.json [output.lpk]');
   const files = untar(fs.readFileSync(inp));
   const m = files.find(([p]) => p === 'manifest.json');
-  if (!m) die('not a LordOS package');
+  if (!m) die('not a Insane OS package');
   const out = outArg || inp;
   write(out, seal(files, JSON.parse(m[1].toString('utf8')), key));
   console.log(`${out}: ${trustLine(key)}`);

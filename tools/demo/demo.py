@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the LordOS demo video: records the VM while it runs a script of scenes,
+"""Builds the Insane OS demo video: records the VM while it runs a script of scenes,
 with an English voice (the host's `say` command) and Spanish subtitles drawn over the video.
 
 Usage (on the development machine, with ffmpeg and Pillow):
@@ -7,8 +7,8 @@ Usage (on the development machine, with ffmpeg and Pillow):
 
 The script is a list of scenes:
   { "chapter": "La Tienda",            # optional: title screen before the scene
-    "en": "LordOS has its own store…",  # what the voice says
-    "es": "LordOS tiene su propia tienda…",   # the subtitle
+    "en": "Insane OS has its own store…",  # what the voice says
+    "es": "Insane OS tiene su propia tienda…",   # the subtitle
     "actions": [["key", "{f4}"], ["type", "tienda{ret}"], ["move", 640, 300], ["click", 640, 300],
                 ["rclick", 547, 757], ["wheel", "down", 3], ["wait", 1.5], ["ssh", "command in the VM"]],
     "min": 4 }                          # minimum seconds

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Writes an SPDX 2.3 JSON software bill of materials (SBOM) for a built LordOS package: the
+# Writes an SPDX 2.3 JSON software bill of materials (SBOM) for a built Insane OS package: the
 # lordos .deb itself, what is compiled or bundled into it (third_party/, fonts, data, the React
 # packages in the theme bundle) and the Debian packages it depends on, at the versions installed
 # on the machine that runs this script (the build VM). See docs/COMPLIANCE.md.
@@ -78,7 +78,7 @@ E = os.environ
 root, tmp = E["SBOM_ROOT"], E["SBOM_TMP"]
 version, arch, tag = E["SBOM_VERSION"], E["SBOM_ARCH"], E["SBOM_TAG"]
 debname = E["SBOM_DEB_NAME"]
-REPO = "https://github.com/lordbasex/LordOS"
+REPO = "https://github.com/lordbasex/Insane OS"
 
 def read(p, default=""):
     try:
@@ -133,8 +133,8 @@ main_id = "SPDXRef-Package-lordos"
 packages = [pkg(main_id, "lordos", version, "MIT", "Organization: IPERFEX",
                 purl=f"pkg:deb/lordos/lordos@{version}?arch={arch}",
                 checksums=[E["SBOM_DEB_SHA"]],
-                copyright="Copyright (c) 2026 iPERFEX and the LordOS contributors",
-                comment=f"The LordOS package ({debname}); source: {REPO}")]
+                copyright="Copyright (c) 2026 iPERFEX and the Insane OS contributors",
+                comment=f"The Insane OS package ({debname}); source: {REPO}")]
 packages[0]["downloadLocation"] = f"{REPO}/releases/download/{tag}/{debname}"
 packages[0]["homepage"] = "https://lordos.org"
 packages[0]["primaryPackagePurpose"] = "APPLICATION"

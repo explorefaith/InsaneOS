@@ -14,7 +14,7 @@
 enum { WK_OK = 0, WK_NOT_ASSOCIATED, WK_NO_CARRIER, WK_NO_ADDRESS, WK_NO_GATEWAY };
 
 typedef struct {
-    int  (*active)(const char *name);       /* still LordOS's and switched on (net-down: leave it alone) */
+    int  (*active)(const char *name);       /* still Insane OS's and switched on (net-down: leave it alone) */
     int  (*health)(const char *name);       /* WK_OK, or what fails */
     void (*renew)(const char *name);        /* the DHCP client confirms its lease */
     void (*reassociate)(const char *name);  /* wpa_supplicant drops the association and joins again; renews DHCP */

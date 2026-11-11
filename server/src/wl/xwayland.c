@@ -131,7 +131,7 @@ int xwl_init(void) {
         break;
     }
     if (XW.lfd < 0) { fprintf(stderr, "xwayland: no free X display\n"); return -1; }
-    setenv("DISPLAY", XW.display, 1);               /* inherited by the apps LordOS starts */
+    setenv("DISPLAY", XW.display, 1);               /* inherited by the apps Insane OS starts */
     /* Java (AWT/Swing) guesses frame insets for a reparenting window manager unless told: ours
      * doesn't reparent (the theme draws the frame), so without this its content is shifted and blank */
     setenv("_JAVA_AWT_WM_NONREPARENTING", "1", 1);

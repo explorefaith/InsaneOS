@@ -1,8 +1,8 @@
-LordOS is built by people from different countries, languages and backgrounds, and we want every one of them to feel welcome. This code of conduct applies to everyone who takes part in the project.
+Insane OS is built by people from different countries, languages and backgrounds, and we want every one of them to feel welcome. This code of conduct applies to everyone who takes part in the project.
 
 ## Our pledge
 
-We, as members, contributors and maintainers, pledge to make participation in the LordOS community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, colour, religion, or sexual identity and orientation.
+We, as members, contributors and maintainers, pledge to make participation in the Insane OS community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, colour, religion, or sexual identity and orientation.
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive and healthy community.
 
@@ -26,13 +26,13 @@ Examples of unacceptable behaviour:
 
 ## Enforcement responsibilities
 
-The maintainers of LordOS are responsible for clarifying and enforcing these standards, and will take appropriate and fair corrective action in response to any behaviour they consider inappropriate, threatening, offensive or harmful.
+The maintainers of Insane OS are responsible for clarifying and enforcing these standards, and will take appropriate and fair corrective action in response to any behaviour they consider inappropriate, threatening, offensive or harmful.
 
 Maintainers have the right and the responsibility to remove, edit or reject comments, commits, code, wiki edits, issues and other contributions that don't follow this code of conduct, and will explain the reasons for moderation decisions when appropriate.
 
 ## Scope
 
-This code of conduct applies in all community spaces: the LordOS repository and its issues, pull requests and discussions, the website, and any other space run by the project. It also applies when someone officially represents the community in public spaces, for example using an official email address, posting through an official account, or acting as a representative at an online or offline event.
+This code of conduct applies in all community spaces: the Insane OS repository and its issues, pull requests and discussions, the website, and any other space run by the project. It also applies when someone officially represents the community in public spaces, for example using an official email address, posting through an official account, or acting as a representative at an online or offline event.
 
 ## Enforcement
 
@@ -70,6 +70,6 @@ Maintainers will follow these community impact guidelines in deciding the conseq
 
 ## Attribution
 
-This code of conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html), and licensed under the [Creative Commons Attribution 4.0 International license (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). The changes are: the scope and the reporting channel were adapted to LordOS, and the text was translated into Spanish and Portuguese.
+This code of conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html), and licensed under the [Creative Commons Attribution 4.0 International license (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). The changes are: the scope and the reporting channel were adapted to Insane OS, and the text was translated into Spanish and Portuguese.
 
 The community impact guidelines were inspired by [Mozilla's code of conduct enforcement ladder](https://github.com/mozilla/diversity).

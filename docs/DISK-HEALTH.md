@@ -10,7 +10,7 @@ card, USB disks).
 
 ## 1. What already exists (0.8.8.5)
 
-- **LordOS's own SMART reader** in C, no external program: `disk-smart <disk>` in the privileged helper
+- **Insane OS's own SMART reader** in C, no external program: `disk-smart <disk>` in the privileged helper
   (`server/src/disk/disk_admin.c`): ATA SMART through `SG_IO` with ATA PASS-THROUGH (16), and the NVMe health log (log page
   02h) through `NVME_IOCTL_ADMIN_CMD`; parsers in `server/src/disk/` (`smart_nvme_parse`, tested in `smartctl_test`).
 - **smartmontools optional**: with Debian's `smartctl` installed, Disks shows the full report (attributes, error log, SCT
@@ -39,7 +39,7 @@ doesn't cover yet (cards, eMMC, many USB bridges).
 
 ## 3. The life number, per kind of disk
 
-`life` is 0–100 % (100 = new), from what the disk itself reports; LordOS never invents it. Where the disk reports no wear,
+`life` is 0–100 % (100 = new), from what the disk itself reports; Insane OS never invents it. Where the disk reports no wear,
 the card says so and shows the condition instead of a number.
 
 | Disk | Source | Life | Also shown |
@@ -48,11 +48,11 @@ the card says so and shows the condition instead of a number.
 | **SATA SSD** | ATA Device Statistics (GP log 04h): page 07h *Percentage Used Endurance Indicator* (standard, ACS-3); page 01h *Logical Sectors Written*, *Power-On Hours* | `100 − Percentage Used` | Reallocated, pending and uncorrectable counts; when page 07h is missing, the vendor attributes as a fallback, each normalized value read the way the vendor documents: 177 Wear Leveling Count, 231 SSD Life Left, 233 Media Wearout Indicator, 202 Percent Lifetime Remaining; written bytes from 241 Total LBAs Written only when its unit is known |
 | **Hard disk (HDD)** | ATA SMART + Device Statistics | **no wear %**: platters don't wear like flash | Condition from reallocated, pending and uncorrectable sectors (any growth is *Check*, pending > 0 is *Replace soon*), Power-On Hours, start/stop and load cycles, temperature, SMART overall result |
 | **eMMC** (boards, some laptops) | sysfs, no root: `/sys/block/mmcblk*/device/life_time` (EXT_CSD *DEVICE_LIFE_TIME_EST_TYP_A/B*, in steps of 10 %) and `pre_eol_info` (normal / 80 % of spare used / urgent) | `100 − 10 × (worse of A and B − 1)` | Pre-EOL state, model and serial from sysfs |
-| **SD card** (Raspberry Pi) | No standard health. sysfs gives identity: `/sys/block/mmcblk0/device/{name,serial,manfid,oemid,date,type}` | **"This card doesn't report its life"** | Model, maker, serial and date from the card's CID (today the Disks screen shows "—" for model and serial on the Pi's card: fix that); speed mode and clock (`/sys/kernel/debug/mmc0/ios`, root, read once); LordOS's own count of what was written to it since it was installed (from `/sys/block/mmcblk0/stat`, kept in the history), and a note that cards wear out with writes |
+| **SD card** (Raspberry Pi) | No standard health. sysfs gives identity: `/sys/block/mmcblk0/device/{name,serial,manfid,oemid,date,type}` | **"This card doesn't report its life"** | Model, maker, serial and date from the card's CID (today the Disks screen shows "—" for model and serial on the Pi's card: fix that); speed mode and clock (`/sys/kernel/debug/mmc0/ios`, root, read once); Insane OS's own count of what was written to it since it was installed (from `/sys/block/mmcblk0/stat`, kept in the history), and a note that cards wear out with writes |
 | **USB disks** | SAT pass-through (`SG_IO` ATA 16) works through most bridges; NVMe-to-USB bridges need their vendor pass-through (some bridges map NVMe admin commands; the rest don't) | As the disk inside, when the bridge lets it through | Otherwise "This disk's adapter doesn't pass its health on" |
 | Virtual disks, images | — | Not shown | — |
 
-**Remaining life in time.** No disk reports its rated endurance (TBW) in its logs, so LordOS estimates from the disk's own
+**Remaining life in time.** No disk reports its rated endurance (TBW) in its logs, so Insane OS estimates from the disk's own
 wear and how fast it is writing: with `used %` and `written TB` read at two dates at least 7 days apart, *projected
 total ≈ written ÷ used × 100*, and *years left ≈ (100 − used) ÷ (used per day) ÷ 365*. Shown only after 7 days of history,
 as "about N years at this rate", never as a promise. The person can also type the rated TBW from the box or spec sheet
@@ -74,7 +74,7 @@ condition word.
 
 - One point per disk per day, kept as root in `/var/lib/lordos/disk-health/<serial-hash>.json` (life, written bytes,
   power-on hours, max temperature of the day, errors): about 40 bytes a day, 15 KB a year. Keyed by serial (hashed), so a disk
-  moved to another port or another LordOS computer keeps its history on that computer; never sent anywhere.
+  moved to another port or another Insane OS computer keeps its history on that computer; never sent anywhere.
 - Disks → the *Life* card shows the curve of life and of written TB over time, and the estimate above.
 - The temperature history of Monitor stays as it is (live, in memory).
 

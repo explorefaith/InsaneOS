@@ -1,4 +1,4 @@
-// Store: LordOS apps (.lpk packages, no root) and Debian apps (our own package engine,
+// Store: Insane OS apps (.lpk packages, no root) and Debian apps (our own package engine,
 // server/src/pkg; install and remove go through the administration helper).
 import {
   View, Text, Image, useTheme, useLocale, useAppWindow, useStore, Button, ScrollView, SidebarItem, SectionTitle, SearchField, Hairline, EmptyState, GroupBox, Toolbar, ToolbarButton,
@@ -124,7 +124,7 @@ export function Message({ msg }) {
   return <Text style={{ fontSize: typeScale.callout, color: msg.ok ? '#30d158' : '#ff453a', marginBottom: spacing.m, lineHeight: 1.4, textAlign: 'start' }}>{msg.text}</Text>;
 }
 
-// ---- LordOS apps (.lpk) ----
+// ---- Insane OS apps (.lpk) ----
 
 // Packages found in the home folder (Downloads, Desktop and the top level).
 function findPackageFiles() {
@@ -199,7 +199,7 @@ function InstallFile({ path, onDone }) {
   );
 }
 
-function LordOSPage({ query }) {
+function InsaneOSPage({ query }) {
   const t = useTheme();
   const { t: tr } = useLocale();
   const list = useStore(packageList);
@@ -275,21 +275,21 @@ function PkgManage({ pkg, onMsg }) {
 }
 const pkgManifest = (pkg) => ({ name: pkg.name, description: pkg.description, icon: 'icon.png', size: pkg.size, minSize: pkg.minSize, permissions: pkg.permissions });
 
-// ---- installed apps (all of them: LordOS, packages and Linux) ----
+// ---- installed apps (all of them: Insane OS, packages and Linux) ----
 
 function InstalledPage({ query }) {
   const t = useTheme();
   const { t: tr } = useLocale();
   const apps = useLauncherApps();
   const shown = apps.filter((a) => matches(query, [a.name, a.id, a.genericName], [a.comment]));
-  // the kind, and a LordOS app's or package's own version (manifest "version")
+  // the kind, and a Insane OS app's or package's own version (manifest "version")
   const kind = (a) => (a.version && a.kind !== 'linux' ? tr('store.kindVersion', { kind: tr(`store.kind.${a.kind}`), v: a.version }) : tr(`store.kind.${a.kind}`));
   return (
     <View>
       <List count={null} empty={tr('store.debian.none')}>
         {shown.map((a) => (
           <AppRow key={a.id} icon={<a.Icon size={32} />} name={a.name} detail={a.comment || a.genericName || ''} extra={kind(a)}>
-            {/* a system app is part of LordOS: never removable here (docs/SIGNING.md, "Verified system code") */}
+            {/* a system app is part of Insane OS: never removable here (docs/SIGNING.md, "Verified system code") */}
             {a.kind === 'lordos' && isSystemApp(a.id) && <Text style={{ fontSize: typeScale.caption, color: t.textDim, whiteSpace: 'nowrap' }}>{tr('store.systemApp')}</Text>}
             {a.kind === 'linux' && debian.canRemove(a) && <Button small label={tr('store.remove')} onClick={() => debian.removeApp(a)} />}
             <Button small label={tr('store.open')} onClick={() => launchApp(a.id)} />
@@ -362,7 +362,7 @@ export default function Store() {
   else if (page === 'commercial') body = <AiPage section="commercial" query={query} onOpen={openAi} onPage={go} />;
   else if (page === 'remote') body = <AiPage section="remote" query={query} onOpen={openAi} />;
   else if (page === 'suites') body = <AiPage section="suites" query={query} onOpen={openAi} />;
-  else if (page === 'lordos') body = <LordOSPage query={query} />;
+  else if (page === 'lordos') body = <InsaneOSPage query={query} />;
   else if (page === 'installed') body = <InstalledPage query={query} />;
   else body = <debian.Updates />;
   const item = (id, label, detail, glyph) => (
@@ -384,7 +384,7 @@ export default function Store() {
           {catalogApps('remote').length ? item('remote', tr('store.page.remote'), catalogApps('remote').length, PAGE_GLYPH.remote) : null}
           {catalogApps('suites').length ? item('suites', tr('store.page.suites'), catalogApps('suites').length, PAGE_GLYPH.suites) : null}
           {CATS.filter((c) => counts[c]).map((c) => item(`cat:${c}`, tr(`store.cat.${c}`), counts[c], GLYPH[c]))}
-          <SectionTitle>LordOS</SectionTitle>
+          <SectionTitle>Insane OS</SectionTitle>
           {item('lordos', tr('store.page.lordos'), null, PAGE_GLYPH.lordos)}
           <View style={{ height: 12 }} />
         </ScrollView>

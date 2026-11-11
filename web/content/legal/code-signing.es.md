@@ -1,11 +1,11 @@
-LordOS firma lo que publica para que puedas comprobar que un archivo viene del proyecto y que nadie lo cambió en el camino. Esta página explica qué se firma, con qué claves y cómo verificarlo vos mismo. Para avisarnos de un problema con una firma, mirá la [Política de seguridad](/legal/security/).
+Insane OS firma lo que publica para que puedas comprobar que un archivo viene del proyecto y que nadie lo cambió en el camino. Esta página explica qué se firma, con qué claves y cómo verificarlo vos mismo. Para avisarnos de un problema con una firma, mirá la [Política de seguridad](/legal/security/).
 
 ## Archivos de cada versión
 
-Cada archivo de una versión en GitHub (la imagen ISO, la imagen para Raspberry Pi 5 y el paquete `.deb`) figura con su SHA-256 en un archivo llamado `SHA256SUMS`. `SHA256SUMS` está firmado con la **clave de versiones de LordOS**:
+Cada archivo de una versión en GitHub (la imagen ISO, la imagen para Raspberry Pi 5 y el paquete `.deb`) figura con su SHA-256 en un archivo llamado `SHA256SUMS`. `SHA256SUMS` está firmado con la **clave de versiones de Insane OS**:
 
 - `SHA256SUMS.sig` es el base64 de la firma **Ed25519** de 64 bytes sobre los bytes exactos de `SHA256SUMS`.
-- Clave pública: [lordos-release.pub.pem](/lordos-release.pub.pem), también en el repositorio como [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/LordOS/blob/main/tools/release/lordos-release.pub.pem).
+- Clave pública: [lordos-release.pub.pem](/lordos-release.pub.pem), también en el repositorio como [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/Insane OS/blob/main/tools/release/lordos-release.pub.pem).
 - Huella (SHA-256 de la clave pública en DER):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
@@ -25,24 +25,24 @@ El primer comando decodifica la firma, el segundo tiene que mostrar `Signature V
 openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum
 ```
 
-## Apps de LordOS (.lpk) y la Tienda
+## Apps de Insane OS (.lpk) y la Tienda
 
-Las apps nativas de LordOS vienen como paquetes `.lpk`. Un `.lpk` firmado lleva la lista de todos sus archivos con su SHA-256 y una firma **Ed25519** sobre esa lista. LordOS la verifica con su propio código en C al instalar la app y cada vez que la carga, así que un archivo cambiado se detecta.
+Las apps nativas de Insane OS vienen como paquetes `.lpk`. Un `.lpk` firmado lleva la lista de todos sus archivos con su SHA-256 y una firma **Ed25519** sobre esa lista. Insane OS la verifica con su propio código en C al instalar la app y cada vez que la carga, así que un archivo cambiado se detecta.
 
 La Tienda y el diálogo de instalación muestran uno de estos niveles de confianza:
 
 | Nivel | Cuándo |
 |---|---|
-| **LordOS** | firmado con la clave oficial de LordOS, que viene compilada en el sistema (ningún archivo de tu carpeta personal puede agregar una clave oficial) |
-| **Autor verificado** | firmado con una clave que figura en el catálogo firmado de LordOS |
-| **Firmado por <nombre>** | firmado con una clave que LordOS no conoce |
+| **Insane OS** | firmado con la clave oficial de Insane OS, que viene compilada en el sistema (ningún archivo de tu carpeta personal puede agregar una clave oficial) |
+| **Autor verificado** | firmado con una clave que figura en el catálogo firmado de Insane OS |
+| **Firmado por <nombre>** | firmado con una clave que Insane OS no conoce |
 | **Sin firma** | no tiene firma: la Tienda te avisa que la instales solo si confiás en quien te la dio |
 
 Otras reglas te protegen después de instalar:
 
 - **Misma clave para las actualizaciones.** Una versión nueva tiene que estar firmada con la misma clave que la instalada; una actualización firmada con otra clave se rechaza.
-- **Catálogo firmado y revocación.** El catálogo de LordOS está firmado con la clave de LordOS y trae las claves de los autores verificados y una **lista de revocación** de claves y paquetes. Un paquete revocado no se instala, y uno ya instalado se desactiva con un mensaje claro.
-- **Modificada por vos.** Si editás una app instalada, LordOS la marca como modificada, te muestra qué archivos cambiaron y puede restaurar la original. Si compartís tu versión, se firma con tu propia clave y le da el crédito al autor original.
+- **Catálogo firmado y revocación.** El catálogo de Insane OS está firmado con la clave de Insane OS y trae las claves de los autores verificados y una **lista de revocación** de claves y paquetes. Un paquete revocado no se instala, y uno ya instalado se desactiva con un mensaje claro.
+- **Modificada por vos.** Si editás una app instalada, Insane OS la marca como modificada, te muestra qué archivos cambiaron y puede restaurar la original. Si compartís tu versión, se firma con tu propia clave y le da el crédito al autor original.
 
 ## Paquetes de Debian
 
@@ -50,7 +50,7 @@ El sistema base y todos los paquetes de la sección Debian de la Tienda vienen d
 
 - El índice de paquetes (`InRelease`) tiene que tener una firma OpenPGP válida de una clave del llavero de esa fuente, que instala el paquete `debian-archive-keyring` de Debian. Los índices vencidos, revocados o repetidos se rechazan.
 - Cada lista de paquetes y cada `.deb` se verifican contra el SHA-256 de ese índice firmado antes de guardarlos o pasárselos a `dpkg`.
-- LordOS hace estas verificaciones con su propio motor de paquetes, y `apt` sigue funcionando al lado con las mismas claves.
+- Insane OS hace estas verificaciones con su propio motor de paquetes, y `apt` sigue funcionando al lado con las mismas claves.
 
 Cuando la fuente pide HTTPS, las descargas van por HTTP, igual que con `apt` y `deb.debian.org`: la seguridad viene de las firmas y los hashes, así que alguien en la red puede ver qué paquetes descargás pero no puede cambiarlos.
 
@@ -65,7 +65,7 @@ En la Raspberry Pi 5, el kernel y el firmware vienen del archivo de Raspberry Pi
 ## Cómo guardamos las claves
 
 - La mitad privada de la **clave de versiones** vive solo en la computadora del mantenedor, legible solo por su dueño, con una copia de respaldo sin conexión. Nunca se guarda en el repositorio, en una máquina de compilación ni en un servidor.
-- La mitad privada de la **clave de LordOS** para los paquetes `.lpk` también se guarda fuera del repositorio, en la computadora del mantenedor. Hoy es una clave de desarrollo; la clave definitiva para las versiones públicas la va a reemplazar en el sistema y el cambio se va a anunciar.
+- La mitad privada de la **clave de Insane OS** para los paquetes `.lpk` también se guarda fuera del repositorio, en la computadora del mantenedor. Hoy es una clave de desarrollo; la clave definitiva para las versiones públicas la va a reemplazar en el sistema y el cambio se va a anunciar.
 - Las claves públicas se publican en el repositorio y en este sitio, para que cualquiera pueda verificarlas.
 
 ## Si una clave se ve comprometida

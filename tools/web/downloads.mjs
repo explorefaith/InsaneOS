@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const REPO = 'lordbasex/LordOS';
+const REPO = 'lordbasex/Insane OS';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // kind → file name pattern; the first group is the version written in the file name

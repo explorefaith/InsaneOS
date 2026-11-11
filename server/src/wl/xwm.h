@@ -1,8 +1,8 @@
-/* xwm.h — LordOS's X window manager for Xwayland (xwm.c) and its glue with the compositor (wl.c).
+/* xwm.h — Insane OS's X window manager for Xwayland (xwm.c) and its glue with the compositor (wl.c).
  *
  * X11 apps are clients of Xwayland; Xwayland is one Wayland client of lord-server and gives every
  * mapped top-level X window a wl_surface. The window manager is a second X client (on the fd
- * Xwayland gets with -wm) that decides what those windows are: a LordOS window with the theme's
+ * Xwayland gets with -wm) that decides what those windows are: a Insane OS window with the theme's
  * frame, a menu or tooltip drawn above everything (override-redirect), their title and app
  * (WM_CLASS), focus, stacking, close, fullscreen, and the clipboard bridge. See docs/WAYLAND.md,
  * "X11 apps (Xwayland)", and docs/PRIVACY.md, "X11 apps". */
@@ -29,7 +29,7 @@ int  xwm_is_fixed(const XWin *w);              /* its minimum and maximum size a
 void xwm_place(XWin *w, int x, int y);         /* where its content is on screen (logical, from wl_paint) */
 void xwm_resize(XWin *w, int width, int height);   /* the theme's frame gave it this size */
 void xwm_set_state(XWin *w, int maximized, int fullscreen, int minimized);
-void xwm_focus(XWin *w);                       /* NULL: a LordOS or Wayland window has the keyboard */
+void xwm_focus(XWin *w);                       /* NULL: a Insane OS or Wayland window has the keyboard */
 void xwm_close(XWin *w);
 void xwm_tick(void);                           /* once per loop (wl_flush): clipboard changes, output */
 
@@ -51,7 +51,7 @@ void wlx_popup_moved(int sid, int x, int y);
 enum { XREQ_MOVE = 1, XREQ_RESIZE, XREQ_MAXIMIZE, XREQ_UNMAXIMIZE, XREQ_MINIMIZE, XREQ_FULLSCREEN, XREQ_UNFULLSCREEN };
 void wlx_request(int sid, int what, int arg);
 void wlx_fullscreen_rect(int *x, int *y, int *w, int *h);  /* the display a fullscreen X window covers */
-/* Clipboard: what an X app copied becomes LordOS's (and every Wayland app's) selection. */
+/* Clipboard: what an X app copied becomes Insane OS's (and every Wayland app's) selection. */
 void wlx_clip_text(const char *text, size_t n, const char *origin);
 void wlx_clip_png(const unsigned char *png, size_t n, const char *origin);
 void wlx_primary_text(const char *text, size_t n);

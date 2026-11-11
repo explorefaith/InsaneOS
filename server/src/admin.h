@@ -1,4 +1,4 @@
-/* admin.h — LordOS privileged helper (see admin.c). */
+/* admin.h — Insane OS privileged helper (see admin.c). */
 #ifndef LORD_ADMIN_H
 #define LORD_ADMIN_H
 

@@ -1,6 +1,6 @@
 # Sessions, login screen and fast user switching (M8)
 
-LordOS has its own session manager, `lord-sessiond`. It does the same as GDM or any other
+Insane OS has its own session manager, `lord-sessiond`. It does the same as GDM or any other
 "display manager":
 
 - it shows the login screen on the monitor;
@@ -140,7 +140,7 @@ display up; a driver that loads later than the wait is not picked up by itself.
 ### Boot splash
 
 The boot splash (Plymouth, theme `lordos`; see `ISO.md` and `RASPBERRY.md`, "Boot splash") hands
-the screen to LordOS without a black frame or a flash of the text console:
+the screen to Insane OS without a black frame or a flash of the text console:
 
 1. **`lordos.service` → `lordos-splash deactivate`**, the last `ExecStartPre` (on the Raspberry Pi
    after `wait-kms`): Plymouth stops drawing and drops DRM master, but its last frame stays on the
@@ -159,12 +159,12 @@ the screen to LordOS without a black frame or a flash of the text console:
 4. **lord-sessiond** creates `/run/lordos/first-frame` (also at once when there is no monitor).
 5. **`lordos-splash-quit.service`** (wanted by `lordos.service`) waits for that file and runs
    `plymouth quit --retain-splash`: Plymouth closes its card without touching the screen, which
-   already shows LordOS. Without the file after 35 s it ends Plymouth anyway. With no usable display
+   already shows Insane OS. Without the file after 35 s it ends Plymouth anyway. With no usable display
    (below) it ends Plymouth without `--retain-splash`, so the console shows.
 6. Plymouth's own `plymouth-quit.service` (a plain `plymouth quit`) is ordered after it by
    `plymouth-quit.service.d/lordos.conf`, so it can't end the splash early. There is no
    `Conflicts=` with it (the display-manager way): starting `plymouth-quit.service` by hand would
-   then stop LordOS.
+   then stop Insane OS.
 
 lord-sessiond runs nothing new for this: Plymouth is only called from the units, with fixed
 arguments (`/usr/lib/lordos/lordos-splash`). Without Plymouth installed or running, both steps do
@@ -219,14 +219,14 @@ after that the wait is 1, 2, 4… seconds, up to 5 minutes.
 ### Boot time
 
 When the first frame of a boot reaches the monitor, `lord-sessiond` logs the seconds since the kernel
-started (`CLOCK_BOOTTIME`) with the LordOS version and build, and appends the same as one JSON line to
+started (`CLOCK_BOOTTIME`) with the Insane OS version and build, and appends the same as one JSON line to
 `/var/lib/lordos/boot-times.jsonl` (`record_boot_time`: root's, 0644, written whole and renamed, the last
-200 boots, no user or host names). About LordOS shows this boot's line, found by the kernel's boot id
+200 boots, no user or host names). About Insane OS shows this boot's line, found by the kernel's boot id
 (`boot_time_load` in `ui/js_sys.c`: the file must be root's and not writable by others). The boot splash
 shows its own timer (`tools/boot/plymouth/lordos/lordos.script`). How to check and compare boots:
 [RESULTS.md](RESULTS.md), "Boot time: check it yourself".
 
-**Boot time test (0.8.6, LordBench).** System Information → Performance can measure N boots in a row (2 to
+**Boot time test (0.8.6, InsaneBench).** System Information → Performance can measure N boots in a row (2 to
 10). The admin action `boot-test <n>` writes `/var/lib/lordos/boot-test` (root's, a fixed format:
 `bench/boottest.c`) and the session restarts as usual. At each boot's first frame lord-sessiond records the
 boot with `"test":k,"testOf":n` and, while boots are left, writes the file again and restarts 30 s later
@@ -288,7 +288,7 @@ In the SDK: `session.lock()`, `session.switchUser()` and `session.managed()`. Th
 ### Restart and Shut Down from a session
 
 Since 0.8.1 the crown menu ends with **Restart…** and **Shut Down…**, after Lock Screen, Switch
-User… and Log Out; the Lord Classic theme has them behind a **Power** button at the bottom of its start
+User… and Log Out; the Insane Classic theme has them behind a **Power** button at the bottom of its start
 menu. Before, they were only on the login screen. Sleep is not offered: suspend and resume with the
 card lent to a session has not been tested on real hardware yet.
 
@@ -296,7 +296,7 @@ card lent to a session has not been tested on real hardware yet.
 |---|---|
 | ![crown menu](session-power-menu-light.png) | ![crown menu, dark](session-power-menu-dark.png) |
 | ![restart confirmation](session-power-restart-light.png) | ![restart confirmation, dark](session-power-restart-dark.png) |
-| ![Lord Classic start menu, Power](session-power-classic-light.png) | ![Lord Classic, dark](session-power-classic-dark.png) |
+| ![Insane Classic start menu, Power](session-power-classic-light.png) | ![Insane Classic, dark](session-power-classic-dark.png) |
 
 - **The confirmation** (`sdk/power.jsx`, `<PowerDialog>`, in the `modal` layer; a theme renders it
   inside its `ThemeProvider`) says what will happen and counts down 60 seconds; at zero it does it,
@@ -320,7 +320,7 @@ card lent to a session has not been tested on real hardware yet.
   session seen only through the remote desktop isn't offered them; before 0.8.5 it showed the
   sheet and nothing happened at the end of the countdown.
 - **Tested on VM 122:** the menu items, the sheet in light and dark, the countdown, Cancel and
-  Escape (no restart after the minute), the Lord Classic Power button, a real Shut Down (`qm start` back
+  Escape (no restart after the minute), the Insane Classic Power button, a real Shut Down (`qm start` back
   to the login screen) and a real Restart (back to the login screen). The refusal with other users
   logged in was checked in the code path only: it needs a second account's password on the VM.
 
@@ -342,7 +342,7 @@ changed) in `settings.sessionSaved`, in `settings.json`, which is already on `lo
 That write and the logout's are `lord.settings.save(text, true)`: fsynced, file and folder, because they must
 survive the power cut they are for. Each entry is a typed Dock id (`dockIdOfWindow`), a frame, maximized,
 minimized and the snap zone; never an Exec line, argv, environment, pid, title or a Linux app's document. A
-LordOS app's `args` are kept only for the fields listed per app in `sdk/sessionmodel.js`, without `nonce`. Left
+Insane OS app's `args` are kept only for the fields listed per app in `sdk/sessionmodel.js`, without `nonce`. Left
 out: windows with no `.desktop`, hidden apps, Force Quit, About This App, the installer, the sandbox probe,
 Screenshots' editor, picture-in-picture. The file can be written by any program the user runs, so the list is
 validated again when it is read, the same rules (`server/tests/session_model_test.mjs`).
@@ -358,7 +358,7 @@ without leaving the loop (seen on VM 125: gone in under 300 ms, nothing written)
 the main thread's signalfd, so every signal stop runs the normal end of a session, including `term_shutdown`.
 
 **Coming back.** Up to 12 windows, 450 ms apart, through the Dock's own path (`launchDockItem`: `launchApp`,
-`lord.apps.launchPackage`, `lord.apps.launch(desktop id)`). A LordOS app opens with `wm.open` and its frame. A
+`lord.apps.launchPackage`, `lord.apps.launch(desktop id)`). A Insane OS app opens with `wm.open` and its frame. A
 Linux window is a new process, so its saved frame waits by Dock id and the first new window of that app takes it
 (90 s at most). What is already open is not opened twice (Open at Login, the Terminal's live sessions). The
 window that was in front ends in front. Nothing runs on a live system, the login screen or in an isolated app.
@@ -373,7 +373,7 @@ doesn't answer (seen with a stopped one: 3.4 s in all) or asks something back is
 `/etc/firefox-esr/lordos-session.js` (`browser.startup.page` 3); `off` removes both, and so does `postrm`.
 These are machine-wide: the last session to apply its setting wins. On VM 125, Chromium and Firefox ESR
 brought their pages back after a logout and a reboot with no crash notice. After a forced power-off Firefox
-came back alone; Chromium shows its own "Restore pages?" and its button brought the tab back: LordOS can't
+came back alone; Chromium shows its own "Restore pages?" and its button brought the tab back: Insane OS can't
 answer that for it, and an app with no such feature loses what it had open (only the window returns).
 
 What doesn't come back: the state inside a Linux app, a Files window's current folder when it wasn't the one it
@@ -531,7 +531,7 @@ session. Everything that changes something goes through closed `admin.c` actions
 - **Multiple monitors:** since 0.8.0 the session drives every display of the lent card
   (`display_attach` → `outputs_apply` in `main.c`, see [DISPLAYS.md](DISPLAYS.md)); the lend/revoke
   cycle with several real monitors is untested.
-- **Text consoles:** Ctrl+Alt+F2 doesn't switch consoles while LordOS is running, as before.
+- **Text consoles:** Ctrl+Alt+F2 doesn't switch consoles while Insane OS is running, as before.
 - **Choosing the avatar image:** today it's a hand-typed path; the file picker is missing.
 - **Testing with a real card** (AMD, on the live USB): in the VMs, the GPU could only be tested
   with `LORD_GPU=1` and llvmpipe.

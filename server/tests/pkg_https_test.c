@@ -26,7 +26,7 @@ int main(void) {
     FetchItem a = one("https://downloads.claude.ai/claude-code/apt/stable/dists/stable/InRelease");
     CHECK("an HTTPS-only vendor repository", a.status == 200 && a.size > 100, &a);
     FetchItem b = one("https://lordos.org/apt/dists/stable/InRelease");
-    CHECK("LordOS's repository over HTTPS", b.status == 200 && b.size > 100, &b);
+    CHECK("Insane OS's repository over HTTPS", b.status == 200 && b.size > 100, &b);
     FetchItem c = one("http://lordos.org/apt/dists/stable/InRelease");
     CHECK("the same over plain HTTP still works", c.status == 200 && c.size == b.size, &c);
     FetchItem d = one("http://packages.microsoft.com/repos/code/dists/stable/InRelease");

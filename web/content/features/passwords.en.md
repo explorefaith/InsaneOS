@@ -1,6 +1,6 @@
 ## The short version
 
-Passwords is LordOS's password manager, and the same machinery is the **system keyring**: the place where apps keep secrets such as Wi-Fi passwords, VPN credentials and mail account passwords. Everything is stored in an encrypted vault file, and everything that touches your secrets in plain form runs in one small locked-in process, `lord-vault`.
+Passwords is Insane OS's password manager, and the same machinery is the **system keyring**: the place where apps keep secrets such as Wi-Fi passwords, VPN credentials and mail account passwords. Everything is stored in an encrypted vault file, and everything that touches your secrets in plain form runs in one small locked-in process, `lord-vault`.
 
 [[shot:0]]
 
@@ -14,7 +14,7 @@ Think of a safe-deposit room in a bank. The Passwords window is the counter wher
 - **2FA codes** (TOTP and HOTP) with a live countdown. You can add one from a QR image; the secret never leaves `lord-vault`, and the window only receives the current code.
 - **A generator** for passwords and passphrases from a 7,776-word list.
 - **A security report** with weak, reused, old and breached passwords. "Breached" is checked **offline only**: against a bundled list of 10,000 common passwords and, if you provide one, a local file of breached-password hashes. Nothing is ever looked up online; `lord-vault` has no network at all.
-- **Import** from KDBX files (versions 3.1 and 4), from browser CSV exports and from other managers' CSV and JSON exports, with LordOS's own readers. **Export** to an encrypted copy, or to CSV after a red warning.
+- **Import** from KDBX files (versions 3.1 and 4), from browser CSV exports and from other managers' CSV and JSON exports, with Insane OS's own readers. **Export** to an encrypted copy, or to CSV after a red warning.
 
 [[shot:3]]
 
@@ -23,7 +23,7 @@ Think of a safe-deposit room in a bank. The Passwords window is the counter wher
 The vault has one random 32-byte key. It is never derived from your password. Instead, each way of unlocking wraps that same key:
 
 - **a master password**, stretched with Argon2id, with its cost measured on your machine to take about 0.7 s;
-- **a FIDO2 security key** with the `hmac-secret` extension, through LordOS's own CTAP2 client;
+- **a FIDO2 security key** with the `hmac-secret` extension, through Insane OS's own CTAP2 client;
 - **a key file**, for example on a USB stick;
 - **a password plus a key file**, as two factors;
 - **a printable recovery key** of 40 characters.
@@ -49,21 +49,21 @@ Several methods can live side by side. The vault locks itself after 5 minutes of
 ## The system keyring
 
 - **Opened at login.** `lord-sessiond` checks your login password, then hands it once to `lord-vault` to open the session keyring, and wipes its copy.
-- **LordOS apps** keep their secrets with the SDK's `keyring`. Each app sees only its own items. For installed `.lpk` apps, `lord-server` sets the owner from the app's verified identity, so an app can't claim to be another. If an app asks for another app's item, the system asks you first.
-- **Linux apps** use the standard freedesktop Secret Service over D-Bus, served by LordOS's own code. Chromium was tested end to end: it saved a login, restarted, fetched its key from LordOS's keyring and filled the login in. Since 0.8.5 a session started at boot waits for its session bus, so with automatic login LordOS's keyring holds the Secret Service from the start, and if an app pulls in gnome-keyring, only its PKCS#11 part runs; on the test VM Chrome then asked through LordOS's own keyring prompt.
+- **Insane OS apps** keep their secrets with the SDK's `keyring`. Each app sees only its own items. For installed `.lpk` apps, `lord-server` sets the owner from the app's verified identity, so an app can't claim to be another. If an app asks for another app's item, the system asks you first.
+- **Linux apps** use the standard freedesktop Secret Service over D-Bus, served by Insane OS's own code. Chromium was tested end to end: it saved a login, restarted, fetched its key from Insane OS's keyring and filled the login in. Since 0.8.5 a session started at boot waits for its session bus, so with automatic login Insane OS's keyring holds the Secret Service from the start, and if an app pulls in gnome-keyring, only its PKCS#11 part runs; on the test VM Chrome then asked through Insane OS's own keyring prompt.
 
 [[shot:4]]
 
 ## In the Terminal (0.8.8.6)
 
 - **Fill a password the program asks for.** When ssh, sudo, git or gpg asks for a password, a bar under the prompt offers your Passwords logins (the ones for that host first) or **Type It**. The password you pick goes from `lord-vault` to the terminal in `lord-server`'s C code, on a private channel: it never passes through JavaScript, the screen or the session log, and it is written only while the program is still asking. The bar appears when the terminal is in password mode (echo off) and the prompt names a password, and it says which program is asking, so a script that prints a fake prompt shows as itself.
-- **Save a password you typed.** When you type or paste a password for ssh, sftp, scp, rsync, mysql, psql, redis-cli, mongosh or git and the program accepts it, LordOS offers to save it, with its host, port and user, in the matching category. Until you answer, it waits in one locked page of memory that is wiped on every way out (rejected, Ctrl+C, declined, saved, closed, or after 60 seconds). Your own login password (sudo, su, passwd, pkexec) is never captured, and nothing is captured while the program is being traced.
+- **Save a password you typed.** When you type or paste a password for ssh, sftp, scp, rsync, mysql, psql, redis-cli, mongosh or git and the program accepts it, Insane OS offers to save it, with its host, port and user, in the matching category. Until you answer, it waits in one locked page of memory that is wiped on every way out (rejected, Ctrl+C, declined, saved, closed, or after 60 seconds). Your own login password (sudo, su, passwd, pkexec) is never captured, and nothing is captured while the program is being traced.
 
 Both are exceptions approved in the project's rulebook (`AGENTS.md`), tested on a real pseudo-terminal (`build/term-secret-test`, `build/term-capture-test` with 28 checks, also under ASan and UBSan).
 
 ## The skeptical reader's questions
 
-**Who can read the session keyring?** Inside LordOS, each app only its own items, unless you share one. Through the Secret Service, the access rule is the freedesktop one: any Linux app of your session that can reach the session bus can read the unlocked collection, as with other desktop keyrings. Isolated `.lpk` apps can't reach the bus.
+**Who can read the session keyring?** Inside Insane OS, each app only its own items, unless you share one. Through the Secret Service, the access rule is the freedesktop one: any Linux app of your session that can reach the session bus can read the unlocked collection, as with other desktop keyrings. Isolated `.lpk` apps can't reach the bus.
 
 **Can the Passwords app read the security key directly?** No. Using a security key goes through the `usb` permission prompt; then `lord-server` opens the device and passes it straight to `lord-vault`. Neither the app window nor its JavaScript ever holds it.
 
@@ -76,11 +76,11 @@ Both are exceptions approved in the project's rulebook (`AGENTS.md`), tested on 
 
 ## Read the source
 
-- [server/src/vault/vault.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/vault.c): the `lord-vault` process and its sandbox
-- [server/src/vault/vfile.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/vfile.c): the `.lvault` format and unlock slots
-- [server/src/vault/smem.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/smem.c): the locked, wiped memory arena
-- [server/src/vault/keyring.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/keyring.c) and [server/src/vault/secretsvc.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/secretsvc.c): the keyring and the Secret Service
-- [server/src/vault/ctap2.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/ctap2.c): the FIDO2 client
-- [server/src/sec/brokerkr.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/brokerkr.c): the keyring for isolated apps
-- [apps/passwords](https://github.com/lordbasex/LordOS/tree/main/apps/passwords): the app
-- [docs/PASSWORDS.md](https://github.com/lordbasex/LordOS/blob/main/docs/PASSWORDS.md)
+- [server/src/vault/vault.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/vault.c): the `lord-vault` process and its sandbox
+- [server/src/vault/vfile.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/vfile.c): the `.lvault` format and unlock slots
+- [server/src/vault/smem.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/smem.c): the locked, wiped memory arena
+- [server/src/vault/keyring.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/keyring.c) and [server/src/vault/secretsvc.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/secretsvc.c): the keyring and the Secret Service
+- [server/src/vault/ctap2.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/ctap2.c): the FIDO2 client
+- [server/src/sec/brokerkr.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokerkr.c): the keyring for isolated apps
+- [apps/passwords](https://github.com/lordbasex/Insane OS/tree/main/apps/passwords): the app
+- [docs/PASSWORDS.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PASSWORDS.md)

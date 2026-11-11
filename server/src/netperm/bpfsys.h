@@ -40,7 +40,7 @@ int  bpfs_prog_load(uint32_t type, uint32_t attach, const NpProgDesc *d, int (*m
 /* The same with the attach target's BTF id (LSM programs: the kernel function of the hook) and
  * the license string. The kernel only loads LSM programs with a GPL-compatible license: the
  * programs are ours (MIT), and MIT code may also be distributed under the GPL, so those go as
- * "Dual MIT/GPL"; the others as "LordOS". */
+ * "Dual MIT/GPL"; the others as "Insane OS". */
 int  bpfs_prog_load_btf(uint32_t type, uint32_t attach, uint32_t btf_id, const char *license, const NpProgDesc *d,
                         int (*map_fd)(const char *), char *log, size_t loglen);
 /* Id of a function (BTF_KIND_FUNC) in the kernel's own type information (/sys/kernel/btf/vmlinux,

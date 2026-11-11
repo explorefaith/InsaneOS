@@ -22,6 +22,9 @@ export const motionItems = catalog.items;
 export const motionThumb = (it) => `asset:wallpapers/motion/${it.id}.thumb.jpg`;
 export const motionPoster = (it) => `asset:wallpapers/motion/${it.id}.poster.jpg`;
 export const motionDownloads = createStore({});     // id → percent while downloading
+// The media id of the playing desktop wallpaper (or null): widgets read its pixels to match
+// their colours to what is on screen (themes/default/components/DesktopWidgets.jsx).
+export const wallpaperMedia = createStore(null);
 
 // What this machine can play: empty until lord-media answers, and empty for good without the hardware.
 export function currentCodecs() {
@@ -139,14 +142,15 @@ function acquire(file, rate, key, display, onLost) {
   if (!p) {
     let id = 0;
     motionBusy.set(true);
-    try { id = media.play('wallpaper', file, { loop: true, audio: 0, hwOnly: 1, rate, appName: 'LordOS' }); } catch (e) { motionBusy.set(false); return null; }
+    try { id = media.play('wallpaper', file, { loop: true, audio: 0, hwOnly: 1, rate, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
     if (!id) { motionBusy.set(false); return null; }
     p = { id, tag, views: new Map(), paused: false, playing: createStore(false) };
     media.on(id, (type, d) => {
       if (type === 'state' && d.state === 'playing') { p.playing.set(true); motionBusy.set(false); }
-      else if (type === 'error' || type === 'closed') { p.playing.set(false); if (players.get(tag) === p) { players.delete(tag); p.onLost?.(); } }
+      else if (type === 'error' || type === 'closed') { p.playing.set(false); if (players.get(tag) === p) { players.delete(tag); wallpaperMedia.set(null); p.onLost?.(); } }
     });
     players.set(tag, p);
+    wallpaperMedia.set(p.id);
     startTicking();
   }
   p.onLost = onLost;
@@ -155,7 +159,7 @@ function acquire(file, rate, key, display, onLost) {
 }
 function release(p, key) {
   p.views.delete(key);
-  if (!p.views.size && players.get(p.tag) === p) { players.delete(p.tag); media.close(p.id); }
+  if (!p.views.size && players.get(p.tag) === p) { players.delete(p.tag); wallpaperMedia.set(null); media.close(p.id); }
 }
 
 function Layer({ path, rate, display, style }) {

@@ -7,7 +7,7 @@
  *        off: no file (the shipped 10-lordos.conf keeps PermitRootLogin no); key: PermitRootLogin
  *        prohibit-password (public keys only); password: PermitRootLogin yes. Written as
  *        /etc/ssh/sshd_config.d/05-lordos-root.conf: sshd keeps the first value it reads, and 05 comes
- *        before LordOS's 10. Checked with sshd -t, then the running server reloads.
+ *        before Insane OS's 10. Checked with sshd -t, then the running server reloads.
  *   ssh-root-key add\n<admin password>\n<public key line>
  *   ssh-root-key remove\n<admin password>\n<SHA256:fingerprint>
  *        one OpenSSH public key (sshkey_parse: a known type, its base64 blob starting with that type,
@@ -45,11 +45,11 @@
 #define KEYS_MAX    (256 * 1024)
 
 static const char text_key[] =
-    "# LordOS · root over SSH (Settings → Sharing → Remote login → Advanced): public keys only.\n"
+    "# Insane OS · root over SSH (Settings → Sharing → Remote login → Advanced): public keys only.\n"
     "# Written by Settings; turn it off there to remove it. See docs/REMOTE.md.\n"
     "PermitRootLogin prohibit-password\n";
 static const char text_password[] =
-    "# LordOS · root over SSH (Settings → Sharing → Remote login → Advanced): public keys or password.\n"
+    "# Insane OS · root over SSH (Settings → Sharing → Remote login → Advanced): public keys or password.\n"
     "# Written by Settings; turn it off there to remove it. See docs/REMOTE.md.\n"
     "PermitRootLogin yes\n";
 

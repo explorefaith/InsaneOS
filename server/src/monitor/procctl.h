@@ -27,7 +27,7 @@ int proc_stat_read(int pid, ProcStat *s);
  *   "init"     PID 1 (and anything below it)
  *   "kernel"   a kernel thread
  *   "session"  the session's own lord-server (session_pid)
- *   "system"   another part of LordOS or the desktop: lord-sessiond, lord-netperm, lord-netd,
+ *   "system"   another part of Insane OS or the desktop: lord-sessiond, lord-netperm, lord-netd,
  *              lord-fand, the helpers (lord-vault, lord-maild, lord-doc, lord-media), the root
  *              helper, any lord-server that is not an isolated app (`--app`), PipeWire,
  *              WirePlumber and the systemd managers.

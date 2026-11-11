@@ -1,4 +1,4 @@
-/* sources_admin.c — vendor repositories from LordOS's catalog (0.8.5; Store → Artificial Intelligence,
+/* sources_admin.c — vendor repositories from Insane OS's catalog (0.8.5; Store → Artificial Intelligence,
  * docs/UPDATES.md "Mirrored apps (catalog)"). Administrators only:
  *
  *   pkg-source-add <id>      the catalog entry <id> (source type "apt", delivery "direct") becomes
@@ -17,7 +17,7 @@
  * instead, the key dearmored when the name ends in .gpg, so the package's own write changes nothing.
  *
  * Nothing comes from the caller but the id: the repository, suite, components, architectures and key
- * come from the catalog the lordos package ships (<LordOS dir>/apt/catalog.json and apt/keys/, root's,
+ * come from the catalog the lordos package ships (<Insane OS dir>/apt/catalog.json and apt/keys/, root's,
  * not writable by others), every field is checked against a strict character set, the key file must
  * hold a primary key with exactly the catalog's fingerprint, and the files are fixed text written
  * whole and renamed. The engine then verifies that repository's InRelease with that key only (its
@@ -40,7 +40,7 @@
 #define KEYRINGS    "/usr/share/keyrings"
 #define CATALOG_MAX (512 * 1024)
 
-/* <LordOS dir> (the folder that holds bin/lord-server) */
+/* <Insane OS dir> (the folder that holds bin/lord-server) */
 static int lordos_dir(char *out, size_t cap) {
     char exe[PATH_MAX];
     ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
@@ -242,7 +242,7 @@ void pkg_act_source_add(const AdminReq *req, const char *arg, size_t len) {
     free(key);
     if (bad) { admin_err("sys.writeFailed", "path", kpath, NULL); return; }
     int n = snprintf(text, sizeof text,
-                     "# Added by LordOS (Store): %s. Removing it in the Store removes this file.\n"
+                     "# Added by Insane OS (Store): %s. Removing it in the Store removes this file.\n"
                      "Types: deb\nURIs: %s\nSuites: %s\nComponents: %s\nArchitectures: %s\nSigned-By: %s\n",
                      r.name, r.url, r.suites, r.comps, r.arches, kpath);
     if (n <= 0 || n >= (int)sizeof text || write_atomic(spath, text, (size_t)n)) { unlink(kpath); admin_err("sys.writeFailed", "path", spath, NULL); return; }

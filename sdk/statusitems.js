@@ -8,7 +8,7 @@
 // null.
 //
 // An item with a panel opens it with statusPanelAt(button): below the button when the bar is in the top half of its
-// display (Lord Flow's menu bar, a Classic taskbar at the top) and above it when the bar is at the bottom (the Classic
+// display (Insane Flow's menu bar, a Classic taskbar at the top) and above it when the bar is at the bottom (the Classic
 // taskbar's default), aligned to the button's edge on the side away from the display's nearer edge.
 import { createElement as h } from 'react';
 import { View, displayAt } from '@lordos/runtime';

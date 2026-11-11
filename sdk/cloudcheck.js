@@ -146,11 +146,11 @@ export function buildReport(facts) {
   const n = (r) => steps.filter((s) => s.result === r).length;
   const word = (w) => (/^[a-z][A-Za-z.]*$/.test(String(w || '')) ? String(w) : '');
   return [
-    'LordOS Cloud provider check',
-    `LordOS: ${word(f.version) || String(f.version || '').replace(/[^\w. ·()+-]/g, '').slice(0, 40)} (${String(f.arch || '').replace(/[^\w-]/g, '').slice(0, 16)})`,
+    'Insane OS Cloud provider check',
+    `Insane OS: ${word(f.version) || String(f.version || '').replace(/[^\w. ·()+-]/g, '').slice(0, 40)} (${String(f.arch || '').replace(/[^\w-]/g, '').slice(0, 16)})`,
     `rclone: ${String(f.rclone || '').replace(/[^\w.-]/g, '').slice(0, 24)}`,
     `Provider: ${String(f.label || '').replace(/[\r\n]/g, ' ').slice(0, 60)} (${String(f.kind || '').replace(/[^\w-]/g, '').slice(0, 24)})`,
-    `Verified on LordOS: ${yn(f.verified)}`,
+    `Verified on Insane OS: ${yn(f.verified)}`,
     `Own app: ${yn(f.ownApp)}`,
     `Space info: ${(f.aboutFields || []).filter((k) => ABOUT_FIELDS.includes(k)).join(', ') || 'none'}`,
     `Links supported: ${yn(f.linksSupported)}`,
@@ -166,7 +166,7 @@ export const checkWorks = (steps) => {
 
 // ---- GitHub ----
 
-export const ISSUE_BASE = 'https://github.com/lordbasex/LordOS/issues/new';
+export const ISSUE_BASE = 'https://github.com/lordbasex/Insane OS/issues/new';
 export const ISSUE_URL_MAX = 7000;
 const TRUNC = '\n[truncated]';
 export function issueUrl({ label, report = '', version = '' } = {}) {

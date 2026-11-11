@@ -4,7 +4,7 @@
 //   { dfmt: '%Y-%m-%d', tfmt: '%T', am: '', pm: '', decimal: ',', group: '.' }
 // fromGlibc() turns them into the part of a format.json that comes from the region (sdk/i18n.js):
 //   { date: { numeric: '{yyyy}-{mm}-{dd}' }, hour12: false, decimal: ',', group: '.' }
-// so a region whose language LordOS has no format.json for (lt_LT, de_DE, pl_PL…) still gets its own
+// so a region whose language Insane OS has no format.json for (lt_LT, de_DE, pl_PL…) still gets its own
 // 24-hour clock, date order and separators instead of the interface language's. Pure: no lord.*;
 // tests in server/tests/regionformat_test.mjs.
 import { regionOf, regionCountry } from './localename.js';

@@ -1,4 +1,4 @@
-// LordBench's model (0.8.6, docs/BENCHMARK.md "0.8.6 — LordBench"): the measurements by category, how a
+// InsaneBench's model (0.8.6, docs/BENCHMARK.md "0.8.6 — InsaneBench"): the measurements by category, how a
 // result compares with the reference machines (×N of each, never one score), the three verdicts
 // (performance, compatibility, stability), the desktop run's verdict against the refresh budget, and what
 // changed against the previous result. Pure
@@ -33,13 +33,13 @@ export const INPUT_WARN_FRAMES = 3;     // pointer-to-screen p99 above this many
 
 export { REFERENCES };
 
-// the measurements that time LordOS's own engine code (layout, paint, shaping) with the machine: a reference
-// value of one carries the LordOS version it was measured with ("lordos"), and is used only for a result of that
+// the measurements that time Insane OS's own engine code (layout, paint, shaping) with the machine: a reference
+// value of one carries the Insane OS version it was measured with ("lordos"), and is used only for a result of that
 // same version, so an engine change (or a new interface font) never shows up as a faster or slower machine
 export const ENGINE_IDS = ['cpu.ui.1', 'cpu.ui.n', 'cpu.shape.1', 'cpu.shape.n'];
 
 // ×N of the reference for one measurement (latency: the reference's time over ours); null if either
-// is missing, or if the reference value belongs to another LordOS version (ENGINE_IDS)
+// is missing, or if the reference value belongs to another Insane OS version (ENGINE_IDS)
 export function ratio(res, ref, id) {
   const a = res && res.results && res.results[id], b = ref && ref.results && ref.results[id];
   if (!a || !b || !(a.value > 0) || !(b.value > 0)) return null;
@@ -57,7 +57,7 @@ export function categoryRatios(res, ref) {
   return out;
 }
 
-// the references a result can be compared with: the same LordBench version
+// the references a result can be compared with: the same InsaneBench version
 export function comparableReferences(res) {
   return REFERENCES.filter((r) => res && r.lordbench === res.lordbench);
 }
@@ -177,7 +177,7 @@ export function conditionDiffs(a, b) {
   return Object.keys(x).filter((k) => x[k] !== y[k] && (x[k] != null || y[k] != null)).map((k) => ({ id: k, now: x[k], before: y[k] }));
 }
 
-// change against the previous result, per measurement (+ is better), only with the same LordBench
+// change against the previous result, per measurement (+ is better), only with the same InsaneBench
 // version and mode
 export function changes(now, prev) {
   if (!now || !prev || now.lordbench !== prev.lordbench || now.mode !== prev.mode) return null;

@@ -1,4 +1,4 @@
-// System Information → Performance (0.8.6, docs/BENCHMARK.md "0.8.6 — LordBench"). Quick (about a minute)
+// System Information → Performance (0.8.6, docs/BENCHMARK.md "0.8.6 — InsaneBench"). Quick (about a minute)
 // or Full (storage on a scratch file, a sustained load and every video codec too) runs of the lord-bench
 // helper and of lord-media's video measurement through lord.sysinfo.bench (server/src/bench/lbrun.c), and
 // Desktop impact: the compositor's frame times while a test window moves (scene.jsx), alone and with every
@@ -133,7 +133,7 @@ function Conditions({ res }) {
     : tr(pf.flags ? 'sysinfo.perf.pi.none' : pf.voltageAlarm ? 'sysinfo.perf.pi.noneVoltage' : 'sysinfo.perf.pi.noneTemp', pfVars);
   return (
     <GroupBox title={tr('sysinfo.perf.conditions')} footer={tr('sysinfo.perf.conditionsFooter')}>
-      <Row label={tr('sysinfo.perf.c.versions')} value={`LordOS ${res.lordos} · ${tr('sysinfo.perf.kernel', { v: res.kernel })} · LordBench ${res.lordbench}`} />
+      <Row label={tr('sysinfo.perf.c.versions')} value={`Insane OS ${res.lordos} · ${tr('sysinfo.perf.kernel', { v: res.kernel })} · InsaneBench ${res.lordbench}`} />
       <Row label={tr('sysinfo.perf.c.threads')} value={tr('sysinfo.perf.threadsOf', { n: res.threads, cpus: res.cpus })} />
       <Row label={tr('sysinfo.perf.c.quiet')} value={tr(res.quiet && res.quiet.quiet ? 'sysinfo.perf.quietYes' : 'sysinfo.perf.quietNo', { pct: formatNumber((res.quiet && res.quiet.busyPct) || 0, 0), s: formatNumber((res.quiet && res.quiet.waitedS) || 0, 0) })} />
       <Row label={tr('sysinfo.perf.c.temps')} value={[temp(b) && tr('sysinfo.perf.startEnd', { a: temp(b), b: temp(a) || '—' }), trips].filter(Boolean).join(' · ')} />
@@ -298,7 +298,7 @@ export default function Performance({ r }) {
       <View style={{ padding: spacing.xl, gap: spacing.l }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.m }}>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontSize: typeScale.headline, fontWeight: 600, color: t.text, textAlign: 'start' }}>LordBench</Text>
+            <Text style={{ fontSize: typeScale.headline, fontWeight: 600, color: t.text, textAlign: 'start' }}>InsaneBench</Text>
             <Text style={{ fontSize: typeScale.callout, color: t.textDim, textAlign: 'start', lineHeight: 1.4 }}>{tr('sysinfo.perf.intro')}</Text>
           </View>
           {running ? <Button label={tr('sysinfo.perf.cancel')} onClick={cancel} /> : [

@@ -1,4 +1,4 @@
-/* lbinput.h — LordBench's synthetic pointer, for the input latency of the desktop test (docs/BENCHMARK.md,
+/* lbinput.h — InsaneBench's synthetic pointer, for the input latency of the desktop test (docs/BENCHMARK.md,
  * "Desktop impact").
  *
  * While the scene's window moves (grab_script_begin, ui/grab.c), a thread of lord-server plays a mouse: 125
@@ -7,7 +7,7 @@
  * takes the newest position once per frame (as it does with a real mouse's motion, main.c) and moves the
  * window to it; each event's latency is the time until the first frame showing it, or a later position,
  * was presented (bench/lbframes.c). It measures lord-server's part (waking up, the frame, the flip), not the
- * device's. The positions only ever move LordBench's own window: nothing reaches the theme's JS, an app or
+ * device's. The positions only ever move InsaneBench's own window: nothing reaches the theme's JS, an app or
  * the real pointer. */
 #ifndef LORD_BENCH_LBINPUT_H
 #define LORD_BENCH_LBINPUT_H

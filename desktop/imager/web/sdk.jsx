@@ -1,9 +1,9 @@
 // sdk.jsx — the few parts of @lordos/sdk the imager's UI uses, for a browser view (the Tauri app's
-// window). The shared UI (apps/imager) is built against this module instead of LordOS's engine:
+// window). The shared UI (apps/imager) is built against this module instead of Insane OS's engine:
 // View, Text, Image, ScrollView, TextInput, Button, Toggle, Segmented, SearchField, Lumo,
-// LordOSLogo, useTheme, useLocale, t, tOptional, formatDate, formatNumber, createStore, useStore,
-// useKeyboard, typeScale, spacing. Styles are LordOS's (React Native-like objects, arrays of them)
-// turned into CSS; colors and sizes are Lord Flow's (themes/default/tokens.js). docs/IMAGER.md.
+// InsaneLogo, useTheme, useLocale, t, tOptional, formatDate, formatNumber, createStore, useStore,
+// useKeyboard, typeScale, spacing. Styles are Insane OS's (React Native-like objects, arrays of them)
+// turned into CSS; colors and sizes are Insane Flow's (themes/default/tokens.js). docs/IMAGER.md.
 import { createElement as h, useEffect, useMemo, useState, useSyncExternalStore, useRef } from 'react';
 import { catalogs } from './catalogs.js';
 
@@ -20,7 +20,7 @@ export function createStore(initial) {
 }
 export const useStore = (s) => useSyncExternalStore(s.subscribe, s.get);
 
-// ---- theme: Lord Flow, light and dark (themes/default/tokens.js) ----
+// ---- theme: Insane Flow, light and dark (themes/default/tokens.js) ----
 
 const ACCENTS = { azul: '#0a84ff', violeta: '#bf5af2', rosa: '#ff375f', naranja: '#ff9f0a', verde: '#30d158', grafito: '#8e8e93' };
 function makeTheme(mode) {
@@ -78,7 +78,7 @@ export function formatDate(d, style = 'short') {
 export const typeScale = { caption: 11, body: 13, callout: 12, headline: 15, title: 17, largeTitle: 22 };
 export const spacing = { xxs: 2, xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24, xxxl: 32 };
 
-// ---- styles: LordOS / React Native objects → CSS ----
+// ---- styles: Insane OS / React Native objects → CSS ----
 
 const UNITLESS = new Set(['flex', 'flexGrow', 'flexShrink', 'opacity', 'fontWeight', 'zIndex', 'order']);
 const LOGICAL = {
@@ -194,8 +194,8 @@ export function Lumo({ pose = 'confused', size = 96, alt, style }) {
   const p = POSES.has(pose) ? pose : 'confused';
   return h(Image, { src: `asset:mascot/lumo-${p}-256.png`, alt: alt || t(`mascot.${p}`), style: [{ width: size, height: size }, style] });
 }
-export function LordOSLogo({ size = 64 }) {
-  return h(Image, { src: 'asset:icons/lordos-icon-128.png', alt: 'LordOS', style: { width: size, height: size, borderRadius: size * 0.22, boxShadow: '0 2px 6px rgba(0,0,0,0.3)' } });
+export function InsaneLogo({ size = 64 }) {
+  return h(Image, { src: 'asset:icons/lordos-icon-128.png', alt: 'Insane OS', style: { width: size, height: size, borderRadius: size * 0.22, boxShadow: '0 2px 6px rgba(0,0,0,0.3)' } });
 }
 
 // ---- keyboard ----

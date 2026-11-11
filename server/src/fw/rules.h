@@ -120,7 +120,7 @@ void     fw_store_free(FwStore *s);
  * desktop:<id>. 0 ok, -1 if it isn't a valid id (empty, too long, odd characters). */
 int fw_app_canon(const char *in, char *out, size_t n);
 
-/* (0.8.5) LordOS's own components that use the network, each in its own scope
+/* (0.8.5) Insane OS's own components that use the network, each in its own scope
  * lordos-net-<name>.scope so the kernel enforces their rules (docs/MONITOR.md, "Native apps as
  * their own rows"): their firewall id is "lordos:<name>". 1 if name is one of them. */
 #define FW_COMPONENTS { "mail", "store", "print", "terminal", "lists", "lan", "machines", "sql", NULL }

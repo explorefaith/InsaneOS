@@ -44,7 +44,7 @@ static JSValue f_wifi_known(JSContext *c, JSValueConst t, int argc, JSValueConst
     return json_or_null(c, net_wifi_known_json(), "<net.wifiKnown>");
 }
 
-/* lord.net.config(interface): the configuration saved by LordOS, or null. */
+/* lord.net.config(interface): the configuration saved by Insane OS, or null. */
 static JSValue f_config(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     if (argc < 1) return JS_NULL;

@@ -109,9 +109,9 @@ eq('a Pi adds its section', hardwareSections({ raspberryPi: { model: 'Raspberry 
 eq('throttle 0x50000', throttleFlags(0x50000), { underVoltageNow: false, cappedNow: false, throttledNow: false, softLimitNow: false,
   underVoltage: true, capped: false, throttled: true, softLimit: false });
 eq('throttle unknown', [throttleFlags(null), throttleFlags(-1)], [null, null]);
-// the Pi's rows: the LordOS kernel only has rpi_volt's alarm (no throttling row), older ones get_throttled
-eq('pi: LordOS kernel, no alarm', piStatus({ underVoltageAlarm: false }), { power: 'powerOkRecent', throttling: null });
-eq('pi: LordOS kernel, alarm', piStatus({ underVoltageAlarm: true }), { power: 'underVoltageRecent', throttling: null });
+// the Pi's rows: the Insane OS kernel only has rpi_volt's alarm (no throttling row), older ones get_throttled
+eq('pi: Insane OS kernel, no alarm', piStatus({ underVoltageAlarm: false }), { power: 'powerOkRecent', throttling: null });
+eq('pi: Insane OS kernel, alarm', piStatus({ underVoltageAlarm: true }), { power: 'underVoltageRecent', throttling: null });
 eq('pi: nothing readable', piStatus({ model: 'Raspberry Pi 5' }), { power: null, throttling: null });
 eq('pi: no section', piStatus(null), { power: null, throttling: null });
 eq('pi: old kernel, since boot', piStatus({ throttled: 0x50000 }), { power: 'underVoltageSeen', throttling: 'throttledSeen' });
@@ -158,7 +158,7 @@ eq('remote on by choice is information', evaluate({ ...good, remote: { enabled: 
 eq('no BPF LSM is a warning', evaluate({ ...good, report: { ...good.report, software: { ...good.report.software, bpfLsm: false } } }).find((r) => r.id === 'netperm').note, 'netpermNoLsm');
 eq('headless is information', evaluate({ ...good, report: { ...good.report, session: { composition: 'headless' } } }).find((r) => r.id === 'gpu').state, 'info');
 eq('development code is a warning', evaluate({ ...good, code: { state: 'development' } }).find((r) => r.id === 'code').state, 'warn');
-eq('outside LordOS\'s session tree it is only information', evaluate({ ...good, facts: { ...good.facts, cgroup: '/user.slice/user-1000.slice/session-3.scope' } }).find((r) => r.id === 'cgroups'),
+eq('outside Insane OS\'s session tree it is only information', evaluate({ ...good, facts: { ...good.facts, cgroup: '/user.slice/user-1000.slice/session-3.scope' } }).find((r) => r.id === 'cgroups'),
   { id: 'cgroups', paper: '§11.4', level: 'configured', state: 'info', note: 'cgroupsNotSession', vars: {} });
 eq('nothing known', st(evaluate({})), { serverUser: 'unknown', landlock: 'unknown', netperm: 'unknown', code: 'unknown', remoteClosed: 'unknown', cgroups: 'unknown', gpu: 'warn' });
 

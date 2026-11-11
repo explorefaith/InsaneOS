@@ -1,4 +1,4 @@
-// menubar_displays_scene.mjs — the second scene of tests/menubar_test.mjs (not run by itself), 0.8.8.6: Lord Flow's
+// menubar_displays_scene.mjs — the second scene of tests/menubar_test.mjs (not run by itself), 0.8.8.6: Insane Flow's
 // menu bar on every display. Three monitors side by side over the stub `lord` (the bundle's banner); <MenuBars> from
 // themes/default/components/MenuBar.jsx through runtime/index.js and the real SDK. It checks one bar per display,
 // the app's menus lit only on the focused window's display, a click on a dimmed bar lighting it, one clock timer
@@ -65,15 +65,15 @@ rt.render(h(Scene));
 await flush();
 
 const colorOf = (id) => (styles.get(id) || {}).color;
-const lit = () => textNodes('LordOS').map((id) => colorOf(id) === colorOf(textNodes('⌕')[0]));
+const lit = () => textNodes('Insane OS').map((id) => colorOf(id) === colorOf(textNodes('⌕')[0]));
 check('a bar on each of the three displays', textNodes('⌕').length, 3);
-check('the app\'s name on each bar', textNodes('LordOS').length, 3);
+check('the app\'s name on each bar', textNodes('Insane OS').length, 3);
 check('lit only on the focused window\'s display (the right one)', lit(), [false, false, true]);
-check('the dimmed color is a different one', colorOf(textNodes('LordOS')[0]) !== colorOf(textNodes('LordOS')[2]), true);
+check('the dimmed color is a different one', colorOf(textNodes('Insane OS')[0]) !== colorOf(textNodes('Insane OS')[2]), true);
 const timers3 = live.size;
 
 // a click on the left bar's dimmed app name lights that bar (and opens the menu there)
-await click(textNodes('LordOS')[0]);
+await click(textNodes('Insane OS')[0]);
 check('a click on a dimmed bar lights it', lit(), [true, false, false]);
 // the focused window moves to the main display: the pin is stale, the main bar is lit
 props.focusRect = { x: 2000, y: 40, w: 900, h: 700 };

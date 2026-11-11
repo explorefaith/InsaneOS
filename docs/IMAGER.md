@@ -1,41 +1,41 @@
-# LordOS Imager
+# Insane OS Imager
 
-Our own SD card and USB stick writer, with a first-run experience for LordOS on the Raspberry Pi 5:
+Our own SD card and USB stick writer, with a first-run experience for Insane OS on the Raspberry Pi 5:
 choose the device, the system image and the drive, customise the first boot (computer name,
 language, user, Wi-Fi, remote access, appearance, cooling), and write. Lumo gives a tip at every
 step and celebrates at the end.
 
 It comes in two forms that share the same interface and the same rules:
 
-- **in LordOS**, as a native app (`apps/imager`), shipped with the distribution;
+- **in Insane OS**, as a native app (`apps/imager`), shipped with the distribution;
 - **for other computers**, as a small desktop app built with Tauri (`desktop/imager`, about 6 MB):
   a Mac download, a Windows download and a Linux download.
 
 It is not a web page: a browser can't write a whole disk.
 
-| In LordOS | On another computer |
+| In Insane OS | On another computer |
 |---|---|
 | ![Device](imager/native-01-device.png) | ![Device](imager/desktop-01-device.png) |
 | ![Customise: cooling](imager/native-10-tab-cooling.png) | ![Customise: cooling](imager/desktop-07-cooling.png) |
 | ![Writing](imager/native-15-writing.png) | ![Writing](imager/desktop-11-writing-dark.png) |
 | ![Done](imager/native-18-done.png) | ![Done](imager/desktop-12-done-dark.png) |
-| ![The Linux download running inside LordOS](imager/desktop-13-linux-in-lordos.png) | ![The Linux download, written through udisks2](imager/desktop-14-linux-done.png) |
+| ![The Linux download running inside Insane OS](imager/desktop-13-linux-in-lordos.png) | ![The Linux download, written through udisks2](imager/desktop-14-linux-done.png) |
 
 ## The steps
 
 | Step | What it does |
 |---|---|
-| **Device** | Two views. First the kind: **Raspberry Pi** (one card, with its supported models under it), PC (USB stick) or generic arm64 (USB stick). For a Raspberry Pi, Next shows **Which Raspberry Pi?**: the **Pi 5** and the **Pi 500** (a Pi 5 inside a keyboard, tested by the community), the same image; the model sets the tips (memory for the Pi 5; the Pi 500's 8 GB, power supply and built-in heatsink) and Cooling (the Pi 500 has no fan header: no fan, case or overclock to choose, only the profile). Boards LordOS doesn't support (Compute Module 5, Pi 4/400, Pi 3/Zero 2) are listed with their status. **Generic arm64** writes the arm64 live ISO and lists only the releases that have one; **PC** writes the amd64 live ISO. For the Pi 5, the memory advice: 4 GB minimum, 8 GB comfortable, 16 GB for the best performance. |
-| **System image** | The latest LordOS release (version, date, download size, "Signed by LordOS"), older releases on request (since 0.8.5 point releases such as `v0.8.4.1-beta` are listed too: the tag is `v` and three numbers, or four for a point release, plus an optional suffix; `apps/imager/core/releases.js` and the desktop app's core), or **an image file of your own** (`.img`, `.img.xz`, `.iso`) with a clear warning that nobody vouches for it. Downloads are cached and resume after an interruption. |
+| **Device** | Two views. First the kind: **Raspberry Pi** (one card, with its supported models under it), PC (USB stick) or generic arm64 (USB stick). For a Raspberry Pi, Next shows **Which Raspberry Pi?**: the **Pi 5** and the **Pi 500** (a Pi 5 inside a keyboard, tested by the community), the same image; the model sets the tips (memory for the Pi 5; the Pi 500's 8 GB, power supply and built-in heatsink) and Cooling (the Pi 500 has no fan header: no fan, case or overclock to choose, only the profile). Boards Insane OS doesn't support (Compute Module 5, Pi 4/400, Pi 3/Zero 2) are listed with their status. **Generic arm64** writes the arm64 live ISO and lists only the releases that have one; **PC** writes the amd64 live ISO. For the Pi 5, the memory advice: 4 GB minimum, 8 GB comfortable, 16 GB for the best performance. |
+| **System image** | The latest Insane OS release (version, date, download size, "Signed by Insane OS"), older releases on request (since 0.8.5 point releases such as `v0.8.4.1-beta` are listed too: the tag is `v` and three numbers, or four for a point release, plus an optional suffix; `apps/imager/core/releases.js` and the desktop app's core), or **an image file of your own** (`.img`, `.img.xz`, `.iso`) with a clear warning that nobody vouches for it. Downloads are cached and resume after an interruption. |
 | **Storage** | Only removable drives (USB, SD cards): model, size, kind, labels, what is mounted. Internal disks and the disk the computer runs from are never listed, and "show all drives" doesn't exist. Too small, write-protected and over-2-TiB drives are shown disabled with the reason; a very large removable drive gets a warning. Erasing is spelled out before anything happens. |
-| **Customise** (Pi only) | A switch, then seven tabs: **General** (computer name, language: English, Español and Português as chips and "+ More languages" for the others, each only if the chosen image can start in it; time zone, keyboard layout, Wi-Fi country), **User** (full name, user name, password with confirmation and a strength hint, automatic login), **Wi-Fi** (network name, password or open network, hidden network, a scan on LordOS), **Remote access** (SSH off / keys only / password and keys, keys pasted or from a `.pub` file; LordOS remote desktop on or off), **Appearance** (Lord Flow or Lord Classic, light or dark, accent, wallpaper), **Cooling** (case with a fan, active cooler, passive case, nothing; a profile; a mild overclock only with a fan), **More** (Bluetooth, automatic update checks, and the statement that LordOS collects nothing). Profiles save and load everything except secrets. |
+| **Customise** (Pi only) | A switch, then seven tabs: **General** (computer name, language: English, Español and Português as chips and "+ More languages" for the others, each only if the chosen image can start in it; time zone, keyboard layout, Wi-Fi country), **User** (full name, user name, password with confirmation and a strength hint, automatic login), **Wi-Fi** (network name, password or open network, hidden network, a scan on Insane OS), **Remote access** (SSH off / keys only / password and keys, keys pasted or from a `.pub` file; Insane OS remote desktop on or off), **Appearance** (Insane Flow or Insane Classic, light or dark, accent, wallpaper), **Cooling** (case with a fan, active cooler, passive case, nothing; a profile; a mild overclock only with a fan), **More** (Bluetooth, automatic update checks, and the statement that Insane OS collects nothing). Profiles save and load everything except secrets. |
 | **Write** | A summary, then "Erase and write" asks once more. Download (if needed) → release signature → image check → write → read back and compare → first-run file → eject. Progress, speed and time left; Cancel at any time (the drive is wiped so it never looks half-written). |
 | **Done** | Lumo celebrates; next steps: put the card in the Pi 5, the first boot takes about a minute, then it is `hostname.local` on the network (`ssh user@hostname.local`, `https://hostname.local:5673`). A sound and a notification when it finishes. |
 
 **App options:** sound when finished, eject when finished, check for app updates (the desktop app;
-in LordOS the imager updates with the system), language and appearance (the desktop app; in
-LordOS they follow Settings), the download cache (where, how big, clear; the desktop app can move
-it). No telemetry: the imager only contacts the LordOS releases on GitHub.
+in Insane OS the imager updates with the system), language and appearance (the desktop app; in
+Insane OS they follow Settings), the download cache (where, how big, clear; the desktop app can move
+it). No telemetry: the imager only contacts the Insane OS releases on GitHub.
 
 More screenshots: the native app in [`imager/native-*.png`](imager/) (every step and tab, the
 custom image warning, the confirmation, cancelling, the options), the desktop app in
@@ -49,7 +49,7 @@ apps/imager/
   state.js                 the wizard state and the write pipeline
   core/                    validators, the first-run file writer, profiles, the release list (plain JS)
   data/                    time zones and keyboard layouts (Debian 13's tzdata and xkb-data)
-  platform.js              LordOS: lord.disks, lord.imager, the admin actions, lord.fs
+  platform.js              Insane OS: lord.disks, lord.imager, the admin actions, lord.fs
 desktop/imager/
   web/sdk.jsx              DOM versions of the few @lordos/sdk primitives the UI uses
   web/platform.js          the same functions as apps/imager/platform.js, over Tauri commands
@@ -60,24 +60,24 @@ desktop/imager/
 
 The interface imports only View, Text, Image, ScrollView, TextInput, Button, Lumo, useTheme,
 useKeyboard, t, typeScale, spacing and a store from `@lordos/sdk`; in the desktop build those come
-from `web/sdk.jsx`, which draws them with HTML and Lord Flow's colors (light, dark or automatic).
+from `web/sdk.jsx`, which draws them with HTML and Insane Flow's colors (light, dark or automatic).
 The texts are the same catalogs (`assets/locales/<lang>/imager.json`, plus errors, status, mascot
 and countries), so both apps speak English, Spanish, Portuguese, French and Italian identically. The desktop app's language is the globe at the bottom of its sidebar (English, Español and Português first, then the others, then the computer's language).
 
-The writing rules exist twice, in C for LordOS (`server/src/imager/`) and in Rust for the desktop
+The writing rules exist twice, in C for Insane OS (`server/src/imager/`) and in Rust for the desktop
 (`desktop/imager/core/`), and are tested against the same fixtures (a real signed `SHA256SUMS`, the
 same `.xz` files, the same password and Wi-Fi vectors).
 
 ## Security model
 
-### In LordOS
+### In Insane OS
 
 `lord-server` runs as the user and never executes anything. Everything that needs root is one of
 four closed admin actions in `server/src/imager/imager_admin.c` (table `IMAGER_ADMIN_ACTIONS`):
 
 | Action | Argument | What it does |
 |---|---|---|
-| `imager-fetch` | `meta`, or `file\n<tag>\n<name>\n<size>` | `/usr/bin/curl` **as the user** (setresuid, no new privileges, no curlrc, https only also after redirects) fetches `https://api.github.com/repos/lordbasex/LordOS/releases?per_page=10` or `https://github.com/lordbasex/LordOS/releases/download/<tag>/<name>` into `~/.cache/lordos/imager` (resumable `.part`; the tag and name are validated; only images and the two signature files). Root never parses what arrives. |
+| `imager-fetch` | `meta`, or `file\n<tag>\n<name>\n<size>` | `/usr/bin/curl` **as the user** (setresuid, no new privileges, no curlrc, https only also after redirects) fetches `https://api.github.com/repos/lordbasex/Insane OS/releases?per_page=10` or `https://github.com/lordbasex/Insane OS/releases/download/<tag>/<name>` into `~/.cache/lordos/imager` (resumable `.part`; the tag and name are validated; only images and the two signature files). Root never parses what arrives. |
 | `imager-fetch-cancel` | none | stops this user's download |
 | `imager-cache-clear` | none | deletes the imager's cache, as the user, one level of release folders |
 | `imager-write` | `<disk>\n<size>\n<model>\n<serial>\nofficial\|custom\n<image>[\n<SHA256SUMS>\n<SHA256SUMS.sig>]` | writes the image to a whole disk (below) |
@@ -91,7 +91,7 @@ four closed admin actions in `server/src/imager/imager_admin.c` (table `IMAGER_A
 2. **The image:** opened with the user's permissions, only from their home or their mounts, never
    from the disk being written; `.img`, `.img.xz` or `.iso`; the `.xz` index gives its uncompressed
    size, which must fit.
-3. **Official images:** `SHA256SUMS.sig` must verify with the release key compiled into LordOS
+3. **Official images:** `SHA256SUMS.sig` must verify with the release key compiled into Insane OS
    (`codesig_release_key`, fingerprint `c7155b8e…53ea108e`, docs/SIGNING.md) and the file's SHA-256
    must be the listed one — **before anything is erased**.
 4. **Right before opening:** the identity is checked again, mounts under `/media` are unmounted
@@ -117,7 +117,7 @@ user's folders). It writes nothing and runs nothing.
 
 ### On other computers
 
-- **Downloads** go only to the LordOS releases on GitHub over HTTPS (Rust, `reqwest` with rustls),
+- **Downloads** go only to the Insane OS releases on GitHub over HTTPS (Rust, `reqwest` with rustls),
   into the platform's cache folder, resumable. What is trusted is decided by the signature, never by
   the transport.
 - **Drives:** only removable, non-system drives are listed and accepted; the identity is checked
@@ -135,14 +135,14 @@ user's folders). It writes nothing and runs nothing.
     locked and dismounted before writing. PowerShell (and any other helper process) is started with
     `CREATE_NO_WINDOW`, so no console window ever appears: up to 0.8.6 each drive listing opened an
     empty PowerShell window over the app, once per poll
-    ([#73](https://github.com/lordbasex/LordOS/issues/73)).
+    ([#73](https://github.com/lordbasex/Insane OS/issues/73)).
   - **Drive polling:** the app asks for the list 2 s after the previous answer came back (never two at
     once). On Windows the core answers from the last `Get-Disk` listing unless the disks changed: a
     fingerprint taken without starting a process (each `\\.\PhysicalDriveN` opened with no access
     rights and asked its size) decides, with a full listing at least every 30 s. A failed listing is
     retried after 2, 4, 8, 16, 32 and then every 60 s, never in a tight loop
     (`drives::list_polled`). Right before writing, the drive is always listed afresh.
-- **The same pipeline** as in LordOS: signature and hash before erasing, decompression while
+- **The same pipeline** as in Insane OS: signature and hash before erasing, decompression while
   writing with the file hashed again, read back and compare, wipe on failure or cancel.
 - **Secrets** are derived in Rust: the password as SHA-512 crypt with 200 000 rounds (`$6$`, accepted
   by every Linux PAM and by `lordos-firstrun`), the Wi-Fi key as the WPA2 PSK.
@@ -170,7 +170,7 @@ user's folders). It writes nothing and runs nothing.
 |---|---|---|
 | `version` | `1` | first |
 | `hostname` | RFC 1123 label | `[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?`, not only digits, not `localhost` |
-| `lang` | `en` \| `es` \| `pt` \| `fr` \| `it` | the languages LordOS ships; `fr` from 0.8.8 images, `it` from 0.8.9 images (an older first-run program refuses the whole file, so the Imager only offers what the chosen image knows) |
+| `lang` | `en` \| `es` \| `pt` \| `fr` \| `it` | the languages Insane OS ships; `fr` from 0.8.8 images, `it` from 0.8.9 images (an older first-run program refuses the whole file, so the Imager only offers what the chosen image knows) |
 | `timezone` | `Area/City` | `[A-Za-z0-9_+-/]`, starts with a capital, no `..`; must exist in the image's zoneinfo |
 | `keyboard`, `keyboard_variant` | xkb layout and variant | `[a-z]{2,10}`; variant `[A-Za-z0-9_-]{0,32}`; the layout must exist in the image |
 | `wifi_country` | two capital letters | `cfg80211.ieee80211_regdom=` in `cmdline.txt` |
@@ -187,7 +187,7 @@ user's folders). It writes nothing and runs nothing.
 | `bluetooth` | `0` \| `1` | |
 | `theme` | `default` \| `classic` | |
 | `mode` | `light` \| `dark` | |
-| `accent` | a LordOS accent name | `azul`, `violeta`, `rosa`, `naranja`, `verde`, `grafito`, … |
+| `accent` | a Insane OS accent name | `azul`, `violeta`, `rosa`, `naranja`, `verde`, `grafito`, … |
 | `wallpaper` | a wallpaper id | `[a-z0-9-]{1,48}` |
 | `cooler` | `case-fan` \| `active-cooler` \| `passive` \| `none` | |
 | `performance` | `balanced` \| `performance` \| `quiet` \| `conservative` | needs `cooler`; `performance` and `quiet` need a fan |
@@ -271,7 +271,7 @@ The overclock warns that not every board is stable and how to undo it (delete ou
   every button, card, switch, tab and field of the step; Enter or Space activates; Escape goes back.
   In the desktop app the browser's own focus does the same and every control has a screen-reader
   label, role and state (`aria-label`, `aria-checked`, `aria-selected`, `role="progressbar"`…).
-  LordOS itself has no screen reader yet; the labels are in place for when it does.
+  Insane OS itself has no screen reader yet; the labels are in place for when it does.
 - **Texts:** every string is in English, Spanish, Portuguese, French and Italian (`node tools/i18n-check.mjs`).
 - **Never color alone:** problems carry text, the steps carry numbers and checkmarks.
 
@@ -286,7 +286,7 @@ On the development machine (the Mac download is built on one), with Rust (rustup
 
 ```sh
 desktop/imager/scripts/build-mac.sh
-# → desktop/imager/target/release/bundle/macos/LordOS Imager.app (6.3 MB)
+# → desktop/imager/target/release/bundle/macos/Insane OS Imager.app (6.3 MB)
 #   desktop/imager/target/universal-apple-darwin/release/bundle/dmg/lordos_imager_0.8.8.6_universal.dmg (7.5 MB)
 ```
 
@@ -296,7 +296,7 @@ desktop/imager/scripts/build-mac.sh
 `scripts/build-mac.sh` does all of it when `IMAGER_SIGN_IDENTITY` is set and a notarization profile
 named `lordos-notary` exists in the keychain (created once by the maintainer with
 `xcrun notarytool store-credentials lordos-notary --apple-id <id> --team-id UR4X327NVD`; the
-password never goes into the repository or a script). The LordOS release key
+password never goes into the repository or a script). The Insane OS release key
 (`~/.config/lordos-release/`) signs release files, not apps, and is not used here. Without
 `IMAGER_SIGN_IDENTITY` the build stays unsigned and the first launch needs a right click → Open.
 
@@ -321,7 +321,7 @@ desktop/imager/scripts/build-windows.sh
 #   desktop/imager/target/windows/lordos-imager.exe (6.2 MB, requireAdministrator)
 ```
 
-**Version.** The Imager's own version follows LordOS's numbering (four numbers for a point release, like
+**Version.** The Imager's own version follows Insane OS's numbering (four numbers for a point release, like
 `0.8.8.6`), kept in `desktop/imager/VERSION`. It is what the app shows, sends as its User-Agent and compares
 with the release files for "a newer Imager", and what the build scripts name the downloads with. Cargo and
 Tauri only take three numbers, so the crates, `package.json` and `tauri.conf.json` carry it with the last two
@@ -348,7 +348,7 @@ The containers keep their own `node_modules` and cargo target folders in named v
 | `server/tests/firstrun_image_test.sh` (root, VM 116) | the real 0.8.3 Raspberry Pi image written by `imager-write`, the first-run file put on its boot partition as the user, then `lordos-firstrun --root --boot`: every file it should write, owners and modes, nothing else changed in `cmdline.txt`/`config.txt`, no Wi-Fi password anywhere, the file shredded, and a broken file applies nothing | 25/25 |
 | Native app on VM 116 | the whole flow with the 0.8.3 image to the virtual stick: written and verified; the first-run file it wrote parses, its yescrypt hash verifies with `crypt(3)` and its PSK matches `pbkdf2_hmac` | ✓ |
 | Desktop app (Mac download, on the development machine) | the whole flow through the app's own commands (`LORDOS_IMAGER_TEST_STATE`, no simulated input) to a 16 GB disk image: download of 0.8.3 from GitHub, signature, image check, write, read back (the same SHA-256 as the native write, `b623f7a8…`), the first-run file on the boot partition (it parses, glibc accepts its SHA-512 hash, the PSK matches) | ✓ |
-| Linux download inside LordOS (VM 116) | the `.deb`'s binary as a Wayland app in the LordOS session: lists only the virtual stick (2 disks hidden), downloads 0.8.3 again, signature, image check, write and read back through udisks2's `OpenDevice` (the same SHA-256); without a polkit agent udisks2 answers "not authorized" and nothing on the drive is touched, with a test rule standing in for the agent the write goes through | ✓ |
+| Linux download inside Insane OS (VM 116) | the `.deb`'s binary as a Wayland app in the Insane OS session: lists only the virtual stick (2 disks hidden), downloads 0.8.3 again, signature, image check, write and read back through udisks2's `OpenDevice` (the same SHA-256); without a polkit agent udisks2 answers "not authorized" and nothing on the drive is touched, with a test rule standing in for the agent the write goes through | ✓ |
 | Downloads on VM 116 | `imager-fetch meta`, the two signature files, the 558 MB image cancelled at 335 MB and resumed from the `.part` | ✓ |
 
 ## Not done or not verified yet
@@ -366,9 +366,9 @@ The containers keep their own `node_modules` and cargo target folders in named v
   polkit and the Windows download were not run against a real stick (the test opened its own disk
   image directly; the Linux and Windows downloads were built and the core tested on Linux, not run
   with a window).
-- **Wi-Fi scan** only on LordOS (the desktop app types the name).
-- **App updates** on the desktop: the option looks for a newer LordOS Imager among the files of the
-  LordOS releases it already reads; no release carries one yet, so it has never found one.
+- **Wi-Fi scan** only on Insane OS (the desktop app types the name).
+- **App updates** on the desktop: the option looks for a newer Insane OS Imager among the files of the
+  Insane OS releases it already reads; no release carries one yet, so it has never found one.
 - **WPA3-only networks** need the password on the board (only the WPA2 key is stored).
 - **Secrets in the host keychain:** profiles never keep secrets at all; storing them in the
   keychain was left out.

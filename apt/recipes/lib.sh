@@ -7,7 +7,7 @@
 #   PKG VERSION UPSTREAM_VERSION ARCH SOURCE_DATE_EPOCH JOBS   from apt/build.sh
 # The container has no network (--network none) and runs as the invoking user.
 
-MAINTAINER="LordOS <lord.basex@gmail.com>"
+MAINTAINER="Insane OS <lord.basex@gmail.com>"
 
 die() { echo "recipe: $*" >&2; exit 1; }
 
@@ -62,7 +62,7 @@ copyright_file() {
     {
         printf 'Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\n'
         printf 'Upstream-Name: %s\nSource: %s\n' "$cf_name" "$cf_src"
-        printf 'Comment: Packaged for LordOS from the verified upstream release (apt/catalog.json in the LordOS\n repository). The upstream licence text follows.\n\n'
+        printf 'Comment: Packaged for Insane OS from the verified upstream release (apt/catalog.json in the Insane OS\n repository). The upstream licence text follows.\n\n'
         printf 'Files: *\nCopyright: see below\nLicense: %s\n' "$cf_lic"
         sed -e 's/^$/./' -e 's/^/ /' "$cf_licfile"
     } > "$cf_out"

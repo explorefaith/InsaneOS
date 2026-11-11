@@ -1,4 +1,4 @@
-/* lpk.h — LordOS native app packages (.lpk): read, install, list and remove (see lpk.c). */
+/* lpk.h — Insane OS native app packages (.lpk): read, install, list and remove (see lpk.c). */
 #ifndef LORD_LPK_H
 #define LORD_LPK_H
 

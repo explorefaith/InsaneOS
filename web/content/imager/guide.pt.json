@@ -1,15 +1,15 @@
 {
-  "meta": ["Como usar o LordOS Imager · LordOS", "Grave o LordOS em um cartão SD ou pendrive e prepare o primeiro boot do Raspberry Pi 5, tela por tela: dispositivo, imagem do sistema, armazenamento, personalização, gravação e primeiro boot."],
-  "kicker": "Guia · LordOS Imager",
-  "title": "Como usar o LordOS Imager",
-  "lead": "Grave o LordOS em um cartão SD ou pendrive a partir do seu computador e prepare o primeiro boot do Raspberry Pi 5. Tela por tela, em uns dez minutos.",
+  "meta": ["Como usar o Insane OS Imager · Insane OS", "Grave o Insane OS em um cartão SD ou pendrive e prepare o primeiro boot do Raspberry Pi 5, tela por tela: dispositivo, imagem do sistema, armazenamento, personalização, gravação e primeiro boot."],
+  "kicker": "Guia · Insane OS Imager",
+  "title": "Como usar o Insane OS Imager",
+  "lead": "Grave o Insane OS em um cartão SD ou pendrive a partir do seu computador e prepare o primeiro boot do Raspberry Pi 5. Tela por tela, em uns dez minutos.",
   "version": "Versão {v} · livre e de código aberto · não coleta nada",
-  "alsoIn": "Já usa o LordOS? Está em Apps → Sistema.",
+  "alsoIn": "Já usa o Insane OS? Está em Apps → Sistema.",
   "hello": "Oi, eu sou o Lumo! Vou com você em cada tela.",
-  "heroAlt": "LordOS Imager: escolha o seu dispositivo",
+  "heroAlt": "Insane OS Imager: escolha o seu dispositivo",
   "needTitle": "O que você precisa",
   "need": [
-    ["O seu computador", "Com o LordOS Imager instalado e conexão à internet para o download."],
+    ["O seu computador", "Com o Insane OS Imager instalado e conexão à internet para o download."],
     ["Um cartão SD ou pendrive", "De preferência 16 GB ou mais (8 GB no mínimo). Tudo o que houver nele será apagado."],
     ["Um Raspberry Pi 5", "Com pelo menos 4 GB de memória; com 8 ou 16 GB a área de trabalho fica mais fluida. Recomendam-se uma ventoinha e a fonte de 27 W."],
     ["Uns dez minutos", "Quase todo o tempo é o download e a gravação, que andam sozinhos."]
@@ -28,16 +28,16 @@
     {
       "id": "device", "title": "Escolha o seu dispositivo",
       "text": "Escolha **Raspberry Pi 5** para preparar um cartão SD para a placa, ou **PC (pendrive USB)** para gravar o sistema ao vivo para um computador. Abaixo do Pi, uma barra mostra quanta memória ele precisa.",
-      "points": ["4 GB é o mínimo, 8 GB é confortável e 16 GB dá o melhor desempenho.", "Só dá para escolher as placas que o LordOS realmente suporta."],
+      "points": ["4 GB é o mínimo, 8 GB é confortável e 16 GB dá o melhor desempenho.", "Só dá para escolher as placas que o Insane OS realmente suporta."],
       "shots": [["01-device", "Passo 1: o dispositivo, com a recomendação de memória para o Raspberry Pi 5"]],
       "tip": ["wave", "Sem adivinhação", "Se a sua placa ainda não é suportada, eu aviso em vez de deixar você gravar um cartão que não vai iniciar."]
     },
     {
       "id": "image", "title": "Escolha a imagem do sistema",
-      "text": "A versão mais recente do LordOS já vem escolhida e marcada **Assinada pelo LordOS**. O download fica guardado, então o próximo cartão é mais rápido.",
+      "text": "A versão mais recente do Insane OS já vem escolhida e marcada **Assinada pelo Insane OS**. O download fica guardado, então o próximo cartão é mais rápido.",
       "points": ["As versões anteriores estão a um clique.", "Você também pode usar um arquivo de imagem seu (`.img`, `.img.xz` ou `.iso`). Ele é gravado e conferido, mas ninguém garante de onde veio."],
-      "shots": [["02-image", "Passo 2: a versão assinada mais recente do LordOS"]],
-      "tip": ["shield", "Só imagens assinadas", "As imagens oficiais são conferidas com a chave de publicação do LordOS antes de apagar qualquer coisa."]
+      "shots": [["02-image", "Passo 2: a versão assinada mais recente do Insane OS"]],
+      "tip": ["shield", "Só imagens assinadas", "As imagens oficiais são conferidas com a chave de publicação do Insane OS antes de apagar qualquer coisa."]
     },
     {
       "id": "storage", "title": "Escolha o cartão ou o pendrive",
@@ -53,11 +53,11 @@
         ["05-tab-general", "Geral", "O **nome do computador** é como você vai achar a placa na sua rede: aqui `lordos-pi`, ou seja `lordos-pi.local`. Depois, o idioma, o fuso horário, o layout do teclado e o país do Wi-Fi."],
         ["06-tab-user", "Usuário", "A sua conta de administrador: nome completo, nome de usuário e uma senha digitada duas vezes. No cartão vai só um hash de mão única da senha. O login automático é opcional."],
         ["07-tab-wifi", "Wi-Fi", "O nome da rede exatamente como aparece (maiúsculas contam) e a senha dela. O cartão guarda a chave derivada da rede, nunca a senha que você digitou. Redes ocultas e abertas também funcionam."],
-        ["08-tab-remote", "Acesso remoto", "Login remoto (SSH): desligado, só chaves (o recomendado) ou senha e chaves. Você também pode ligar a área de trabalho remota do LordOS; ela fica na sua rede local."],
-        ["09-tab-look", "Aparência", "Lord Flow ou Lord Classic, claro ou escuro, uma cor de destaque e um papel de parede."],
-        ["10-tab-cooling", "Resfriamento", "Conte ao LordOS o que resfria a placa e ele escolhe a curva da ventoinha certa. Não tem certeza? Veja [Que resfriamento eu tenho?](#cooling)."],
+        ["08-tab-remote", "Acesso remoto", "Login remoto (SSH): desligado, só chaves (o recomendado) ou senha e chaves. Você também pode ligar a área de trabalho remota do Insane OS; ela fica na sua rede local."],
+        ["09-tab-look", "Aparência", "Insane Flow ou Insane Classic, claro ou escuro, uma cor de destaque e um papel de parede."],
+        ["10-tab-cooling", "Resfriamento", "Conte ao Insane OS o que resfria a placa e ele escolhe a curva da ventoinha certa. Não tem certeza? Veja [Que resfriamento eu tenho?](#cooling)."],
         ["11-tab-cooling-overclock", "Overclock leve", "Só com ventoinha: 2,6 GHz em vez de 2,4 GHz, sem tensão extra. O aviso explica como desfazer."],
-        ["12-tab-more", "Mais", "Bluetooth, a busca automática de atualizações e uma promessa: o LordOS não coleta nada."],
+        ["12-tab-more", "Mais", "Bluetooth, a busca automática de atualizações e uma promessa: o Insane OS não coleta nada."],
         ["13-profiles", "Perfis", "Salve estes ajustes para usá-los no próximo cartão. Senhas e chaves de Wi-Fi nunca são salvas: você digita de novo."]
       ],
       "tip": ["shield", "Nada secreto às claras", "A sua senha e a do Wi-Fi nunca chegam ao cartão como são: só um hash e uma chave derivada."]
@@ -76,7 +76,7 @@
     },
     {
       "id": "firstboot", "title": "O primeiro boot no Raspberry Pi 5",
-      "text": "Coloque o cartão na placa, conecte o monitor, o teclado e o mouse, e depois a fonte. Aparecem a coroa do LordOS e uma barra de progresso enquanto o sistema cresce para ocupar o cartão e aplica os seus ajustes. Em cerca de um minuto, a tela de login mostra a sua conta.",
+      "text": "Coloque o cartão na placa, conecte o monitor, o teclado e o mouse, e depois a fonte. Aparecem a coroa do Insane OS e uma barra de progresso enquanto o sistema cresce para ocupar o cartão e aplica os seus ajustes. Em cerca de um minuto, a tela de login mostra a sua conta.",
       "points": ["De outro computador da sua casa é `lordos-pi.local`.", "Login remoto: `ssh demo@lordos-pi.local`.", "Área de trabalho remota, se você ligou: `https://lordos-pi.local:5673`."],
       "boot": [["docs/boot/splash-preview.png", "A tela de inicialização durante o primeiro boot"], ["docs/screenshots/greeter.png", "A tela de login (com contas de exemplo)"]],
       "tip": ["celebrate", "Bem-vindo", "O arquivo de ajustes é aplicado uma vez e depois sobrescrito e apagado do cartão."]
@@ -103,43 +103,43 @@
   "optText": "**Opções do app**, embaixo na barra lateral: um som e ejetar ao terminar, procurar atualizações do app, idioma e aparência, e a pasta de downloads, com quanto ela ocupa e um botão para limpá-la.",
   "optShot": ["20-options", "Opções do app"],
   "secTitle": "Seguro desde o projeto",
-  "secLead": "O que o LordOS Imager faz para proteger o seu cartão, a sua placa e você.",
+  "secLead": "O que o Insane OS Imager faz para proteger o seu cartão, a sua placa e você.",
   "sec": [
-    ["Só imagens assinadas", "Antes de apagar qualquer coisa, a lista de arquivos da versão é conferida com a chave de publicação do LordOS, e o SHA-256 da imagem com essa lista. Durante a gravação, a imagem é calculada de novo."],
+    ["Só imagens assinadas", "Antes de apagar qualquer coisa, a lista de arquivos da versão é conferida com a chave de publicação do Insane OS, e o SHA-256 da imagem com essa lista. Durante a gravação, a imagem é calculada de novo."],
     ["Lido de volta e comparado", "Depois de gravar, o cartão inteiro é lido de volta e comparado com o que foi gravado."],
     ["A sua senha continua sua", "Ela vira um hash de mão única antes de ser gravada. O Wi-Fi é guardado como a chave derivada da rede."],
     ["Aplicado uma vez e apagado", "A placa confere o arquivo de ajustes de forma rígida, aplica uma vez e depois o sobrescreve e apaga. Um arquivo inválido não aplica nada."],
     ["Só cartões e pendrives", "Os discos do seu computador nunca aparecem, e o seu computador pede a aprovação de um administrador antes de abrir a unidade."],
-    ["Nada é coletado", "Sem conta, sem dados de uso, sem relatórios de falhas. O imager só fala com a página de versões do LordOS para listar e baixar imagens."]
+    ["Nada é coletado", "Sem conta, sem dados de uso, sem relatórios de falhas. O imager só fala com a página de versões do Insane OS para listar e baixar imagens."]
   ],
-  "secLink": "Como o LordOS assina as suas versões",
+  "secLink": "Como o Insane OS assina as suas versões",
   "faqTitle": "Se algo der errado",
   "faq": [
     ["O meu cartão não aparece", "Só aparecem unidades removíveis: cartões SD e pendrives. Use um leitor se o seu computador não tiver entrada e espere alguns segundos: a lista se atualiza sozinha. Um cartão com a trava ligada, ou com menos de 8 GB, aparece em cinza com o motivo. Os discos do seu computador nunca aparecem, de propósito."],
-    ["Diz que a assinatura não foi confirmada", "Então nada foi gravado nem apagado. Os arquivos baixados não batem com o que o LordOS assinou, quase sempre porque um download falhou. Abra **Opções do app → Downloads → Limpar** e tente de novo. Se continuar, avise a gente (veja a página de segurança)."],
+    ["Diz que a assinatura não foi confirmada", "Então nada foi gravado nem apagado. Os arquivos baixados não batem com o que o Insane OS assinou, quase sempre porque um download falhou. Abra **Opções do app → Downloads → Limpar** e tente de novo. Se continuar, avise a gente (veja a página de segurança)."],
     ["A placa não conecta ao meu Wi-Fi", "Confira o nome da rede (maiúsculas contam), a senha e o país do Wi-Fi em **Geral**. Uma rede que só aceita WPA3 precisa da senha na própria placa: conecte um cabo de rede uma vez e adicione-a em **Ajustes → Rede**."],
     ["Não acho lordos-pi.local", "Dê um ou dois minutos ao primeiro boot e confira se o seu computador está na mesma rede (redes de convidados costumam separar os aparelhos). A tela de login mostra o endereço da placa num canto; você pode usar esse endereço no lugar do nome."],
     ["Como entro por SSH?", "Se você ligou: `ssh demo@lordos-pi.local` (com o seu usuário e o nome do seu computador). Só chaves é o mais seguro. Dá para ligar ou desligar depois em **Ajustes → Compartilhar**. A conta root nunca faz login."],
     ["A placa não inicia depois do overclock", "Coloque o cartão no seu computador, abra a partição de boot e apague o bloco entre `# >>> lordos-firstrun` e `# <<< lordos-firstrun` do `config.txt`. A placa volta a iniciar na velocidade normal."],
     ["Pulei a personalização. E agora?", "A placa inicia em modo de configuração e entra sozinha. Crie a sua conta em **Ajustes → Usuários**; no próximo boot a conta de configuração é removida. Até lá, não ligue a área de trabalho remota."],
-    ["Posso gravar um pendrive para um PC?", "Sim: escolha **PC (pendrive USB)** no passo 1. Ele grava o sistema ao vivo do LordOS; inicie o PC pelo pendrive para experimentar e depois instale a partir dele."]
+    ["Posso gravar um pendrive para um PC?", "Sim: escolha **PC (pendrive USB)** no passo 1. Ele grava o sistema ao vivo do Insane OS; inicie o PC pelo pendrive para experimentar e depois instale a partir dele."]
   ],
-  "endTitle": "Pronto? Baixe o LordOS Imager",
+  "endTitle": "Pronto? Baixe o Insane OS Imager",
   "endText": "Livre e de código aberto. Cada imagem oficial é conferida com a assinatura da versão antes de apagar qualquer coisa.",
   "endOther": "Prefere outro jeito de gravar o cartão? Veja a seção de downloads.",
-  "shotsNote": "Telas do LordOS Imager {v} com valores de exemplo: usuário “demo”, computador “lordos-pi”, rede “HomeNetwork”.",
+  "shotsNote": "Telas do Insane OS Imager {v} com valores de exemplo: usuário “demo”, computador “lordos-pi”, rede “HomeNetwork”.",
   "home": {
-    "title": "Como gravar o LordOS em um pendrive ou cartão SD",
+    "title": "Como gravar o Insane OS em um pendrive ou cartão SD",
     "lead": "Para o PC (ISO) e para a imagem do Raspberry Pi 5.",
     "badge": "Recomendado",
-    "steps": ["Escolha o seu dispositivo e a versão assinada mais recente do LordOS.", "Escolha o cartão ou o pendrive e, para o Pi, prepare o primeiro boot.", "Grave: ele confere a assinatura, grava e lê o cartão de volta."],
+    "steps": ["Escolha o seu dispositivo e a versão assinada mais recente do Insane OS.", "Escolha o cartão ou o pendrive e, para o Pi, prepare o primeiro boot.", "Grave: ele confere a assinatura, grava e lê o cartão de volta."],
     "guide": "Guia passo a passo",
     "optTitle": "Prefere a sua ferramenta de sempre? Tudo bem.",
     "optText": "Baixe a ISO ou a imagem do Raspberry Pi na versão, confira com o SHA256SUMS e grave com qualquer app de gravar imagens, ou com `dd`. `/dev/sdX` é o cartão ou pendrive inteiro, não uma partição.",
     "optPc": "PC (ISO)",
     "optPi": "Raspberry Pi 5",
     "optVerify": "Como conferir a assinatura do SHA256SUMS",
-    "optPiSetup": "Sem o LordOS Imager, o Pi inicia em modo de configuração. Para prepará-lo, coloque o `lordos-user.txt` e os arquivos interruptor (`ssh`, `remote-desktop`) na partição de boot do cartão antes do primeiro boot.",
+    "optPiSetup": "Sem o Insane OS Imager, o Pi inicia em modo de configuração. Para prepará-lo, coloque o `lordos-user.txt` e os arquivos interruptor (`ssh`, `remote-desktop`) na partição de boot do cartão antes do primeiro boot.",
     "optPiLink": "Arquivos interruptor e lordos-user.txt"
   }
 }

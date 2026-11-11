@@ -1,9 +1,9 @@
-# config.txt - LordOS for Raspberry Pi 5 (the only supported board). See docs/RASPBERRY.md.
+# config.txt - Insane OS for Raspberry Pi 5 (the only supported board). See docs/RASPBERRY.md.
 # Read by the board firmware before the kernel. It can be edited with the card in another machine.
 
 [all]
 arm_64bit=1
-# no rainbow square at power-on: the LordOS boot splash (Plymouth) is the first thing on the screen
+# no rainbow square at power-on: the Insane OS boot splash (Plymouth) is the first thing on the screen
 disable_splash=1
 # initramfs with the same name as the kernel (kernel_2712.img -> initramfs_2712, kernel8.img -> initramfs8)
 auto_initramfs=1

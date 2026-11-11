@@ -392,7 +392,7 @@ int vm_machine_parse(const char *text, size_t len, VmMachine *m, char *err, size
     if (o->type != J_OBJ) { r = fail(err, n, VM_E_JSON, "not a JSON object"); goto out; }
     /* schema first: a newer file is refused before its other keys are judged */
     if ((r = get_int(o, "schema", &m->schema, err, n))) { r = VM_E_SCHEMA; goto out; }
-    if (m->schema > VM_SCHEMA) { r = fail(err, n, VM_E_NEWER, "schema %d is newer than this LordOS (%d): opened read-only", m->schema, VM_SCHEMA); goto out; }
+    if (m->schema > VM_SCHEMA) { r = fail(err, n, VM_E_NEWER, "schema %d is newer than this Insane OS (%d): opened read-only", m->schema, VM_SCHEMA); goto out; }
     if (m->schema < 1) { r = fail(err, n, VM_E_SCHEMA, "schema %d", m->schema); goto out; }
     for (const JVal *k = o->kid; k; k = k->next) {
         int known = 0;

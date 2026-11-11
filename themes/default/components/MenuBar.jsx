@@ -4,8 +4,8 @@
 // <MenuBars> draws one full bar per display (0.8.8.6; Settings → Desktop & Dock → Menu Bar → "Show the menu bar on
 // every display", on by default): the app's menus are lit on the focused window's display and dimmed on the others,
 // where a click lights that bar and opens the menu there. sdk/menubarmodel.js decides which bar is lit.
-import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, LordOSGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs } from '@lordos/sdk';
-import { useState, useRef } from 'react';
+import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut } from '@lordos/sdk';
+import { useState, useRef, useEffect } from 'react';
 import { Menu } from './Menu.jsx';
 
 // Date and time with the region's format (sdk/i18n.js),
@@ -49,6 +49,46 @@ function BellGlyph({ color, dot }) {
       <View style={{ width: 13, height: 1.5, borderRadius: 1, backgroundColor: color }} />
       <View style={{ marginTop: 1, width: 4, height: 2, borderBottomLeftRadius: 2, borderBottomRightRadius: 2, backgroundColor: color }} />
       {dot ? <View style={{ position: 'absolute', right: -2, top: -1, width: 6, height: 6, borderRadius: 3, backgroundColor: dot }} /> : null}
+    </View>
+  );
+}
+
+// A small CPU / temperature readout in the bar (Settings can't turn it off yet; lord.monitor
+// samples every few seconds only while this is mounted, so the cost is a JSON parse per tick).
+const statsTicker = sharedTicker(() => Date.now(), 4000);
+function StatsItem({ t }) {
+  const tickNow = useStore(statsTicker);
+  const stats = useRef({ cpu: null, temp: null });
+  useEffect(() => {
+    try { lord.monitor?.start?.(); } catch { /* not available */ }
+  }, []);
+  if (typeof lord !== 'undefined' && lord.monitor) {
+    try {
+      const smp = lord.monitor.sample();
+      if (smp) {
+        const cpu = Array.isArray(smp.cpu) ? smp.cpu[smp.cpu.length - 1] : smp.cpu;
+        if (cpu != null && isFinite(cpu)) stats.current.cpu = Math.round(cpu * 100);
+        if (smp.temp != null && isFinite(smp.temp)) stats.current.temp = Math.round(smp.temp);
+      }
+    } catch { /* monitor not running */ }
+  }
+  if (stats.current.cpu == null) return null;
+  const label = `${stats.current.cpu}%` + (stats.current.temp != null ? ` · ${stats.current.temp}°` : '');
+  return (
+    <BarItem t={t}>
+      <Label t={t}>{label}</Label>
+    </BarItem>
+  );
+}
+
+// Camera icon for the one-click screenshot (drawn with views, like the bell — no font needed).
+function CameraGlyph({ t }) {
+  const b = `1.5px solid ${t.menuText}`;
+  return (
+    <View style={{ width: 17, height: 13, position: 'relative' }}>
+      <View style={{ position: 'absolute', left: 0, top: 2, width: 17, height: 11, borderRadius: 3, border: b }} />
+      <View style={{ position: 'absolute', left: 5, top: 0, width: 7, height: 4, borderRadius: 2, border: b, borderBottomWidth: 0 }} />
+      <View style={{ position: 'absolute', left: 5.5, top: 4.5, width: 6, height: 6, borderRadius: 3, border: b }} />
     </View>
   );
 }
@@ -123,9 +163,9 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
         paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: `blur(${t.blur}px)`,
       }}>
         <BarItem t={t} active={open?.name === 'logo'} anchorRef={refs.logo} onClick={() => toggle('logo', refs.logo)}>
-          <LordOSGlyph size={16} color={t.menuText} />
+          <InsaneGlyph size={16} color={t.menuText} />
         </BarItem>
-        <BarItem t={t} active={open?.name === 'app'} anchorRef={refs.app} onClick={() => toggle('app', refs.app)}><Label t={t} bold dim={dim}>{app ? (app.builtin ? windowAppName(wm.get(focused)) : appName(app)) : 'LordOS'}</Label></BarItem>
+        <BarItem t={t} active={open?.name === 'app'} anchorRef={refs.app} onClick={() => toggle('app', refs.app)}><Label t={t} bold dim={dim}>{app ? (app.builtin ? windowAppName(wm.get(focused)) : appName(app)) : 'Insane OS'}</Label></BarItem>
         {extra.map((m, i) => {
           const key = `app${i}`;
           const ref = { get current() { return appRefs.current[key]; } };
@@ -144,6 +184,10 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
         ) : null}
         <StatusItems color={t.menuText} />
         <PrivacyIndicators />
+        <StatsItem t={t} />
+        <BarItem t={t} onClick={() => runShortcut('capture.full')}>
+          <CameraGlyph t={t} />
+        </BarItem>
         <BarItem t={t} onClick={() => spotlight.toggle(area)}><Label t={t}>⌕</Label></BarItem>
         <BarItem t={t} active={controlCenter} anchorRef={refs.cc} onClick={() => onControlCenter(itemAt(refs.cc))}><ControlGlyph t={t} /></BarItem>
         {bar.bell ? <BarItem t={t} active={clockPanel} anchorRef={refs.bell} onClick={() => onClock(itemAt(refs.bell))}><BellGlyph color={t.menuText} dot={unread ? t.accent : null} /></BarItem> : null}

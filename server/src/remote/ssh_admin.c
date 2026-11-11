@@ -31,7 +31,7 @@
 #define ED25519_KEY   "/etc/ssh/ssh_host_ed25519_key"
 
 static const char allow_admins_text[] =
-    "# LordOS · remote login (Settings → Sharing): only administrators. See docs/REMOTE.md.\n"
+    "# Insane OS · remote login (Settings → Sharing): only administrators. See docs/REMOTE.md.\n"
     "# Written by Settings; choose \"All users\" there to remove it.\n"
     "AllowGroups sudo admin wheel root\n";   /* root: only matters with root over SSH on (ssh_root.c) */
 

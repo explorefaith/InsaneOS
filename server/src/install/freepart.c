@@ -261,7 +261,7 @@ const char *fp_create(const char *disk, uint64_t start, uint64_t end, FpUndo *u)
     char n[64], t[24], c[24];
     snprintf(n, sizeof n, "%u:%llu:%llu", u->num, (unsigned long long)start, (unsigned long long)end);
     snprintf(t, sizeof t, "%u:" ROOT_CODE, u->num);
-    snprintf(c, sizeof c, "%u:LordOS", u->num);
+    snprintf(c, sizeof c, "%u:Insane OS", u->num);
 #ifdef FP_TEST
     if (fp_test_fail == 3) snprintf(t, sizeof t, "%u:zzzz", u->num);
 #endif
@@ -277,7 +277,7 @@ const char *fp_create(const char *disk, uint64_t start, uint64_t end, FpUndo *u)
 #ifdef FP_TEST
     if (fp_test_fail == 2) { fp_undo(u); return "install.formatRootFailed"; }
 #endif
-    { const char *const m[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "LordOS", u->root, NULL };
+    { const char *const m[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "Insane OS", u->root, NULL };
       if (admin_run(m)) { fp_undo(u); return "install.formatRootFailed"; } }
     return NULL;
 }

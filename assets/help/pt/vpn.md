@@ -23,24 +23,24 @@ ficam guardadas só para o root. **PPTP é inseguro**: existe para redes antigas
 
 Se a sua organização faz você entrar pela própria página (login único, muitas vezes com um app
 autenticador), escolha **Autenticação → Login único** ao adicionar a VPN Fortinet: sem usuário nem
-senha. Ao conectar, o LordOS abre a página de login da organização no seu navegador e mostra
+senha. Ao conectar, o Insane OS abre a página de login da organização no seu navegador e mostra
 "Aguardando você fazer login na página da organização…". Faça login lá; a VPN conecta quando você
 terminar. Você tem 5 minutos; **Cancelar** interrompe e **Abrir página de login** abre de novo.
 
 ## "Não foi possível verificar o certificado deste servidor"
 
-O LordOS mostra a impressão digital do certificado, para quem e por quem foi emitido. Muitas vezes o
+O Insane OS mostra a impressão digital do certificado, para quem e por quem foi emitido. Muitas vezes o
 servidor envia uma cadeia de certificados incompleta, que outros sistemas completam sozinhos.
 Compare a impressão digital com a que sua organização informa e escolha **Confiar** (um
-administrador): o LordOS a guarda para essa VPN e conecta. Se depois o servidor mostrar outro
-certificado, o LordOS avisa que mudou e pergunta de novo.
+administrador): o Insane OS a guarda para essa VPN e conecta. Se depois o servidor mostrar outro
+certificado, o Insane OS avisa que mudou e pergunta de novo.
 
 Para mudar uma VPN salva, desligue-a e escolha **⋯ → Editar…** na linha dela. O botão da lixeira a apaga.
 
 ## Fortinet: mais servidores, certificado do cliente
 
 - **Mais servidores:** adicione os outros servidores da organização com **+ Adicionar servidor**
-  (`servidor` ou `servidor:porta`). O LordOS tenta em ordem e usa o primeiro que responder; a
+  (`servidor` ou `servidor:porta`). O Insane OS tenta em ordem e usa o primeiro que responder; a
   linha da VPN mostra qual enquanto está conectada.
 - **Certificado do cliente:** se a sua organização deu um certificado, escolha **Certificado do
   cliente → Escolher…** e selecione o certificado e a chave privada (arquivos PEM; um só arquivo

@@ -1,17 +1,17 @@
-# Flatpak and Flathub in LordOS: design review
+# Flatpak and Flathub in Insane OS: design review
 
 **Status (2026-10-27): design review kept for the future; not planned for any release.** On 2026-10-27 the
 maintainer decided not to implement Flatpak for now, to keep the system stable and avoid the complexity and
 future problems it would add; this document stays as the reference if that is ever reconsidered. No code has
 been written and nothing below is built. The roadmap item ([ROADMAP.md](ROADMAP.md), "Flatpak and Flathub (future, undecided; not planned for
 any release)"; when it was written it was planned for 0.8.6) asks for a Flathub section in the
-Store without giving up LordOS's security model. This document goes through the four problems the
+Store without giving up Insane OS's security model. This document goes through the four problems the
 roadmap lists, gives the options for each with their trade-offs against `AGENTS.md`, recommends
 one, and lists exactly which new exceptions the maintainer has to approve before any code is
 written. Every statement is marked as one of:
 
 - **Checked** — read on 2026-10-27 from Flatpak's source at the tag Debian 13 ships (1.16.6), from
-  Debian 13's package metadata, from Flathub's live repository, or from LordOS's own code and docs.
+  Debian 13's package metadata, from Flathub's live repository, or from Insane OS's own code and docs.
   Not run.
 - **Design** — a proposal, not built.
 - **Unverified** — an assumption that the test plan has to confirm on a VM before it can be claimed.
@@ -24,10 +24,10 @@ Nothing here has been run on a VM. No compatibility with any Flathub app is clai
 
 - **Flatpak stays optional.** The Debian `flatpak` package is installed only when the user turns
   Flathub on in the Store, through the existing package engine (`pkg-install`, without Recommends),
-  like Chrome or Spotify. LordOS never links libflatpak, libostree or bubblewrap. Its own isolation
+  like Chrome or Spotify. Insane OS never links libflatpak, libostree or bubblewrap. Its own isolation
   stays its own code: the root-owned app scope, `lord-netperm`'s kernel programs and the launcher's
   view. Flatpak's sandbox (bubblewrap) is an extra layer inside it, never the only one.
-- **Identity:** a Flatpak app is started only by LordOS's launcher, in a root-owned
+- **Identity:** a Flatpak app is started only by Insane OS's launcher, in a root-owned
   `app-lordos-fp-<id>.scope`, which the firewall, the Monitor, the PipeWire guard and the
   notification server read as the app `flatpak:<id>`. `flatpak run` can't move itself out (its
   transient-scope call needs `/run/user/<uid>/systemd/private`, which the launcher's view doesn't
@@ -35,14 +35,14 @@ Nothing here has been run on a VM. No compatibility with any Flathub app is clai
   under `user@`.
 - **Launching:** the launcher never runs the `Exec` line of a Flatpak export. It takes a validated
   Flatpak app id of an installed app and builds the `flatpak run` command line itself in C: a fixed
-  set of options plus LordOS's restrictions and a fixed list of things LordOS never grants. The
+  set of options plus Insane OS's restrictions and a fixed list of things Insane OS never grants. The
   command-line options win over the app's metadata and over the user's override files.
-- **Permissions:** the Store shows what the app declares (its `[Context]`) and what LordOS changes.
-  LordOS's existing restrictions (Settings → Privacy) apply to Flatpak apps through the same
-  kernel paths as to Linux apps. No portal beyond the Settings portal LordOS already serves in
-  0.8.6; a LordOS portal is a later phase with its own review.
+- **Permissions:** the Store shows what the app declares (its `[Context]`) and what Insane OS changes.
+  Insane OS's existing restrictions (Settings → Privacy) apply to Flatpak apps through the same
+  kernel paths as to Linux apps. No portal beyond the Settings portal Insane OS already serves in
+  0.8.6; a Insane OS portal is a later phase with its own review.
 - **Installing:** per user (`flatpak --user`), no root and no new admin action. The Flathub remote
-  comes from a `.flatpakrepo` file LordOS ships (its GPG key pinned), the catalog is Flathub's
+  comes from a `.flatpakrepo` file Insane OS ships (its GPG key pinned), the catalog is Flathub's
   signed appstream data that `flatpak` itself verifies, and every `flatpak` command lord-server runs
   is one of a closed list, run in its own firewall component `lordos:flathub`.
 - **Seven approvals are needed** (see "Exceptions to approve"): the Flatpak launch path, the
@@ -73,10 +73,10 @@ The `flatpak` package also installs (file list from packages.debian.org):
   system-wide installs;
 - `/etc/profile.d/flatpak.sh`, `/etc/X11/Xsession.d/20flatpak` and
   `/usr/lib/systemd/user-environment-generators/60-flatpak`: add the export folders to
-  `XDG_DATA_DIRS`. LordOS's launcher reads two fixed folders and ignores `XDG_DATA_DIRS`, so these
+  `XDG_DATA_DIRS`. Insane OS's launcher reads two fixed folders and ignores `XDG_DATA_DIRS`, so these
   change nothing there.
 
-LordOS's package engine installs Recommends only when asked (`pkg-install … --recommends`,
+Insane OS's package engine installs Recommends only when asked (`pkg-install … --recommends`,
 [PACKAGES.md](PACKAGES.md)), so turning Flathub on would not pull `xdg-desktop-portal` in. That
 matters: lord-server already owns `org.freedesktop.portal.Desktop` on the session bus for the
 Settings portal (`server/src/ui/portal.c`), and `tests/fwlinux/screen.sh` depends on no screen-cast
@@ -92,7 +92,7 @@ portal being installed.
   `app-flatpak-<escaped id>-<instance id>.scope` with its own pid. If the socket isn't there or the
   call fails, it logs "Failed to run in transient scope" at info level and **goes on**: "nothing
   really depends on it".
-- **Checked (LordOS).** The user manager has PID 1 do that move, which only checks the uid
+- **Checked (Insane OS).** The user manager has PID 1 do that move, which only checks the uid
   ([FIREWALL.md](FIREWALL.md), "Escape via `systemd-run --user`"). So a `flatpak run` started inside
   `app-lordos-<id>.scope` would leave it for `user@<uid>.service/app.slice/…`. There
   `lord-netperm` finds no app scope and applies the per-user union: restriction-only, so not a
@@ -100,7 +100,7 @@ portal being installed.
   and its traffic isn't attributed.
 - **Checked (flatpak-portal.c).** `flatpak-portal` (D-Bus activated, under `user@`) runs
   sub-sandboxes as its own children with `flatpak run --parent-pid=…`; they land under `user@` the
-  same way, whatever LordOS does with the parent.
+  same way, whatever Insane OS does with the parent.
 - **Checked (flatpak-run.c).** bubblewrap is started with `--unshare-user --disable-userns` (when
   unprivileged) and `--unshare-pid`. A process's cgroup doesn't change across namespaces, so
   `lord-netperm`'s programs (`bpf_get_current_ancestor_cgroup_id`) and `sec/appid.c` find a
@@ -115,16 +115,16 @@ which `AGENTS.md` forbids. The user (and any unsandboxed app of theirs) controls
 process another app's rules and take it out of the union. Two such attempts were already beaten
 (`docs/SECURITY-REVIEW-0.8.0.md` #15 and #37).
 
-**B. Start Flatpak apps in a root-owned LordOS scope, in a view without the systemd user socket.**
+**B. Start Flatpak apps in a root-owned Insane OS scope, in a view without the systemd user socket.**
 The launcher's child enters `app-lordos-fp-<id>.scope` through `lord-sessiond`'s placement service
-(as every Linux app does today), then builds a view with LordOS's own code
+(as every Linux app does today), then builds a view with Insane OS's own code
 (`sandbox_files_isolate`: user, mount, PID and IPC namespaces) whose runtime folder contains only
 the sockets Flatpak is meant to use, never `systemd/`. `flatpak run`'s transient-scope call fails,
 and the app, its D-Bus proxy and every process it forks stay in the root-owned scope, where the
 user can't move them (every `cgroup.procs` there is root's). *Trade-offs:* every Flatpak launch
 needs unprivileged namespaces and the view (the launcher already requires them for restricted
-Linux apps); bubblewrap then nests its own user namespace inside LordOS's (allowed by the kernel,
-**Unverified** under LordOS's view); a private runtime folder per launch means Flatpak's per-app
+Linux apps); bubblewrap then nests its own user namespace inside Insane OS's (allowed by the kernel,
+**Unverified** under Insane OS's view); a private runtime folder per launch means Flatpak's per-app
 `$XDG_RUNTIME_DIR/.flatpak/<id>` state (shared `/tmp` between instances, `flatpak ps`) isn't seen
 from outside, unless the launcher binds a per-app folder into the view (open question 4).
 
@@ -151,7 +151,7 @@ The view (Design) for a Flatpak app:
 | X display | only if the app declares `x11`/`fallback-x11` and isn't restricted | none | none |
 
 Giving the session bus to an unrestricted app's `flatpak run` is safe only because the app itself
-reaches it through Flatpak's filtering proxy (`xdg-dbus-proxy`), never directly: LordOS always adds
+reaches it through Flatpak's filtering proxy (`xdg-dbus-proxy`), never directly: Insane OS always adds
 `--nosocket=session-bus` (see "Never granted"). A restricted app has no bus, so `flatpak run` starts
 no proxy (Checked: `flatpak_run_add_session_dbus_args` returns without one when there is no bus
 socket), and the app has no portals, notifications or other D-Bus services, exactly the cost Linux
@@ -172,7 +172,7 @@ not read for this review): the first thing to test.
   `~/.local/share/flatpak/exports/share/applications` (user) or
   `/var/lib/flatpak/exports/share/applications` (system). Its `Exec` is `/usr/bin/flatpak run
   --branch=… --arch=… --command=… [--file-forwarding] <id> [@@ %f @@]`.
-- **Checked.** LordOS's launcher (`server/src/apps.c`) lists `.desktop` files only from
+- **Checked.** Insane OS's launcher (`server/src/apps.c`) lists `.desktop` files only from
   `~/.local/share/applications` and `/usr/share/applications`, runs their `Exec` without a shell,
   and refuses files written from JS (`lord.fs` denies those folders). The user's export folder is
   in the home folder: anything running as the user can write a file there with any `Exec`.
@@ -185,7 +185,7 @@ not read for this review): the first thing to test.
 
 **A. Add the two export folders to the launcher's list and run their `Exec` lines.** Smallest
 change. *Rejected:* a third and fourth folder whose `Exec` is run as is, one of them user-writable
-and unknown to `lord.fs`'s deny list; the command line would be whatever the file says, so LordOS's
+and unknown to `lord.fs`'s deny list; the command line would be whatever the file says, so Insane OS's
 arguments (identity, restrictions, never-granted permissions) couldn't be guaranteed.
 
 **B. A Flatpak launch path that takes only an app id and builds the command line in C.**
@@ -193,7 +193,7 @@ arguments (identity, restrictions, never-granted permissions) couldn't be guaran
 id must:
 
 - pass Flatpak's own name rules (at least three dot-separated elements of `[A-Za-z0-9_-]`, not
-  starting with a digit, at most 255 bytes) and LordOS's scope name limit (`cgroup_scope_name_ok`:
+  starting with a digit, at most 255 bytes) and Insane OS's scope name limit (`cgroup_scope_name_ok`:
   62 bytes for the id part; see open question 1);
 - be an installed app: `~/.local/share/flatpak/app/<id>/current/active/metadata` (user) or
   `/var/lib/flatpak/app/<id>/current/active/metadata` (system, read-only use), opened without
@@ -201,13 +201,13 @@ id must:
 
 The argv is fixed in C: `/usr/bin/flatpak` (root-owned, not writable by others, as the Xwayland
 rule), `run`, `--arch=<native>`, `--branch=<the active branch read from the installation>`,
-LordOS's generated context options (next sections), the id, and with "Open with" one path after
+Insane OS's generated context options (next sections), the id, and with "Open with" one path after
 it. The `.desktop` export is read only for the name, icon, `MimeType` and `Categories`, never for
 `Exec`. "Open with" follows `launchWith`'s rules (realpath in the home folder or the user's
 mounts, only apps with `MimeType`) and, instead of the document portal, adds
 `--filesystem=<that real path>` so the sandbox sees exactly that file (**Unverified** for single
 files: to test). Desktop actions are not offered in
-phase 1 (their `Exec` lines are app arguments LordOS would have to validate).
+phase 1 (their `Exec` lines are app arguments Insane OS would have to validate).
 
 **C. Run Flatpak apps from the Store only (no launcher, no Dock).** *Rejected:* the Dock, search
 and "Open with" are where apps are opened; a second launch path just for the Store would be the
@@ -237,7 +237,7 @@ An app's `metadata` `[Context]` group declares:
   `--device`, `--nodevice`, `--allow`, `--disallow`, `--filesystem`, `--nofilesystem`,
   `--talk-name`, `--no-talk-name`, `--own-name`, `--system-talk-name`, `--system-no-talk-name`,
   `--env`, `--unset-env`…). `flatpak_run_app` merges the metadata, then the system and user
-  override files, then **the command line last**: LordOS's options win over everything, including
+  override files, then **the command line last**: Insane OS's options win over everything, including
   `~/.local/share/flatpak/overrides/<id>`, which any unsandboxed process of the user can write.
 - `--nofilesystem=<path>` for a path not granted becomes a tmpfs over it
   (`flatpak_exports_add_path_expose_or_hide`, mode NONE), so a folder can be hidden inside a
@@ -245,12 +245,12 @@ An app's `metadata` `[Context]` group declares:
   `~/.var/app/*`.
 - Every app may call any `org.freedesktop.portal.*` name through its proxy
   (`--call=org.freedesktop.portal.*=*` in `flatpak-run-dbus.c`). Whether `--no-talk-name` overrides
-  that wildcard is **Unverified**; LordOS doesn't rely on it.
+  that wildcard is **Unverified**; Insane OS doesn't rely on it.
 - The Wayland side: Flatpak creates a `wp_security_context_v1` listener when the compositor
-  offers it. LordOS's compositor doesn't (checked: no reference in `server/src/wl`), so Flatpak
+  offers it. Insane OS's compositor doesn't (checked: no reference in `server/src/wl`), so Flatpak
   apps connect to the normal Wayland socket like any Linux app.
 
-### What LordOS never grants (Design, fixed in C)
+### What Insane OS never grants (Design, fixed in C)
 
 Whatever the app declares, the launcher always adds:
 
@@ -259,25 +259,25 @@ Whatever the app declares, the launcher always adds:
 | `--nosocket=session-bus` | the unfiltered bus reaches the systemd user manager (`systemd-run --user`) and the session helper |
 | `--no-talk-name=org.freedesktop.Flatpak` | `flatpak-spawn --host`: any command, unsandboxed, outside the scope |
 | `--no-talk-name=org.freedesktop.systemd1` | units and transient scopes outside the scope |
-| no `--own-name` of a name lord-server serves (`org.freedesktop.Notifications`, `org.freedesktop.portal.Desktop`) | impersonating LordOS's services |
+| no `--own-name` of a name lord-server serves (`org.freedesktop.Notifications`, `org.freedesktop.portal.Desktop`) | impersonating Insane OS's services |
 | `--nofilesystem` (hide) for `~/.config/lordos`, `~/.local/share/lordos`, `~/.cache/lordos`, `~/.local/share/applications`, `~/.config/autostart`, `~/.config/systemd`, `~/.config/environment.d`, `~/.local/bin` | the folders `fsops_protected()` and the launcher's grant rules keep from every app: rules, permissions, launchers, autostart, units |
 | `--filesystem=<file>:ro` for `~/.bashrc`, `~/.profile`, `~/.bash_profile`, `~/.zshrc` (those that exist) | shell startup files run outside any sandbox at the next login |
 
 `org.freedesktop.portal.Flatpak` (sub-sandboxes) can't be refused reliably by an option, so in
-phase 1 LordOS masks `flatpak-portal.service` (see "Exceptions to approve", E5): with no owner and
+phase 1 Insane OS masks `flatpak-portal.service` (see "Exceptions to approve", E5): with no owner and
 no activation the name can't be called. A user who unmasks it in their own manager only loses
 per-app identity for those sub-sandboxes (they fall under the `user@` union), never a restriction.
 
 The table is **Design**: whether each hidden path really disappears inside a sandbox granted
 `home` or `host` is part of the test plan.
 
-### LordOS's restrictions on a Flatpak app (Design)
+### Insane OS's restrictions on a Flatpak app (Design)
 
 The existing restrictions of Settings → Privacy apply to `flatpak:<id>` with the same enforcement
-as for Linux apps, because the app stays in its scope. Where Flatpak has a matching option LordOS
+as for Linux apps, because the app stays in its scope. Where Flatpak has a matching option Insane OS
 adds it as well, as defence in depth (the kernel path is the boundary, not bubblewrap):
 
-| Restriction | Enforced by (unchanged LordOS code) | Also added to `flatpak run` |
+| Restriction | Enforced by (unchanged Insane OS code) | Also added to `flatpak run` |
 |---|---|---|
 | network rules, no-internet, no-LAN, no-network | `lord-netperm` cgroup programs on the scope | `--unshare=network` for no-network |
 | no camera | `cgroup/dev` (V4L2) + PipeWire guard | — |
@@ -286,12 +286,12 @@ adds it as well, as defence in depth (the kernel path is the boundary, not bubbl
 | no microphone | `cgroup/dev` (ALSA capture nodes) + PipeWire guard | — (`--nosocket=pulseaudio` would also take the sound output) |
 | no screen capture | no capture protocol, no screen-cast portal, `/dev/fb*` denied | — |
 | no notifications | `hw/notifyd.c`: the caller's pid is the app's `xdg-dbus-proxy`, which `flatpak run` starts inside the scope, so its cgroup is the app's | — |
-| no access to your files | LordOS's view (home is a tmpfs with only `~/.var/app/<id>`), see Problem 1 | `--nofilesystem=home --nofilesystem=host` |
+| no access to your files | Insane OS's view (home is a tmpfs with only `~/.var/app/<id>`), see Problem 1 | `--nofilesystem=home --nofilesystem=host` |
 
 **No access to your files is the one restriction whose enforcement changes.** For a Linux app it
 is the view plus Landlock's file rules; for a Flatpak app Landlock's file rules can't be used
 (bubblewrap must mount), so it is the view alone: a mount namespace whose home is an empty tmpfs,
-built by LordOS's code, plus Flatpak's own options inside. Paths outside the home (`/media`,
+built by Insane OS's code, plus Flatpak's own options inside. Paths outside the home (`/media`,
 `/run/media`, other users' homes, `/mnt`) are also hidden in the view by tmpfs mounts (Design),
 because without Landlock nothing else would deny them. This is weaker than the Linux-app version
 in one respect: Landlock would also have denied files reachable through an fd passed in or a bind
@@ -308,25 +308,25 @@ way. To measure on the VM (test 9).
 
 ### Portals
 
-LordOS runs no `xdg-desktop-portal`; lord-server serves `org.freedesktop.portal.Settings` itself.
+Insane OS runs no `xdg-desktop-portal`; lord-server serves `org.freedesktop.portal.Settings` itself.
 
-**A. Install `xdg-desktop-portal` and write a LordOS backend** (`org.freedesktop.impl.portal.*`:
+**A. Install `xdg-desktop-portal` and write a Insane OS backend** (`org.freedesktop.impl.portal.*`:
 FileChooser, Screenshot, ScreenCast, Camera…). The frontend identifies Flatpak apps (from
 `/.flatpak-info` of the caller), keeps the permission store and runs the document portal.
-*Trade-offs:* a large GLib daemon under `user@` (outside any LordOS scope) that decides app
+*Trade-offs:* a large GLib daemon under `user@` (outside any Insane OS scope) that decides app
 identity and brokers files; it wants the `org.freedesktop.portal.Desktop` name lord-server holds
 (the Settings portal would move to a backend); its ScreenCast and Camera frontends hand out
 PipeWire streams, which would break the "no Linux app can copy the screen" claim the moment a
 backend exists.
 
 **B. Serve the needed frontend interfaces in lord-server, on the name it already owns.**
-FileChooser (LordOS's own dialog, `fs.openFile`-style), OpenURI, Notification, Inhibit, next to
+FileChooser (Insane OS's own dialog, `fs.openFile`-style), OpenURI, Notification, Inhibit, next to
 Settings. The caller is identified as notifyd does it today: the bus's
 `GetConnectionUnixProcessID`, then that pid's cgroup (the proxy's scope), never a file the app can
 write. ScreenCast, Screenshot and Camera are not offered. *Trade-offs:* a new D-Bus surface in
 lord-server with untrusted callers; FileChooser for a sandboxed app needs a way to expose the
 chosen file after start, which is the document portal's FUSE file system (Debian's
-`xdg-document-portal` is part of the `xdg-desktop-portal` package) or a LordOS equivalent.
+`xdg-document-portal` is part of the `xdg-desktop-portal` package) or a Insane OS equivalent.
 
 **C. No new portals in phase 1.** Apps reach only the Settings portal (dark mode, accent, fonts).
 GTK 4 and Qt fall back to their own in-process file dialogs, which show only what the sandbox sees
@@ -340,13 +340,13 @@ FileChooser).
 
 - **Before installing**, an app's page lists its declared `[Context]` in plain language (network,
   your files: home / whole computer / specific folders, devices: GPU / all devices / USB / webcam via
-  `all`, sound, X11, D-Bus names grouped as "talks to other apps"), and next to each one what LordOS
-  changes ("never granted on LordOS", "hidden: LordOS settings and launchers"). The metadata comes
+  `all`, sound, X11, D-Bus names grouped as "talks to other apps"), and next to each one what Insane OS
+  changes ("never granted on Insane OS", "hidden: Insane OS settings and launchers"). The metadata comes
   from `flatpak remote-info --show-metadata` (one of the closed commands below), parsed in C with a
   strict key-file reader into a fixed set of flags; unknown keys are shown as "other".
 - Flathub's `verified` flag and licence come from the appstream data (see Problem 4). An app that
   asks for `org.freedesktop.Flatpak`, the unfiltered session bus or `host` says so in red before
-  install, and that LordOS removes it (so it may not work).
+  install, and that Insane OS removes it (so it may not work).
 - **Settings → Privacy** lists Flatpak apps with the same restrictions as Linux apps, labelled
   "Flatpak". A per-app editor for Flatpak's own permissions (turning a declared one off) is a later
   phase: it would add options from a validated table, never free text.
@@ -372,23 +372,23 @@ FileChooser).
   remote's keys: Flathub can roll its key forward through a summary signed with the current one.
 - **Checked.** OSTree's summary and commits are GPG-signed (detached OpenPGP signatures inside
   GVariant), objects are content-addressed by SHA-256. Flatpak verifies them through libostree and
-  GPGME. LordOS's package engine has its own OpenPGP and RSA code (`pkg/pgp.c`, `pkg/crypto.c`) for
+  GPGME. Insane OS's package engine has its own OpenPGP and RSA code (`pkg/pgp.c`, `pkg/crypto.c`) for
   clear-signed `InRelease` files, but no GVariant or OSTree reader.
 - **Checked.** `flatpak --user` installs into `~/.local/share/flatpak` with no root and no system
-  helper. The system helper (root, polkit) is used only for `--system`; LordOS doesn't install
+  helper. The system helper (root, polkit) is used only for `--system`; Insane OS doesn't install
   polkit.
 
 ### Options
 
 **A. lord-server runs `flatpak --user` for a closed list of commands, in its own firewall
 component.** Flatpak does the network, TLS, OSTree and signature checks itself (libostree +
-GPGME). LordOS controls which commands run, their arguments, their scope and what it reads back.
+GPGME). Insane OS controls which commands run, their arguments, their scope and what it reads back.
 *Trade-offs:* a third-party program doing network and parsing as the user, not inside
 `sandbox_apply_helper` (it must write `~/.local/share/flatpak` and runs bubblewrap for
 `apply_extra` and triggers); its trust store (`~/.local/share/flatpak/repo/flathub.trustedkeys.gpg`)
 is user-writable, as is everything else in the home folder.
 
-**B. LordOS's own OSTree client in a sandboxed helper** (GVariant parser, detached OpenPGP
+**B. Insane OS's own OSTree client in a sandboxed helper** (GVariant parser, detached OpenPGP
 signatures in `pgp.c`, object fetch and checkout), Flatpak used only to run. *Trade-offs:* the
 strongest control and no third-party network code, but several weeks of work, and installing
 still has to produce a layout `flatpak run` accepts. Not for 0.8.6.
@@ -420,12 +420,12 @@ Each command is started like a connector: lord-server forks, the child enters a 
 `lordos:store`). Downloads of `extra-data` (proprietary apps that fetch from their vendor during
 install) go through the same scope.
 
-**The pinned key.** The `.flatpakrepo` shipped by LordOS holds Flathub's key above. Because the
-key expires on 2027-06-14 and Flathub can roll it through `xa.gpg-keys`, LordOS also ships a new
+**The pinned key.** The `.flatpakrepo` shipped by Insane OS holds Flathub's key above. Because the
+key expires on 2027-06-14 and Flathub can roll it through `xa.gpg-keys`, Insane OS also ships a new
 `.flatpakrepo` in a `lordos` update when Flathub publishes one, with a migration that runs
 `remote-modify --gpg-import` for users who have the remote (a per-user `MIGRATIONS` entry in
 `sdk/settings.js`; never by hand). Whether to accept key updates delivered by the summary or only
-LordOS's is open question 6.
+Insane OS's is open question 6.
 
 **Which subset.** Design: the default is the whole of Flathub, and the Store marks apps that are
 neither verified nor free software. Offering `verified_floss` as a setting is open question 7.
@@ -457,25 +457,25 @@ for every decoder. The website's API is never used.
 ## Dependency policy
 
 `AGENTS.md` and [ARCHITECTURE.md](ARCHITECTURE.md) forbid "bubblewrap, flatpak, firejail or
-libseccomp for isolation", and `.lpk` isolation must stay LordOS's own code. The argument for
+libseccomp for isolation", and `.lpk` isolation must stay Insane OS's own code. The argument for
 allowing Flatpak as an **app source**:
 
-1. LordOS doesn't link it: no libflatpak, libostree or bubblewrap code in any LordOS binary.
+1. Insane OS doesn't link it: no libflatpak, libostree or bubblewrap code in any Insane OS binary.
    lord-server only executes `/usr/bin/flatpak` with fixed argv (E1, E3).
 2. It isn't installed by default; it arrives as a Debian package the user chooses in the Store,
    like the Commercial apps, and the page says what it adds (about the size: **Unverified**,
    measured in test 1; Flathub runtimes add hundreds of MB each).
-3. LordOS's boundaries for a Flatpak app are LordOS's: the root-owned scope, `lord-netperm`'s
+3. Insane OS's boundaries for a Flatpak app are Insane OS's: the root-owned scope, `lord-netperm`'s
    programs, the PipeWire guard, notifyd and the launcher's view. If bubblewrap failed open, the app
-   would still be held by every LordOS restriction the owner set, exactly like an unsandboxed Linux
-   app. Flatpak's sandbox adds to that; LordOS's guarantees don't depend on it.
+   would still be held by every Insane OS restriction the owner set, exactly like an unsandboxed Linux
+   app. Flatpak's sandbox adds to that; Insane OS's guarantees don't depend on it.
 4. `.lpk` apps, sysapps and helpers keep `sec/sandbox.c` and nothing changes for them.
 
 What it costs that the policy was protecting: a large amount of third-party C (Flatpak, OSTree,
 GPGME/GnuPG, xdg-dbus-proxy, bubblewrap) runs as the user when Flathub is on, and Flatpak's network
-code runs outside LordOS's helper sandbox (Problem 4). The wording to approve is E4.
+code runs outside Insane OS's helper sandbox (Problem 4). The wording to approve is E4.
 
-The root parts of the package are not used: LordOS masks `flatpak-system-helper.service` (E5), so
+The root parts of the package are not used: Insane OS masks `flatpak-system-helper.service` (E5), so
 installing Flathub adds no root service and no polkit actions are reachable (polkitd isn't installed;
 the mask makes that explicit).
 
@@ -487,7 +487,7 @@ network exceptions:
 - **E1. The Flatpak launch path** (Problem 2, option B). `lord.apps.launchFlatpak(id)` /
   `launchFlatpakWith(id, path)`: only a validated id of an installed Flatpak app (user or system
   installation), only `/usr/bin/flatpak` (root-owned, not writable by others), argv built in C
-  from a fixed set (`run`, `--arch`, `--branch` read from the installation, LordOS's restriction and
+  from a fixed set (`run`, `--arch`, `--branch` read from the installation, Insane OS's restriction and
   never-granted options from fixed tables, the id, and for `With` one real path in the home folder
   or the user's mounts with its `--filesystem` grant). Never an `Exec` line from an export, never
   caller arguments, no shell. The child enters its scope and builds the view (E2) before exec;
@@ -503,7 +503,7 @@ network exceptions:
   shipped file).
 - **E4. Dependency policy wording.** "Flatpak (and with it bubblewrap, OSTree and
   xdg-dbus-proxy) may be installed from the Store as an app source and is run only through E1 and
-  E3; it is never linked, never installed by default and never used for LordOS's own isolation."
+  E3; it is never linked, never installed by default and never used for Insane OS's own isolation."
 - **E5. Masking Flatpak's services**: the `lordos` package ships `/etc/systemd/system/
   flatpak-system-helper.service` and `/etc/systemd/user/flatpak-portal.service` as links to
   `/dev/null` (harmless while Flatpak isn't installed). This is a packaging change with a
@@ -539,9 +539,9 @@ option B), which gets its own review in a later phase.
 1. Store → "Flathub" switch: installs `flatpak` (no Recommends), runs `remote-add` from the shipped
    file. Masks per E5. x86-64 only.
 2. Catalog: `update --appstream`, the sandboxed parser, a Flathub section in Discover and search,
-   app pages with declared permissions and LordOS's changes.
+   app pages with declared permissions and Insane OS's changes.
 3. Install, uninstall, update for user installations; Flathub in Store → Installed and Updates.
-4. The launch path (E1) with the scope and view (E2), the never-granted table, LordOS's restrictions
+4. The launch path (E1) with the scope and view (E2), the never-granted table, Insane OS's restrictions
    mapped as above; Dock, search, launcher grid and "Open with".
 5. Firewall, Monitor, Settings → Privacy for `flatpak:<id>` and `lordos:flathub`.
 6. The test plan below, with a list of apps actually tried and how they behaved: only those are
@@ -549,9 +549,9 @@ option B), which gets its own review in a later phase.
 
 **Phase 2 (0.8.7 or later):**
 
-- LordOS's portal frontends (E8): FileChooser with a document store, OpenURI, Notification,
+- Insane OS's portal frontends (E8): FileChooser with a document store, OpenURI, Notification,
   Inhibit; identity by cgroup.
-- Sub-sandboxes (`org.freedesktop.portal.Flatpak` served by LordOS so `flatpak-spawn` children
+- Sub-sandboxes (`org.freedesktop.portal.Flatpak` served by Insane OS so `flatpak-spawn` children
   enter the same scope), which Chromium/Electron apps need.
 - A session-bus filter for device-restricted apps (shared with Linux apps, already the "next step"
   in FIREWALL.md).
@@ -559,9 +559,9 @@ option B), which gets its own review in a later phase.
 - `wp_security_context_v1` in the compositor, so Wayland clients from Flatpak are known by
   their sandbox engine and app id.
 - aarch64 / Raspberry Pi 5 (16 KB pages: some runtimes or apps may not run; **Unverified**).
-- Option B of Problem 4 (LordOS's own signed summary and appstream reader).
+- Option B of Problem 4 (Insane OS's own signed summary and appstream reader).
 
-## Test plan (VM, x86-64 Debian 13 with LordOS)
+## Test plan (VM, x86-64 Debian 13 with Insane OS)
 
 Each step records the commands, the output and a screenshot (`screendump`) before anything is
 claimed; packages installed for it go into `VM-SETUP.md`.
@@ -572,7 +572,7 @@ claimed; packages installed for it go into `VM-SETUP.md`.
 2. `remote-add` from the shipped file: the remote's key fingerprint equals the pinned one;
    `update --appstream` runs in `lordos-net-flathub.scope` (its row in Monitor → Network); blocking
    `lordos:flathub` makes it fail with a firewall denial.
-3. Bubblewrap under LordOS's view: `flatpak run` of a small app (e.g. a GTK 4 app from Flathub)
+3. Bubblewrap under Insane OS's view: `flatpak run` of a small app (e.g. a GTK 4 app from Flathub)
    inside the view with scoping-only Landlock starts; the same with `sandbox_apply_files` fails (to
    confirm the reasoning in Problem 1).
 4. Identity: after launch, `/proc/<pid>/cgroup` of the app, its `xdg-dbus-proxy` and its children
@@ -617,16 +617,16 @@ claimed; packages installed for it go into `VM-SETUP.md`.
 5. **Which binary parses appstream** (E7): a mode of `lord-doc` (which already decodes untrusted
    files), or a small new helper?
 6. **Key roll-over.** Accept Flathub's key updates delivered in its signed summary (`xa.gpg-keys`,
-   Flatpak's default behaviour), or pin strictly to the key LordOS ships and update it only in
-   LordOS releases? The current key expires on 2027-06-14.
+   Flatpak's default behaviour), or pin strictly to the key Insane OS ships and update it only in
+   Insane OS releases? The current key expires on 2027-06-14.
 7. **Subsets.** Whole Flathub by default, or `verified_floss` by default with the rest behind a
    setting?
-8. **Update detection.** One more closed command (`remote-ls --updates`) or LordOS's own comparison
+8. **Update detection.** One more closed command (`remote-ls --updates`) or Insane OS's own comparison
    of installed commits against the appstream data?
 9. **Disk use on low-end machines.** Runtimes are large; should the Store warn below a free-space
    threshold, and should Flathub be offered at all on the Raspberry Pi in phase 1?
 10. **Flatpak's own seccomp filter** (Flatpak installs one in every sandbox; whether Debian's
-    build links libseccomp for it is **Unverified**): it is Flatpak's, inside the app, and LordOS
+    build links libseccomp for it is **Unverified**): it is Flatpak's, inside the app, and Insane OS
     never uses it; confirm the wording of E4 covers it.
 
 ## References
@@ -641,7 +641,7 @@ claimed; packages installed for it go into `VM-SETUP.md`.
   of `flatpak` (trixie, amd64).
 - Flathub: `https://dl.flathub.org/repo/flathub.flatpakrepo`, `summary`, `summary.idx`
   (fetched 2026-10-27).
-- LordOS: [FIREWALL.md](FIREWALL.md) ("Linux apps", "Escape via `systemd-run --user`", "LordOS
+- Insane OS: [FIREWALL.md](FIREWALL.md) ("Linux apps", "Escape via `systemd-run --user`", "Insane OS
   components in their own scopes", "Blocklists"), [PRIVACY.md](PRIVACY.md) ("What is isolated
   today", "Root-owned app scopes"), [WAYLAND.md](WAYLAND.md) ("The launcher"),
   [PACKAGES.md](PACKAGES.md), [ARCHITECTURE.md](ARCHITECTURE.md) (dependencies),

@@ -1,7 +1,7 @@
-# 0.8.4: the preinstalled browsers draw their own bar, with LordOS's window buttons in it (traffic
-# lights through LordOS's GTK theme), instead of the LordOS frame on top (docs/WAYLAND.md, "Frame
+# 0.8.4: the preinstalled browsers draw their own bar, with Insane OS's window buttons in it (traffic
+# lights through Insane OS's GTK theme), instead of the Insane OS frame on top (docs/WAYLAND.md, "Frame
 # and colors"). The ISO up to 0.8.3 wrote the opposite defaults; this changes them where they are
-# still exactly what LordOS wrote, so an administrator's own choice stays:
+# still exactly what Insane OS wrote, so an administrator's own choice stays:
 #
 # - /etc/chromium/master_preferences: "custom_chrome_frame": false → true, and the GTK theme
 #   ("extensions": {"theme": {"system_theme": 1}}) when the file sets no "extensions" yet. These are
@@ -28,13 +28,13 @@ if [ -f "$CH" ] && grep -q '"custom_chrome_frame": false' "$CH"; then
 fi
 
 FF="$R/etc/firefox-esr/lordos.js"
-OLD_FF='// LordOS: Firefox windows use the system frame (the theme frame); change it in
+OLD_FF='// Insane OS: Firefox windows use the system frame (the theme frame); change it in
 // Customize Toolbar > Title Bar, or in about:config.
 pref("browser.tabs.inTitlebar", 0);'
 if [ -f "$FF" ] && [ "$(cat "$FF")" = "$OLD_FF" ]; then      # exactly the file the ISO wrote
     t=$(mktemp "$FF.XXXXXX")
-    printf '%s\n' '// LordOS: Firefox draws its own bar, with the window buttons in LordOS'"'"'s order (see' \
-        '// docs/WAYLAND.md); 0 gives it the LordOS frame instead (Customize Toolbar > Title Bar).' \
+    printf '%s\n' '// Insane OS: Firefox draws its own bar, with the window buttons in Insane OS'"'"'s order (see' \
+        '// docs/WAYLAND.md); 0 gives it the Insane OS frame instead (Customize Toolbar > Title Bar).' \
         'pref("browser.tabs.inTitlebar", 1);' > "$t"
     chmod 644 "$t"
     mv "$t" "$FF"

@@ -168,7 +168,7 @@ static void op_text(uint32_t id, const JVal *a) {
     if (fd < 0) { reply_err(id, "memory", ""); return; }
     cairo_surface_t *s = cairo_pdf_surface_create_for_stream(write_fd, &fd, pw, ph);
     if (title && title[0]) cairo_pdf_surface_set_metadata(s, CAIRO_PDF_METADATA_TITLE, title);
-    cairo_pdf_surface_set_metadata(s, CAIRO_PDF_METADATA_CREATOR, "LordOS");
+    cairo_pdf_surface_set_metadata(s, CAIRO_PDF_METADATA_CREATOR, "Insane OS");
     cairo_t *cr = cairo_create(s);
     const double margin = 56, line = size * 1.38, top = margin + (title && title[0] ? 18 : 0);
     double maxw = pw - 2 * margin;

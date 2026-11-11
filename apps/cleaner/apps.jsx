@@ -1,5 +1,5 @@
-// Apps: what is installed, largest first, and what removed LordOS apps left behind. A Linux app is removed by the
-// package engine with lord.pkg.plan shown first and the admin helper's pkg-remove, as in the Store; a LordOS app with
+// Apps: what is installed, largest first, and what removed Insane OS apps left behind. A Linux app is removed by the
+// package engine with lord.pkg.plan shown first and the admin helper's pkg-remove, as in the Store; a Insane OS app with
 // packages.remove. Leftovers are candidates of one rule, whole folders chosen by name, to the Trash.
 import { View, Image, ScrollView, ConfirmDialog, admin, cleaner, packages, t as tr, formatBytes, locale, typeScale, spacing } from '@lordos/sdk';
 import { useMemo, useState } from 'react';

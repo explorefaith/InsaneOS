@@ -1,6 +1,6 @@
 // defaults.js — default applications (Settings → Default Apps, docs/SETTINGS.md). They are kept
 // in ~/.config/mimeapps.list (freedesktop spec, so GNOME/KDE apps and xdg-open agree) through
-// lord.mime; the terminal goes in ~/.config/xdg-terminals.list. LordOS's own apps are written as
+// lord.mime; the terminal goes in ~/.config/xdg-terminals.list. Insane OS's own apps are written as
 // "lordos-<app>.desktop".
 //
 //   DEFAULT_CATEGORIES                  [{ id, mimes, natives, terminal?, family? }]
@@ -26,7 +26,7 @@ export const DEFAULT_CATEGORIES = [
   { id: 'pdf', mimes: ['application/pdf'], natives: ['pdf'] },
   { id: 'text', mimes: ['text/plain', 'text/markdown', 'text/x-log'], natives: ['editor'] },
   { id: 'terminal', mimes: [], natives: ['terminal'], terminal: true },
-  // the app the clock's calendar opens (issue #58): LordOS Calendar, or one such as Thunderbird. Only apps that declare
+  // the app the clock's calendar opens (issue #58): Insane OS Calendar, or one such as Thunderbird. Only apps that declare
   // text/calendar itself: an editor that takes text/* is no calendar (family: false).
   { id: 'calendar', mimes: ['text/calendar'], natives: ['calendar'], family: false },
 ];
@@ -48,7 +48,7 @@ export function defaultFor(id) {
 const resolve = (mime) => (api() && lord.mime.resolve ? lord.mime.resolve(mime) : null);
 
 // What Settings shows for a category: { id, auto } or null. auto: the user chose nothing, and this
-// is what opens these files (the system's default, else LordOS's own app, else the first installed
+// is what opens these files (the system's default, else Insane OS's own app, else the first installed
 // app that declares the type), so the order is the same as defaultOpenerId's.
 export function defaultInfo(id) {
   const c = cat(id);
@@ -113,6 +113,6 @@ export function defaultOpenerId(mime) {
   const c = DEFAULT_CATEGORIES.find((x) => x.mimes.includes(mime))
     || DEFAULT_CATEGORIES.find((x) => x.mimes[0] && x.family !== false && mime.startsWith(`${x.mimes[0].split('/')[0]}/`) && x.id !== 'browser' && x.id !== 'mail');
   const d = c ? defaultFor(c.id) : null;
-  // then the category's (LordOS's own app), then the first installed app that declares the type
+  // then the category's (Insane OS's own app), then the first installed app that declares the type
   return d || (r ? r.id : null);
 }

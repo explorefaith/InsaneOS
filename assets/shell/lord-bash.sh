@@ -1,4 +1,4 @@
-# lord-bash.sh — LordOS Terminal shell integration for bash (the same escape sequences popular terminal emulators use).
+# lord-bash.sh — Insane OS Terminal shell integration for bash (the same escape sequences popular terminal emulators use).
 #
 # La terminal lanza `bash --rcfile lord-bash.sh -i`. Este archivo primero carga lo mismo
 # que un shell de login (/etc/profile y ~/.bash_profile, ~/.bash_login o ~/.profile) y
@@ -15,7 +15,7 @@ elif [ -r ~/.bash_login ]; then . ~/.bash_login
 elif [ -r ~/.profile ]; then . ~/.profile
 fi
 
-if [ -n "$LORD_TERM_INTEGRATION_LOADED" ] || [ "$TERM_PROGRAM" != LordTerminal ]; then return 0; fi
+if [ -n "$LORD_TERM_INTEGRATION_LOADED" ] || [ "$TERM_PROGRAM" != InsaneTerminal ]; then return 0; fi
 LORD_TERM_INTEGRATION_LOADED=1
 
 __lord_status() {

@@ -63,7 +63,7 @@ Description: LLM inference in C/C++: run GGUF models locally
  HTTP API with a web UI, and tools to quantize, benchmark and convert models.
  "llama-cli -hf <user>/<model>-GGUF" downloads a model from Hugging Face.
  .
- Built by LordOS from the upstream release $(jq -r .source.tag "$app") (commit $(printf %s "$commit" | cut -c1-12)), with
+ Built by Insane OS from the upstream release $(jq -r .source.tag "$app") (commit $(printf %s "$commit" | cut -c1-12)), with
  every CPU variant of the architecture (the best one is chosen at run time)
  and the Vulkan backend, loaded only when a Vulkan device is present (a GPU
  with a Vulkan driver, such as Mesa's in mesa-vulkan-drivers).

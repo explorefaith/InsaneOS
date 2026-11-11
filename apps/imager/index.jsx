@@ -1,4 +1,4 @@
-// LordOS Imager: writes LordOS to an SD card or a USB stick and prepares the Raspberry Pi's first
+// Insane OS Imager: writes Insane OS to an SD card or a USB stick and prepares the Raspberry Pi's first
 // boot (computer name, user, Wi-Fi, remote access, look, cooling). Steps: Device → System image →
 // Storage → Customise → Write → Done, with Lumo giving a tip at each one. docs/IMAGER.md.
 //
@@ -60,13 +60,13 @@ function back() {
 
 function stepDetail(s, id, tr) {
   if (id === 'device') return deviceLabel(deviceById(s.device), tr);
-  if (id === 'image') return s.image ? (s.image.official ? `LordOS ${s.image.release.version}` : s.image.name) : '';
+  if (id === 'image') return s.image ? (s.image.official ? `Insane OS ${s.image.release.version}` : s.image.name) : '';
   if (id === 'storage') return s.drive ? `${s.drive.model} · ${formatSize(s.drive.size)}` : '';
   if (id === 'customise') return s.customise ? (s.cfg.hostname || tr('imager.custom.on')) : tr('imager.custom.skipped');
   return '';
 }
 
-// The desktop app's own language (on LordOS the Imager follows Settings): a globe with the
+// The desktop app's own language (on Insane OS the Imager follows Settings): a globe with the
 // language's name; its menu lists English, Español and Português, then the others, then "the
 // computer's language".
 function AppLanguage({ s }) {

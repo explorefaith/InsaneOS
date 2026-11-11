@@ -234,7 +234,7 @@ function expand(k, v, out) {
       return;
     case 'fontFamily':
       // three families: Inter ('sans-serif'), JetBrains Mono ('monospace', or a name containing "mono")
-      // and the brand face of the LordOS wordmark ('brand': Plus Jakarta Sans, see LordOSWordmark)
+      // and the brand face of the Insane OS wordmark ('brand': Plus Jakarta Sans, see InsaneWordmark)
       out.fontFamily = /mono|courier|consol/i.test(String(v)) ? 'monospace' : /brand|jakarta/i.test(String(v)) ? 'brand' : 'sans-serif';
       return;
     default:

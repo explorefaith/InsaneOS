@@ -1,4 +1,4 @@
-/* x11wire.h — the small part of the X11 wire protocol that LordOS's X window manager (xwm.c)
+/* x11wire.h — the small part of the X11 wire protocol that Insane OS's X window manager (xwm.c)
  * speaks with Xwayland. Our own code, no libxcb/libX11 (dependency policy, docs/ARCHITECTURE.md):
  * request encoding, packet framing, the connection setup reply and the ICCCM/EWMH properties the
  * window manager reads. Pure functions with no I/O, tested by tests/xwm_test.c. */

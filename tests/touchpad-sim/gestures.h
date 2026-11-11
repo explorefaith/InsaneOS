@@ -7,7 +7,7 @@
 #ifndef TPSIM_GESTURES_H
 #define TPSIM_GESTURES_H
 
-#define SIM_NAME   "LordOS SynPS/2 Synaptics TouchPad (simulado)"
+#define SIM_NAME   "Insane OS SynPS/2 Synaptics TouchPad (simulado)"
 #define SIM_X_MIN  1266
 #define SIM_X_MAX  5676
 #define SIM_Y_MIN  1096

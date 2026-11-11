@@ -1,5 +1,5 @@
 # lib.sh — shared by the per-restriction end-to-end tests of Linux apps (docs/FIREWALL.md, "Linux
-# apps"). Run them in the test VM as the session user, with passwordless sudo, a LordOS session
+# apps"). Run them in the test VM as the session user, with passwordless sudo, a Insane OS session
 # (lord-sessiond) and lord-netperm running. Each script builds an app scope by hand, the way the
 # launcher's root-owned scopes look (system.slice/lordos.service/lordos-session-<uid>/
 # app-lordos-<id>.scope), writes ~/.config/lordos/firewall.json and puts it back at the end.
@@ -11,7 +11,7 @@ FW=~/.config/lordos/firewall.json
 pass=0; fail=0
 ok()  { pass=$((pass+1)); echo "  ok:   $*"; }
 bad() { fail=$((fail+1)); echo "  BAD:  $*"; }
-[ -d "$SESS" ] || { echo "no LordOS session for uid $U ($SESS)"; exit 2; }
+[ -d "$SESS" ] || { echo "no Insane OS session for uid $U ($SESS)"; exit 2; }
 mkdir -p ~/.config/lordos
 FW_BACKUP=$(mktemp); FW_HAD=0
 [ -f "$FW" ] && { cp "$FW" "$FW_BACKUP"; FW_HAD=1; }

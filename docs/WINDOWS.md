@@ -11,7 +11,7 @@ and the cursor shows the arrow for each direction.
 | ![move](windows-move.png) | ![gtk](windows-gtk-move.png) |
 | Moving a window: move cursor, the Dock stays on top | GTK Demo (own frame, CSD) moved from its bar: lord-server follows `xdg_toplevel.move` in C |
 | ![cursors](windows-resize-cursors.png) | ![app](windows-app-cursor.png) |
-| LordOS cursors (`server/src/cursor.c`) at 2x over light and dark backgrounds; the red dot is the hotspot | The I-beam in Chromium's address bar: it asks for it via `cursor-shape-v1` and LordOS draws it |
+| Insane OS cursors (`server/src/cursor.c`) at 2x over light and dark backgrounds; the red dot is the hotspot | The I-beam in Chromium's address bar: it asks for it via `cursor-shape-v1` and Insane OS draws it |
 
 The screenshots are from VM 118 on the CPU path (on the GPU path the cursor goes through the cursor
 plane and `screendump` doesn't show it).
@@ -84,7 +84,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
     full repaint within 2 levels (before the fix: 217–221 levels off).
 - **If something inside changes,** like a terminal line or the blinking cursor, only that part of
   the layer is repainted.
-- **If a node inside changes** (a style, a text, a transform such as LordBench's turning square, or a
+- **If a node inside changes** (a style, a text, a transform such as InsaneBench's turning square, or a
   child moving inside the window), only its old box (moved with the window) and its new one are
   repainted in the layer, with a 4 px margin (`layer_tree_part`; 0.8.6). The window's
   own style or size, a part outside the layer or bigger than half of it still repaint the whole layer.
@@ -103,7 +103,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
     app window registers it);
   - a transformed node's image steps its bilinear weights along each row from its first pixel, so a
     part whose left edge cuts that image would change them: `canvas_affine_watch` reports it and the
-    layer is painted whole instead (the margin keeps that from happening in LordBench's scene).
+    layer is painted whole instead (the margin keeps that from happening in InsaneBench's scene).
 - **What's below** (everything painted before the window: background, desktop, the other windows)
   is also saved once. Per frame:
   1. the region that changed is copied;
@@ -167,7 +167,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
 
 ### Checking it (0.8.6)
 
-- **`test_drag_exact`** (`server/tests/engine_test.c`, run by `make -C server test`) drags LordBench's
+- **`test_drag_exact`** (`server/tests/engine_test.c`, run by `make -C server test`) drags InsaneBench's
   desktop scene along its figure of eight for 480 frames, plus seven short runs (a text that resizes a
   child, a child moving inside the window, a terminal's blinking cursor, a square turning across the
   window's edge, the window crossing x = 0 and y = 0 while the square turns, a child removed after
@@ -194,7 +194,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
   points it lacks added beside it, which must leave the earlier runs' hashes identical), never against
   the code being checked.
 - **The copy of what is below** has nine more runs (1,500 frames): a progress bar in the window below
-  that changes width every 3 frames (as LordBench's Performance view does) with its title every 30,
+  that changes width every 3 frames (as InsaneBench's Performance view does) with its title every 30,
   an app window and a blinking terminal in it; the menu bar's text every 2 frames; a square turning on
   the desktop and one turned and still; a blurred panel whose text changes every 40 frames; the
   window below raised above the dragged one and back; all of them at 100 % and at 200 %; the windows
@@ -210,7 +210,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
   squares outside the dragged window's rounded corners), 2,217 and 70,882; before the corner change,
   2,265 and 70,940.
 - **`test_drag_corners`** checks the corners of a dragged rounded window against a full repaint (above).
-- **On the Raspberry Pi 5** with its monitor, LordBench's desktop test (its square turning) went from 53–58
+- **On the Raspberry Pi 5** with its monitor, InsaneBench's desktop test (its square turning) went from 53–58
   to 59.8–60 fps alone and from 24–25 to 30 fps under load with this work and GPU drag off
   (`docs/BENCHMARK.md`, "The drag frame's cost"). The final run (2026-10-29, GPU drag and the frame pipeline off,
   the defaults now): 59.9 fps alone and 30.5–31.1 fps under load, the pointer on screen 25.7–25.9 ms after it moved
@@ -232,7 +232,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
 `<WindowShell>` is the window's node: the frame goes inside and around it there are 8 invisible
 zones. They are 6 px outside the frame and 3 px inside. The sides carry
 `ns-resize`/`ew-resize` and the corners (16 px) `nwse-resize`/`nesw-resize`. Both themes use it,
-also for Linux apps with their own frame (CSD): their resize edge is in the shadow, which LordOS
+also for Linux apps with their own frame (CSD): their resize edge is in the shadow, which Insane OS
 crops.
 
 ```jsx
@@ -244,7 +244,7 @@ crops.
 
 ### Cursors (`server/src/cursor.c`)
 
-- **Own cursor set, drawn by LordOS.** They are vector shapes (polygons, capsules, rings with signed
+- **Own cursor set, drawn by Insane OS.** They are vector shapes (polygons, capsules, rings with signed
   distance), rasterized with 4×4 samples per pixel at 1x (32 px) and 2x (64 px, on screens from
   2560×1440). Black fill, white outline and a soft shadow.
 - **No system theme is read.** Debian doesn't install Adwaita or DMZ on the ISO, so there's no new
@@ -289,7 +289,7 @@ JS 0.20, layout 0.56, paint 11.43, present 0.61), max gap 36.9 ms; layer: 1023 p
 ("paint") and presentation ("present"). Since 0.8.6 the line ends with what the copy
 of what is below did during the drag: `below: B built whole, P in part, S frames switched to it (not:
 … ancestor, … blur, … transform, … unreached, … cost)`, the last part counting the frames where the old
-rule painted everything and the copy could not be used, by reason. LordBench's scripted move (no
+rule painted everything and the copy could not be used, by reason. InsaneBench's scripted move (no
 button held) writes the layer's counters and the same text in a `drag (scripted): …` line when it ends.
 
 | Path | Window | Before | After |
@@ -310,7 +310,7 @@ button held) writes the layer's counters and the same text in a `drag (scripted)
   - an occasional rebuild if something below changed.
 
 **How it was measured** (scratchpad scripts, one per VM):
-- `uinput-ventanas-118.py`: runs in the VM as root and creates the tablet «LordOS prueba tableta». It
+- `uinput-ventanas-118.py`: runs in the VM as root and creates the tablet «Insane OS prueba tableta». It
   is driven through `/run/uinput-ventanas`.
 - The QMP mouse (`input-send-event`) is no good for measuring: QEMU's USB tablet has a 16-event queue
   and at 120 Hz it loses motions and even the "release".
@@ -384,7 +384,7 @@ still the Dock's blur.
 
 ## Snapping (0.8.3)
 
-A theme turns it on with `configureWindows({ snap: true })` (Lord Classic does; Lord Flow doesn't).
+A theme turns it on with `configureWindows({ snap: true })` (Insane Classic does; Insane Flow doesn't).
 The geometry is in `sdk/snap.js` (no runtime imports, tested by `server/tests/snap_test.mjs`), the
 window side in `sdk/windows.js`.
 
@@ -396,10 +396,10 @@ window side in `sdk/windows.js`.
   is going on, the SDK reads `lord.wm.pointer()` (`ui/js_wm.c`: the pointer and the drag's edges,
   no arguments, read only) every 90 ms and sets `snapPreview` when the zone changes; the theme draws
   it under the moving window. Crossing into a zone costs one rebuild of what is below the window.
-- **A scripted move (0.8.6, LordBench):** `wm.scriptMove(id, { rx, ry, periodMs })` asks lord-server to move
+- **A scripted move (0.8.6, InsaneBench):** `wm.scriptMove(id, { rx, ry, periodMs })` asks lord-server to move
   the window along a figure of eight through this same path (`lord.wm.script`, `grab_script_begin` in
   `ui/grab.c`: the window painted once into a layer, one step per frame from the main loop, no button held
-  and no JS per frame). The positions come from LordBench's synthetic pointer (`bench/lbinput.c`, a 125 Hz
+  and no JS per frame). The positions come from InsaneBench's synthetic pointer (`bench/lbinput.c`, a 125 Hz
   thread on an eventfd the main loop polls like a device; taken once per frame like a real mouse's motion), so
   the test also measures pointer-to-screen latency; without that thread the path follows the clock. Pointer
   input or `wm.stopScript()` stops it. Only System Information's desktop
@@ -413,14 +413,14 @@ window side in `sdk/windows.js`.
   Super+arrows (`snapNext` in `snap.js`), and `w.snapped` (the zone) for a theme that squares the
   corners of a snapped window.
 - **Measured** (VM 119, 1280×800, CPU path, a 960 × 600 Files window dragged in circles for 6 s
-  three times through QMP, about 52 moves per second): Lord Classic 7.5–7.7 ms of work per frame (JS
-  0.35, paint 6.4–6.7) and Lord Flow 13.1–13.4 ms (paint 12.1–12.3, its Dock's blur), both at
+  three times through QMP, about 52 moves per second): Insane Classic 7.5–7.7 ms of work per frame (JS
+  0.35, paint 6.4–6.7) and Insane Flow 13.1–13.4 ms (paint 12.1–12.3, its Dock's blur), both at
   the rate of the input. A drag that keeps crossing the top edge (the preview appearing and going)
   costs 9 ms per frame (JS 1.6). Without the preview polling, 6.3–6.6 ms.
 
 ## Remembered places (0.8.7)
 
-Each app reopens where it was: size, position, maximized and display, per app, in `settings.windowPlaces` (`sdk/windowmemory.js`, the rules in `sdk/placemodel.js`, tests in `tests/place_model_test.mjs`). Flow and Classic share this, for LordOS apps and for Linux apps, whose position the compositor decides.
+Each app reopens where it was: size, position, maximized and display, per app, in `settings.windowPlaces` (`sdk/windowmemory.js`, the rules in `sdk/placemodel.js`, tests in `tests/place_model_test.mjs`). Flow and Classic share this, for Insane OS apps and for Linux apps, whose position the compositor decides.
 
 - **Which display:** a place is kept relative to its display, and a display is known by its name from the EDID plus its connector, never by index. The same monitor on another port still matches, unless two identical monitors make that ambiguous. Monitors with the same name on the same connector can't be told apart.
 - **Display gone, or the place off screen:** the window goes to a visible area of a display that exists, sized to fit.
@@ -431,8 +431,8 @@ Each app reopens where it was: size, position, maximized and display, per app, i
 
 ## The Window menu, the app menu and Force Quit (0.8.5)
 
-The same menus in both themes, built by the SDK (`sdk/windowmenu.js`, `sdk/appcontrol.js`); Lord Flow
-shows them in its menu bar (Window, the app's name, the crown menu), Lord Classic in each window's own
+The same menus in both themes, built by the SDK (`sdk/windowmenu.js`, `sdk/appcontrol.js`); Insane Flow
+shows them in its menu bar (Window, the app's name, the crown menu), Insane Classic in each window's own
 Window and Help menus (its in-window menu strip, since it has no menu bar).
 
 - **Window menu** (`windowMenuItems`): Minimize, Zoom, Fill, Center; **Move & Resize** with the halves
@@ -442,9 +442,9 @@ Window and Help menus (its in-window menu strip, since it has no menu bar).
   'restore')`); **Move to <display>** for every other display (`wm.moveToDisplay`: a snapped window
   keeps its zone, the rest keep their place relative to the screen); Bring All to Front; and the open
   windows, the one in front checked.
-- **App menu** (`appMenuItems`, Lord Flow: a click on the app's name in the menu bar): About <app> (its
+- **App menu** (`appMenuItems`, Insane Flow: a click on the app's name in the menu bar): About <app> (its
   icon, name, own version and where it comes from; a system window, `apps/appabout`), Settings… (the
-  app's own, ❖,), Hide <app>, Hide Others, Show All and Quit <app> (❖Q). In Lord Classic, About <app>
+  app's own, ❖,), Hide <app>, Hide Others, Show All and Quit <app> (❖Q). In Insane Classic, About <app>
   is in each window's Help menu.
 - **Force Quit…** (the crown menu, a system window `apps/forcequit`) lists the open apps and ends the
   chosen one without asking it (`forceQuit`): a Linux or isolated app's own process gets SIGKILL from
@@ -458,7 +458,7 @@ Window and Help menus (its in-window menu strip, since it has no menu bar).
   CPU when moving with a real graphics card.
 - The Dock's blur is recomputed when a window passes underneath.
 - The first frame of a drag builds the below part (about 35 ms).
-- `xdg_toplevel.resize` requested by a GTK app from its edge: the edge is in the shadow that LordOS
+- `xdg_toplevel.resize` requested by a GTK app from its edge: the edge is in the shadow that Insane OS
   crops, so in practice it is resized with the theme's edges (tested with Chromium; GTK Demo was
   tested by moving it).
 - System cursor themes (Xcursor) and the cursor size in Settings.

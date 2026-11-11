@@ -1,8 +1,8 @@
-We respect the rights of authors, and we expect everyone who contributes to LordOS to do the same. If you believe that something on lordos.org, in a LordOS release or in the LordOS repository infringes your copyright, tell us and we will look at it.
+We respect the rights of authors, and we expect everyone who contributes to Insane OS to do the same. If you believe that something on lordos.org, in a Insane OS release or in the Insane OS repository infringes your copyright, tell us and we will look at it.
 
 ## The law that applies
 
-LordOS is run from Argentina by iPERFEX (Pablo Miranda and Federico Pereira), and we handle these reports under Argentine law, mainly Law 11.723 on intellectual property. We are not a US service provider and we don't promise the procedures of the US Digital Millennium Copyright Act (DMCA). The notice we ask for is similar to a DMCA notice, so you can use one you already have.
+Insane OS is run from Argentina by iPERFEX (Pablo Miranda and Federico Pereira), and we handle these reports under Argentine law, mainly Law 11.723 on intellectual property. We are not a US service provider and we don't promise the procedures of the US Digital Millennium Copyright Act (DMCA). The notice we ask for is similar to a DMCA notice, so you can use one you already have.
 
 ## How to send a notice
 
@@ -31,7 +31,7 @@ We stop accepting contributions from people who repeatedly infringe others' righ
 
 ## Other platforms
 
-Material hosted by other services follows their rules. For content on GitHub, including the LordOS repository and its releases, you can also use [GitHub's DMCA takedown policy](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Debian packages are handled by Debian.
+Material hosted by other services follows their rules. For content on GitHub, including the Insane OS repository and its releases, you can also use [GitHub's DMCA takedown policy](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy). Debian packages are handled by Debian.
 
 ## Disputes
 

@@ -10,7 +10,7 @@
 static const char *const role_names[MP_ROLES] = { "root", "home", "swap", "esp" };
 /* sgdisk's codes and names of the new partitions; root's code is the architecture's (install.c) */
 static const char *const role_codes[MP_ROLES] = { NULL, "8302", "8200", "ef00" };
-static const char *const role_labels[MP_ROLES] = { "LordOS", "home", "swap", "EFI" };
+static const char *const role_labels[MP_ROLES] = { "Insane OS", "home", "swap", "EFI" };
 /* the same types as they lie on disk: Linux /home, Linux swap, EFI system */
 static const uint8_t home_guid[16] = { 0xe1, 0xc7, 0x3a, 0x93, 0xb4, 0x2e, 0x13, 0x4f, 0xb8, 0x44, 0x0e, 0x14, 0xe2, 0xae, 0xf9, 0x15 };
 static const uint8_t swap_guid[16] = { 0x6d, 0xfd, 0x57, 0x06, 0xab, 0xa4, 0xc4, 0x43, 0x84, 0xe5, 0x09, 0x33, 0xc8, 0x4b, 0x4f, 0x4f };

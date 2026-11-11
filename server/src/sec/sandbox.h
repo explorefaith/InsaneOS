@@ -136,7 +136,7 @@ typedef struct {
  * and PID namespace (unprivileged; uid and gid map to themselves):
  *   - the home folder is an empty tmpfs with only rw[] and ro[] bound into it (ro[] read-only);
  *   - the runtime dir is an empty tmpfs with only sockets[] bound into it: no session bus, no
- *     systemd user manager, no agents, no LordOS sockets;
+ *     systemd user manager, no agents, no Insane OS sockets;
  *   - /tmp, /var/tmp and /dev/shm are private tmpfs (no other program's sockets or shared memory),
  *     with its own IPC namespace, and /dev/pts is a new devpts instance (not the session's terminals);
  *   - the working directory is entered again inside the view (cwd, else the home folder): a

@@ -1,4 +1,4 @@
-/* boottest.h — LordBench's boot time test (docs/BENCHMARK.md, "Boot"): with an administrator's consent,
+/* boottest.h — InsaneBench's boot time test (docs/BENCHMARK.md, "Boot"): with an administrator's consent,
  * the computer restarts N times in a row (2 to 10) and lord-sessiond records each boot's time to the first
  * frame, marked as part of the test, in /var/lib/lordos/boot-times.jsonl.
  *

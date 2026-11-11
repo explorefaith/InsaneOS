@@ -1,6 +1,6 @@
 // memtop.js — Monitor → Memory, "Using the most memory": the processes grouped by app, the largest
 // first. An app's processes are added up (a browser's tabs, an isolated app's helpers): by its app id
-// when the process has one (LordOS, an isolated "lpk:" app, a Linux app's desktop id), else by the
+// when the process has one (Insane OS, an isolated "lpk:" app, a Linux app's desktop id), else by the
 // process name. Resident memory: a page shared between processes counts in each of them, so the
 // groups can add up to more than "Used by apps". Pure logic (server/tests/monitor_memtop_test.mjs).
 

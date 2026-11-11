@@ -12,7 +12,7 @@
  * One JSON object a line on stdout, one per phase and a last one with the verdict. It uses a render node and no
  * display, so it runs beside a session. busMBs is each worker's last-level misses (perf_event_open, its own
  * thread) × 64 bytes: the CPU side of the traffic only, null if the kernel gives no such counter. The GPU's time is
- * the flush to the native fence's timestamp when the driver has one, as LordBench's gpuMs starts at the flip queued, so
+ * the flush to the native fence's timestamp when the driver has one, as InsaneBench's gpuMs starts at the flip queued, so
  * a render thread waiting for a core under load doesn't count as GPU time; else, the draw and glFinish together. */
 #include "gpu/gcontend.h"
 

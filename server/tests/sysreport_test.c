@@ -1,5 +1,5 @@
 /* sysreport_test.c — System Information's collector (src/sysreport) over fake trees: an AMD desktop,
- * an Intel laptop, an Nvidia desktop, a Raspberry Pi 5 (with the LordOS kernel) and a VM, and the Pi
+ * an Intel laptop, an Nvidia desktop, a Raspberry Pi 5 (with the Insane OS kernel) and a VM, and the Pi
  * firmware's power and throttling on small trees (that kernel, an older one with get_throttled, both,
  * neither, not a Pi). Each tree is full of things a report must never carry (serial numbers, UUIDs, MAC addresses, a host name, a user name, a monitor's serial,
  * a MAC inside an interface name); the test checks what each report finds, that its JSON is valid,
@@ -360,7 +360,7 @@ static void fixture(const char *r, const char *kind) {
         conn(r, 1, "Writeback-1", 0, NULL, NULL);
         disk(r, "mmcblk0", "", "62333952\n", 0, NULL);
         disk(r, "mmcblk0boot0", "", "8192\n", 0, NULL);
-        /* the LordOS rpi-6.18.y kernel: no get_throttled under soc@107c000000:firmware, only rpi_volt's alarm */
+        /* the Insane OS rpi-6.18.y kernel: no get_throttled under soc@107c000000:firmware, only rpi_volt's alarm */
         mkdirs_in(r, "sys/devices/platform/soc@107c000000/soc@107c000000:firmware");
         put(r, "sys/class/hwmon/hwmon1/name", "rpi_volt\n"); put(r, "sys/class/hwmon/hwmon1/in0_lcrit_alarm", "0\n");
         put(r, "sys/block/zram0/disksize", "2147483648\n");
@@ -459,7 +459,7 @@ static void test_kind(const char *kind) {
     }
     CHECK(ll && bl && zr, "%s: kernel config", kind);
     if (strcmp(kind, "rpi5")) CHECK(r->naudio == 1 && !strcmp(r->audio[0], "HD-Audio Generic"), "%s: audio %s", kind, r->audio[0]);
-    CHECK(contains(md, "# System report") && contains(md, "| LordOS | 0.8.5-beta |"), "%s: markdown head", kind);
+    CHECK(contains(md, "# System report") && contains(md, "| Insane OS | 0.8.5-beta |"), "%s: markdown head", kind);
 
     if (!strcmp(kind, "amd")) {
         CHECK(!strcmp(r->machine.vendor, "Micro-Star International Co., Ltd.") && !r->machine.version[0], "amd: dmi (placeholder dropped)");
@@ -553,7 +553,7 @@ static void test_fetch(const char *kind) {
     FetchColor modes[3] = { FETCH_PLAIN, FETCH_256, FETCH_TRUECOLOR };
     for (int m = 0; m < 3; m++) {
         char *out = fetch_render(r, &l, modes[m]);
-        CHECK(out && contains(out, "LordOS 0.8.5-beta (Debian GNU/Linux 13 (trixie))") && contains(out, "CPU"), "%s/%d: fetch lines", kind, m);
+        CHECK(out && contains(out, "Insane OS 0.8.5-beta (Debian GNU/Linux 13 (trixie))") && contains(out, "CPU"), "%s/%d: fetch lines", kind, m);
         for (size_t i = 0; i < sizeof SECRETS / sizeof SECRETS[0]; i++)
             CHECK(!contains(out, SECRETS[i]), "%s/%d: fetch --share carries \"%s\"", kind, m, SECRETS[i]);
         CHECK(m != FETCH_PLAIN || !strchr(out, '\033'), "%s: plain fetch has escape codes", kind);
@@ -652,7 +652,7 @@ static void test_facts(void) {
     CHECK(sr_tcp_listening("/nonexistent", 5673) == -1, "facts: no /proc/net");
 }
 
-/* The Raspberry Pi firmware's power and throttling (hw/rpifw.c, shared with LordBench) on small trees: what the
+/* The Raspberry Pi firmware's power and throttling (hw/rpifw.c, shared with InsaneBench) on small trees: what the
  * kernel shows is reported, what it doesn't is left out, never a false "no throttling". */
 static void pi_case(const char *name, int pi, const char *throttled_path, const char *throttled, const char *alarm,
                     int want_thr, int want_uv, const char *want_json, const char *not_json, const char *want_md, const char *not_md) {
@@ -677,7 +677,7 @@ static void pi_case(const char *name, int pi, const char *throttled_path, const 
 static void test_pi_firmware(void) {
     const char *p5 = "sys/devices/platform/soc@107c000000/soc@107c000000:firmware/get_throttled";
     const char *p4 = "sys/devices/platform/soc/soc:firmware/get_throttled";
-    /* a Pi 5 with the LordOS kernel: rpi_volt only */
+    /* a Pi 5 with the Insane OS kernel: rpi_volt only */
     pi_case("lordos ok", 1, NULL, NULL, "0\n", -1, 0, "\"throttled\":null,\"underVoltageAlarm\":false}", NULL,
             "no under-voltage in the last 2 s (rpi_volt); throttling not reported by this kernel", "since boot");
     pi_case("lordos alarm", 1, NULL, NULL, "1\n", -1, 1, "\"throttled\":null,\"underVoltageAlarm\":true}", NULL,

@@ -1,6 +1,6 @@
 /* pkagent.c — see pkagent.h.
  *
- * Why it registers per process. polkit finds an agent by the subject's logind session, and a LordOS
+ * Why it registers per process. polkit finds an agent by the subject's logind session, and a Insane OS
  * session has none it can see: lord-server and its apps live under lordos.service's own cgroup tree
  * (docs/PRIVACY.md, "Root-owned app scopes"), so sd_pid_get_session and sd_pid_get_owner_uid both
  * fail for them. Moving that tree under user.slice would move the firewall, the Monitor and every
@@ -215,7 +215,7 @@ static void helper_line(const char *l) {
             if (bad) failed();
         }
         break;
-    case PKL_ASK_SHOWN: failed(); break;    /* LordOS names the account; PAM has nothing to ask in clear */
+    case PKL_ASK_SHOWN: failed(); break;    /* Insane OS names the account; PAM has nothing to ask in clear */
     case PKL_SUCCESS: finish(1); break;
     case PKL_FAILURE: failed(); break;
     default: break;                         /* PAM's messages: not shown, a bad password has its own text */

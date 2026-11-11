@@ -1,5 +1,5 @@
 /* wl_textinput.c — zwp_text_input_v3: a Linux app tells the compositor that a text field took focus
- * and where its caret is. LordOS uses it only to open the on-screen keyboard and keep the field in
+ * and where its caret is. Insane OS uses it only to open the on-screen keyboard and keep the field in
  * view (docs/ON-SCREEN-KEYBOARD.md); the text itself keeps arriving as keys on wl_keyboard, so nothing
  * is ever sent back with commit_string, and surrounding text and content types are ignored. */
 #include "wl.h"

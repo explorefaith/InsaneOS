@@ -9,7 +9,7 @@ import {
 import { useState } from 'react';
 import { GroupBox, SettingRow, PopUp, Note, Stack, TimeField } from './ui.jsx';
 
-// Apps that can notify: the ones that already did, LordOS apps that use notifications and packages
+// Apps that can notify: the ones that already did, Insane OS apps that use notifications and packages
 // that declare the permission.
 const BUILTIN = ['settings', 'backup', 'clock', 'terminal', 'store', 'mail', 'passwords', 'recorder', 'screenshots'];
 

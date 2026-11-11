@@ -1,4 +1,4 @@
-/* testbench.c — lordos-testbench: LordOS's visual test bench (docs/PAPER-VALIDATION.md, "the visual test
+/* testbench.c — lordos-testbench: Insane OS's visual test bench (docs/PAPER-VALIDATION.md, "the visual test
  * bench"). A plain Wayland client, so it tests the compositor from the outside like any app, and runs on
  * any compositor for comparison. What it shows:
  *
@@ -65,8 +65,8 @@
 #define C_CROSS    TB_RGB(0, 230, 255)
 #define C_SYSTEM   TB_RGB(150, 110, 255)
 
-/* keys LordOS's compositor keeps for itself (wl.c, wl_key): Print Screen, the media keys and ❖ on its own
- * (its press never reaches an app; ❖ combinations are LordOS's shortcuts) */
+/* keys Insane OS's compositor keeps for itself (wl.c, wl_key): Print Screen, the media keys and ❖ on its own
+ * (its press never reaches an app; ❖ combinations are Insane OS's shortcuts) */
 static int system_key(int code) { return code == KEY_SYSRQ || code == KEY_LEFTMETA || code == KEY_RIGHTMETA; }
 
 /* ---- Wayland ---- */
@@ -102,7 +102,7 @@ static int card_x, card_y;
 
 /* ---- measurements ---- */
 #define now_ms bench_now_ms
-static BenchFrames ft;                  /* frame times (src/bench, shared with LordBench) */
+static BenchFrames ft;                  /* frame times (src/bench, shared with InsaneBench) */
 static BenchPresent pr;
 static unsigned long no_buffer;
 static uint32_t clock_id;

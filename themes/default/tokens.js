@@ -1,4 +1,4 @@
-// Tokens of the "Lord Flow" theme. The base keys (text, accent, windowBg…) are the contract
+// Tokens of the "Insane Flow" theme. The base keys (text, accent, windowBg…) are the contract
 // with apps (see sdk/theme.js); the rest belongs to this theme.
 import { lordosWallpapers } from '@lordos/sdk';
 
@@ -11,7 +11,7 @@ export const accents = {
   grafito: '#8e8e93',
 };
 
-// The LordOS collection (Signature, Lumo, Cosmos; sdk/wallpapers.js) and this theme's own
+// The Insane OS collection (Signature, Lumo, Cosmos; sdk/wallpapers.js) and this theme's own
 // gradients (tools/gen-wallpaper.py). name: English fallback; the shown name is the translation of
 // nameKey (assets/locales/*/shell.json). Thumbnails: assets/thumbs/ (320×180).
 const gradients = [

@@ -1,8 +1,8 @@
-LordOS es gratis y va a seguir siéndolo. Las donaciones ayudan al grupo iPERFEX a seguir construyéndolo: tiempo de desarrollo, pruebas en hardware real y alojamiento.
+Insane OS es gratis y va a seguir siéndolo. Las donaciones ayudan al grupo iPERFEX a seguir construyéndolo: tiempo de desarrollo, pruebas en hardware real y alojamiento.
 
 ## Donar es voluntario
 
-Donar es totalmente opcional. Todo lo que hay en lordos.org y en LordOS está disponible dones o no.
+Donar es totalmente opcional. Todo lo que hay en lordos.org y en Insane OS está disponible dones o no.
 
 ## No es una compra
 
@@ -24,7 +24,7 @@ Las donaciones **no son reembolsables**, salvo cuando la ley disponga otra cosa.
 
 ## Impuestos
 
-Las donaciones a LordOS **no son deducibles de impuestos**. El grupo iPERFEX no es una entidad de bien público ni una organización sin fines de lucro registrada, y no podemos emitir comprobantes fiscales por donaciones. Sos responsable de los impuestos que te correspondan.
+Las donaciones a Insane OS **no son deducibles de impuestos**. El grupo iPERFEX no es una entidad de bien público ni una organización sin fines de lucro registrada, y no podemos emitir comprobantes fiscales por donaciones. Sos responsable de los impuestos que te correspondan.
 
 ## Quién las recibe
 

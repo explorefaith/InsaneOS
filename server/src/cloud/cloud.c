@@ -3,7 +3,7 @@
  *   ~/.config/lordos/cloud/accounts.json   id, name, kind, created, paused; the options (bandwidth, battery, space)
  *   ~/.config/lordos/cloud/rclone.conf     each account's type and non-secret options (0600, no secret in it)
  *   ~/.config/lordos/cloud/keep.json       Keep on This Computer, per account
- *   ~/.config/lordos/cloud/links.json      the links made from LordOS (rclone can't list them)
+ *   ~/.config/lordos/cloud/links.json      the links made from Insane OS (rclone can't list them)
  *   ~/.cache/lordos/cloud/                 rclone's VFS cache (vfs/<id>/, vfsMeta/<id>/)
  *   ~/.cache/lordos/cloud.log              rclone's log (the Logs app shows it)
  *   $XDG_RUNTIME_DIR/lordos/cloud/rc.sock  the rc socket, in a 0700 folder
@@ -292,7 +292,7 @@ static void save_accounts(void) {
 
     /* rclone.conf: types and non-secret options only */
     jb_init(&b);
-    jb_raw(&b, "# LordOS Cloud: each account's type and options. Its secrets are in the keyring, not here.\n");
+    jb_raw(&b, "# Insane OS Cloud: each account's type and options. Its secrets are in the keyring, not here.\n");
     for (int i = 0; i < ACC_MAX; i++) {
         Acc *a = &cl_acc[i];
         if (!a->used) continue;
@@ -818,7 +818,7 @@ static const CloudKind *kind_put(const char *kind, const char *type, const char 
 
 void cloud_set_assets(const char *dir) { cpy(cl_assets, sizeof cl_assets, dir); }
 
-/* assets/cloud/providers.json: the kinds tested on LordOS (docs/CLOUD.md 19) */
+/* assets/cloud/providers.json: the kinds tested on Insane OS (docs/CLOUD.md 19) */
 static JDoc verified_doc(int *ok) {
     JDoc d = { 0 };
     *ok = 0;
@@ -1001,7 +1001,7 @@ static char *question_json(const char *id, const char *state, const JVal *o) {
 }
 
 /* rclone's state machine of config/create, non-interactive. question NULL: every question answered here (the
- * default, or cloud_answer's); otherwise only LordOS's own ones, and the first other one goes back in *question (1).
+ * default, or cloud_answer's); otherwise only Insane OS's own ones, and the first other one goes back in *question (1).
  * 0 done, -1 error (msg). */
 static int answer_states(const char *id, JDoc *d, char *msg, size_t mn, char **question) {
     for (int i = 0; i < 16; i++) {

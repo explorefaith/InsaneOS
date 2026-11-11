@@ -1,12 +1,12 @@
 ---
-title: Bem-vindo ao LordOS
+title: Bem-vindo ao Insane OS
 section: start
 order: 1
 keywords: início, começar, introdução, novidades
 ---
-# Bem-vindo ao LordOS
+# Bem-vindo ao Insane OS
 
-O LordOS é uma distribuição GNU/Linux livre baseada no Debian, com seu próprio ambiente de desktop,
+O Insane OS é uma distribuição GNU/Linux livre baseada no Debian, com seu próprio ambiente de desktop,
 servidor gráfico e compositor Wayland feitos do zero em C, e uma interface em React que roda sobre
 o seu próprio motor. Os apps do Linux (GTK, Qt, navegadores) funcionam junto com os nativos. Ele
 foi pensado para funcionar bem em computadores modestos.
@@ -30,4 +30,4 @@ os atalhos dos apps a usam.
 - [Apps Linux (GNOME e KDE)](help:linux-apps)
 - [Privacidade e permissões](help:privacy)
 
-Você pode ver o tour de boas-vindas de novo em **Ajuda → Bem-vindo ao LordOS**.
+Você pode ver o tour de boas-vindas de novo em **Ajuda → Bem-vindo ao Insane OS**.

@@ -19,7 +19,7 @@ import { RuleSheet, destKind, RED, GREEN } from './RuleSheet.jsx';
 
 const { sortByPrecedence, isDefaultRule } = fwRule;
 
-// Firewall id of a launcher app: the built-in ones run inside LordOS; isolated ones have a scope.
+// Firewall id of a launcher app: the built-in ones run inside Insane OS; isolated ones have a scope.
 const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'lordos');
 
 function useAppIndex() {
@@ -32,7 +32,7 @@ function useAppIndex() {
   return byId;
 }
 
-// (0.8.5) LordOS's own components with their own scope take rules too (Mail, Store, Printers, Terminal, Blocklists)
+// (0.8.5) Insane OS's own components with their own scope take rules too (Mail, Store, Printers, Terminal, Blocklists)
 const { COMPONENTS } = netModel;
 const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('lordos:') && !COMPONENTS[id].system);
 export const appLabelOf = (tr, apps, id) => (id === 'lordos' ? tr('monitor.lordos') : COMPONENTS[id] ? tr(COMPONENTS[id].label) : apps.get(id)?.name || id.replace(/^(desktop|lpk):/, ''));

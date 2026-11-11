@@ -12,7 +12,7 @@ static int fails;
 static int props_seen;
 static void on_prop(void *ud, const char *key, const char *val, uint32_t len) {
     (void)ud;
-    if (!strcmp(key, "application.name")) CHECK(!strcmp(val, "LordOS") && len == 6);
+    if (!strcmp(key, "application.name")) CHECK(!strcmp(val, "Insane OS") && len == 6);
     if (!strcmp(key, "media.role")) CHECK(!strcmp(val, "event"));
     props_seen++;
 }
@@ -33,7 +33,7 @@ int main(void) {
     ts_cmap(&o, 2, map);
     uint32_t vol[2] = { PA_VOLUME_NORM, PA_VOLUME_NORM / 2 };
     ts_cvol(&o, 2, vol);
-    const char *kv[] = { "application.name", "LordOS", "media.role", "event" };
+    const char *kv[] = { "application.name", "Insane OS", "media.role", "event" };
     ts_proplist(&o, kv, 2);
     ts_format_pcm(&o);
     size_t n = ts_finish(&o);

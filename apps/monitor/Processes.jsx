@@ -6,7 +6,7 @@
 // The user's own processes are signalled by lord-server itself (lord.monitor.signal); another
 // user's or root's go through the root helper's proc-signal / proc-info (administrators only).
 // Both check the process's start time, so a PID reused meanwhile is never hit, and both refuse
-// the protected ones (PID 1, kernel threads, the session, LordOS's services and helpers,
+// the protected ones (PID 1, kernel threads, the session, Insane OS's services and helpers,
 // PipeWire), which the table marks with `prot`.
 import {
   View, Text, ScrollView, Segmented, SearchField, ToolbarButton, Button, GroupBox, FormRow, typeScale, spacing, useTheme, useLocale,

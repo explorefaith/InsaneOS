@@ -1,4 +1,4 @@
-// i18n.js — LordOS language and region for themes and apps.
+// i18n.js — Insane OS language and region for themes and apps.
 //
 //   t('terminal.menu.newTab')                 → "New Tab"
 //   t('files.items', { count: 3 })            → "3 items" (plural according to the language)
@@ -7,7 +7,7 @@
 //   direction() → 'rtl' | 'ltr'      textDirection('مرحبا') → 'rtl'
 //
 // Strings live in JSON catalogs that the server reads at runtime:
-//   assets/locales/<language>/<namespace>.json            (bundled with LordOS)
+//   assets/locales/<language>/<namespace>.json            (bundled with Insane OS)
 //   ~/.local/share/lordos/locales/<language>/<namespace>.json   (the user's language packs)
 // The namespace is the first part of the key ('terminal', 'files', 'shell'…). A new
 // language is a folder with those files and a meta.json; no code changes are needed.
@@ -21,7 +21,7 @@ import { settings } from './settings.js';
 import { fromGlibc, regionFromEnv } from './regionformat.js';
 
 export const FALLBACK = 'en';
-// The three languages LordOS lists first everywhere (Settings, the login screen, the Imager); the
+// The three languages Insane OS lists first everywhere (Settings, the login screen, the Imager); the
 // others are added with + (docs/LANGUAGES.md).
 export const CORE_LANGUAGES = ['en', 'es', 'pt'];
 
@@ -77,7 +77,7 @@ function catalog(lang, ns) {
 }
 
 // Available languages: [{ id, name (in its own language), english, plural, user, partial }]. A partial
-// language (meta.json "partial": true) translates only part of LordOS; the rest is shown in the next
+// language (meta.json "partial": true) translates only part of Insane OS; the rest is shown in the next
 // preferred language or English (docs/LANGUAGES.md).
 export function languages() {
   const out = [];
@@ -218,7 +218,7 @@ function formats() {
   const { lang, region } = locale.get();
   const names = catalog(lang, 'format') || catalog(FALLBACK, 'format') || {};
   const rlang = region ? region.split('_')[0] : lang;
-  // a region in a language LordOS isn't translated into (lt_LT with English names): glibc's clock,
+  // a region in a language Insane OS isn't translated into (lt_LT with English names): glibc's clock,
   // date order and separators for it, over the interface language's
   const rbase = catalog(rlang, 'format') || { ...names, ...(regionData(region) || {}) };
   const r = { ...rbase, ...(rbase.regions?.[region] || {}) };

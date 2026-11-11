@@ -44,7 +44,7 @@ export function registerDockActions(appId, fn) { actionProviders.set(appId, fn);
 
 // ---- ids ----
 
-// What an old untyped id is now: a package or a LordOS app (null if unknown).
+// What an old untyped id is now: a package or a Insane OS app (null if unknown).
 const classify = (id) => { const a = getApp(id); return !a || a.builtin ? null : a.package ? 'lpk' : 'app'; };
 
 // A launcher app object or any id → its typed Dock id (null if it can't be pinned).
@@ -107,7 +107,7 @@ export const dock = {
 // Stored in settings.json. Left and right are physical sides of the screen, even with a
 // right-to-left language.
 export const DOCK_DEFAULTS = {
-  dockPosition: 'bottom',     // 'bottom' | 'left' | 'right' (Lord Flow theme)
+  dockPosition: 'bottom',     // 'bottom' | 'left' | 'right' (Insane Flow theme)
   dockSize: 54,               // px of each icon (36–80)
   dockMagnify: true,          // magnification
   dockMagnifySize: 86,        // px of the largest icon when magnified (more than dockSize)
@@ -150,7 +150,7 @@ windows.subscribe(() => {
   if (next.join('\n') !== cur.join('\n')) settings.set({ dockRecentApps: next });
 });
 
-// Which launcher app a window belongs to: its LordOS app, or the Linux app from its .desktop.
+// Which launcher app a window belongs to: its Insane OS app, or the Linux app from its .desktop.
 export function launcherIdOf(w) {
   if (!String(w.id).startsWith('linux#')) return appIdOf(w.id);
   const appId = w.args?.appId || '';
@@ -273,7 +273,7 @@ export function quitFrontApp() {
 // Can the session hand args and «new window» to an isolated built-in app's process?
 const isolatedArgs = () => typeof lord !== 'undefined' && !!lord.broker && typeof lord.broker.openArgs === 'function';
 
-// The quick actions of a Dock item: a LordOS app's (manifest "dockActions" + registerDockActions),
+// The quick actions of a Dock item: a Insane OS app's (manifest "dockActions" + registerDockActions),
 // or a Linux app's desktop actions (Actions= in its .desktop, run by lord.apps.launchAction).
 export function dockQuickActions(e) {
   const p = parseDockId(e.id);
@@ -391,7 +391,7 @@ export function trashMenu({ onEmpty }) {
 // The theme starts a press with beginDockDrag on mouse down (an icon of the Dock, the app launcher
 // or the start menu); past DRAG_START px it becomes a drag. The bar that accepts drops registers
 // a target: hit(x, y) → { index } (a position among the shown pinned items) | { trash: true } | null,
-// and near(x, y) → is the pointer still close to the bar. Several bars can register at once (Lord Classic's
+// and near(x, y) → is the pointer still close to the bar. Several bars can register at once (Insane Classic's
 // taskbar on every display, 0.8.8.6): the first one hit takes the drop, and near is any of them. A Dock item taken more than about 60 px
 // away and held there for REMOVE_HOLD ms shows the remove cue; releasing it then unpins it (a
 // locked item springs back). dockDrag holds what is happening, for the theme to draw.

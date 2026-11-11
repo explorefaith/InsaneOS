@@ -2,8 +2,9 @@
 // wallpaper and live CPU/RAM usage. The network, Wi-Fi, Bluetooth and CPU/RAM tiles can be turned off in Settings →
 // Desktop & Dock → Control Center (issue #58, sdk/menubarmodel.js).
 import {
-  View, Text, Image, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr,
+  View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
+  usePowerProfiles, admin,
   panelLeft, inBar,
 } from '@lordos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -19,6 +20,47 @@ function quickWallpapers(list, cur) {
 
 function Tile({ t, children, style }) {
   return <View style={[{ padding: 12, borderRadius: 12, backgroundColor: t.hover, border: `1px solid ${t.separator}` }, style]}>{children}</View>;
+}
+
+// "Speed up now": frees the page cache, trims the SSD and shrinks the journal (the root
+// admin action optimize-now) — for the moment the desktop feels heavy.
+function OptimizeTile({ t }) {
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    setBusy(true);
+    try { await admin.run('optimize-now', '', null, { quiet: true }); } catch { /* best effort */ }
+    setBusy(false);
+  };
+  return (
+    <Tile t={t} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+      <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tOptional('shell.cc.optimize') || 'Speed up'}</Text>
+      <Button small label={busy ? '…' : tOptional('shell.cc.optimizeNow') || 'Now'} onClick={run} disabled={busy} />
+    </Tile>
+  );
+}
+
+// Power mode (macOS's Low Power Mode): performance / balanced / power-saver through
+// power-profiles-daemon (lord.power, sdk/hardware.jsx). Hidden when ppd isn't there.
+function PowerTile({ t }) {
+  const profiles = usePowerProfiles();
+  const list = profiles?.profiles?.length ? profiles.profiles : null;
+  const active = profiles?.activeProfile || null;
+  if (!list || !active) return null;
+  const label = (p) => tOptional(`shell.cc.power.${p}`) || (p === 'power-saver' ? 'Low Power' : p === 'performance' ? 'Performance' : 'Balanced');
+  const pick = (p) => { try { lord.power.setProfile(p); } catch (e) { console.log(`power: ${e.message}`); } };
+  return (
+    <Tile t={t} style={{ gap: 8 }}>
+      <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tOptional('shell.cc.power.title') || 'Power Mode'}</Text>
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        {list.map((p) => (
+          <View key={p} onClick={() => pick(p)} style={{ flex: 1, alignItems: 'center', paddingVertical: 6, borderRadius: 8,
+            backgroundColor: active === p ? t.accent : t.control }}>
+            <Text style={{ fontSize: 11, fontWeight: active === p ? 600 : 400, color: active === p ? '#fff' : t.textDim }}>{label(p)}</Text>
+          </View>
+        ))}
+      </View>
+    </Tile>
+  );
 }
 
 function Meter({ t, label, value, detail }) {
@@ -170,6 +212,8 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
           <Toggle on={s.effects} onChange={(effects) => set({ effects })} />
         </Tile>
       </View>
+      <PowerTile t={t} />
+      <OptimizeTile t={t} />
       <SoundTile t={t} />
       <NowPlayingTile />
       {p.ccNetwork && typeof lord.net !== 'undefined' ? <NetTile t={t} onClose={onClose} ifs={ifs} /> : null}

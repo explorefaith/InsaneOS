@@ -20,13 +20,13 @@ mkdir -p "$T/home/.local/share/lordos/voice"
 ln -s "$M" "$T/home/.local/share/lordos/voice/models"
 # a real voice to clone, made here: the English model's built-in voice (alba, CC-BY-4.0)
 VOICE=$T/voice.wav
-HOME=$T/home build/lord-say -b cpu -l en -o "$VOICE" "This is a sample of my voice, recorded for LordOS to learn how I speak." 2>/dev/null
+HOME=$T/home build/lord-say -b cpu -l en -o "$VOICE" "This is a sample of my voice, recorded for Insane OS to learn how I speak." 2>/dev/null
 check "a reference voice was made" '[ "$(voiced "$VOICE" | cut -d. -f1)" -ge 3 ]'
 mkdir -p "$T/home/.local/share/lordos/voice/voices"
 cp "$VOICE" "$T/home/.local/share/lordos/voice/voices/test.wav"
 for b in cpu gpu; do
     [ "$b" = gpu ] && [ ! -e /dev/dri/renderD128 ] && { echo "skip GPU: no render node"; continue; }
-    HOME=$T/home build/lord-say -b $b -l es -v test -o "$T/es-$b.wav" "Hola, esta es la voz de LordOS. Funciona sin internet." 2>"$T/es-$b.err"
+    HOME=$T/home build/lord-say -b $b -l es -v test -o "$T/es-$b.wav" "Hola, esta es la voz de Insane OS. Funciona sin internet." 2>"$T/es-$b.err"
     check "$b: Spanish speech" '[ "$(voiced "$T/es-$b.wav" | cut -d. -f1)" -ge 2 ]'
     build/doc-test build/lord-tts selftest-tts "$M" $b > "$T/self-$b.out" 2>/dev/null
     check "$b: cannot read ~/.ssh or the home folder" 'grep -q "\"ssh\":[1-9]" "$T/self-$b.out" && grep -q "\"home_file\":[1-9]" "$T/self-$b.out"'
@@ -35,9 +35,9 @@ for b in cpu gpu; do
     check "$b: never the display's node (card0)" 'grep -q "\"card0\":[1-9]" "$T/self-$b.out"'
 done
 check "GPU: the render node opens; CPU: it doesn't" '[ ! -e /dev/dri/renderD128 ] || { grep -q "\"render_ok\":0" "$T/self-gpu.out" && grep -q "\"render_ok\":[1-9]" "$T/self-cpu.out"; }'
-HOME=$T/home build/lord-say -b cpu -l en -o "$T/en.wav" "Hello, this is the voice of LordOS." 2>/dev/null
+HOME=$T/home build/lord-say -b cpu -l en -o "$T/en.wav" "Hello, this is the voice of Insane OS." 2>/dev/null
 check "English with its built-in voice" '[ "$(voiced "$T/en.wav" | cut -d. -f1)" -ge 1 ]'
-HOME=$T/home build/lord-say -b cpu -l pt -v test -o "$T/pt.wav" "Olá, esta é a voz do LordOS." 2>/dev/null
+HOME=$T/home build/lord-say -b cpu -l pt -v test -o "$T/pt.wav" "Olá, esta é a voz do Insane OS." 2>/dev/null
 check "Portuguese" '[ "$(voiced "$T/pt.wav" | cut -d. -f1)" -ge 1 ]'
 printf '\033[1;32mlordbasex\033[0m dice: hola.\n' | HOME=$T/home build/lord-say -b cpu -l es -v test -o "$T/ansi.wav" 2>/dev/null
 check "terminal colors in the text are not read" '[ -s "$T/ansi.wav" ]'

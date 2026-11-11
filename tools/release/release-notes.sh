@@ -1,10 +1,10 @@
 #!/bin/sh
-# Prints the GitHub release body for one LordOS version: the matching section of CHANGELOG.md
+# Prints the GitHub release body for one Insane OS version: the matching section of CHANGELOG.md
 # (without its heading or its "### Verifying" part), relative links made absolute for that tag, and a fixed footer with the
 # downloads table, the verification steps and links.
 #
 #   tools/release/release-notes.sh <version> > notes.md
-#   gh release create v<version> --title "LordOS <version>" --prerelease --notes-file notes.md ...
+#   gh release create v<version> --title "Insane OS <version>" --prerelease --notes-file notes.md ...
 #
 # <version> is the CHANGELOG version, with or without a leading "v" (e.g. 0.8.0-beta).
 # Environment:
@@ -32,8 +32,8 @@ filever=${LORDOS_FILE_VERSION:-${version%%-*}}
 imagerver=$(sed -n 's/.*"imager": *"\([0-9.]*\)".*/\1/p' "$root/package.json" | head -1)
 imagerver=${imagerver:-$filever}
 case $version in *-*) imagertag=v$imagerver-${version#*-} ;; *) imagertag=v$imagerver ;; esac
-imagerdl=https://github.com/lordbasex/LordOS/releases/download/$imagertag
-repo=https://github.com/lordbasex/LordOS
+imagerdl=https://github.com/lordbasex/Insane OS/releases/download/$imagertag
+repo=https://github.com/lordbasex/Insane OS
 blob=$repo/blob/$tag
 
 # The section: from "## [<version>]" up to the next "## [" heading or the link references.
@@ -89,22 +89,22 @@ cat <<EOF
 | \`lordos-live-${filever}-amd64.iso\` | Live and installable image for 64-bit PCs (UEFI and BIOS). Write it to a USB stick as is; Secure Boot off. |
 | \`lordos-${filever}-amd64.ova\` | Virtual machine image for VirtualBox and VMware: open it and the machine is imported. You create your own account on its first boot. |
 | \`lordos-live-${filever}-arm64.iso\` | Live and installable image for generic arm64 machines and virtual machines with UEFI. Secure Boot off. |
-| \`lordos-${filever}-rpi5-arm64.img.xz\` | Image for the Raspberry Pi 5, for the LordOS Imager (below) or Raspberry Pi Imager ("Use custom"), an SD card or an NVMe drive. |
-| \`lordos_${filever}_amd64.deb\` | The LordOS package for an existing Debian 13 on a PC (installed by \`install.sh\`, or with \`apt install ./…\`). |
+| \`lordos-${filever}-rpi5-arm64.img.xz\` | Image for the Raspberry Pi 5, for the Insane OS Imager (below) or Raspberry Pi Imager ("Use custom"), an SD card or an NVMe drive. |
+| \`lordos_${filever}_amd64.deb\` | The Insane OS package for an existing Debian 13 on a PC (installed by \`install.sh\`, or with \`apt install ./…\`). |
 | \`lordos_${filever}_arm64.deb\` | The same package for Debian 13 on arm64. |
-| \`lordos-rclone_<version>_amd64.deb\`, \`lordos-rclone_<version>_arm64.deb\` | Upstream rclone, built from its release tag, for Cloud and Connect to Server; the LordOS package depends on it (\`install.sh\` installs it with the package). MIT. |
-| \`lordos-hwdata_<date>_all.deb\` | The signed tested-hardware snapshot for System Information's Compatibility panel, which the LordOS package depends on (both architectures; \`install.sh\` installs it with the package, or \`apt install ./lordos-hwdata_…_all.deb ./lordos_…\`). Newer ones arrive through Store → Updates between releases. |
-| [\`lordos_imager_${imagerver}_universal.dmg\`](${imagerdl}/lordos_imager_${imagerver}_universal.dmg) | LordOS Imager for Mac (both processor families, signed and notarized): writes LordOS to an SD card or a USB stick and prepares the Raspberry Pi 5's first boot. |
-| [\`lordos_imager_${imagerver}_x64_setup.exe\`](${imagerdl}/lordos_imager_${imagerver}_x64_setup.exe) | LordOS Imager for Windows (64-bit installer; not code-signed yet, so the system asks before running it). |
-| [\`lordos_imager_${imagerver}_amd64.deb\`](${imagerdl}/lordos_imager_${imagerver}_amd64.deb) | LordOS Imager for Linux (Debian 13 and similar, amd64; needs udisks2). |
+| \`lordos-rclone_<version>_amd64.deb\`, \`lordos-rclone_<version>_arm64.deb\` | Upstream rclone, built from its release tag, for Cloud and Connect to Server; the Insane OS package depends on it (\`install.sh\` installs it with the package). MIT. |
+| \`lordos-hwdata_<date>_all.deb\` | The signed tested-hardware snapshot for System Information's Compatibility panel, which the Insane OS package depends on (both architectures; \`install.sh\` installs it with the package, or \`apt install ./lordos-hwdata_…_all.deb ./lordos_…\`). Newer ones arrive through Store → Updates between releases. |
+| [\`lordos_imager_${imagerver}_universal.dmg\`](${imagerdl}/lordos_imager_${imagerver}_universal.dmg) | Insane OS Imager for Mac (both processor families, signed and notarized): writes Insane OS to an SD card or a USB stick and prepares the Raspberry Pi 5's first boot. |
+| [\`lordos_imager_${imagerver}_x64_setup.exe\`](${imagerdl}/lordos_imager_${imagerver}_x64_setup.exe) | Insane OS Imager for Windows (64-bit installer; not code-signed yet, so the system asks before running it). |
+| [\`lordos_imager_${imagerver}_amd64.deb\`](${imagerdl}/lordos_imager_${imagerver}_amd64.deb) | Insane OS Imager for Linux (Debian 13 and similar, amd64; needs udisks2). |
 | \`install.sh\` | The one-line installer for Debian 13: \`curl -fsSL https://lordos.org/install.sh \| sh\`. It checks the signature before installing. |
 | \`SHA256SUMS\` | The SHA-256 of every file in this release. |
-| \`SHA256SUMS.sig\` | The Ed25519 signature of \`SHA256SUMS\` with the LordOS release key (base64). |
+| \`SHA256SUMS.sig\` | The Ed25519 signature of \`SHA256SUMS\` with the Insane OS release key (base64). |
 | \`lordos_${filever}_<arch>.spdx.json\` | Software bill of materials (SPDX 2.3) for each package: what it bundles and the Debian packages it depends on. |
 
 ## Verifying the downloads
 
-The LordOS release public key is \`lordos-release.pub.pem\` ([in the repository](${blob}/tools/release/lordos-release.pub.pem), or at https://lordos.org/lordos-release.pub.pem). Its fingerprint, the SHA-256 of the DER public key, is:
+The Insane OS release public key is \`lordos-release.pub.pem\` ([in the repository](${blob}/tools/release/lordos-release.pub.pem), or at https://lordos.org/lordos-release.pub.pem). Its fingerprint, the SHA-256 of the DER public key, is:
 
 \`\`\`
 c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e

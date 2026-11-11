@@ -1,6 +1,6 @@
 /* appclient.c — «modo app»: `lord-server --app <id>` corre una app .lpk instalada como su propio
  * proceso, aislado (server/src/sec/sandbox.c), y se dibuja como un CLIENTE Wayland del compositor
- * de LordOS. El tema le pone su marco (pide decoración del servidor, como las apps Qt), aparece
+ * de Insane OS. El tema le pone su marco (pide decoración del servidor, como las apps Qt), aparece
  * en el Dock y se ve por el escritorio remoto, igual que cualquier app.
  *
  * Reusa el motor de interfaz propio (ui/: nodos, layout, pintado, texto) y QuickJS (js.c), igual

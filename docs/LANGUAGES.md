@@ -1,21 +1,21 @@
-# Language and region in LordOS
+# Language and region in Insane OS
 
-LordOS handles language across the whole system, not just in the interface. It ships with
+Insane OS handles language across the whole system, not just in the interface. It ships with
 **Spanish, English, Portuguese, French and Italian**, and **Lithuanian** as a partial translation (see
 "Partial languages"), and more languages are added with packs, without touching code.
 
 **Settings → Language & Region → Preferred languages** lists English, Español and Português by
 default. **+** adds another one (Français, Italiano, an installed pack); it goes first and becomes
-LordOS's language. **−** removes the selected one and **↑ ↓** reorder them. The first language is the one of
-LordOS and its apps (the login screen keeps the one chosen on it); when a text isn't translated the next ones are tried in
+Insane OS's language. **−** removes the selected one and **↑ ↓** reorder them. The first language is the one of
+Insane OS and its apps (the login screen keeps the one chosen on it); when a text isn't translated the next ones are tried in
 order, then English (`settings.languages`, `sdk/i18n.js`). The **+** list also names the languages
-LordOS isn't translated into yet (`sdk/langnames.js`): picking one says so and where to ask for it.
+Insane OS isn't translated into yet (`sdk/langnames.js`): picking one says so and where to ask for it.
 The login screen's language button (a globe and the language's name) shows English, Español and
-Português first and then the other languages LordOS ships.
+Português first and then the other languages Insane OS ships.
 
 | Layer | What it does | Where |
 |---|---|---|
-| LordOS interface | Theme, app and SDK text with `t('key')`; plurals; dates and numbers | `sdk/i18n.js`, `assets/locales/` |
+| Insane OS interface | Theme, app and SDK text with `t('key')`; plurals; dates and numbers | `sdk/i18n.js`, `assets/locales/` |
 | User region | `LANG`/`LC_*` in `~/.config/locale.conf`; inherited by shells (and by Linux apps in M6) | `server/src/ui/js_sys.c` |
 | glibc regions | generates `es_AR.UTF-8`, `pt_BR.UTF-8`… (`locale-gen`), system default region | helper `server/src/admin.c` |
 | Program messages | Debian's translations (gettext): `ls`, `date`, `man`… come out in the chosen language | Debian |
@@ -128,7 +128,7 @@ assets/locales/pt/meta.json   { "id": "pt", "name": "Português", "english": "Po
                                 "plural": "zero-one-other", "region": "pt_BR", "direction": "ltr" }
 ```
 
-The ones shipped with LordOS are in `assets/locales/`; the user's in
+The ones shipped with Insane OS are in `assets/locales/`; the user's in
 `~/.local/share/lordos/locales/` (they don't need root and win if both exist).
 
 To create one:
@@ -147,13 +147,13 @@ the same format.
 `node tools/i18n-check.mjs` with no arguments checks every bundled language and also the keys the
 code uses (`t('…')` in apps, themes and SDK) that don't exist in English. Today (0.8.5-beta): 8,002 keys, complete in es, en, pt, fr and it (0.8.8.2: 9,342 keys; 0.8.8.6: 11,075 keys, lt partial with 961, 8.7%), and 496 error codes from the server (0.8.8.6: 574). It also runs `tools/brand-check.mjs`, which fails when a third-party
 brand or product name (another system, its apps or features) shows up in the catalogs,
-the Help articles, the app manifests, README.md or CHANGELOG.md: LordOS uses its own names
+the Help articles, the app manifests, README.md or CHANGELOG.md: Insane OS uses its own names
 (Search, Apps, Night Light, Quick Preview…) and generic wording. Real exceptions go in its
 `ALLOW` list.
 
 ### Partial languages
 
-A language that translates only part of LordOS says so in its `meta.json` with `"partial": true`. Its
+A language that translates only part of Insane OS says so in its `meta.json` with `"partial": true`. Its
 missing texts are shown in the next preferred language or in English, Settings lists it as "partly
 translated", and `node tools/i18n-check.mjs` prints its coverage (complete namespaces and the started
 ones) instead of failing on the missing keys; its `{x}` variables must still match English.
@@ -247,7 +247,7 @@ Arabic) and invisibles (ZWJ, direction marks) are hidden.
 | ![files](files-use-scripts.png) | ![terminal](terminal-use-scripts.png) |
 | In the interface (file names in Files): Sinhala, Tibetan, Myanmar, Khmer, Mongolian, Tai Tham, Sundanese, Balinese and Javanese | In the Terminal, with Thai at the end (`docs/packs/escrituras-m5b.txt`) |
 
-For the remaining scripts of South and Southeast Asia, LordOS follows HarfBuzz's other three
+For the remaining scripts of South and Southeast Asia, Insane OS follows HarfBuzz's other three
 shapers:
 
 | Shaper | Scripts | What it does |
@@ -327,7 +327,7 @@ ZWJ sequences and flags at every box width from 8 to 400 px (`make -C server tes
 If the language is right to left (`meta.json` → `"direction": "rtl"`; `i18n-pack` sets it
 automatically for ar, he, fa, ur…), **the whole interface flips**, as on popular desktop systems: menu bar, menus
 (they open to the left), windows (buttons on the right), Dock, tabs, Settings, Files and the
-Lord Classic theme (start and taskbar on the right). The terminal's content stays left to right (see
+Insane Classic theme (start and taskbar on the right). The terminal's content stays left to right (see
 "In the terminal" below).
 
 The engine follows CSS: `direction: 'rtl' | 'ltr'` is inherited, flips the row axis and the
@@ -403,7 +403,7 @@ can drop).
 | ![scripts](files-world-scripts.png) | ![arabic](ui-arabic.png) |
 | Names in Arabic, Hebrew, Chinese, Japanese, Korean and mixed (bidi), with emoji | Arabic interface: bar, window, sidebar, columns and Dock mirrored |
 | ![menu](menu-arabic.png) | ![classic](classic-theme-arabic.png) |
-| Menu in Arabic: opens to the left, shortcut on the other side | Lord Classic theme in Arabic; the terminal stays left to right |
+| Menu in Arabic: opens to the left, shortcut on the other side | Insane Classic theme in Arabic; the terminal stays left to right |
 | ![japanese](ime-japanese.png) | ![pinyin](ime-pinyin.png) |
 | Japanese in the Terminal: にほんご → 日本語 / にほんご / ニホンゴ | Pinyin: zhongguo → 中国, 中古, 中… (page 1 of 7) |
 | ![hangul](ime-hangul.png) | ![result](ime-terminal.png) |
@@ -440,5 +440,5 @@ translates the desktop, Settings, Files, About and the Calculator; the Terminal 
 | Package | What for |
 |---|---|
 | `libthai-data` | dictionary for Thai word breaking (it was already installed as a dependency; the `th` language pack installs it too) |
-| `libthai-dev` | only for the `tests/thbrk_compare.sh` test (compares with libthai); LordOS doesn't use it |
+| `libthai-dev` | only for the `tests/thbrk_compare.sh` test (compares with libthai); Insane OS doesn't use it |
 | `fonts-noto-core` | already installed: provides Noto Sans Khmer, Myanmar, Sinhala, Balinese, Javanese, Mongolian…, Noto Serif Tibetan (the km, my, bo, si, mn, jv… language packs require it) |

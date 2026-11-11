@@ -101,9 +101,9 @@ const eq = (what, got, want) => {
 
 // 4. the chosen file's folder is away: the last good copy, read-only, nothing written there or anywhere
 {
-  const chosen = '/home/u/Backups/LordOS-Terminal/terminal.json';
+  const chosen = '/home/u/Backups/Insane OS-Terminal/terminal.json';
   const m = load({ terminalConfigPath: chosen }, { [DEF]: JSON.stringify({ schema: 1, profiles: [{ id: 'cached', name: 'From the cache' }] }) },
-    ['/home/u/Backups/LordOS-Terminal']);
+    ['/home/u/Backups/Insane OS-Terminal']);
   eq('away: profiles from the cache', m.terminalSettings().profiles.map((p) => p.name), ['From the cache']);
   eq('away: read-only, with the reason', [m.termConfig.get().readOnly, m.termConfig.get().problem.code], [true, 'termconf.unavailable']);
   eq('away: a change is not saved', m.saveTerminalSettings({ hotkey: 'off' }), false);

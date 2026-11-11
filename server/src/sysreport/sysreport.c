@@ -304,7 +304,7 @@ static void collect_cpu(SysReport *r, const char *root, const char *cpuinfo) {
     read_attr(p, c->arch, sizeof c->arch);
     if (!c->arch[0] && !root[0]) { struct utsname u; if (!uname(&u)) snprintf(c->arch, sizeof c->arch, "%.15s", u.machine); }
 
-    /* instruction sets that matter for LordOS's own code and for apps */
+    /* instruction sets that matter for Insane OS's own code and for apps */
     static const char *x86[] = { "sse4_2", "avx", "avx2", "fma", "avx512f", "aes", "sha_ni", "vaes" };
     static const char *arm[] = { "asimd", "sve", "sve2", "aes", "sha2", "crc32", "atomics" };
     char flags[4096];
@@ -749,8 +749,8 @@ static void collect_pi(SysReport *r, const char *root, const char *cpuinfo) {
         if (t >= 1000000000 && gmtime_r(&t, &tm)) strftime(r->pi.bootloader_date, sizeof r->pi.bootloader_date, "%Y-%m-%d", &tm);
     }
     free(ts);
-    /* what the firmware says about power and throttling (hw/rpifw.c, shared with LordBench): rpi_volt's
-     * under-voltage alarm (the only one the LordOS rpi-6.18.y kernel has) and get_throttled where an older
+    /* what the firmware says about power and throttling (hw/rpifw.c, shared with InsaneBench): rpi_volt's
+     * under-voltage alarm (the only one the Insane OS rpi-6.18.y kernel has) and get_throttled where an older
      * kernel has it; whatever the kernel doesn't show stays unknown */
     RpiFw fw;
     rpifw_read(root, &fw);
@@ -965,7 +965,7 @@ static void collect_software(SysReport *r, const char *root) {
     }
 #endif
 
-    /* the kernel options LordOS's isolation, firewall and memory handling depend on */
+    /* the kernel options Insane OS's isolation, firewall and memory handling depend on */
     static const char *opts[] = {
         "CONFIG_SECURITY_LANDLOCK", "CONFIG_SECCOMP_FILTER", "CONFIG_USER_NS", "CONFIG_BPF_SYSCALL", "CONFIG_BPF_JIT",
         "CONFIG_CGROUP_BPF", "CONFIG_BPF_LSM", "CONFIG_INET_DIAG_DESTROY", "CONFIG_INET_UDP_DIAG", "CONFIG_MEMCG",
@@ -989,7 +989,7 @@ static void collect_software(SysReport *r, const char *root) {
     s->netperm = exists(root, "/run/lordos/netperm.sock");
     s->fand = exists(root, "/run/lordos/fand.sock");
     s->netd = exists(root, "/run/lordos/netd.sock");
-    /* the live session from the ISO (live-boot's marker, as LordBench reads it): a shared report says so
+    /* the live session from the ISO (live-boot's marker, as InsaneBench reads it): a shared report says so
      * (docs/BENCHMARK.md, "From the live USB") */
     s->live = exists(root, "/run/live");
     collect_boot(s, root);

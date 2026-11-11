@@ -77,26 +77,26 @@ int main(void) {
     snprintf(p, sizeof p, "%s/.config/lordos/mail/x.json", H);
     check(termconf_set_custom(p, err, sizeof err) && has_code(err, "fs.protected"), "a protected folder refused");
 
-    mk("/Backups"); mk("/Backups/LordOS-Terminal");
-    snprintf(p, sizeof p, "%s/Backups/LordOS-Terminal/terminal.json", H);
+    mk("/Backups"); mk("/Backups/Insane OS-Terminal");
+    snprintf(p, sizeof p, "%s/Backups/Insane OS-Terminal/terminal.json", H);
     check(!termconf_set_custom(p, err, sizeof err) && termconf_is_custom() && !strcmp(termconf_path(), p), "chosen file set");
     check(fsops_protected(p), "lord.fs: the chosen file protected");
-    snprintf(p, sizeof p, "%s/Backups/LordOS-Terminal", H);
+    snprintf(p, sizeof p, "%s/Backups/Insane OS-Terminal", H);
     check(fsops_protected_below(p), "lord.fs: its folder can't be moved by a generic operation");
     check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.missing"), "chosen, not written yet: missing");
     check(!termconf_write(termconf_path(), "{\"chosen\":1}", 12, &mt, err, sizeof err), "chosen file written");
-    check(mode_of("/Backups/LordOS-Terminal/terminal.json") == 0600, "chosen file 0600");
-    snprintf(p, sizeof p, "%s/Backups/LordOS-Terminal/terminal.json", H);
+    check(mode_of("/Backups/Insane OS-Terminal/terminal.json") == 0600, "chosen file 0600");
+    snprintf(p, sizeof p, "%s/Backups/Insane OS-Terminal/terminal.json", H);
     check(!termconf_set_custom(p, err, sizeof err), "choosing the same file again is fine");
 
     /* the place goes away (renamed folder, disk not mounted): unavailable, and nothing is created there */
     char a[PATH_MAX + 64], b[PATH_MAX + 64];
-    snprintf(a, sizeof a, "%s/Backups/LordOS-Terminal", H);
+    snprintf(a, sizeof a, "%s/Backups/Insane OS-Terminal", H);
     snprintf(b, sizeof b, "%s/Backups/Renamed", H);
     rename(a, b);
     check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.unavailable"), "folder gone: unavailable");
     check(termconf_write(termconf_path(), "{}", 2, &mt, err, sizeof err) && has_code(err, "termconf.unavailable"), "folder gone: not written");
-    check(!exists("/Backups/LordOS-Terminal"), "folder gone: not created");
+    check(!exists("/Backups/Insane OS-Terminal"), "folder gone: not created");
     t = termconf_read(termconf_cache(), &len, &mt, err, sizeof err);
     check(t != NULL, "the cache is still there");
     free(t);

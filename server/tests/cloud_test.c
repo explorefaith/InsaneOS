@@ -481,7 +481,7 @@ static void t_state(void) {
         json_free(&d);
     }
     free(s);
-    /* the links made from LordOS: only valid ones, not expired */
+    /* the links made from Insane OS: only valid ones, not expired */
     s = cloud_links("cab12cd34");
     CHECK(s && strstr(s, "/Cloud/Work/Share/a.txt") && strstr(s, "https://dav.example.test/s/abc") && !strstr(s, "../x") && !strstr(s, "javascript") && !strstr(s, "/s/old"));
     free(s);

@@ -22,17 +22,17 @@ cat > "$T/usr/share/doc/lordos-disk-formats/copyright" <<C
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Files: *
 License: MIT
- See the LordOS repository. This package holds a marker file and depends on the drivers.
+ See the Insane OS repository. This package holds a marker file and depends on the drivers.
 C
 cat > "$T/DEBIAN/control" <<C
 Package: lordos-disk-formats
 Version: $V
 Architecture: $ARCH
-Maintainer: LordOS <lord.basex@gmail.com>
+Maintainer: Insane OS <lord.basex@gmail.com>
 Section: admin
 Priority: optional
 Depends: lordos, $DEPS
-Description: disk formats for LordOS Files and Disks
+Description: disk formats for Insane OS Files and Disks
  Mounts and formats NTFS, exFAT, FAT and HFS+ volumes on the desktop; APFS with
  the optional apfs-dkms driver.
 C

@@ -1,6 +1,6 @@
 ## En pocas palabras
 
-Contraseñas es el gestor de contraseñas de LordOS, y la misma maquinaria es el **llavero del sistema**: el lugar donde las apps guardan secretos como contraseñas de Wi-Fi, credenciales de VPN y contraseñas de cuentas de correo. Todo se guarda en un archivo de bóveda cifrado, y todo lo que toca tus secretos en claro corre en un único proceso chico y encerrado, `lord-vault`.
+Contraseñas es el gestor de contraseñas de Insane OS, y la misma maquinaria es el **llavero del sistema**: el lugar donde las apps guardan secretos como contraseñas de Wi-Fi, credenciales de VPN y contraseñas de cuentas de correo. Todo se guarda en un archivo de bóveda cifrado, y todo lo que toca tus secretos en claro corre en un único proceso chico y encerrado, `lord-vault`.
 
 [[shot:0]]
 
@@ -14,7 +14,7 @@ Pensalo como el sector de cajas de seguridad de un banco. La ventana de Contrase
 - **Códigos 2FA** (TOTP y HOTP) con cuenta regresiva en vivo. Podés agregar uno desde una imagen QR; el secreto nunca sale de `lord-vault` y la ventana solo recibe el código actual.
 - **Un generador** de contraseñas y de frases de contraseña a partir de una lista de 7776 palabras.
 - **Un informe de seguridad** con contraseñas débiles, repetidas, viejas y filtradas. "Filtradas" se revisa **solo sin conexión**: contra una lista incluida de las 10.000 contraseñas más comunes y, si le das uno, un archivo local de hashes de contraseñas filtradas. Nunca se consulta nada en línea; `lord-vault` no tiene red en absoluto.
-- **Importación** desde archivos KDBX (versiones 3.1 y 4), desde exportaciones CSV de navegadores y desde exportaciones CSV y JSON de otros gestores, con lectores propios de LordOS. **Exportación** a una copia cifrada, o a CSV después de una advertencia en rojo.
+- **Importación** desde archivos KDBX (versiones 3.1 y 4), desde exportaciones CSV de navegadores y desde exportaciones CSV y JSON de otros gestores, con lectores propios de Insane OS. **Exportación** a una copia cifrada, o a CSV después de una advertencia en rojo.
 
 [[shot:3]]
 
@@ -23,7 +23,7 @@ Pensalo como el sector de cajas de seguridad de un banco. La ventana de Contrase
 La bóveda tiene una única clave aleatoria de 32 bytes. Nunca se deriva de tu contraseña. En cambio, cada forma de desbloqueo envuelve esa misma clave:
 
 - **una contraseña maestra**, estirada con Argon2id, con su costo medido en tu máquina para que tarde unos 0,7 s;
-- **una llave de seguridad FIDO2** con la extensión `hmac-secret`, a través del cliente CTAP2 propio de LordOS;
+- **una llave de seguridad FIDO2** con la extensión `hmac-secret`, a través del cliente CTAP2 propio de Insane OS;
 - **un archivo llave**, por ejemplo en un pendrive;
 - **una contraseña más un archivo llave**, como dos factores;
 - **una clave de recuperación imprimible** de 40 caracteres.
@@ -49,21 +49,21 @@ Varios métodos pueden convivir. Por defecto, la bóveda se cierra sola después
 ## El llavero del sistema
 
 - **Se abre al ingresar.** `lord-sessiond` verifica tu contraseña de ingreso, se la pasa una sola vez a `lord-vault` para abrir el llavero de la sesión y borra su copia.
-- **Las apps de LordOS** guardan sus secretos con el `keyring` del SDK. Cada app ve solo sus propios ítems. Para las apps `.lpk` instaladas, `lord-server` fija el dueño a partir de la identidad verificada de la app, así que una app no puede hacerse pasar por otra. Si una app pide un ítem de otra app, el sistema primero te pregunta a vos.
-- **Las apps de Linux** usan el Secret Service estándar de freedesktop por D-Bus, servido por código propio de LordOS. Chromium se probó de punta a punta: guardó un login, se reinició, buscó su clave en el llavero de LordOS y completó el login. Desde 0.8.5 una sesión que arranca con el equipo espera a su bus de sesión, así que con el ingreso automático el llavero de LordOS tiene el Secret Service desde el principio, y si una app trae gnome-keyring, solo corre su parte PKCS#11; en la VM de prueba Chrome pidió entonces la clave por el aviso del llavero de LordOS.
+- **Las apps de Insane OS** guardan sus secretos con el `keyring` del SDK. Cada app ve solo sus propios ítems. Para las apps `.lpk` instaladas, `lord-server` fija el dueño a partir de la identidad verificada de la app, así que una app no puede hacerse pasar por otra. Si una app pide un ítem de otra app, el sistema primero te pregunta a vos.
+- **Las apps de Linux** usan el Secret Service estándar de freedesktop por D-Bus, servido por código propio de Insane OS. Chromium se probó de punta a punta: guardó un login, se reinició, buscó su clave en el llavero de Insane OS y completó el login. Desde 0.8.5 una sesión que arranca con el equipo espera a su bus de sesión, así que con el ingreso automático el llavero de Insane OS tiene el Secret Service desde el principio, y si una app trae gnome-keyring, solo corre su parte PKCS#11; en la VM de prueba Chrome pidió entonces la clave por el aviso del llavero de Insane OS.
 
 [[shot:4]]
 
 ## En la Terminal (0.8.8.6)
 
 - **Completar la contraseña que pide un programa.** Cuando ssh, sudo, git o gpg piden una contraseña, una barra debajo del mensaje ofrece tus accesos de Contraseñas (primero los de ese host) o **Escribirla**. La contraseña que elegís va de `lord-vault` a la terminal en el código C de `lord-server`, por un canal privado: nunca pasa por JavaScript, la pantalla ni el registro de la sesión, y se escribe solo mientras el programa sigue pidiéndola. La barra aparece cuando la terminal está en modo contraseña (sin eco) y el mensaje nombra una contraseña, y dice qué programa la pide, así un script que imprime un mensaje falso se muestra como lo que es.
-- **Guardar una contraseña que escribiste.** Cuando escribís o pegás una contraseña para ssh, sftp, scp, rsync, mysql, psql, redis-cli, mongosh o git y el programa la acepta, LordOS ofrece guardarla, con su host, puerto y usuario, en la categoría que corresponde. Hasta que respondas, espera en una página de memoria bloqueada que se borra en toda salida (rechazada, Ctrl+C, declinada, guardada, cerrada, o a los 60 segundos). Tu propia contraseña de inicio de sesión (sudo, su, passwd, pkexec) nunca se captura, y no se captura nada mientras el programa está siendo trazado.
+- **Guardar una contraseña que escribiste.** Cuando escribís o pegás una contraseña para ssh, sftp, scp, rsync, mysql, psql, redis-cli, mongosh o git y el programa la acepta, Insane OS ofrece guardarla, con su host, puerto y usuario, en la categoría que corresponde. Hasta que respondas, espera en una página de memoria bloqueada que se borra en toda salida (rechazada, Ctrl+C, declinada, guardada, cerrada, o a los 60 segundos). Tu propia contraseña de inicio de sesión (sudo, su, passwd, pkexec) nunca se captura, y no se captura nada mientras el programa está siendo trazado.
 
 Las dos son excepciones aprobadas en el reglamento del proyecto (`AGENTS.md`), probadas en una pseudoterminal real (`build/term-secret-test`, `build/term-capture-test` con 28 verificaciones, también con ASan y UBSan).
 
 ## Las preguntas del lector escéptico
 
-**¿Quién puede leer el llavero de la sesión?** Dentro de LordOS, cada app solo sus propios ítems, salvo que compartas uno. Por el Secret Service, la regla de acceso es la de freedesktop: cualquier app de Linux de tu sesión que llegue al bus de la sesión puede leer la colección desbloqueada, como con otros llaveros de escritorio. Las apps `.lpk` aisladas no llegan al bus.
+**¿Quién puede leer el llavero de la sesión?** Dentro de Insane OS, cada app solo sus propios ítems, salvo que compartas uno. Por el Secret Service, la regla de acceso es la de freedesktop: cualquier app de Linux de tu sesión que llegue al bus de la sesión puede leer la colección desbloqueada, como con otros llaveros de escritorio. Las apps `.lpk` aisladas no llegan al bus.
 
 **¿La app Contraseñas puede leer la llave de seguridad directamente?** No. Usar una llave de seguridad pasa por el aviso del permiso `usb`; después `lord-server` abre el dispositivo y se lo pasa directo a `lord-vault`. Ni la ventana de la app ni su JavaScript lo tienen nunca.
 
@@ -76,11 +76,11 @@ Las dos son excepciones aprobadas en el reglamento del proyecto (`AGENTS.md`), p
 
 ## Leé el código
 
-- [server/src/vault/vault.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/vault.c): el proceso `lord-vault` y su caja de arena
-- [server/src/vault/vfile.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/vfile.c): el formato `.lvault` y las ranuras de desbloqueo
-- [server/src/vault/smem.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/smem.c): la zona de memoria bloqueada y borrada
-- [server/src/vault/keyring.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/keyring.c) y [server/src/vault/secretsvc.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/secretsvc.c): el llavero y el Secret Service
-- [server/src/vault/ctap2.c](https://github.com/lordbasex/LordOS/blob/main/server/src/vault/ctap2.c): el cliente FIDO2
-- [server/src/sec/brokerkr.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/brokerkr.c): el llavero para apps aisladas
-- [apps/passwords](https://github.com/lordbasex/LordOS/tree/main/apps/passwords): la app
-- [docs/PASSWORDS.md](https://github.com/lordbasex/LordOS/blob/main/docs/PASSWORDS.md)
+- [server/src/vault/vault.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/vault.c): el proceso `lord-vault` y su caja de arena
+- [server/src/vault/vfile.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/vfile.c): el formato `.lvault` y las ranuras de desbloqueo
+- [server/src/vault/smem.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/smem.c): la zona de memoria bloqueada y borrada
+- [server/src/vault/keyring.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/keyring.c) y [server/src/vault/secretsvc.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/secretsvc.c): el llavero y el Secret Service
+- [server/src/vault/ctap2.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/vault/ctap2.c): el cliente FIDO2
+- [server/src/sec/brokerkr.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokerkr.c): el llavero para apps aisladas
+- [apps/passwords](https://github.com/lordbasex/Insane OS/tree/main/apps/passwords): la app
+- [docs/PASSWORDS.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PASSWORDS.md)

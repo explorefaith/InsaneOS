@@ -1,9 +1,9 @@
 [
  {
-  "chapter": "LordOS",
+  "chapter": "Insane OS",
   "chapter_es": "Adelanto · versión 0.7",
-  "en": "This is LordOS: a desktop environment built from scratch, with its own display server written in C and an interface written in React.",
-  "es": "Esto es LordOS: un entorno de escritorio hecho desde cero, con su propio servidor gráfico en C y una interfaz en React.",
+  "en": "This is Insane OS: a desktop environment built from scratch, with its own display server written in C and an interface written in React.",
+  "es": "Esto es Insane OS: un entorno de escritorio hecho desde cero, con su propio servidor gráfico en C y una interfaz en React.",
   "actions": [
    [
     "click",
@@ -247,10 +247,10 @@
   "min": 5
  },
  {
-  "chapter": "LordOS",
+  "chapter": "Insane OS",
   "chapter_es": "Muy pronto: la instalación y todas las funciones",
-  "en": "That was a quick look. The full video will show the installation and every feature. LordOS: fast, light, and all its own.",
-  "es": "Esto fue un adelanto. El video completo va a mostrar la instalación y todas las funciones. LordOS: rápido, liviano y propio.",
+  "en": "That was a quick look. The full video will show the installation and every feature. Insane OS: fast, light, and all its own.",
+  "es": "Esto fue un adelanto. El video completo va a mostrar la instalación y todas las funciones. Insane OS: rápido, liviano y propio.",
   "actions": [
    [
     "move",

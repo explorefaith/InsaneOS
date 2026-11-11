@@ -1,7 +1,7 @@
 // Monitor → GPU (docs/MONITOR.md, "GPU"): each graphics card drawn live (its fans turn with the real fan, the heat
 // line and the load light follow the card), its load, temperature and fan over the last minutes in Cooling's chart,
 // the apps using it (each engine's share and their GPU memory, with the APIs they use), its memory, clocks and power,
-// the APIs installed for it, LordOS's AI engines, and — for administrators, on amdgpu — its fan by hand (lord-fand).
+// the APIs installed for it, Insane OS's AI engines, and — for administrators, on amdgpu — its fan by hand (lord-fand).
 // lord.monitor.gpu() is read once per second only while this tab or the Overview is on screen and the window isn't
 // minimized; the model is gpumodel.js.
 import {
@@ -392,7 +392,7 @@ export function OverviewGpu({ onOpen, style }) {
   );
 }
 
-// The Overview's line for LordOS's AI and the virtual machines (both come with the GPU sample).
+// The Overview's line for Insane OS's AI and the virtual machines (both come with the GPU sample).
 export function OverviewAiVms({ style }) {
   const t = useTheme();
   const { t: tr } = useLocale();

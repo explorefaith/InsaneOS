@@ -1,4 +1,4 @@
-/* imager_test.c — the LordOS Imager's pure checks (src/imager/imgverify.c, docs/IMAGER.md):
+/* imager_test.c — the Insane OS Imager's pure checks (src/imager/imgverify.c, docs/IMAGER.md):
  * the release signature (good, tampered, missing, wrong key, malformed), SHA256SUMS lookups, image
  * names and tags, and the .xz index reader on real xz files (one stream, many blocks, two streams,
  * stream padding) plus damaged and random ones. Fixtures in tests/imager/: a real signed

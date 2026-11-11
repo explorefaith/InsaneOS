@@ -29,7 +29,7 @@ Description: OpenAI's coding agent for the terminal (Codex CLI)
  its approval mode. Sign in with a ChatGPT account or an API key.
  .
  This is the upstream static (musl) release binary, verified against its pinned
- SHA-256 and its sigstore signature, packaged for LordOS. On Linux Codex uses
+ SHA-256 and its sigstore signature, packaged for Insane OS. On Linux Codex uses
  bubblewrap to sandbox the commands it runs.
 EOF
 build_deb "$r"

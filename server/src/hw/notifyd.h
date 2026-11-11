@@ -1,5 +1,5 @@
 /* notifyd.h — org.freedesktop.Notifications on the session bus, so notifications from Linux apps
- * (GTK, Qt, Electron, notify-send) appear as LordOS banners and follow Settings → Notifications
+ * (GTK, Qt, Electron, notify-send) appear as Insane OS banners and follow Settings → Notifications
  * (per-app style, sound, Do Not Disturb). The banner is drawn by the theme (sdk/notify.js); this
  * only translates the protocol (spec 1.2): Notify, CloseNotification, GetCapabilities,
  * GetServerInformation, and the NotificationClosed / ActionInvoked signals. Body markup is reduced

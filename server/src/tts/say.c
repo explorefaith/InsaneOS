@@ -1,4 +1,4 @@
-/* say.c — lord-say, LordOS's `say` command (docs/VOICE.md): text to speech.
+/* say.c — lord-say, Insane OS's `say` command (docs/VOICE.md): text to speech.
  *
  *   say "Hola, ¿cómo estás?"            say -l en -v alba "Hello"          echo texto | say
  *   say -f notas.txt -o notas.wav       say -b gpu "…"                      say --voices
@@ -499,7 +499,7 @@ int main(int argc, char **argv) {
         if (!fallback) { const char *l = getenv("LANG"); if (l && strlen(l) >= 2) { envlang[0] = l[0]; envlang[1] = l[1]; fallback = envlang; } }
         lang = say_language(text, len, fallback);
     }
-    if (strcmp(lang, "es") && strcmp(lang, "en") && strcmp(lang, "pt")) lang = "en";    /* the languages LordOS has voices for */
+    if (strcmp(lang, "es") && strcmp(lang, "en") && strcmp(lang, "pt")) lang = "en";    /* the languages Insane OS has voices for */
     if (!quality) quality = conf_quality[0] ? conf_quality : "auto";
     if (strcmp(quality, "auto") && strcmp(quality, "standard") && strcmp(quality, "hd")) die("quality is auto, standard or hd", quality);
     const char *roots[2] = { user_root, ROOTS_SYS };

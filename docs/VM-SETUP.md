@@ -1,4 +1,4 @@
-# LordOS development VM (Proxmox)
+# Insane OS development VM (Proxmox)
 
 A reproducible log of every step applied to the VM. Rule: start from minimal Debian 13
 and write down **every** package or change added here.
@@ -78,7 +78,7 @@ Result: kernel `6.12.111+deb13-amd64`, `virtio_gpu` module loaded,
 | `nodejs`                | 20.19.2     | building the React shell         |
 | `foot`                  | 1.21.0      | Wayland terminal for testing     |
 
-> Note: these versions were surveyed before deciding on our own architecture. LordOS does **not**
+> Note: these versions were surveyed before deciding on our own architecture. Insane OS does **not**
 > use wlroots, WebKit or cog (see `ARCHITECTURE.md`). `foot` will be useful to test M4.
 
 ## Step 3 — Toolchain (the only install for M1)
@@ -93,7 +93,7 @@ There is no `rsync` on the VM; the code is copied with `tar` over SSH:
 
 ```sh
 COPYFILE_DISABLE=1 tar czf - --exclude build server | \
-  ssh lord@172.17.0.51 'mkdir -p ~/LordOS && cd ~/LordOS && tar xzf - && make -C server'
+  ssh lord@172.17.0.51 'mkdir -p ~/Insane OS && cd ~/Insane OS && tar xzf - && make -C server'
 ```
 
 ## Step 4 — Test M1 and capture the screen
@@ -128,8 +128,8 @@ On the development machine: `npm install && npm run build` (generates `themes/de
 
 ```sh
 COPYFILE_DISABLE=1 tar czf - --no-xattrs --exclude build --exclude node_modules --exclude legacy \
-  server third_party assets themes | ssh lord@172.17.0.51 'cd ~/LordOS && tar xzf - && make -C server -j4'
-# on the VM, from ~/LordOS/server:
+  server third_party assets themes | ssh lord@172.17.0.51 'cd ~/Insane OS && tar xzf - && make -C server -j4'
+# on the VM, from ~/Insane OS/server:
 sudo ./build/lord-server [--profile]      # --profile: per-primitive timings and % repainted
 ```
 
@@ -168,7 +168,7 @@ printf '123456789日本語\r\n' | server/build/vt-dump 10 3 7 3    # reflow with
 ```
 
 Typing into the VM from the Proxmox host (`tools/lord-type.py`, copied to `/root/`; it needs
-the US layout in LordOS, the ES/US button in the menu bar):
+the US layout in Insane OS, the ES/US button in the menu bar):
 
 ```sh
 python3 /root/lord-type.py 115 'ls --color=always\n'
@@ -184,7 +184,7 @@ QEMU USB Tablet (`event3`, the one the noVNC console uses).
 
 ## Step 9 — M4: full terminal (fonts, shells, tmux)
 
-Packages installed **only to test** Terminal features (LordOS doesn't need them
+Packages installed **only to test** Terminal features (Insane OS doesn't need them
 to work; if they are missing, those features aren't offered or fall back):
 
 ```sh
@@ -205,7 +205,7 @@ Restarting the server **without losing the terminals** (the shells stay in their
 
 ```sh
 sudo pkill -x lord-server        # SIGTERM: saves screens and leaves the shells alive
-cd ~/LordOS/server && sudo setsid -f sh -c "./build/lord-server > /tmp/lord.log 2>&1 < /dev/null"
+cd ~/Insane OS/server && sudo setsid -f sh -c "./build/lord-server > /tmp/lord.log 2>&1 < /dev/null"
 ls /run/user/1000/lordos-term/   # one .sock (and .state) per live session
 ```
 
@@ -225,7 +225,7 @@ sudo apt-get install -y --no-install-recommends libxkbcommon-dev xkb-data libx11
 | `xkb-data` | 2.42 | every keyboard layout |
 | `libx11-data` | 1.8.12 | data only: compose tables (dead keys) in `/usr/share/X11/locale` |
 
-Installed **from LordOS** (Settings → Language & Region, through the privileged helper) during
+Installed **from Insane OS** (Settings → Language & Region, through the privileged helper) during
 the tests: the `pt_BR.UTF-8` and `es_AR.UTF-8` regions (`locale-gen`), `/etc/default/locale` =
 `es_AR.UTF-8`, and the packages `manpages-pt-br`, `hunspell-pt-br`, `aspell-pt-br`, `hyphen-pt-br`
 and `mythes-pt-br`. The time zone was tested by changing it to America/Sao_Paulo and set back to
@@ -274,14 +274,14 @@ sudo apt-get install -y --no-install-recommends libwayland-dev wayland-protocols
 | `wayland-protocols` | 1.44 | xdg-shell and xdg-decoration XML |
 | `libwayland-bin` | 1.23.1 | `wayland-scanner`: generates the protocol code at build time |
 
-Test apps (not needed for LordOS):
+Test apps (not needed for Insane OS):
 
 ```sh
 sudo apt-get install -y --no-install-recommends foot gtk-4-examples featherpad qt6-wayland
 ```
 
 `foot` (Wayland terminal), `gtk4-demo` (GTK 4.18) and `featherpad` (Qt 6.8, with the Wayland
-plugin from `qt6-wayland`). They are opened from a new tab in the LordOS Terminal (or over ssh
+plugin from `qt6-wayland`). They are opened from a new tab in the Insane OS Terminal (or over ssh
 with `WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000`).
 
 ## Step 13 — M7: apps, packages and system services
@@ -325,7 +325,7 @@ sudo apt-get install -y --no-install-recommends wpasupplicant openvpn
 sudo apt-get install -y --no-install-recommends hostapd dnsmasq-base iw wireguard-tools
 ```
 
-LordOS launches `wpa_supplicant` and `openvpn` with their fixed path and a config it generates. The
+Insane OS launches `wpa_supplicant` and `openvpn` with their fixed path and a config it generates. The
 Wi-Fi tests use the `mac80211_hwsim` module and the VPN and DHCP tests use network namespaces: they never
 touch eth0.
 
@@ -360,7 +360,7 @@ on 2D virtio-gpu. Details and measurements in `GPU.md`.
 ## Step 14 — M8: live ISO, GPU and test VMs
 
 **Live ISO** (`ISO.md`). At first it was built on VM 115. Since the ISO with lord-sessiond
-(October 16) it is built on **VM 116**, in `~/LordOS-iso`, because 115 is the user's
+(October 16) it is built on **VM 116**, in `~/Insane OS-iso`, because 115 is the user's
 development VM:
 
 ```sh
@@ -385,7 +385,7 @@ it didn't work, because the host has no GPU.
 | 115 | `lordos-dev` | development (172.17.0.51) |
 | 116 | `lordos-gpu` | clone of 115 for the GPU path (172.17.0.52, `vga: virtio`); the user `lord` is in the `kvm` group (`/dev/udmabuf`) |
 | 118 | `lordos-notes` | clone of 115 to test Notes (172.17.0.53; snippet `local:snippets/lordos-notes.yaml`); `wl-clipboard` only for the clipboard tests |
-| 116 | `lordos-gpu` | also, since M8: builds the live ISO (`~/LordOS-iso`, `/var/tmp/lordos-iso`) |
+| 116 | `lordos-gpu` | also, since M8: builds the live ISO (`~/Insane OS-iso`, `/var/tmp/lordos-iso`) |
 | 117 | `lordos-live` | boots the live ISO (4 GB, q35, `vga: virtio`, `audio0: ich9-intel-hda`, OVMF with efidisk or SeaBIOS). Boots from the CD first. It has a 24 GB `scsi0` disk with an old installation from an earlier test |
 | 121 | `lordos-install-tmp` | temporary, already deleted: 24 GB, OVMF, `boot: order=scsi0;ide2`; the ISO was installed there and the installed system's login screen was tested (`qm destroy 121 --purge 1 --destroy-unreferenced-disks 1`) |
 
@@ -425,7 +425,7 @@ sudo cp -r themes assets /usr/local/lib/lordos/ && sudo chown -R root:root /usr/
   Enabled.
 - The first version's `lordos-remote.service` and the hand-launched `lord-server` were removed.
 - `/etc/default/keyboard` with `XKBLAYOUT="us"`: it is the login screen's layout.
-  Without that file it uses `latam`, LordOS's.
+  Without that file it uses `latam`, Insane OS's.
 - **Test users:**
   - `bob` (`useradd -m -s /bin/bash -c "Bob Prueba" bob`);
   - the passwords of `lord` and `bob` are test-only, for logging in through the monitor and the web.
@@ -585,7 +585,7 @@ sudo install -m 755 tests/touchpad-sim/tpsim /usr/local/bin/tpsim
 
 ## Step 16 — M9: documents, printing and scanner (VM 116)
 
-On **VM 116** (172.17.0.52), in a separate folder, `~/LordOS-m9`: `~/LordOS-iso` and its build
+On **VM 116** (172.17.0.52), in a separate folder, `~/Insane OS-m9`: `~/Insane OS-iso` and its build
 environment were not touched.
 
 **To build `lord-doc`** (the documents helper, `DOCUMENTS.md`):
@@ -635,28 +635,28 @@ need a voice model in `~/.local/share/lordos/voice/models/<es|en|pt>/standard.gg
 
 ```sh
 sudo apt-get install -y --no-install-recommends cups printer-driver-cups-pdf cups-ipp-utils avahi-daemon avahi-utils
-sudo usermod -aG lpadmin lord        # manage printers (LordOS administrators have it)
+sudo usermod -aG lpadmin lord        # manage printers (Insane OS administrators have it)
 ```
 
 | Package | Version | What for |
 |---|---|---|
-| `cups` (`cups-daemon`, `cups-client`, `cups-filters`…) | 2.4.10 | the queue and the drivers; LordOS speaks IPP to it over `/run/cups/cups.sock` |
+| `cups` (`cups-daemon`, `cups-client`, `cups-filters`…) | 2.4.10 | the queue and the drivers; Insane OS speaks IPP to it over `/run/cups/cups.sock` |
 | `printer-driver-cups-pdf` | 3.0.2 | tests only: the virtual «PDF» printer (it leaves jobs in `~/PDF/`) |
 | `cups-ipp-utils` | 2.4.10 | tests only: `ippeveprinter`, an IPP Everywhere printer "on the network" |
 | `samba`, `nfs-kernel-server` | 0.8.7 | VM 125, for an hour on 2026-10-31: the test servers of Files → Network, inside a network namespace, with every unit masked so nothing listened on the LAN; purged afterwards (`FILES.md`, "Network") |
-| `avahi-daemon`, `avahi-utils` | 0.8 | CUPS announces and finds printers; in the tests, announcing the scanner (`avahi-publish`). LordOS's mDNS doesn't need it |
+| `avahi-daemon`, `avahi-utils` | 0.8 | CUPS announces and finds printers; in the tests, announcing the scanner (`avahi-publish`). Insane OS's mDNS doesn't need it |
 | `libarchive-tools`, `zstd` | 3.7.4, 1.5.7 | tests only: building `.7z` and `.tar.zst` in `tests/doc_evil.sh` |
 | `strace` | — | only for debugging the helper |
 
 **Test emulators** (temporary systemd units, as the user `lord`):
 
 ```sh
-sudo systemd-run --unit=lord-test-ipp --uid=lord ippeveprinter -p 8631 -M LordOS \
+sudo systemd-run --unit=lord-test-ipp --uid=lord ippeveprinter -p 8631 -M Insane OS \
   -m "Impresora IPP de prueba" -l "Oficina 2" -f application/pdf,image/pwg-raster,image/jpeg \
   -d /tmp/ippeve "Impresora de la oficina"
-sudo systemd-run --unit=lord-test-escl --uid=lord python3 -I ~/LordOS-m9/server/tests/escl_server.py 8090
+sudo systemd-run --unit=lord-test-escl --uid=lord python3 -I ~/Insane OS-m9/server/tests/escl_server.py 8090
 sudo systemd-run --unit=lord-test-escl-mdns --uid=lord avahi-publish -s "Escáner de prueba" \
-  _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba LordOS"
+  _uscan._tcp 8090 "rs=eSCL" "ty=Escáner de prueba Insane OS"
 ```
 
 **The session on VM 116**, as in step 15:
@@ -752,14 +752,14 @@ See `WINDOWS.md` and `SOUND.md` (Real time). On VM 118 (172.17.0.53):
 - **`lord` in the `pipewire` group** (`usermod -aG pipewire lord` and `systemctl restart user@1000`):
   real-time PipeWire, as in the ISO.
 - **Virtual tablet for measuring:** `~/uinput-ventanas-118.py`, which runs as root. It creates the tablet
-  «LordOS prueba tableta» and is driven through `/run/uinput-ventanas` (`move X Y`, `down`, `up`,
+  «Insane OS prueba tableta» and is driven through `/run/uinput-ventanas` (`move X Y`, `down`, `up`,
   `drag X Y sec hz radius`). It has to exist before the session takes the monitor.
   - The QMP mouse drops events above ~20 per second.
   - With `mouse_set 3` (QEMU monitor) the QMP mouse is the USB tablet and not the VMMouse.
 - **Test files:**
   - `~/tono-ventanas.wav` (a 5-minute tone);
   - `~/antes-ventanas/` (the old themes, to measure the "before");
-  - `~/LordOS-antes` (the tree without motion coalescing).
+  - `~/Insane OS-antes` (the tree without motion coalescing).
 - **GPU path with llvmpipe:**
   `/etc/systemd/system/lordos.service.d/gpu-ventanas.conf` with `Environment=LORD_GPU=1`. It was added
   only for measuring and removed.
@@ -798,7 +798,7 @@ See `FIREWALL.md`, step 2. On VM 122 (172.17.0.56), which already had `lord-sess
   - destinations: the gateway (TCP 53), 127.0.0.1, example.com and www.debian.org. Nothing large was
     downloaded from the internet.
 - **No network touched:** neither eth0 nor nftables rules. The hooks are cgroup hooks and only
-  reach the apps in LordOS sessions.
+  reach the apps in Insane OS sessions.
 - **`systemd-run --user` escape (M8 follow-up, no new packages).** `lord-netperm` now also attaches
   to each session user's `user@<uid>.service` and applies the per-user restriction union there (see
   `FIREWALL.md`, «Escape via `systemd-run --user`»). Tested as the restricted app `desktop:aisla`
@@ -818,16 +818,16 @@ See `FIREWALL.md`, step 2. On VM 122 (172.17.0.56), which already had `lord-sess
   - `/etc/chromium/master_preferences` with `"custom_chrome_frame": false` (the original was kept as
     `master_preferences.orig-ventanas`);
   - `/etc/firefox-esr/lordos.js` with `pref("browser.tabs.inTitlebar", 0)`;
-  - `assets/gtk/LordOS*` copied to `/usr/share/themes/`.
+  - `assets/gtk/Insane OS*` copied to `/usr/share/themes/`.
 
 
 ## Step — M9: Passwords and the system keyring (VM 116 `lordos-gpu`)
 
-See `PASSWORDS.md`. Everything was built in a new folder, `~/LordOS-pw` (the workers used
-`~/LordOS-pw-ctap`, `~/LordOS-pw-dbus`, `~/LordOS-pw-kdbx` and `~/LordOS-pw-qr`); `~/LordOS-iso`
-and `~/LordOS-m9` were not touched.
+See `PASSWORDS.md`. Everything was built in a new folder, `~/Insane OS-pw` (the workers used
+`~/Insane OS-pw-ctap`, `~/Insane OS-pw-dbus`, `~/Insane OS-pw-kdbx` and `~/Insane OS-pw-qr`); `~/Insane OS-iso`
+and `~/Insane OS-m9` were not touched.
 
-- **Deploy:** `make -C server` in `~/LordOS-pw`, then `lord-server`, `lord-sessiond`,
+- **Deploy:** `make -C server` in `~/Insane OS-pw`, then `lord-server`, `lord-sessiond`,
   `lord-vault` (new) and `lord-doc` installed into `/usr/local/lib/lordos/bin` (root, 755), and
   `themes/` and `assets/` copied to `/usr/local/lib/lordos/`. Restarting the service needs the
   sessions killed first (`KillMode=process`): `systemctl stop lordos`, `pkill -x lord-server`,
@@ -842,8 +842,8 @@ and `~/LordOS-m9` were not touched.
   | `libsecret-tools` (+ `libsecret-1-0`) | 0.21.7-1 | `secret-tool` against our Secret Service |
   | `chromium` | 155.0.8059.79-1~deb13u1 | saving and autofilling a login through the Secret Service |
   | `keepassxc-minimal` | 2.7.10+dfsg1-1 | creating the KDBX test files (`server/tests/import/`) |
-  | `python3-venv` | 3.13.5-1 | a venv in `~/LordOS-pw-kdbx/venv` with pykeepass 4.2.0 for KDBX 4 variants |
-  | `libavcodec-dev`, `libavformat-dev`, `libavutil-dev`, `libswscale-dev`, `libswresample-dev` | Debian 13 | building `lord-media`, so LordOS screenshots work for the protected-window capture |
+  | `python3-venv` | 3.13.5-1 | a venv in `~/Insane OS-pw-kdbx/venv` with pykeepass 4.2.0 for KDBX 4 variants |
+  | `libavcodec-dev`, `libavformat-dev`, `libavutil-dev`, `libswscale-dev`, `libswresample-dev` | Debian 13 | building `lord-media`, so Insane OS screenshots work for the protected-window capture |
 
 - **FIDO2:** `/etc/udev/rules.d/71-lordos-fido.rules` (the rule in `PASSWORDS.md`); the software
   authenticator `server/build/softfido` (from `tests/fido-soft/softfido.c`) runs as root on
@@ -882,7 +882,7 @@ RAM and disappears on reboot.
   `/usr/lib/x86_64-linux-gnu`, then `ldconfig`). They aren't installed with `apt`.
 - **Binaries:** built in a `debian:trixie` container with the `-dev` packages of steps 16 and 19.
 - **Sample content** in `/home/lordos`: generated photos in `Imágenes` (with `Viajes` and `Familia`
-  subfolders), `Documentos/Guia-LordOS.pdf` (5 pages with an outline), five notes in `Notas`, a
+  subfolders), `Documentos/Guia-Insane OS.pdf` (5 pages with an outline), five notes in `Notas`, a
   small project in `Proyectos/lordos-demo`, and the Arabic test pack in
   `~/.local/share/lordos/locales/ar`.
 - **Screenshots:** a scratch-only harness (never in the repo) bundled into the test theme. F9/F8
@@ -952,7 +952,7 @@ isolated app»). On VM 122 (172.17.0.56):
 See `SETTINGS.md`. On VM 118 (172.17.0.53), which already had `lord-sessiond` with
 `AUTOLOGIN=lord` (step 18):
 
-- **Tree and install:** a copy in `~/LordOS-ajustes` (sent with `tar` over ssh; the VM has no
+- **Tree and install:** a copy in `~/Insane OS-ajustes` (sent with `tar` over ssh; the VM has no
   rsync), built there and installed as root into `/usr/local/lib/lordos/{bin,themes,assets}`; the
   session restarts with `systemctl kill -s KILL --kill-whom=all lordos`, `reset-failed`,
   `rm /run/lordos/autologin-done` and `start`.
@@ -979,10 +979,10 @@ See `SETTINGS.md`. On VM 118 (172.17.0.53), which already had `lord-sessiond` wi
 ## Step 23 — M9 system apps and `lord-netd` (VM 119 `lordos-spot`)
 
 See `SYSTEM.md` (Disks, Backups, Logs, Clock, Help) and `NETWORK.md` ("The network belongs to the
-system"). VM 119 still runs LordOS installed like the `.deb` (step 19). It was not reinstalled from
+system"). VM 119 still runs Insane OS installed like the `.deb` (step 19). It was not reinstalled from
 the ISO.
 
-**Deploy:** the tree is copied to `~/LordOS-sis` (only changed files, so `make` never keeps stale
+**Deploy:** the tree is copied to `~/Insane OS-sis` (only changed files, so `make` never keeps stale
 objects), built with `make -C server -j4`, and `lord-server`, `lord-sessiond`, `lord-media` and the
 new `lord-netd` are installed root-owned in `/usr/lib/lordos/bin`, with the themes and `assets`.
 
@@ -1004,7 +1004,7 @@ while processes survived; see `SESSIONS.md`).
 
 `dosfstools` and `e2fsprogs` were already installed.
 
-**Test-only setup (not part of LordOS):**
+**Test-only setup (not part of Insane OS):**
 
 | Item | For |
 |---|---|
@@ -1108,12 +1108,12 @@ screen. Results and screenshots: `docs/qa/` (`all-apps.png`, `settings-pages.png
   file is `session.conf.qa-122.bak`).
 - **Test user:** `qa` («Qa Tester», standard), created from Settings → Users to check a new user's
   defaults.
-- **Tree and scripts:** the tree is synced to `~/LordOS-qa` by the development machine's scratch script
+- **Tree and scripts:** the tree is synced to `~/Insane OS-qa` by the development machine's scratch script
   `sync-qa-122.sh`; screenshots via `qm monitor 122` (`screendump`), mouse via
   `/root/lord-qmp-input.py 122`, typing via `/root/lord-type.py 122`. Network untouched.
 - **QA fixes (login screen, `make test` runner):** `unicode-data` installed with apt so
   `tests/run_suites.sh` finds `/usr/share/unicode/BidiCharacterTest.txt` (the bidi conformance suite).
-  The fixes were built in a separate copy, `~/LordOS-qafix-122`. The new `lord-sessiond` and the
+  The fixes were built in a separate copy, `~/Insane OS-qafix-122`. The new `lord-sessiond` and the
   greeter bundle are installed in `/usr/lib/lordos` (the package's originals are kept as
   `*.qafix-122.bak`). To test "last user", `qa` was shown once through a one-time
   `AUTOLOGIN=qa` (restored to `AUTOLOGIN=` right away) and its session was then ended, which follows
@@ -1121,7 +1121,7 @@ screen. Results and screenshots: `docs/qa/` (`all-apps.png`, `settings-pages.png
 
 ## Step 26 — Firewall restrictions for Linux apps (VM 119, October 18)
 
-See `FIREWALL.md`, "Linux apps". Tree in `~/LordOS-fwlinux`, built there (`make -C server -j8`,
+See `FIREWALL.md`, "Linux apps". Tree in `~/Insane OS-fwlinux`, built there (`make -C server -j8`,
 `make -C server test`: 23 passed, 2 skipped).
 
 - **Packages (tests only):** `strace` (the GTK app's file opens in `tests/fwlinux/files.sh`),
@@ -1141,7 +1141,7 @@ See `FIREWALL.md`, "Linux apps". Tree in `~/LordOS-fwlinux`, built there (`make 
 
 ## Step 27 — Remote login (SSH) in Settings → Sharing (VM 122 `lordos-sandbox`, October 18)
 
-See `REMOTE.md`, "Remote login (SSH)". Tree in `~/LordOS-ssh` (sent with `tar`), only
+See `REMOTE.md`, "Remote login (SSH)". Tree in `~/Insane OS-ssh` (sent with `tar`), only
 `make -C server build/lord-server`; that `lord-server`, the three theme bundles, `app-host` and
 `assets/locales` were installed over `/usr/lib/lordos` after saving the previous ones.
 
@@ -1150,17 +1150,17 @@ See `REMOTE.md`, "Remote login (SSH)". Tree in `~/LordOS-ssh` (sent with `tar`),
   Settings switch through the package engine (`pkg-install`), same version
   (`1:10.0p1-7+deb13u4`).
 - **Changes undone at the end:** the previous `/etc/ssh` (host keys and the cloud image's
-  `sshd_config` with `PasswordAuthentication no`) was restored from a backup, both LordOS drop-ins
+  `sshd_config` with `PasswordAuthentication no`) was restored from a backup, both Insane OS drop-ins
   were removed and `ssh.service` was enabled again, so other agents' SSH access and known host
   keys are unchanged. `lord` was taken out of `sudo` for the standard-user test and put back. The
-  saved `lord-server`, themes and assets were restored and `~/LordOS-ssh` deleted.
+  saved `lord-server`, themes and assets were restored and `~/Insane OS-ssh` deleted.
 - **Side effects:** the VM was rebooted twice (the reboot tests), which ended `bob`'s background
   session; `lord` ends at the login screen. Nothing in the network configuration was touched.
 
 ## Step 28 — Monitor → Network: traffic accounting, chart and map (VM 118 `lordos-notes`, October 18)
 
 See `MONITOR.md` and `FIREWALL.md` ("Traffic accounting"). On VM 118 (172.17.0.53), in its own
-folder `~/LordOS-monred`, installed into `/usr/local/lib/lordos` as in step 15 (the previous
+folder `~/Insane OS-monred`, installed into `/usr/local/lib/lordos` as in step 15 (the previous
 `/usr/local/lib/lordos` was saved in `/var/tmp/lordos-backup-monred` and put back at the end).
 
 - **Installed, tests only:** `iperf3` 3.18 (`apt-get install --no-install-recommends iperf3`; its
@@ -1177,10 +1177,10 @@ folder `~/LordOS-monred`, installed into `/usr/local/lib/lordos` as in step 15 (
 
 ## Step 29 — 0.8.2: immutable (A/B) prototype (VM 122 `lordos-sandbox`, October 19)
 
-See `IMMUTABLE.md`, "The prototype". On VM 122 (172.17.0.56), in its own folder `~/LordOS-inmut3`
+See `IMMUTABLE.md`, "The prototype". On VM 122 (172.17.0.56), in its own folder `~/Insane OS-inmut3`
 (only `tools/immutable/`) and the work folder `/var/tmp/lordos-immutable` (base tree, images,
 throwaway test key). The test images boot in **QEMU inside the VM** (nested KVM, OVMF): the VM's own
-disk, boot, network and LordOS installation were not touched.
+disk, boot, network and Insane OS installation were not touched.
 
 - **Installed** (`apt-get install --no-install-recommends`): `debootstrap`, `systemd-repart`,
   `systemd-ukify`, `systemd-boot-efi`, `systemd-boot-tools`, `cryptsetup-bin`, `erofs-utils`,
@@ -1194,7 +1194,7 @@ disk, boot, network and LordOS installation were not touched.
   space). Nothing else changed.
 ## Step 30 — New wallpapers (VM 123 `lordos-monitor`, October 19)
 
-Tree in `~/LordOS-wp`, built there (`make -C server -j4`, `make -C server test`: 23 passed,
+Tree in `~/Insane OS-wp`, built there (`make -C server -j4`, `make -C server test`: 23 passed,
 3 skipped). Nothing was installed with apt.
 
 - **Deployment, temporary:** `/usr/local/lib/lordos` was copied to `lordos.wp123-bak`, the new
@@ -1214,7 +1214,7 @@ Tree in `~/LordOS-wp`, built there (`make -C server -j4`, `make -C server test`:
 
 See `MONITOR.md` ("Disk temperature and health") and `SYSTEM.md` ("SMART with smartmontools").
 
-- **Deploy:** the `v082-disks` tree built in `~/LordOS-dt082`; only `lord-server`, the themes and
+- **Deploy:** the `v082-disks` tree built in `~/Insane OS-dt082`; only `lord-server`, the themes and
   `assets/locales` were installed in `/usr/lib/lordos`, after a backup
   (`/var/tmp/disktemp082-backup/lordos-before.tgz`), and put back from it afterwards.
 - **Test user:** `disktest` ("Disk Test", in the `sudo` group, a test-only password), created so the
@@ -1231,8 +1231,8 @@ See `MONITOR.md` ("Disk temperature and health") and `SYSTEM.md` ("SMART with sm
 ## Step 32 — Monitor → Network: per-destination switches, traffic history, several damaged rectangles (VM 119 `lordos-spot`, October 19)
 
 See `MONITOR.md` ("Per-destination switches", "Traffic history", "0.8.2: several damaged
-rectangles"). On VM 119 (172.17.0.54), built in its own folders (`~/LordOS-monred`, plus
-`~/LordOS-before` from `origin/main` and instrumented copies for the measurements), all deleted at
+rectangles"). On VM 119 (172.17.0.54), built in its own folders (`~/Insane OS-monred`, plus
+`~/Insane OS-before` from `origin/main` and instrumented copies for the measurements), all deleted at
 the end.
 
 - **Installed:** `linux-perf` (`apt-get install --no-install-recommends linux-perf`), to find where
@@ -1258,7 +1258,7 @@ the end.
 ## Step 33 — Mail, Calendar, Contacts and Reminders in their own process (VM 118 `lordos-notes`, October 19)
 
 See `PRIVACY.md` ("System apps in their own process"). On VM 118 (172.17.0.53), tree in
-`~/LordOS-inmut2`, built there and installed into `/usr/local/lib/lordos` (`lord-server`,
+`~/Insane OS-inmut2`, built there and installed into `/usr/local/lib/lordos` (`lord-server`,
 `lord-sessiond`, and `lord-maild` and `lord-vault`, which this VM's install didn't have, plus themes
 and assets) by `~/inst-inmut2-118.sh`; the previous tree was saved in
 `~/inmut2-backup-20261019/lordos` and put back at the end (files that only the new build added were
@@ -1287,7 +1287,7 @@ See `WAYLAND.md` ("X11 apps (Xwayland)") and `PRIVACY.md` ("X11 apps"). Installe
 
 | Package | What for |
 |---|---|
-| `xwayland` 2:24.1.6 | X11 apps (the only one LordOS needs; it brings `xserver-common`, `x11-xkb-utils`) |
+| `xwayland` 2:24.1.6 | X11 apps (the only one Insane OS needs; it brings `xserver-common`, `x11-xkb-utils`) |
 | `xterm`, `x11-apps` (xeyes, xwd), `x11-utils` (xprop, xwininfo, xev) | test apps and X inspection |
 | `xclip`, `xinput`, `xdotool` | clipboard tests, the keyboard-snoop test (`tests/xwayland/keysnoop.sh`) and reading the X pointer (XTEST is off, so `xdotool` can't type) |
 | `openjdk-21-jdk-headless`, `openjdk-21-jre` | the Swing test app (`~/xwl-tests/SwingTest.java`, a `.desktop` with `StartupWMClass=SwingTest`, removed after the tests) |
@@ -1299,13 +1299,13 @@ See `WAYLAND.md` ("X11 apps (Xwayland)") and `PRIVACY.md` ("X11 apps"). Installe
   (llvmpipe), removed afterwards.
 - Input: a uinput tablet+keyboard (`~/uinput-xwl-118.py`, the same as the earlier steps' scripts)
   mapped to the whole desktop (2987×1067 on this VM's two displays).
-- The installed LordOS was backed up to `~/xwayland-backup-20261019` and restored after the tests;
+- The installed Insane OS was backed up to `~/xwayland-backup-20261019` and restored after the tests;
   `firewall.json` was restored too.
 
 ## Step 35 — The Classic theme as a second full appearance (VM 119 `lordos-spot`, October 19)
 
-See `DESIGN.md` ("Lord Classic") and `WINDOWS.md` ("Snapping"). On VM 119 (172.17.0.54), tree in
-`~/LordOS-classic`, built there (`make -C server`, `make -C server test`) and installed into
+See `DESIGN.md` ("Insane Classic") and `WINDOWS.md` ("Snapping"). On VM 119 (172.17.0.54), tree in
+`~/Insane OS-classic`, built there (`make -C server`, `make -C server test`) and installed into
 `/usr/lib/lordos` (`lord-server`, `lord-media`, `lord-vault`, `lord-maild`, the theme bundles, the
 app host, the system apps, `assets/{fonts,locales,shell,icons,mascot,monitor,help}` and the wallpaper
 JPEGs under `assets/wallpapers`, which this older install didn't have) by `~/deploy-classic-119.sh`.
@@ -1325,13 +1325,13 @@ The installed tree was saved first in `/var/backups/lordos-classic-bak` and put 
 - **Undone at the end:** `/usr/lib/lordos` put back from the backup (the files the deploy added
   removed, the rest copied back; `diff -r` against the backup empty, then the backup deleted),
   `~/.config/lordos/settings.json` restored from its copy, `~/.cache/lordos-shot*.json`,
-  `~/shot-harness`, `~/deploy-classic-119.sh` and `~/LordOS-classic` deleted. The VM ends at the
+  `~/shot-harness`, `~/deploy-classic-119.sh` and `~/Insane OS-classic` deleted. The VM ends at the
   login screen.
 
 ## Step 36 — Remote desktop security review (VM 122 `lordos-sandbox`, October 19)
 
 See `REMOTE.md`, "Security analysis (0.8.3)". On VM 122 (172.17.0.56), tree in
-`~/LordOS-remotesec`, built there (`make -C server`, `make -C server test`) and installed over the
+`~/Insane OS-remotesec`, built there (`make -C server`, `make -C server test`) and installed over the
 package's files by `~/deploy-remotesec-122.sh` (it saved `/usr/lib/lordos`, `/etc/lordos` and
 `/var/lib/lordos/remote` to `/var/backups/lordos-remotesec-20261019` first).
 
@@ -1354,7 +1354,7 @@ package's files by `~/deploy-remotesec-122.sh` (it saved `/usr/lib/lordos`, `/et
 
 See `ISO.md`, "Release test (0.8.3 Beta, October 19)".
 
-- **VM 116:** the release tree in `~/LordOS-iso`, built there; ISO and `.deb` in
+- **VM 116:** the release tree in `~/Insane OS-iso`, built there; ISO and `.deb` in
   `/var/tmp/lordos-iso/out/` (the 0.8.0 and 0.8.1 ISOs there were removed to make room: identical
   copies are in Proxmox's `local:iso`). Nothing installed.
 - **Proxmox:** `local:iso/lordos-live-0.8.3-amd64.iso` added. A temporary typing helper in the
@@ -1366,7 +1366,7 @@ See `ISO.md`, "Release test (0.8.3 Beta, October 19)".
   and disks as before: the earlier "Test User" installs, at the login screen) and the snapshots
   deleted.
 - **Raspberry Pi 5 (172.17.0.24):** built the arm64 package and the image in
-  `/var/tmp/lordos-src-083` and `/var/tmp/lordos-rpi-v083b`. The installed LordOS went from 0.8.0
+  `/var/tmp/lordos-src-083` and `/var/tmp/lordos-rpi-v083b`. The installed Insane OS went from 0.8.0
   to 0.8.3 with apt: `/usr/share/keyrings/lordos-archive-keyring.gpg` and
   `/etc/apt/sources.list.d/lordos.sources` (the live repository) added, `lordos` 0.8.3 with
   `xwayland` and its 14 dependencies installed, migrations 001–004 applied (002 wrote
@@ -1377,14 +1377,14 @@ See `ISO.md`, "Release test (0.8.3 Beta, October 19)".
 ## Step 38 — 0.8.4: browsers with their own bar (VM 119 `lordos-spot`, October 19)
 
 See `WAYLAND.md` ("Who draws the frame", "The browsers by default"). On VM 119 (172.17.0.54), tree
-in `~/LordOS-csd`, built there (`make -C server`, `make -C server build/deco-client`,
+in `~/Insane OS-csd`, built there (`make -C server`, `make -C server build/deco-client`,
 `make -C server test`) and installed over `/usr/lib/lordos` by `~/deploy-csd-119.sh` (it saved
 `/usr/lib/lordos`, the original `/etc/chromium/master_preferences` and `settings.json` first, in
 `/var/backups/lordos-csd-bak`).
 
 - **Installed for the tests:** `gsettings-desktop-schemas` (the ISO has it; without it GTK 3 can't
   read the theme and the button layout from the keyfile backend, and Chromium's GTK theme shows
-  Adwaita's buttons on the right), removed at the end. `assets/gtk/LordOS*` copied to
+  Adwaita's buttons on the right), removed at the end. `assets/gtk/Insane OS*` copied to
   `/usr/share/themes/` (the package does that), removed at the end.
 - **Session:** `/etc/lordos/session.conf` with `AUTOLOGIN=lord` (it didn't exist; removed at the
   end), English, light, Lord Default in `settings.json` (restored at the end).
@@ -1406,12 +1406,12 @@ in `~/LordOS-csd`, built there (`make -C server`, `make -C server build/deco-cli
 
 ## Step 39 — 0.8.4: the browsers' title bar switch in Settings (VM 119 `lordos-spot`, October 19)
 
-See `WAYLAND.md` ("The switch in Settings"). On VM 119 (172.17.0.54), tree in `~/LordOS-brs` (copied
+See `WAYLAND.md` ("The switch in Settings"). On VM 119 (172.17.0.54), tree in `~/Insane OS-brs` (copied
 with `tar` over SSH: the VM has no `rsync`), built there (`make -C server`, `make -C server test`)
 and installed over `/usr/lib/lordos` by `~/deploy-brs-119.sh` (it saved `/usr/lib/lordos` to
 `/var/backups/lordos-brs-bak` and `settings.json` to `/var/tmp` first).
 
-- **Installed for the tests,** as in step 38: `gsettings-desktop-schemas` and `assets/gtk/LordOS*` in
+- **Installed for the tests,** as in step 38: `gsettings-desktop-schemas` and `assets/gtk/Insane OS*` in
   `/usr/share/themes/` (Chromium's GTK theme needs them for the traffic lights); both removed at the
   end.
 - **Session:** `/etc/lordos/session.conf` with `AUTOLOGIN=lord` (it didn't exist; removed at the
@@ -1430,9 +1430,9 @@ and installed over `/usr/lib/lordos` by `~/deploy-brs-119.sh` (it saved `/usr/li
   - **Firefox:** `lord` already had two Firefox ESR profiles in `~/.config/mozilla/firefox` from
     October 16 (not checked before the first toggle, so the switch wrote to them): `user.js` lines
     and `user.js.lordos-backup` files, and Firefox ran three times on `eb7mmslg.default-esr` (its
-    normal session files changed; `prefs.js` got `browser.tabs.inTitlebar`). At the end LordOS's
+    normal session files changed; `prefs.js` got `browser.tabs.inTitlebar`). At the end Insane OS's
     files were removed from both profiles (`user.js`, `user.js.lordos-backup`; Firefox never creates a `user.js`, and both
-    backups held only LordOS's line) and the `inTitlebar` line removed from
+    backups held only Insane OS's line) and the `inTitlebar` line removed from
     `prefs.js` with Firefox closed, so it follows the default again.
 - **Input and screenshots:** `lord-qmp-input.py 119 1280 800` from the host, `screendump` holding
   `flock /tmp/sistema-119-screen.lock`.
@@ -1444,7 +1444,7 @@ and installed over `/usr/lib/lordos` by `~/deploy-brs-119.sh` (it saved `/usr/li
 
 ## Step 40 — 0.8.4: remote desktop over WebRTC (VM 122 `lordos-sandbox`, October 19)
 
-See `REMOTE.md`, "Video (WebRTC)". On VM 122 (172.17.0.56), tree in `~/LordOS-rtc` (synced from the
+See `REMOTE.md`, "Video (WebRTC)". On VM 122 (172.17.0.56), tree in `~/Insane OS-rtc` (synced from the
 Mac's `v084-rtc` worktree by a script of its own name, `sync-rtc-122.sh`, kept outside the repo),
 built there (`make -C server`, `make -C server test`) and installed over the package's files by
 `~/deploy-rtc-122.sh`, which saved `/usr/lib/lordos`, `/etc/lordos` and `/var/lib/lordos/remote` to
@@ -1478,7 +1478,7 @@ were built on the Mac (the VM has no Node).
 
 ## Step 41 — 0.8.4: the Pi kernel with socket destroy (VM 116 and the Raspberry Pi, October 19)
 
-See `RASPBERRY.md` ("The LordOS kernel", "Switching kernels on a board") and `FIREWALL.md`
+See `RASPBERRY.md` ("The Insane OS kernel", "Switching kernels on a board") and `FIREWALL.md`
 ("Existing connections are cut").
 
 - **VM 116 (172.17.0.52), cross build:** installed `gcc-aarch64-linux-gnu` and
@@ -1510,9 +1510,9 @@ See `RASPBERRY.md` ("The LordOS kernel", "Switching kernels on a board") and `FI
     (this board's lacks `cgroup_enable=memory`, so `verify-board` reports the memory controller as
     FAIL; the image's has it).
 
-## Step 42 — 0.8.4: LordOS Imager (VM 116 `lordos-gpu`, October 19)
+## Step 42 — 0.8.4: Insane OS Imager (VM 116 `lordos-gpu`, October 19)
 
-See `IMAGER.md`. Tree in `~/LordOS-imager`, built there (`make -C server`, `make -C server test`:
+See `IMAGER.md`. Tree in `~/Insane OS-imager`, built there (`make -C server`, `make -C server test`:
 23 passed, the imager suites included) and installed over `/usr/local/lib/lordos` by
 `~/deploy-imager-116.sh`, which first saved `/usr/local/lib/lordos` and lord's `settings.json` in
 `/var/backups/lordos-imager-bak`.
@@ -1531,10 +1531,10 @@ See `IMAGER.md`. Tree in `~/LordOS-imager`, built there (`make -C server`, `make
 - **Session:** `/etc/lordos/session.conf` with `AUTOLOGIN=lord` (it didn't exist) and lord's
   `settings.json` set to English, both put back at the end; the locked `pwtest` session from an earlier
   test was ended by the service restarts.
-- **The Linux download (Tauri) inside the LordOS session:** installed for the test only
+- **The Linux download (Tauri) inside the Insane OS session:** installed for the test only
   `libwebkit2gtk-4.1-0` and `udisks2` with their dependencies (61 packages, listed in
   `~/ImagerTest/linux-test-packages.txt`), and `/etc/polkit-1/rules.d/49-lordos-imager-test.rules`
-  allowing `lord` the udisks2 open/mount/eject actions (the LordOS session has no polkit agent to
+  allowing `lord` the udisks2 open/mount/eject actions (the Insane OS session has no polkit agent to
   ask); the app ran as a Wayland client with `WAYLAND_DISPLAY=wayland-0`. All of it was removed at
   the end (`apt-get purge` of those packages, then the rule).
 - **Screenshots** with `qm monitor 116` (`screendump`) from the Proxmox host, the pointer with
@@ -1543,20 +1543,20 @@ See `IMAGER.md`. Tree in `~/LordOS-imager`, built there (`make -C server`, `make
   lord's `settings.json` restored, `lordos.service` restarted to the login screen; the gadget
   unloaded (`rmmod g_mass_storage dummy_hcd`), the bind mount and the scratch mount removed, and the
   scratch disk detached and deleted from the VM (`qm set 116 --delete scsi1`, then the unused volume
-  removed); `~/ImagerTest`, `~/.cache/lordos/imager`, `~/.config/LordOS Imager` and the test key and
-  image files deleted. `~/LordOS-imager` (the tree) is kept, like the other agents' trees. No network
+  removed); `~/ImagerTest`, `~/.cache/lordos/imager`, `~/.config/Insane OS Imager` and the test key and
+  image files deleted. `~/Insane OS-imager` (the tree) is kept, like the other agents' trees. No network
   or Proxmox setting other than the scratch disk was touched.
 
 ## Step 43 — 0.8.4: the remote desktop WebRTC only (VM 122 `lordos-sandbox`, October 19)
 
 See `REMOTE.md`, "Video (WebRTC)", "ICE over TCP", "Reconnecting" and "When it can't connect". On
-VM 122 (172.17.0.56), tree in `~/LordOS-rtc2` (copied from the Mac's `v084-rtc-only` worktree with
+VM 122 (172.17.0.56), tree in `~/Insane OS-rtc2` (copied from the Mac's `v084-rtc-only` worktree with
 `tar` over SSH: the VM has no `rsync`), built there (`make -C server`, `make -C server test`) and
 installed over the package's files by `~/deploy-rtc2-122.sh`, which needed the backup of
 `/usr/lib/lordos`, `/etc/lordos`, `/var/lib/lordos/remote`, `/var/lib/lordos/last-user`, the
 `iptables-save` output and the package selections in `/var/backups/lordos-rtc2-20261019` first
 (`~/restore-rtc2-122.sh` put them back). The theme bundles were built on the Mac (the VM has no Node).
-For the before/after measurements, `main`'s `server/` was built in `~/LordOS-rtc2-base` and its three
+For the before/after measurements, `main`'s `server/` was built in `~/Insane OS-rtc2-base` and its three
 binaries installed for one round, then this branch's again.
 
 - **Installed for the build:** `libsrtp2-dev` and `libusrsctp-dev` (with `libsrtp2-1`, `libusrsctp2`,
@@ -1598,7 +1598,7 @@ See `ISO.md`, "Release test (0.8.4 Beta, October 19–25)".
 
 - **VM 116:** installed `libsrtp2-dev` and `libusrsctp-dev` (with `libsrtp2-1`, `libusrsctp2`,
   `libnss3-dev`, `libnspr4-dev`), which `lord-sessiond` now needs; they stay, for the next release
-  builds. The release tree in `~/LordOS-iso`, built there; ISO and `.deb` in
+  builds. The release tree in `~/Insane OS-iso`, built there; ISO and `.deb` in
   `/var/tmp/lordos-iso/out/` (the 0.8.2 and 0.8.3 ISOs there were removed to make room: identical
   copies are in Proxmox's `local:iso`), `apt-get clean` run. Left stopped, as it was found on the
   25th.
@@ -1615,7 +1615,7 @@ See `ISO.md`, "Release test (0.8.4 Beta, October 19–25)".
   `libusrsctp2`, `libnss3-dev`, `libnspr4-dev`) for the native build. Removed the old image work
   folders `/var/tmp/lordos-rpi-v081` (an unpublished 0.8.1 build) and `-v082b` (its image is the
   published 0.8.2 one, same SHA-256) to make room. Built the arm64 package and the image in
-  `/var/tmp/lordos-src-084` and `/var/tmp/lordos-rpi-v084c`. The installed LordOS went from 0.8.3 to
+  `/var/tmp/lordos-src-084` and `/var/tmp/lordos-rpi-v084c`. The installed Insane OS went from 0.8.3 to
   0.8.4 with apt (from staging, then the source put back on the live repository), migration 005;
   `lordos`, `lord-netperm` and `lord-fand` restarted, no reboot. The firewall cut test ran as root
   with a hand-made `lordos-session-0` cgroup (removed afterwards, with the empty
@@ -1627,7 +1627,7 @@ See `ISO.md`, "Release test (0.8.4 Beta, October 19–25)".
 
 See `ISO.md`, "Release test (0.8.4.1 Beta, October 25)".
 
-- **VM 116:** started (it was stopped); the release tree in `~/LordOS-0841`, built and tested there;
+- **VM 116:** started (it was stopped); the release tree in `~/Insane OS-0841`, built and tested there;
   the `.deb` and its SBOM in `/var/tmp/`. Nothing installed. Left stopped.
 - **VM 120:** a Proxmox snapshot `r0841pre` first; then a fresh 0.8.4 install from the 0.8.4 ISO
   (test user `rtester`, `openssh-server`, a sudoers drop-in, `lordos.sources` on `apt-staging`) and
@@ -1637,7 +1637,7 @@ See `ISO.md`, "Release test (0.8.4.1 Beta, October 25)".
 - **Raspberry Pi 5 (172.17.0.24, the user's TEST SD with the 0.8.4 image):** clock set by hand
   (the image had no time client), `debootstrap`, `xz-utils`, `curl`, `gpg`, `dosfstools`, `fdisk`,
   `dpkg-dev`, `python3`, `dpkg-repack` and `file` installed for the native image build; the
-  installed LordOS kernels repacked with `dpkg-repack` into `/var/tmp/lordos-kernel/out` (`dpkg
+  installed Insane OS kernels repacked with `dpkg-repack` into `/var/tmp/lordos-kernel/out` (`dpkg
   --verify` clean first: the same files as the 0.8.4 image's). Tree in `/var/tmp/lordos-src-0841`,
   image work folder `/var/tmp/lordos-rpi-v0841`. `lordos` 0.8.4 → 0.8.4.1 from staging (then the
   source put back on the live repository). For the Settings test: a test-only account `rtest`
@@ -1649,8 +1649,8 @@ See `ISO.md`, "Release test (0.8.4.1 Beta, October 25)".
 ## Step 46 — Monitor → Network, second generation, for 0.8.5 (VM 118 `lordos-notes`, October 19)
 
 See `MONITOR.md` ("Network, second generation", "The menu bar network item", "Blocklists") and
-`FIREWALL.md` ("LordOS components in their own scopes", "The essential system services",
-"Blocklists"). On VM 118 (172.17.0.53), tree in `~/LordOS-netmon` (copied over SSH with `tar`: the
+`FIREWALL.md` ("Insane OS components in their own scopes", "The essential system services",
+"Blocklists"). On VM 118 (172.17.0.53), tree in `~/Insane OS-netmon` (copied over SSH with `tar`: the
 VM has no rsync), built there (`make -C server`, `make -C server test`, `sudo build/npverify-test`)
 and installed over `/usr/local/lib/lordos` (`lord-server`, `lord-netperm`, the new `lord-fetch`,
 themes and assets) by `~/deploy-netmon-118.sh`, which first saved `/usr/local/lib/lordos` in
@@ -1675,7 +1675,7 @@ was not tested here). Nothing was installed with apt.
 - **Measurements:** `iperf3` (already on this VM since step 28) through a veth pair `npb0`/`npb1`
   into a private namespace `npb` (10.213.7.0/30), deleted after each run; eth0 and the network
   configuration were not touched. For the A/B runs the 0.8.3 `lord-netperm` and main's build
-  (built in `~/LordOS-netmon-base`) were swapped in for a few minutes and the new build put back.
+  (built in `~/Insane OS-netmon-base`) were swapped in for a few minutes and the new build put back.
 - **Input and screenshots:** `lord-qmp-input.py 118 2987 1067` and `lord-type.py 118` from the
   Proxmox host, `screendump` converted to PNG on the development machine.
 - **Undone at the end:** `/usr/local/lib/lordos` restored from the backup (`diff -r` empty), the
@@ -1687,7 +1687,7 @@ was not tested here). Nothing was installed with apt.
 
 ## Step 47 — 0.8.5: System Information's collector (VM 116 `lordos-gpu`, October 26)
 
-See `BENCHMARK.md` ("0.8.5 — System Information"). Built in `~/LordOS-085fs` (`make -C server
+See `BENCHMARK.md` ("0.8.5 — System Information"). Built in `~/Insane OS-085fs` (`make -C server
 build/lordos-sysreport build/sysreport-test`) and run from there as `lord`; nothing was installed
 over `/usr/local/lib/lordos`.
 
@@ -1708,7 +1708,7 @@ over `/usr/local/lib/lordos`.
 
 ## Step — 0.8.5 release: Raspberry Pi kernel and image on VM 116 (2026-10-27)
 
-To cross-build the LordOS Pi 5 kernel (`tools/rpi/build-kernel.sh`, pinned commit
+To cross-build the Insane OS Pi 5 kernel (`tools/rpi/build-kernel.sh`, pinned commit
 `234188315037848e5b07d65b85d38edc64095caa`) and the Pi image (`tools/rpi/build-img.sh`) on the x86-64
 VM 116, as `docs/RASPBERRY.md` lists:
 
@@ -1718,9 +1718,9 @@ sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu libc6-dev-
   qemu-user-static binfmt-support fdisk dosfstools e2fsprogs xz-utils curl gpg util-linux
 ```
 
-## Step — 0.8.6 in development: LordBench on VM 116 (2026-10-27)
+## Step — 0.8.6 in development: InsaneBench on VM 116 (2026-10-27)
 
-See `BENCHMARK.md` ("Built so far"). Built in `~/LordOS-086` (`make -C server`, plus `build/lordbench-cli` to run
+See `BENCHMARK.md` ("Built so far"). Built in `~/Insane OS-086` (`make -C server`, plus `build/lordbench-cli` to run
 it from a terminal) and run from there as `lord`; nothing was installed over `/usr/local/lib/lordos` and no
 package was added. The build uses `xz` (xz-utils, already installed: `dpkg-deb` depends on it) to compress the
 xz workload's fixed text (`build/gen/lb_corpus.h`). The app was checked in an isolated headless session of that
@@ -1741,7 +1741,7 @@ not on the VM and not into the chroot itself.
 
 ## Step — 0.8.8.4 in development: Mail folder tree, issue #28 (VM 116, 2026-11-05)
 
-See `MAIL.md` ("Folders: roles and tree"). Tree in `~/LordOS-i28`, built there (`build/mail-test`,
+See `MAIL.md` ("Folders: roles and tree"). Tree in `~/Insane OS-i28`, built there (`build/mail-test`,
 `build/mail-test-asan`, `build/lord-maild`, `build/maild-cli`, `build/lord-server`), nothing installed over
 `/usr/local/lib/lordos`.
 
@@ -1764,7 +1764,7 @@ See `MAIL.md` ("Folders: roles and tree"). Tree in `~/LordOS-i28`, built there (
 - **Undone at the end:** both instances stopped, those five packages purged (no `dovecot` users left), `~/i28-dc`, the test homes and the screenshots removed.
 ## Step — 0.8.8.4 in development: CalDAV/CardDAV for #32 on VM 116 (2026-11-05)
 
-See `MAIL.md` ("Calendars and contacts accounts", "Measured against Radicale"). Built in `~/LordOS-i32`
+See `MAIL.md` ("Calendars and contacts accounts", "Measured against Radicale"). Built in `~/Insane OS-i32`
 (`make -j2 build/lord-maild build/maild-cli build/mail-test build/mail-test-asan build/mailc-test
 build/mailnet-test build/lord-server`); nothing installed over `/usr/local/lib/lordos`.
 
@@ -1772,22 +1772,22 @@ build/mailnet-test build/lord-server`); nothing installed over `/usr/local/lib/l
    Its system service stays disabled and stopped: the tests run a private instance as `lord`.
 2. **Names:** `127.0.0.1 dav.example.test contacts.example.test` appended to `/etc/hosts` (two names for the
    same server, so the contacts URL is a different host from the calendars URL, as with the large provider).
-3. **Private Radicale** (`~/LordOS-i32/dav-setup.sh`, kept out of the repo): `127.0.0.1:5233`, TLS with a
+3. **Private Radicale** (`~/Insane OS-i32/dav-setup.sh`, kept out of the repo): `127.0.0.1:5233`, TLS with a
    self-signed certificate for both names (the certificate warning and *Trust This Certificate* are part
    of the test), `htpasswd` with plain passwords (test only), `owner_only`, storage under
-   `~/LordOS-i32/dav-test`. Users `ana@example.test` and `beto@example.test`, test-only passwords; their
+   `~/Insane OS-i32/dav-test`. Users `ana@example.test` and `beto@example.test`, test-only passwords; their
    calendars, a weekly event with a moved occurrence, an all-day event, a to-do and six contacts are created
    with `curl` (`MKCOL` / `PUT`). No real account and no outside server were used.
-4. **Runs:** `build/maild-cli` with `HOME=~/LordOS-i32/dav-test/home` (its own accounts file and cache), and an
+4. **Runs:** `build/maild-cli` with `HOME=~/Insane OS-i32/dav-test/home` (its own accounts file and cache), and an
    isolated headless session of the branch (`HOME` and `XDG_RUNTIME_DIR` of its own, `--headless 1280x800`)
    driven over its `remote.sock` as root (the socket accepts only root since the remote desktop hardening),
    asking for the video (`RP_VIDEO`, `RP_VMODE`) so the lossless stills arrive.
 ## Step — 0.8.8.4 in development: Store search, VSCodium and Brave on VM 116 (2026-11-05)
 
 Issues #37, #38 and #39 (`PACKAGES.md`, "Search"; `UPDATES.md`, "Mirrored apps (catalog)"; `WAYLAND.md`, Brave).
-Built in `~/LordOS-i37`; that tree's package engine was pointed at its own index and cache
+Built in `~/Insane OS-i37`; that tree's package engine was pointed at its own index and cache
 (`/var/tmp/i37-pkg`, `/var/tmp/i37-cache`, a local edit of `idx.h` that is not committed) so the shared
-`/var/lib/lordos/pkg` of the installed LordOS was left alone. Two vendor sources were added the way the Store adds
+`/var/lib/lordos/pkg` of the installed Insane OS was left alone. Two vendor sources were added the way the Store adds
 them (`build/pkg-test run pkg-source-add <id>`, from a root-owned copy of `apt/catalog.json` and `apt/keys/` under
 `/opt/i37`) and two apps installed with the engine:
 
@@ -1802,12 +1802,12 @@ They stay on the VM for later Brave and VSCodium tests. To remove them: `pkg-rem
 `apt-get purge brave-browser brave-keyring codium`), then `pkg-source-remove vscodium` and
 `pkg-source-remove brave-browser`, and `sudo rm -rf /opt/i37 /var/tmp/i37-pkg /var/tmp/i37-cache`. The screenshots
 came from an isolated headless session of that tree (own `HOME` `~/i37-home`, `XDG_RUNTIME_DIR` `/tmp/i37-rt` and a
-`dbus-run-session` bus, driven over its `remote.sock`), with the LordOS GTK theme copied into that home's
+`dbus-run-session` bus, driven over its `remote.sock`), with the Insane OS GTK theme copied into that home's
 `.local/share/themes` because VM 116 doesn't have it in `/usr/share/themes`.
 
 ## Step — 0.8.8.7 in development: the build machine's media and logind headers (main machine, 2026-11-09)
 
-The maintainer's main machine (bare metal, Debian 13 with LordOS) also builds the packages. 0.8.8.6 was built there
+The maintainer's main machine (bare metal, Debian 13 with Insane OS) also builds the packages. 0.8.8.6 was built there
 without `lord-media` and `lord-vmdisplay` because these were missing; `tools/iso/mkdeb.sh` now refuses to package
 without them.
 

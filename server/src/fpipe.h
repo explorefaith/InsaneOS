@@ -50,7 +50,7 @@ enum {
     FPIPE_PREPARE,                         /* paint the next frame while the flip is pending */
 };
 int fpipe_step(int eligible, int pending, int prep, int needs, int paint);
-/* Pointer input and LordBench's scripted step wait for this display's flip (they belong to the next
+/* Pointer input and InsaneBench's scripted step wait for this display's flip (they belong to the next
  * frame, and only one is prepared at a time): without the pipeline while its flip is pending, with it
  * only once a frame is prepared (or was tried) for that flip. */
 int fpipe_blocked(int eligible, int pending, int prep);

@@ -1,6 +1,6 @@
 # Desktops
 
-Several desktops, each with its own windows, in Lord Flow and Lord Classic. All displays switch together.
+Several desktops, each with its own windows, in Insane Flow and Insane Classic. All displays switch together.
 There is always at least one, and at most nine. Most of this is SDK work: `lord-server` knows only that a
 window is *parked*.
 
@@ -9,7 +9,7 @@ window is *parked*.
 | `sdk/desktopmodel.js` | The rules as plain data, no runtime: what shows, what is in front, who has the keyboard, the Overview's layout. `server/tests/desktop_model_test.mjs` |
 | `sdk/windows.js` | `w.desktop`, the stores `activeDesktop`, `desktopList` and `desktopNames`, `desktopName`, `renameDesktop`, `moveDesktop`, `wm.moveToDesktop`, `wm.raise`, `useWindows`, `useWindowHidden` |
 | `sdk/desktops.js` | Switching, the keys, the saved count and names, the indicator, the animation |
-| `sdk/overview.jsx` | The Overview, the same in both themes (it replaced Lord Classic's task view) |
+| `sdk/overview.jsx` | The Overview, the same in both themes (it replaced Insane Classic's task view) |
 | `sdk/windowshell.jsx` | `display: none` on a hidden desktop, the window's place in the Overview |
 | `sdk/wayland.js`, `server/src/wl/wl.c` | The keyboard and the parked state of Linux windows |
 
@@ -23,7 +23,7 @@ Picture-in-picture is sticky: it shows on every desktop, and it is never the fro
 the keyboard. Back from it, the window stays on the desktop in view. Fullscreen belongs to its desktop.
 
 `useWindows()` gives `windows` (all), `visible` and `focused` (this desktop, and `wm.focused()` agrees), and
-`mounted`, what a theme draws. A LordOS app on a hidden desktop stays mounted with `display: none`, because
+`mounted`, what a theme draws. A Insane OS app on a hidden desktop stays mounted with `display: none`, because
 its state lives in React: an Editor's text, a Help search and a tour step are still there on the way back. It
 costs no paint or layout. A Linux window has its state in its own process and its node goes away, as when it is
 minimized. Something that animates inside an app asks `useWindowHidden(id)`.
@@ -44,7 +44,7 @@ is typed on another desktop, and an app the user can't see must not be able to b
   rule needs the compositor: `lord.wayland.state(id, max, 0, iconic, parked)` → `wl_set_parked`. A parked window
   loses the keyboard, `wl_set_focus` refuses it, its menus close, and it leaves fullscreen and gets it back when
   its desktop returns. A fullscreen request while parked waits for that. This is the only thing C knows.
-- A text field of a mounted LordOS app loses the focus when its window leaves the desktop in view
+- A text field of a mounted Insane OS app loses the focus when its window leaves the desktop in view
   (`checkFront` in `sdk/components.jsx`).
 - The Overview is in the `overlay` layer, so with it open the keys are the shell's.
 
@@ -55,12 +55,12 @@ A parked X11 window goes iconic and to the bottom of X's stack through the path 
 
 ## The Overview
 
-Ctrl+Up in Lord Flow, Super+Tab or the taskbar button in Lord Classic, the Window menu or the desktop's menu in
+Ctrl+Up in Insane Flow, Super+Tab or the taskbar button in Insane Classic, the Window menu or the desktop's menu in
 both, and a four-finger swipe up. The windows of the desktop in a grid, drawn smaller by a transform on their
 real frame (lord-server paints a raster of it, so no app redraws; on the GPU path a Linux window's quad is drawn
 at the scaled box, with its hole opened there, so it stays live and can't overflow or reach the Dock), with
 minimized ones too: a minimized Linux window that has nothing to draw, such as an iconic X11 window, shows its app
-icon and title (`OverviewPlaceholder`, behind the body, so a last buffer covers it; a LordOS app gets none, its body is translucent). Along the top, a strip with every desktop: a miniature of its windows' frames and icons
+icon and title (`OverviewPlaceholder`, behind the body, so a last buffer covers it; a Insane OS app gets none, its body is translucent). Along the top, a strip with every desktop: a miniature of its windows' frames and icons
 over the wallpaper, since the other desktops' windows aren't drawn. There is no capture of those.
 
 - Click a window to go to it; Esc, a click on the wallpaper or the same key closes. Tab, the arrows and Enter work.
@@ -95,7 +95,7 @@ showing. The last desktop can't be closed.
 
 ## Keys and gestures
 
-| | Lord Flow | Lord Classic |
+| | Insane Flow | Insane Classic |
 |---|---|---|
 | Overview | ⌃↑ | ❖Tab |
 | App windows | ⌃↓ | |
@@ -104,7 +104,7 @@ showing. The last desktop can't be closed.
 | Close desktop | Overview | ❖⌃F4 |
 
 ⌃ arrows are word movement in apps, in Linux apps and in the Terminal. **Settings → Desktop & Dock → Desktops → Use Ctrl +
-arrow keys for Desktops** (Lord Flow only, `apps/settings/Desktops.jsx`) turns them off (`settings.desktopArrows`): the entries stop applying and the theme asks for the
+arrow keys for Desktops** (Insane Flow only, `apps/settings/Desktops.jsx`) turns them off (`settings.desktopArrows`): the entries stop applying and the theme asks for the
 `flow` key table instead of `flow-desktops` (`server/src/wl/keygrab.c`), so the keys reach apps. ❖⌃ arrows stay. See
 [SHORTCUTS.md](SHORTCUTS.md).
 
@@ -149,9 +149,9 @@ over `remote.sock`, with a small Wayland client that logs keys, focus and `confi
 - A Help search and tour step survived switching away and back, with no keys reaching the hidden field.
 - Dock click and app switcher jumping desktops, Move to Desktop, session restore after a stop, a live theme switch.
 
-| ![Lord Flow](desktops-overview-flow.png) | ![Lord Classic](desktops-overview-classic.png) |
+| ![Insane Flow](desktops-overview-flow.png) | ![Insane Classic](desktops-overview-classic.png) |
 |---|---|
-| The Overview in Lord Flow | The Overview in Lord Classic |
+| The Overview in Insane Flow | The Overview in Insane Classic |
 
 ![Move to Desktop](desktops-move-menu.png)
 

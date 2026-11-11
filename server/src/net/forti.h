@@ -58,7 +58,7 @@ int forti_gw_parse(const char *s, int defport, FortiGw *g);
 int forti_gw_list(const char *host, const char *port, const char *alt, FortiGw *g, int max);
 
 /* One trusted-cert value: fingerprints separated by ',' or ' ', each "hex" (any server) or
- * "host@hex" (only that server; what LordOS saves when the person trusts a certificate).
+ * "host@hex" (only that server; what Insane OS saves when the person trusts a certificate).
  * Valid: 0; -1 otherwise. */
 int forti_certs_valid(const char *val);
 

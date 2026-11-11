@@ -119,7 +119,7 @@ char *compose_message(Account *a, const JVal *m, int *fds, int nfds, size_t *ole
     /* threading headers: ids only (no line breaks smuggled in) */
     if (irt && *irt && !strpbrk(irt, "\r\n")) jb_printf(&b, "In-Reply-To: %.*s\r\n", 998, irt);
     if (refs && *refs && !strpbrk(refs, "\r\n")) jb_printf(&b, "References: %.*s\r\n", 3000, refs);
-    jb_raw(&b, "MIME-Version: 1.0\r\nX-Mailer: LordOS Mail\r\n");
+    jb_raw(&b, "MIME-Version: 1.0\r\nX-Mailer: Insane OS Mail\r\n");
     const char *text = json_str(m, "text"), *html = json_str(m, "html");
     const char *ics = json_str(m, "calendar"), *icsm = json_str(m, "calendarMethod");
     const JVal *atts = json_get(m, "attachments");

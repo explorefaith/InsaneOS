@@ -22,7 +22,7 @@
     "connections": "Connections",
     "anchorLabel": "Link to this section",
     "paper": {
-      "metaDescription": "How LordOS works inside: the paper behind the free GNU/Linux distribution based on Debian with its own desktop environment, display server and Wayland compositor.",
+      "metaDescription": "How Insane OS works inside: the paper behind the free GNU/Linux distribution based on Debian with its own desktop environment, display server and Wayland compositor.",
       "toc": "Contents",
       "pdf": "Download PDF",
       "version": "Version",
@@ -38,18 +38,18 @@
       "nav": "Legal",
       "updated": "Last updated",
       "indexTitle": "Legal and trust",
-      "indexLead": "The terms, policies and notices for lordos.org and LordOS, and how we handle security and trust.",
+      "indexLead": "The terms, policies and notices for lordos.org and Insane OS, and how we handle security and trust.",
       "groups": {
         "legal": "Legal",
         "trust": "Trust & security"
       },
       "all": "All legal pages",
       "moved": "This page has moved to",
-      "metaIndex": "Terms, privacy, licenses, trademark, security and trust policies for LordOS and lordos.org."
+      "metaIndex": "Terms, privacy, licenses, trademark, security and trust policies for Insane OS and lordos.org."
     },
     "faq": {
       "title": "Frequently asked questions",
-      "lead": "Short answers about LordOS, downloads, hardware, privacy and the project.",
+      "lead": "Short answers about Insane OS, downloads, hardware, privacy and the project.",
       "search": "Search the questions",
       "categories": "Categories",
       "empty": "No question matches your search.",
@@ -58,11 +58,11 @@
     "navFaq": "FAQ",
     "theme": "Theme",
     "about": {
-      "metaTitle": "About · Made by iPERFEX · LordOS",
-      "metaDescription": "LordOS is created and maintained by iPERFEX, a technology company from Argentina led by Pablo Miranda and Federico Pereira.",
+      "metaTitle": "About · Made by iPERFEX · Insane OS",
+      "metaDescription": "Insane OS is created and maintained by iPERFEX, a technology company from Argentina led by Pablo Miranda and Federico Pereira.",
       "kicker": "About",
       "title": "Made by iPERFEX",
-      "lead": "LordOS is created and maintained by iPERFEX, a technology company from Argentina, led by Pablo Miranda and Federico Pereira.",
+      "lead": "Insane OS is created and maintained by iPERFEX, a technology company from Argentina, led by Pablo Miranda and Federico Pereira.",
       "site": "Visit iperfex.com",
       "linkedin": "iPERFEX on LinkedIn",
       "creatorsTitle": "The creators",
@@ -71,32 +71,32 @@
       "photoOf": "Photo of {name}",
       "initialsOf": "Initials of {name}",
       "workTitle": "Work with iPERFEX",
-      "workLead": "The team that builds LordOS can help your organisation use it.",
+      "workLead": "The team that builds Insane OS can help your organisation use it.",
       "work": [
         [
           "Sponsorship",
-          "Sponsor LordOS and help fund new features, hardware for testing and the release infrastructure."
+          "Sponsor Insane OS and help fund new features, hardware for testing and the release infrastructure."
         ],
         [
           "Collaborations and partnerships",
-          "Work with us on joint projects, integrations or hardware partnerships around LordOS."
+          "Work with us on joint projects, integrations or hardware partnerships around Insane OS."
         ],
         [
-          "Custom apps for LordOS",
-          "Native apps built on the LordOS interface engine, packaged as .lpk, and integrations with your systems."
+          "Custom apps for Insane OS",
+          "Native apps built on the Insane OS interface engine, packaged as .lpk, and integrations with your systems."
         ],
         [
           "Support for companies",
-          "Help with deployments, Raspberry Pi 5 fleets and custom LordOS images for your devices."
+          "Help with deployments, Raspberry Pi 5 fleets and custom Insane OS images for your devices."
         ],
         [
           "Training",
-          "Training for teams that deploy, manage or build apps for LordOS."
+          "Training for teams that deploy, manage or build apps for Insane OS."
         ]
       ],
       "contact": "Contact iPERFEX",
       "supportTitle": "Support the project",
-      "supportText": "LordOS is free software. You can help with a donation or by following the project.",
+      "supportText": "Insane OS is free software. You can help with a donation or by following the project.",
       "donate": "Donate",
       "github": "Follow the project on GitHub"
     },
@@ -106,8 +106,8 @@
         "Boots in 16 s",
         "Signed releases · Ed25519"
       ],
-      "alt": "The LordOS desktop with Calendar, Files, Photos and Player open",
-      "carousel": "Screens of LordOS",
+      "alt": "The Insane OS desktop with Calendar, Files, Photos and Player open",
+      "carousel": "Screens of Insane OS",
       "pause": "Pause the slideshow",
       "play": "Play the slideshow",
       "choose": "Choose a screen",
@@ -118,7 +118,7 @@
     },
     "darkMode": "Dark mode",
     "copyright": "Copyright © 2026 {co} — All rights reserved.",
-    "mitLine": "LordOS is free software under the MIT license",
+    "mitLine": "Insane OS is free software under the MIT license",
     "menu": "Menu",
     "closeMenu": "Close menu",
     "contact": "Contact",
@@ -126,12 +126,12 @@
     "hardware": {
       "kicker": "Hardware",
       "title": "Tested hardware",
-      "lead": "Computers, boards and graphics cards LordOS has run on, what worked on each and how fast it was, from reports people share with System Information and from the project's own reference machines. So far it holds only the reference machines.",
+      "lead": "Computers, boards and graphics cards Insane OS has run on, what worked on each and how fast it was, from reports people share with System Information and from the project's own reference machines. So far it holds only the reference machines.",
       "machinesTitle": "Machines",
       "gpusTitle": "Graphics cards and drivers",
       "problemsTitle": "Known problems",
       "shareTitle": "Add your computer",
-      "shareText": "Open System Information → Report → Share on GitHub. It saves a report with no serial numbers, addresses or names, and a page that opens GitHub's form; you attach the file and submit it with your own account. LordOS sends nothing by itself. To check a computer without installing, start the LordOS USB stick and choose Check this computer in the boot menu.",
+      "shareText": "Open System Information → Report → Share on GitHub. It saves a report with no serial numbers, addresses or names, and a page that opens GitHub's form; you attach the file and submit it with your own account. Insane OS sends nothing by itself. To check a computer without installing, start the Insane OS USB stick and choose Check this computer in the boot menu.",
       "shareLink": "The hardware report form on GitHub",
       "reference": "Reference machine",
       "live": "live session",
@@ -144,7 +144,7 @@
       "machine": "Machine",
       "stateHead": "State",
       "componentHead": "Component",
-      "versions": "LordOS versions",
+      "versions": "Insane OS versions",
       "reportedIn": "Reported with",
       "fixedIn": "Fixed in",
       "noProblems": "No problems reported yet.",
@@ -220,7 +220,7 @@
     "connections": "Conexiones",
     "anchorLabel": "Enlace a esta sección",
     "paper": {
-      "metaDescription": "Cómo funciona LordOS por dentro: el paper de la distribución GNU/Linux libre basada en Debian con su propio entorno de escritorio, servidor gráfico y compositor Wayland.",
+      "metaDescription": "Cómo funciona Insane OS por dentro: el paper de la distribución GNU/Linux libre basada en Debian con su propio entorno de escritorio, servidor gráfico y compositor Wayland.",
       "toc": "Contenido",
       "pdf": "Descargar PDF",
       "version": "Versión",
@@ -236,18 +236,18 @@
       "nav": "Legal",
       "updated": "Última actualización",
       "indexTitle": "Legal y confianza",
-      "indexLead": "Los términos, políticas y avisos de lordos.org y LordOS, y cómo manejamos la seguridad y la confianza.",
+      "indexLead": "Los términos, políticas y avisos de lordos.org y Insane OS, y cómo manejamos la seguridad y la confianza.",
       "groups": {
         "legal": "Legal",
         "trust": "Confianza y seguridad"
       },
       "all": "Todas las páginas legales",
       "moved": "Esta página se mudó a",
-      "metaIndex": "Términos, privacidad, licencias, marca, seguridad y políticas de confianza de LordOS y lordos.org."
+      "metaIndex": "Términos, privacidad, licencias, marca, seguridad y políticas de confianza de Insane OS y lordos.org."
     },
     "faq": {
       "title": "Preguntas frecuentes",
-      "lead": "Respuestas cortas sobre LordOS, descargas, hardware, privacidad y el proyecto.",
+      "lead": "Respuestas cortas sobre Insane OS, descargas, hardware, privacidad y el proyecto.",
       "search": "Buscar en las preguntas",
       "categories": "Categorías",
       "empty": "Ninguna pregunta coincide con tu búsqueda.",
@@ -256,11 +256,11 @@
     "navFaq": "FAQ",
     "theme": "Tema",
     "about": {
-      "metaTitle": "Nosotros · Hecho por iPERFEX · LordOS",
-      "metaDescription": "LordOS es creado y mantenido por iPERFEX, una empresa de tecnología de Argentina liderada por Pablo Miranda y Federico Pereira.",
+      "metaTitle": "Nosotros · Hecho por iPERFEX · Insane OS",
+      "metaDescription": "Insane OS es creado y mantenido por iPERFEX, una empresa de tecnología de Argentina liderada por Pablo Miranda y Federico Pereira.",
       "kicker": "Nosotros",
       "title": "Hecho por iPERFEX",
-      "lead": "LordOS es creado y mantenido por iPERFEX, una empresa de tecnología de Argentina, liderada por Pablo Miranda y Federico Pereira.",
+      "lead": "Insane OS es creado y mantenido por iPERFEX, una empresa de tecnología de Argentina, liderada por Pablo Miranda y Federico Pereira.",
       "site": "Visitá iperfex.com",
       "linkedin": "iPERFEX en LinkedIn",
       "creatorsTitle": "Los creadores",
@@ -269,32 +269,32 @@
       "photoOf": "Foto de {name}",
       "initialsOf": "Iniciales de {name}",
       "workTitle": "Trabajá con iPERFEX",
-      "workLead": "El equipo que construye LordOS puede ayudar a tu organización a usarlo.",
+      "workLead": "El equipo que construye Insane OS puede ayudar a tu organización a usarlo.",
       "work": [
         [
           "Patrocinio",
-          "Patrociná LordOS y ayudá a financiar nuevas funciones, hardware para pruebas y la infraestructura de publicación."
+          "Patrociná Insane OS y ayudá a financiar nuevas funciones, hardware para pruebas y la infraestructura de publicación."
         ],
         [
           "Colaboraciones y alianzas",
-          "Trabajá con nosotros en proyectos conjuntos, integraciones o alianzas de hardware alrededor de LordOS."
+          "Trabajá con nosotros en proyectos conjuntos, integraciones o alianzas de hardware alrededor de Insane OS."
         ],
         [
-          "Apps a medida para LordOS",
-          "Apps nativas sobre el motor de interfaz de LordOS, empaquetadas como .lpk, e integraciones con tus sistemas."
+          "Apps a medida para Insane OS",
+          "Apps nativas sobre el motor de interfaz de Insane OS, empaquetadas como .lpk, e integraciones con tus sistemas."
         ],
         [
           "Soporte para empresas",
-          "Ayuda con despliegues, flotas de Raspberry Pi 5 e imágenes de LordOS a medida para tus equipos."
+          "Ayuda con despliegues, flotas de Raspberry Pi 5 e imágenes de Insane OS a medida para tus equipos."
         ],
         [
           "Capacitación",
-          "Capacitación para equipos que despliegan, administran o desarrollan apps para LordOS."
+          "Capacitación para equipos que despliegan, administran o desarrollan apps para Insane OS."
         ]
       ],
       "contact": "Contactar a iPERFEX",
       "supportTitle": "Apoyá el proyecto",
-      "supportText": "LordOS es software libre. Podés ayudar con una donación o siguiendo el proyecto.",
+      "supportText": "Insane OS es software libre. Podés ayudar con una donación o siguiendo el proyecto.",
       "donate": "Donar",
       "github": "Seguí el proyecto en GitHub"
     },
@@ -304,8 +304,8 @@
         "Arranca en 16 s",
         "Versiones firmadas · Ed25519"
       ],
-      "alt": "El escritorio de LordOS con Calendario, Archivos, Fotos y Reproductor abiertos",
-      "carousel": "Pantallas de LordOS",
+      "alt": "El escritorio de Insane OS con Calendario, Archivos, Fotos y Reproductor abiertos",
+      "carousel": "Pantallas de Insane OS",
       "pause": "Pausar las imágenes",
       "play": "Reanudar las imágenes",
       "choose": "Elegí una pantalla",
@@ -316,7 +316,7 @@
     },
     "darkMode": "Modo oscuro",
     "copyright": "Copyright © 2026 {co} — Todos los derechos reservados.",
-    "mitLine": "LordOS es software libre con licencia MIT",
+    "mitLine": "Insane OS es software libre con licencia MIT",
     "menu": "Menú",
     "closeMenu": "Cerrar menú",
     "contact": "Contacto",
@@ -324,12 +324,12 @@
     "hardware": {
       "kicker": "Hardware",
       "title": "Hardware probado",
-      "lead": "Computadoras, placas y tarjetas gráficas en las que corrió LordOS, qué funcionó en cada una y qué tan rápido fue, a partir de los reportes que la gente comparte con Información del Sistema y de las máquinas de referencia del propio proyecto. Por ahora tiene solo las máquinas de referencia.",
+      "lead": "Computadoras, placas y tarjetas gráficas en las que corrió Insane OS, qué funcionó en cada una y qué tan rápido fue, a partir de los reportes que la gente comparte con Información del Sistema y de las máquinas de referencia del propio proyecto. Por ahora tiene solo las máquinas de referencia.",
       "machinesTitle": "Máquinas",
       "gpusTitle": "Tarjetas gráficas y drivers",
       "problemsTitle": "Problemas conocidos",
       "shareTitle": "Sumá tu computadora",
-      "shareText": "Abrí Información del Sistema → Reporte → Compartir en GitHub. Guarda un reporte sin números de serie, direcciones ni nombres, y una página que abre el formulario de GitHub; adjuntás el archivo y lo enviás con tu propia cuenta. LordOS no envía nada por su cuenta. Para revisar una computadora sin instalar, arrancá el pendrive de LordOS y elegí Check this computer en el menú de arranque.",
+      "shareText": "Abrí Información del Sistema → Reporte → Compartir en GitHub. Guarda un reporte sin números de serie, direcciones ni nombres, y una página que abre el formulario de GitHub; adjuntás el archivo y lo enviás con tu propia cuenta. Insane OS no envía nada por su cuenta. Para revisar una computadora sin instalar, arrancá el pendrive de Insane OS y elegí Check this computer en el menú de arranque.",
       "shareLink": "El formulario de reporte de hardware en GitHub",
       "reference": "Máquina de referencia",
       "live": "sesión live",
@@ -342,7 +342,7 @@
       "machine": "Máquina",
       "stateHead": "Estado",
       "componentHead": "Componente",
-      "versions": "Versiones de LordOS",
+      "versions": "Versiones de Insane OS",
       "reportedIn": "Reportado con",
       "fixedIn": "Resuelto en",
       "noProblems": "Todavía no hay problemas reportados.",
@@ -418,7 +418,7 @@
     "connections": "Conexões",
     "anchorLabel": "Link para esta seção",
     "paper": {
-      "metaDescription": "Como o LordOS funciona por dentro: o paper da distribuição GNU/Linux livre baseada no Debian com ambiente de desktop, servidor gráfico e compositor Wayland próprios.",
+      "metaDescription": "Como o Insane OS funciona por dentro: o paper da distribuição GNU/Linux livre baseada no Debian com ambiente de desktop, servidor gráfico e compositor Wayland próprios.",
       "toc": "Conteúdo",
       "pdf": "Baixar PDF",
       "version": "Versão",
@@ -434,18 +434,18 @@
       "nav": "Jurídico",
       "updated": "Última atualização",
       "indexTitle": "Jurídico e confiança",
-      "indexLead": "Os termos, políticas e avisos do lordos.org e do LordOS, e como tratamos segurança e confiança.",
+      "indexLead": "Os termos, políticas e avisos do lordos.org e do Insane OS, e como tratamos segurança e confiança.",
       "groups": {
         "legal": "Jurídico",
         "trust": "Confiança e segurança"
       },
       "all": "Todas as páginas jurídicas",
       "moved": "Esta página mudou para",
-      "metaIndex": "Termos, privacidade, licenças, marca, segurança e políticas de confiança do LordOS e do lordos.org."
+      "metaIndex": "Termos, privacidade, licenças, marca, segurança e políticas de confiança do Insane OS e do lordos.org."
     },
     "faq": {
       "title": "Perguntas frequentes",
-      "lead": "Respostas curtas sobre o LordOS, downloads, hardware, privacidade e o projeto.",
+      "lead": "Respostas curtas sobre o Insane OS, downloads, hardware, privacidade e o projeto.",
       "search": "Buscar nas perguntas",
       "categories": "Categorias",
       "empty": "Nenhuma pergunta corresponde à sua busca.",
@@ -454,11 +454,11 @@
     "navFaq": "FAQ",
     "theme": "Tema",
     "about": {
-      "metaTitle": "Sobre · Feito pela iPERFEX · LordOS",
-      "metaDescription": "O LordOS é criado e mantido pela iPERFEX, uma empresa de tecnologia da Argentina liderada por Pablo Miranda e Federico Pereira.",
+      "metaTitle": "Sobre · Feito pela iPERFEX · Insane OS",
+      "metaDescription": "O Insane OS é criado e mantido pela iPERFEX, uma empresa de tecnologia da Argentina liderada por Pablo Miranda e Federico Pereira.",
       "kicker": "Sobre",
       "title": "Feito pela iPERFEX",
-      "lead": "O LordOS é criado e mantido pela iPERFEX, uma empresa de tecnologia da Argentina, liderada por Pablo Miranda e Federico Pereira.",
+      "lead": "O Insane OS é criado e mantido pela iPERFEX, uma empresa de tecnologia da Argentina, liderada por Pablo Miranda e Federico Pereira.",
       "site": "Visite iperfex.com",
       "linkedin": "iPERFEX no LinkedIn",
       "creatorsTitle": "Os criadores",
@@ -467,32 +467,32 @@
       "photoOf": "Foto de {name}",
       "initialsOf": "Iniciais de {name}",
       "workTitle": "Trabalhe com a iPERFEX",
-      "workLead": "A equipe que constrói o LordOS pode ajudar a sua organização a usá-lo.",
+      "workLead": "A equipe que constrói o Insane OS pode ajudar a sua organização a usá-lo.",
       "work": [
         [
           "Patrocínio",
-          "Patrocine o LordOS e ajude a financiar novos recursos, hardware para testes e a infraestrutura de publicação."
+          "Patrocine o Insane OS e ajude a financiar novos recursos, hardware para testes e a infraestrutura de publicação."
         ],
         [
           "Colaborações e parcerias",
-          "Trabalhe conosco em projetos conjuntos, integrações ou parcerias de hardware em torno do LordOS."
+          "Trabalhe conosco em projetos conjuntos, integrações ou parcerias de hardware em torno do Insane OS."
         ],
         [
-          "Apps sob medida para o LordOS",
-          "Apps nativos sobre o motor de interface do LordOS, empacotados como .lpk, e integrações com os seus sistemas."
+          "Apps sob medida para o Insane OS",
+          "Apps nativos sobre o motor de interface do Insane OS, empacotados como .lpk, e integrações com os seus sistemas."
         ],
         [
           "Suporte para empresas",
-          "Ajuda com implantações, frotas de Raspberry Pi 5 e imagens do LordOS sob medida para os seus equipamentos."
+          "Ajuda com implantações, frotas de Raspberry Pi 5 e imagens do Insane OS sob medida para os seus equipamentos."
         ],
         [
           "Treinamento",
-          "Treinamento para equipes que implantam, administram ou desenvolvem apps para o LordOS."
+          "Treinamento para equipes que implantam, administram ou desenvolvem apps para o Insane OS."
         ]
       ],
       "contact": "Contatar a iPERFEX",
       "supportTitle": "Apoie o projeto",
-      "supportText": "O LordOS é software livre. Você pode ajudar com uma doação ou acompanhando o projeto.",
+      "supportText": "O Insane OS é software livre. Você pode ajudar com uma doação ou acompanhando o projeto.",
       "donate": "Doar",
       "github": "Acompanhe o projeto no GitHub"
     },
@@ -502,8 +502,8 @@
         "Inicia em 16 s",
         "Versões assinadas · Ed25519"
       ],
-      "alt": "O desktop do LordOS com Calendário, Arquivos, Fotos e Player abertos",
-      "carousel": "Telas do LordOS",
+      "alt": "O desktop do Insane OS com Calendário, Arquivos, Fotos e Player abertos",
+      "carousel": "Telas do Insane OS",
       "pause": "Pausar a apresentação",
       "play": "Retomar a apresentação",
       "choose": "Escolha uma tela",
@@ -514,7 +514,7 @@
     },
     "darkMode": "Modo escuro",
     "copyright": "Copyright © 2026 {co} — Todos os direitos reservados.",
-    "mitLine": "LordOS é software livre sob a licença MIT",
+    "mitLine": "Insane OS é software livre sob a licença MIT",
     "menu": "Menu",
     "closeMenu": "Fechar menu",
     "contact": "Contato",
@@ -522,12 +522,12 @@
     "hardware": {
       "kicker": "Hardware",
       "title": "Hardware testado",
-      "lead": "Computadores, placas e placas de vídeo em que o LordOS rodou, o que funcionou em cada um e quão rápido foi, a partir dos relatórios que as pessoas compartilham com as Informações do Sistema e das máquinas de referência do próprio projeto. Por enquanto tem só as máquinas de referência.",
+      "lead": "Computadores, placas e placas de vídeo em que o Insane OS rodou, o que funcionou em cada um e quão rápido foi, a partir dos relatórios que as pessoas compartilham com as Informações do Sistema e das máquinas de referência do próprio projeto. Por enquanto tem só as máquinas de referência.",
       "machinesTitle": "Máquinas",
       "gpusTitle": "Placas de vídeo e drivers",
       "problemsTitle": "Problemas conhecidos",
       "shareTitle": "Adicione o seu computador",
-      "shareText": "Abra Informações do Sistema → Relatório → Compartilhar no GitHub. Ele salva um relatório sem números de série, endereços nem nomes, e uma página que abre o formulário do GitHub; você anexa o arquivo e envia com a sua própria conta. O LordOS não envia nada por conta própria. Para verificar um computador sem instalar, inicie o pendrive do LordOS e escolha Check this computer no menu de inicialização.",
+      "shareText": "Abra Informações do Sistema → Relatório → Compartilhar no GitHub. Ele salva um relatório sem números de série, endereços nem nomes, e uma página que abre o formulário do GitHub; você anexa o arquivo e envia com a sua própria conta. O Insane OS não envia nada por conta própria. Para verificar um computador sem instalar, inicie o pendrive do Insane OS e escolha Check this computer no menu de inicialização.",
       "shareLink": "O formulário de relatório de hardware no GitHub",
       "reference": "Máquina de referência",
       "live": "sessão live",
@@ -540,7 +540,7 @@
       "machine": "Máquina",
       "stateHead": "Estado",
       "componentHead": "Componente",
-      "versions": "Versões do LordOS",
+      "versions": "Versões do Insane OS",
       "reportedIn": "Relatado com",
       "fixedIn": "Resolvido em",
       "noProblems": "Ainda não há problemas relatados.",

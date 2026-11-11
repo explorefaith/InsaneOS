@@ -36,7 +36,7 @@ function Review({ s }) {
       <StepHeader title={tr('imager.review.title')} text={tr('imager.review.text')} />
       <Group>
         <KeyValue label={tr('imager.step.device')} value={deviceLabel(dev, tr)} />
-        <KeyValue label={tr('imager.step.image')} value={img.official ? `LordOS ${img.release.version} · ${formatSize(img.size)}` : `${img.name} · ${formatSize(img.size)}`} />
+        <KeyValue label={tr('imager.step.image')} value={img.official ? `Insane OS ${img.release.version} · ${formatSize(img.size)}` : `${img.name} · ${formatSize(img.size)}`} />
         <KeyValue label={tr('imager.step.storage')} value={`${s.drive.model} · ${formatSize(s.drive.size)} (${s.drive.name})`} />
         <KeyValue label={tr('imager.review.check')} value={tr(img.official ? 'imager.review.checkOfficial' : 'imager.review.checkCustom')} />
       </Group>

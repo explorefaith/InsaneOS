@@ -1,4 +1,4 @@
-# LordOS boot menu theme (GRUB 2). The ISO (tools/iso/build.sh) and the disk installer
+# Insane OS boot menu theme (GRUB 2). The ISO (tools/iso/build.sh) and the disk installer
 # (GRUB_THEME=/usr/share/grub/themes/lordos/theme.txt) use it. Images: tools/boot/gen-boot-assets.py;
 # fonts: docs/ISO.md, "Boot splash and boot menu". See also docs/brand/README.md.
 title-text: ""

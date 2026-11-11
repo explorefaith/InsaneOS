@@ -215,7 +215,7 @@ const reconciler = Reconciler(host);
 // The search, the app launcher, shell sheets and system prompts (keyring, permissions, the file
 // chooser) live in the overlay, modal and system layers (sdk/layers.js), and Screenshots' area
 // selection in the capture layer. While any of them shows
-// something, the keyboard is LordOS's: no Linux app (Wayland or X11) gets the keys typed into it
+// something, the keyboard is Insane OS's: no Linux app (Wayland or X11) gets the keys typed into it
 // (sdk/wayland.js asks the compositor; docs/PRIVACY.md).
 const KEYBOARD_LAYERS = new Set([40, 60, 100, 120]);   // overlay, modal, system, capture
 let keyboardBusy = false;

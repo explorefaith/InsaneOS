@@ -28,7 +28,7 @@ int main(void) {
     check("too short", tts_hiss(s, 100, R, 1) == -100, 0);
     check("no samples", tts_hiss(NULL, L, R, 1) == -100, 0);
     /* a try the model ended early */
-    check("syllables: Spanish", tts_syllables("Hola, LordOS ya puede leer en voz alta.") == 12, (double)tts_syllables("Hola, LordOS ya puede leer en voz alta."));
+    check("syllables: Spanish", tts_syllables("Hola, Insane OS ya puede leer en voz alta.") == 12, (double)tts_syllables("Hola, Insane OS ya puede leer en voz alta."));
     check("syllables: accents and a lone y", tts_syllables("Acción y canción, ÁÉ") == 6, (double)tts_syllables("Acción y canción, ÁÉ"));
     check("syllables: Portuguese", tts_syllables("Não sei, você está aí?") == 7, (double)tts_syllables("Não sei, você está aí?"));
     check("a whole sentence (2.56 s) is fine", !tts_cut_short(61440, R, 12, 76800), 0);

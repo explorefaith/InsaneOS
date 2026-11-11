@@ -381,7 +381,7 @@ static JSValue call_hot(int which, int argc, JSValueConst *argv) {
     return call_global_atom(hot_atom[which], argc, argv);
 }
 
-/* Reads a bundle of LordOS's own code through the verified-code check (sec/codesig.c): the bytes
+/* Reads a bundle of Insane OS's own code through the verified-code check (sec/codesig.c): the bytes
  * returned are exactly the ones that were hashed. NULL (and *refused = 1) if it was refused. */
 static char *load_code(const char *path, size_t *len, int *refused) {
     codesig_init(js_sys_assets());
@@ -431,14 +431,14 @@ static void session_context(void) {
     js_input_register(ctx, lord);      /* lord.input: touchpads and touchscreens (tp/) */
     js_fw_register(ctx, lord);         /* lord.fw: per-app network permissions (lord-netperm, docs/FIREWALL.md) */
     js_disk_register(ctx, lord);       /* lord.disks: disks and partitions (Disks app) */
-    js_imager_register(ctx, lord);     /* lord.imager: LordOS Imager (docs/IMAGER.md) */
+    js_imager_register(ctx, lord);     /* lord.imager: Insane OS Imager (docs/IMAGER.md) */
     js_backup_register(ctx, lord);     /* lord.backup: Backups (backup/) */
     js_cloud_register(ctx, lord);      /* lord.cloud: Cloud (cloud/, docs/CLOUD.md) */
     js_rdesk_register(ctx, lord);      /* lord.rdesk: the RDP and VNC apps */
     js_vm_register(ctx, lord);         /* lord.vm: Machines (vm/, docs/VIRTUALIZATION.md) */
     js_lan_register(ctx, lord);        /* lord.lan: Files → Network (lan/, docs/FILES.md) */
     js_clean_register(ctx, lord);      /* lord.clean: Cleaner (clean/, docs/CLEANER-ARCHITECTURE.md) */
-    js_logs_register(ctx, lord);       /* lord.logs: journal and LordOS logs (Logs app) */
+    js_logs_register(ctx, lord);       /* lord.logs: journal and Insane OS logs (Logs app) */
     js_help_register(ctx, lord);       /* lord.help (Help) and lord.time.zoneOffset (Clock, tzif.c) */
     js_hw_register(ctx, lord);         /* lord.display/power/bt/mime/timedate (Settings, src/hw) */
     js_voice_register(ctx, lord);      /* lord.voice: reading text aloud through lord-say (tts/speak.c, docs/VOICE.md) */
@@ -474,11 +474,11 @@ static const char recovery_js[] =
     "(function(){\n"
     "const R = globalThis.__lordRecovery || {};\n"
     "const EN = {\n"
-    "  'code.recovery.title': 'This LordOS component was modified and was not loaded',\n"
-    "  'code.recovery.session': 'LordOS checks its own code before running it. A part of the desktop no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
-    "  'code.recovery.greeter': 'LordOS checks its own code before running it. The login screen no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
-    "  'code.recovery.app': 'LordOS checks its own code before running it. This app no longer matches the signed copy, so it was not started.',\n"
-    "  'code.recovery.fix': 'To repair it, reinstall LordOS: sudo apt install --reinstall lordos',\n"
+    "  'code.recovery.title': 'This Insane OS component was modified and was not loaded',\n"
+    "  'code.recovery.session': 'Insane OS checks its own code before running it. A part of the desktop no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
+    "  'code.recovery.greeter': 'Insane OS checks its own code before running it. The login screen no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
+    "  'code.recovery.app': 'Insane OS checks its own code before running it. This app no longer matches the signed copy, so it was not started.',\n"
+    "  'code.recovery.fix': 'To repair it, reinstall Insane OS: sudo apt install --reinstall lordos',\n"
     "  'code.recovery.details': 'Not loaded:',\n"
     "  'code.recovery.logout': 'Log Out',\n"
     "};\n"

@@ -53,7 +53,7 @@ export function readReports(dir, schema = loadSchema()) {
   return out;
 }
 
-// (b) the snapshot: one entry per device key, component and LordOS version, with the states reported.
+// (b) the snapshot: one entry per device key, component and Insane OS version, with the states reported.
 export function buildSnapshot(entries) {
   const map = new Map();
   let generated = '';
@@ -129,7 +129,7 @@ export function renderSections(model, t, esc, issueUrl) {
   const fmt = (v) => (v >= 100 ? Math.round(v).toLocaleString('en-US') : String(Math.round(v * 10) / 10));
   const machines = model.machines.map((m) => `<article class="hw-card">
 <h3>${esc(m.name)}</h3>
-<p class="hw-meta">${esc((t.kind && t.kind[m.kind]) || m.kind)} · ${esc(m.arch)} · LordOS ${esc(m.lordos)}${m.live ? ` · ${esc(t.live)}` : ''} · ${src(m)}</p>
+<p class="hw-meta">${esc((t.kind && t.kind[m.kind]) || m.kind)} · ${esc(m.arch)} · Insane OS ${esc(m.lordos)}${m.live ? ` · ${esc(t.live)}` : ''} · ${src(m)}</p>
 <dl class="hw-dl">
 <dt>${esc(t.cpu)}</dt><dd>${esc(m.cpu)}${m.threads ? ` (${m.threads} ${esc(t.threads)})` : ''}</dd>
 <dt>${esc(t.gpu)}</dt><dd>${esc(m.gpu)}${m.driver ? ` <code>${esc(m.driver)}</code>` : ''}</dd>

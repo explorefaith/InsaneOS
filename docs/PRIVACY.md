@@ -1,6 +1,6 @@
 # Privacy: app isolation and permissions (M8)
 
-LordOS isolates third-party apps (`.lpk`) and controls what each one can use (camera,
+Insane OS isolates third-party apps (`.lpk`) and controls what each one can use (camera,
 microphone, files, network…) with per-app permissions and system-drawn prompts: the system asks the
 first time and the user decides. See also [SIGNING.md](SIGNING.md) (signed packages) and
 [NATIVE-APPS.md](NATIVE-APPS.md).
@@ -31,15 +31,15 @@ first time and the user decides. See also [SIGNING.md](SIGNING.md) (signed packa
 
 ## What is isolated today
 
-Not every program on LordOS is sandboxed. This is exactly what applies to each kind:
+Not every program on Insane OS is sandboxed. This is exactly what applies to each kind:
 
 | Kind | Process | Landlock + seccomp | cgroup scope | Broker and permissions | Firewall |
 |---|---|---|---|---|---|
 | `.lpk` apps, Passwords, Mail, Calendar, Contacts, Reminders | own process (`lord-server --app <id>`) | yes | own (`app-lordos-lpk-<id>.scope`) | yes: every call is checked in `lord-server` | per app (`lpk:<id>`): network rules and every non-network restriction (broker) |
-| Other built-in apps | inside `lord-server` | no | `lord-server`'s | no broker: camera, microphone and screen are checked in C (`js_media.c`), notifications in `sdk/notify.js` | as "LordOS" (`lordos`): network rules; camera, microphone, screen and notifications restrictions |
+| Other built-in apps | inside `lord-server` | no | `lord-server`'s | no broker: camera, microphone and screen are checked in C (`js_media.c`), notifications in `sdk/notify.js` | as "Insane OS" (`lordos`): network rules; camera, microphone, screen and notifications restrictions |
 | Linux apps from the launcher | own process | no by default; with "no access to your files", or restricted from the microphone, camera, USB or Bluetooth, their own user, mount, PID and IPC namespaces plus Landlock (no seccomp), from the next launch | own (`app-lordos-<id>.scope`) | no | per app (`desktop:<id>`), when the owner sets them: network rules; camera, USB and screen (`/dev/fb*`) devices and Bluetooth sockets in the kernel (`lord-netperm`); microphone and PipeWire cameras (our PipeWire guard, plus ALSA capture nodes in the kernel); files (the launcher); notifications (our notification server). Not the clipboard, and not BlueZ over D-Bus |
 | Terminal programs | children of the Terminal's shell | no | `lordos-net-terminal.scope` (0.8.5; best effort, `lord-server`'s if it can't be placed) | no | as "Terminal" (`lordos:terminal`, 0.8.5): network rules, each program listed by name |
-| LordOS's network components (0.8.5): Mail's sync, the Store's downloads, printers and scanners, the blocklist downloads | a connector (`lord-server --net-connector <name>`) or the package engine's download child | the connectors: no (fixed requests only, `no_new_privs`); `lord-fetch` and `lord-tls`: the helpers' sandbox | own, root-owned `lordos-net-<name>.scope` | no | per component (`lordos:mail`, `lordos:store`, `lordos:print`, `lordos:lists`): network rules ([FIREWALL.md](FIREWALL.md), "LordOS components in their own scopes") |
+| Insane OS's network components (0.8.5): Mail's sync, the Store's downloads, printers and scanners, the blocklist downloads | a connector (`lord-server --net-connector <name>`) or the package engine's download child | the connectors: no (fixed requests only, `no_new_privs`); `lord-fetch` and `lord-tls`: the helpers' sandbox | own, root-owned `lordos-net-<name>.scope` | no | per component (`lordos:mail`, `lordos:store`, `lordos:print`, `lordos:lists`): network rules ([FIREWALL.md](FIREWALL.md), "Insane OS components in their own scopes") |
 
 Built-in apps reach files through `lord.fs`: since 0.8.5 its reading calls (`list`, `read`, `stat`,
 `du`, `free`, `search`) reach the whole tree as the session user (`fsops_readable`; the system's own
@@ -186,7 +186,7 @@ disappears and the bar and the orange dot go off.
 Our own code, without bubblewrap, flatpak or firejail. It uses kernel 6.12 features directly:
 
 - **Landlock** (ABI up to 6): read-only access to the package folder, the "app host", the fonts
-  (LordOS and `/usr/share/fonts`) and the libraries; read and write only to
+  (Insane OS and `/usr/share/fonts`) and the libraries; read and write only to
   `~/.local/share/lordos/appdata/<id>`; nothing else from `$HOME`. TCP rules and scoping of
   abstract unix sockets and signals (`LANDLOCK_SCOPE_*`).
 - **seccomp-bpf**: an **allow list** of syscalls, applied to every thread (`TSYNC`). The dangerous
@@ -261,7 +261,7 @@ sandbox-test helper: 17/17   see "Helpers" below
 
 ## Cleaner's delete
 
-Cleaner is the only place in LordOS that deletes a file outside the Trash (approved by the maintainer on 2026-10-30;
+Cleaner is the only place in Insane OS that deletes a file outside the Trash (approved by the maintainer on 2026-10-30;
 `CLEANER-SECURITY.md`). It runs in `lord-server` as the session user, only for a file a scan found under a `regenerable`
 rule's fixed root, from a plan the user confirmed, with a confirmation that says it can't be undone. JS can't name a path,
 `lord.fs` gained nothing, and the scans stay on this machine. Its history keeps counts and sizes, never a path. Three closed
@@ -286,7 +286,7 @@ stays the session user, and the only privileged program is polkit's own setuid h
 | Enter | `lord-server` starts `/usr/lib/polkit-1/polkit-agent-helper-1`, writes the cookie and, when PAM asks, the password, once, to its stdin. The helper checks it and tells polkitd by itself |
 
 **Why per process.** polkit finds a session's agent by asking logind which session a process belongs to, and
-that answer comes from the cgroup: LordOS's apps live under `lordos.service`
+that answer comes from the cgroup: Insane OS's apps live under `lordos.service`
 ([Root-owned app scopes](#root-owned-app-scopes)), so for them `sd_pid_get_session` and `sd_pid_get_owner_uid` both fail.
 A logind session of the user doesn't help while the apps stay there, and moving the tree under
 `user.slice` would move the firewall's BPF attachment, the Monitor and every scope. The process-scoped registration is polkit's
@@ -325,10 +325,10 @@ Size: `polkitd`, `pkexec` and their polkit and duktape libraries come to about 1
 
 ## Decoding helpers: `sandbox_apply_helper`
 
-A single sandbox for all of LordOS, no copies: the helpers that decode untrusted data
+A single sandbox for all of Insane OS, no copies: the helpers that decode untrusted data
 (`lord-media`: video, photos, camera; `lord-doc`: Poppler and libarchive; and the other helpers:
 `lord-maild`, `lord-vault`, since 0.8.7 the network reader `lord-lan`, since 0.8.5 the blocklist downloader `lord-fetch` and the package
-engine's TLS relay `lord-tls`, since 0.8.6 LordBench's `lord-bench`, and since 0.8.7 Cleaner's
+engine's TLS relay `lord-tls`, since 0.8.6 InsaneBench's `lord-bench`, and since 0.8.7 Cleaner's
 scanner `lord-clean` and Remote Desk's `lord-rdesk`) use
 `sandbox_apply_helper(const SandboxHelperCfg *cfg)` from `server/src/sec/sandbox.h`:
 
@@ -352,8 +352,8 @@ sandbox_apply_helper(&cfg);                 /* SANDBOX_HELPER_DIR_FDS says the f
   (glibc falls back to `clone`, which can be filtered by flags).
 - **TSYNC**: the filter also reaches threads that already existed (VA-API, drivers). If seccomp
   can't be applied, the helper exits (`_exit(70)`): it **fails closed**. If Landlock is missing
-  (Raspberry Pi's own kernel; the LordOS Pi image ships its own build with Landlock, see
-  `RASPBERRY.md`, "The LordOS kernel"), it goes on with seccomp and warns.
+  (Raspberry Pi's own kernel; the Insane OS Pi image ships its own build with Landlock, see
+  `RASPBERRY.md`, "The Insane OS kernel"), it goes on with seccomp and warns.
 - **Files**: nothing except `ro_paths` and the folders that arrive as fds (`rw_dir_fds`: write,
   create files, folders and links, and delete files, **without truncating**).
 - **ioctl by class** (`allow_ioctl_classes`): only types `'d'` (DRM/VA-API), `'V'` (V4L2, Pi 5)
@@ -522,9 +522,9 @@ through `globalThis.__lordos.monitorDevices`.
 
 ## System prompts take the keyboard (0.8.2)
 
-Until 0.8.1, keys typed into LordOS's search, the app launcher, a sheet or a system prompt (the
+Until 0.8.1, keys typed into Insane OS's search, the app launcher, a sheet or a system prompt (the
 keyring/password prompt, a permission prompt, the file chooser) were also delivered to the Linux
-(Wayland) app in front: the compositor's keyboard focus followed the top window, not what LordOS
+(Wayland) app in front: the compositor's keyboard focus followed the top window, not what Insane OS
 drew above it, so a Linux app could read a password typed into the keyring prompt. Now, while
 anything shows in the `overlay`, `modal` or `system` layers ([LAYERS.md](LAYERS.md)),
 `runtime/index.js` reports it after each React commit and `sdk/wayland.js` sets the compositor's
@@ -658,7 +658,7 @@ package keeps its plain owner while a user `.lpk` with the same id does not reac
 - **Store** stays in the session's process for now. It drives the package engine (`lord.pkg`:
   plans, installs and removals through the root helper), signature checks and trust
   (`lord.sign`), reads `.lpk`/`.deb` files you pick, lists every installed app and drives updates
-  of LordOS itself. Isolating it means a broker op for each of those powers with its own checks —
+  of Insane OS itself. Isolating it means a broker op for each of those powers with its own checks —
   a set of new privileged operations, not a move — and the Store is being changed by another
   0.8.2 item ("Suggested for your computer"). It is not shipped half-isolated.
 - **Photos** stays in-process: it is a library over your picture folders (it lists them and
@@ -667,7 +667,7 @@ package keeps its plain owner while a user `.lpk` with the same id does not reac
   printing over the broker first. The untrusted part, decoding images, already happens in the
   sandboxed `lord-media` helper (`media.image`, `media.edit`), not in the window's process.
 - **Not covered for the isolated four:** printing (none of them prints today) and drag and drop
-  (none of them accepts drops today). Links in mail are shown and copied (LordOS has no web engine),
+  (none of them accepts drops today). Links in mail are shown and copied (Insane OS has no web engine),
   as before.
 - **Limits.** A firewall *network* rule for `lpk:mail` does not stop mail syncing: the connections
   are opened by `lord-server` for `lord-maild` (firewall id `lordos`), as in 0.8.1; the Mail window
@@ -677,7 +677,7 @@ package keeps its plain owner while a user `.lpk` with the same id does not reac
 ## X11 apps (0.8.3)
 
 X11 apps run through Xwayland (`WAYLAND.md`, "X11 apps (Xwayland)"). X11 was designed for programs
-that trust each other, and LordOS doesn't pretend otherwise:
+that trust each other, and Insane OS doesn't pretend otherwise:
 
 **What X11 apps can do to each other (inherent, not fixed).** All X11 apps of a session share one X
 display. Any of them can read the others' windows (`XGetImage` on another app's window), their
@@ -689,39 +689,39 @@ focused one, but that is only a hint: X11 doesn't authenticate who sends a reque
 boundary between X apps. **If two programs must not see each other, at least one of them should be
 a Wayland app.**
 
-**What LordOS controls: the border between X11 and the rest.**
+**What Insane OS controls: the border between X11 and the rest.**
 
 - **Screen and windows.** Xwayland is a Wayland client like any other: it only ever gets the
-  buffers of its own windows, never another app's surface or LordOS's screen (there is no
+  buffers of its own windows, never another app's surface or Insane OS's screen (there is no
   screen-copy protocol). `xwd -root` fails (`BadMatch`: rootless Xwayland has no root picture) and
   the X window tree only holds X windows, so **Passwords, the keyring prompt and every other
-  Wayland or LordOS window are invisible to X11 apps** (`xwayland-protected.png`).
+  Wayland or Insane OS window are invisible to X11 apps** (`xwayland-protected.png`).
 - **Keyboard.** Xwayland receives keys only while one of its windows has the keyboard. Global X
-  grabs and keyloggers inside X see nothing typed into a LordOS or Wayland window: with Passwords
+  grabs and keyloggers inside X see nothing typed into a Insane OS or Wayland window: with Passwords
   focused, `tests/xwayland/keysnoop.sh` sampled the X keyboard 958 times while a passphrase was typed
   and saw no key down (the same run with xterm focused saw them). Search, the app launcher, shell
   sheets and system prompts (keyring, permissions, the file chooser) also take the keyboard from
   any Linux app while they are open (they are in the overlay, modal and system layers;
   `runtime/index.js`, `sdk/wayland.js`) — this also fixed keys reaching a Wayland app behind the
   search panel. The compositor doesn't offer Xwayland's keyboard-grab protocol.
-- **Clipboard.** What is copied in LordOS or a Wayland app enters X only while an X window has the
+- **Clipboard.** What is copied in Insane OS or a Wayland app enters X only while an X window has the
   keyboard, and leaves when the keyboard goes back (the window manager gives the selection up), so
   an X app in the background never reads it. What Passwords copies (marked sensitive) **never**
   enters X. In the other direction, an X app's copy is read once, when it is made, and becomes
-  LordOS's.
+  Insane OS's.
 - **Synthetic input.** Xwayland starts with XTEST disabled, so an X app can't type or click into
   another X app (e.g. a terminal) with synthetic events.
 - **Xwayland itself** runs in `lordos-xwayland.scope` (not lord-server's), without network (its own
   empty network namespace) and with `no_new_privs`; it is started only by a connection to the
   session's X socket (mode 0600, no abstract socket, no TCP) and stopped 10 s after the last X app.
 
-**Per-app identity.** An X11 app launched from LordOS is placed in its app scope
+**Per-app identity.** An X11 app launched from Insane OS is placed in its app scope
 (`app-lordos-<desktop id>.scope`) before it runs, exactly like a Wayland app, so the per-app
 firewall and the Monitor apply to it (tested: XTerm with "no internet" can't connect;
 `xwayland-firewall.png`). Its window is grouped in the Dock by `WM_CLASS`.
 
 **Restricted apps get no X display.** A Linux app with a device or "no files" restriction runs in
-its own view (private `/tmp`, see `FIREWALL.md`), and LordOS doesn't put the X socket there and
+its own view (private `/tmp`, see `FIREWALL.md`), and Insane OS doesn't put the X socket there and
 removes `DISPLAY`: given the shared display above, a restricted X11 app could watch or drive the
 other X apps. Such an app must speak Wayland (most GTK/Qt apps do); an X11-only app with one of
 those restrictions doesn't open. Isolated `.lpk` apps never get X either (their seccomp filter
@@ -802,7 +802,7 @@ user's systemd manager for a new scope or service. The manager has PID 1 do the 
 (`AttachProcessesToUnit`), which runs as root and only checks that the process and the target unit
 belong to the same UID; it does not look at the source cgroup. The process then runs in
 `user@<uid>.service/app.slice/…`, outside `lordos.service`. This is closed by `lord-netperm`:
-it attaches its cgroup programs to each LordOS session user's `user@<uid>.service` too, and holds a
+it attaches its cgroup programs to each Insane OS session user's `user@<uid>.service` too, and holds a
 process that escapes there to the strictest **union** of that user's running restricted apps'
 restrictions (restriction-only, so never less restrictive than the app's own policy). Tested on
 VM 122 with `systemd-run --user --scope`, `systemd-run --user` (service) and `setsid` — all denied,
@@ -910,13 +910,13 @@ synchronous RPC (`js_broker_pending`), events are NUL-terminated before `JS_Pars
   close guards still apply, and the process ends when the last window is gone. Other apps quit the
   same way, by closing every window of their Dock entry (`quitApp` in `sdk/dock.js`).
 - **❖ shortcuts:** `appspawn.c` records the app process's real pid (the intermediate child reports
-  it through a pipe), so the compositor knows which Wayland client is an isolated LordOS app
+  it through a pipe), so the compositor knows which Wayland client is an isolated Insane OS app
   (`brokersrv_app_of_pid`). That client also receives ❖ combinations (❖N, ❖C, ❖A, ❖W…) together
   with the ❖ key itself, as an app inside the theme would. The system keeps ❖L, ❖⌃Q, ❖Q,
   ❖Space, ❖⌥Space, ❖V, ❖., ❖Tab, ❖`, ❖Esc, ❖⇧3/4/5 and ❖F1–F12 (`system_meta_key` in
   `wl/wl.c`) and those of the theme's fixed table (`wl/keygrab.c`, [SHORTCUTS.md](SHORTCUTS.md)), which
   isolated apps cannot change: `lord.wayland` does not exist in their process. A Linux app still gets no ❖
-  combination, except Lord Flow's ❖ as Ctrl, sent as Ctrl to that client only.
+  combination, except Insane Flow's ❖ as Ctrl, sent as Ctrl to that client only.
 - **Keyboard layout:** the app compiles the keymap that the compositor sends over
   `wl_keyboard.keymap` (`kb_set_keymap_string`), which is already expanded and reads no files.
   `kb_set()` inside the sandbox failed, because Landlock hides `/usr/share/X11/xkb`

@@ -9,7 +9,7 @@
 
 /* After wl_start(), in a user session (not the login screen, not app mode): if Xwayland is
  * installed, reserves a display (/tmp/.X11-unix/X<n>, 0600, and its lock file), sets DISPLAY for
- * the apps LordOS starts, and waits for a connection. 0 if there is an X socket. */
+ * the apps Insane OS starts, and waits for a connection. 0 if there is an X socket. */
 int  xwl_init(void);
 void xwl_stop(void);                    /* stops Xwayland and removes the socket and the lock */
 const char *xwl_display(void);          /* ":1", or "" */

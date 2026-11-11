@@ -1,10 +1,10 @@
-LordOS es software libre y las contribuciones son bienvenidas: código, documentación, traducciones, pruebas en hardware real y buenos reportes de errores. Esta página explica cómo participar y las pocas reglas que sigue toda contribución.
+Insane OS es software libre y las contribuciones son bienvenidas: código, documentación, traducciones, pruebas en hardware real y buenos reportes de errores. Esta página explica cómo participar y las pocas reglas que sigue toda contribución.
 
 ## Cómo participar
 
-El repositorio es público en [github.com/lordbasex/LordOS](https://github.com/lordbasex/LordOS). Podés:
+El repositorio es público en [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). Podés:
 
-- probar LordOS y [reportar problemas](/legal/issues/) en [GitHub Issues](https://github.com/lordbasex/LordOS/issues), con la salida de `lordos-issue` (desde la 0.8.8: ejecutalo en una terminal; escribe `~/lordos-issue-<fecha>.txt` con los nombres y las direcciones reemplazados, y no envía nada);
+- probar Insane OS y [reportar problemas](/legal/issues/) en [GitHub Issues](https://github.com/lordbasex/Insane OS/issues), con la salida de `lordos-issue` (desde la 0.8.8: ejecutalo en una terminal; escribe `~/lordos-issue-<fecha>.txt` con los nombres y las direcciones reemplazados, y no envía nada);
 - probarla en tu hardware y contarnos qué funciona y qué no;
 - **seguir** (watch) el repositorio o darle una **estrella** para enterarte de las versiones.
 
@@ -20,7 +20,7 @@ Para cambios grandes (una app nueva, un servicio del sistema nuevo, una dependen
 
 ## Licencia de las contribuciones
 
-LordOS usa licencias **inbound = outbound** (la misma licencia de entrada y de salida): al contribuir, licenciás tu contribución bajo la misma **licencia MIT** que el resto del proyecto ([LICENSE](https://github.com/lordbasex/LordOS/blob/main/LICENSE)). El copyright de tu trabajo sigue siendo tuyo; no hay cesión de derechos ni un acuerdo de contribución aparte para firmar.
+Insane OS usa licencias **inbound = outbound** (la misma licencia de entrada y de salida): al contribuir, licenciás tu contribución bajo la misma **licencia MIT** que el resto del proyecto ([LICENSE](https://github.com/lordbasex/Insane OS/blob/main/LICENSE)). El copyright de tu trabajo sigue siendo tuyo; no hay cesión de derechos ni un acuerdo de contribución aparte para firmar.
 
 ## Certificado de Origen del Desarrollador (sign-off)
 
@@ -42,15 +42,15 @@ Usá tu nombre real (o el nombre con el que se te conoce públicamente). Los pul
 
 - **Solo en inglés.** Todo el código, los identificadores, los comentarios, los mensajes de commit y la documentación en Markdown se escriben en inglés. La excepción son los textos que ve el usuario: viven en los catálogos de idioma (`assets/locales/<idioma>/`) y pasan por la traducción, con el inglés como idioma predeterminado.
 - **Las pruebas tienen que pasar.** Corré `make -C server test` para las suites autónomas (y `make -C server test-full` cuando toques los procesos auxiliares o el sandbox), y `node tools/i18n-check.mjs` cuando toques textos que ve el usuario. Sumá una prueba por cada error que arregles y cada función que agregues, cuando se pueda.
-- **C prolijo.** C11 legible y modular, que compile sin advertencias con `-Wall -Wextra`. Respetá la política de dependencias de [docs/ARCHITECTURE.md](https://github.com/lordbasex/LordOS/blob/main/docs/ARCHITECTURE.md).
+- **C prolijo.** C11 legible y modular, que compile sin advertencias con `-Wall -Wextra`. Respetá la política de dependencias de [docs/ARCHITECTURE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/ARCHITECTURE.md).
 - **No afirmes compatibilidad sin probar.** Si decís que algo funciona con un hardware o una app, es porque lo probaste.
-- **Reglas de marca.** Seguí el [kit de marca](https://github.com/lordbasex/LordOS/blob/main/docs/LORDOS-BRAND.md) para el logo, los colores y la escritura "LordOS". Usá nombres genéricos para las funciones y dejá afuera de los textos públicos las marcas y los nombres de productos de otras empresas; `node tools/brand-check.mjs` lo verifica.
+- **Reglas de marca.** Seguí el [kit de marca](https://github.com/lordbasex/Insane OS/blob/main/docs/LORDOS-BRAND.md) para el logo, los colores y la escritura "Insane OS". Usá nombres genéricos para las funciones y dejá afuera de los textos públicos las marcas y los nombres de productos de otras empresas; `node tools/brand-check.mjs` lo verifica.
 - **Nada de secretos.** Nunca subas claves privadas, contraseñas ni datos personales.
 
 ## Traducciones
 
-LordOS viene en cuatro idiomas: inglés, español, portugués y francés (desde la 0.8.8). Otros idiomas se suman como **paquetes de idioma** armados a partir de los catálogos de traducción; mirá [docs/LANGUAGES.md](https://github.com/lordbasex/LordOS/blob/main/docs/LANGUAGES.md). Las correcciones a las traducciones que ya existen también son bienvenidas.
+Insane OS viene en cuatro idiomas: inglés, español, portugués y francés (desde la 0.8.8). Otros idiomas se suman como **paquetes de idioma** armados a partir de los catálogos de traducción; mirá [docs/LANGUAGES.md](https://github.com/lordbasex/Insane OS/blob/main/docs/LANGUAGES.md). Las correcciones a las traducciones que ya existen también son bienvenidas.
 
 ## Código de conducta
 
-Todas las personas que participan en LordOS siguen nuestro [Código de conducta](/legal/code-of-conduct/). Los problemas de seguridad nunca se reportan en público: mirá la [Política de seguridad](/legal/security/).
+Todas las personas que participan en Insane OS siguen nuestro [Código de conducta](/legal/code-of-conduct/). Los problemas de seguridad nunca se reportan en público: mirá la [Política de seguridad](/legal/security/).

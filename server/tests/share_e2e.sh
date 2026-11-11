@@ -2,7 +2,7 @@
 # share_e2e.sh — the screen-sharing API against real, isolated headless sessions (docs/SCREEN-SHARING.md). A test
 # machine only, with sudo; not part of make test. Run from the repository root after `make -C server build/share-client`:
 #   sudo needs no password here; it makes one app scope, writes the user's grants file and removes both at the end.
-# It never touches a running LordOS session: its sessions live in ./rt with their own HOME.
+# It never touches a running Insane OS session: its sessions live in ./rt with their own HOME.
 U=$(id -u); ROOT=$PWD; B=$ROOT/server/build; C=$B/share-client; R=$ROOT/rt; RG=$ROOT/rtg
 CGB=/sys/fs/cgroup/system.slice/lordos.service/lordos-session-$U; CG=$CGB/app-lordos-sharetest.scope
 G=/var/lib/lordos/share/$U.json; ID=desktop:sharetest

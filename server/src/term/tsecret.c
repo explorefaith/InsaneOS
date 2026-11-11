@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 int term_prompt_names_secret(const char *line) {
-    /* what programs print in the languages LordOS speaks (data matched against their output, not text shown) */
+    /* what programs print in the languages Insane OS speaks (data matched against their output, not text shown) */
     static const char *const words[] = { "password", "passphrase", "passcode", "pin:", "contraseña", "clave", "senha", /* i18n-ok */
                                          "mot de passe", "passwort", "parola d", NULL };
     char low[256];

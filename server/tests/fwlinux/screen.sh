@@ -5,7 +5,7 @@
 #   - the compositor offers no capture protocol (screencopy, image capture, dmabuf export) to a
 #     client (build/wl-globals, connected like any app);
 #   - an X server socket, if any, is the session's own rootless Xwayland (0.8.3): 0600, the user's, and
-#     rootless, so an X11 app sees only X11 windows, never Wayland or LordOS windows; restricted apps
+#     rootless, so an X11 app sees only X11 windows, never Wayland or Insane OS windows; restricted apps
 #     get no DISPLAY (docs/FIREWALL.md);
 #   - no screen-cast portal is installed that could hand a PipeWire screen stream to an app
 #     (xdg-desktop-portal with a ScreenCast backend);

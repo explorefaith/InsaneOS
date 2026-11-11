@@ -1,4 +1,4 @@
-// markdown.jsx — our own <Markdown source />: renders markdown with LordOS nodes.
+// markdown.jsx — our own <Markdown source />: renders markdown with Insane OS nodes.
 //
 //   <Markdown source={text} base="/home/lord/Notes/x" width={420}
 //     onToggleTask={(line) => …} onLink={(url) => …} onHeadingRef={(id, node) => …} />

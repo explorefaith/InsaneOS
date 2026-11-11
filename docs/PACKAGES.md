@@ -1,6 +1,6 @@
-# Debian packages in LordOS
+# Debian packages in Insane OS
 
-LordOS installs and removes Debian packages with its own code: it reads the apt sources,
+Insane OS installs and removes Debian packages with its own code: it reads the apt sources,
 downloads and verifies the signed indexes, resolves dependencies and downloads the `.deb` files.
 **dpkg** does only the last step: unpacking and configuring. It doesn't use apt or libapt,
 gpgv/sqv, curl, zlib or liblzma. The dpkg database (`/var/lib/dpkg`) is still written only by
@@ -19,7 +19,7 @@ The code is in `server/src/pkg/`:
 | `resolve.c` | Dependency resolver and installation order |
 | `pin.c` | apt's preferences and priorities (0.8.5, see "How it resolves") |
 | `http.c` | HTTP/1.1 client, with a child process that runs as `nobody`; HTTPS through `lord-tls` (0.8.5, see "HTTPS") |
-| `sources_admin.c` | `pkg-source-add`/`pkg-source-remove`: vendor repositories from LordOS's catalog (0.8.5) |
+| `sources_admin.c` | `pkg-source-add`/`pkg-source-remove`: vendor repositories from Insane OS's catalog (0.8.5) |
 | `pkg.c` | Privileged helper actions (update, install, remove, local `.deb`) |
 | `../ui/js_pkg.c` | `lord.pkg`, the queries for the UI (without root) |
 
@@ -38,7 +38,7 @@ The code is in `server/src/pkg/`:
   given in the signed index. Only then is it stored, read or passed to dpkg.
 - **Keyring.** It is taken as trusted, as gpgv does: it is a root-owned file installed by
   `debian-archive-keyring`.
-- **HTTPS since 0.8.5.** Until 0.8.4 LordOS had no TLS of its own and downloaded `https://` sources
+- **HTTPS since 0.8.5.** Until 0.8.4 Insane OS had no TLS of its own and downloaded `https://` sources
   over `http://`, with the same path; since 0.8.5 they are downloaded over HTTPS through the sandboxed
   `lord-tls` helper (see "HTTPS" below), and `http://` sources as before. Either way security comes
   from the signatures and the SHA-256 hashes, as with apt; HTTPS adds privacy (someone watching the
@@ -51,16 +51,16 @@ The code is in `server/src/pkg/`:
 - **Its own firewall app** (0.8.5): before dropping root the download child moves itself into
   `lordos-net-store.scope` (`cgroup_enter_root`), so the Store and the updates are "Store and
   updates" (`lordos:store`) in Monitor → Network, with their own rules; blocking them asks first,
-  because no security update arrives while they are blocked (`FIREWALL.md`, "LordOS components in
+  because no security update arrives while they are blocked (`FIREWALL.md`, "Insane OS components in
   their own scopes").
 - **Downloads without root.** The process that talks to the network drops privileges before
   connecting: it becomes `nobody`, with no groups, with `no_new_privs` and no way back to root.
   It passes the bytes to the root process through a pipe. The root process only writes them into
   its folder, counts the size and computes the SHA-256: it doesn't interpret anything it
   receives.
-- **Locks.** While dpkg works, LordOS takes dpkg's frontend lock
+- **Locks.** While dpkg works, Insane OS takes dpkg's frontend lock
   (`/var/lib/dpkg/lock-frontend`, same as apt) and passes it `DPKG_FRONTEND_LOCKED=1`. If apt is
-  running, LordOS waits its turn: they don't step on each other. LordOS operations among
+  running, Insane OS waits its turn: they don't step on each other. Insane OS operations among
   themselves are queued (`/var/lib/lordos/pkg/lock`).
 - **Local `.deb`** (`pkg-install-file`):
   - the file must be in the user's folder;
@@ -79,9 +79,9 @@ The code is in `server/src/pkg/`:
 | `/var/lib/lordos/pkg/index.bin` | Index (packages, "provides", AppStream apps, sources, texts and long descriptions); world-readable |
 | `/var/lib/lordos/pkg/lists/` | Verified `InRelease` files and the compressed indexes, named by their SHA-256 (what didn't change isn't downloaded again) |
 | `/var/lib/lordos/pkg/icons/64/` | 64×64 icons of the desktop apps (DEP-11) |
-| `/var/lib/lordos/pkg/auto` | Packages LordOS installed as dependencies |
+| `/var/lib/lordos/pkg/auto` | Packages Insane OS installed as dependencies |
 | `/var/lib/lordos/pkg/sources` | SHA-256 of the list files the index was built from: when a component or source is added or removed, the next `pkg-update` rebuilds the index even if no signed release file changed |
-| `/var/lib/lordos/pkg/notes` | The verified `main/notes/ReleaseNotes` of every source that has one (LordOS's; [UPDATES.md](UPDATES.md)); world-readable |
+| `/var/lib/lordos/pkg/notes` | The verified `main/notes/ReleaseNotes` of every source that has one (Insane OS's; [UPDATES.md](UPDATES.md)); world-readable |
 | `/var/cache/lordos/pkg/` | `.deb` files while they're being installed (deleted when done) |
 
 ## Helper actions (`admin.run`)
@@ -101,7 +101,7 @@ All of them run in a separate process (`A_FORK`) and require an administrator us
 
 **Vendor repositories (0.8.5, `sources_admin.c`).** Store → Artificial Intelligence and Store →
 Commercial add a maker's signed APT repository only when one of its apps is installed. Only the id comes
-from the caller: the entry is read from LordOS's catalog (`<LordOS dir>/apt/catalog.json` and
+from the caller: the entry is read from Insane OS's catalog (`<Insane OS dir>/apt/catalog.json` and
 `apt/keys/`, shipped root-owned by the lordos package), must be `"type": "apt", "delivery": "direct"`,
 every field passes a strict character set, and the key file must hold a primary key with exactly the
 catalog's fingerprint. The action writes `/etc/apt/sources.list.d/lordos-<id>.sources` (Signed-By that
@@ -125,7 +125,7 @@ repository removes that repository. The catalog itself is described in `UPDATES.
 
   The UI shows the plan (`lord.pkg.plan`) and, if the user accepts, repeats the request with
   `--allow-remove` (when installing) or `--cascade` (when removing).
-- **Orphans.** When removing, the dependencies LordOS installed (recorded in
+- **Orphans.** When removing, the dependencies Insane OS installed (recorded in
   `/var/lib/lordos/pkg/auto`) that nobody uses anymore after that change are removed too, as
   `apt autoremove` would do afterwards. They appear in the plan with `reason: 'auto'` and do
   **not** need `--cascade`. `--keep-orphans` keeps them. `pkg-autoremove` cleans up the ones that
@@ -174,40 +174,40 @@ progress. "Updates" lists what can be upgraded and upgrades everything together.
 | Installed and opened from the Store (GTK 4 + libadwaita, in Spanish, with its AppStream icon in the Dock) | |
 
 **The Store since 0.8.5.** A sidebar in three groups (Store: Discover, For this computer, Installed,
-Updates; Categories: Artificial Intelligence and Debian's ten categories, each with its count; LordOS
+Updates; Categories: Artificial Intelligence and Debian's ten categories, each with its count; Insane OS
 apps), the page's title, a back button and the search in a toolbar, and apps as cards in a grid (icon,
 name, category, two lines of summary, the download size and a Get, Open or View button). Discover opens
 with a featured banner, then the AI shelf and a shelf per category; an app's page has a row of facts
 (version, size, category, distribution). The hardware suggestions moved to their own page, **For this
-computer** (below). Store → Installed shows each native LordOS app's own version.
+computer** (below). Store → Installed shows each native Insane OS app's own version.
 
-- **Artificial Intelligence** lists LordOS's catalog of AI apps (`UPDATES.md`, "Mirrored apps
+- **Artificial Intelligence** lists Insane OS's catalog of AI apps (`UPDATES.md`, "Mirrored apps
   (catalog)"), each with its kind, vendor and licence, dimmed on an architecture it doesn't support. An
   app from its vendor's repository first says whose repository it adds and its key fingerprint, then
-  adds it (`pkg-source-add`) and fetches the lists; an app LordOS builds that the lists don't have yet
+  adds it (`pkg-source-add`) and fetches the lists; an app Insane OS builds that the lists don't have yet
   offers to fetch them again.
 - **Commercial** lists free-of-charge apps whose source code isn't public (Google Chrome, Microsoft
-  Edge, Spotify), from their makers' signed repositories with the key LordOS pins. The page says before
-  anything is installed that LordOS can't review or fix what they do. Tested on the VMware machine:
+  Edge, Spotify), from their makers' signed repositories with the key Insane OS pins. The page says before
+  anything is installed that Insane OS can't review or fix what they do. Tested on the VMware machine:
   the three sources added, the three apps installed, `apt update` and the engine's update clean
   afterwards. Steam needs i386 multiarch, which the engine doesn't do yet (see "Pending").
 - **Third-party apps** (until 0.8.8.3 "Third-party suites") lists open source apps and suites from
   other projects: ArtCraft (0.8.8.1, its maker's `.deb` with a pinned SHA-256), and since 0.8.8.4
   VSCodium (#38) and Brave Browser (#39), both from their makers' signed repositories (amd64 and arm64)
-  with the key LordOS pins, added the same way as the AI apps' (`UPDATES.md`, "Mirrored apps (catalog)").
+  with the key Insane OS pins, added the same way as the AI apps' (`UPDATES.md`, "Mirrored apps (catalog)").
   Tested on VM 116 (amd64): both sources added, verified and installed by the engine.
 - **Remote access** (0.8.8.6) lists third-party remote access apps: Tailscale (#68, from Tailscale's
-  signed repository with the key LordOS pins) and RustDesk (#66, its maker's `.deb` with a pinned
-  SHA-256, mirrored in LordOS's repository), amd64 and arm64. Both install a system service that
+  signed repository with the key Insane OS pins) and RustDesk (#66, its maker's `.deb` with a pinned
+  SHA-256, mirrored in Insane OS's repository), amd64 and arm64. Both install a system service that
   starts with the computer and isn't held to the per-app firewall; the page says so. What each does
-  on LordOS, and what it can't do: `UPDATES.md`, "Remote access: Tailscale and RustDesk". Not
-  installed on a LordOS system yet.
+  on Insane OS, and what it can't do: `UPDATES.md`, "Remote access: Tailscale and RustDesk". Not
+  installed on a Insane OS system yet.
 - **Disk Formats** (0.8.7, `lordos-disk-formats`, `tools/iso/mkdeb-diskformats.sh`) is one item in the Commercial group,
-  from the LordOS repository: it depends on `ntfs-3g`, `exfatprogs` and `dosfstools`, and on amd64 suggests `apfs-dkms`,
+  from the Insane OS repository: it depends on `ntfs-3g`, `exfatprogs` and `dosfstools`, and on amd64 suggests `apfs-dkms`,
   offered as a switch on its page. Those drivers are free software ([FILES.md](FILES.md), "Disks' file systems").
-- **The featured banner** comes from the LordOS repository (`apt/featured/featured.json` and
+- **The featured banner** comes from the Insane OS repository (`apt/featured/featured.json` and
   `banner.png`, published under `main/featured/` and listed in the signed InRelease). The engine takes
-  them only from a source whose signed Release says `Origin: LordOS`, checks their hashes, that the
+  them only from a source whose signed Release says `Origin: Insane OS`, checks their hashes, that the
   JSON is an object of at most 64 KB and that the PNG has a PNG signature and at most 2 MB, and keeps
   them in `/var/lib/lordos/pkg/` (`lord.pkg.featured()`, read-only). Until the picture is there the
   Store draws a skeleton of the banner (it pulses, unless Reduce motion is on); a repository without a banner shows
@@ -222,12 +222,12 @@ more, packages with only some of them follow, after all of those, when one of th
 of their name (`vs code` also lists `code-aster`); a word only in a summary isn't enough.
 `lord.pkg.search` does this in C (`server/src/pkg/match.c`, tested in `build/pkg-test`), and the
 Store's own lists in JS with the same rules (`apps/store/search.js`, tested in
-`server/tests/store_search_test.mjs`). While searching, Discover first shows **From the LordOS
+`server/tests/store_search_test.mjs`). While searching, Discover first shows **From the Insane OS
 catalog**: the catalog apps that match (`apt/catalog.json`, every section), which aren't in the package
 lists until their maker's repository is added; they match by name, id, package name, the catalog's
 `keywords` (`"vscode"`, `"vs code"`, nicknames) and, with less weight, the summary in the user's
 language and in English, the vendor and the kind. The same search filters the catalog pages,
-categories, Installed and LordOS apps. Spotlight asks for `every: true`: only the packages with every
+categories, Installed and Insane OS apps. Spotlight asks for `every: true`: only the packages with every
 word. On VM 116 (Debian 13, 75,016 packages) a search takes 24–33 ms, the same as before (24–31 ms with
 the old substring search, measured with the same queries).
 
@@ -241,13 +241,13 @@ the catalog apps with only "code", then the packages.*
 Remote Desk; `rclone`, `fuse3` and `openssh-client` for Connect to Server; `openssl`. An update brings them in.
 Since 0.8.8.5 `lordos-rclone` (rclone's official release binary v1.75.2, unmodified, at `/usr/lib/lordos/rclone/rclone`; `tools/iso/mkdeb-rclone.sh`
 checks the release's signed `SHA256SUMS` against rclone's pinned release key and the zip's hash, one package per architecture,
-published in LordOS's own apt repository with each release since rclone has none) replaces Debian's `rclone` as the dependency: Cloud needs a newer rclone than Debian 13's 1.60, and
+published in Insane OS's own apt repository with each release since rclone has none) replaces Debian's `rclone` as the dependency: Cloud needs a newer rclone than Debian 13's 1.60, and
 Connect to Server runs the same binary (Debian's only if ours is missing). Debian's `rclone` stays installed on an upgrade; nothing runs it.
 
 ## Suggested for your computer
 
 Store → **For this computer** (until 0.8.5 the top of Discover) shows **Suggested for your computer**: Debian packages for the hardware
-LordOS finds, each card saying why it appears, what it installs and, for software that isn't free,
+Insane OS finds, each card saying why it appears, what it installs and, for software that isn't free,
 that it isn't (with an orange label; such cards never have a highlighted button, and the plan
 repeats the notice). **Install** shows the usual plan and runs `pkg-install` through the admin
 helper; **Don't suggest again** stores the card's id in `settings.json` (`suggestions.dismissed`).
@@ -272,14 +272,14 @@ needs `contrib` as well as `non-free`), is never offered as installable.
 
 | Detected | How | Suggests | Notes |
 |---|---|---|---|
-| VMware virtual machine | DMI `sys_vendor` "VMware, Inc." or a PCI device of vendor `15ad` | `open-vm-tools` | Preinstalled since 0.8.1, so it normally shows as installed. `open-vm-tools-desktop` is not suggested: it targets an X11 session (LordOS runs X11 apps through Xwayland since 0.8.3, but its clipboard and resize integration was not tested there) |
+| VMware virtual machine | DMI `sys_vendor` "VMware, Inc." or a PCI device of vendor `15ad` | `open-vm-tools` | Preinstalled since 0.8.1, so it normally shows as installed. `open-vm-tools-desktop` is not suggested: it targets an X11 session (Insane OS runs X11 apps through Xwayland since 0.8.3, but its clipboard and resize integration was not tested there) |
 | QEMU/KVM guest with a guest agent channel | a virtio port named `org.qemu.guest_agent.0` (only present when the host enabled the agent) | `qemu-guest-agent` | Clean shutdown from the host, frozen disks for backups, the guest's address |
 | VirtualBox virtual machine | DMI product "VirtualBox" or PCI `80ee:cafe` | `virtualbox-guest-utils` | **Not in Debian 13** (main, contrib or backports): the card explains that, and that the kernel already has the guest drivers (display with VMSVGA, shared folders) |
-| NVIDIA graphics card (x86_64) | PCI vendor `10de`, class `0300`/`0302`/`0380` | `linux-headers-amd64`, `nvidia-driver`, `firmware-misc-nonfree` | **non-free**. The card says the free `nouveau` driver is in use and stays the default; what changes: DKMS builds the module for each kernel, Secure Boot needs its key enrolled at the next restart, cards older than about 2014 need the free driver, and the LordOS desktop hasn't been tested with this driver yet. `nvidia-driver` also depends on packages in `contrib` (`nvidia-installer-cleanup`): without both components in the sources the card explains that instead (the LordOS ISO enables both) |
+| NVIDIA graphics card (x86_64) | PCI vendor `10de`, class `0300`/`0302`/`0380` | `linux-headers-amd64`, `nvidia-driver`, `firmware-misc-nonfree` | **non-free**. The card says the free `nouveau` driver is in use and stays the default; what changes: DKMS builds the module for each kernel, Secure Boot needs its key enrolled at the next restart, cards older than about 2014 need the free driver, and the Insane OS desktop hasn't been tested with this driver yet. `nvidia-driver` also depends on packages in `contrib` (`nvidia-installer-cleanup`): without both components in the sources the card explains that instead (the Insane OS ISO enables both) |
 | USB printer | an interface of class `07`, by USB vendor ID: HP `03f0` → `hplip`, Epson `04b8` → `printer-driver-escpr`, Brother `04f9` → `printer-driver-brlaser`, Samsung `04e8` → `printer-driver-splix`, Canon `04a9` → `printer-driver-gutenprint` | the vendor's Debian driver | Vendors not in the table get nothing: most printers work driverless with CUPS |
 | USB printer with IPP over USB | interface `07/01/04` | `ipp-usb` | Driverless printing and scanning: the device shows up like a network printer |
 | USB scanner | udev's `libsane_matched=yes` for the device (`/run/udev/data/c189:N`; needs libsane's udev rules installed), by vendor: HP → `libsane-hpaio` | the vendor's SANE backend | Other vendors' backends are already in `libsane1` |
-| Raspberry Pi 5 (and 500, CM5) | device tree `compatible` | `rpi-eeprom`, `raspi-utils`, `gpiod` (those that exist) | `rpi-eeprom` and `raspi-utils` come from the Raspberry Pi archive the LordOS image configures, and since 0.8.4.1 also from the LordOS repository (`UPDATES.md`, "Raspberry Pi firmware packages"); `gpiod` from Debian |
+| Raspberry Pi 5 (and 500, CM5) | device tree `compatible` | `rpi-eeprom`, `raspi-utils`, `gpiod` (those that exist) | `rpi-eeprom` and `raspi-utils` come from the Raspberry Pi archive the Insane OS image configures, and since 0.8.4.1 also from the Insane OS repository (`UPDATES.md`, "Raspberry Pi firmware packages"); `gpiod` from Debian |
 | A device that asked for missing firmware | the firmware loader's "Direct firmware load for X failed" / "firmware: failed to load X" lines in the kernel log, minus files present now | the package that ships X (`iwlwifi-*`, `intel/ibt-*` → `firmware-iwlwifi`; `rtl_bt/`, `rtw88/`, `rtw89/`, `rtlwifi/`, `rtl_nic/` → `firmware-realtek`; `ath*k/`, `ar3k/`, `qca/`, `htc_*` → `firmware-atheros`; `brcm/brcmfmac*` → `firmware-brcm80211`; `brcm/BCM*` → `bluez-firmware`; `mediatek/`, `mt76*` → `firmware-mediatek`; `mrvl/`, `libertas/` → `firmware-libertas`; `amdgpu/`, `radeon/` → `firmware-amd-graphics`; `i915/`, `xe/` → `firmware-intel-graphics`; `nvidia/` → `firmware-nvidia-graphics`) | **non-free-firmware**, one card per package (Wi-Fi, Bluetooth, network adapter, graphics). The prefixes were checked against trixie's `non-free-firmware` Contents. If the package is installed and a file is still missing, nothing is offered. Files no prefix matches (e.g. `regulatory.db`, which a VM without Wi-Fi also asks for) get no card |
 
 Cards are ordered: installable, then explained (not available), then installed.
@@ -295,7 +295,7 @@ udev's database entry of each USB device (only the `libsane_matched` flag) and `
 are reduced to hex IDs and printable ASCII before they reach JS. Nothing runs, nothing is written,
 nothing goes over the network.
 
-The kernel log is readable by the session only with `kernel.dmesg_restrict=0` (as on the LordOS
+The kernel log is readable by the session only with `kernel.dmesg_restrict=0` (as on the Insane OS
 Raspberry Pi kernel). With Debian's default (`1`) the Store asks the admin helper's fixed action
 **`hw-firmware-missing`**: no arguments, any user, read-only; it reads `/dev/kmsg` as root and returns
 only `LOG fw <file> <driver>` lines whose file name passes `hwscan_fw_name_valid()` (`[A-Za-z0-9._+,/-]`,
@@ -333,7 +333,7 @@ prints the facts of the machine it runs on.
   engine gives one card, `rpi5Tools`, as installed (the Store itself wasn't run on the board).
 
 **Needs real hardware:** an NVIDIA card (the driver install, DKMS, Secure Boot enrollment and the
-LordOS desktop on it), a USB printer and scanner of each vendor in the table, Wi-Fi and Bluetooth
+Insane OS desktop on it), a USB printer and scanner of each vendor in the table, Wi-Fi and Bluetooth
 adapters without firmware (that the miss is logged as expected and the device works after the
 install), and VMware and VirtualBox guests.
 
@@ -362,7 +362,7 @@ lord.pkg.apps({ category, type = 'desktop-application', limit = 100, offset = 0,
 lord.pkg.categories()           // { AudioVideo: 210, Development: 180, … } (desktop apps)
 lord.pkg.icon(name)             // path of the 64×64 PNG or null
 lord.pkg.releaseNotes(name, version)   // Markdown release notes a source published for that version, or null
-lord.pkg.featured()             // (0.8.5) the Store's banner from the signed LordOS repository, or null
+lord.pkg.featured()             // (0.8.5) the Store's banner from the signed Insane OS repository, or null
 lord.pkg.rebootRequired()       // null, or the packages that asked for a restart (/run/reboot-required.pkgs)
 
 // Summary = { name, version (candidate), summary, section, size, installedSize (bytes),
@@ -411,7 +411,7 @@ await admin.run('pkg-install', 'featherpad', (line) => …)    // line: "progres
 - **Orphans.** Marking starts from the roots: what was installed manually, what is essential and
   what is being installed now. `Pre-Depends`, `Depends` and `Recommends` are followed, because apt
   also counts recommended packages, and so are all present alternatives or providers. Whatever in
-  `auto` is left unmarked is removed. Only dependencies LordOS installed are touched: what apt
+  `auto` is left unmarked is removed. Only dependencies Insane OS installed are touched: what apt
   installed as automatic is not included.
 - **Neighbors.** When something is upgraded or removed, it rechecks what depended on it.
   Installed packages left without what they need are first upgraded, and if that isn't possible

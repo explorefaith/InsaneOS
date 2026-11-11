@@ -1,4 +1,4 @@
-/* tp_route.h — splits what the driver (tp.c) produces between the LordOS UI (JS) and the
+/* tp_route.h — splits what the driver (tp.c) produces between the Insane OS UI (JS) and the
  * Wayland apps (wl/wl_input.c). main.c gives it the pointer; the remote desktop injects the browser's scroll and
  * pinch through here. */
 #ifndef LORD_TP_ROUTE_H

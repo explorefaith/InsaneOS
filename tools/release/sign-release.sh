@@ -1,5 +1,5 @@
 #!/bin/sh
-# Signs a LordOS release folder: writes SHA256SUMS (every release file) and SHA256SUMS.sig
+# Signs a Insane OS release folder: writes SHA256SUMS (every release file) and SHA256SUMS.sig
 # (base64 of the Ed25519 signature over the exact bytes of SHA256SUMS), then verifies it
 # against tools/release/lordos-release.pub.pem.
 #

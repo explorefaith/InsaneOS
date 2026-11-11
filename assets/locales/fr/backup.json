@@ -22,7 +22,7 @@
   "bytes": "{done} sur {total}",
   "cancel": "Annuler",
   "dest": "Destination",
-  "destHelp": "Un disque externe (ext4 recommandé) ou un dossier. Les sauvegardes sont stockées dans LordOS-Backups.",
+  "destHelp": "Un disque externe (ext4 recommandé) ou un dossier. Les sauvegardes sont stockées dans Insane OS-Backups.",
   "volFree": "{free} libres sur {total} · {fs}",
   "noLinks": "pas de liens physiques : chaque sauvegarde occupe tout son espace",
   "noDisks": "Aucun disque externe monté. Connectez-en un ou choisissez un dossier.",

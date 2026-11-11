@@ -1,4 +1,4 @@
-/* term.h — LordOS terminal engine: xterm emulator (vt.c), PTY (pty.c),
+/* term.h — Insane OS terminal engine: xterm emulator (vt.c), PTY (pty.c),
  * sessions and events (term.c) and grid drawing (term_paint.c).
  *
  * Emulation and drawing are in C so that `cat` of large files or `htop` do not

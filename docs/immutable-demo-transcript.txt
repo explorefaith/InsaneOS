@@ -1,7 +1,7 @@
 ##### [   0.0s] copying the factory image (version 1) and fresh UEFI variables
 ##### [   4.5s] 1. first boot of the factory image
 $ cat /usr/lib/lordos/immutable/VERSION
-  LordOS immutable prototype, image version 1, built 2026-10-19T05:14:54Z
+  Insane OS immutable prototype, image version 1, built 2026-10-19T05:14:54Z
 $ /usr/lib/lordos/immutable/update --status
   running: image version 1, /usr = /dev/mapper/usr erofs ro
   slot A: /dev/vda2  label=lordos_usr_1  <- running
@@ -45,7 +45,7 @@ $ /usr/lib/lordos/immutable/update --status
 $ systemctl reboot
 ##### [ 149.1s] booted after the update
 $ cat /usr/lib/lordos/immutable/VERSION
-  LordOS immutable prototype, image version 2, built 2026-10-19T05:15:14Z
+  Insane OS immutable prototype, image version 2, built 2026-10-19T05:15:14Z
 $ cat /etc/lordos-demo.conf /home/demo/notes.txt
   kept across updates
   my file
@@ -87,7 +87,7 @@ $ systemctl reboot
 ##### [ 240.5s] version 3 failed its health check (attempt 3); the system restarts itself
 ##### [ 267.9s] booted on its own after the failed attempts
 $ cat /usr/lib/lordos/immutable/VERSION
-  LordOS immutable prototype, image version 2, built 2026-10-19T05:15:14Z
+  Insane OS immutable prototype, image version 2, built 2026-10-19T05:15:14Z
 $ /usr/lib/lordos/immutable/update --status
   running: image version 2, /usr = /dev/mapper/usr erofs ro
   slot A: /dev/vda2  label=lordos_usr_3

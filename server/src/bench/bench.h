@@ -1,4 +1,4 @@
-/* bench.h — measurement pieces shared by lordos-testbench (src/testbench) and LordBench (0.8.6,
+/* bench.h — measurement pieces shared by lordos-testbench (src/testbench) and InsaneBench (0.8.6,
  * docs/BENCHMARK.md): the clock, frame-time statistics against a refresh budget, presentation
  * accounting, input-to-screen latency, the GL renderer's kind and the reports' state file. Pure C with
  * libc and libm only: no Wayland, no GL (the GL scene is glscene.h). */

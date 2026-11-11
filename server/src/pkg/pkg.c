@@ -452,7 +452,7 @@ static void write_notes(const char *notes, size_t len) {
 }
 
 /* The Store's banner (Store → Discover, apt/featured/ in the repository): a small JSON object and a
- * PNG, both listed in LordOS's signed InRelease. The JSON is checked to parse here and again by the
+ * PNG, both listed in Insane OS's signed InRelease. The JSON is checked to parse here and again by the
  * Store; the PNG only by its signature and size (it is drawn like the DEP-11 icons). Without them the
  * Store shows its own banner. */
 #define FEATURED_MAX (64u << 10)
@@ -627,12 +627,12 @@ void pkg_act_update(const AdminReq *r, const char *arg, size_t len) {
             char base[200];
             const char *ext;
             for (int k = 0; k < 7; k++) {
-                if (k >= 5 && strcmp(R[i].origin, "LordOS")) continue;   /* the Store's banner: LordOS's repository only */
+                if (k >= 5 && strcmp(R[i].origin, "Insane OS")) continue;   /* the Store's banner: Insane OS's repository only */
                 if (k == 0) snprintf(base, sizeof base, "%s/binary-%s/Packages", src[i].comps[c], arch);
                 else if (k == 1) snprintf(base, sizeof base, "%s/i18n/Translation-en", src[i].comps[c]);
                 else if (k == 2) snprintf(base, sizeof base, "%s/dep11/Components-%s.yml", src[i].comps[c], arch);
                 else if (k == 3) snprintf(base, sizeof base, "%s/dep11/icons-64x64.tar", src[i].comps[c]);
-                else if (k == 4) snprintf(base, sizeof base, "%s/notes/ReleaseNotes", src[i].comps[c]);   /* LordOS's release notes */
+                else if (k == 4) snprintf(base, sizeof base, "%s/notes/ReleaseNotes", src[i].comps[c]);   /* Insane OS's release notes */
                 else if (k == 5) snprintf(base, sizeof base, "%s/featured/Featured", src[i].comps[c]);    /* the Store's banner (JSON) */
                 else snprintf(base, sizeof base, "%s/featured/Banner", src[i].comps[c]);                  /* and its image (PNG) */
                 const RelFile *f = rel_pick(&R[i], base, &ext);
@@ -671,7 +671,7 @@ void pkg_act_update(const AdminReq *r, const char *arg, size_t len) {
     for (int i = 0; i < ns; i++) if (rel[i].status != 304) changed = 1;
     free(rel);
     progress("lists", (uint64_t)ns, (uint64_t)ns);
-    /* release notes listed but not stored yet (an index built before LordOS read them): rebuild */
+    /* release notes listed but not stored yet (an index built before Insane OS read them): rebuild */
     for (int k = 0; k < nw && !changed; k++) if (w[k].kind == 4 && access(PKG_DIR "/notes", F_OK)) changed = 1;
     for (int k = 0; k < nw && !changed; k++) if (w[k].kind == 5 && access(PKG_DIR "/featured.json", F_OK)) changed = 1;
     /* a component or source added or removed: the same InRelease files, other lists */

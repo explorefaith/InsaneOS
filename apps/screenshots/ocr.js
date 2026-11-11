@@ -2,7 +2,7 @@
 // (server/tests/screenshots_model_test.mjs): which Tesseract languages to read with, and how the text is cleaned.
 
 // The interface's languages (settings.languages, "es", "pt-BR"…) as Tesseract's data names, first (they win where
-// two read a word differently), then the ones LordOS installs (English: code, commands and most of a screen; and
+// two read a word differently), then the ones Insane OS installs (English: code, commands and most of a screen; and
 // Spanish, Portuguese, French and Italian, so "año" keeps its accent with an English interface; a missing one is
 // skipped by Tesseract), each once: ['pt'] → 'por+eng+spa+fra+ita'. Five cost ~0.3 s a selection.
 const TESS = { en: 'eng', es: 'spa', pt: 'por', fr: 'fra', it: 'ita', de: 'deu', ca: 'cat', nl: 'nld' };

@@ -1,8 +1,8 @@
 # Mail, Calendar, Contacts and Reminders (M9)
 
-LordOS ships four native apps for personal information: **Mail** (a three-pane client in the
+Insane OS ships four native apps for personal information: **Mail** (a three-pane client in the
 spirit of classic desktop mail clients), **Calendar**, **Contacts** and **Reminders**. They are
-ordinary LordOS apps (React on our engine, `apps/mail`, `apps/calendar`, `apps/contacts`,
+ordinary Insane OS apps (React on our engine, `apps/mail`, `apps/calendar`, `apps/contacts`,
 `apps/reminders`). All the network protocols and every parser of data that comes from outside
 run in one sandboxed helper process, **`lord-maild`**.
 
@@ -18,7 +18,7 @@ run in one sandboxed helper process, **`lord-maild`**.
 | Compose: rich text (markdown marks + live preview), markdown, plain text; signatures; drafts on the server; send later | **done** |
 | Invitations (.ics in mail): Accept / Maybe / Decline, event added to Calendar, iTIP REPLY sent to the organizer | **done** (REPLY delivered to the organizer's mailbox) |
 | Calendar: day / week / month, several calendars with colors, local and CalDAV, recurrence, alarms | **done** |
-| Calendars & Contacts accounts from Calendar and Contacts (*Add Account…*): any CalDAV/CardDAV server, an iCloud preset (app-specific password), contacts on their own address, conflicts that keep your version (0.8.8.4, [#32](https://github.com/lordbasex/LordOS/issues/32)) | **done**, tested against Radicale 3.5 (VM 116); the iCloud preset not tried with a real account |
+| Calendars & Contacts accounts from Calendar and Contacts (*Add Account…*): any CalDAV/CardDAV server, an iCloud preset (app-specific password), contacts on their own address, conflicts that keep your version (0.8.8.4, [#32](https://github.com/lordbasex/Insane OS/issues/32)) | **done**, tested against Radicale 3.5 (VM 116); the iCloud preset not tried with a real account |
 | Google calendars and contacts | **not available yet**: Google allows them only over OAuth with a registered client (see [Google calendars and contacts](#google-calendars-and-contacts-not-available-yet)) |
 | Reminders: lists, due dates, priorities, flags, Today / Scheduled / All / Flagged / Completed, VTODO over CalDAV | **done** |
 | Contacts: local and CardDAV, groups, photo, the usual vCard fields; Mail autocompletes from it | **done** |
@@ -62,7 +62,7 @@ run in one sandboxed helper process, **`lord-maild`**.
   connected socket back (`MQ_SOCK`). (0.8.5) The socket itself is made and connected by Mail's connector
   (`lord-server --net-connector mail`, in `lordos-net-mail.scope`), so Mail and the calendar sync
   are their own app for the firewall and Monitor → Network ("Mail and calendars", `lordos:mail`;
-  `FIREWALL.md`, "LordOS components in their own scopes"); the endpoint check above is unchanged. The allowed endpoints are exactly: each account's IMAP and
+  `FIREWALL.md`, "Insane OS components in their own scopes"); the endpoint check above is unchanged. The allowed endpoints are exactly: each account's IMAP and
   SMTP `host:port`, each DAV URL's `host:port`, and — for CalDAV/CardDAV discovery redirects inside
   the same provider (for example `pNN-caldav.icloud.com`) — other hosts of the same domain on port 443.
   So a malicious message that takes over `lord-maild` still cannot talk to anything else.
@@ -207,7 +207,7 @@ sorted by date. It is rebuilt from the cache in milliseconds at start and never 
 
 ### HTML without executing anything
 
-LordOS has no web engine (WebKit/Chromium are not allowed), and Mail does not need one. The
+Insane OS has no web engine (WebKit/Chromium are not allowed), and Mail does not need one. The
 HTML part goes through **our sanitizer** (`server/src/mail/html.c`): a tolerant tokenizer that
 builds a small tree in JSON — blocks, layout tables (rows, cells, widths, colors, padding,
 alignment), text runs (bold, monospace, color, size, background, underline/strike), images and
@@ -237,7 +237,7 @@ their own colors are shown on their own light "paper" (also in dark mode), other
   lord-server re-validates every reply of lord-maild before JavaScript sees it (`mailc.c`), with a
   nesting limit that fits the HTML tree (`HTML_JSON_DEPTH`, twice `HTML_MAX_DEPTH` plus a few):
   deeply nested newsletter tables used to pass the parser's default 32 levels and the message
-  showed "bad-json" ([#18](https://github.com/lordbasex/LordOS/issues/18)). A reply too large for
+  showed "bad-json" ([#18](https://github.com/lordbasex/Insane OS/issues/18)). A reply too large for
   the queue (16 MB) arrives as `too-big` ("This message is too large to show here") and never
   spoils the other events.
 
@@ -285,13 +285,13 @@ is added with its URL; discovery follows `current-user-principal`, `calendar-hom
 
 ### Calendars and contacts accounts (0.8.8.4)
 
-Calendar and Contacts have **Add Account…** under their lists ([#32](https://github.com/lordbasex/LordOS/issues/32)).
+Calendar and Contacts have **Add Account…** under their lists ([#32](https://github.com/lordbasex/Insane OS/issues/32)).
 It opens Mail's sheet in *CalDAV / CardDAV* mode (`openDavSetup()` in `sdk/mail.js`: the accounts
 file and the keyring item belong to Mail, so the isolated Calendar and Contacts processes get no new
 powers). The sheet has a **Service** choice, from `DAV_PRESETS` (provider names are data shown as
 `{name}`, like the mail providers; the catalogs carry no brand names):
 
-| Service | What you type | What LordOS stores |
+| Service | What you type | What Insane OS stores |
 |---|---|---|
 | Other server | server URL, optional contacts URL, user name, password; Calendars and Contacts toggles | `url`, `carddav` (only when different), `cal`, `card` |
 | iCloud | the account's email and an **app-specific password** (two-factor authentication on; account page → Sign-In and Security → App-Specific Passwords) | `url: https://caldav.icloud.com/`, `carddav: https://contacts.icloud.com/` |
@@ -322,14 +322,14 @@ from there.
 ### Google calendars and contacts (not available yet)
 
 Google turned off password sign-in (and app passwords) for CalDAV and CardDAV: both accept only an
-OAuth 2.0 access token (`Authorization: Bearer …`) for an app registered in Google Cloud. LordOS has
+OAuth 2.0 access token (`Authorization: Bearer …`) for an app registered in Google Cloud. Insane OS has
 no registered client, so the Google service in the sheet is a clear "not available yet" and no
 account can be created. No client, key or account was created for this work. What the maintainer
 must do to turn it on:
 
-1. **Google Cloud project** (console.cloud.google.com) owned by the LordOS project, with the
+1. **Google Cloud project** (console.cloud.google.com) owned by the Insane OS project, with the
    **CalDAV API** and the **CardDAV API** enabled (APIs & Services → Library).
-2. **OAuth consent screen**: external, app name "LordOS", the lordos.org home page, privacy policy
+2. **OAuth consent screen**: external, app name "Insane OS", the lordos.org home page, privacy policy
    and terms links, support and developer emails, and the scopes
    `https://www.googleapis.com/auth/calendar` and `https://www.googleapis.com/auth/carddav`
    (both "sensitive": Google's **app verification** is needed before more than 100 test users can

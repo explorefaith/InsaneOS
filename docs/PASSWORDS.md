@@ -1,10 +1,10 @@
 # Passwords and the system keyring (M9)
 
-**Passwords** ("Contraseñas" in Spanish, "Senhas" in Portuguese) is the LordOS password manager.
+**Passwords** ("Contraseñas" in Spanish, "Senhas" in Portuguese) is the Insane OS password manager.
 The same machinery is also the **system keyring**: native apps keep their secrets there through
 `lord.keyring` / the SDK `keyring`, and Linux apps (Chromium, Firefox, `secret-tool`, anything
 using libsecret) through our own implementation of the freedesktop **Secret Service** D-Bus API.
-No gnome-keyring, kwallet, libsecret, libdbus or sd-bus is used by LordOS.
+No gnome-keyring, kwallet, libsecret, libdbus or sd-bus is used by Insane OS.
 
 ## Screenshots (VM 116, real `lord-sessiond` session, user `pwtest`)
 
@@ -37,11 +37,11 @@ editor, generator, first run); the shots below are from the first version.
 | ![Chromium offers to save](passwords-browser-save.png) | ![Chromium Safe Storage in the session keyring](passwords-browser-keyring.png) |
 | Chromium (Wayland, `--password-store=gnome-libsecret`) saving a password | …its "Chromium Safe Storage" key lands in our Secret Service, visible in *Session keyring* |
 | ![Chromium autofills after a restart](passwords-browser-autofill.png) | ![Protected window in a capture](passwords-protected-capture.png) |
-| After restarting Chromium it decrypts and autofills the saved login: the key came back from our service | The Passwords window comes out black in LordOS screenshots, recordings and the remote desktop |
+| After restarting Chromium it decrypts and autofills the saved login: the key came back from our service | The Passwords window comes out black in Insane OS screenshots, recordings and the remote desktop |
 
 | ![Categories tree and tags](passwords-categories.png) | ![The real screen at the same moment](passwords-real-screen.png) |
 |---|---|
-| Main window: user categories as a tree (Trabajo → Clientes, Hogar → Inventario, imported KeePass folders), tags with colours | The real monitor (QEMU screendump) when the black LordOS screenshot above was taken: only captures are blanked |
+| Main window: user categories as a tree (Trabajo → Clientes, Hogar → Inventario, imported KeePass folders), tags with colours | The real monitor (QEMU screendump) when the black Insane OS screenshot above was taken: only captures are blanked |
 
 ## Architecture: where the secrets live
 
@@ -103,7 +103,7 @@ in-app file picker, the shell clipboard timer). The vault itself is unchanged ei
 Hidden in app mode: "Print" for the recovery key (the print dialog lives in the shell; saving it
 to a file works) and the "Open Settings" link on VPN items.
 
-| App mode: the system file dialog over the lock screen | App mode: a LordOS screenshot of the app window |
+| App mode: the system file dialog over the lock screen | App mode: a Insane OS screenshot of the app window |
 |---|---|
 | ![Powerbox](passwords-app-file-picker.png) | ![Protected app window](passwords-app-screenshot.png) |
 
@@ -185,7 +185,7 @@ Several methods can coexist; at least one besides the recovery key must remain.
 (system prompt, stored in `permisos.json`, checked in C). `lord-server` finds FIDO devices by the
 HID report descriptor (usage page 0xF1D0, `src/vault/fidodev.c`), opens `/dev/hidrawN` and passes
 the fd to `lord-vault`. Neither the app nor its JavaScript ever sees the device.
-FIDO hidraw nodes need a udev rule because LordOS sessions are not logind seat sessions
+FIDO hidraw nodes need a udev rule because Insane OS sessions are not logind seat sessions
 (`TAG+="uaccess"` does not apply):
 
 ```
@@ -219,9 +219,9 @@ Locking frees the model block by block; every arena block is wiped on free.
 ## Clipboard
 
 - Copying a password, PIN, card number or 2FA code calls `clipboard.set(value, { secure: true })`:
-  it never enters LordOS' clipboard history (Search / ❖V panel).
+  it never enters Insane OS' clipboard history (Search / ❖V panel).
 - Wayland clients now see the extra MIME type `x-kde-passwordManagerHint` (value `secret`) on a
-  sensitive LordOS clipboard, the KDE/GNOME convention clipboard managers honour
+  sensitive Insane OS clipboard, the KDE/GNOME convention clipboard managers honour
   (`src/wl/wl.c`). The bytes handed to Wayland clients are wiped after sending.
 - The clipboard is cleared after 30 s (configurable: 15/30/60/120 s) if it still holds the same
   value: by `lord-server` in app mode (`BOP_CLIP_SECRET`), by the app in the in-process fallback.
@@ -249,7 +249,7 @@ A separate vault, like the *login* keyring of other desktop systems:
 3. `lord-server` forwards it to `lord-vault` (`session-password` on the control channel) and wipes
    its buffers; `lord-vault` opens `login.lvault` (a `session` slot, Argon2id tuned to ~0.4 s) or
    creates it on first login.
-4. If the account password was changed outside LordOS, the slot no longer opens: `lord-vault` emits
+4. If the account password was changed outside Insane OS, the slot no longer opens: `lord-vault` emits
    `keyring-mismatch` (the UI can ask for the old password; re-wrapping is a `password-change` on
    `v:"login"`).
 
@@ -400,7 +400,7 @@ ssh ec2-user@203.0.113.7 in Passwords?"** (**Save**, **Not Now**).
 ### Secret Service (`org.freedesktop.secrets`)
 
 Our own minimal D-Bus code (`src/vault/dbus.c`, `secretsvc.c`). Before writing it we checked: no
-LordOS binary links libdbus or libsystemd (sd-bus), so adding either would have been a new
+Insane OS binary links libdbus or libsystemd (sd-bus), so adding either would have been a new
 dependency; the protocol subset needed (SASL EXTERNAL, Hello, RequestName, method calls and
 returns, signals, properties) is small. `lord-server` connects the session bus socket
 (`DBUS_SESSION_BUS_ADDRESS` or `$XDG_RUNTIME_DIR/bus`) and passes it already connected; the
@@ -412,8 +412,8 @@ sandboxed `lord-vault` authenticates and serves on it.
   HKDF-SHA256, AES-128-CBC). `secret-tool` (libsecret 0.21.7) negotiates the DH one.
 - Items are entries of `login.lvault` with `x.ss = {attrs, ctype}`; non-UTF-8 secrets are stored
   base64.
-- If another service already owns the name (gnome-keyring, kwallet), LordOS does not take it.
-  Two things keep it LordOS's (0.8.5): `lord-sessiond` starts a session only once the user's session
+- If another service already owns the name (gnome-keyring, kwallet), Insane OS does not take it.
+  Two things keep it Insane OS's (0.8.5): `lord-sessiond` starts a session only once the user's session
   bus exists (with automatic login it used to start a few milliseconds earlier, and `lord-vault` then
   never got on the bus), and the lordos package ships
   `/usr/lib/systemd/user/gnome-keyring-daemon.service.d/lordos.conf`, which starts gnome-keyring (when
@@ -424,7 +424,7 @@ sandboxed `lord-vault` authenticates and serves on it.
 - **Chromium:** current Chromium releases keep their saved logins in their own database and store
   only the encryption key ("Chromium Safe Storage", schema `chrome_libsecret_os_crypt_password_v2`)
   in the Secret Service. We verified the whole round trip: save a login, restart Chromium, it
-  fetches the key from our service and autofills. LordOS does not set `XDG_CURRENT_DESKTOP` to
+  fetches the key from our service and autofills. Insane OS does not set `XDG_CURRENT_DESKTOP` to
   GNOME, so Chromium needs `--password-store=gnome-libsecret` to pick libsecret; without it, it
   uses its "basic" store.
 - Not implemented: delete prompts, more than one collection (`CreateCollection` returns `login`),
@@ -524,7 +524,7 @@ Not part of `make test` because they need the real helper or root:
   `vc_attach_app()`: requests over its own socket and the lock event reaching it).
 - App mode by hand on VM 116: the app process unlocks, reveals, copies (pasted in the Terminal,
   empty again after 30 s), attaches a file through the powerbox, locks, and its window is black in
-  a LordOS screenshot.
+  a Insane OS screenshot.
 - `tests/fido-soft/run-pw-116.sh` (32/32): `softfido`, a software CTAP2 authenticator on
   `/dev/uhid` (CTAPHID, getInfo, clientPIN, makeCredential, getAssertion with hmac-secret), and the
   client against it: same salt → same secret, other salt or credential → different, wrong key →

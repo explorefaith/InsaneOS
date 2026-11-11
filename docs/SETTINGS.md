@@ -19,8 +19,8 @@ pairing, Sound with a Bluetooth headset, a Linux app's notification and Files' "
 | Notifications | with Sound | `apps/settings/Notifications.jsx`, `sdk/notify.js`, `hw/notifyd.c` |
 | Date & Time | with Language & Region | `apps/settings/DateTime.jsx`, `hw/hw.c` (timedated) |
 | Wallpaper → Your pictures (0.8.8) | with Appearance, Desktop & Dock | `apps/settings/index.jsx` (`Wallpapers`; a PNG or JPEG of your own for the desktop or the login screen, picked with the system file dialog), `sdk/settings.js` (`addWallpaperImage`, `removeWallpaperImage`); see `WALLPAPERS.md` |
-| Desktop & Dock → Desktops (0.8.8) | with Appearance, Wallpaper | `apps/settings/Desktops.jsx` (`DesktopsSection`, in `Dock.jsx`): number of desktops, the Ctrl arrows switch (Lord Flow only), the four finger swipe and each desktop's name (0.8.8.3); see `DESKTOPS.md` |
-| Desktop & Dock → Menu Bar / Taskbar and Control Center (0.8.8.6, issue #58) | with Appearance, Wallpaper | `apps/settings/Dock.jsx` (`MenuBarSection`, `ControlCenterSection`), `sdk/menubarmodel.js` (`settings.menuBar`; everything on unless turned off, so no migration): Lord Flow's "Show the menu bar on every display" and Lord Classic's "Show the taskbar on every display" (one key, `settings.menuBarAllDisplays`, absent = on since 0.8.8.6; the same switch as Displays → "Show menu bar on all displays"), Cleaner's item (its own `cleaner.menuItem`), the keyboard layout, the on-screen keyboard's item, the notifications bell and the clock panel's calendar in both themes; Lord Flow's Control Center tiles (processor and memory, network and VPN, Wi-Fi, Bluetooth). The volume's output list is `sdk/soundoutputs.js`; Wallpaper → Thumbnail size is `settings.wallpaperThumbs` |
+| Desktop & Dock → Desktops (0.8.8) | with Appearance, Wallpaper | `apps/settings/Desktops.jsx` (`DesktopsSection`, in `Dock.jsx`): number of desktops, the Ctrl arrows switch (Insane Flow only), the four finger swipe and each desktop's name (0.8.8.3); see `DESKTOPS.md` |
+| Desktop & Dock → Menu Bar / Taskbar and Control Center (0.8.8.6, issue #58) | with Appearance, Wallpaper | `apps/settings/Dock.jsx` (`MenuBarSection`, `ControlCenterSection`), `sdk/menubarmodel.js` (`settings.menuBar`; everything on unless turned off, so no migration): Insane Flow's "Show the menu bar on every display" and Insane Classic's "Show the taskbar on every display" (one key, `settings.menuBarAllDisplays`, absent = on since 0.8.8.6; the same switch as Displays → "Show menu bar on all displays"), Cleaner's item (its own `cleaner.menuItem`), the keyboard layout, the on-screen keyboard's item, the notifications bell and the clock panel's calendar in both themes; Insane Flow's Control Center tiles (processor and memory, network and VPN, Wi-Fi, Bluetooth). The volume's output list is `sdk/soundoutputs.js`; Wallpaper → Thumbnail size is `settings.wallpaperThumbs` |
 | Keyboard → App switcher (0.8.8) | with Language & Region, Date & Time | `apps/settings/Switcher.jsx`: the keys, which apps show, size and look; see `SHORTCUTS.md` |
 | Mouse & Trackpad (0.8.8: always shown) | with Keyboard | `apps/settings/Trackpad.jsx`: since 0.8.8.4 one section per device: Pointer (size), Mouse (speed, natural scrolling, primary button) and Trackpad (its rows apply when there is one); see `TRACKPAD.md` |
 | Default Apps | with Keyboard and Mouse & Trackpad | `apps/settings/DefaultApps.jsx`, `sdk/defaults.js`, `hw/defaults.c`, `hw/mimeapps.c` |
@@ -52,7 +52,7 @@ the time fields keep `direction: 'ltr'`.
  admin.c ─ display-brightness, power-profile, power-suspend, power-buttons, time-ntp, time-set,
            bt-unblock, rpi-case, video-optimize, browser-restore, hw-firmware-missing (the Store's suggestions,
            read-only), hw-memory-modules (System Information, read-only),
-           rpi-eeprom-status (read-only), rpi-eeprom-update, boot-test, boot-test-cancel (LordBench's
+           rpi-eeprom-status (read-only), rpi-eeprom-update, boot-test, boot-test-cancel (InsaneBench's
            boot time test, docs/BENCHMARK.md)
 
  Cooling: lord.fan (ui/js_fan.c) ── /run/lordos/fand.sock ── lord-fand (root service, src/fan)
@@ -191,12 +191,12 @@ and signals dispatched to handlers.
   - *The adapter is on from boot.* `bluetooth.service` is enabled (bluez's postinst, and made sure
     by `tools/iso/build.sh` and `tools/rpi/build-img.sh`), and BlueZ's `[Policy] AutoEnable`
     defaults to `true` (`plugins/policy.c`), so every adapter is powered when bluetoothd finds it,
-    before the login screen. LordOS ships no `/etc/bluetooth/main.conf` changes: that file is
+    before the login screen. Insane OS ships no `/etc/bluetooth/main.conf` changes: that file is
     bluez's conffile and BlueZ 5.82 reads no `main.conf.d`.
   - *It listens for the device.* With the kernel's connection control, BlueZ leaves the adapter's
     `Connectable` off for strangers and puts every stored (paired) BR/EDR device in the kernel's
     accept list (`btd_device_set_temporary` → `MGMT_OP_ADD_DEVICE`), which keeps page scan on for
-    them while the adapter is neither discoverable nor pairable. LordOS never sets `Connectable`,
+    them while the adapter is neither discoverable nor pairable. Insane OS never sets `Connectable`,
     `Discoverable` or `Pairable`.
   - *The device is trusted.* bluetoothd lets a returning HID device in without asking only if it
     is `Trusted`; otherwise it asks the default agent, and at the login screen no session (no agent)
@@ -215,10 +215,10 @@ and signals dispatched to handlers.
     connect without a bond; a Magic Mouse (1 or 2) bonds when it pairs, so it is not affected. It
     stays at the default. `ClassicBondedOnly=false` is only for old mice that can't pair at all, and
     it lets a device that merely uses a known keyboard's or mouse's address connect unencrypted and
-    type into the computer (CVE-2020-0556), so LordOS never sets it.
+    type into the computer (CVE-2020-0556), so Insane OS never sets it.
 - **On or off across restarts.** BlueZ doesn't keep an adapter's power: with AutoEnable it is on
   after every boot, which is what lets a mouse reconnect at the login screen. The switch (Settings,
-  Lord Flow's Control Center, Lord Classic's Quick Settings) goes through `setBluetoothPower`, which
+  Insane Flow's Control Center, Insane Classic's Quick Settings) goes through `setBluetoothPower`, which
   keeps the choice in `settings.json` (`bluetoothOff`); when the user's last choice was off, the
   session turns the adapter off again at login, once per appearance of the adapter (a dongle
   plugged in again, bluetoothd restarted), and leaves it on if it is turned on later by other means
@@ -236,7 +236,7 @@ and signals dispatched to handlers.
 - **Audio.** Headphones and speakers become PipeWire devices through WirePlumber's BlueZ monitor
   (Debian `libspa-0.2-bluetooth`) and appear in Settings → Sound. WirePlumber 0.5 only enables
   Bluetooth for a user whose session is active **on a logind seat**; sessions started by
-  `lord-sessiond` are not logind sessions, so LordOS needs this drop-in
+  `lord-sessiond` are not logind sessions, so Insane OS needs this drop-in
   (`/etc/wireplumber/wireplumber.conf.d/lordos-bluez.conf` on the ISO):
 
   ```
@@ -297,7 +297,7 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
   button and every sleep timer end in systemd-logind's sleep, and the idle deadlines run on
   `CLOCK_MONOTONIC`, which stops while the computer sleeps, so "require password" never fired for
   them. A session that `lord-sessiond` shows takes a logind "delay" sleep inhibitor
-  (`Inhibit("sleep", "LordOS", …, "delay")`, allowed to anyone by logind's polkit policy) on the system
+  (`Inhibit("sleep", "Insane OS", …, "delay")`, allowed to anyone by logind's polkit policy) on the system
   bus (`hw/sleeplock.c`; `hw/sysbus.c` negotiates fds for it, `vault/dbus.c` accepts them only on such a
   connection and only in replies) and listens for `PrepareForSleep`, believed only from logind's own
   connection. On `PrepareForSleep(true)` the theme hears idle `{stage:"suspend"}` and, with
@@ -317,7 +317,7 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
 - **Power button and lid.** What systemd-logind does (sleep, hibernate, shut down, do nothing). The
   admin action `power-buttons <power> <lid> <lid-on-ac>` writes
   `/etc/systemd/logind.conf.d/lordos.conf` (a short list of values, validated) and runs
-  `systemctl reload systemd-logind`. LordOS never grabs the ACPI power button (only keyboards, mice
+  `systemctl reload systemd-logind`. Insane OS never grabs the ACPI power button (only keyboards, mice
   and tablets are grabbed), so logind sees it. Lid rows only show with a battery.
 
 ## Cooling
@@ -341,7 +341,7 @@ the peer and reports `canChange`. Monitor has the same view read-only, with a hi
 | ![Update available](settings-board-firmware-available.png) | ![Update ready](settings-board-firmware-pending.png) | ![Up to date](settings-board-firmware-uptodate.png) |
 | An update is available | Updated: restart to finish | After the restart |
 
-LordOS's own page for the bootloader in the board's EEPROM, instead of `raspi-config`. It is in the
+Insane OS's own page for the bootloader in the board's EEPROM, instead of `raspi-config`. It is in the
 sidebar only on a BCM2712 board (`lord.system.info().board === 'pi5'`, from the device tree's
 `compatible` list: Raspberry Pi 5, Pi 500, Compute Module 5). It shows:
 
@@ -352,7 +352,7 @@ sidebar only on a BCM2712 board (`lord.system.info().board === 'pi5'`, from the 
 - **Update** (administrators), and after it **Restart…** (the session's Restart dialog) with a note
   to keep the power connected. Without `rpi-eeprom` it offers to install it with the package engine.
 
-New bootloader images arrive as updates of the `rpi-eeprom` package, from the LordOS repository
+New bootloader images arrive as updates of the `rpi-eeprom` package, from the Insane OS repository
 ([UPDATES.md](UPDATES.md), "Raspberry Pi firmware packages") or Raspberry Pi's archive that the
 image also configures. The work is two closed admin actions:
 
@@ -361,7 +361,7 @@ image also configures. The work is two closed admin actions:
   `BOOTLOADER: update available|up to date` verdict, the time stamps in `CURRENT:` and `LATEST:`
   (between 2001 and 2096) and a lowercase release name; the verdict has to agree with the numbers,
   and anything else is `hw.eepromFailed`. The program's own text never reaches the UI (its hint to
-  run `raspi-config` included: on LordOS this page is the way). "Pending" means
+  run `raspi-config` included: on Insane OS this page is the way). "Pending" means
   `/run/rpi-eeprom-update-pending` exists (the program's root-owned marker on tmpfs: an update was
   written or staged during this boot). The reply is `OK <uptodate|available|pending> <current>
   <latest> <release>`, checked again by the page.
@@ -372,14 +372,14 @@ image also configures. The work is two closed admin actions:
 
 Both check the board first (`hw.notRaspberryPi5`) and that the program is root-owned and not
 writable by others (`hw.noEeprom`). How the update is applied is `rpi-eeprom-update`'s decision: on
-the LordOS image (no `flashrom`, no `rpieepromab`) it stages the image and `recovery.bin` on the boot
+the Insane OS image (no `flashrom`, no `rpieepromab`) it stages the image and `recovery.bin` on the boot
 partition and the bootloader flashes itself at the next boot, keeping its recovery path; with
 `rpieepromab` or `flashrom` installed it writes the EEPROM at once. Either way the new version runs
 after a restart.
 
 **Not exposed:** editing the bootloader's configuration (`rpi-eeprom-config`) and the release
 choice. The release lives in `/etc/default/rpi-eeprom-update`, a conffile of `rpi-eeprom`: writing
-it from LordOS would make dpkg ask about it on every package update (or drop the choice), so it stays
+it from Insane OS would make dpkg ask about it on every package update (or drop the choice), so it stays
 `default` unless an administrator edits the file. Tested on the Raspberry Pi 5 (ISO.md, "Release test
 (0.8.4.1 Beta)").
 
@@ -391,7 +391,7 @@ it from LordOS would make dpkg ask about it on every package update (or drop the
 
 - **Per app:** allow, style (none / banners / alerts: alerts stay until dismissed), sound, and
   "show on lock screen" (stored, shown disabled: the lock screen is the greeter and does not show
-  notifications yet). Apps appear after their first notification, plus LordOS apps that notify
+  notifications yet). Apps appear after their first notification, plus Insane OS apps that notify
   (Backup, Clock, Settings…) and packages that declare the `notifications` permission. For `.lpk`
   packages "allow" **is** the sandbox's `notifications` permission (`perms.set`), the same switch as
   Privacy & Security.
@@ -401,7 +401,7 @@ it from LordOS would make dpkg ask about it on every package update (or drop the
 - **Linux apps:** `hw/notifyd.c` serves `org.freedesktop.Notifications` on the session bus
   (spec 1.2: `Notify`, `CloseNotification`, `GetCapabilities`, `GetServerInformation`,
   `NotificationClosed`, `ActionInvoked`), so GTK, Qt, Electron and `notify-send` notifications
-  become LordOS banners with the app's icon and actions, and follow the same per-app settings (the
+  become Insane OS banners with the app's icon and actions, and follow the same per-app settings (the
   key is `linux:<desktop id>`, from the `desktop-entry` hint). Body markup is reduced to text.
 
   ![A notification banner (the test button in Settings; a Linux app's notifications look the same)](settings-notifications-linux-app.png)
@@ -426,15 +426,15 @@ it from LordOS would make dpkg ask about it on every package update (or drop the
 
 ![Default Apps](settings-default-apps-dark.png)
 
-Browser, mail, music, video, images, PDF, text editor, terminal and calendar. Candidates are LordOS's own apps
+Browser, mail, music, video, images, PDF, text editor, terminal and calendar. Candidates are Insane OS's own apps
 and the Linux apps whose `.desktop` `MimeType` covers the category (terminals: `Categories` with
 `TerminalEmulator`; calendar (0.8.8.6, issue #58): `text/calendar` itself, not `text/*`). The calendar is the
-app a day in the clock's panel opens, in both themes (`sdk/sysopen.js` `openCalendarApp`): LordOS Calendar on
+app a day in the clock's panel opens, in both themes (`sdk/sysopen.js` `openCalendarApp`): Insane OS Calendar on
 that day, or the chosen app (Thunderbird…) as it starts.
 
 - Saved in `~/.config/mimeapps.list` (freedesktop spec: the `[Default Applications]` line is
   replaced and the app goes first in `[Added Associations]`, as GLib does; every other line is
-  kept), so `xdg-open` and GNOME/KDE apps agree. LordOS apps are written as `lordos-<app>.desktop`.
+  kept), so `xdg-open` and GNOME/KDE apps agree. Insane OS apps are written as `lordos-<app>.desktop`.
   The terminal goes in `~/.config/xdg-terminals.list`.
 - Lookup follows the spec's order (`$XDG_CONFIG_HOME`, `/etc/xdg`, `~/.local/share/applications`,
   `/usr/local/share/applications`, `/usr/share/applications`, `defaults.list`), with the user's
@@ -467,18 +467,18 @@ that day, or the chosen app (Thunderbird…) as it starts.
   GLib's reset does; `[Removed Associations]` and every other line are kept). `lord.mime.get`
   still returns the first `[Default Applications]` entry without checking it is installed.
 - **What Settings shows.** A category the user never chose shows **Automatic (<app>)**: the
-  system's default if there is one, else LordOS's own app for the category (Photos, Player, PDF
+  system's default if there is one, else Insane OS's own app for the category (Photos, Player, PDF
   Viewer, Text Editor, Mail), else the first installed app that declares the type (the web
   browser on a fresh account). Choosing an app writes it as before; an explicit choice can go
   back with **Automatic**, which calls `lord.mime.unset` for every type of the category. The
   terminal is unchanged (`~/.config/xdg-terminals.list`).
 - **Files** lists the default app first in "Open With", marked "(default)", and double-click opens
   it (`defaultOpenerId`: the user's choice or the system's default if installed, else the
-  category's LordOS app, else the first declaring app; on a fresh account an `.html` file now
+  category's Insane OS app, else the first declaring app; on a fresh account an `.html` file now
   opens in the installed browser instead of the Text Editor). **`lord.apps.launchWith('', path)`**
   opens a file with the default Linux app for its type, the automatic one included (the same
   rules as `launchWith`: a real path in the home or `/media/$USER`, one argument, no shell); it
-  returns false when the default is a LordOS app, which the theme opens itself, or when no
+  returns false when the default is a Insane OS app, which the theme opens itself, or when no
   installed app opens the type.
 - Tests: `build/defaults-test` (`tests/defaults_test.c`, in `make -C server test`) builds a fake
   XDG tree (`defaults_set_root`, tests only) and checks the user's choice, the system lists and
@@ -507,8 +507,8 @@ user's own Chromium, Brave (0.8.8.4) and Firefox profiles; see `WAYLAND.md`, "Th
 Not hardware pages, listed here so this document points to them:
 
 - **Appearance → Desktop style** lists every installed theme and is the only place to choose one; the
-  separate Themes page is gone (an old link to it opens Appearance). The two LordOS themes are now
-  called **Lord Flow** (menu bar and Dock) and **Lord Classic** (taskbar and start menu); the choice
+  separate Themes page is gone (an old link to it opens Appearance). The two Insane OS themes are now
+  called **Insane Flow** (menu bar and Dock) and **Insane Classic** (taskbar and start menu); the choice
   is kept (`THEMES-GUIDE.md`).
 - **Sharing → Advanced: root over SSH**, off by default, administrators only, every change confirmed
   with the administrator's own password (`REMOTE.md`, "Root over SSH").

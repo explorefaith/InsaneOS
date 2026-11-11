@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
     FILE *f = fopen(RESULT, "w");
     if (f) { fprintf(f, "%s %s\n", ok ? "DONE" : "FAILED", last_line); fclose(f); }
     if (!ok) { printf("lordos-auto: FAILED %s\n", last_line); return 1; }
-    printf("lordos-auto: DONE, LordOS is installed on /dev/%s\n", c.disk);
+    printf("lordos-auto: DONE, Insane OS is installed on /dev/%s\n", c.disk);
     sync();
     if (!strcmp(c.after, "stay")) return 0;
     printf("lordos-auto: %s in 10 seconds\n", !strcmp(c.after, "reboot") ? "restarting" : "powering off");

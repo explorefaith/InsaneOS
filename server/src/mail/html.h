@@ -1,6 +1,6 @@
 /* html.h — mail HTML, without a browser (see docs/MAIL.md, "HTML without executing anything").
  *
- * LordOS has no web engine: a message's HTML is never executed or "loaded". This
+ * Insane OS has no web engine: a message's HTML is never executed or "loaded". This
  * sanitizer reads it with an in-house, lenient tokenizer and builds a small JSON tree that
  * Mail renders with its native views (View/Text/Image):
  *

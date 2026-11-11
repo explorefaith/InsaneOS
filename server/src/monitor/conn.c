@@ -314,7 +314,7 @@ static void scopes_scan(void) {
     char dir[PATH_MAX];
     if (!self[0] || (size_t)snprintf(dir, sizeof dir, "/sys/fs/cgroup%s", self) >= sizeof dir) return;
     char *sl = strrchr(dir, '/');
-    if (!sl || strcmp(sl, "/server")) return;           /* not a LordOS session */
+    if (!sl || strcmp(sl, "/server")) return;           /* not a Insane OS session */
     *sl = 0;
     int dfd = open(dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     DIR *d = dfd >= 0 ? fdopendir(dup(dfd)) : NULL;

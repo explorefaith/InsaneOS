@@ -1,4 +1,4 @@
-// voiceplayer.jsx — the small player while LordOS reads aloud (docs/VOICE.md), and the dialog that asks where to save
+// voiceplayer.jsx — the small player while Insane OS reads aloud (docs/VOICE.md), and the dialog that asks where to save
 // a text as a sound file. sdk/index.js mounts both in their layers; the player shows when a reading starts (unless
 // Settings → AI → Voice turns it off) and goes a few seconds after it ends, or at once with ✕.
 //

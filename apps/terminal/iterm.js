@@ -8,7 +8,7 @@
 //     ("New Bookmarks"), the default profile and the global shortcuts.
 //
 // Returns { profiles, schemes, keyMap, defaultGuid, warnings }: the caller decides what to
-// keep. What LordOS doesn't have is reported in `warnings`, never made up.
+// keep. What Insane OS doesn't have is reported in `warnings`, never made up.
 import { t as T } from '@lordos/sdk';
 import { DEFAULT_PROFILE, newProfileId } from './profiles.js';
 
@@ -193,7 +193,7 @@ export function itermCombo(spec) {
   return out.join('+');
 }
 
-// Exported key actions (KEY_ACTION_*) that exist in LordOS.
+// Exported key actions (KEY_ACTION_*) that exist in Insane OS.
 const ITERM_ACTIONS = {
   0: 'nextTab', 2: 'prevTab', 4: 'scrollBottom', 5: 'scrollTop', 6: 'scrollLineDown', 7: 'scrollLineUp',
   8: 'scrollPageDown', 9: 'scrollPageUp', 18: 'paneLeft', 19: 'paneRight', 20: 'paneUp', 21: 'paneDown',
@@ -302,7 +302,7 @@ export function convertProfile(o, fonts, warnings) {
   if (o['Use Tab Color'] && o['Tab Color']) p.tabColor = color(o['Tab Color']) || '';
   if (o['Initial Text']) p.initialText = String(o['Initial Text']);
   if (o['Custom Command'] === 'Yes' && o.Command) {
-    // LordOS solo abre el shell del usuario: el comando se escribe en él al abrir la sesión.
+    // Insane OS solo abre el shell del usuario: el comando se escribe en él al abrir la sesión.
     p.initialText = `${o.Command}${p.initialText ? `\n${p.initialText}` : ''}`;
     w(T('terminal.iterm.command', { cmd: o.Command }));
   }

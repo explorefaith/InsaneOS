@@ -1,4 +1,4 @@
-// platform.js — the LordOS Imager on LordOS itself: everything the shared UI needs from the system.
+// platform.js — the Insane OS Imager on Insane OS itself: everything the shared UI needs from the system.
 // The desktop app (desktop/imager) replaces this module with its own (desktop/imager/web/platform.js,
 // Tauri commands) and keeps the same functions. docs/IMAGER.md, "One UI, two platforms".
 //
@@ -40,7 +40,7 @@ function driveOf(d) {
 export const platform = {
   kind: 'native',
   domFocus: false,
-  a11y: () => ({}),               // LordOS has no screen reader yet; the desktop app fills these in
+  a11y: () => ({}),               // Insane OS has no screen reader yet; the desktop app fills these in
   available: () => has() && admin.available(),
 
   // ---- drives: removable, not the system disk, not read-only (the root side checks it again) ----
@@ -149,7 +149,7 @@ export const platform = {
   saveProfiles(list) { fs.mkdir('.config/lordos'); fs.write('.config/lordos/imager-profiles.json', JSON.stringify(list, null, 2)); },
   cacheSize() { try { return fs.du(CACHE, 200)?.size || 0; } catch { return 0; } },
   async clearCache() { await admin.run('imager-cache-clear', '', null, { quiet: true }); },
-  // the language and theme follow LordOS; updates come with LordOS itself
+  // the language and theme follow Insane OS; updates come with Insane OS itself
   followsSystem: true,
   appUpdates: null,
 

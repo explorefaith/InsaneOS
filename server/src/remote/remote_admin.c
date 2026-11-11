@@ -86,7 +86,7 @@ static int conf_write(const Conf *c) {
     mkdir("/etc/lordos", 0755);
     mkdir(CONF_DIR, 0755);
     char text[1600];
-    int n = snprintf(text, sizeof text, "# LordOS · remote desktop (Settings → Sharing). See docs/REMOTE.md\nenabled=%d\nport=%d\nallow=%s\nnet=%s\ninsecure_dev=%d\n",
+    int n = snprintf(text, sizeof text, "# Insane OS · remote desktop (Settings → Sharing). See docs/REMOTE.md\nenabled=%d\nport=%d\nallow=%s\nnet=%s\ninsecure_dev=%d\n",
                      c->enabled, c->port, c->group_only ? "group" : "all", rs_net_name(c->net), c->insecure_dev);
     for (int i = 0; i < c->nstun; i++) n += snprintf(text + n, sizeof text - (size_t)n, "stun=%s\n", c->stun[i]);
     if (c->turn[0]) {

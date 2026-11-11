@@ -1,7 +1,7 @@
 /* cloud_files.c — files on demand (docs/CLOUD.md 7): the status of each file, Free Up Space and the automatic pass,
  * and Keep on This Computer.
  *
- * rclone never evicts (the mounts have no age or size limit); LordOS does, by removing a file's cached data and its
+ * rclone never evicts (the mounts have no age or size limit); Insane OS does, by removing a file's cached data and its
  * vfsMeta entry while the mount runs (measured in Phase 0: the next read fetches it again). A file goes only if it
  * is clean: not open (no process of this user has it open under ~/Cloud, and rclone isn't holding it — vfs/stats
  * inUse plus the 5 s rclone keeps a closed handle), not changed here and not waiting in vfs/queue, and not kept. */

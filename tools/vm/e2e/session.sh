@@ -1,5 +1,5 @@
 #!/bin/sh
-# session.sh — a real headless LordOS session (lord-server) for Machines' end-to-end bench, the way the Cloud bench
+# session.sh — a real headless Insane OS session (lord-server) for Machines' end-to-end bench, the way the Cloud bench
 # (branch cloud-e2e, tools/cloud/e2e/session.sh) makes them, with one difference: lord-server starts as root with
 # --user, as lord-sessiond starts it, so the session has its administration helper (lord-admin: vm-image-list,
 # vm-image-get, vm-image-remove) and drops to the user itself. Run as root on the build VM. Test only.

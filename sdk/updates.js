@@ -1,11 +1,11 @@
-// updates.js — updating LordOS in place (docs/UPDATES.md).
+// updates.js — updating Insane OS in place (docs/UPDATES.md).
 //
 //   lordosUpdate(lang)   { installed, version, available, size, notes } of the lordos package, or null
 //   lordosUpdateWaiting() true when the last check found a newer lordos package
 //   restartNeeded()      null, or { packages: [...] } when an installed update needs a restart
 //   updatePrefs()        { autoCheck } (settings.json "updates"); setUpdatePrefs({ autoCheck })
 //
-// The packages come from the signed LordOS repository on lordos.org (and Debian's), through our own
+// The packages come from the signed Insane OS repository on lordos.org (and Debian's), through our own
 // package engine (lord.pkg, admin.run('pkg-update' | 'pkg-install' | 'pkg-upgrade')). The optional
 // daily check only downloads the signed lists and notifies; it never installs anything.
 import { settings } from './settings.js';
@@ -46,7 +46,7 @@ export function lordosUpdateWaiting() {
 }
 
 // A restart is needed when a package asked for one (/run/reboot-required: a new kernel, or the
-// lordos postinst) or when the installed LordOS is not the one running in this session.
+// lordos postinst) or when the installed Insane OS is not the one running in this session.
 export function restartNeeded() {
   if (!has()) return null;
   const asked = lord.pkg.rebootRequired() || null;
@@ -89,7 +89,7 @@ function maybeNotify() {
 let checking = false;
 function check() {
   // No readable package list (a new install, or an update that changed its format): build it now,
-  // even with the daily check off, or the Store shows only the LordOS catalog until someone checks.
+  // even with the daily check off, or the Store shows only the Insane OS catalog until someone checks.
   const missing = !lord.pkg.available();
   if (checking || !admin.available() || (!missing && !updatePrefs().autoCheck)) return;
   const last = lord.pkg.available() ? lord.pkg.lastUpdate() : 0;

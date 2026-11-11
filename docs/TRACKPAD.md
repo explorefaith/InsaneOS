@@ -1,6 +1,6 @@
 # Touchpad, gestures and touchscreens
 
-LordOS handles touchpads and touchscreens with its **own driver** that reads evdev directly
+Insane OS handles touchpads and touchscreens with its **own driver** that reads evdev directly
 (multitouch, protocol B). It doesn't use libinput: the dependency policy forbids it (see
 `ARCHITECTURE.md`). The driver does what you expect from a modern laptop:
 
@@ -10,7 +10,7 @@ LordOS handles touchpads and touchscreens with its **own driver** that reads evd
 - pinch to zoom;
 - three-finger swipe for desktop actions.
 
-Gestures reach the LordOS interface (new SDK events) and Linux apps, through the Wayland protocols.
+Gestures reach the Insane OS interface (new SDK events) and Linux apps, through the Wayland protocols.
 That's how, for example, Chromium's pinch zoom works.
 
 ## Before
@@ -78,7 +78,7 @@ but badly.
 (`~/.cache/lordos/session.log`) says what it found:
 
 ```
-tp: LordOS SynPS/2 Synaptics TouchPad (simulado): touchpad (clickpad), 105×87 mm, 5 contacts
+tp: Insane OS SynPS/2 Synaptics TouchPad (simulado): touchpad (clickpad), 105×87 mm, 5 contacts
 ```
 
 ## How it recognizes each thing
@@ -106,7 +106,7 @@ On every `SYN_REPORT` the driver looks at the contacts in millimeters.
   typing, so Ctrl+click still works. A touch that began after the last key is **released** once
   that time passes with no other key: it moves the pointer without lifting the finger, but it can't
   tap. Before 0.8.8.4 it stayed ignored until the finger lifted: pressing Space in Files to close
-  the Quick Preview and touching right after left the pointer stuck ([#34](https://github.com/lordbasex/LordOS/issues/34)).
+  the Quick Preview and touching right after left the pointer stuck ([#34](https://github.com/lordbasex/Insane OS/issues/34)).
 - **Pinned fingers:** pressing (or releasing) a clickpad pushes the finger a little. The fingers
   that are down are pinned at that moment and don't move the pointer until they move 1.5 mm on
   purpose, so a click doesn't nudge the pointer.
@@ -189,7 +189,7 @@ with `tp_open` (`tp-test --live`), with the same results.
 **Still to check on the real laptop:** the thresholds come from libinput's quirks for these devices; a recording
 of the real touchpad (`tpsim record`, see the checklist) would confirm them.
 
-## The LordOS interface (SDK)
+## The Insane OS interface (SDK)
 
 The new `View` events are in `apps/README.md` and `themes/README.md`:
 
@@ -238,7 +238,7 @@ live: `sdk/trackpad.js` calls `lord.input.configure`. Since 0.8.8.4 it has one s
 
 The size multiplies the display's scale (a 200 % display with Small draws the 150 % pointer, 48 px) and is capped at
 300 %, 96 px (0.8.8.6, #47; it was 200 %, 64 px). A pointer larger than the GPU's cursor plane is drawn in the
-composition instead (docs/GPU.md). It applies to LordOS's own pointers (`cursor.c`, also the shapes Linux apps ask for with
+composition instead (docs/GPU.md). It applies to Insane OS's own pointers (`cursor.c`, also the shapes Linux apps ask for with
 `cursor-shape-v1`) and sets `XCURSOR_SIZE` (24 × size) for Linux apps started afterwards; apps that draw their own
 pointer image and are already open keep theirs.
 
@@ -280,7 +280,7 @@ The protocols are in `WAYLAND.md`.
   - Chromium zooms the page (see the screenshot); GTK uses it in maps, viewers and inertia.
 - **`wl_pointer`** (seat v9):
   - touchpad fine scrolling goes with `axis_source(finger)` and fractional values, and `axis_stop`
-    on both axes when the fingers lift (the app does its own inertia, so LordOS's doesn't reach
+    on both axes when the fingers lift (the app does its own inertia, so Insane OS's doesn't reach
     it);
   - `axis_relative_direction` says whether scrolling is natural;
   - the mouse wheel sends `axis_source(wheel)` and `axis_value120` (v8+), or `axis_discrete`
@@ -304,7 +304,7 @@ Verified in the VM with `WAYLAND_DEBUG=1 foot`:
   - dragging is dragging: the button is pressed if the finger moves 2 mm or stays 90 ms;
   - two fingers do direct scrolling (the content follows the finger, always) and pinch, with the
     pointer at the gesture's center.
-- A single screen is used: the position from 0 to 1 is mapped to the whole LordOS screen.
+- A single screen is used: the position from 0 to 1 is mapped to the whole Insane OS screen.
 
 ## Remote desktop
 
@@ -416,7 +416,7 @@ At first it cost 57.5 % CPU. The changes:
   - painting starts from the opaque node that covers everything that changed (the wallpaper and
     whatever is behind aren't painted);
   - text measurements are cached;
-  - an image at two sizes (the LordOS icon in the Dock and in the bar) is no longer rescaled every
+  - an image at two sizes (the Insane OS icon in the Dock and in the bar) is no longer rescaled every
     frame;
   - images that fall outside aren't rescaled;
   - a 1:1 image is copied directly;
@@ -506,7 +506,7 @@ The maximum is a frame that was being drawn on the CPU at that exact moment.
 ## Pending
 
 - **Isolated apps:** they don't have their own inertia for fine scrolling (Wayland apps do it
-  themselves; LordOS's is for the theme's interface).
+  themselves; Insane OS's is for the theme's interface).
 - **CPU compositing:** each frame copies the bounding box of what changed to the graphics card's
   buffer (`present_cpu` in `main.c`); copying only the separate damaged rectangles is written but
   off by default (`LORD_DAMAGE=multi`), and would further lower the cost of panning the map.

@@ -130,7 +130,7 @@ want "its type" 4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709 "$(sgdisk -i 5 "$IMG" | sed
 want "swap is number 6, of type Linux swap" 0657FD6D-A4AB-43C4-84E5-0933C84B4F4F "$(sgdisk -i 6 "$IMG" | sed -n 's/Partition GUID code: \([-0-9A-F]*\).*/\1/p')"
 want "partition 4 untouched" "$P4S" "$(sgdisk -i 4 "$IMG" | sed -n 's/First sector: \([0-9]*\).*/\1/p')"
 attach
-want "/ is ext4" "ext4 LordOS" "$(blkid -p -s TYPE -o value "${LOOP}p5") $(blkid -p -s LABEL -o value "${LOOP}p5")"
+want "/ is ext4" "ext4 Insane OS" "$(blkid -p -s TYPE -o value "${LOOP}p5") $(blkid -p -s LABEL -o value "${LOOP}p5")"
 want "swap is swap" swap "$(blkid -p -s TYPE -o value "${LOOP}p6")"
 want "partition 4 still has its old system" oldroot "$(blkid -p -s LABEL -o value "${LOOP}p4")"
 mount -o ro "${LOOP}p1" "$MNT"; [ -f "$MNT/EFI/other/loader.efi" ] && ok "the other loader is still there" || bad "loader gone"; umount "$MNT"
@@ -141,7 +141,7 @@ build; attach; T=$(tag)
 fullgpt >"$W/gpt-before"; esp_state >"$W/esp-before"; home_state >"$W/home-before"
 out=$("$CLI" apply "$L" --uefi --tag "$T" --root 4 --esp 1 --home 2 | tail -1); echo "  $out"
 case "$out" in "apply ok root=${LOOP}p4 "*) ok "applied" ;; *) bad "$out" ;; esac
-want "/ was formatted" LordOS "$(blkid -p -s LABEL -o value "${LOOP}p4")"
+want "/ was formatted" Insane OS "$(blkid -p -s LABEL -o value "${LOOP}p4")"
 sync; detach
 want "the table is byte-identical" "$(cat "$W/gpt-before")" "$(fullgpt)"
 want "EFI partition bytes unchanged" "$(cat "$W/esp-before")" "$(esp_state)"

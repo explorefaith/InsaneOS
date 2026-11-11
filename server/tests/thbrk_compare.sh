@@ -1,5 +1,5 @@
 #!/bin/sh
-# thbrk_compare.sh — compares LordOS Thai word breaks (build/thbrk-test) with libthai's,
+# thbrk_compare.sh — compares Insane OS Thai word breaks (build/thbrk-test) with libthai's,
 # line by line. Only breaks between two characters of the Thai block count: spaces,
 # Latin and punctuation are handled by the UI's common line breaking.
 # Needs libthai-dev (for the test only), libthai-data and python3.

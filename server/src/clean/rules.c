@@ -113,7 +113,7 @@ static const CleanRule table[] = {
       .text_key = "cleaner.rule.ai-lmstudio-old", .unit_depth = 2, .explicit_only = 1 },
     { .id = "ai-ollama", .version = 1, .category = "ai", .root = ".ollama/models", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,
       .text_key = "cleaner.rule.ai-ollama" },
-    /* what a removed LordOS app left: its folder, whole, chosen by name. An installed app's folder is never offered */
+    /* what a removed Insane OS app left: its folder, whole, chosen by name. An installed app's folder is never offered */
     { .id = "app-leftovers", .version = 1, .category = "apps", .root = ".local/share/lordos/appdata", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_TRASH,
       .text_key = "cleaner.rule.app-leftovers", .unit_depth = 1, .explicit_only = 1, .leftover = 1 },
     /* shown and measured, nothing offered */

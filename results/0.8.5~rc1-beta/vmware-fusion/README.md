@@ -1,14 +1,14 @@
-# vmware-fusion — LordOS 0.8.5~rc1-beta
+# vmware-fusion — Insane OS 0.8.5~rc1-beta
 
 Collected 2026-10-26T20:20Z with `tools/results/collect.sh vmware-fusion` (docs/RESULTS.md); the report's
 own version field says `0.8.5~rc1-beta`.
 
 **Conditions:** VMware Fusion on a Mac (Intel Core i9-10900, 4 cores and 4.7 GB given to the VM), the
 virtual display at 1280×800 @ 60 Hz on the `vmwgfx` driver with GPU composition (`SVGA3D`, a virtual GPU on
-the host). LordOS 0.8.4.1 installed from the ISO earlier, updated to the 0.8.5~rc1 package with `apt install`
+the host). Insane OS 0.8.4.1 installed from the ISO earlier, updated to the 0.8.5~rc1 package with `apt install`
 (no migration was needed; code verified, 10 files) and then `lord-server` replaced by the build with
 software vblank pacing (below). Measured about one minute after a reboot and sign-in, with Files and About
-LordOS open; the login screen's `lord-server` stays running after sign-in (it serves user switching and
+Insane OS open; the login screen's `lord-server` stays running after sign-in (it serves user switching and
 locking).
 
 **What it shows:**
@@ -27,7 +27,7 @@ Reproduce:
 
 ```sh
 lordos-sysreport report --json > sysreport.json
-lordos-testbench --gl --auto 25 > testbench.json      # inside a LordOS session
+lordos-testbench --gl --auto 25 > testbench.json      # inside a Insane OS session
 free -m                                                  # whole system
 sudo sh -c 'for f in /proc/[0-9]*/smaps_rollup; do ...'  # PSS per process: see tools/results/collect.sh
 systemd-analyze

@@ -1,4 +1,4 @@
-/* wasm.h — LordOS's own WebAssembly interpreter (no dependencies; see docs/WASM.md).
+/* wasm.h — Insane OS's own WebAssembly interpreter (no dependencies; see docs/WASM.md).
  *
  * Supports WebAssembly 2.0 without SIMD: the MVP plus sign-extension, non-trapping float-to-int,
  * multi-value, bulk memory, reference types and mutable globals. A single 32-bit memory.

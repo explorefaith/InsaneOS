@@ -4,9 +4,9 @@
       "id": "layers",
       "kind": "stack",
       "title": {
-        "en": "The layers of LordOS",
-        "es": "Las capas de LordOS",
-        "pt": "As camadas do LordOS"
+        "en": "The layers of Insane OS",
+        "es": "Las capas de Insane OS",
+        "pt": "As camadas do Insane OS"
       },
       "nodes": [
         {
@@ -26,23 +26,23 @@
         {
           "id": "engine",
           "label": {
-            "en": "LordOS UI engine",
-            "es": "Motor de interfaz de LordOS",
-            "pt": "Motor de interface do LordOS"
+            "en": "Insane OS UI engine",
+            "es": "Motor de interfaz de Insane OS",
+            "pt": "Motor de interface do Insane OS"
           },
           "sub": {
-            "en": "React on QuickJS, native layout, painting and text in C. Used by LordOS's own apps; Linux apps don't go through it",
-            "es": "React sobre QuickJS, layout, pintado y texto nativos en C. Lo usan las apps de LordOS; las apps de Linux no pasan por acá",
-            "pt": "React sobre QuickJS, layout, pintura e texto nativos em C. Usado pelos apps do LordOS; apps Linux não passam por ele"
+            "en": "React on QuickJS, native layout, painting and text in C. Used by Insane OS's own apps; Linux apps don't go through it",
+            "es": "React sobre QuickJS, layout, pintado y texto nativos en C. Lo usan las apps de Insane OS; las apps de Linux no pasan por acá",
+            "pt": "React sobre QuickJS, layout, pintura e texto nativos em C. Usado pelos apps do Insane OS; apps Linux não passam por ele"
           },
           "tone": "ours"
         },
         {
           "id": "server",
           "label": {
-            "en": "LordOS display server and Wayland compositor",
-            "es": "Servidor gráfico y compositor Wayland de LordOS",
-            "pt": "Servidor gráfico e compositor Wayland do LordOS"
+            "en": "Insane OS display server and Wayland compositor",
+            "es": "Servidor gráfico y compositor Wayland de Insane OS",
+            "pt": "Servidor gráfico e compositor Wayland do Insane OS"
           },
           "sub": {
             "en": "lord-server, in C: KMS without libdrm, evdev without libinput, composition on CPU or GPU. Linux apps and isolated .lpk apps connect here as Wayland clients",
@@ -82,9 +82,9 @@
       ],
       "edges": [],
       "caption": {
-        "en": "Violet layers are LordOS's own code; the lower layers are reused from Debian and Linux.",
-        "es": "Las capas violetas son código propio de LordOS; las de abajo se reutilizan de Debian y Linux.",
-        "pt": "As camadas violeta são código próprio do LordOS; as de baixo são reaproveitadas do Debian e do Linux."
+        "en": "Violet layers are Insane OS's own code; the lower layers are reused from Debian and Linux.",
+        "es": "Las capas violetas son código propio de Insane OS; las de abajo se reutilizan de Debian y Linux.",
+        "pt": "As camadas violeta são código próprio do Insane OS; as de baixo são reaproveitadas do Debian e do Linux."
       }
     },
     {

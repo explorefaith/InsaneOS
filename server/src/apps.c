@@ -9,7 +9,7 @@
  *     files (the %f %u… codes are removed) and it does not go through a shell: argv is built per the
  *     specification and run with execv;
  *   - terminal apps (Terminal=true) are neither listed nor launched;
- *   - JS cannot create .desktop files: lord.fs is read-only and LordOS app packages are installed
+ *   - JS cannot create .desktop files: lord.fs is read-only and Insane OS app packages are installed
  *     in another folder (~/.local/share/lordos/apps), so a command cannot be
  *     invented from the UI.
  * App output goes to ~/.cache/lordos/apps.log (trimmed when it exceeds 1 MB).
@@ -348,7 +348,7 @@ int apps_list(const char *lang, const DesktopApp **out) {
             size_t len = strlen(de->d_name);
             if (len < 9 || strcmp(de->d_name + len - 8, ".desktop")) continue;
             /* the id is the file name without .desktop, with any character outside [A-Za-z0-9._-] made
-             * '-' ("LordOS Imager.desktop" → "LordOS-Imager"): packages name their files freely, but the
+             * '-' ("Insane OS Imager.desktop" → "Insane OS-Imager"): packages name their files freely, but the
              * id also names the app's scope (app-lordos-<id>.scope); the real file is kept in a->file */
             char id[160];
             snprintf(id, sizeof id, "%.*s", (int)(len - 8), de->d_name);
@@ -359,8 +359,8 @@ int apps_list(const char *lang, const DesktopApp **out) {
             int flen = snprintf(file, sizeof file, "%s/%s", dirs[d], de->d_name);
             if (flen < 0 || flen >= PATH_MAX || parse_desktop(file, lang, e)) continue;
             if (!e->is_app || e->hidden || e->nodisplay || e->terminal || !e->has_name || !e->exec[0]) continue;
-            if (e->only[0] && !list_has(e->only, "LordOS")) continue;
-            if (e->not_[0] && list_has(e->not_, "LordOS")) continue;
+            if (e->only[0] && !list_has(e->only, "Insane OS")) continue;
+            if (e->not_[0] && list_has(e->not_, "Insane OS")) continue;
             char prog[PATH_MAX];
             if (e->tryexec[0] && find_program(e->tryexec, d == 0, prog, sizeof prog)) continue;
             DesktopApp *a = &list[n++];
@@ -579,7 +579,7 @@ static FilesPlan *files_plan(const DesktopApp *a, const char *file, const char *
     }
     p->cfg.runtime_dir = p->runtime;
     /* the only sockets of the session it keeps: the display and the sound server's normal ones
-     * (never pipewire-0-manager, the bus, systemd's, agents' or LordOS's own) */
+     * (never pipewire-0-manager, the bus, systemd's, agents' or Insane OS's own) */
     const char *wd = getenv("WAYLAND_DISPLAY");
     int ns = 0;
     if (wd && wd[0] && !strchr(wd, '/') && strlen(wd) < sizeof p->wayland) { snprintf(p->wayland, sizeof p->wayland, "%s", wd); p->cfg.sockets[ns++] = p->wayland; }
@@ -737,7 +737,7 @@ int apps_launch_with(const char *id, const char *path) {
     if (!path || !realpath(path, real) || !fsops_allowed(real) || stat(real, &st) || !(S_ISREG(st.st_mode) || S_ISDIR(st.st_mode))) return -1;
     /* id "" = the default app for the file's type (apps_default_for: the user's choice in Settings →
      * Default Apps, else the system's default, else the first installed app that declares the type);
-     * -1 if that is one of LordOS's own apps (the theme opens those) or there is none */
+     * -1 if that is one of Insane OS's own apps (the theme opens those) or there is none */
     char mime[MIME_MAX], def[DESKTOP_ID_MAX];
     if (id && !id[0]) {
         if (defaults_guess(real, mime, sizeof mime) || apps_default_for(mime, def, sizeof def) <= 0) return -1;
@@ -805,7 +805,7 @@ int apps_default_for(const char *mime, char *out, size_t n) {
     char id[DESKTOP_ID_MAX];
     int r = 0;
     /* 1. [Default Applications], file by file: the first entry that is installed (the user's own
-     *    files first; LordOS's own "lordos-<app>.desktop" counts only there, the theme opens it) */
+     *    files first; Insane OS's own "lordos-<app>.desktop" counts only there, the theme opens it) */
     for (int i = 0; i < f.n && !r; i++)
         for (int k = 0; !r && mimeapps_entry(f.text[i], "Default Applications", mime, k, id, sizeof id) == 0; k++) {
             if (defaults_removed(&f, i, mime, id)) continue;
@@ -919,7 +919,7 @@ static int launch(const char *id, const char *file, const char *action) {
         const char *home = getenv("HOME");
         if (!cwd[0] || chdir(cwd)) { if (home && chdir(home)) {} }
         /* its own app-lordos-<id>.scope cgroup: the firewall, the Monitor, the PipeWire guard and
-         * the notification server know the app only by it. In a LordOS session a launch that can't
+         * the notification server know the app only by it. In a Insane OS session a launch that can't
          * be placed there never runs (it would run as lord-server itself, with none of its rules). */
         if (app_scope_reserved(id) || (app_scope_enter(id) && getenv("LORDOS_SESSIOND"))) {
             static const char msg[] = "apps: could not place the app in its own scope: not launched\n";

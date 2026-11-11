@@ -5,7 +5,7 @@
  *   Chromium  ~/.config/chromium/{Default,Profile N}/Preferences, and the same in Brave's
  *             ~/.config/BraveSoftware/Brave-Browser (0.8.8.4, #39; "chromium" below means both):
  *             browser.custom_chrome_frame = on, and with on extensions.theme.system_theme = 1
- *             (the GTK theme, for LordOS's window buttons) unless the profile uses a theme
+ *             (the GTK theme, for Insane OS's window buttons) unless the profile uses a theme
  *             extension. Only while that browser is not running (it rewrites the file when it quits);
  *             a surgical edit of those keys, the rest of the file byte for byte, validated as JSON
  *             before and after, a backup (Preferences.lordos-backup) and an atomic rename.
@@ -38,12 +38,12 @@ enum { BRF_CHANGED = 0, BRF_SAME = 1, BRF_BAD = -1 };
 
 /* Pure edits (tests/brframe_test.c). *out is malloc'd (NUL-terminated) only with BRF_CHANGED. */
 int brf_chrome_edit(const char *in, size_t n, int on, char **out, size_t *outn);
-/* user.js: value 0/1 sets LordOS's marked line, -1 removes it. *own = 1 if a line the user wrote
+/* user.js: value 0/1 sets Insane OS's marked line, -1 removes it. *own = 1 if a line the user wrote
  * sets the preference (then nothing is changed: BRF_SAME). */
 int brf_userjs_edit(const char *in, size_t n, int value, char **out, size_t *outn, int *own);
 /* The value prefs.js holds for browser.tabs.inTitlebar, or -1 if it isn't set there. */
 int brf_prefs_value(const char *in, size_t n);
-/* The value of LordOS's marked line in user.js, or -1. */
+/* The value of Insane OS's marked line in user.js, or -1. */
 int brf_userjs_ours(const char *in, size_t n);
 
 /* On disk. cfg: the user's config folder (~/.config); home: the home folder (legacy ~/.mozilla). */

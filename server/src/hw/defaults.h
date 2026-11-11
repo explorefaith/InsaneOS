@@ -1,6 +1,6 @@
 /* defaults.h — default applications on disk (Settings → Default Apps): the user's
  * ~/.config/mimeapps.list and the system ones, shared-mime-info's globs2, and the preferred
- * terminal in ~/.config/xdg-terminals.list (the xdg-terminal-exec convention). LordOS's own apps
+ * terminal in ~/.config/xdg-terminals.list (the xdg-terminal-exec convention). Insane OS's own apps
  * are written as "lordos-<app>.desktop" (no such file exists; other desktops skip them). */
 #ifndef LORD_HW_DEFAULTS_H
 #define LORD_HW_DEFAULTS_H

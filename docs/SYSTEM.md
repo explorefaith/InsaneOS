@@ -1,13 +1,13 @@
 # System apps (M9)
 
-The native system apps that ship preinstalled with LordOS: **Disks** (Discos), **Backups** (Copias
+The native system apps that ship preinstalled with Insane OS: **Disks** (Discos), **Backups** (Copias
 de seguridad), **Logs** (Registros), **Clock** (Reloj) and **Help** (Ayuda). All of them use `t()`
 with es/en/pt, work right to left and have their own icon. Anything that needs root goes through
 closed `admin.c` actions, with arguments validated on the root side and programs at fixed paths.
 
 ## Disks (`apps/disks`)
 
-The LordOS disk utility, like GNOME Disks.
+The Insane OS disk utility, like GNOME Disks.
 
 - **On the left:** disks grouped into Internal, External (USB and cards) and Images (`loop`
   devices backed by a file), each with its partitions. A dot marks the mounted ones.
@@ -254,7 +254,7 @@ so 0.8.2 uses it instead of growing our own:
 enables `smartmontools.service`, which starts at the next boot (on VM 119 it was enabled but not
 started right after the install). Debian's default configuration checks each disk every 30
 minutes with `-n standby` (a resting disk is not woken) and mails root, which goes nowhere on a
-desktop. LordOS's own notices (`MONITOR.md`) don't need it, so since 0.8.3 it stays off: the
+desktop. Insane OS's own notices (`MONITOR.md`) don't need it, so since 0.8.3 it stays off: the
 `lordos` package ships `/usr/lib/systemd/system/smartmontools.service.d/lordos.conf` with
 `ConditionPathExists=/etc/lordos/smartd-enabled`, and migration `004-0.8.3-smartd-off.sh` stops a
 smartd already running from an earlier install. An administrator who wants it creates that file
@@ -358,7 +358,7 @@ home folder needs no root, so no new action was added to `admin.c`.
 ### On-disk layout
 
 ```
-<destination>/LordOS-Backups/<host>-<user>/
+<destination>/Insane OS-Backups/<host>-<user>/
 ├── 2026-10-17-235656/        a snapshot: the whole home folder, as it was
 ├── 2026-10-18-001432/        what did not change is a hard link to the previous one
 ├── .inprogress-<stamp>/      the run in progress (renamed when it finishes)
@@ -380,7 +380,7 @@ home folder needs no root, so no new action was added to `admin.c`.
   and opens with `O_NOFOLLOW`; it does not cross into other filesystems (a disk mounted inside the
   home folder) and skips fifos, sockets and devices.
 - **Exclusions:** always `.cache`, `.local/share/Trash`, `.local/share/lordos/apps`,
-  `.local/share/lordos/trash` and `.thumbnails`; the `LordOS-Backups` folder itself when the
+  `.local/share/lordos/trash` and `.thumbnails`; the `Insane OS-Backups` folder itself when the
   destination is inside the home folder (by device and inode); and the folders the user adds
   (validated relative paths: no `..`, leading `/` or control characters).
 
@@ -523,7 +523,7 @@ the thread not competing with the compositor for CPU (wakeup p99 of 2 ms at most
 
 ## Logs (`apps/logs`)
 
-LordOS's log viewer.
+Insane OS's log viewer.
 
 - **Sources** (sidebar):
   - **My logs:** the user's own systemd journal (`user-<uid>.journal` and its archived files);
@@ -531,7 +531,7 @@ LordOS's log viewer.
     `adm`) it is read like the user's own; otherwise an administrator gets it through the closed
     action `logs-system`; anyone else is told it needs an administrator;
   - **Kernel:** the kernel's messages (`_TRANSPORT=kernel`) from the readable journal;
-  - **LordOS:** the session's own logs, `~/.cache/lordos/<name>.log` (`session.log`,
+  - **Insane OS:** the session's own logs, `~/.cache/lordos/<name>.log` (`session.log`,
     `greeter.log`…).
 - **Filters:** level (all, info and above, warnings and above, errors), time range (15 min, 1 hour,
   24 h, everything), process or unit (`[A-Za-z0-9@._:-]`, the same check as the C side), and free-text
@@ -592,7 +592,7 @@ thread work.
 | `logs.sources()` | `{ user, system, uid }`: how many user files, whether the system journal is readable directly |
 | `logs.query({ scope: 'user'\|'system', since, until, prio, kernel, match, grep, limit })` | promise of `[{ t (µs), s, p, pid, uid, k, id, u, b, m }]`, oldest first |
 | `logs.system(query)` | the same through `logs-system` (administrators) |
-| `logs.files()`, `logs.tail(name, bytes)` | the LordOS logs and the end of one of them (up to 1 MB) |
+| `logs.files()`, `logs.tail(name, bytes)` | the Insane OS logs and the end of one of them (up to 1 MB) |
 | `logs.follow(on)`, `logs.onChange(fn)` | live follow (`'journal'` or `'file'`, name) |
 
 ### Tests and measurements
@@ -697,15 +697,15 @@ it simply doesn't show them.
 An item with a panel (Cleaner, the network item, a third-party app's menu) places it with
 `statusPanelAt(button)` inside `<Overlay anchor={button}>`, and the privacy indicators do the same:
 the panel opens toward the middle of the button's display (`sdk/statusplace.js`), below a bar at the
-top (Lord Flow's menu bar, a Classic taskbar moved to the top) and above the Classic taskbar at the
+top (Insane Flow's menu bar, a Classic taskbar moved to the top) and above the Classic taskbar at the
 bottom, its default. Before 0.8.8.4 they always opened below, so on the bottom taskbar only their top
-edge showed under the bar ([#29](https://github.com/lordbasex/LordOS/issues/29)). `classic` draws
+edge showed under the bar ([#29](https://github.com/lordbasex/Insane OS/issues/29)). `classic` draws
 the items 40 px tall, as tall as its buttons, so a panel clears the bar. Tested by
 `server/tests/statusplace_test.mjs`.
 
 ### Session notifications (`sdk/notify.js`)
 
-LordOS had no notifications (only the short clipboard toast). Now there is one shared by every app,
+Insane OS had no notifications (only the short clipboard toast). Now there is one shared by every app,
 mounted by `startShell`, so it shows with any theme:
 
 ```js
@@ -739,7 +739,7 @@ dismissNotification(id);
 
 ## Help (`apps/help`)
 
-LordOS help and tips: a help viewer and a tips app.
+Insane OS help and tips: a help viewer and a tips app.
 
 - **Articles:** one per app and per feature (desktop, windows, Search, clipboard, keyboard and
   input methods, Linux apps, touchpad, network, VPN, users and sessions, remote desktop, privacy,
@@ -753,7 +753,7 @@ LordOS help and tips: a help viewer and a tips app.
   section (`wm.open('settings', { args: { section } })`, which Settings already accepted);
   `[Files](app:files)` opens an app; `[VPN](help:vpn)` another article. An app's article has an
   "Open <app>" button.
-- **Help menu** in the `default` theme: "LordOS Help" and "Welcome to LordOS".
+- **Help menu** in the `default` theme: "Insane OS Help" and "Welcome to Insane OS".
 
 ### Article format
 
@@ -792,7 +792,7 @@ slashes), so nothing outside `<assets>/help/` can be reached; `O_NOFOLLOW`, regu
 its own: articles appear in the "Help" section with a snippet in the preview, and Enter opens the
 article. The section title comes from `shell.spotlight.section.<id>`.
 
-### "Welcome to LordOS"
+### "Welcome to Insane OS"
 
 A six-step tour (welcome, the desktop, Search, Settings with buttons to Appearance, Network and
 Users, the system apps, and where help is), with "Skip", "Back" and "Next".
@@ -808,7 +808,7 @@ Users, the system apps, and where help is), with "Skip", "Back" and "Next".
 | | |
 |---|---|
 | ![welcome](help-welcome.png) | ![article](help-article.png) |
-| "Welcome to LordOS" on first login | An article opened from Search, with links to other articles |
+| "Welcome to Insane OS" on first login | An article opened from Search, with links to other articles |
 | ![spotlight](help-in-search.png) | |
 | Search finds Help articles | |
 

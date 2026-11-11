@@ -7,12 +7,12 @@ keywords: settings, configuration, preferences, system
 ---
 # Settings
 
-Everything you can configure in LordOS is in Settings. The field at the top searches the sections.
+Everything you can configure in Insane OS is in Settings. The field at the top searches the sections.
 
 | Section | What it has |
 |---|---|
 | [General](settings:general) | This computer: name, software and storage |
-| [Appearance](settings:appearance) | Desktop style (Lord Flow or Lord Classic), dark or light mode, accent color, transparency |
+| [Appearance](settings:appearance) | Desktop style (Insane Flow or Insane Classic), dark or light mode, accent color, transparency |
 | [Wallpaper](settings:wallpaper) | The desktop background |
 | [Displays](settings:displays) | Resolution, scale, arrangement of several displays, Night Light |
 | [Network](settings:network) | Wired, Wi-Fi and VPN (see [Network](help:network)) |

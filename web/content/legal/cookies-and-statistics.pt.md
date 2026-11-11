@@ -9,7 +9,7 @@ O lordos.org **não usa cookies**: nem de sessão, nem de análise, nem de publi
 Não coletamos estatísticas de nenhum tipo:
 
 - **No site:** nenhum serviço de análise, nenhum contador, nenhum pixel de rastreamento, nenhuma impressão digital do navegador, nenhum widget de redes sociais e nenhuma fonte ou script carregado de outros servidores.
-- **Na distribuição LordOS:** sem telemetria, sem estatísticas de uso, sem relatórios de falhas e sem identificadores do aparelho. As conexões de rede que o LordOS faz estão listadas na [Política de privacidade](/legal/privacy/).
+- **Na distribuição Insane OS:** sem telemetria, sem estatísticas de uso, sem relatórios de falhas e sem identificadores do aparelho. As conexões de rede que o Insane OS faz estão listadas na [Política de privacidade](/legal/privacy/).
 
 ## O que o site guarda no seu navegador
 
@@ -28,7 +28,7 @@ O site é servido por uma rede de distribuição de conteúdo (CDN). Para entreg
 
 ## Contagem de downloads
 
-Os arquivos de cada versão ficam no GitHub Releases. O GitHub mantém um contador de downloads por arquivo; ele é público, é um único total por arquivo e não diz nada sobre quem baixou. Se algum dia mencionarmos quantas vezes o LordOS foi baixado, esse número vem desses contadores.
+Os arquivos de cada versão ficam no GitHub Releases. O GitHub mantém um contador de downloads por arquivo; ele é público, é um único total por arquivo e não diz nada sobre quem baixou. Se algum dia mencionarmos quantas vezes o Insane OS foi baixado, esse número vem desses contadores.
 
 ## Sites de doação
 

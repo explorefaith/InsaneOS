@@ -1,6 +1,6 @@
-LordOS lo hace un equipo chico, y tratamos de trabajar como lo hacen los proyectos de código abierto serios. Esta página explica, con honestidad, con qué normas internacionales están alineados nuestros procesos, qué implementa cada una y qué falta todavía.
+Insane OS lo hace un equipo chico, y tratamos de trabajar como lo hacen los proyectos de código abierto serios. Esta página explica, con honestidad, con qué normas internacionales están alineados nuestros procesos, qué implementa cada una y qué falta todavía.
 
-**LordOS e iPERFEX no tienen ninguna certificación ISO.** "Alineado con" significa que seguimos las prácticas principales de una norma y publicamos la evidencia de abajo; no significa que un auditor nos haya evaluado o certificado, ni que cumplamos todos los requisitos.
+**Insane OS e iPERFEX no tienen ninguna certificación ISO.** "Alineado con" significa que seguimos las prácticas principales de una norma y publicamos la evidencia de abajo; no significa que un auditor nos haya evaluado o certificado, ni que cumplamos todos los requisitos.
 
 ## Divulgación y gestión de vulnerabilidades: ISO/IEC 29147 e ISO/IEC 30111
 
@@ -10,7 +10,7 @@ LordOS lo hace un equipo chico, y tratamos de trabajar como lo hacen los proyect
 
 ## Cumplimiento de licencias de código abierto: ISO/IEC 5230 (OpenChain)
 
-**Qué hacemos:** un inventario de cada componente de terceros incluido y su licencia en [THIRD_PARTY.md](https://github.com/lordbasex/LordOS/blob/main/THIRD_PARTY.md); avisos de licencia en la página de [Licencias](/legal/licenses/), en el repositorio y en el archivo de copyright de cada paquete de Debian; una lista de materiales de software (SBOM) en SPDX 2.3, generada por `tools/release/make-sbom.sh` y adjunta a cada versión a partir de la 0.8.0 beta; el proceso está documentado en [docs/COMPLIANCE.md](https://github.com/lordbasex/LordOS/blob/main/docs/COMPLIANCE.md). Las contribuciones entran bajo la misma licencia MIT con una firma de conformidad (mirá [Contribuir](/legal/contributing/)).
+**Qué hacemos:** un inventario de cada componente de terceros incluido y su licencia en [THIRD_PARTY.md](https://github.com/lordbasex/Insane OS/blob/main/THIRD_PARTY.md); avisos de licencia en la página de [Licencias](/legal/licenses/), en el repositorio y en el archivo de copyright de cada paquete de Debian; una lista de materiales de software (SBOM) en SPDX 2.3, generada por `tools/release/make-sbom.sh` y adjunta a cada versión a partir de la 0.8.0 beta; el proceso está documentado en [docs/COMPLIANCE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/COMPLIANCE.md). Las contribuciones entran bajo la misma licencia MIT con una firma de conformidad (mirá [Contribuir](/legal/contributing/)).
 
 **Qué falta:** una política de código abierto escrita; una persona designada como responsable del cumplimiento; capacitación para quienes contribuyen; una autocertificación OpenChain.
 
@@ -24,7 +24,7 @@ LordOS lo hace un equipo chico, y tratamos de trabajar como lo hacen los proyect
 
 Aplicamos algunas prácticas que describe ISO/IEC 27001, solo donde son reales:
 
-- **Mínimo privilegio:** las apps corren en su propio sandbox (Landlock, seccomp, cgroups, sin capacidades), y los procesos auxiliares que manejan datos no confiables (correo, documentos, multimedia, la bóveda de contraseñas) se quedan sin privilegios ni acceso a la red, como documenta [docs/PRIVACY.md](https://github.com/lordbasex/LordOS/blob/main/docs/PRIVACY.md). Las credenciales de publicación del sitio solo pueden escribir en un bucket de almacenamiento y refrescar una distribución de la CDN.
+- **Mínimo privilegio:** las apps corren en su propio sandbox (Landlock, seccomp, cgroups, sin capacidades), y los procesos auxiliares que manejan datos no confiables (correo, documentos, multimedia, la bóveda de contraseñas) se quedan sin privilegios ni acceso a la red, como documenta [docs/PRIVACY.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PRIVACY.md). Las credenciales de publicación del sitio solo pueden escribir en un bucket de almacenamiento y refrescar una distribución de la CDN.
 - **Versiones firmadas:** cada archivo de una versión figura en un `SHA256SUMS` firmado (mirá [Firma de código](/legal/code-signing/)).
 - **Custodia de claves:** la clave de firma de versiones se guarda solo en la máquina del mantenedor, nunca en el repositorio ni en una máquina de compilación, con una copia de respaldo fuera de línea.
 

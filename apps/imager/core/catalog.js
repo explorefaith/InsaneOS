@@ -1,4 +1,4 @@
-// catalog.js — what the LordOS Imager offers: devices, cooling, appearance and the defaults. Data
+// catalog.js — what the Insane OS Imager offers: devices, cooling, appearance and the defaults. Data
 // only (labels are i18n keys); shared by the native and desktop apps. docs/IMAGER.md.
 
 // Devices. Only the Raspberry Pi 5 is supported (docs/RASPBERRY.md); the others are listed so
@@ -16,7 +16,7 @@ export const DEVICES = [
   { id: 'rpi3', name: 'Raspberry Pi 3 / Zero 2', kind: 'pi', supported: false, never: true },
 ];
 export const deviceById = (id) => DEVICES.find((d) => d.id === id) || null;
-// the Raspberry Pi models LordOS supports (Device → Raspberry Pi → which one)
+// the Raspberry Pi models Insane OS supports (Device → Raspberry Pi → which one)
 export const PI_MODELS = DEVICES.filter((d) => d.kind === 'pi' && d.supported);
 // The name to show: a board's own, or the i18n key of a live ISO's card
 export const deviceLabel = (d, tr) => (d && d.name) || tr(`imager.device.${d && d.id === 'pc-arm64' ? 'pcArm64' : 'pc'}`);
@@ -26,7 +26,7 @@ export const RAM_ADVICE = [
   { gb: 4, level: 'min' }, { gb: 8, level: 'comfortable' }, { gb: 16, level: 'max' },
 ];
 
-// The languages a LordOS image can start in (lordos-firstrun's lang=). English, Español and
+// The languages a Insane OS image can start in (lordos-firstrun's lang=). English, Español and
 // Português are shown first; the others after them. since: the first image version whose first-run
 // program knows the language (an older one would refuse the whole file).
 export const LANGUAGES = [
@@ -67,12 +67,12 @@ export const overclockAllowed = (cooler) => coolerHasFan(cooler);
 
 export const THEMES = ['default', 'classic'];
 export const MODES = ['light', 'dark'];
-// Lord Flow's accents (themes/default/tokens.js)
+// Insane Flow's accents (themes/default/tokens.js)
 export const ACCENTS = [
   { id: 'azul', color: '#0a84ff' }, { id: 'violeta', color: '#bf5af2' }, { id: 'rosa', color: '#ff375f' },
   { id: 'naranja', color: '#ff9f0a' }, { id: 'verde', color: '#30d158' }, { id: 'grafito', color: '#8e8e93' },
 ];
-// A few of the LordOS wallpapers (assets/wallpapers/index.json ids)
+// A few of the Insane OS wallpapers (assets/wallpapers/index.json ids)
 export const WALLPAPERS = ['lumo-celestial', 'crystal-crown', 'aurora'];
 
 // What a new customisation starts with (the board's own defaults where nothing is chosen)

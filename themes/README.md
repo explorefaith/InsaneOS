@@ -1,4 +1,4 @@
-# LordOS themes
+# Insane OS themes
 
 A theme is a React app that draws **the whole desktop**: wallpaper, bars, dock or taskbar, menus
 and window frames. Apps (`apps/`) go inside those windows and adapt to the theme's colors on
@@ -6,8 +6,8 @@ their own. `lord-server` runs the theme with QuickJS and paints it with its C en
 
 | Theme | Style |
 |---|---|
-| `default` | Lord Flow: menu bar, dock with magnification, app launcher, Control Center |
-| `classic` | Lord Classic: a centered taskbar, start menu with search, tray with quick settings and notifications, window snapping and the SDK's Overview (0.8.3) |
+| `default` | Insane Flow: menu bar, dock with magnification, app launcher, Control Center |
+| `classic` | Insane Classic: a centered taskbar, start menu with search, tray with quick settings and notifications, window snapping and the SDK's Overview (0.8.3) |
 
 ```sh
 npm install           # once (React + esbuild)
@@ -15,15 +15,15 @@ npm run build         # bundles every theme, with the SDK and every app
 ```
 
 The user switches themes live from **Settings → Appearance → Desktop style**, which lists every
-installed theme (since 0.8.5 there is no separate Themes page), with no restart: the LordOS app
+installed theme (since 0.8.5 there is no separate Themes page), with no restart: the Insane OS app
 windows that were open come back in the new theme. The choice is saved and respected on the next start.
 
 ## Creating a new theme
 
-The full guide, for a React developer new to LordOS, is [`docs/THEMES-GUIDE.md`](../docs/THEMES-GUIDE.md)
+The full guide, for a React developer new to Insane OS, is [`docs/THEMES-GUIDE.md`](../docs/THEMES-GUIDE.md)
 (anatomy, the token contract, frames, menus, layers, building, the verified-code check, testing and
 a checklist); a small starting point is [`examples/theme-minimal/`](../examples/theme-minimal/).
-Note that a theme LordOS did not sign only loads on a development build (see the guide). In short:
+Note that a theme Insane OS did not sign only loads on a development build (see the guide). In short:
 
 1. Copy `themes/classic` to `themes/mytheme` (`index.jsx` puts the pieces together; the frame,
    taskbar and panels are in `components/`, the colors and shape tokens in `tokens.js`).
@@ -74,7 +74,7 @@ Images (`<Image src="assets/...">`) are resolved relative to the theme's folder.
 `mode`, `accent`, `text`, `textDim`, `windowBg`, `sidebarBg`, `separator`, `hover`, `control`,
 `inputBg`. Optional: `gtkButtons` (order of the GTK apps' buttons, e.g. `':minimize,maximize,close'`; by default the traffic lights on the left, see `docs/WAYLAND.md`), `accents` (name → color map, for Settings), `wallpapers`
 (`[{ id, nameKey, name, src, thumb?, category?, variants? }]`; Settings groups them by `category` and
-shows `thumb` in its grid; add `lordosWallpapers` from the SDK to offer the LordOS collection, and
+shows `thumb` in its grid; add `lordosWallpapers` from the SDK to offer the Insane OS collection, and
 draw with `wallpaperSrc(w, width, height)` so a higher-resolution variant is used where it exists,
 see `assets/wallpapers/README.md`), and the overlay scroll bars' look (0.8.3, `ScrollView`):
 `scrollThumb`, `scrollThumbHover` (colors), `scrollRadius` (corner radius; a pill by default) and

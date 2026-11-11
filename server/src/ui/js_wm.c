@@ -5,7 +5,7 @@
  *       Only with a button held down; lord-server tracks it until it is released.
  *   lord.wm.cancel()                 also stops a scripted move
  *   lord.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) → bool
- *       LordBench's desktop scene (docs/BENCHMARK.md): the node moves along a figure of eight, rx × ry px,
+ *       InsaneBench's desktop scene (docs/BENCHMARK.md): the node moves along a figure of eight, rx × ry px,
  *       one turn every periodMs (500–60000), one step per frame through the drag's own path (grab.c),
  *       with no button held; pointer input or cancel() stops it. No end notice: the scene's window closes.
  *   lord.wm.pointer() → { x, y, active, edges }: the pointer now and the drag in progress (no
@@ -17,6 +17,7 @@
 #include "js_wm.h"
 #include "grab.h"
 #include "portal.h"
+#include "../wl/wl.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -68,7 +69,7 @@ static JSValue f_grab(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     return JS_NewBool(c, grab_begin(node, edges, &lim) == 0);
 }
 
-/* LordBench's scene: lord.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) */
+/* InsaneBench's scene: lord.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) */
 static JSValue f_script(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     int32_t node = 0;
@@ -108,8 +109,17 @@ static int get_word(JSContext *c, JSValueConst o, const char *k, char *out, size
     return ok;
 }
 
-static JSValue f_portal_set(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
+/* lord.wm.nodePid(node) → the Wayland client pid of that window's toplevel, 0 when there is
+ * none (native windows, X11 ones, our own process). The shell reports the pids of the windows
+ * on screen so the pressure-freeze helper only ever stops real background processes. */
+static JSValue f_nodepid(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
+    int32_t node = 0;
+    if (argc < 1 || JS_ToInt32(c, &node, argv[0])) return JS_NewInt32(c, 0);
+    return JS_NewInt32(c, wl_node_pid(node));
+}
+
+static JSValue f_portal_set(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {    (void)t;
     if (argc < 1 || !JS_IsObject(argv[0])) return JS_FALSE;
     JSValue dv = JS_GetPropertyStr(c, argv[0], "dark");
     int dark = JS_ToBool(c, dv);
@@ -137,6 +147,7 @@ static const JSCFunctionListEntry wm_funcs[] = {
     JS_CFUNC_DEF("cancel", 0, f_cancel),
     JS_CFUNC_DEF("pointer", 0, f_pointer),
     JS_CFUNC_DEF("script", 2, f_script),
+    JS_CFUNC_DEF("nodePid", 1, f_nodepid),
 };
 
 void js_wm_register(JSContext *c, JSValue lord) {

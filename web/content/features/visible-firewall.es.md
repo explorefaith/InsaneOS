@@ -1,6 +1,6 @@
 ## En pocas palabras
 
-La mayoría de los firewalls piensan en puertos y direcciones. El firewall de LordOS piensa en **apps**: vos decidís cuáles de tus apps pueden usar la red, y cuánto. Y como está integrado al Monitor, podés ver qué está haciendo cada app antes de decidir.
+La mayoría de los firewalls piensan en puertos y direcciones. El firewall de Insane OS piensa en **apps**: vos decidís cuáles de tus apps pueden usar la red, y cuánto. Y como está integrado al Monitor, podés ver qué está haciendo cada app antes de decidir.
 
 [[shot:0]]
 
@@ -24,7 +24,7 @@ Imaginate un edificio con un guardia en la puerta de cada departamento en lugar 
 
 **1. Cada app tiene un nombre que el kernel puede ver.** Cuando abrís una app de Linux desde el lanzador de apps, `lord-server` le pide a root que la ubique en su propio cgroup, `app-lordos-<id>.scope`. Las apps `.lpk` instaladas reciben `app-lordos-lpk-<id>.scope`. Estos scopes los crea y los tiene root, así que una app no se puede mudar a otro.
 
-**2. Un servicio root chico aplica las reglas.** `lord-netperm` carga sus programas eBPF en el cgroup del servicio de LordOS, que contiene todas las sesiones:
+**2. Un servicio root chico aplica las reglas.** `lord-netperm` carga sus programas eBPF en el cgroup del servicio de Insane OS, que contiene todas las sesiones:
 
 | Gancho del kernel | Qué revisa |
 |---|---|
@@ -47,7 +47,7 @@ Cada programa averigua a qué app pertenece el proceso que llama (por el cgroup 
 
 Desde 0.8.3, apagar la regla de una app, agregar una regla que deniega un destino o una restricción como "sin internet" no solo frena las conexiones nuevas: un video que ya se estaba reproduciendo también se corta. El kernel descarta los paquetes de las conexiones que la regla nueva deniega, y `lord-netperm` cierra esos sockets, así que la app ve que la conexión terminó en lugar de quedarse colgada. Solo se corta lo que la regla nueva deniega: los otros destinos, la red local con "sin internet" y los clientes de un servidor que corre la app siguen funcionando. Volver a permitir funciona al instante, y el Monitor muestra los bytes descartados como "Tráfico bloqueado".
 
-En una Raspberry Pi 5, el cierre necesita el kernel de LordOS compilado con la destrucción de sockets (`6.18.57-lordos.3`); con uno anterior los paquetes se descartan igual, pero la app recién ve que la conexión terminó cuando vence su propio tiempo de espera.
+En una Raspberry Pi 5, el cierre necesita el kernel de Insane OS compilado con la destrucción de sockets (`6.18.57-lordos.3`); con uno anterior los paquetes se descartan igual, pero la app recién ve que la conexión terminó cuando vence su propio tiempo de espera.
 
 ## ¿Funciona por dominio?
 
@@ -67,26 +67,26 @@ La misma lista de apps restringidas también puede quitar la cámara, el micróf
 
 [[diagram:restrictions]]
 
-- **Las apps aisladas de LordOS** (apps `.lpk`, Contraseñas y, desde 0.8.2, Mail, Calendario, Contactos y Recordatorios): las ocho, en el broker que ya media todo lo que reciben.
-- **Las apps incluidas** (la fila "LordOS"): cámara, micrófono, pantalla y notificaciones. Esa fila es el escritorio mismo, así que archivos, USB, portapapeles y Bluetooth se restringen por app.
-- **Las apps de Linux abiertas desde el lanzador de apps:** los dispositivos de cámara, USB, captura ALSA y framebuffer se rechazan en el kernel (`cgroup/dev`); los sockets Bluetooth, con un programa BPF LSM; el micrófono y las cámaras de PipeWire, con la guardia de PipeWire de LordOS, en vivo, identificando a cada cliente por las credenciales de su socket; las notificaciones, con el servidor de notificaciones de LordOS, que le pregunta al bus quién llama y descarta la notificación si no lo puede saber; y "sin acceso a tus archivos" abre la app, desde su próximo inicio, en sus propios espacios de nombres con una carpeta personal vacía y Landlock. La captura de pantalla nunca estuvo a su alcance: no hay protocolo de captura, y las apps X11 (con Xwayland desde 0.8.3) solo se ven entre ellas, nunca a las apps Wayland ni la pantalla de LordOS.
+- **Las apps aisladas de Insane OS** (apps `.lpk`, Contraseñas y, desde 0.8.2, Mail, Calendario, Contactos y Recordatorios): las ocho, en el broker que ya media todo lo que reciben.
+- **Las apps incluidas** (la fila "Insane OS"): cámara, micrófono, pantalla y notificaciones. Esa fila es el escritorio mismo, así que archivos, USB, portapapeles y Bluetooth se restringen por app.
+- **Las apps de Linux abiertas desde el lanzador de apps:** los dispositivos de cámara, USB, captura ALSA y framebuffer se rechazan en el kernel (`cgroup/dev`); los sockets Bluetooth, con un programa BPF LSM; el micrófono y las cámaras de PipeWire, con la guardia de PipeWire de Insane OS, en vivo, identificando a cada cliente por las credenciales de su socket; las notificaciones, con el servidor de notificaciones de Insane OS, que le pregunta al bus quién llama y descarta la notificación si no lo puede saber; y "sin acceso a tus archivos" abre la app, desde su próximo inicio, en sus propios espacios de nombres con una carpeta personal vacía y Landlock. La captura de pantalla nunca estuvo a su alcance: no hay protocolo de captura, y las apps X11 (con Xwayland desde 0.8.3) solo se ven entre ellas, nunca a las apps Wayland ni la pantalla de Insane OS.
 
 ## Nuevo en 0.8.5
 
-Esto llegó con LordOS 0.8.5-beta, publicada el 27 de octubre de 2026.
+Esto llegó con Insane OS 0.8.5-beta, publicada el 27 de octubre de 2026.
 
 - **Monitor → Red, segunda generación.** La lista de apps ahora es un árbol: cada app se abre en los sitios y direcciones con los que habla, y cada dirección en sus puertos, con lo enviado y lo recibido, un pequeño medidor en vivo y un interruptor para permitir o bloquear en cada destino. Un solo botón agrupa la vista por app, dominio, dirección, puerto o país y la filtra por dirección, protocolo y regla; la búsqueda convierte `app:`, `domain:`, `ip:`, `port:`, `proto:` y `country:` en etiquetas que podés combinar.
 - **Se muestran los sockets de ping, raw y de paquetes** debajo de la app que los abrió. Los sockets IP raw y de paquetes pueden ver o falsificar tráfico, y la fila lo dice, con el protocolo o el ethertype y la interfaz.
-- **Las partes propias de LordOS tienen sus propias filas y reglas.** Mail y la sincronización del calendario, la Tienda y las actualizaciones, las impresoras y los escáneres, la Terminal (con los nombres de los programas que corrés en ella) y las actualizaciones de las listas de bloqueo corren cada una en un proceso propio, en su propio scope, así que podés verlas y bloquearlas por separado y lo hace cumplir el kernel. Bloquear la Tienda pregunta antes, porque se frenan las actualizaciones de seguridad. La resolución de nombres, la sincronización de la hora, el servicio de red y tus túneles VPN también se muestran, y nunca se bloquean. En la 0.8.7, la búsqueda en la red de Archivos tiene su propia fila. El tráfico de un recurso de red montado no la tiene: el cliente del kernel abre sus propios sockets, fuera de cualquier app.
-- **Listas de bloqueo.** Ajustes → Privacidad → Listas de bloqueo ofrece listas públicas de sitios de publicidad, rastreadores, malware y ataques, cada una con su fuente y su licencia. Activás una y LordOS la descarga por HTTPS una vez por día, con un descargador aislado que solo recibe un socket ya conectado, revisa cada línea dos veces y bloquea esos destinos para todas las apps. Una regla que escribiste para un sitio siempre le gana a una lista, y una dirección solo se bloquea cuando todos los nombres que dio el resolvedor del sistema para ella están en la lista, así un servidor compartido no se corta por accidente.
+- **Las partes propias de Insane OS tienen sus propias filas y reglas.** Mail y la sincronización del calendario, la Tienda y las actualizaciones, las impresoras y los escáneres, la Terminal (con los nombres de los programas que corrés en ella) y las actualizaciones de las listas de bloqueo corren cada una en un proceso propio, en su propio scope, así que podés verlas y bloquearlas por separado y lo hace cumplir el kernel. Bloquear la Tienda pregunta antes, porque se frenan las actualizaciones de seguridad. La resolución de nombres, la sincronización de la hora, el servicio de red y tus túneles VPN también se muestran, y nunca se bloquean. En la 0.8.7, la búsqueda en la red de Archivos tiene su propia fila. El tráfico de un recurso de red montado no la tiene: el cliente del kernel abre sus propios sockets, fuera de cualquier app.
+- **Listas de bloqueo.** Ajustes → Privacidad → Listas de bloqueo ofrece listas públicas de sitios de publicidad, rastreadores, malware y ataques, cada una con su fuente y su licencia. Activás una y Insane OS la descarga por HTTPS una vez por día, con un descargador aislado que solo recibe un socket ya conectado, revisa cada línea dos veces y bloquea esos destinos para todas las apps. Una regla que escribiste para un sitio siempre le gana a una lista, y una dirección solo se bloquea cuando todos los nombres que dio el resolvedor del sistema para ella están en la lista, así un servidor compartido no se corta por accidente.
 - **Denegar en silencio**, el modo de arriba, también desde un ítem nuevo de la barra de menús.
 - **Actividad de red en la barra de menús** (opcional, apagada de forma predeterminada): las velocidades de subida y bajada, y un panel con los últimos cinco minutos, las apps que mueven datos ahora, lo denegado hace poco, el modo del firewall y las listas de bloqueo.
 
 ## Las preguntas del lector escéptico
 
-**¿Se aplica también a las apps de Linux?** Sí. Es uno de sus puntos principales: Chromium, Firefox o cualquier app abierta desde el lanzador de apps tiene su propio scope y sus propias reglas. Las apps incluidas de LordOS y los programas iniciados desde la Terminal cuentan juntos como "LordOS"; desde 0.8.5 la Terminal y las partes de red propias de LordOS tienen filas propias.
+**¿Se aplica también a las apps de Linux?** Sí. Es uno de sus puntos principales: Chromium, Firefox o cualquier app abierta desde el lanzador de apps tiene su propio scope y sus propias reglas. Las apps incluidas de Insane OS y los programas iniciados desde la Terminal cuentan juntos como "Insane OS"; desde 0.8.5 la Terminal y las partes de red propias de Insane OS tienen filas propias.
 
-**¿Puede una app escaparse de su scope?** Se probó. Una app de Linux no puede anotarse en otro cgroup, porque cada archivo `cgroup.procs` del árbol de la sesión es de root. Todavía puede pedirle al gestor systemd del usuario que arranque un proceso nuevo fuera del árbol (`systemd-run --user`). LordOS también cierra eso: `lord-netperm` engancha además sus programas al `user@<uid>.service` de cada usuario, y cualquier proceso ahí queda sujeto a la unión más estricta de las restricciones de las apps restringidas que ese usuario tenga corriendo. Probado con `systemd-run --user --scope`, un servicio transitorio y `setsid`: todos denegados.
+**¿Puede una app escaparse de su scope?** Se probó. Una app de Linux no puede anotarse en otro cgroup, porque cada archivo `cgroup.procs` del árbol de la sesión es de root. Todavía puede pedirle al gestor systemd del usuario que arranque un proceso nuevo fuera del árbol (`systemd-run --user`). Insane OS también cierra eso: `lord-netperm` engancha además sus programas al `user@<uid>.service` de cada usuario, y cualquier proceso ahí queda sujeto a la unión más estricta de las restricciones de las apps restringidas que ese usuario tenga corriendo. Probado con `systemd-run --user --scope`, un servicio transitorio y `setsid`: todos denegados.
 
 [[shot:3]]
 
@@ -108,13 +108,13 @@ Esto llegó con LordOS 0.8.5-beta, publicada el 27 de octubre de 2026.
 
 ## Leé el código
 
-- [server/src/netperm/np.bpf.c](https://github.com/lordbasex/LordOS/blob/main/server/src/netperm/np.bpf.c): los programas eBPF de cgroup y LSM
-- [server/src/netperm/netperm.c](https://github.com/lordbasex/LordOS/blob/main/server/src/netperm/netperm.c): el servicio root
-- [server/src/netperm/npcompile.c](https://github.com/lordbasex/LordOS/blob/main/server/src/netperm/npcompile.c): las reglas convertidas en mapas del kernel
-- [server/src/netperm/npdns.c](https://github.com/lordbasex/LordOS/blob/main/server/src/netperm/npdns.c): los nombres desde el resolvedor del sistema
-- [server/src/fw/rules.c](https://github.com/lordbasex/LordOS/blob/main/server/src/fw/rules.c): reglas, precedencia y el lector estricto del archivo
-- [server/src/ui/js_fw.c](https://github.com/lordbasex/LordOS/blob/main/server/src/ui/js_fw.c): `lord.fw`, la API de la sesión
-- [apps/monitor/Firewall.jsx](https://github.com/lordbasex/LordOS/blob/main/apps/monitor/Firewall.jsx) y [apps/monitor/FwRules.jsx](https://github.com/lordbasex/LordOS/blob/main/apps/monitor/FwRules.jsx): las secciones de Ajustes
-- [server/src/sec/restrict.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/restrict.c) y [server/src/sec/pwguard.c](https://github.com/lordbasex/LordOS/blob/main/server/src/sec/pwguard.c): las restricciones en el broker y la guardia de PipeWire
-- [server/tests/netperm_integration.sh](https://github.com/lordbasex/LordOS/blob/main/server/tests/netperm_integration.sh): la prueba con el kernel, 18 de 18
-- [docs/FIREWALL.md](https://github.com/lordbasex/LordOS/blob/main/docs/FIREWALL.md) y [docs/MONITOR.md](https://github.com/lordbasex/LordOS/blob/main/docs/MONITOR.md)
+- [server/src/netperm/np.bpf.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/np.bpf.c): los programas eBPF de cgroup y LSM
+- [server/src/netperm/netperm.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/netperm.c): el servicio root
+- [server/src/netperm/npcompile.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/npcompile.c): las reglas convertidas en mapas del kernel
+- [server/src/netperm/npdns.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/npdns.c): los nombres desde el resolvedor del sistema
+- [server/src/fw/rules.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/fw/rules.c): reglas, precedencia y el lector estricto del archivo
+- [server/src/ui/js_fw.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_fw.c): `lord.fw`, la API de la sesión
+- [apps/monitor/Firewall.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/monitor/Firewall.jsx) y [apps/monitor/FwRules.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/monitor/FwRules.jsx): las secciones de Ajustes
+- [server/src/sec/restrict.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/restrict.c) y [server/src/sec/pwguard.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/pwguard.c): las restricciones en el broker y la guardia de PipeWire
+- [server/tests/netperm_integration.sh](https://github.com/lordbasex/Insane OS/blob/main/server/tests/netperm_integration.sh): la prueba con el kernel, 18 de 18
+- [docs/FIREWALL.md](https://github.com/lordbasex/Insane OS/blob/main/docs/FIREWALL.md) y [docs/MONITOR.md](https://github.com/lordbasex/Insane OS/blob/main/docs/MONITOR.md)

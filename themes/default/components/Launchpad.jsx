@@ -1,7 +1,7 @@
 // App launcher ("Apps"): all apps in full screen, with keyboard search.
 // An app is pinned to the Dock by dragging it onto the Dock (the launcher steps aside as soon as the
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
-// the same for LordOS apps, .lpk packages and Linux apps (sdk/dock.js).
+// the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
   beginDockDrag, dockDragJustEnded } from '@lordos/sdk';
 import { useEffect, useRef, useState } from 'react';

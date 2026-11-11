@@ -1,8 +1,8 @@
 ## Who runs this website
 
-lordos.org is the website of **LordOS**, a free Debian-based GNU/Linux distribution with its own desktop environment.
+lordos.org is the website of **Insane OS**, a free Debian-based GNU/Linux distribution with its own desktop environment.
 
-- **Project:** LordOS, by the iPERFEX group
+- **Project:** Insane OS, by the iPERFEX group
 - **Authors:** Pablo Miranda and Federico Pereira
 - **Responsible entity:** iPERFEX (Pablo Miranda and Federico Pereira)
 - **Country:** Argentina
@@ -19,7 +19,7 @@ We write the content of this website carefully, but we can't guarantee that it i
 
 ## Copyright
 
-The text, images and code of this website are part of the LordOS project and, unless stated otherwise, are released under the [MIT license](https://github.com/lordbasex/LordOS/blob/main/LICENSE). The LordOS name, the crown logo and Lumo are covered by the [Trademark and brand policy](/legal/trademark/).
+The text, images and code of this website are part of the Insane OS project and, unless stated otherwise, are released under the [MIT license](https://github.com/lordbasex/Insane OS/blob/main/LICENSE). The Insane OS name, the crown logo and Lumo are covered by the [Trademark and brand policy](/legal/trademark/).
 
 ## Other legal pages
 

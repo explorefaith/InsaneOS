@@ -1,4 +1,4 @@
-// Disks — the LordOS disk utility, like GNOME Disks (see docs/SYSTEM.md,
+// Disks — the Insane OS disk utility, like GNOME Disks (see docs/SYSTEM.md,
 // "Disks"). On the left, the disks and their partitions; on the right, usage, details, health
 // (SMART) and the actions: mount, unmount, eject, format, rename, erase and create a bootable USB
 // from an image.

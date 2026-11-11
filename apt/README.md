@@ -1,6 +1,6 @@
 # apt/ — the curated app catalog
 
-`apt/catalog.json` lists the third-party apps LordOS offers through its Store with the normal package
+`apt/catalog.json` lists the third-party apps Insane OS offers through its Store with the normal package
 engine. It is the only source of truth: nothing goes into the repository unless it is pinned here, and
 every change is reviewed in a pull request like code. See `docs/UPDATES.md`, "Mirrored apps
 (catalog)", for how it fits into the signed repository on lordos.org.
@@ -8,7 +8,7 @@ every change is reviewed in a pull request like code. See `docs/UPDATES.md`, "Mi
 ```
 apt/catalog.json        the apps (schema 1, below)
 apt/keys/<vendor>.asc   the vendors' APT signing keys (public), pinned by fingerprint in the catalog
-apt/recipes/<recipe>/   how LordOS builds its own .deb of an app that has no vendor .deb
+apt/recipes/<recipe>/   how Insane OS builds its own .deb of an app that has no vendor .deb
 apt/recipes/lib.sh      helpers shared by the recipes
 apt/build.sh            check | fetch | list   (POSIX sh; jq, gpg/gpgv, curl and docker on the Mac)
 ```
@@ -24,7 +24,7 @@ apt/build.sh            check | fetch | list   (POSIX sh; jq, gpg/gpgv, curl and
 - **Mirrored** (everything else, and an `apt` entry with `"delivery": "mirror"`): the files are
   downloaded on the maintainer's Mac, verified, packaged when they are not a .deb, and added to
   `pool/catalog/` of lordos.org/apt by `tools/release/apt-repo.sh build <target> --catalog …`, signed
-  with the LordOS archive key together with everything else. Today: llama.cpp, whisper.cpp and codex-cli (built by LordOS) and goose, opencode, ArtCraft and RustDesk (the vendor's .deb).
+  with the Insane OS archive key together with everything else. Today: llama.cpp, whisper.cpp and codex-cli (built by Insane OS) and goose, opencode, ArtCraft and RustDesk (the vendor's .deb).
 
 ## Schema (version 1)
 
@@ -65,7 +65,7 @@ apt/build.sh            check | fetch | list   (POSIX sh; jq, gpg/gpgv, curl and
 | `build` | `recipe`, `version`, `revision`, `source_date_epoch`, `tag`, `commit`, `url` + `sha256` of the source tarball, `inputs` [{`name`, `url`, `sha256`}], `notes.<arch>` | the catalog |
 | `binary` | `recipe`, `version`, `revision`, `source_date_epoch`, `files.<arch>.{url, sha256, sigstore?}`, `sigstore.{identity, issuer}`, `inputs` [] | the catalog |
 
-A package LordOS builds is versioned `<version>-<revision>` (`0.7.0-1lordos1`). A `deb822` source a
+A package Insane OS builds is versioned `<version>-<revision>` (`0.7.0-1lordos1`). A `deb822` source a
 system writes for a direct entry is exactly:
 
 ```
@@ -84,7 +84,7 @@ Signed-By: <the key from apt/keys/, fingerprint <fingerprint>>
    the hashes from the vendor's own published digests (a GitHub release asset's `digest`, a
    `sha256sum.txt`), then confirm them on a second download. For codex-cli, also the sigstore bundle
    and the identity (`…/rust-release.yml@refs/tags/rust-v<version>`).
-2. A LordOS packaging change without a new upstream version: bump `revision` (`1lordos2`). A
+2. A Insane OS packaging change without a new upstream version: bump `revision` (`1lordos2`). A
    published version is never replaced: the pool is append-only, and `apt-repo.sh` refuses a file
    with the same name and different contents. Built packages are kept in the cache and not rebuilt.
 3. Direct or `apt` app: nothing to bump; the newest version in the vendor's signed index is used.

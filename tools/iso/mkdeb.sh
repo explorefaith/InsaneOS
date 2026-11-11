@@ -8,10 +8,10 @@
 #   /usr/lib/lordos/bin/lord-netd         system networking (root; launched and watched by lord-sessiond)
 #   /usr/lib/lordos/bin/lord-fand         fan control by temperature (root, own service, enabled)
 #   /usr/lib/lordos/bin/lord-autoinstall  the live ISO's unattended install (root, lordos-autoinstall.service; docs/UNATTENDED.md)
-#   /usr/lib/lordos/bin/lord-pkexec       /usr/bin/pkexec on LordOS, no privilege (docs/PRIVACY.md); the real one
+#   /usr/lib/lordos/bin/lord-pkexec       /usr/bin/pkexec on Insane OS, no privilege (docs/PRIVACY.md); the real one
 #                                         is diverted to /usr/bin/pkexec.distrib by postinst
 #   /usr/lib/lordos/bin/lord-server       each session's server (looks for ../themes and ../assets)
-#   /usr/bin/lordos-sysreport             System Information's report and LordBench as a command (user;
+#   /usr/bin/lordos-sysreport             System Information's report and InsaneBench as a command (user;
 #                                         docs/BENCHMARK.md): a link to /usr/lib/lordos/bin/lordos-sysreport,
 #                                         which starts the lord-bench and lord-media next to it
 #   /usr/bin/lordos-fetch                 the crown and a summary of the computer (a link to the same binary)
@@ -21,11 +21,11 @@
 #   /usr/lib/lordos/themes/<theme>/       theme.json, theme.bundle.js and their resources (greeter: the
 #                                         login screen)
 #   /usr/lib/lordos/assets/               fonts, texts (locales), icons, shell integration
-#   /usr/lib/lordos/code-manifest.json    SHA-256 of every bundle LordOS runs as its own code, and
+#   /usr/lib/lordos/code-manifest.json    SHA-256 of every bundle Insane OS runs as its own code, and
 #   /usr/lib/lordos/code-manifest.sig     its Ed25519 signature (release key; docs/SIGNING.md)
 #   /usr/lib/lordos/lordos-live-prep      live preparation (grub language, folders)
 #   /usr/lib/systemd/system/lordos.service  lord-sessiond on tty1
-#   /usr/lib/lordos/lordos-splash         boot splash hand-off (Plymouth → LordOS, docs/SESSIONS.md)
+#   /usr/lib/lordos/lordos-splash         boot splash hand-off (Plymouth → Insane OS, docs/SESSIONS.md)
 #   /usr/share/backgrounds/lordos/        the wallpapers (<category>/lordos-<name>.jpg, thumbs/), linked
 #                                         from /usr/lib/lordos/assets/wallpapers
 #   /usr/share/plymouth/themes/lordos/    the boot splash theme (selected by the ISO, the Raspberry Pi
@@ -36,7 +36,7 @@
 #                                         GTK's window-button layout where the session can't give its own (#52)
 #   (not here: /usr/lib/lordos/assets/hwreport/, the signed tested-hardware snapshot, is the lordos-hwdata
 #   package from tools/iso/mkdeb-hwdata.sh, which this one Depends on; docs/BENCHMARK.md)
-#   /usr/lib/lordos/apt/lordos.sources    the signed LordOS repository on lordos.org (updates from the
+#   /usr/lib/lordos/apt/lordos.sources    the signed Insane OS repository on lordos.org (updates from the
 #                                         Store and apt; docs/UPDATES.md): postinst copies it to
 #                                         /etc/apt/sources.list.d/ when missing, postrm removes it
 #   /usr/share/keyrings/lordos-archive-keyring.gpg   the key that signs that repository
@@ -46,7 +46,7 @@
 #   /usr/lib/systemd/system/smartmontools.service.d/lordos.conf  Debian's smartd stays off
 #   /usr/lib/systemd/user/gnome-keyring-daemon.service.d/lordos.conf  gnome-keyring without the Secret Service
 #   /usr/lib/systemd/logind.conf.d/lordos-machines.conf  a shutdown waits up to 30 s for Machines to save running machines
-#   /usr/share/chromium/extensions/lordos-video/  LordOS's own browser extension for smooth video without
+#   /usr/share/chromium/extensions/lordos-video/  Insane OS's own browser extension for smooth video without
 #                                         hardware decoding (Debian's chromium loads every folder there;
 #                                         docs/VIDEO.md). Its settings are written at login by the
 #                                         admin action video-optimize, not shipped (postrm removes them)
@@ -86,7 +86,7 @@ install -m 755 server/build/lord-sessiond "$L/bin/lord-sessiond"
 install -m 755 server/build/lord-netd "$L/bin/lord-netd"
 install -m 755 server/build/lord-netperm "$L/bin/lord-netperm"
 install -m 755 server/build/lord-fand "$L/bin/lord-fand"
-# /usr/bin/pkexec on LordOS: postinst diverts the real one and links this (docs/PRIVACY.md, "Authentication for Linux apps")
+# /usr/bin/pkexec on Insane OS: postinst diverts the real one and links this (docs/PRIVACY.md, "Authentication for Linux apps")
 install -m 755 server/build/lord-pkexec "$L/bin/lord-pkexec"
 # the live ISO's unattended install (docs/UNATTENDED.md); its unit is enabled only on the ISO (tools/iso/build.sh)
 install -m 755 server/build/lord-autoinstall "$L/bin/lord-autoinstall"
@@ -97,10 +97,10 @@ if [ "${DEB_ARCH:-}" = arm64 ] && [ "$(dpkg --print-architecture)" != arm64 ]; t
     STRIP=aarch64-linux-gnu-strip
     command -v "$STRIP" > /dev/null || { echo "missing $STRIP (binutils-aarch64-linux-gnu)" >&2; exit 1; }
 fi
-# the LordOS Imager's first-run file applier (Raspberry Pi image, rpi/firstboot; docs/IMAGER.md)
+# the Insane OS Imager's first-run file applier (Raspberry Pi image, rpi/firstboot; docs/IMAGER.md)
 install -m 755 server/build/lordos-firstrun "$L/bin/lordos-firstrun"
-# System Information's report and LordBench for a terminal, SSH or CI; lord-server never runs it. In the
-# LordOS folder because `bench` only starts the lord-bench next to its own binary (/proc/self/exe)
+# System Information's report and InsaneBench for a terminal, SSH or CI; lord-server never runs it. In the
+# Insane OS folder because `bench` only starts the lord-bench next to its own binary (/proc/self/exe)
 install -d "$PKG/usr/bin"
 install -m 755 server/build/lordos-sysreport "$L/bin/lordos-sysreport"
 "$STRIP" --strip-unneeded "$L/bin/lordos-sysreport" 2>/dev/null || true
@@ -147,7 +147,7 @@ fi
 # lord-maild: IMAP/SMTP/CalDAV/CardDAV with TLS for Mail (docs/MAIL.md); lord-server only launches the one in its own folder
 [ -x server/build/lord-maild ] && install -m 755 server/build/lord-maild "$L/bin/lord-maild"
 [ -x "$L/bin/lord-maild" ] && { "$STRIP" --strip-unneeded "$L/bin/lord-maild" 2>/dev/null || true; }
-# lord-bench (0.8.6): LordBench's sandboxed workloads (docs/BENCHMARK.md); lord-server only launches the one in its own folder
+# lord-bench (0.8.6): InsaneBench's sandboxed workloads (docs/BENCHMARK.md); lord-server only launches the one in its own folder
 [ -x server/build/lord-bench ] && install -m 755 server/build/lord-bench "$L/bin/lord-bench"
 [ -x "$L/bin/lord-bench" ] && { "$STRIP" --strip-unneeded "$L/bin/lord-bench" 2>/dev/null || true; }
 # lord-clean (0.8.7): Cleaner's sandboxed read-only scanner (docs/CLEANER-ARCHITECTURE.md); lord-server only launches the one in its own folder
@@ -249,7 +249,7 @@ install -D -m 644 tools/iso/rootfs/etc/modprobe.d/lordos-vmwgfx.conf "$PKG/etc/m
 install -D -m 644 tools/iso/rootfs/etc/modules-load.d/lordos-drivetemp.conf "$PKG/usr/lib/modules-load.d/lordos-drivetemp.conf"
 # Debian's smartd stays off: Disks and the Monitor read SMART on demand (docs/SYSTEM.md, "smartd")
 install -D -m 644 packaging/systemd/smartmontools-lordos.conf "$PKG/usr/lib/systemd/system/smartmontools.service.d/lordos.conf"
-# gnome-keyring, if an app pulls it in, without its Secret Service: LordOS keeps that name (docs/PASSWORDS.md)
+# gnome-keyring, if an app pulls it in, without its Secret Service: Insane OS keeps that name (docs/PASSWORDS.md)
 install -D -m 644 packaging/systemd/gnome-keyring-lordos.conf "$PKG/usr/lib/systemd/user/gnome-keyring-daemon.service.d/lordos.conf"
 # Machines: a shutdown or restart waits up to 30 s for running machines to be saved (docs/VIRTUALIZATION.md 6.1)
 install -D -m 644 packaging/systemd/logind-lordos-machines.conf "$PKG/usr/lib/systemd/logind.conf.d/lordos-machines.conf"
@@ -258,7 +258,7 @@ install -D -m 644 tools/iso/rootfs/etc/ssh/sshd_config.d/10-lordos.conf "$PKG/et
 # a process may only trace its own descendants: a restricted Linux app must not take over an
 # unrestricted process of the same user (lord-server, PipeWire, another app) and act through it
 install -d "$PKG/usr/lib/sysctl.d"
-printf '%s\n' '# LordOS: ptrace only of descendants (docs/FIREWALL.md, "Linux apps")' 'kernel.yama.ptrace_scope = 1' > "$PKG/usr/lib/sysctl.d/50-lordos-ptrace.conf"
+printf '%s\n' '# Insane OS: ptrace only of descendants (docs/FIREWALL.md, "Linux apps")' 'kernel.yama.ptrace_scope = 1' > "$PKG/usr/lib/sysctl.d/50-lordos-ptrace.conf"
 chmod 644 "$PKG/usr/lib/sysctl.d/50-lordos-ptrace.conf"
 install -m 644 tools/iso/rootfs/etc/systemd/system/lordos.service "$PKG/usr/lib/systemd/system/lordos.service"
 # smooth video in Chromium without hardware decoding (docs/VIDEO.md); the Firefox manifest stays out
@@ -268,7 +268,7 @@ install -d "$X"
     install -D -m 644 "assets/browser/video/$f" "$X/$f"
 done
 find "$PKG/usr/share/chromium" -type d -exec chmod 755 {} +
-# boot splash (docs/brand/README.md, "Boot splash"): the Plymouth theme and the hand-off to LordOS
+# boot splash (docs/brand/README.md, "Boot splash"): the Plymouth theme and the hand-off to Insane OS
 install -m 755 tools/boot/lordos-splash "$L/lordos-splash"
 install -m 644 tools/boot/systemd/lordos-splash-quit.service "$PKG/usr/lib/systemd/system/lordos-splash-quit.service"
 install -D -m 644 tools/boot/systemd/plymouth-quit.service.d/lordos.conf "$PKG/usr/lib/systemd/system/plymouth-quit.service.d/lordos.conf"
@@ -280,9 +280,9 @@ install -m 644 tools/boot/plymouth/lordos/lordos.plymouth tools/boot/plymouth/lo
 install -d "$PKG/usr/share/grub/themes/lordos"
 install -m 644 tools/iso/grub/lordos/theme.txt tools/iso/grub/lordos/*.png tools/iso/grub/lordos/*.pf2 \
     "$PKG/usr/share/grub/themes/lordos/"
-# LordOS GTK3 themes (the settings portal picks them by light/dark)
+# Insane OS GTK3 themes (the settings portal picks them by light/dark)
 install -d "$PKG/usr/share/themes"
-cp -r assets/gtk/LordOS assets/gtk/LordOS-dark "$PKG/usr/share/themes/"
+cp -r assets/gtk/Insane OS assets/gtk/Insane OS-dark "$PKG/usr/share/themes/"
 find "$PKG/usr/share/themes" -type d -exec chmod 755 {} +; find "$PKG/usr/share/themes" -type f -exec chmod 644 {} +
 # GTK's defaults where the session can't give its own: the window buttons of apps that draw their
 # title bar (#52; docs/WAYLAND.md). GLib's dpkg trigger compiles the schema override.
@@ -300,11 +300,11 @@ D="$PKG/usr/share/doc/lordos"
 install -m 644 README.md "$D/README.md"
 cat > "$D/copyright" <<'C'
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: LordOS
-Source: https://github.com/lordbasex/LordOS
+Upstream-Name: Insane OS
+Source: https://github.com/lordbasex/Insane OS
 
 Files: *
-Copyright: 2026 iPERFEX and the LordOS contributors
+Copyright: 2026 iPERFEX and the Insane OS contributors
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -327,9 +327,9 @@ License: Expat
 Files: usr/share/backgrounds/lordos/*
 Copyright: 2026 iPERFEX
 License: Expat
-Comment: Created by iPERFEX with an AI image generator; part of the LordOS brand
- assets. The LordOS name, the crown and Lumo shown in them are also covered by the
- LordOS trademark and brand policy (lordos.org).
+Comment: Created by iPERFEX with an AI image generator; part of the Insane OS brand
+ assets. The Insane OS name, the crown and Lumo shown in them are also covered by the
+ Insane OS trademark and brand policy (lordos.org).
 
 Files: usr/lib/lordos/assets/fonts/*
 License: OFL-1.1
@@ -339,7 +339,7 @@ License: OFL-1.1
 
 Files: usr/lib/lordos/bin/lord-bench
 License: OFL-1.1
- Built into lord-bench for LordBench's shaping workload: subsets of Noto Sans Arabic,
+ Built into lord-bench for InsaneBench's shaping workload: subsets of Noto Sans Arabic,
  Devanagari, Thai and CJK SC. SIL Open Font License 1.1, full text and copyright
  notices in usr/share/doc/lordos/OFL-Noto.txt.
 
@@ -359,7 +359,7 @@ License: MIT and public-domain
 C
 chmod 644 "$D/copyright"
 install -m 644 server/src/bench/fonts/OFL.txt "$D/OFL-Noto.txt"
-printf 'lordos (%s) trixie; urgency=medium\n\n  * Package built by tools/iso/mkdeb.sh.\n\n -- LordOS <lord.basex@gmail.com>  %s\n' \
+printf 'lordos (%s) trixie; urgency=medium\n\n  * Package built by tools/iso/mkdeb.sh.\n\n -- Insane OS <lord.basex@gmail.com>  %s\n' \
     "$VERSION" "$(date -R)" | gzip -9n > "$D/changelog.gz"
 chmod 644 "$D/changelog.gz"
 
@@ -385,7 +385,7 @@ MEDIADEPS=""
 if [ -x "$L/bin/lord-media" ]; then MEDIADEPS=", libavcodec61, libavformat61, libavutil59, libswscale8, libswresample5, libva2, libva-drm2"; fi
 # the remote desktop is WebRTC only (docs/REMOTE.md, "Video (WebRTC)"): lord-sessiond always links libsrtp2 and usrsctp
 RTCDEPS=", libsrtp2-1, libusrsctp2"
-# the CPU's microcode updates on amd64 (non-free-firmware, in every LordOS install's sources): a Depends, so the
+# the CPU's microcode updates on amd64 (non-free-firmware, in every Insane OS install's sources): a Depends, so the
 # update to 0.8.8.6 brings them to installs that never had them (they load on the next boot)
 MICROCODEDEPS=""
 [ "${DEB_ARCH:-$(dpkg --print-architecture)}" = amd64 ] && MICROCODEDEPS=", intel-microcode, amd64-microcode"
@@ -401,16 +401,16 @@ cat > "$PKG/DEBIAN/control" <<C
 Package: lordos
 Version: $VERSION
 Architecture: ${DEB_ARCH:-$(dpkg --print-architecture)}
-Maintainer: LordOS <lord.basex@gmail.com>
+Maintainer: Insane OS <lord.basex@gmail.com>
 Installed-Size: $SIZE
 Depends: libc6 (>= 2.38), libwayland-server0 (>= 1.22), libwayland-client0 (>= 1.22), libxkbcommon0 (>= 1.5), libcrypt1, libssl3t64 | libssl3, ca-certificates, passwd, procps, xkb-data, libfreerdp3-3, libfreerdp-client3-3, libwinpr3-3, fuse3, openssh-client, openssl, polkitd, pkexec$HWDATADEPS$RCLONEDEPS$GPUDEPS$DOCDEPS$OCRDEPS$TTSDEPS$MEDIADEPS$RTCDEPS$MICROCODEDEPS
 Recommends: pipewire-pulse, wireplumber, wpasupplicant, openvpn, fonts-noto-core, fonts-noto-color-emoji, fonts-dejavu-core, locales, tzdata, sudo, cups, cups-client, avahi-daemon, libnss-mdns, mesa-va-drivers, bluez, libspa-0.2-bluetooth, power-profiles-daemon, systemd-timesyncd, shared-mime-info, gsettings-desktop-schemas, xwayland, pci.ids, usb.ids, curl, wget, rsync, screen, htop, vim, mc, tcpdump, net-tools, fdisk, rfkill, jq$OCRRECS
 Section: x11
 Priority: optional
 Protected: yes
-Homepage: https://github.com/lordbasex/LordOS
+Homepage: https://github.com/lordbasex/Insane OS
 Description: desktop environment for Debian GNU/Linux, built from scratch
- LordOS is a desktop environment for Debian GNU/Linux with its own display
+ Insane OS is a desktop environment for Debian GNU/Linux with its own display
  server and Wayland compositor written in C (DRM/KMS, evdev) and the
  interface in React on its own engine.
  It includes the native apps, the themes, the login screen and the
@@ -428,7 +428,7 @@ if [ "$1" = configure ] && command -v systemctl >/dev/null 2>&1; then
     if [ -d /run/systemd/system ]; then systemctl restart systemd-sysctl.service >/dev/null 2>&1 || true; fi
     if [ -d /run/systemd/system ]; then systemctl restart lord-fand.service >/dev/null 2>&1 || true; fi
 fi
-# the LordOS repository: added when missing, so an administrator's edit (Enabled: no) is kept; not a
+# the Insane OS repository: added when missing, so an administrator's edit (Enabled: no) is kept; not a
 # conffile, so removing the package also removes it and apt keeps working (docs/UPDATES.md)
 if [ "$1" = configure ] && [ ! -e /etc/apt/sources.list.d/lordos.sources ] && [ -d /etc/apt/sources.list.d ]; then
     install -m 644 /usr/lib/lordos/apt/lordos.sources /etc/apt/sources.list.d/lordos.sources
@@ -439,7 +439,7 @@ if [ "$1" = configure ]; then
     dpkg-divert --package lordos --quiet --rename --divert /usr/bin/pkexec.distrib --add /usr/bin/pkexec
     ln -sfn ../lib/lordos/bin/lord-pkexec /usr/bin/pkexec
 fi
-# `say` is LordOS's text to speech (docs/VOICE.md); an alternative, so another package's say can sit beside it
+# `say` is Insane OS's text to speech (docs/VOICE.md); an alternative, so another package's say can sit beside it
 if [ "$1" = configure ] && [ -x /usr/lib/lordos/bin/lord-say ]; then
     update-alternatives --quiet --install /usr/bin/say say /usr/lib/lordos/bin/lord-say 50
 fi

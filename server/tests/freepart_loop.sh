@@ -100,7 +100,7 @@ want "new entry is number 2, between the others" "$S" "$(sgdisk -i 2 "$IMG" | se
 want "new entry ends at the region's end" "$E" "$(sgdisk -i 2 "$IMG" | sed -n 's/Last sector: \([0-9]*\).*/\1/p')"
 want "new partition's type" 4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709 "$(sgdisk -i 2 "$IMG" | sed -n 's/Partition GUID code: \([-0-9A-F]*\).*/\1/p')"
 want "new partition is ext4" ext4 "$(blkid -p -s TYPE -o value "${LOOP}p2")"
-want "its label" LordOS "$(blkid -p -s LABEL -o value "${LOOP}p2")"
+want "its label" Insane OS "$(blkid -p -s LABEL -o value "${LOOP}p2")"
 mount -o ro "${LOOP}p3" "$MNT"; want "the known file" "$K" "$(sha256sum <"$MNT/known-file" | cut -d' ' -f1)"; umount "$MNT"
 mount -o ro "${LOOP}p1" "$MNT"; if ( cd "$MNT" && sha256sum --quiet -c "$W/esp.sums" ); then ok "ESP files intact"; else bad "ESP files"; fi; umount "$MNT"
 out=$("$CLI" probe "$L" --uefi); echo "  $out"
@@ -110,14 +110,14 @@ if [ -d /usr/lib/grub/x86_64-efi ] && command -v grub-install >/dev/null; then
     echo "== grub's arguments on the ESP, run from this machine (not the chroot of an install)"
     B=$W/boot; mkdir -p "$B"
     mount "${LOOP}p1" "$MNT"
-    grub-install --target=x86_64-efi --efi-directory="$MNT" --boot-directory="$B" --bootloader-id=LordOS --no-nvram 2>&1 | tail -1 | sed 's/^/  /'
-    [ -f "$MNT/EFI/LordOS/grubx64.efi" ] && ok "grub is in EFI/LordOS" || bad "grub missing"
+    grub-install --target=x86_64-efi --efi-directory="$MNT" --boot-directory="$B" --bootloader-id=Insane OS --no-nvram 2>&1 | tail -1 | sed 's/^/  /'
+    [ -f "$MNT/EFI/Insane OS/grubx64.efi" ] && ok "grub is in EFI/Insane OS" || bad "grub missing"
     if ( cd "$MNT" && sha256sum --quiet -c "$W/esp.sums" ); then ok "fallback loader and the other system's folder unchanged"; else bad "grub touched them"; fi
-    want "ESP files outside EFI/LordOS" "$(wc -l <"$W/esp.sums")" "$(cd "$MNT" && find . -type f -not -path './EFI/LordOS/*' | wc -l)"
+    want "ESP files outside EFI/Insane OS" "$(wc -l <"$W/esp.sums")" "$(cd "$MNT" && find . -type f -not -path './EFI/Insane OS/*' | wc -l)"
     ls "$MNT/EFI" | sed 's/^/  EFI\//'
     umount "$MNT"
     out=$("$CLI" probe "$L" --uefi)
-    case "$out" in *why=install.free.espHasLordOS*|*why=install.free.noRoom*) ok "EFI/LordOS now present: not offered again" ;; *) bad "$out" ;; esac
+    case "$out" in *why=install.free.espHasInsane OS*|*why=install.free.noRoom*) ok "EFI/Insane OS now present: not offered again" ;; *) bad "$out" ;; esac
 fi
 detach
 

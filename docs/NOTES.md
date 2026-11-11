@@ -1,6 +1,6 @@
 # Notes (sticky notes)
 
-A native LordOS app that comes preinstalled: `apps/notes`, in the Dock by default. They are
+A native Insane OS app that comes preinstalled: `apps/notes`, in the Dock by default. They are
 markdown notes that are read with formatting and a table of contents, accept images, attachments
 and emoji, and can be placed on the desktop as sticky notes (widgets) that move and resize. They
 save themselves in the home folder.
@@ -16,7 +16,7 @@ save themselves in the home folder.
 | ![desktop](notes-desktop-image.png) | ![pinned](notes-pinned.png) |
 | A note on the desktop, with an attachment, checkboxes and an image | Pinned to the front: it stays above the windows |
 | ![classic](notes-classic-theme.png) | |
-| Lord Classic theme: a note pinned in front of the Terminal | |
+| Insane Classic theme: a note pinned in front of the Terminal | |
 
 ## Where they are stored
 
@@ -36,7 +36,7 @@ in the home folder through `lord.fs`). If both folders exist, Notes uses `~/Note
 there is no Trash, a deleted note goes to `~/Notes/.trash`.
 
 `nota.md` is plain markdown with a small YAML header: it opens with any editor. If it is edited
-by hand while LordOS is running, the change shows up the next time the session is opened.
+by hand while Insane OS is running, the change shows up the next time the session is opened.
 
 ```markdown
 ---
@@ -118,7 +118,7 @@ and `toggleTask(text, line)`.
 - **Inline:** bold, italic, strikethrough, `code`, links, bare URLs, local images
   `![](image.png)` (relative to the note's folder, at their real size up to the available
   width) and `:emoji:`.
-- **How mixed-style text is built.** The LordOS engine has no runs with different styles inside
+- **How mixed-style text is built.** The Insane OS engine has no runs with different styles inside
   a single `<Text>`. So a paragraph is a row with `flexWrap: 'wrap'` and one `<Text>` per word
   (the space is attached to the word): it breaks lines between words and each word carries its
   style.

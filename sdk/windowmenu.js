@@ -8,7 +8,7 @@
 //   Bring All to Front
 //   the open windows, the one in front checked
 //
-// Lord Flow shows it under Window in its menu bar; Lord Classic in each window's Window menu.
+// Insane Flow shows it under Window in its menu bar; Insane Classic in each window's Window menu.
 import { windows, wm, getApp, windowTitle, onActiveDesktop } from './windows.js';
 import { screen, displayFor } from '@lordos/runtime';
 import { t } from './i18n.js';

@@ -1,4 +1,4 @@
-/* lbmain.c — lord-bench, LordBench's helper (docs/BENCHMARK.md, "0.8.6 — LordBench").
+/* lbmain.c — lord-bench, InsaneBench's helper (docs/BENCHMARK.md, "0.8.6 — InsaneBench").
  *
  * lord-server (lbrun.c) launches it from a fixed path next to its own binary, with no arguments, the
  * channel on fd 3 and a minimal environment. The first message (LbGo) says what to run and brings at

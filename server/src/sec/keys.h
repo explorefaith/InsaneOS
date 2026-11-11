@@ -1,5 +1,5 @@
-/* keys.h — official LordOS public keys (Ed25519, in hex). Anything signed with one of these
- * keys is shown as "LordOS"; the catalog (catalog.json) is only valid when signed by one of them.
+/* keys.h — official Insane OS public keys (Ed25519, in hex). Anything signed with one of these
+ * keys is shown as "Insane OS"; the catalog (catalog.json) is only valid when signed by one of them.
  *
  * Today there's only one: the DEVELOPMENT key (packaging/keys/lordos-dev.pub). Its private key is
  * not in the repository: it lives on the development machine, in ~/.config/lordos-dev/lordos-dev.key
@@ -10,7 +10,7 @@
 #define LORD_SEC_KEYS_H
 
 static const char *const lordos_official_keys[] = {
-    "3deb68366612b82046761673f6d8936a10b87aa4dab52b90d5a7039354b7ddb7",     /* LordOS (development) */
+    "3deb68366612b82046761673f6d8936a10b87aa4dab52b90d5a7039354b7ddb7",     /* Insane OS (development) */
     NULL,
 };
 

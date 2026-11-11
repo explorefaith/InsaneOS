@@ -1,4 +1,4 @@
-Qué necesita cada imagen de LordOS. Si un número de esta página no coincide con otra, la que mantenemos al día es esta.
+Qué necesita cada imagen de Insane OS. Si un número de esta página no coincide con otra, la que mantenemos al día es esta.
 
 ## De un vistazo
 
@@ -38,11 +38,11 @@ Paso a paso: [Máquina virtual (OVA)](/es/virtual-machine/).
 - **Almacenamiento:** una tarjeta SD de 16 GB o más (8 GB mínimo), o un disco NVMe en la M.2 HAT+, que es más rápido.
 - **Alimentación y refrigeración:** se recomiendan la fuente oficial de 27 W (5 V, 5 A) y refrigeración activa.
 
-[LordOS Imager](/es/imager/) graba la imagen y prepara el primer arranque.
+[Insane OS Imager](/es/imager/) graba la imagen y prepara el primer arranque.
 
 ## Sobre un Debian 13 que ya tenés
 
-`curl -fsSL https://lordos.org/install.sh | sh` agrega LordOS a Debian 13 (trixie), amd64 o arm64, arrancado con systemd. Necesita root o `sudo` y 2 GB libres en `/var`. Otras distribuciones basadas en Debian pueden funcionar, con una advertencia.
+`curl -fsSL https://lordos.org/install.sh | sh` agrega Insane OS a Debian 13 (trixie), amd64 o arm64, arrancado con systemd. Necesita root o `sudo` y 2 GB libres en `/var`. Otras distribuciones basadas en Debian pueden funcionar, con una advertencia.
 
 ## No soportado
 

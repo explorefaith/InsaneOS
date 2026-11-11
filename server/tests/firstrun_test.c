@@ -24,7 +24,7 @@ static char full[8192];
 
 static const char *full_file(void) {
     snprintf(full, sizeof full,
-        "# lordos-firstrun, written by the LordOS Imager\n"
+        "# lordos-firstrun, written by the Insane OS Imager\n"
         "version=1\n"
         "hostname=pi-living\n"
         "lang=es\n"

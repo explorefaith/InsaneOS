@@ -69,7 +69,7 @@ static void get(uint32_t id, const char *json, size_t len, int fd) {
     }
     HttpResp r;
     memset(&r, 0, sizeof r);
-    int rc = http_request(c, "GET", host, path, "Accept-Encoding: identity\r\nUser-Agent: LordOS-blocklists/1\r\n", NULL, 0,
+    int rc = http_request(c, "GET", host, path, "Accept-Encoding: identity\r\nUser-Agent: Insane OS-blocklists/1\r\n", NULL, 0,
                           FWL_RAW_MAX, 180000, &r);
     conn_close(c);
     json_free(&d);

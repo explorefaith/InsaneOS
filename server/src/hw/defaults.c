@@ -158,6 +158,6 @@ int defaults_set_terminal(const char *id) {
     snprintf(path, sizeof path, "%s/.config", h);
     mkdir(path, 0700);
     snprintf(path, sizeof path, "%s/.config/xdg-terminals.list", h);
-    snprintf(text, sizeof text, "# Written by LordOS (Settings → Default Apps)\n%s\n", id);
+    snprintf(text, sizeof text, "# Written by Insane OS (Settings → Default Apps)\n%s\n", id);
     return write_atomic(path, text);
 }

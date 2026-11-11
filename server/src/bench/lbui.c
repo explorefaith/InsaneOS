@@ -74,7 +74,7 @@ static Node *window(Node *parent, double x, double y, double w, double h, uint32
     return n;
 }
 
-/* A desktop as LordOS draws it: a translucent top bar, a file manager with a sidebar and a 40-row list, a
+/* A desktop as Insane OS draws it: a translucent top bar, a file manager with a sidebar and a 40-row list, a
  * settings window with a wrapped paragraph and controls, a notification and the Dock, both blurring what is
  * behind them, a rotated badge and a half-transparent card. Fixed data only, and text only in characters Inter
  * covers: anything else would make the engine look for a fallback font, by path (textlayout.c). Every weight is
@@ -84,7 +84,7 @@ static void build_scene(void) {
                                          "invoice", "scan", "notes", "presentation", "budget", "summary" };
     static const char *const places[] = { "Home", "Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos",
                                           "Trash", "This computer", "Network", "USB disk", "Recent", "Starred", "Shared" };
-    static const char *const menu[] = { "LordOS", "Files", "Edit", "View", "Go", "Window", "Help" };
+    static const char *const menu[] = { "Insane OS", "Files", "Edit", "View", "Go", "Window", "Help" };
     static const char *const labels[] = { "Wallpaper", "Accent colour", "Appearance", "Text size", "Night light", "Animations",
                                           "Notifications", "Sounds", "Hot corners", "Dock size" };
     static const uint32_t icon_colors[] = { 0xff0a84ff, 0xff30d158, 0xffff9f0a, 0xffff453a, 0xffbf5af2, 0xff64d2ff,
@@ -197,7 +197,7 @@ static void build_scene(void) {
     /* a notification with blur, a half-transparent card and a rotated badge */
     Node *note = window(root, 1500, 44, 390, 110, 0xd0f8f8fa);
     sn(note, "backdropBlur", 24); sn(note, "borderRadius", 16); pad(note, 14); sn(note, "gap", 4);
-    Node *nt = text(note, "LordBench", 14, 0xff1c1c1e);
+    Node *nt = text(note, "InsaneBench", 14, 0xff1c1c1e);
     sn(nt, "fontWeight", 600);
     text(note, "Measuring the interface: layout and paint of a fixed scene, then shaping five scripts.", 13, 0xff3a3a3c);
     Node *card = window(root, 1420, 620, 420, 240, 0xff1c1c1e);

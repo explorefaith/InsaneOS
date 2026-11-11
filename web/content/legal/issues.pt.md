@@ -1,8 +1,8 @@
-Encontrou algo que não funciona, ou tem uma ideia para melhorar o LordOS? Esta página explica onde nos contar e o que incluir, para podermos agir rápido.
+Encontrou algo que não funciona, ou tem uma ideia para melhorar o Insane OS? Esta página explica onde nos contar e o que incluir, para podermos agir rápido.
 
 ## Onde relatar
 
-Use o [GitHub Issues](https://github.com/lordbasex/LordOS/issues). Escolha o modelo de relato de bug ou de pedido de recurso; as issues em branco ficam desativadas para que cada relato traga as informações de que precisamos.
+Use o [GitHub Issues](https://github.com/lordbasex/Insane OS/issues). Escolha o modelo de relato de bug ou de pedido de recurso; as issues em branco ficam desativadas para que cada relato traga as informações de que precisamos.
 
 Antes de escrever, veja as [perguntas frequentes](/faq/) e as issues que já existem: talvez alguém já tenha relatado.
 
@@ -13,7 +13,7 @@ Antes de escrever, veja as [perguntas frequentes](/faq/) e as issues que já exi
 ## O que incluir num relato de bug
 
 - **A saída do `lordos-issue`** (a partir da 0.8.8): rode `lordos-issue` num terminal. Ele escreve `~/lordos-issue-<data>.txt` com os nomes e os endereços substituídos, e não envia nada. Leia e depois cole no relato: ele já traz a versão e os dados do hardware abaixo.
-- **A versão do LordOS**, como aparece no app Sobre o LordOS (por exemplo "0.8.8 · Beta").
+- **A versão do Insane OS**, como aparece no app Sobre o Insane OS (por exemplo "0.8.8 · Beta").
 - **Como você instalou:** a ISO (live ou instalada), a imagem para Raspberry Pi 5 ou o `.deb` no Debian 13.
 - **O seu hardware:** o modelo do computador ou da placa, a placa de vídeo, a quantidade de memória e qualquer dispositivo envolvido (impressora, touchpad, adaptador Wi-Fi, monitor).
 - **Passos para reproduzir:** o que você fez, um passo por linha, a partir de uma inicialização limpa se possível.
@@ -43,7 +43,7 @@ Somos uma equipe pequena, então estes são objetivos, não garantias:
 
 - confirmamos os relatos enviados pelo formulário de contato em cerca de **5 dias úteis**;
 - fazemos a triagem de cada relato: tentamos reproduzi-lo, pedimos mais informações se necessário e atribuímos rótulos e uma prioridade;
-- as correções saem na próxima versão que puder incluí-las, e as notas de versão no [GitHub Releases](https://github.com/lordbasex/LordOS/releases) as mencionam.
+- as correções saem na próxima versão que puder incluí-las, e as notas de versão no [GitHub Releases](https://github.com/lordbasex/Insane OS/releases) as mencionam.
 
 ## Rótulos
 

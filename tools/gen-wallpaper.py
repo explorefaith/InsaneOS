@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the default LordOS wallpaper (PNG, standard library only).
+"""Generates the default Insane OS wallpaper (PNG, standard library only).
 
 Usage: python3 tools/gen-wallpaper.py output.png [width height] [palette]
 Palettes: aurora, ocean, sunset, graphite.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""demo.py — boots the EXPERIMENTAL immutable LordOS image (tools/immutable/build.sh) in QEMU and
+"""demo.py — boots the EXPERIMENTAL immutable Insane OS image (tools/immutable/build.sh) in QEMU and
 runs the A/B demonstration of docs/IMMUTABLE.md over the serial console:
 
   1. factory image (version 1): /usr is dm-verity + read-only, /etc and /home writable

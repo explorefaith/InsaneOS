@@ -1,5 +1,5 @@
 // regionformat_test.mjs — a region's formats from glibc's locale data (sdk/regionformat.js, #45): the
-// 24-hour clock, date order and separators of a region whose language LordOS has no format.json for,
+// 24-hour clock, date order and separators of a region whose language Insane OS has no format.json for,
 // and the region a session runs in when none was chosen (the login screen's too).
 //
 //   node tests/regionformat_test.mjs        (from server/; run_suites.sh runs it when node exists)

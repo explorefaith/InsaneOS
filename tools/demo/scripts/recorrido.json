@@ -1,9 +1,9 @@
 [
  {
   "chapter": "Tu escritorio",
-  "chapter_es": "LordOS recién instalado",
-  "en": "This is LordOS right after installation. It has a menu bar, a Dock with magnification, and fast, smooth windows, all drawn by our own display server.",
-  "es": "Así queda LordOS recién instalado: barra de menú, un Dock con lupa y ventanas fluidas, todo dibujado por nuestro propio servidor gráfico.",
+  "chapter_es": "Insane OS recién instalado",
+  "en": "This is Insane OS right after installation. It has a menu bar, a Dock with magnification, and fast, smooth windows, all drawn by our own display server.",
+  "es": "Así queda Insane OS recién instalado: barra de menú, un Dock con lupa y ventanas fluidas, todo dibujado por nuestro propio servidor gráfico.",
   "actions": [
    [
     "click",
@@ -72,8 +72,8 @@
  {
   "chapter": "Aplicaciones",
   "chapter_es": "Todas tus apps, por categoría",
-  "en": "The app launcher shows every app: our own LordOS apps, Linux apps, and installed packages, organized by category. Press F4 or tap the Super key to open it.",
-  "es": "Aplicaciones muestra todas las apps: las de LordOS, las de Linux y los paquetes instalados, por categoría. Se abre con F4 o la tecla Super.",
+  "en": "The app launcher shows every app: our own Insane OS apps, Linux apps, and installed packages, organized by category. Press F4 or tap the Super key to open it.",
+  "es": "Aplicaciones muestra todas las apps: las de Insane OS, las de Linux y los paquetes instalados, por categoría. Se abre con F4 o la tecla Super.",
   "actions": [
    [
     "key",
@@ -199,8 +199,8 @@
   "speed": 4
  },
  {
-  "en": "And here it is: a GTK 4 app from Debian, running as a native LordOS window through our own Wayland compositor.",
-  "es": "Y acá está: una app GTK 4 de Debian, corriendo como ventana de LordOS gracias a nuestro propio compositor Wayland.",
+  "en": "And here it is: a GTK 4 app from Debian, running as a native Insane OS window through our own Wayland compositor.",
+  "es": "Y acá está: una app GTK 4 de Debian, corriendo como ventana de Insane OS gracias a nuestro propio compositor Wayland.",
   "actions": [
    [
     "click",
@@ -334,7 +334,7 @@
    ],
    [
     "typela",
-    "echo Hola desde LordOS\n"
+    "echo Hola desde Insane OS\n"
    ],
    [
     "wait",
@@ -342,7 +342,7 @@
    ],
    [
     "typela",
-    "echo 'print(\"Hola LordOS\")' > hola.py\n"
+    "echo 'print(\"Hola Insane OS\")' > hola.py\n"
    ],
    [
     "wait",
@@ -447,7 +447,7 @@
    ],
    [
     "typela",
-    "\nfor i in range(3):\n    print(i, 'LordOS')\n"
+    "\nfor i in range(3):\n    print(i, 'Insane OS')\n"
    ],
    [
     "wait",
@@ -521,7 +521,7 @@
    ],
    [
     "typela",
-    "# Ideas para LordOS\n\n## Esta semana\n\n* Instalarlo en una VM\n"
+    "# Ideas para Insane OS\n\n## Esta semana\n\n* Instalarlo en una VM\n"
    ],
    [
     "typela",
@@ -658,8 +658,8 @@
  {
   "chapter": "Temas",
   "chapter_es": "Cambiá todo el escritorio en vivo",
-  "en": "Finally, themes. A theme is a React app, and you can switch it live without closing anything. This is the Lord Classic theme, with a taskbar and a start menu.",
-  "es": "Por último, los temas: un tema es una app de React y se cambia en vivo sin cerrar nada. Este es el tema Lord Classic, con barra de tareas y menú de inicio.",
+  "en": "Finally, themes. A theme is a React app, and you can switch it live without closing anything. This is the Insane Classic theme, with a taskbar and a start menu.",
+  "es": "Por último, los temas: un tema es una app de React y se cambia en vivo sin cerrar nada. Este es el tema Insane Classic, con barra de tareas y menú de inicio.",
   "actions": [
    [
     "key",
@@ -708,10 +708,10 @@
   "min": 9
  },
  {
-  "chapter": "LordOS",
+  "chapter": "Insane OS",
   "chapter_es": "Rápido, liviano y propio",
-  "en": "That's LordOS: its own display server, its own engine and its own apps, built on Debian, and light enough for modest hardware. Thanks for watching.",
-  "es": "Eso es LordOS: servidor gráfico, motor y apps propios, sobre Debian, y liviano para equipos modestos. Gracias por mirar.",
+  "en": "That's Insane OS: its own display server, its own engine and its own apps, built on Debian, and light enough for modest hardware. Thanks for watching.",
+  "es": "Eso es Insane OS: servidor gráfico, motor y apps propios, sobre Debian, y liviano para equipos modestos. Gracias por mirar.",
   "actions": [
    [
     "key",

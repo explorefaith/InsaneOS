@@ -59,7 +59,7 @@ static void take(void) {
     DBuf b;
     dw_init(&b);
     dw_str(&b, "sleep");
-    dw_str(&b, "LordOS");
+    dw_str(&b, "Insane OS");
     dw_str(&b, "Locking the screen before sleep");
     dw_str(&b, "delay");
     if (sysbus_call(LOGIN1, LOGIN1_PATH, LOGIN1_MGR, "Inhibit", "ssss", &b, got_inhibit, NULL)) asking = 1;

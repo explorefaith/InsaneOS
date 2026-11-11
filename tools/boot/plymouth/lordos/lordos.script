@@ -1,12 +1,18 @@
-# lordos.script: the LordOS boot splash (Plymouth "script" module).
+# lordos.script — the Insane OS boot splash (Plymouth "script" module), v2.
 #
-# The crown on a navy gradient with a soft violet glow, and a rounded progress bar that follows
-# Plymouth's boot progress, smoothed so it never jumps or goes back. In the bottom right corner, the
-# time since the splash started, in seconds and milliseconds (lord-sessiond logs the time from the
-# kernel's start to the desktop's first frame; docs/RESULTS.md). No text messages: Esc shows
-# the text console as usual. The password field appears only when a disk asks for one (LUKS).
-# The images come from tools/boot/gen-boot-assets.py (1x, and @2x on 4K screens).
-# See docs/brand/README.md, "Boot splash".
+# What you see while the machine boots:
+#   • a navy gradient with a soft violet glow that breathes behind the mark
+#   • the Insane burst mark in the middle, gently pulsing
+#   • a field of glowing particles drifting upward in three depth layers — far ones are
+#     small, slow and dim; near ones big, quick and bright — each twinkling on its own phase
+#   • a rounded progress bar that follows Plymouth's boot progress, eased so it never jumps
+#     or goes backwards, and a boot timer in the bottom right (seconds.milliseconds)
+#   • "insane os" as a small tagline under the bar, fading in
+# No text messages: Esc shows the text console as usual. The password field appears only
+# when a disk asks for one (LUKS). Everything is local; nothing is fetched.
+#
+# The images come from tools/gen-brand-insane.py (1x, and @2x on 4K screens).
+# See docs/brand/README.md and docs/SESSIONS.md.
 
 # ---- layout ----
 scale = 1;
@@ -22,7 +28,10 @@ Window.SetBackgroundBottomColor(0.043, 0.043, 0.110);
 
 cx = Window.GetX() + Window.GetWidth() / 2;
 cy = Window.GetY() + Window.GetHeight() / 2;
+W = Window.GetWidth();
+H = Window.GetHeight();
 
+# ---- the mark and its breathing glow ----
 crown_image = img("crown");
 glow_image = img("glow");
 crown_y = Math.Int(cy - crown_image.GetHeight() / 2 - 40 * scale);
@@ -30,8 +39,11 @@ crown_y = Math.Int(cy - crown_image.GetHeight() / 2 - 40 * scale);
 glow = Sprite(glow_image);
 glow.SetPosition(Math.Int(cx - glow_image.GetWidth() / 2),
                  Math.Int(crown_y + crown_image.GetHeight() / 2 - glow_image.GetHeight() / 2), 1);
-crown = Sprite(crown_image);
-crown.SetPosition(Math.Int(cx - crown_image.GetWidth() / 2), crown_y, 3);
+glow.SetOpacity(0.8);
+
+mark = Sprite(crown_image);
+mark.SetPosition(Math.Int(cx - crown_image.GetWidth() / 2), crown_y, 3);
+mark.SetOpacity(0.95);
 
 # ---- the progress bar: track, a scaled gradient body and two round caps ----
 track_image = img("track");
@@ -50,27 +62,142 @@ cap_start.SetPosition(bar_x, bar_y, 6);
 cap_end = Sprite(img("cap-end"));
 cap_end.SetPosition(bar_x, bar_y, 6);
 
-wordmark_image = img("wordmark");
-wordmark = Sprite(wordmark_image);
-wordmark.SetPosition(Math.Int(cx - wordmark_image.GetWidth() / 2), bar_y + bar_h + 28 * scale, 4);
-wordmark.SetOpacity(0.55);
+# tagline: "insane os" under the bar, fading in over the first two seconds
+tagline = Sprite();
+tagline.SetOpacity(0);
+tagline_img = Image.Text("insane os", 0.62, 0.58, 0.86, 0.5, "Sans 11");
+if (global.scale == 2) tagline_img = Image.Text("insane os", 0.62, 0.58, 0.86, 0.5, "Sans 22");
+tagline.SetImage(tagline_img);
+tagline.SetPosition(Math.Int(cx - tagline_img.GetWidth() / 2), bar_y + bar_h + 26 * global.scale, 4);
 
+# ---- boot progress state ----
 target = 0;         # what Plymouth reports (0..1)
 shown = 0;          # what the bar draws, eased towards target
 drawn_w = -1;
 bar_visible = 1;
-# shutdown and reboot have no progress: only the crown
+# shutdown and reboot have no progress: only the mark and the particles
 mode = Plymouth.GetMode();
 if (mode == "shutdown" || mode == "reboot") bar_visible = 0;
 
+# ============================================================
+# the particle field — three depth layers drifting upward
+#
+#   far:  small, slow, dim      → depth
+#   mid:  medium
+#   near: big, quick, bright    → presence
+#
+# Each particle carries its own texture, size, speed, sway and twinkle phase. The
+# positions are seeded from a Park–Miller LCG so every boot starts the same way.
+# ============================================================
+
+PARTICLES = 48;
+DOT = [];
+DOT[0] = img("particle-violet");
+DOT[1] = img("particle-pink");
+DOT[2] = img("particle-white");
+
+seed = 20261111;
+fun rnd() {
+    # Park–Miller minimal standard, exact in doubles
+    global.seed = Math.Int(global.seed * 16807) - Math.Int(global.seed * 16807 / 2147483647) * 2147483647;
+    if (global.seed <= 0) global.seed = global.seed + 2147483646;
+    return global.seed / 2147483647;
+}
+
+# the size of particle i, by depth layer (far → near)
+fun size_for(i) {
+    layer = i % 3;
+    if (layer == 0) return 7 + global.p_frac[i] * 6;
+    if (layer == 1) return 13 + global.p_frac[i] * 9;
+    return 22 + global.p_frac[i] * 14;
+}
+
+# per-particle state arrays
+p_x = [];  p_y = [];  p_v = [];      # position, upward speed
+p_amp = []; p_freq = []; p_phase = [];   # horizontal sway
+p_tw = [];  p_base = [];             # twinkle frequency, base opacity
+p_z = [];   p_i = [];                # z-order, texture index
+p_frac = [];                          # size fraction inside the layer
+
+i = 0;
+while (i < PARTICLES) {
+    layer = i % 3;
+    tex = i % 3;
+    global.p_frac[i] = rnd();
+    size = Math.Int(size_for(i));
+    if (layer == 0) {
+        v = 0.14 + rnd() * 0.10;       # slow
+        base = 0.22 + rnd() * 0.10;    # dim
+    } else {
+        if (layer == 1) {
+            v = 0.28 + rnd() * 0.16;
+            base = 0.36 + rnd() * 0.14;
+        } else {
+            v = 0.5 + rnd() * 0.22;
+            base = 0.5 + rnd() * 0.18;
+        }
+    }
+    p_x[i] = rnd() * W;
+    p_y[i] = rnd() * H;
+    p_v[i] = v * scale;
+    p_amp[i] = (8 + rnd() * 26) * scale;
+    p_freq[i] = 0.4 + rnd() * 1.1;
+    p_phase[i] = rnd() * 6.283;
+    p_tw[i] = 0.6 + rnd() * 1.6;
+    p_base[i] = base;
+    p_z[i] = 2;
+    p_i[i] = tex;
+    i = i + 1;
+}
+
+# sprites: one per particle, the texture pre-scaled to its size (never scaled per frame)
+i = 0;
+while (i < PARTICLES) {
+    p_spr[i] = Sprite(DOT[p_i[i]].Scale(Math.Int(size_for(i)), Math.Int(size_for(i))));
+    p_spr[i].SetOpacity(0);
+    i = i + 1;
+}
+
+t = 0;                       # splash time, advanced by the refresh calls (≈ 50/s)
+
+fun draw_particles() {
+    i = 0;
+    while (i < PARTICLES) {
+        # drift upward, wrap at the top edge back to below the screen
+        global.p_y[i] = global.p_y[i] - global.p_v[i];
+        if (global.p_y[i] < -40) {
+            global.p_y[i] = H + 20 + rnd() * 40;
+            global.p_x[i] = rnd() * W;
+        }
+        sway = Math.Sin(global.t * global.p_freq[i] + global.p_phase[i]) * global.p_amp[i];
+        tw = 0.62 + 0.38 * Math.Sin(global.t * global.p_tw[i] + global.p_phase[i] * 1.7);
+        p_spr[i].SetPosition(Math.Int(global.p_x[i] + sway), Math.Int(global.p_y[i]), global.p_z[i]);
+        p_spr[i].SetOpacity(global.p_base[i] * tw);
+        i = i + 1;
+    }
+}
+
+fun draw_glow_and_mark() {
+    # the glow breathes on a slow sine, the mark answers a little quicker and softer
+    glow.SetOpacity(0.62 + 0.3 * Math.Sin(global.t * 0.9));
+    mark.SetOpacity(0.9 + 0.1 * Math.Sin(global.t * 1.35 + 1.1));
+}
+
+fun draw_tagline() {
+    k = global.t / 2;
+    if (k > 1) k = 1;
+    if (!global.bar_visible) tagline.SetOpacity(0);
+    else tagline.SetOpacity(0.42 * k);
+}
+
+# ---- the progress bar: track, a scaled gradient body and two round caps ----
 fun draw_bar() {
     if (!global.bar_visible) {
         track.SetOpacity(0); fill.SetOpacity(0); cap_start.SetOpacity(0); cap_end.SetOpacity(0);
-        wordmark.SetOpacity(0);
+        tagline.SetOpacity(0);
         return;
     }
     track.SetOpacity(1);
-    wordmark.SetOpacity(0.55);
     w = Math.Int(global.bar_w * global.shown);
     if (w == global.drawn_w) return;
     global.drawn_w = w;
@@ -108,8 +235,8 @@ fun pad3(n) {
 
 fun draw_timer() {
     if (!global.bar_visible) { timer.SetOpacity(0); return; }
-    t = global.boot_s + global.since_s;
-    ms = Math.Int(t * 1000);
+    tt = global.boot_s + global.since_s;
+    ms = Math.Int(tt * 1000);
     if (ms <= global.timer_shown) return;      # never backwards when Plymouth's duration catches up
     global.timer_shown = ms;
     sec = Math.Int(ms / 1000);
@@ -132,11 +259,16 @@ fun boot_progress(duration, progress) {
 }
 
 fun refresh() {
-    # ease out: a fraction of the remaining distance each frame (about 50 per second), never back
+    global.t = global.t + 0.02;
+    # the particles and the breathing glow run on every frame; the bar eases towards
+    # Plymouth's progress and never jumps or goes back
     if (global.shown < global.target) {
         global.shown = global.shown + (global.target - global.shown) * 0.06 + 0.0004;
         if (global.shown > global.target) global.shown = global.target;
     }
+    draw_particles();
+    draw_glow_and_mark();
+    draw_tagline();
     draw_bar();
     global.since_s = global.since_s + 0.02;
     draw_timer();

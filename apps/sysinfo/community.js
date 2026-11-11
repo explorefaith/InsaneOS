@@ -1,10 +1,10 @@
 // community.js — community data in the Compatibility panel (0.8.7, docs/BENCHMARK.md "Compatibility"): which
-// devices of this machine other LordOS users confirmed, from the catalogue's signed snapshot
+// devices of this machine other Insane OS users confirmed, from the catalogue's signed snapshot
 // (lord.sysinfo.community(): verified in C, server/src/sysreport/hwsnap.c, before JS sees it). Pure functions,
 // tested by server/tests/hwreport_test.mjs; tools/hwreport/catalog.mjs builds the snapshot with the same keys.
 //
 // A device is named by a key that holds no identity of the machine: PCI ids, a driver name or a product
-// name. Only entries for the same LordOS version (x.y.z, the channel ignored) are shown, as the design asks.
+// name. Only entries for the same Insane OS version (x.y.z, the channel ignored) are shown, as the design asks.
 
 export const SNAPSHOT_FORMAT = 'lordos-hwsnapshot';
 // the Compatibility rows a machine-wide key answers for (the GPU, network, Wi-Fi, Bluetooth and audio rows
@@ -48,7 +48,7 @@ export function deviceKeys(system) {
 
 const base = (v) => { const m = /^(\d+\.\d+\.\d+(?:\.\d+)?)/.exec(String(v || '')); return m ? m[1] : ''; };
 
-// For each Compatibility row, what the snapshot says about this machine's devices with this LordOS version:
+// For each Compatibility row, what the snapshot says about this machine's devices with this Insane OS version:
 // { [component]: [{ name, works, limits, no, reports, references }] }. A snapshot that isn't one (wrong format
 // or version) gives nothing.
 export function communityFor(snapshot, system, lordos) {

@@ -1,7 +1,7 @@
 // The clock's panel (issue #58): this session's notifications (sdk/notify.js notifyHistory) grouped by app, with Do
-// Not Disturb and "Clear all", and a month calendar below it, as in Lord Classic. The calendar can be turned off in
+// Not Disturb and "Clear all", and a month calendar below it, as in Insane Classic. The calendar can be turned off in
 // Settings → Desktop & Dock → Menu Bar; a click on a day opens the calendar app chosen in Settings → Default Apps
-// (LordOS Calendar unless the user chose another one, sdk/sysopen.js openCalendarApp).
+// (Insane OS Calendar unless the user chose another one, sdk/sysopen.js openCalendarApp).
 import {
   View, Text, ScrollView, Toggle, useStore, notifyHistory, clearNotifyHistory, settings, notifyPrefs, dndActive, useSettings,
   getApp, appName, formatTime, formatDate, monthName, weekdayName, locale, addListener, t as tr, menuBarPrefs, monthCells, weekStartFor,

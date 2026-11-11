@@ -25,6 +25,11 @@ export const vaultAvailable = () => has() && lord.vault.available();
 const waiting = new Map();          // id → { resolve, reject }
 const listeners = new Set();
 let fast = null, slow = null;
+// Idle backoff: a stalled or lost reply would keep the 8 ms poller spinning forever
+// (125 wakeups/s burning a full core). After 10 s with nothing arriving, the fast poller
+// slows to 60 ms; the first message (or new request) snaps it back to 8 ms.
+let lastAct = 0, fastPeriod = 8;
+const FAST_MS = 8, BACKOFF_MS = 60, BACKOFF_AFTER = 10000;
 
 function dispatch(m) {
   if (m.kind === 'evt') {
@@ -47,8 +52,15 @@ function pump() {
     let list = [];
     try { list = JSON.parse(s); } catch (e) { list = []; }
     for (const m of list) dispatch(m);
+    if (list.length) {
+      lastAct = Date.now();
+      if (fast && fastPeriod !== FAST_MS) { clearInterval(fast); fast = setInterval(pump, FAST_MS); fastPeriod = FAST_MS; }
+    }
   }
   if (!waiting.size && fast) { clearInterval(fast); fast = null; }
+  else if (fast && lastAct && Date.now() - lastAct > BACKOFF_AFTER && fastPeriod !== BACKOFF_MS) {
+    clearInterval(fast); fast = setInterval(pump, BACKOFF_MS); fastPeriod = BACKOFF_MS;
+  }
 }
 
 // Events (auto-lock, Secret Service notices) arrive even when nobody is waiting for anything.
@@ -64,7 +76,9 @@ export function vaultRequest(op, args = {}, { files, fds } = {}) {
   startSlow();
   return new Promise((resolve, reject) => {
     waiting.set(id, { resolve, reject });
-    if (!fast) fast = setInterval(pump, 8);
+    lastAct = Date.now();
+    if (!fast) { fast = setInterval(pump, FAST_MS); fastPeriod = FAST_MS; }
+    else if (fastPeriod !== FAST_MS) { clearInterval(fast); fast = setInterval(pump, FAST_MS); fastPeriod = FAST_MS; }
   });
 }
 

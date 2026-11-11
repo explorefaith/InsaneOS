@@ -214,7 +214,7 @@ int pwguard_start(void) {
     s = pb_begin(&b);
     size_t d = pb_begin(&b);
     pb_int(&b, 2);
-    pb_str(&b, "application.name"); pb_str(&b, "LordOS privacy guard");
+    pb_str(&b, "application.name"); pb_str(&b, "Insane OS privacy guard");
     pb_str(&b, "media.category"); pb_str(&b, "Manager");
     pb_end(&b, d);
     pb_end(&b, s);

@@ -11,7 +11,7 @@ Please report vulnerabilities **privately**, never in a public issue:
   in the subject.
 - Once this repository is public, GitHub private vulnerability reporting will be available too.
 
-Include the LordOS version (shown in the About LordOS app), how you installed it (ISO,
+Include the Insane OS version (shown in the About Insane OS app), how you installed it (ISO,
 Raspberry Pi 5 image or Debian package), the steps to reproduce and the impact. English, Spanish and
 Portuguese are all fine.
 
@@ -23,7 +23,7 @@ Debian's security updates, installed through the Store or apt. See
 
 ## Verifying releases
 
-Release files are listed in `SHA256SUMS`, signed with the LordOS release key (Ed25519,
+Release files are listed in `SHA256SUMS`, signed with the Insane OS release key (Ed25519,
 `tools/release/lordos-release.pub.pem`). Fingerprint (SHA-256 of the DER public key):
 
 ```

@@ -17,7 +17,7 @@
   "default.denyShort": "bloque tout le reste",
   "default.allowHint": "Ce qu’aucune règle ne couvre suit le mode du pare-feu.",
   "default.denyHint": "Seul ce qu’une règle Autoriser couvre peut se connecter.",
-  "notEnforceable": "Cette app n’a pas de scope propre (elle n’a pas été ouverte depuis LordOS) : ses règles sont conservées mais pas appliquées.",
+  "notEnforceable": "Cette app n’a pas de scope propre (elle n’a pas été ouverte depuis Insane OS) : ses règles sont conservées mais pas appliquées.",
   "empty": "Aucune règle pour cette app.",
   "add": "Ajouter une règle…",
   "edit": "Modifier",

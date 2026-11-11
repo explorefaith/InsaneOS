@@ -39,7 +39,7 @@ const words = (check[0] ? check[0][2] : '').split(/\s+/);
 eq('it asks for the check', words.includes('lordos.check=1'), true);
 eq('it boots the live system', words.includes('boot=live'), true);
 eq('no other entry asks for it', entries.filter((m) => m[2].includes('lordos.check')).length, 1);
-eq('it is not the default entry', entries[0] && entries[0][1].startsWith('LordOS'), true);
+eq('it is not the default entry', entries[0] && entries[0][1].startsWith('Insane OS'), true);
 
 const theme = fs.readFileSync(path.join(root, 'tools/iso/grub/lordos/theme.txt'), 'utf8');
 const num = (k) => Number(new RegExp(`^\\s*${k} = (\\d+)\\s*$`, 'm').exec(theme)?.[1]);

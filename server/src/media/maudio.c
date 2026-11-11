@@ -90,7 +90,7 @@ MAudio *maudio_open(int rec, const char *app, const char *title, const char *rol
     a->ring_fd = -1;
     a->pa.fd = -1;
     a->volume = 1;
-    snprintf(a->app, sizeof a->app, "%s", app && *app ? app : "LordOS");
+    snprintf(a->app, sizeof a->app, "%s", app && *app ? app : "Insane OS");
     snprintf(a->title, sizeof a->title, "%s", title && *title ? title : a->app);
     if (rec) snprintf(a->source, sizeof a->source, "%s", role_or_source ? role_or_source : "");
     else snprintf(a->role, sizeof a->role, "%s", role_or_source && *role_or_source ? role_or_source : "video");

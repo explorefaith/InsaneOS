@@ -207,7 +207,7 @@ int main(void) {
     {
         struct { const char *file, *want; } real[] = {
             { "tests/qr/wifi.png", "WIFI:T:WPA;S:Casa Lord;P:clave-segura-123;;" },
-            { "tests/qr/otpauth.png", "otpauth://totp/LordOS:lord@example.org?secret=JBSWY3DPEHPK3PXP&issuer=LordOS&algorithm=SHA1&digits=6&period=30" },
+            { "tests/qr/otpauth.png", "otpauth://totp/Insane OS:lord@example.org?secret=JBSWY3DPEHPK3PXP&issuer=Insane OS&algorithm=SHA1&digits=6&period=30" },
             { "tests/qr/url-v11.png", "https://example.org/contrasenas/una/ruta/bastante/larga/para/llegar/a/la/version/diez?con=parametros&y=mas&valores=1234567890" },
             { "tests/qr/captura.png", "otpauth://totp/Banco:ana?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=Banco" },
         };

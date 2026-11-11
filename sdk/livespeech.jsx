@@ -1,11 +1,11 @@
-// livespeech.jsx — Live Speech (docs/VOICE.md): type something and LordOS says it aloud, with the voice chosen for the
+// livespeech.jsx — Live Speech (docs/VOICE.md): type something and Insane OS says it aloud, with the voice chosen for the
 // text's language in Settings → AI → Voice (a personal voice too). Meta+Shift+Escape opens and closes it
 // (sdk/shortcuts.js) while Settings → AI's "Live Speech" is on; sdk/index.js mounts it in the overlay layer.
 //
 //   liveSpeech.toggle() / liveSpeech.close()
 //
 // Enter says the text and keeps the panel open for the next; the last phrases stay below it to be said again with a
-// click (only in memory: they go when LordOS restarts). Esc closes it. The player shows as for any reading.
+// click (only in memory: they go when Insane OS restarts). Esc closes it. The player shows as for any reading.
 import { useState } from 'react';
 import { View, Text, mainBox } from '@lordos/runtime';
 import { createStore, useStore } from './store.js';

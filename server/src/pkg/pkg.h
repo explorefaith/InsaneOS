@@ -1,4 +1,4 @@
-/* pkg.h — LordOS's own Debian packages (see pkg.c and docs/PACKAGES.md).
+/* pkg.h — Insane OS's own Debian packages (see pkg.c and docs/PACKAGES.md).
  *
  * Everything that modifies the system is an action of the privileged helper (admin.c); lord-server
  * only reads the index (idx.h) and the dpkg database (status.h). */
@@ -13,7 +13,7 @@ void pkg_act_remove(const AdminReq *r, const char *arg, size_t len);
 void pkg_act_autoremove(const AdminReq *r, const char *arg, size_t len);
 void pkg_act_upgrade(const AdminReq *r, const char *arg, size_t len);
 void pkg_act_install_file(const AdminReq *r, const char *arg, size_t len);
-/* (0.8.5) a vendor repository from LordOS's catalog: sources_admin.c */
+/* (0.8.5) a vendor repository from Insane OS's catalog: sources_admin.c */
 void pkg_act_source_add(const AdminReq *r, const char *arg, size_t len);
 void pkg_act_source_remove(const AdminReq *r, const char *arg, size_t len);
 

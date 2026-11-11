@@ -4,7 +4,7 @@
 //   help.read(id)          → { id, title, app, section, keywords, body } or null
 //   help.open(id)          → opens Help on that article
 //   help.search(text)      → [{ id, title, score, snippet }]
-//   help.startTour()       → opens "Welcome to LordOS"
+//   help.startTour()       → opens "Welcome to Insane OS"
 //
 // English is the default language: every article exists in assets/help/en, and es/pt (or any other
 // language) are translations. The list is the English one plus any extra articles of the interface
@@ -21,7 +21,7 @@
 //   ---
 // Special links in the text: [Open Settings → Network](settings:network), [Files](app:files)
 // and [another article](help:spotlight). Search indexes the articles (registerSpotlightSource).
-// They are read by lord.help (server/src/ui/js_help.c), only from LordOS's assets/help folder.
+// They are read by lord.help (server/src/ui/js_help.c), only from Insane OS's assets/help folder.
 import { locale, t } from './i18n.js';
 import { settings } from './settings.js';
 import { wm, getApp, isLiveSystem } from './windows.js';
@@ -139,7 +139,7 @@ registerSpotlightSource('help', (q, query) => {
   }));
 });
 
-// First login: "Welcome to LordOS", only once (settings.welcomeShown). On the live system the
+// First login: "Welcome to Insane OS", only once (settings.welcomeShown). On the live system the
 // installer opens instead.
 export function maybeStartTour() {
   if (settings.get().welcomeShown || isLiveSystem() || !getApp('help') || !has()) return;

@@ -8,7 +8,7 @@
 #   sudo tests/imager_write_test.sh <user> <sdX> /var/tmp/stick.img <signed release dir in the user's home> [internal sdY]
 #
 # The release dir holds SHA256SUMS, SHA256SUMS.sig and a small official .img.xz they list (any real
-# LordOS release works). The script checks first that <sdX> is that gadget and that its size is the
+# Insane OS release works). The script checks first that <sdX> is that gadget and that its size is the
 # backing file's, and stops otherwise.
 set -u
 U=${1:?user}; D=${2:?sdX}; BACK=${3:?backing file}; REL=${4:?release dir}

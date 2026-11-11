@@ -1,4 +1,4 @@
-/* snd.c — LordOS sound client.
+/* snd.c — Insane OS sound client.
  *
  * Speaks the PulseAudio native protocol with pipewire-pulse (the part of PipeWire that
  * serves it at $XDG_RUNTIME_DIR/pulse/native): no libpulse or libpipewire. Keeps a copy of
@@ -333,7 +333,7 @@ static void send_client_name(void) {
     char pid[16];
     snprintf(pid, sizeof pid, "%d", (int)getpid());
     const char *kv[] = {
-        "application.name", "LordOS", "application.id", "org.lordos.Server",
+        "application.name", "Insane OS", "application.id", "org.lordos.Server",
         "application.icon_name", "audio-card", "application.process.id", pid,
         "application.process.binary", "lord-server",
     };
@@ -861,7 +861,7 @@ int snd_meter(uint32_t source) {
     ts_bool(&t, 0);                                 /* variable_rate */
     ts_bool(&t, 0);                                 /* peak_detect: no, computed here */
     ts_bool(&t, 1);                                 /* adjust_latency */
-    const char *kv2[] = { "media.name", "LordOS: level meter", "application.id", "org.lordos.Server" };
+    const char *kv2[] = { "media.name", "Insane OS: level meter", "application.id", "org.lordos.Server" };
     ts_proplist(&t, kv2, 2);
     ts_u32(&t, PA_INVALID_INDEX);                   /* direct_on_input */
     ts_bool(&t, 0);                                 /* early_requests */
@@ -879,7 +879,7 @@ int snd_meter(uint32_t source) {
 
 /* ---- system sounds ---- */
 
-static const char *const sample_names[3] = { "lordos-pop", "lordos-notify", "lordos-error" };
+static const char *const sample_names[4] = { "lordos-pop", "lordos-notify", "lordos-error", "lordos-chime" };
 
 #define SR 44100
 
@@ -890,6 +890,24 @@ static int16_t *synth(int which, uint32_t *bytes) {
         { 1046.5, 1568, 0.32, 0.12 },               /* notify: C6 → G6 */
         { 311, 233, 0.30, 0.13 },                   /* error: two low notes */
     };
+    if (which == 3) {
+        /* chime: C6, E6, G6 arpeggio, warm and soft — the login sound */
+        static const double notes[3] = { 1046.5, 1318.5, 1568.0 };
+        static const double start[3] = { 0, 0.16, 0.32 };
+        int n = (int)(0.9 * SR);
+        int16_t *s = calloc((size_t)n, 2);
+        if (!s) return NULL;
+        for (int k = 0; k < 3; k++)
+            for (int i = (int)(start[k] * SR); i < n; i++) {
+                double local = (double)i / SR - start[k];
+                double env = (1 - exp(-local * 700)) * exp(-local * 7);
+                double v = sin(2 * M_PI * notes[k] * local) * 0.5 + sin(4 * M_PI * notes[k] * local) * 0.08;
+                double x = s[i] + v * env * 0.4 * 32767;
+                s[i] = x > 32767 ? 32767 : x < -32768 ? -32768 : (int16_t)x;
+            }
+        *bytes = (uint32_t)n * 2;
+        return s;
+    }
     int n = (int)(tone[which].dur * SR);
     int16_t *s = malloc((size_t)n * 2);
     if (!s) return NULL;
@@ -932,7 +950,7 @@ static int play_sample(int which) {
     ts_str(&t, NULL);                               /* the default output */
     ts_u32(&t, PA_VOLUME_NORM);
     ts_str(&t, sample_names[which]);
-    const char *kv[] = { "media.role", "event", "application.name", "LordOS", "application.id", "org.lordos.Server", "event.id", sample_names[which] };
+    const char *kv[] = { "media.role", "event", "application.name", "Insane OS", "application.id", "org.lordos.Server", "event.id", sample_names[which] };
     ts_proplist(&t, kv, 4);
     return cmd_send(&t, tag, R_ACK, PA_CMD_PLAY_SAMPLE, 0);
 }
@@ -942,6 +960,7 @@ int snd_play(const char *name) {
     if (!strcmp(name, "pop")) which = 0;
     else if (!strcmp(name, "notify")) which = 1;
     else if (!strcmp(name, "error")) which = 2;
+    else if (!strcmp(name, "chime")) which = 3;
     if (which < 0 || !S.connected) return -1;
     if (S.samples_uploaded & 1 << which) return play_sample(which);
     S.play_after |= 1 << which;

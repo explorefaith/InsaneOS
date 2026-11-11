@@ -1,6 +1,6 @@
 /* portal.c — our own org.freedesktop.portal.Settings and FileChooser (without xdg-desktop-portal): GTK, GNOME
  * (libadwaita) and Qt apps read from here the dark/light mode, the accent color, the order of the
- * title bar buttons and the GTK 3 theme, and follow LordOS's changes live (SettingChanged).
+ * title bar buttons and the GTK 3 theme, and follow Insane OS's changes live (SettingChanged).
  * Uses Passwords' own D-Bus client (vault/dbus.c). See docs/WAYLAND.md, "GTK and GNOME apps".
  *
  * GTK 3 outside Flatpak doesn't read the portal: it reads GSettings. lord-server gives the apps
@@ -522,7 +522,7 @@ void portal_set(int is_dark, const double rgb[3], const char *accent_name, const
     if (accent_name) snprintf(acc_name, sizeof acc_name, "%s", accent_name);
     if (button_layout) snprintf(buttons, sizeof buttons, "%s", button_layout);
     /* GTK 3: our own theme if installed (assets/gtk), otherwise Adwaita */
-    const char *t = dark ? "LordOS-dark" : "LordOS";
+    const char *t = dark ? "Insane OS-dark" : "Insane OS";
     snprintf(gtk_theme, sizeof gtk_theme, "%s", theme_installed(t) ? t : dark ? "Adwaita-dark" : "Adwaita");
     if (old_dark != dark) { changed(0); changed(3); }
     if (memcmp(old, acc, sizeof old)) changed(1);

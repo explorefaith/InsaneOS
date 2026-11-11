@@ -236,9 +236,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -247,9 +247,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -258,9 +258,9 @@
     "theme": "light",
     "variant": "rtl",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -379,7 +379,7 @@
     "theme": "dark",
     "variant": "rtl",
     "caption": {
-      "en": "Lord Classic theme in Arabic",
+      "en": "Insane Classic theme in Arabic",
       "es": "Tema clásico en árabe",
       "pt": "Tema clássico em árabe"
     }
@@ -390,9 +390,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "Linux app in the Lord Classic theme",
-      "es": "App de Linux con el tema Lord Classic",
-      "pt": "App Linux no tema Lord Classic"
+      "en": "Linux app in the Insane Classic theme",
+      "es": "App de Linux con el tema Insane Classic",
+      "pt": "App Linux no tema Insane Classic"
     }
   },
   {
@@ -401,9 +401,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Lord Classic theme start menu",
-      "es": "Menú de inicio del tema Lord Classic",
-      "pt": "Menu iniciar do tema Lord Classic"
+      "en": "Insane Classic theme start menu",
+      "es": "Menú de inicio del tema Insane Classic",
+      "pt": "Menu iniciar do tema Insane Classic"
     }
   },
   {
@@ -621,9 +621,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Lord Classic left taskbar with top bar",
-      "es": "Barra de Lord Classic a la izquierda y barra superior",
-      "pt": "Barra do Lord Classic à esquerda com barra superior"
+      "en": "Insane Classic left taskbar with top bar",
+      "es": "Barra de Insane Classic a la izquierda y barra superior",
+      "pt": "Barra do Insane Classic à esquerda com barra superior"
     }
   },
   {
@@ -632,9 +632,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Lord Classic taskbar on the left",
-      "es": "Barra de tareas de Lord Classic a la izquierda",
-      "pt": "Barra de tarefas do Lord Classic à esquerda"
+      "en": "Insane Classic taskbar on the left",
+      "es": "Barra de tareas de Insane Classic a la izquierda",
+      "pt": "Barra de tarefas do Insane Classic à esquerda"
     }
   },
   {
@@ -1501,9 +1501,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Installing LordOS",
-      "es": "Instalando LordOS",
-      "pt": "Instalando o LordOS"
+      "en": "Installing Insane OS",
+      "es": "Instalando Insane OS",
+      "pt": "Instalando o Insane OS"
     }
   },
   {
@@ -1611,9 +1611,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS on the live ISO",
-      "es": "Acerca de LordOS en el ISO live",
-      "pt": "Sobre o LordOS no ISO live"
+      "en": "About Insane OS on the live ISO",
+      "es": "Acerca de Insane OS en el ISO live",
+      "pt": "Sobre o Insane OS no ISO live"
     }
   },
   {
@@ -2260,9 +2260,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Early LordOS desktop",
-      "es": "Escritorio temprano de LordOS",
-      "pt": "Área de trabalho inicial do LordOS"
+      "en": "Early Insane OS desktop",
+      "es": "Escritorio temprano de Insane OS",
+      "pt": "Área de trabalho inicial do Insane OS"
     }
   },
   {
@@ -2271,9 +2271,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "Early LordOS desktop",
-      "es": "Escritorio temprano de LordOS",
-      "pt": "Área de trabalho inicial do LordOS"
+      "en": "Early Insane OS desktop",
+      "es": "Escritorio temprano de Insane OS",
+      "pt": "Área de trabalho inicial do Insane OS"
     }
   },
   {
@@ -2293,9 +2293,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Early Lord Classic theme",
-      "es": "Primer tema Lord Classic",
-      "pt": "Primeiro tema Lord Classic"
+      "en": "Early Insane Classic theme",
+      "es": "Primer tema Insane Classic",
+      "pt": "Primeiro tema Insane Classic"
     }
   },
   {
@@ -2656,9 +2656,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Notes in the Lord Classic theme",
-      "es": "Notas con el tema Lord Classic",
-      "pt": "Notas no tema Lord Classic"
+      "en": "Notes in the Insane Classic theme",
+      "es": "Notas con el tema Insane Classic",
+      "pt": "Notas no tema Insane Classic"
     }
   },
   {
@@ -2887,9 +2887,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -2898,9 +2898,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -2909,9 +2909,9 @@
     "theme": "dark",
     "variant": "rtl",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -2920,9 +2920,9 @@
     "theme": "dark",
     "variant": "small",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -3767,9 +3767,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "LordOS installer",
-      "es": "Instalador de LordOS",
-      "pt": "Instalador do LordOS"
+      "en": "Insane OS installer",
+      "es": "Instalador de Insane OS",
+      "pt": "Instalador do Insane OS"
     }
   },
   {
@@ -3778,9 +3778,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "LordOS installer",
-      "es": "Instalador de LordOS",
-      "pt": "Instalador do LordOS"
+      "en": "Insane OS installer",
+      "es": "Instalador de Insane OS",
+      "pt": "Instalador do Insane OS"
     }
   },
   {
@@ -3789,9 +3789,9 @@
     "theme": "dark",
     "variant": "rtl",
     "caption": {
-      "en": "LordOS installer",
-      "es": "Instalador de LordOS",
-      "pt": "Instalador do LordOS"
+      "en": "Insane OS installer",
+      "es": "Instalador de Insane OS",
+      "pt": "Instalador do Insane OS"
     }
   },
   {
@@ -3800,9 +3800,9 @@
     "theme": "dark",
     "variant": "small",
     "caption": {
-      "en": "LordOS installer",
-      "es": "Instalador de LordOS",
-      "pt": "Instalador do LordOS"
+      "en": "Insane OS installer",
+      "es": "Instalador de Insane OS",
+      "pt": "Instalador do Insane OS"
     }
   },
   {
@@ -5648,9 +5648,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "LordOS apps in the store",
-      "es": "Apps de LordOS en la tienda",
-      "pt": "Apps do LordOS na loja"
+      "en": "Insane OS apps in the store",
+      "es": "Apps de Insane OS en la tienda",
+      "pt": "Apps do Insane OS na loja"
     }
   },
   {
@@ -5659,9 +5659,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "LordOS apps in the store",
-      "es": "Apps de LordOS en la tienda",
-      "pt": "Apps do LordOS na loja"
+      "en": "Insane OS apps in the store",
+      "es": "Apps de Insane OS en la tienda",
+      "pt": "Apps do Insane OS na loja"
     }
   },
   {
@@ -5670,9 +5670,9 @@
     "theme": "dark",
     "variant": "rtl",
     "caption": {
-      "en": "LordOS apps in the store",
-      "es": "Apps de LordOS en la tienda",
-      "pt": "Apps do LordOS na loja"
+      "en": "Insane OS apps in the store",
+      "es": "Apps de Insane OS en la tienda",
+      "pt": "Apps do Insane OS na loja"
     }
   },
   {
@@ -5681,9 +5681,9 @@
     "theme": "dark",
     "variant": "small",
     "caption": {
-      "en": "LordOS apps in the store",
-      "es": "Apps de LordOS en la tienda",
-      "pt": "Apps do LordOS na loja"
+      "en": "Insane OS apps in the store",
+      "es": "Apps de Insane OS en la tienda",
+      "pt": "Apps do Insane OS na loja"
     }
   },
   {
@@ -6044,9 +6044,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -6561,9 +6561,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "About LordOS",
-      "es": "Acerca de LordOS",
-      "pt": "Sobre o LordOS"
+      "en": "About Insane OS",
+      "es": "Acerca de Insane OS",
+      "pt": "Sobre o Insane OS"
     }
   },
   {
@@ -6583,9 +6583,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "The LordOS desktop",
-      "es": "El escritorio de LordOS",
-      "pt": "A área de trabalho do LordOS"
+      "en": "The Insane OS desktop",
+      "es": "El escritorio de Insane OS",
+      "pt": "A área de trabalho do Insane OS"
     }
   },
   {
@@ -6594,9 +6594,9 @@
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "The LordOS desktop",
-      "es": "El escritorio de LordOS",
-      "pt": "A área de trabalho do LordOS"
+      "en": "The Insane OS desktop",
+      "es": "El escritorio de Insane OS",
+      "pt": "A área de trabalho do Insane OS"
     }
   },
   {
@@ -7584,9 +7584,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Lord Classic: an app's own menus in a strip under its title bar",
-      "es": "Lord Classic: los menús de la app en una franja bajo la barra de título",
-      "pt": "Lord Classic: os menus do app numa faixa sob a barra de título"
+      "en": "Insane Classic: an app's own menus in a strip under its title bar",
+      "es": "Insane Classic: los menús de la app en una franja bajo la barra de título",
+      "pt": "Insane Classic: os menus do app numa faixa sob a barra de título"
     }
   },
   {
@@ -7694,9 +7694,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "Settings → Appearance → Desktop style: Lord Flow or Lord Classic",
-      "es": "Ajustes → Apariencia → Estilo de escritorio: Lord Flow o Lord Classic",
-      "pt": "Ajustes → Aparência → Estilo da área de trabalho: Lord Flow ou Lord Classic"
+      "en": "Settings → Appearance → Desktop style: Insane Flow or Insane Classic",
+      "es": "Ajustes → Apariencia → Estilo de escritorio: Insane Flow o Insane Classic",
+      "pt": "Ajustes → Aparência → Estilo da área de trabalho: Insane Flow ou Insane Classic"
     }
   },
   {
@@ -7760,9 +7760,9 @@
     "theme": "dark",
     "variant": "normal",
     "caption": {
-      "en": "System Information → Performance: LordBench's verdicts and results against a reference machine",
-      "es": "Información del sistema → Rendimiento: los veredictos y resultados de LordBench frente a una máquina de referencia",
-      "pt": "Informações do sistema → Desempenho: os vereditos e resultados do LordBench frente a uma máquina de referência"
+      "en": "System Information → Performance: InsaneBench's verdicts and results against a reference machine",
+      "es": "Información del sistema → Rendimiento: los veredictos y resultados de InsaneBench frente a una máquina de referencia",
+      "pt": "Informações do sistema → Desempenho: os vereditos e resultados do InsaneBench frente a uma máquina de referência"
     }
   },
   {

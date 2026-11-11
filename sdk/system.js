@@ -4,7 +4,7 @@ import { formatNumber, t } from './i18n.js';
 
 export const systemInfo = () => lord.system.info();
 
-// LordOS's own version, from the build (package.json "version" and "lordos": {"channel"}, see
+// Insane OS's own version, from the build (package.json "version" and "lordos": {"channel"}, see
 // server/Makefile): { version: '0.8.4', channel: 'Beta' (empty for a stable release), build }.
 export function lordosVersion(info) {
   const i = info || systemInfo();

@@ -17,7 +17,7 @@
   "default.denyShort": "blocca tutto il resto",
   "default.allowHint": "Ciò che nessuna regola copre segue la modalità del firewall.",
   "default.denyHint": "Può connettersi solo ciò che è coperto da una regola Consenti.",
-  "notEnforceable": "Questa app non ha un ambito proprio (non è stata aperta da LordOS), quindi le sue regole vengono conservate ma non applicate.",
+  "notEnforceable": "Questa app non ha un ambito proprio (non è stata aperta da Insane OS), quindi le sue regole vengono conservate ma non applicate.",
   "empty": "Nessuna regola per questa app.",
   "add": "Aggiungi regola…",
   "edit": "Modifica",

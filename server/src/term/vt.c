@@ -697,7 +697,7 @@ static void csi(Term *t, int f) {
         }
         if (t->priv != '>') return;
         if (f == 'c') reply(t, "\033[>0;276;0c");
-        else if (f == 'q') reply(t, "\033P>|LordOS Terminal 0.4\033\\");
+        else if (f == 'q') reply(t, "\033P>|Insane OS Terminal 0.4\033\\");
         return;
     }
     if (t->priv) return;

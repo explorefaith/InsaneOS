@@ -30,7 +30,7 @@ Mantené el modificador y tocá Tab: una tira de íconos de apps muestra el nomb
 las más recientes primero. Tab avanza, ⇧Tab retrocede, Esc cancela y al soltar el modificador cambia.
 Una pulsación rápida vuelve a la app anterior.
 
-## Lord Flow
+## Insane Flow
 
 | Atajo | Qué hace |
 |---|---|
@@ -49,9 +49,9 @@ Una pulsación rápida vuelve a la app anterior.
 En una app Linux, ❖C, V, X, A, Z, F, T, W, N, L, R, P y S llegan como Ctrl (como Ctrl+Mayús en un
 emulador de terminal, donde Ctrl+C es la interrupción), solo a esa app. Por eso ❖V pega y ❖L es su
 propio Ctrl+L: con una app Linux al frente la pantalla se bloquea con ❖⌃Q y el portapapeles se abre con
-❖⇧V. En una app de LordOS dentro de la sesión ❖V también pega; ❖⇧V es el portapapeles.
+❖⇧V. En una app de Insane OS dentro de la sesión ❖V también pega; ❖⇧V es el portapapeles.
 
-## Lord Classic
+## Insane Classic
 
 | Atajo | Qué hace |
 |---|---|
@@ -76,7 +76,7 @@ propio Ctrl+L: con una app Linux al frente la pantalla se bloquea con ❖⌃Q y 
 
 | Atajo | Qué hace |
 |---|---|
-| ❖N · ❖T · ❖W | Ventana nueva · pestaña nueva · cerrar (Lord Classic: ⌃N, ⌃T, ⌃W) |
+| ❖N · ❖T · ❖W | Ventana nueva · pestaña nueva · cerrar (Insane Classic: ⌃N, ⌃T, ⌃W) |
 | ❖F · ❖G | Buscar · resultado siguiente |
 | ❖C · ❖X | Copiar · cortar |
 | ❖Z · ❖⇧Z | Deshacer · rehacer |

@@ -1,7 +1,7 @@
-// Settings → General (machine and software details) and Updates (Debian and LordOS).
+// Settings → General (machine and software details) and Updates (Debian and Insane OS).
 import {
   View, Text, Button, useTheme, useLocale, useSystemInfo, useServerStats, lordosVersion, screen, formatBytes, formatDuration, formatNumber,
-  admin, wm, LordOSLogo, LordOSWordmark, spacing, typeScale,
+  admin, wm, InsaneLogo, InsaneWordmark, spacing, typeScale,
 } from '@lordos/sdk';
 import { useState, version as reactVersion } from 'react';
 import { Stack, Section, ValueRow, Note, Message, Actions } from './ui.jsx';
@@ -25,8 +25,8 @@ export function General() {
   return (
     <Stack>
       <View style={{ alignItems: 'center', gap: spacing.xs, paddingTop: spacing.xs }}>
-        <LordOSLogo size={72} />
-        <View style={{ marginTop: spacing.s }}><LordOSWordmark size={typeScale.largeTitle} crown={false} /></View>
+        <InsaneLogo size={72} />
+        <View style={{ marginTop: spacing.s }}><InsaneWordmark size={typeScale.largeTitle} crown={false} /></View>
         <Text style={{ fontSize: typeScale.callout, color: t.textDim }}>{ver.channel ? tr('about.versionChannel', { v: ver.version, channel: ver.channel }) : tr('about.version', { v: ver.version })}</Text>
         <Text style={{ fontSize: typeScale.caption, color: t.textDim }}>{`${info.hostname} · ${info.os}`}</Text>
       </View>
@@ -39,7 +39,7 @@ export function General() {
         [tr('about.uptime'), formatDuration(info.uptime)],
       ]} />
       <Card title={tr('settings.general.software')} rows={[
-        ['LordOS', ver.channel ? `${ver.version} ${ver.channel}` : ver.version],
+        ['Insane OS', ver.channel ? `${ver.version} ${ver.channel}` : ver.version],
         ver.build ? [tr('about.buildLabel'), ver.build] : null,
         [tr('about.os'), info.os],
         [tr('about.kernel'), `${info.kernel} (${info.arch})`],

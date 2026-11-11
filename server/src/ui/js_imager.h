@@ -1,4 +1,4 @@
-/* js_imager.h — lord.imager (the LordOS Imager; see js_imager.c, docs/IMAGER.md). */
+/* js_imager.h — lord.imager (the Insane OS Imager; see js_imager.c, docs/IMAGER.md). */
 #ifndef LORD_JS_IMAGER_H
 #define LORD_JS_IMAGER_H
 

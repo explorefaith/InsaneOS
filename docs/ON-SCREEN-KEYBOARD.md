@@ -17,7 +17,7 @@ It opens only when someone asks for it; a text field taking focus never opens it
 keyboard (decided by the maintainer on 2026-11-01, replacing the Off, Automatic and Always setting).
 
 The ways to open it: the keyboard button next to the clock (`OskStatus`, in the bar unless Settings → Desktop & Dock →
-Menu Bar (Taskbar in Lord Classic) → On-screen keyboard turns it off, issue #58), the shortcut ❖⌃K, and
+Menu Bar (Taskbar in Insane Classic) → On-screen keyboard turns it off, issue #58), the shortcut ❖⌃K, and
 **Show Keyboard** in Settings → Keyboard. It stays open until it's closed with one of those or its hide button.
 
 The login and lock screens are another user's session (`lordos-greeter`): there it opens only with the keyboard
@@ -42,7 +42,7 @@ tells them apart. Use Always, or the menu bar button, on such a machine.
 
 | Where the field is | How it is known |
 |---|---|
-| LordOS: `TextInput`, and custom fields that use `ime.attach` (Notes, Terminal, Text Editor) | `sdk/textfocus.js` |
+| Insane OS: `TextInput`, and custom fields that use `ime.attach` (Notes, Terminal, Text Editor) | `sdk/textfocus.js` |
 | Isolated apps (`lord-server --app`: Mail, Passwords…) | the `BOP_TEXT_FOCUS` broker hint, obeyed only for the window in front |
 | Linux apps that use `zwp_text_input_v3` (GTK, Qt) | `server/src/wl/wl_textinput.c` → `textinput` event |
 | Linux apps that don't (X11 apps; Chromium by default) | not known: **the menu bar button opens it** and the keys work the same |
@@ -98,7 +98,7 @@ the active layout types, and the text goes to the field, which handles its own d
 - **No new way to run anything.** `lord.input.tap` takes one key from a closed list (`osk_key_allowed`):
   letters, digits, punctuation, Tab, Esc, Enter, Backspace, arrows. Never Ctrl, Alt, Super, function or
   system keys; Shift and AltGr come only from a level, and AltGr only if the layout has a third level
-  (otherwise Right Alt is plain Alt). A tap can't be a shortcut, and Super, which starts LordOS's
+  (otherwise Right Alt is plain Alt). A tap can't be a shortcut, and Super, which starts Insane OS's
   shortcuts, can't be pressed at all. Modifiers are pressed and released with the key, so none stays down.
 - **Same routing as a physical key.** Keys go only to the focused client, as `wl_send_paste` does.
 - **Never reachable by isolated apps.** `lord.input` exists only in the theme's and the login screen's

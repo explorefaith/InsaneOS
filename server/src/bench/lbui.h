@@ -1,8 +1,8 @@
-/* lbui.h — LordBench's workloads on LordOS's own interface code (docs/BENCHMARK.md, "Workloads"): the UI
+/* lbui.h — InsaneBench's workloads on Insane OS's own interface code (docs/BENCHMARK.md, "Workloads"): the UI
  * engine's layout and paint (ui/node.c, layout.c, paint.c, text.c, canvas.c) on a fixed scene, and the
  * shaper (ui/otf.c, shape*.c, bidi.c) on fixed paragraphs in five scripts. Everything they use is built
  * into lord-bench: the scene is made in C from fixed data, the fonts are bytes in the binary
- * (build/gen/lb_fonts.h: LordOS's Inter and the subset Noto fonts of src/bench/fonts), and nothing is
+ * (build/gen/lb_fonts.h: Insane OS's Inter and the subset Noto fonts of src/bench/fonts), and nothing is
  * opened by path. Used by lord-bench (lbmain.c) and tested in tests/lordbench_test.c. */
 #ifndef LORD_BENCH_LBUI_H
 #define LORD_BENCH_LBUI_H

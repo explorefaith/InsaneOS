@@ -63,9 +63,9 @@
     {
       "file": "docs/protected-window-capture.png",
       "caption": {
-        "en": "A protected window comes out black in a LordOS screenshot.",
-        "es": "Una ventana protegida sale en negro en una captura de LordOS.",
-        "pt": "Uma janela protegida sai preta numa captura do LordOS."
+        "en": "A protected window comes out black in a Insane OS screenshot.",
+        "es": "Una ventana protegida sale en negro en una captura de Insane OS.",
+        "pt": "Uma janela protegida sai preta numa captura do Insane OS."
       }
     },
     {
@@ -307,9 +307,9 @@
       ],
       "edges": [],
       "caption": {
-        "en": "All of this is LordOS's own code calling the kernel directly; no container tool is involved.",
-        "es": "Todo esto es código propio de LordOS que llama directamente al kernel; no interviene ninguna herramienta de contenedores.",
-        "pt": "Tudo isso é código próprio do LordOS chamando o kernel diretamente; nenhuma ferramenta de contêiner é usada."
+        "en": "All of this is Insane OS's own code calling the kernel directly; no container tool is involved.",
+        "es": "Todo esto es código propio de Insane OS que llama directamente al kernel; no interviene ninguna herramienta de contenedores.",
+        "pt": "Tudo isso é código próprio do Insane OS chamando o kernel diretamente; nenhuma ferramenta de contêiner é usada."
       }
     },
     {

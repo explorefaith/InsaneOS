@@ -1,8 +1,8 @@
-LordOS is free and will stay free. Donations help the iPERFEX group keep building it: development time, testing on real hardware and hosting.
+Insane OS is free and will stay free. Donations help the iPERFEX group keep building it: development time, testing on real hardware and hosting.
 
 ## A donation is voluntary
 
-Donating is entirely optional. Everything on lordos.org and in LordOS is available whether you donate or not.
+Donating is entirely optional. Everything on lordos.org and in Insane OS is available whether you donate or not.
 
 ## Not a purchase
 
@@ -24,7 +24,7 @@ Donations are **non-refundable**, except where the law requires otherwise. If yo
 
 ## Taxes
 
-Donations to LordOS are **not tax-deductible**. The iPERFEX group is not a registered charity or non-profit organization, and we can't issue tax receipts for donations. You are responsible for any taxes that apply to you.
+Donations to Insane OS are **not tax-deductible**. The iPERFEX group is not a registered charity or non-profit organization, and we can't issue tax receipts for donations. You are responsible for any taxes that apply to you.
 
 ## Who receives them
 

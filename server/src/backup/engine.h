@@ -1,7 +1,7 @@
 /* engine.h — the backup engine (Backups app, docs/SYSTEM.md).
  *
  * Our own code, no rsync: a snapshot is a complete tree of the home folder in
- *   <dest>/LordOS-Backups/<host>-<user>/<YYYY-MM-DD-HHMMSS>/
+ *   <dest>/Insane OS-Backups/<host>-<user>/<YYYY-MM-DD-HHMMSS>/
  * Files that did not change (same size, modification time and mode as in the previous snapshot)
  * are hard links to the previous one: every snapshot looks complete but only takes the space of
  * what changed. While copying, the tree lives in .inprogress-<stamp>; it is renamed at the end
@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#define BK_DIRNAME "LordOS-Backups"
+#define BK_DIRNAME "Insane OS-Backups"
 #define BK_MAX_EXCL 64
 #define BK_MAX_SNAPS 4096
 #define BK_ID_LEN 18                    /* "2026-10-17-235959" + 0 */
@@ -24,7 +24,7 @@ typedef struct BkRun BkRun;
 struct BkRun {
     /* input */
     const char *home;                   /* source folder (already resolved with realpath) */
-    const char *machine;                /* <dest>/LordOS-Backups/<host>-<user> (created if missing) */
+    const char *machine;                /* <dest>/Insane OS-Backups/<host>-<user> (created if missing) */
     const char *excl[BK_MAX_EXCL];      /* prefixes relative to home ("Videos/large", ".cache") */
     int nexcl;
     const char *skip_real;              /* real path that is never copied (the destination, if inside home) */

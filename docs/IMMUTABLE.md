@@ -1,16 +1,16 @@
-# An immutable LordOS (A/B system images): design study
+# An immutable Insane OS (A/B system images): design study
 
 **Status (0.8.2; unchanged through 0.8.5-beta): design study plus an experimental prototype.** Nothing here changes the regular
 ISO, the Raspberry Pi image, `install.sh` or the in-place APT updates of [UPDATES.md](UPDATES.md).
 The prototype (`tools/immutable/`) builds a separate disk image that boots in a virtual machine; it
-is a minimal Debian 13, not the LordOS desktop yet. Every statement below is marked as one of:
+is a minimal Debian 13, not the Insane OS desktop yet. Every statement below is marked as one of:
 
 - **Verified** — run on VM 122 (Proxmox, Debian 13, QEMU/KVM with UEFI inside it) on 2026-10-19;
 - **Checked** — read from Debian 13's packages, kernel configuration or upstream documentation, not run;
 - **Design** — a proposal, not built.
 
 This is phase 3 of 3 of "System apps immutable". Phase 1 (0.8.2, [SIGNING.md](SIGNING.md),
-"Verified system code") checks LordOS's own JavaScript bundles against a signed manifest; phase 2 marks
+"Verified system code") checks Insane OS's own JavaScript bundles against a signed manifest; phase 2 marks
 system apps as not removable. This study is about the whole system.
 
 ## Summary
@@ -29,10 +29,10 @@ ships almost completely:
   so Debian security updates reach users as new images. Users keep installing apps: `.lpk` apps in
   the home folder as today, and Debian packages as **system extension images** layered over `/usr`
   (later phase).
-- The updater is **LordOS's own code** in the package engine (it already has HTTP, OpenPGP
+- The updater is **Insane OS's own code** in the package engine (it already has HTTP, OpenPGP
   signatures and SHA-256), following systemd-sysupdate's on-disk conventions, because
   **Debian 13 does not ship systemd-sysupdate** (checked).
-- It is a **separate edition**: "LordOS" (classic, apt-managed) stays as it is and stays supported;
+- It is a **separate edition**: "Insane OS" (classic, apt-managed) stays as it is and stays supported;
   the immutable edition is for new installs from the ISO and a Raspberry Pi image variant. There is
   no in-place migration of existing systems.
 
@@ -41,7 +41,7 @@ two `/usr` slots with dm-verity and a root partition; a signed update written in
 and checked against its root hash; the new version booting with boot counting and being marked good;
 `/etc` and `/home` kept; a deliberately broken version failing its health check three times and the
 machine falling back to the previous version **without anyone touching it**; and a corrupted block of
-the running `/usr` being refused by dm-verity. Secure Boot, the TPM, the LordOS desktop on top, the
+the running `/usr` being refused by dm-verity. Secure Boot, the TPM, the Insane OS desktop on top, the
 Raspberry Pi and app layering are **design only**.
 
 **Effort:** about 300–430 hours in five phases after this one (see "Phased plan"); the first usable
@@ -60,16 +60,16 @@ experimental edition (PC, UEFI, full desktop, updates from the Store) is phase 1
    settings, `/etc` changes and installed apps survive updates and rollbacks.
 4. **No regression for the classic edition.** `install.sh` on Debian, apt, the Store's Debian
    packages and the 0.8.1 update path keep working exactly as today.
-5. **Low-end hardware first** (a LordOS principle): no extra daemons at run time, reads cost a
+5. **Low-end hardware first** (a Insane OS principle): no extra daemons at run time, reads cost a
    hash per 4 KiB block once, updates don't need twice the RAM, SD cards aren't worn by the scheme.
 
 Not goals: making root powerless at run time (see the threat model), a container-only "everything is
 a Flatpak" system, or converting existing installations in place.
 
-## Where LordOS stands today
+## Where Insane OS stands today
 
 - `/usr` is an ordinary ext4 directory tree owned by dpkg. Root (or `sudo`) can change any file.
-- 0.8.2 phase 1 (`server/src/sec/codesig.c`) checks only LordOS's JavaScript bundles, from inside
+- 0.8.2 phase 1 (`server/src/sec/codesig.c`) checks only Insane OS's JavaScript bundles, from inside
   `lord-server`; its threat model says plainly that it does not protect against root, who can
   replace `lord-server` itself (and its compiled-in key).
 - Updates are in-place `dpkg` upgrades from the signed APT repository (0.8.1). A broken update is
@@ -92,13 +92,13 @@ Attackers and failures considered:
 | T5 | Corruption | bit rot, a failing SD card, a bad sector under `/usr` |
 | T6 | A hostile mirror or network | a modified image on the download path, a replayed old image |
 
-What each layer stops (✓ stops, ~ partly, ✗ no). "Classic" is today's LordOS with 0.8.2 phase 1.
+What each layer stops (✓ stops, ~ partly, ✗ no). "Classic" is today's Insane OS with 0.8.2 phase 1.
 
 | | Classic 0.8.2 | Immutable, no Secure Boot (Pi 5 today, PCs with SB off) | Immutable + Secure Boot + measured boot (PC) |
 |---|---|---|---|
 | T1 app changes system files | ✓ (permissions) | ✓ | ✓ |
 | T2 root changes `/usr` at run time | ✗ | ~ (writes to the mounted `/usr` fail; writing the raw partition is caught at read time as I/O errors) | ~ (same) |
-| T2 root **persists** a change to `/usr` across reboot | ✗ | ✗ (root rewrites the ESP: a new UKI with a new hash) | ✓ (a UKI not signed with the LordOS key does not boot) |
+| T2 root **persists** a change to `/usr` across reboot | ✗ | ✗ (root rewrites the ESP: a new UKI with a new hash) | ✓ (a UKI not signed with the Insane OS key does not boot) |
 | T2 root persists through `/etc` or `/var` (a unit in `/etc/systemd`, a cron job, a `.bashrc`) | ✗ | ✗ | ✗ (see below) |
 | T3 offline change of `/usr` | ✗ | ✓ detected (dm-verity fails reads) — but the boot partition itself is unsigned, so an offline attacker can replace the kernel and hash | ✓ |
 | T3 offline change of `/etc`, `/home` | ✗ | ✗ | ~ (only with the root partition encrypted and sealed to the TPM's measurements) |
@@ -132,18 +132,18 @@ modified" screen instead of an I/O error.
 
 **Secure Boot and measured boot on PCs (design).** The chain would be: firmware (Secure Boot, the
 usual third-party CA) → **shim** (signed by that CA; Debian's) → **systemd-boot** (Debian 13 ships a
-signed one: `systemd-boot-efi-amd64-signed`, checked) → the **LordOS UKI**, signed with a LordOS
+signed one: `systemd-boot-efi-amd64-signed`, checked) → the **Insane OS UKI**, signed with a Insane OS
 Secure Boot key that the user enrolls once as a Machine Owner Key (shim's MokManager screen on the
 first boot after install) → kernel command line with `usrhash=` inside the signed UKI → initrd inside
 the signed UKI → dm-verity `/usr`. Because the command line is part of the signed UKI, nobody can
 point a signed kernel at a different `/usr`. With a TPM, systemd-stub measures the UKI's sections into
 PCR 11; an optionally encrypted root partition can be sealed to a **signed PCR policy**
-(`systemd-cryptenroll --tpm2-public-key`), so it unlocks for every LordOS-signed version, including
+(`systemd-cryptenroll --tpm2-public-key`), so it unlocks for every Insane OS-signed version, including
 updates, but not for a foreign kernel. Shipping our own signed shim would need the third-party CA's
 review program; enrolling a MOK avoids that and is what users already do for out-of-tree drivers.
 
 **The Raspberry Pi 5.** It has no UEFI Secure Boot. Its firmware has its own signed-boot mode
-(a customer key fused into one-time-programmable memory, per board, irreversible), which LordOS
+(a customer key fused into one-time-programmable memory, per board, irreversible), which Insane OS
 cannot turn on for users. So on the Pi the immutable edition gives integrity at run time,
 corruption detection and A/B rollback, **not** protection against an offline attacker who rewrites
 the boot partition. That is still a large improvement for the Pi's main failure modes (SD card
@@ -179,7 +179,7 @@ embedded systems.
   symlinks into `/usr`).
 - **Cost:** `/usr` must be "hermetic": everything that changes per machine lives in `/etc` or `/var`.
   Debian mostly is, with known exceptions (below). Updates are whole images (deltas later).
-- **Pi fit:** dm-verity and EROFS are plain kernel features (the LordOS Pi kernel needs
+- **Pi fit:** dm-verity and EROFS are plain kernel features (the Insane OS Pi kernel needs
   `CONFIG_DM_VERITY` and `CONFIG_EROFS_FS` checked/enabled); no systemd-boot, so A/B is done with
   the firmware's `tryboot` instead (below).
 
@@ -223,7 +223,7 @@ Debian packages work with it.
   (greenboot-style), not in Debian.
 - **Debian fit:** building trees is fine; installing extra Debian packages on the client ("package
   layering", as rpm-ostree does for RPM) has no maintained apt equivalent.
-- Bigger dependency (libostree, GLib, curl) on every client; LordOS prefers small, own code.
+- Bigger dependency (libostree, GLib, curl) on every client; Insane OS prefers small, own code.
 
 ### E. Two full root partitions (A/B root, no verity)
 
@@ -280,7 +280,7 @@ same package list + `lordos_<version>.deb`), then split:
   `/usr/share/factory/etc` for updates (below).
 
 So dpkg stays the source of truth for what is in the system, and every Debian security update
-becomes a LordOS image release (a weekly security image plus LordOS releases; see "Update size").
+becomes a Insane OS image release (a weekly security image plus Insane OS releases; see "Update size").
 
 ### Making Debian's `/usr` hermetic: `/etc`, users, caches
 
@@ -291,7 +291,7 @@ This is where Debian and immutable images rub. Known issues and the planned answ
 | Packages ship defaults in `/etc` (conffiles), and an update may change them | Each image carries `/usr/share/factory/etc`. On the first boot of a new version, the migration runner (`/usr/lib/lordos/migrate`, already in 0.8.1) does a **three-way merge**: a file the admin never changed (same as the old factory copy) is replaced with the new factory copy; a changed one is kept and the new default goes next to it as `<file>.lordos-new`, reported in the Store; new files are copied. This is how OSTree handles `/etc`. |
 | System users and groups made by `adduser` in postinst (`lordos-greeter`, `systemd-*`, `messagebus`…) live in `/etc/passwd` | Ship `sysusers.d` entries for every system user of the image (generated at build time from the chroot's `/etc/passwd`); `systemd-sysusers` creates missing ones on boot. |
 | Caches that dpkg triggers rebuild: `ld.so.cache` (in `/etc`!), icon and MIME caches, `gdk-pixbuf` loaders, fontconfig, GSettings schemas | Built at image build time into `/usr`; `ldconfig` at boot only when `/etc/ld.so.conf.d` changed (Debian's `ldconfig.service` already does this with `ConditionNeedsUpdate=/etc`). System extensions trigger a rebuild into `/var/cache` (phase 4). |
-| Units enabled with `systemctl enable` create links in `/etc` | Enable LordOS's units from `/usr` (vendor `.wants`/`.requires` links, as the prototype does) or presets applied by the merge; keep the admin's own `systemctl` choices in `/etc`. |
+| Units enabled with `systemctl enable` create links in `/etc` | Enable Insane OS's units from `/usr` (vendor `.wants`/`.requires` links, as the prototype does) or presets applied by the merge; keep the admin's own `systemctl` choices in `/etc`. |
 | `/var/lib/dpkg` describes the image, not the machine | Ship it read-only inside `/usr` (`/usr/lib/lordos/dpkg-status`) for the Store's "installed" view and for SBOM-style queries; there is no dpkg database on the client to corrupt. |
 | Kernel modules built on the machine (DKMS: some Wi-Fi, out-of-tree GPU drivers) | Not possible on a verified `/usr`. Ship the common ones prebuilt in the image; others need the classic edition. Said clearly in the installer. |
 | `install.sh` and Debian derivatives | Classic only: they are someone else's Debian installation. |
@@ -356,7 +356,7 @@ wear is neutral-to-better for the system and unchanged for user data.
 
 - **Format.** Each version publishes `lordos_usr_<v>.erofs`, `lordos_usr_<v>.verity`,
   `lordos_usr_<v>.roothash` and the signed UKI `lordos_<v>.efi` (Pi: a `bootfs` image), listed in a
-  `SHA256SUMS` signed with the LordOS **APT archive key** (OpenPGP Ed25519, which the package engine
+  `SHA256SUMS` signed with the Insane OS **APT archive key** (OpenPGP Ed25519, which the package engine
   already verifies) — next to the APT repository, e.g. `https://lordos.org/images/stable/<arch>/`.
   The root hash binds the data; the UKI's signature binds the root hash; the `SHA256SUMS` signature
   binds the download.
@@ -366,14 +366,14 @@ wear is neutral-to-better for the system and unchanged for user data.
   so a crash never leaves a half slot that looks bootable; write data and hash partitions; **verify
   the written blocks against the root hash** (`veritysetup verify`); set the partition UUIDs derived
   from the root hash and the labels; install the UKI last, as `lordos_<v>+3.efi`. These are
-  systemd-sysupdate's conventions (labels `@v`, `+tries` names, `_empty`), so LordOS can switch to
+  systemd-sysupdate's conventions (labels `@v`, `+tries` names, `_empty`), so Insane OS can switch to
   `systemd-sysupdate` if Debian ships it later, with the same disk.
-- **Store → Updates** shows "LordOS 0.9.1 is available" as today; Update downloads and writes the
+- **Store → Updates** shows "Insane OS 0.9.1 is available" as today; Update downloads and writes the
   inactive slot while the user keeps working; then "Restart required". Nothing is replaced under the
   running session (an improvement over 0.8.1, where files change under it).
 - **Update size and bandwidth.** A full image is ~1.2–1.6 GB to download (zstd-19 transfer: the
   prototype's 202 MB EROFS compresses to 167 MB; xz −6 165 MB) against ~6 MB for a `lordos` `.deb`
-  today, so full images alone are not acceptable for LordOS users on slow links. Measured on the
+  today, so full images alone are not acceptable for Insane OS users on slow links. Measured on the
   prototype between versions 1 and 2 (a small change in `/usr/lib`): the deterministic EROFS images
   differ in **3 of 51,678 4-KiB blocks**, and `zstd --patch-from` (v1 as dictionary) makes a
   **156 KB** delta instead of 167 MB. Real releases change many packages, and inserting a file
@@ -388,18 +388,18 @@ wear is neutral-to-better for the system and unchanged for user data.
 - **Automatic.** A new version boots with 3 tries (`lordos_<v>+3.efi`); systemd-boot renames it on
   every attempt (`+2-1`, `+1-2`, …). When `boot-complete.target` is reached,
   `systemd-bless-boot` renames it to `lordos_<v>.efi` (good). `boot-complete.target` requires the
-  **LordOS health check**: in the product, "`lord-sessiond` showed the login screen and the GPU or
+  **Insane OS health check**: in the product, "`lord-sessiond` showed the login screen and the GPU or
   CPU path composited a frame" plus `systemd-boot-check-no-failures`. On failure the health check
   restarts the machine; after the last try systemd-boot treats the entry as bad and boots the
   previous version. In the initrd, `panic=10 rd.emergency=reboot` turns an early failure (no `/usr`,
   a kernel that doesn't find the disk) into a counted attempt too. **Verified in the prototype**
   except the product health check.
 - **Telling the user.** After a fallback, the session sees that the booted version is older than the
-  newest entry, which is marked bad, and shows: "LordOS 0.9.2 could not start on this computer, so it
+  newest entry, which is marked bad, and shows: "Insane OS 0.9.2 could not start on this computer, so it
   went back to 0.9.1. Your files and settings are unchanged. The update will be offered again when a
   newer version is available." The bad version is remembered and not reinstalled.
 - **Choosing the previous version.** The boot menu (shown with a key held, or after a failed boot)
-  lists "LordOS 0.9.2" and "LordOS 0.9.1 (previous)". Settings → General → "Restart into the previous
+  lists "Insane OS 0.9.2" and "Insane OS 0.9.1 (previous)". Settings → General → "Restart into the previous
   version" sets a one-shot entry (`LoaderEntryOneShot`, a new closed admin action), and "Keep this
   version" makes it the default.
 
@@ -424,22 +424,22 @@ The Store keeps working for every kind of app, but where things land changes:
 | `.lpk` apps | home folder | **the same**, unchanged |
 | WebAssembly apps | home folder | the same |
 | Debian packages from the Store (Linux apps, codecs, fonts) | `dpkg` into `/usr` | **system extension images** (phase 4): the package engine resolves the packages against the image's own package list, unpacks them (`dpkg-deb -x`, no maintainer scripts), and builds an EROFS `sysext` under `/var/lib/extensions` with an `extension-release` pinned to the image version; `systemd-sysext` overlays it on `/usr`. On every image update the engine rebuilds the extension for the new version before the reboot. Packages whose maintainer scripts do real work (system users, DKMS, services that need enabling) are refused with a clear message, or handled by known rules (sysusers, presets) |
-| Large popular apps (browsers, office) | Debian packages | prebuilt, signed **LordOS sysexts** with dm-verity, offered by the Store, or simply included in the image |
+| Large popular apps (browsers, office) | Debian packages | prebuilt, signed **Insane OS sysexts** with dm-verity, offered by the Store, or simply included in the image |
 | Developer tools (`gcc`, language toolchains, `apt` itself) | apt | a **Debian box**: a `systemd-nspawn` container with full apt, its home shared, apps shown in the launcher (phase 4) |
 | Portable per-user apps (single-file app images, user-local installs) | home folder | the same (`~/.local`) |
 | `/usr/local` and `/opt` | writable | `/opt` on the root partition (bind or symlink); `/usr/local` as a writable directory from the root partition mounted over the image's empty one |
-| Flatpak | not offered | a possible later app source; it is not used for LordOS's own isolation (the policy in [ARCHITECTURE.md](ARCHITECTURE.md) stands). A decision for the project, not part of this design |
+| Flatpak | not offered | a possible later app source; it is not used for Insane OS's own isolation (the policy in [ARCHITECTURE.md](ARCHITECTURE.md) stands). A decision for the project, not part of this design |
 
-Locally built system extensions cannot be signed with a LordOS key, so `systemd-sysext`'s image
+Locally built system extensions cannot be signed with a Insane OS key, so `systemd-sysext`'s image
 policy would accept unsigned extensions only from `/var/lib/extensions`, created by the root-side
 package engine, and the Store marks them as "added on this computer". That is the same trust as a
 Debian package installed by an administrator today, and less than the verified base.
 
 ### Editions and `install.sh`
 
-- **LordOS (classic):** the ISO's default install, the current Pi image and `install.sh` on Debian.
+- **Insane OS (classic):** the ISO's default install, the current Pi image and `install.sh` on Debian.
   apt and in-place updates (0.8.1). Supported indefinitely.
-- **LordOS Immutable (experimental at first):** an option in the ISO installer (UEFI PCs) and a second
+- **Insane OS Immutable (experimental at first):** an option in the ISO installer (UEFI PCs) and a second
   Raspberry Pi image. Images and updates from the image channel.
 - **Migration:** **none in place.** Converting needs repartitioning a disk in use and turning a
   dpkg-managed system into an image, which can't be made safe. Moving is "back up with Backup,
@@ -521,7 +521,7 @@ $ /usr/lib/lordos/immutable/update http://10.0.2.2:8642
 $ systemctl reboot
 ##### booted after the update
 $ cat /usr/lib/lordos/immutable/VERSION
-  LordOS immutable prototype, image version 2
+  Insane OS immutable prototype, image version 2
 $ cat /etc/lordos-demo.conf /home/demo/notes.txt
   kept across updates
   my file
@@ -540,7 +540,7 @@ $ systemctl reboot
   [console] lordos: this version failed its health check; restarting in 5 s   (attempt 3)
 ##### booted on its own after the failed attempts
 $ cat /usr/lib/lordos/immutable/VERSION
-  LordOS immutable prototype, image version 2
+  Insane OS immutable prototype, image version 2
 $ /usr/lib/lordos/immutable/update --status
   slot A: /dev/vda2  label=lordos_usr_3
   slot B: /dev/vda4  label=lordos_usr_2  <- running
@@ -581,7 +581,7 @@ What this verifies:
 
 ### What the prototype does not do (yet)
 
-- The payload is a minimal Debian, not LordOS: no desktop, no `lord-sessiond` health check.
+- The payload is a minimal Debian, not Insane OS: no desktop, no `lord-sessiond` health check.
 - No Secure Boot (unsigned UKI, OVMF without enrolled keys), no TPM, no verity signature partition.
 - The updater is a shell script with `curl` and `gpgv`; the product one is C in the package engine.
 - No three-way `/etc` merge (the factory copy is recorded but not used), no sysusers generation,
@@ -596,10 +596,10 @@ Estimates are for one experienced developer working with agents, including VM te
 |---|---|---|---|
 | 0 | 0.8.2 (this item) | Study, prototype (VM-verified A/B with dm-verity, boot counting, automatic rollback) | done |
 | 1 | 0.9.x | **Experimental PC edition with the full desktop:** image build from the ISO's chroot (`tools/immutable` grows into it), hermetic `/usr` fixes (factory `/etc` + three-way merge in `migrate`, sysusers for every system user, vendor-enabled units), dracut initrd trimmed, installer option "Immutable (experimental)" with repart definitions, the updater in C (`image-update` admin action, APT-key-signed `SHA256SUMS`), Store → Updates for images, the health check in `lord-sessiond`, fallback notice, "previous version" in Settings, factory reset. VM tests (UEFI), real-PC test | 70–100 h |
-| 2 | 0.9.x | **Secure Boot and measured boot:** LordOS Secure Boot key (on the maintainer's Mac, like the other keys), signed UKIs, shim + MOK enrollment step in the installer and its help, verity signature partition, `restart-on-corruption`, optional encrypted root with a signed TPM PCR policy | 40–60 h |
-| 3 | 0.9.x–1.0 | **Raspberry Pi 5 immutable image:** GPT + `autoboot.txt`/`tryboot` A/B, watchdog, kernel in the image (closes the Pi kernel gap), LordOS Pi kernel with dm-verity/EROFS checked, board tests (SD and NVMe) | 40–60 h |
+| 2 | 0.9.x | **Secure Boot and measured boot:** Insane OS Secure Boot key (on the maintainer's Mac, like the other keys), signed UKIs, shim + MOK enrollment step in the installer and its help, verity signature partition, `restart-on-corruption`, optional encrypted root with a signed TPM PCR policy | 40–60 h |
+| 3 | 0.9.x–1.0 | **Raspberry Pi 5 immutable image:** GPT + `autoboot.txt`/`tryboot` A/B, watchdog, kernel in the image (closes the Pi kernel gap), Insane OS Pi kernel with dm-verity/EROFS checked, board tests (SD and NVMe) | 40–60 h |
 | 4 | 1.x | **Apps and bandwidth:** Debian packages as system extensions from the Store, prebuilt signed sysexts, the Debian box container, chunked delta updates (signed chunk index, seeding from the running slot), weekly security images in the release pipeline | 100–140 h |
-| 5 | later | **Hardening `/etc` and execution:** signed confexts for LordOS's own configuration, `/etc` reduced to an allow-list of user changes, IPE policy (execute only from verified images), signed minimum version against rollback attacks; decide whether the immutable edition becomes the default | 50–70 h |
+| 5 | later | **Hardening `/etc` and execution:** signed confexts for Insane OS's own configuration, `/etc` reduced to an allow-list of user changes, IPE policy (execute only from verified images), signed minimum version against rollback attacks; decide whether the immutable edition becomes the default | 50–70 h |
 
 Total after this study: **about 300–430 hours**. Each phase is useful on its own and none of them
 changes the classic edition.

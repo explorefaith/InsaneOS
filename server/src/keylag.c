@@ -114,7 +114,7 @@ void keylag_sent_wl(int traceable) {
     keys[nkeys++] = pending;
 }
 
-void keylag_handled(void) { has_pending = 0; }     /* not sent to an app: LordOS's own, never traced */
+void keylag_handled(void) { has_pending = 0; }     /* not sent to an app: Insane OS's own, never traced */
 
 void keylag_flushed(void) {
     if (!keylag_enabled) return;

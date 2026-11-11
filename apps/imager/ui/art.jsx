@@ -1,4 +1,4 @@
-// art.jsx — the LordOS Imager's drawings, made of views (no product photos or renders, no other
+// art.jsx — the Insane OS Imager's drawings, made of views (no product photos or renders, no other
 // project's artwork): the board, a PC, a USB stick, an SD card, the coolers and the two desktop
 // styles. Shared by the native and desktop apps.
 import { View, Text, useTheme } from '@lordos/sdk';

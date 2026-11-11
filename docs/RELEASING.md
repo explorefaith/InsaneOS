@@ -1,6 +1,6 @@
-# Releasing LordOS
+# Releasing Insane OS
 
-How a LordOS version goes from `main` to a [GitHub release](https://github.com/lordbasex/LordOS/releases).
+How a Insane OS version goes from `main` to a [GitHub release](https://github.com/lordbasex/Insane OS/releases).
 The releases page is the project's public changelog: every release is documented in full, from
 [CHANGELOG.md](../CHANGELOG.md).
 
@@ -17,8 +17,8 @@ The releases page is the project's public changelog: every release is documented
 - **An update of a published version** that only fixes it or completes it (no features planned for
   the next version) adds a fourth number: `0.8.4.1-beta` after `0.8.4-beta`, package `0.8.4.1`. dpkg
   sorts it after `0.8.4` and before `0.8.5`, so Store → Updates and apt offer it like any version.
-  (Semantic Versioning has no fourth number; LordOS uses it only for these.)
-- The release title is **`LordOS <version>`**, for example `LordOS 0.8.0-beta`.
+  (Semantic Versioning has no fourth number; Insane OS uses it only for these.)
+- The release title is **`Insane OS <version>`**, for example `Insane OS 0.8.0-beta`.
 - Every beta (any version with a suffix) is published as a **pre-release**. Only a version without
   a suffix is a normal release.
 
@@ -27,7 +27,7 @@ The releases page is the project's public changelog: every release is documented
 [CHANGELOG.md](../CHANGELOG.md) follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/):
 
 - Changes go under `## [Unreleased]` as they land, in `### Added`, `### Changed`, `### Deprecated`,
-  `### Removed`, `### Fixed` and `### Security` (LordOS also uses `### Known issues and
+  `### Removed`, `### Fixed` and `### Security` (Insane OS also uses `### Known issues and
   limitations`, `### Upgrading` and `### Verifying`).
 - Bullets are written for users first (what you can do now, what was wrong), then technical detail
   where useful, with links to the docs (`docs/…`).
@@ -42,12 +42,12 @@ The releases page is the project's public changelog: every release is documented
    add a new empty `## [Unreleased]` above it, and update the link references at the bottom:
 
    ```
-   [Unreleased]: https://github.com/lordbasex/LordOS/compare/v<version>...HEAD
-   [<version>]: https://github.com/lordbasex/LordOS/compare/v<previous>...v<version>
+   [Unreleased]: https://github.com/lordbasex/Insane OS/compare/v<version>...HEAD
+   [<version>]: https://github.com/lordbasex/Insane OS/compare/v<previous>...v<version>
    ```
 
    Also bump `package.json` (`version`, `lordos.channel`) and commit both.
-2. **Tag.** `git tag -a v<version> -m "LordOS <version>"` on that commit, and push the tag.
+2. **Tag.** `git tag -a v<version> -m "Insane OS <version>"` on that commit, and push the tag.
 3. **Sign the system code, then build** from the tag.
    - On the maintainer's machine (where the release key lives): `npm run build`, then
      `tools/release/sign-code.sh`. It regenerates `code-manifest.json` (the SHA-256 of every theme
@@ -82,7 +82,7 @@ The releases page is the project's public changelog: every release is documented
      new ISO (0.8.4.1 did: the 0.8.4 ISO stayed the current one, see [ISO.md](ISO.md)).
    - Copy them, and `tools/install/install.sh` as `install.sh`, into one release folder (with
      `lordos-hwdata_<date>_all.deb`: `install.sh` installs it from the release together with `lordos`, since a
-     Debian system has no LordOS repository yet).
+     Debian system has no Insane OS repository yet).
 4. **SBOM.** On each build VM, `tools/release/make-sbom.sh lordos_<v>_<arch>.deb`, and put the
    `.spdx.json` files in the release folder ([COMPLIANCE.md](COMPLIANCE.md)).
 5. **Sign.** On the maintainer's machine, `tools/release/sign-release.sh <release-dir>`: it writes
@@ -106,7 +106,7 @@ The releases page is the project's public changelog: every release is documented
 
    On a clean VM with the previous release installed, point a copy of `lordos.sources` at
    `https://lordos.org/apt-staging` (or a `file:` copy of the tree) and check: `sudo apt update`
-   is clean, Store → Updates shows "LordOS <version> is available" with these notes, Update installs
+   is clean, Store → Updates shows "Insane OS <version> is available" with these notes, Update installs
    it, the migrations run (`ls /var/lib/lordos/migrations`), the user's settings are untouched,
    "Restart required" appears and the system comes back after the restart; a second `apt install
    --reinstall lordos` runs no migration again. On the Raspberry Pi, `apt-get update` against
@@ -135,7 +135,7 @@ The releases page is the project's public changelog: every release is documented
 9. **Publish:**
 
    ```sh
-   gh release create v<version> --title "LordOS <version>" --prerelease --verify-tag \
+   gh release create v<version> --title "Insane OS <version>" --prerelease --verify-tag \
        --notes-file notes.md <release-dir>/*
    ```
 
@@ -156,7 +156,7 @@ that already exists, so it can be run again. `server/tests/hwreport_test.mjs` fa
 
 <!-- hardware labels -->
 ```sh
-R=lordbasex/LordOS
+R=lordbasex/Insane OS
 for l in hardware-report \
     report:valid report:check report:invalid report:missing \
     kind:vm kind:board kind:laptop kind:server kind:desktop \
@@ -168,7 +168,7 @@ for l in hardware-report \
 done
 ```
 
-Check with `gh label list --repo lordbasex/LordOS --limit 100`. Done for 0.8.7: 33 labels created.
+Check with `gh label list --repo lordbasex/Insane OS --limit 100`. Done for 0.8.7: 33 labels created.
 with a fake fetch), never on a real issue, because workflows for `issues` events run from the default branch.
 
 ## Voice packages
@@ -187,7 +187,7 @@ tools/release/apt-repo.sh build staging <out>/*.deb      # then live, as for any
 
 (0.8.7; [BENCHMARK.md](BENCHMARK.md), "Newer snapshots between releases".) System Information's Compatibility panel
 reads the tested-hardware snapshot from the `lordos-hwdata` package, so newly accepted reports reach installed
-systems without a LordOS release: the daily update check notices one available update and Store → Updates →
+systems without a Insane OS release: the daily update check notices one available update and Store → Updates →
 *Update all* installs it; the panel reads the files again the next time it opens, with no restart. Everything
 runs on the maintainer's Mac except building the `.deb` (it needs `dpkg-deb`: a build VM, or a `debian:trixie`
 container):

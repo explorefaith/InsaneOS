@@ -1,20 +1,20 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="brand/svg/logo-horizontal-dark.svg">
-    <img src="brand/svg/logo-horizontal-light.svg" alt="LordOS" height="96">
+    <img src="brand/svg/logo-horizontal-light.svg" alt="Insane OS" height="96">
   </picture>
 </p>
 
-# LordOS brand identity
+# Insane OS brand identity
 
-This document describes the LordOS identity: the logo, its colours, its typefaces and how to use
+This document describes the Insane OS identity: the logo, its colours, its typefaces and how to use
 them. The file index (every SVG, PNG and favicon, and how they are generated) is in
 [`brand/README.md`](brand/README.md). All the files come from `tools/gen-brand.py`. Don't edit
 the renders by hand.
 
-## 1. What LordOS is
+## 1. What Insane OS is
 
-LordOS is a free, fast and secure GNU/Linux distribution based on Debian, with a desktop environment of
+Insane OS is a free, fast and secure GNU/Linux distribution based on Debian, with a desktop environment of
 its own, built from its fundamental components on top of Debian and Wayland. It has its own display server and Wayland compositor written in C and
 its own React-based interface engine, the whole system idles at 465–487 MB of RAM (measured once,
 live ISO and installed, in a VM; `lord-server` 32–36 MB RSS at idle; the paper's §7.1), and it brings a Dock, an app launcher, a menu bar, instant search and polished
@@ -31,7 +31,7 @@ the base, a rounded rim and a faceted yellow gem on each tip. Next to it is the 
 <img src="brand/svg/app-icon.svg" alt="App icon" width="128"> <img src="brand/png/app-icon-64.png" alt="App icon, 64 px" width="64"> <img src="brand/png/app-icon-32.png" alt="App icon, 32 px" width="32"> <img src="brand/png/app-icon-16.png" alt="App icon, 16 px" width="16">
 
 The crown on a rounded square (22 % corner radius) with a diagonal violet gradient. It is the
-system's own icon (About, Settings → General, the Dock, Monitor, Help). Outside LordOS, use it for
+system's own icon (About, Settings → General, the Dock, Monitor, Help). Outside Insane OS, use it for
 store listings, avatars and anywhere a square mark is needed. File: `brand/svg/app-icon.svg`, PNGs
 from 16 to 1024 px in `brand/png/`.
 
@@ -94,10 +94,10 @@ social posts. Files: `brand/svg/social-card.svg`, `brand/png/social-card-1200x63
 
 | About (light) | Login screen |
 |---|---|
-| <img src="brand/screenshots/about-light.png" alt="About LordOS, light" width="420"> | <img src="brand/screenshots/greeter.png" alt="Login screen" width="420"> |
+| <img src="brand/screenshots/about-light.png" alt="About Insane OS, light" width="420"> | <img src="brand/screenshots/greeter.png" alt="Login screen" width="420"> |
 
-The two desktop styles carry the brand's name since 0.8.5: **Lord Flow** (menu bar and Dock, formerly
-Lord Default) and **Lord Classic** (taskbar and start menu, formerly Classic), in every language. In a
+The two desktop styles carry the brand's name since 0.8.5: **Insane Flow** (menu bar and Dock, formerly
+Lord Default) and **Insane Classic** (taskbar and start menu, formerly Classic), in every language. In a
 terminal, `lordos-fetch` (0.8.5) draws the crown in the brand colours beside a summary of the computer
 (true colour when the terminal says so, plain ASCII without colour).
 
@@ -130,13 +130,13 @@ terminal, `lordos-fetch` (0.8.5) draws the crown in the brand colours beside a s
 - **Wordmark: Plus Jakarta Sans.** "Lord" in ExtraBold (800) and "OS" in Medium (500), letter
   spacing −0.01 em, no space in between. SIL Open Font License 1.1 (release 2.7.1,
   github.com/tokotype/PlusJakartaSans). The two weights ship in `assets/fonts/` with their license.
-  In the OS the wordmark is live text in this face (`fontFamily: 'brand'`, the `LordOSWordmark`
+  In the OS the wordmark is live text in this face (`fontFamily: 'brand'`, the `InsaneWordmark`
   component). In the SVGs it is outlined from the same files, so they don't need the font
   installed.
 - **Interface: Inter.** All UI text (Regular 400, Medium 500, SemiBold 600, Bold 700). SIL Open Font
   License 1.1. Code and the terminal use JetBrains Mono.
 
-Plus Jakarta Sans is only for the name "LordOS" (and, if needed, short headlines next to it), never
+Plus Jakarta Sans is only for the name "Insane OS" (and, if needed, short headlines next to it), never
 for body text.
 
 ## 5. Usage
@@ -169,7 +169,7 @@ app icon, keep 10 % of its size. No text, edges or other marks go inside it. In 
 
 - Don't stretch, skew, rotate or re-proportion the logo, or move the crown to another side.
 - Don't recolour the crown, the band or the gems, or put the logo on clashing colours.
-- Don't set "LordOS" in another font or weight, add a space ("Lord OS") or change the case
+- Don't set "Insane OS" in another font or weight, add a space ("Lord OS") or change the case
   ("LORDOS", "Lordos").
 - Don't add outlines, drop shadows, glows, bevels or textures (the app icon's soft shadow is part
   of it).
@@ -177,9 +177,9 @@ app icon, keep 10 % of its size. No text, edges or other marks go inside it. In 
 - Don't trace or rebuild the logo from screenshots or raster images. Change `tools/gen-brand.py`
   and regenerate.
 
-## 6. Lumo, the guardian of LordOS
+## 6. Lumo, the guardian of Insane OS
 
-Lumo, the guardian of LordOS: a small celestial fox with white fur and violet highlights, who wears
+Lumo, the guardian of Insane OS: a small celestial fox with white fur and violet highlights, who wears
 a crown and a cape as symbols of protection, freedom and control.
 
 **Anatomy:**
@@ -198,13 +198,13 @@ a welcome, a job well done, a moment of calm, or a gentle hand when something go
 |:-:|:-:|:-:|:-:|
 | ![Lumo, front view](brand/mascot/png/lumo-front-512.png) | ![Lumo, three-quarter view](brand/mascot/png/lumo-three-quarter-512.png) | ![Lumo, back view](brand/mascot/png/lumo-back-512.png) | ![Lumo avatar](brand/mascot/png/lumo-avatar-256.png) |
 
-The head is big and the body small. The LordOS crown sits on top of the head, with a small
+The head is big and the body small. The Insane OS crown sits on top of the head, with a small
 three-lobed tuft of fur in front of its band. The violet capelet is fastened at the neck with a
 yellow gem and leaves the round white belly in view; from the back it shows a four-point star.
 
 ### Poses
 
-| Pose | Name | Meaning | Where LordOS uses it |
+| Pose | Name | Meaning | Where Insane OS uses it |
 |:-:|---|---|---|
 | ![Lumo waving](brand/mascot/png/lumo-wave-512.png) | `lumo-wave` | Hello, welcome | The installer's welcome step and the first page of the first-login tour (Help) |
 | ![Lumo with a shield](brand/mascot/png/lumo-shield-512.png) | `lumo-shield` | Protected, all good | Monitor → Network when the firewall is on and nothing was blocked |
@@ -213,7 +213,7 @@ yellow gem and leaves the round white belly in view; from the back it shows a fo
 | ![Lumo celebrating](brand/mascot/png/lumo-celebrate-512.png) | `lumo-celebrate` | Done, success | Store → Updates when everything is up to date |
 | ![Lumo confused](brand/mascot/png/lumo-confused-512.png) | `lumo-confused` | Something went wrong, nothing here | Error and "not available" states (Calendar, Contacts, Reminders, Logs, Disks, Help, the Store's package engine) |
 
-In LordOS (real sessions on the test VM, light and dark):
+In Insane OS (real sessions on the test VM, light and dark):
 
 | First-login tour (Help) | Installer | Service not available | About |
 |:-:|:-:|:-:|:-:|
@@ -243,7 +243,7 @@ in outcome states, never in "nothing selected" panes.
 - Do keep Lumo small and occasional: one per view, in welcome, success, security and error states.
 - Do keep the outline: it is what makes Lumo read on dark backgrounds.
 - Don't distort, stretch, rotate or crop Lumo (the avatar is the only crop).
-- Don't recolour the crown or its gems; it is the LordOS crown.
+- Don't recolour the crown or its gems; it is the Insane OS crown.
 - Don't change the cape's colour: it stays violet.
 - Don't give Lumo a long snout, a long tail or a big body; don't make it look like another
   project's mascot.
@@ -251,11 +251,11 @@ in outcome states, never in "nothing selected" panes.
 
 ## 7. Wallpapers
 
-Created by iPERFEX with an AI image generator; part of the LordOS brand assets.
-© iPERFEX, part of the LordOS brand.
+Created by iPERFEX with an AI image generator; part of the Insane OS brand assets.
+© iPERFEX, part of the Insane OS brand.
 
 Eleven original wallpapers in three categories, shipped in `/usr/share/backgrounds/lordos/` and
-listed by category in **Settings → Wallpaper** (with the Lord Flow theme's four gradients as a fourth
+listed by category in **Settings → Wallpaper** (with the Insane Flow theme's four gradients as a fourth
 category, "Gradients"). The files, sizes and how to regenerate them are in
 [`assets/wallpapers/README.md`](../assets/wallpapers/README.md).
 
@@ -286,7 +286,7 @@ category, "Gradients"). The files, sizes and how to regenerate them are in
 - **Lumo pieces:** Celestial and Aurora are an artistic interpretation of the celestial fox, with a
   long flowing tail. They don't replace the mascot drawings in section 6; for Lumo in the interface,
   use the brand kit.
-- **Do** use them as desktop, login and promotional backgrounds for LordOS, with the logo on top
+- **Do** use them as desktop, login and promotional backgrounds for Insane OS, with the logo on top
   following section 5.
 - **Don't** crop the crown out of Crystal Crown for use as a logo, or present them as another
   project's artwork.

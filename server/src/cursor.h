@@ -1,4 +1,4 @@
-/* cursor.h — LordOS cursor shapes (own vector drawing, at 1x and 2x). See docs/WINDOWS.md. */
+/* cursor.h — Insane OS cursor shapes (own vector drawing, at 1x and 2x). See docs/WINDOWS.md. */
 #ifndef LORD_CURSOR_H
 #define LORD_CURSOR_H
 

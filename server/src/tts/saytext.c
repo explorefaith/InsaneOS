@@ -88,7 +88,7 @@ size_t say_next(const char *s, size_t len, size_t max, size_t *skip) {
 }
 
 /* ---- which language ----
- * The most common short words of each language LordOS has voices for, and the letters only one of them uses. */
+ * The most common short words of each language Insane OS has voices for, and the letters only one of them uses. */
 static const char *const WORDS_ES[] = { "el", "la", "los", "las", "de", "del", "que", "y", "en", "un", "una", "es", "por", "con",
     "para", "no", "se", "al", "lo", "como", "más", "pero", "su", "sus", "le", "ya", "muy", "también", "fue", "ha", "este",
     "esta", "hay", "está", "son", "yo", "me", "mi", "tu", "qué", "cuando", "donde", "porque", "sin", "sobre", "entre",

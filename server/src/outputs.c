@@ -19,7 +19,7 @@ int out_scale_round(double f) {
     return pct;
 }
 
-/* About 110 logical px per inch is what desktop UIs (and LordOS's theme) are drawn for: a 24"
+/* About 110 logical px per inch is what desktop UIs (and Insane OS's theme) are drawn for: a 24"
  * 1080p (92 dpi) stays at 100 %, a 27" 4K (163 dpi) gets 150 %, a 13" 3K laptop 200 %. The logical
  * desktop never gets smaller than 1024 × 600, and the recommendation stops at OUT_SCALE_REC_MAX. */
 int out_scale_recommended(int pw, int ph, int mm_w, int mm_h) {

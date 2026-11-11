@@ -1,5 +1,5 @@
-// platform.js — the LordOS Imager on the desktop (Tauri: `macos`, `windows`, `linux`). The same functions as
-// apps/imager/platform.js (LordOS), backed by the app's Rust commands (src-tauri/src/main.rs) and
+// platform.js — the Insane OS Imager on the desktop (Tauri: `macos`, `windows`, `linux`). The same functions as
+// apps/imager/platform.js (Insane OS), backed by the app's Rust commands (src-tauri/src/main.rs) and
 // lordos-imager-core. build-web.mjs puts this file in place of the native one.
 import { createElement as h } from 'react';
 import { invoke } from '@tauri-apps/api/core';
@@ -17,7 +17,7 @@ const driveSubs = new Set();
 let progressFn = null;
 listen('imager-progress', (e) => progressFn?.(e.payload));
 
-// Rust errors are { code, detail }: the message is the translated code, as on LordOS
+// Rust errors are { code, detail }: the message is the translated code, as on Insane OS
 let currentDrive = '';
 function fail(e) {
   const code = e?.code || 'imager.fetchFailed';
@@ -108,7 +108,7 @@ export const platform = {
   checkSums: (sums, sig) => invoke('check_sums', { sumsText: sums, sig }),
 
   async pickImage() {
-    const path = await openDialog({ title: t('imager.image.pickTitle'), multiple: false, directory: false, filters: [{ name: 'LordOS', extensions: ['img', 'xz', 'iso'] }] });
+    const path = await openDialog({ title: t('imager.image.pickTitle'), multiple: false, directory: false, filters: [{ name: 'Insane OS', extensions: ['img', 'xz', 'iso'] }] });
     if (!path) return null;
     return call('image_info', { path: String(path) });
   },
@@ -163,12 +163,12 @@ export const platform = {
 let profilesCache = [];
 let cacheSizeNow = 0;
 
-// "Check for app updates": a newer LordOS Imager among the release files GitHub lists (no other request)
+// "Check for app updates": a newer Insane OS Imager among the release files GitHub lists (no other request)
 const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 4; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
 function findUpdate(text) {
   try {
     for (const r of JSON.parse(text)) for (const a of r.assets || []) {
-      const m = /^(?:lordos-imager|LordOS[ ._-]Imager)[_-]v?(\d+\.\d+\.\d+(?:\.\d+)?)/i.exec(a.name || '');
+      const m = /^(?:lordos-imager|Insane OS[ ._-]Imager)[_-]v?(\d+\.\d+\.\d+(?:\.\d+)?)/i.exec(a.name || '');
       if (m && newer(m[1], info_.version) && (!platform.appUpdate || newer(m[1], platform.appUpdate.version))) platform.appUpdate = { version: m[1], tag: r.tag_name };
     }
   } catch { /* not a list */ }

@@ -4,7 +4,7 @@
  * Modesetting is still our own (kms.c, ioctls without libdrm): GBM is created on the same
  * card fd and its buffers become framebuffers with DRM_IOCTL_MODE_ADDFB2.
  *
- * Each frame: the LordOS UI (the canvas the CPU paints) is a fullscreen texture to which
+ * Each frame: the Insane OS UI (the canvas the CPU paints) is a fullscreen texture to which
  * only what changed is uploaded. App windows are drawn below it (textures of their shm or
  * dmabuf buffers, without going through the CPU) and app menus on top; where there is an
  * app window, the UI leaves a transparent hole (alpha 0). A fullscreen app with a compatible
@@ -1379,7 +1379,7 @@ int gpu_gdrag_feed(int out, int which, const uint32_t *px, int w, int h, Rect r)
     return 0;
 }
 
-/* ---- when the GPU finished a frame (LordBench's frame phases) ---- */
+/* ---- when the GPU finished a frame (InsaneBench's frame phases) ---- */
 
 void gpu_fence_on(int on) { fence_wanted = on != 0; }
 

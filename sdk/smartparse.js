@@ -306,7 +306,7 @@ export function summarize(m, t = Date.now()) {
   return { health: m.health, reasons: m.reasons, temp: m.temp, wear: m.wear ? m.wear.used : null, hours: m.hours, standby: m.standby, supported: m.supported, t };
 }
 
-// Summary from LordOS's own SMART reader (disk-smart: smart.c), used when smartmontools is missing.
+// Summary from Insane OS's own SMART reader (disk-smart: smart.c), used when smartmontools is missing.
 export function summaryFromOwn(s, t = Date.now()) {
   if (!obj(s)) return null;
   const map = { ok: 'ok', warning: 'warning', failing: 'failing' };

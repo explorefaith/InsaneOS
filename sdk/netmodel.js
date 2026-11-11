@@ -15,7 +15,7 @@
 //   // [{ key, kind: 'app'|'domain'|'ip'|'port'|'country', label, rx, tx, rateRx, rateTx, conns, denied,
 //   //    last, flows, children: [...] }]
 
-// LordOS's own parts that use the network, each a row of its own (0.8.5): label key, the built-in app
+// Insane OS's own parts that use the network, each a row of its own (0.8.5): label key, the built-in app
 // whose icon it shows (or a glyph), whether the firewall can block it, and what blocking it means.
 //   lordos:<name>  in its own scope (sec/netconn.h): the kernel enforces its rules
 //   system:<name>  an essential system service: shown, never blocked

@@ -12,7 +12,7 @@ double tts_hiss(const float *s, size_t frames, int rate, int ch);
 
 #define TTS_HISS_MAX (-26.0)
 
-/* Pocket TTS also, now and then, ends a sentence early ("Hola, LordOS ya…" came out as just "Hola"), so a cleaner try
+/* Pocket TTS also, now and then, ends a sentence early ("Hola, Insane OS ya…" came out as just "Hola"), so a cleaner try
  * must never win for being cut. A try is cut short when it is under 60 % of the longest try of the same sentence, or,
  * for a sentence of 6 syllables or more, faster than 7.5 syllables a second (its whole sentences measured 3.8–7.4;
  * cut ones 8.1 and 13.6). Syllables are counted as groups of vowels (Spanish, Portuguese and English). */

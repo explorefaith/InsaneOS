@@ -479,7 +479,7 @@ static int proc_stat(const char *proot, int pid, ProcStat *s) {
     return 0;
 }
 
-/* the AI helpers LordOS starts (docs/MONITOR.md, "GPU"): the model's table (apps/monitor/gpumodel.js) says what each is */
+/* the AI helpers Insane OS starts (docs/MONITOR.md, "GPU"): the model's table (apps/monitor/gpumodel.js) says what each is */
 static int ai_name(const char *comm) {
     static const char *const ai[] = { "lord-tts", "lord-ocr", "lord-say" };
     for (size_t i = 0; i < sizeof ai / sizeof *ai; i++) if (!strcmp(comm, ai[i])) return 1;

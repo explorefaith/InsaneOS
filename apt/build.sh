@@ -1,5 +1,5 @@
 #!/bin/sh
-# apt/build.sh — the curated app catalog (apt/catalog.json) of the LordOS APT repository
+# apt/build.sh — the curated app catalog (apt/catalog.json) of the Insane OS APT repository
 # (apt/README.md, docs/UPDATES.md "Mirrored apps (catalog)").
 #
 #   apt/build.sh check [id…]    validate the catalog; for every "apt" entry verify the vendor's
@@ -117,10 +117,10 @@ validate() {
             v=$(jf "$id" ".$f // empty")
             [ -n "$v" ] || die "$id: missing $f"
         done
-        # LordOS's own packages (Disk Formats) have no source: they are built in this repository and added to the
+        # Insane OS's own packages (Disk Formats) have no source: they are built in this repository and added to the
         # pool as .debs with the release (tools/release/apt-repo.sh build … lordos-disk-formats_*.deb).
         own=; [ -n "$(jf "$id" '.source // empty')" ] || own=1
-        [ -z "$own" ] || [ "$(jf "$id" .vendor)" = LordOS ] || die "$id: missing source.type"
+        [ -z "$own" ] || [ "$(jf "$id" .vendor)" = Insane OS ] || die "$id: missing source.type"
         is_name "$(jf "$id" .package)" || die "$id: bad package name"
         for p in $(jf "$id" '(.extra_packages // [])[]'); do is_name "$p" || die "$id: bad extra package $p"; done
         is_https "$(jf "$id" .homepage)" || die "$id: homepage must be https"
@@ -306,7 +306,7 @@ do_deb() {
 }
 
 # ---------------------------------------------------------------------------------------------------
-# packages LordOS builds (apt/recipes/<recipe>/build.sh)
+# packages Insane OS builds (apt/recipes/<recipe>/build.sh)
 
 build_image() {
     a=$1; img=$BUILD_IMAGE-$a

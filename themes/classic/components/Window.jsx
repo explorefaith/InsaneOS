@@ -4,8 +4,8 @@
 // offers the snap layouts (halves, thirds, quarters; sdk/windows.js "Snapping"). Moving and
 // resizing are done in C (<WindowShell>, wm.beginMove; docs/WINDOWS.md); a maximized window is
 // dragged out of its place by JS, and snaps where it is dropped.
-// Lord Classic has no global menu bar: an app that declares menus (File, Edit, View, Go…; the same
-// ones Lord Flow shows on top, useAppMenus) gets them in a strip under its title bar, with Window and
+// Insane Classic has no global menu bar: an app that declares menus (File, Edit, View, Go…; the same
+// ones Insane Flow shows on top, useAppMenus) gets them in a strip under its title bar, with Window and
 // Help, as desktop apps do on a taskbar layout. Apps without menus of their own get no strip.
 import { View, Text, Layer, addListener, wm, AppHost, windowTitle, WindowShell, windowIcon, snapZoneAt, screen, useMenusWithSpeech, getApp, appGroup, windowMenuItems, moveToDesktopItems, solidOver, t as tr } from '@lordos/sdk';
 import { useEffect, useRef, useState } from 'react';

@@ -2,12 +2,12 @@
 
 Video sites send VP9 or AV1 when the browser says it can play them. Without a hardware decoder
 for those codecs the browser decodes them on the processor, and on a slow or shared processor the
-video stutters. The real case that started this: a LordOS virtual machine on VMware, YouTube at
+video stutters. The real case that started this: a Insane OS virtual machine on VMware, YouTube at
 1080p in AV1, decoded by Chromium in software (`media-internals`: `kIsPlatformVideoDecoder` false,
 `Dav1dVideoDecoder`), the tab at about 68 % CPU and the video choppy. The Raspberry Pi 5 has no
 hardware decoder for H.264, VP9 or AV1 (only HEVC), and many older PCs lack VP9 or AV1 decoding.
 
-H.264 costs far less to decode in software. Since 0.8.2 LordOS finds out at every boot what the
+H.264 costs far less to decode in software. Since 0.8.2 Insane OS finds out at every boot what the
 hardware decodes and, when VP9 or AV1 is missing, asks the browsers for H.264 instead. When a video
 still drops frames, a small notice offers a lower quality.
 
@@ -71,7 +71,7 @@ The answer (`lord.media.hwDecode()`):
 ```
 
 `reason` is `ok`, `virtualGpu`, `noDriver` (no VA-API driver and no V4L2 decoder) or `noProfiles`.
-`LORD_MEDIA_HW=0` (no hardware decoding for LordOS's own player) also makes this answer "no".
+`LORD_MEDIA_HW=0` (no hardware decoding for Insane OS's own player) also makes this answer "no".
 
 `build/hwdec-test` checks the virtual GPU list and the virtual machine names.
 
@@ -106,7 +106,7 @@ Neither is a conffile: the package doesn't ship them, and its `postrm` removes t
 
 ## 3. The extension (`assets/browser/video/`)
 
-Written for LordOS (MIT), no third-party code. Installed by the `lordos` package into
+Written for Insane OS (MIT), no third-party code. Installed by the `lordos` package into
 `/usr/share/chromium/extensions/lordos-video/`; Debian's Chromium wrapper (`/etc/chromium.d/extensions`)
 passes every folder there to `--load-extension`, the same way Debian's own `webext-*` packages
 work. The manifest carries a public `key`, so its id is always `kadhcpnkalbaminbojfmbmlgoheicmjo`
@@ -150,7 +150,7 @@ the same extension (`manifest.firefox.json`, id `video@lordos.org`) forced throu
 `/usr/lib/firefox-esr/distribution/policies.json` (`ExtensionSettings`, `force_installed`, a local
 `file://` XPI) is refused, and
 `about:policies` shows "Not fully applied"; with `xpinstall.signatures.required` set to false it
-installs and runs. LordOS doesn't turn signature checking off for every extension to get this.
+installs and runs. Insane OS doesn't turn signature checking off for every extension to get this.
 
 So for now Firefox gets only what a preference can do: `media.av1.enabled = false` (a default
 pref in `/etc/firefox-esr/lordos-video.js`, which the user can still change in `about:config`).
@@ -173,7 +173,7 @@ cd assets/browser/video && mkdir -p /tmp/xpi && cp -r _locales *.js *.png schema
 ## Measurements (VM 122)
 
 Proxmox q35 VM, 4 vCPUs of a Xeon Silver 4108 (1.8 GHz), virtio-gpu without 3D (so: no hardware
-decoding, `reason: virtualGpu`), LordOS compositing on the CPU, the browser window not maximized. YouTube, quality
+decoding, `reason: virtualGpu`), Insane OS compositing on the CPU, the browser window not maximized. YouTube, quality
 forced through the player. CPU is the whole browser process tree over 20 s, in % of one core
 (400 % = all four). Decoder names from Chromium's media-internals (DevTools `Media` domain), codecs
 from the player's own statistics. The host is shared with other VMs, so runs vary; each cell lists

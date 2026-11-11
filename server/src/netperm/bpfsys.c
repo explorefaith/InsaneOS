@@ -113,7 +113,7 @@ int bpfs_map_dump(int fd, void *keys, uint32_t ksz, void *vals, uint32_t vsz, ui
 }
 
 int bpfs_prog_load(uint32_t type, uint32_t attach, const NpProgDesc *d, int (*map_fd)(const char *), char *log, size_t loglen) {
-    return bpfs_prog_load_btf(type, attach, 0, "LordOS", d, map_fd, log, loglen);
+    return bpfs_prog_load_btf(type, attach, 0, "Insane OS", d, map_fd, log, loglen);
 }
 
 int bpfs_prog_load_btf(uint32_t type, uint32_t attach, uint32_t btf_id, const char *license, const NpProgDesc *d,

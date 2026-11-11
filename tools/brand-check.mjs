@@ -1,10 +1,10 @@
-// brand-check.mjs — keeps third-party brand and product names out of LordOS's public text.
+// brand-check.mjs — keeps third-party brand and product names out of Insane OS's public text.
 //
 //   node tools/brand-check.mjs           (also run by tools/i18n-check.mjs)
 //
 // Scans the user-facing text: assets/locales/*/*.json, the Help articles (assets/help), the app
 // manifests and theme.json files, the language packs in docs/packs, README.md and CHANGELOG.md.
-// LordOS uses its own names for its features (Search, Apps, Night Light, Quick Preview, Backups,
+// Insane OS uses its own names for its features (Search, Apps, Night Light, Quick Preview, Backups,
 // Files…) and generic wording for comparisons ("other operating systems"). Exits with code 1 if
 // a name shows up outside the ALLOW list below.
 import fs from 'node:fs';

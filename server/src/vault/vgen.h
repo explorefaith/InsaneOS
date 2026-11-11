@@ -1,6 +1,6 @@
 /* vgen.h — password and passphrase generator, and the strength estimate used by the
  * security report. All offline: the "breach" check runs against the list of the 10,000
- * most common passwords shipped with LordOS (and, if the user chooses, against a local
+ * most common passwords shipped with Insane OS (and, if the user chooses, against a local
  * Have I Been Pwned file: SHA-1 sorted by hash, binary search in the file). */
 #ifndef LORD_VAULT_VGEN_H
 #define LORD_VAULT_VGEN_H

@@ -1,4 +1,4 @@
-/* js_imager.c — lord.imager: what the LordOS Imager (apps/imager, docs/IMAGER.md) needs from C in the
+/* js_imager.c — lord.imager: what the Insane OS Imager (apps/imager, docs/IMAGER.md) needs from C in the
  * session. No root, nothing written, no programs run; everything that writes a disk or downloads is
  * an admin action (imager/imager_admin.c).
  *
@@ -9,7 +9,7 @@
  *                                         64 hex digits, or null. ssid 1..32 bytes, pass 8..63
  *                                         printable ASCII (IEEE 802.11i)
  *   lord.imager.checkSums(sums, sig)      verifies SHA256SUMS (text) with SHA256SUMS.sig against the
- *                                         release key compiled into LordOS: { ok, files: {name: hex} }
+ *                                         release key compiled into Insane OS: { ok, files: {name: hex} }
  *   lord.imager.imageInfo(path)           { kind: 'raw'|'xz', size, raw } of an image in the user's
  *                                         folders (raw: uncompressed size from the .xz index), or null */
 #include "js_imager.h"

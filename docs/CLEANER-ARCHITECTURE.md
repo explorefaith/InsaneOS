@@ -183,4 +183,4 @@ Deliberate differences:
 Build order for Phase 1: `lord-clean` and one safe rule end to end, then the rest of the rules, then large files and the
 storage map, then duplicates.
 
-Names: the interface uses generic words only ("Scan", "Storage map"), as for every LordOS app.
+Names: the interface uses generic words only ("Scan", "Storage map"), as for every Insane OS app.

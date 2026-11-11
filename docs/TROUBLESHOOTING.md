@@ -1,9 +1,9 @@
 # Troubleshooting
 
-## "This LordOS component was modified and was not loaded"
+## "This Insane OS component was modified and was not loaded"
 
-LordOS checks its own code (the themes, the login screen, the system apps) against a list signed with
-the LordOS key before running it ([SIGNING.md](SIGNING.md), "Verified system code"). This message,
+Insane OS checks its own code (the themes, the login screen, the system apps) against a list signed with
+the Insane OS key before running it ([SIGNING.md](SIGNING.md), "Verified system code"). This message,
 or the recovery screen, means a file in `/usr/lib/lordos` no longer matches: a disk error, an edit by
 hand, or tampering. To see which files:
 
@@ -26,8 +26,8 @@ live system too):
 lordos-issue
 ```
 
-It only reads and sends nothing. It saves `~/lordos-issue-<date>.txt` with the LordOS version, the hardware (PCI and
-USB devices, CPU, memory, disks, displays, input devices, network, sound and drivers), an integrity check (LordOS's
+It only reads and sends nothing. It saves `~/lordos-issue-<date>.txt` with the Insane OS version, the hardware (PCI and
+USB devices, CPU, memory, disks, displays, input devices, network, sound and drivers), an integrity check (Insane OS's
 signed code, each app's signature, changed files, kernel taint and software sources), failed services, firmware
 messages, the session's log and this boot's errors. Addresses, your user and computer names and home paths are
 replaced; serial numbers, Wi-Fi names and paired devices are left out. It asks for your password to read the kernel
@@ -37,7 +37,7 @@ log and every package file; without it (or with `--no-root`) the report is short
 
 ## Virtual machines
 
-- **VirtualBox's default display (VMSVGA) shows no desktop.** Fixed in 0.8.8 ([#9](https://github.com/lordbasex/LordOS/issues/9)):
+- **VirtualBox's default display (VMSVGA) shows no desktop.** Fixed in 0.8.8 ([#9](https://github.com/lordbasex/Insane OS/issues/9)):
   the `vmwgfx` driver it needs is now loaded on VirtualBox too, so VMSVGA, VBoxSVGA and VBoxVGA all reach the desktop,
   with BIOS and with EFI ([ISO.md](ISO.md), "Firmware and displays"). On 0.8.7 or earlier, pick VBoxSVGA in the
   machine's display settings.
@@ -47,15 +47,15 @@ log and every package file; without it (or with `--no-root`) the report is short
 
 ## A Linux app asks for administrator rights
 
-Since 0.8.8, a Linux app that runs `pkexec` (for example a launcher updating itself) gets LordOS's own password prompt,
-which names the app and the command; before, it stopped with error 127 ([#4](https://github.com/lordbasex/LordOS/issues/4)).
+Since 0.8.8, a Linux app that runs `pkexec` (for example a launcher updating itself) gets Insane OS's own password prompt,
+which names the app and the command; before, it stopped with error 127 ([#4](https://github.com/lordbasex/Insane OS/issues/4)).
 `/usr/bin/pkexec` is diverted to `lord-pkexec` ([PRIVACY.md](PRIVACY.md), "Authentication for Linux apps"). The prompt
 takes a physical keyboard only, and programs that ask polkit over D-Bus directly still find no agent. After going
 back to a package older than 0.8.8, the diversion leaves a dangling link: remove it with `dpkg-divert --remove` by hand.
 
 ## Typing feels slow
 
-If keys show up late in one app (for example Chromium) but not in LordOS's own apps (Notes, the
+If keys show up late in one app (for example Chromium) but not in Insane OS's own apps (Notes, the
 Terminal), check where the time goes before changing anything. `tools/diag/keylag.sh` does it in
 about two minutes.
 
@@ -64,16 +64,16 @@ about two minutes.
 1. Get the script onto the machine (it is not part of the package):
 
    ```sh
-   curl -fsSLO https://raw.githubusercontent.com/lordbasex/LordOS/main/tools/diag/keylag.sh
+   curl -fsSLO https://raw.githubusercontent.com/lordbasex/Insane OS/main/tools/diag/keylag.sh
    ```
 
-2. Run it in the LordOS Terminal: `sh keylag.sh`. It prints:
+2. Run it in the Insane OS Terminal: `sh keylag.sh`. It prints:
    - the version;
    - GPU or CPU composition;
    - the virtual machine and its guest tools;
    - how many times Chromium logged `The server has buggy presentation feedback` in this session.
 
-   On LordOS 0.8.0 and the 0.8.1 pre-release ISOs, that Chromium line on the GPU path is the bug
+   On Insane OS 0.8.0 and the 0.8.1 pre-release ISOs, that Chromium line on the GPU path is the bug
    described below. To confirm it without the trace, reboot and add `lordos.gpu=0` to the kernel
    line for one boot. That forces CPU composition. Then type in Chromium again.
 
@@ -118,9 +118,9 @@ The trace measures time. It is not a key log:
 
 - **What a line holds:** an opaque sequence number, press or release, and the stage times. No key
   code, character or modifier is ever written.
-- **Which keys are traced:** only keys handed to a Linux (Wayland) app. Keys for LordOS itself are
+- **Which keys are traced:** only keys handed to a Linux (Wayland) app. Keys for Insane OS itself are
   never traced or counted: the theme, its text fields, the Terminal, the Passwords app, the
-  keyring and admin prompts, the login and lock screens, isolated LordOS apps and protected
+  keyring and admin prompts, the login and lock screens, isolated Insane OS apps and protected
   windows.
 - **Who can turn it on:** only `lord-sessiond` (root) passes `LORD_INPUT_DEBUG=1` to user
   sessions, and only when the kernel line has `lordos.inputdebug=1` or the service sets
@@ -219,5 +219,5 @@ From the release notes (`CHANGELOG.md`, 0.8.5-beta, "Known issues and limitation
 - **Searching "displays"** lists the Help article on touchpads and touch screens before Settings →
   Displays; **Settings → Displays** cuts the name of a small display in the arrangement without an
   ellipsis.
-- **Steam** isn't in the Store: it needs i386 multiarch, which LordOS's package engine doesn't do yet
+- **Steam** isn't in the Store: it needs i386 multiarch, which Insane OS's package engine doesn't do yet
   ([ROADMAP.md](ROADMAP.md)).

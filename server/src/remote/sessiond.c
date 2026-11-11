@@ -1,4 +1,4 @@
-/* sessiond.c — lord-sessiond: the LordOS session manager (docs/SESSIONS.md).
+/* sessiond.c — lord-sessiond: the Insane OS session manager (docs/SESSIONS.md).
  *
  * lordos.service starts it as root at boot, replacing the old autostart. It acts as
  * our own "display manager":
@@ -25,7 +25,7 @@
  *   /run/lordos/status.json          sessions, who is on the monitor and who is connected (Settings)
  *
  * SIGHUP rereads the configuration (turns remote on or off without touching the sessions).
- * It's the only LordOS program that links OpenSSL (TLS): lord-server doesn't. */
+ * It's the only Insane OS program that links OpenSSL (TLS): lord-server doesn't. */
 #include "sessiond.h"
 #include "rtcwire.h"
 #include "../sec/cgroup.h"
@@ -187,7 +187,7 @@ static int ensure_cert(void) {
     char host[256] = "lordos";
     gethostname(host, sizeof host - 1);
     X509_NAME *name = X509_get_subject_name(x);
-    X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (const unsigned char *)"LordOS", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (const unsigned char *)"Insane OS", -1, -1, 0);
     X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (const unsigned char *)host, -1, -1, 0);
     X509_set_issuer_name(x, name);
     char san[300];
@@ -505,7 +505,7 @@ static void save_main_display(const char *conn) {
     if (!ok || rename(SD_MAIN_DISPLAY ".new", SD_MAIN_DISPLAY)) unlink(SD_MAIN_DISPLAY ".new");
 }
 
-/* LordBench's boot time test (bench/boottest.h): after a test boot's first frame, when to restart (rd_now()
+/* InsaneBench's boot time test (bench/boottest.h): after a test boot's first frame, when to restart (rd_now()
  * seconds, 0 = not pending) and which boot of how many this one was */
 static double bt_reboot_at;
 static int bt_k, bt_n;
@@ -773,7 +773,7 @@ static int splash_up(void) {
 
 /* Every boot's time to the first frame, kept across reboots to compare boots and versions:
  * /var/lib/lordos/boot-times.jsonl (root's, 0644), one JSON object a line, the last BOOT_TIMES_MAX.
- * Only values LordOS produces itself: no user or host names. About LordOS shows this boot's line
+ * Only values Insane OS produces itself: no user or host names. About Insane OS shows this boot's line
  * (js_sys.c, matched by bootId). */
 #define BOOT_TIMES SD_STATE_DIR "/boot-times.jsonl"
 #define BOOT_TIMES_MAX 200
@@ -828,9 +828,9 @@ static void first_frame(void) {
     clock_gettime(CLOCK_BOOTTIME, &bt);
     double secs = bt.tv_sec + bt.tv_nsec / 1e9;
     const char *what = !has_monitor ? "none" : shown == 'u' ? "session" : "login";   /* autologin, login screen, no monitor */
-    sd_log("first frame on the monitor %.3f s after the kernel started (LordOS %s%s%s, build %s, %s): the boot splash can go",
+    sd_log("first frame on the monitor %.3f s after the kernel started (Insane OS %s%s%s, build %s, %s): the boot splash can go",
            secs, LORD_VERSION, LORD_CHANNEL[0] ? "-" : "", LORD_CHANNEL, LORD_BUILD, what);
-    /* LordBench's boot time test: this boot's number, and another restart if any are left */
+    /* InsaneBench's boot time test: this boot's number, and another restart if any are left */
     BootTest b, after;
     struct stat bst;
     int have = bt_read(BT_PATH, &b) == 0, k = 0;
@@ -886,7 +886,7 @@ static void tell_no_display(void) {
     ioctl(t, KDSETMODE, KD_TEXT);
     static const char msg[] =
         "\033[2J\033[H\r\n"
-        "  LordOS could not show its desktop: no display device with kernel\r\n"
+        "  Insane OS could not show its desktop: no display device with kernel\r\n"
         "  modesetting (KMS) was found.\r\n\r\n"
         "  In a virtual machine, choose another display device: VirtIO GPU,\r\n"
         "  standard VGA or SVGA. On a PC, check that the graphics card has a\r\n"
@@ -1148,7 +1148,7 @@ static int mask_bits(const RsAddr *m) {
     return m->v4 ? n + 96 : n;
 }
 
-/* Does this connection count as "over a LordOS VPN" for net=lan? Only on an interface LordOS's VPN
+/* Does this connection count as "over a Insane OS VPN" for net=lan? Only on an interface Insane OS's VPN
  * manager created (wg-, ovpn-, ips-, ppp-, oc-, fvpn- + name), to that interface's own address, and
  * from inside its subnet or its point-to-point peer (ipnet.c rs_vpn_accepts). A bare ppp0 (a PPPoE
  * uplink), tun0 or wg0 never counts. */

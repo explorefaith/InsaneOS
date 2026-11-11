@@ -1,8 +1,8 @@
 {
   "id": "imager",
   "version": "0.8.5",
-  "name": "LordOS Imager",
-  "description": "Writes LordOS to an SD card or a USB stick and prepares the Raspberry Pi's first boot",
+  "name": "Insane OS Imager",
+  "description": "Writes Insane OS to an SD card or a USB stick and prepares the Raspberry Pi's first boot",
   "size": [960, 660],
   "minSize": [820, 560],
   "dock": false,

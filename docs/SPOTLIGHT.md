@@ -15,7 +15,7 @@ Both are mounted by the SDK, so **every theme has them** without doing anything:
 | ![notes](search-notes.png) | |
 | «apples» finds the note by its content | |
 
-It opens with **❖Space** or **Ctrl+Space**, or with the ⌕ magnifier in the Lord Flow theme's
+It opens with **❖Space** or **Ctrl+Space**, or with the ⌕ magnifier in the Insane Flow theme's
 menu bar. With the Terminal in front, Ctrl+Space is left to the program (in emacs it sets a
 mark); ❖Space works the same.
 
@@ -37,7 +37,7 @@ Sections are ordered by their best result; the calculator always goes on top.
 | Section | Source | On open |
 |---|---|---|
 | Calculator | expressions (`2*(3+4)`, `2^10`, `sqrt(2)`, `pi*2`, `15% de 2400`, decimal comma) with our own parser, no `eval`; conversions (`10 km a mi`, `72 f a c`, `1,5 gb a mb`, `5 lb to kg`, `3 h en min`) | copies the result |
-| Apps | `useLauncherApps()`: LordOS, `.lpk` packages and Linux apps | `launchApp` |
+| Apps | `useLauncherApps()`: Insane OS, `.lpk` packages and Linux apps | `launchApp` |
 | Settings | the Settings sections and their translated keywords (`settings.keywords.*`) | `wm.open('settings', { args: { section } })` |
 | Actions | dark or light mode; log out | the action |
 | Files | name in the home folder: the server's `lord.fs.search` (up to 6 levels); if unavailable, our own walk in chunks (4 levels, 5000 entries, no hidden files) | folders in Files, text in the Editor, the rest in Files with the file selected |
@@ -70,9 +70,9 @@ Sections are ordered by their best result; the calculator always goes on top.
 | ![paste](clipboard-paste.png) | ![settings](clipboard-settings.png) |
 | Chosen with ❖V and the 8 key: «360» was pasted into the Settings search box, which had focus | Settings → Clipboard |
 
-There is a single one for the whole session: the Terminal, LordOS's text fields and Linux apps
+There is a single one for the whole session: the Terminal, Insane OS's text fields and Linux apps
 (the compositor acts as the bridge; see `WAYLAND.md`), and since 0.8.3 X11 apps through Xwayland
-(the X window manager, `wl/xwm.c`, offers LordOS's clipboard to X only while an X window has the
+(the X window manager, `wl/xwm.c`, offers Insane OS's clipboard to X only while an X window has the
 keyboard). The history stores everything copied in
 any of them: texts, links, colors, code, paths and images. For each entry it stores the origin
 and the time.
@@ -83,7 +83,7 @@ and the time.
   - preview, origin, date and length;
   - Paste, Pin and Delete; Del deletes; «Delete all» keeps the pinned items.
 - **Paste.** Choosing something copies it again and pastes it where you were:
-  - into the LordOS text field that had focus;
+  - into the Insane OS text field that had focus;
   - or into the frontmost Linux app, with a Ctrl+V that the compositor sends only to that app
     (`lord.wayland.paste`).
 
@@ -128,7 +128,7 @@ Sensitive content never enters the history, but it can still be pasted:
 - **Linux apps that mark the copy as secret.** They offer the `x-kde-passwordManagerHint`
   format, the KDE and GNOME convention used by KeePassXC and other password managers. The
   compositor detects it (`wl.c`), and `lord.clipboard.state()` answers `sensitive: true`.
-- **LordOS.** `clipboard.set(text, { secure: true })` copies without saving. `TextInput`'s
+- **Insane OS.** `clipboard.set(text, { secure: true })` copies without saving. `TextInput`'s
   `secure` fields (passwords) don't allow copying.
 - **Apps excluded in Settings.** They don't end up in the history.
 
@@ -145,7 +145,7 @@ Sensitive content never enters the history, but it can still be pasted:
 - **Restart:** after restarting lord-server, the history was still there, with the pinned items
   on top.
 - **Full panel:** filters, pin and delete work.
-- **Paste:** ❖V and the 8 key pasted into a LordOS text field.
+- **Paste:** ❖V and the 8 key pasted into a Insane OS text field.
 - **Search:** apps, settings, files (which opened in the Editor), notes, the Store, the
   calculator and the conversions.
 

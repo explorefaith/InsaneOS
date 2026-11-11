@@ -1,6 +1,6 @@
-// "Classic" theme — the second full appearance of LordOS: a centered taskbar with a start menu,
+// "Classic" theme — the second full appearance of Insane OS: a centered taskbar with a start menu,
 // pinned and open apps, a tray with quick settings and a notification panel, window snapping
-// (halves, thirds, quarters) and the SDK's Overview. The apps are the same as in Lord Flow: this theme
+// (halves, thirds, quarters) and the SDK's Overview. The apps are the same as in Insane Flow: this theme
 // only supplies the window frame and the shell, and restyles the SDK's shared controls through its
 // tokens (tokens.js), so every app adapts on its own. See themes/README.md and docs/DESIGN.md.
 //
@@ -86,7 +86,7 @@ function SnapPreview({ t }) {
   );
 }
 
-// Lord Classic's own shortcuts (the common ones are in sdk/shortcuts.js). `ui` is a ref to what the
+// Insane Classic's own shortcuts (the common ones are in sdk/shortcuts.js). `ui` is a ref to what the
 // shell's state offers at that moment.
 const switchApps = (e) => openSwitcher(switcherHold(e), e.shift);
 const openFiles = () => launchApp('files');

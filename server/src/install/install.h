@@ -1,4 +1,4 @@
-/* install.h — LordOS installer to disk, only from the live ISO (see install.c and docs/ISO.md). */
+/* install.h — Insane OS installer to disk, only from the live ISO (see install.c and docs/ISO.md). */
 #ifndef LORD_INSTALL_H
 #define LORD_INSTALL_H
 

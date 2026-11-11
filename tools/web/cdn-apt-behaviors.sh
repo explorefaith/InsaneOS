@@ -1,7 +1,7 @@
 #!/bin/sh
 # One-time CloudFront change so lordos.org can serve the APT repository (docs/UPDATES.md,
 # "Serving it"): two cache behaviors, apt/* and apt-staging/*, copied from the default one but
-# serving plain HTTP as is (allow-all: LordOS's package engine reads https sources over http and
+# serving plain HTTP as is (allow-all: Insane OS's package engine reads https sources over http and
 # trusts the signatures, like apt with deb.debian.org) and without the lordos-router function
 # (it would turn InRelease, Release and Packages into <path>/index.html).
 #

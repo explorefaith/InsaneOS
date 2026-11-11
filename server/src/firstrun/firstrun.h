@@ -1,6 +1,6 @@
-/* firstrun.h — the LordOS first-run file (lordos-firstrun.txt on the boot partition).
+/* firstrun.h — the Insane OS first-run file (lordos-firstrun.txt on the boot partition).
  *
- * The LordOS Imager (apps/imager, desktop/imager) writes it next to the image; the Raspberry Pi's
+ * The Insane OS Imager (apps/imager, desktop/imager) writes it next to the image; the Raspberry Pi's
  * lordos-rpi-firstboot.service runs `lordos-firstrun apply` on the first boot, which parses it with
  * fr_parse() (pure, no I/O: tests/firstrun_test.c and an ASan/UBSan fuzz run), applies it once and
  * shreds it. The format is specified in docs/IMAGER.md, "The first-run file".

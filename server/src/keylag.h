@@ -7,8 +7,8 @@
  *
  * Privacy: it is a timing trace, not a key log. No key code, character or modifier is ever written:
  * only an opaque sequence number and press/release. Only keys handed to a Linux (Wayland) app are
- * traced, never keys that go to LordOS itself (the theme, its text fields, the Terminal, the
- * Passwords app, keyring and admin prompts), to an isolated LordOS app, or to a protected window;
+ * traced, never keys that go to Insane OS itself (the theme, its text fields, the Terminal, the
+ * Passwords app, keyring and admin prompts), to an isolated Insane OS app, or to a protected window;
  * those are skipped without being counted. The trace goes to its own file,
  * $XDG_RUNTIME_DIR/lordos-keylag.log (0600, tmpfs, gone at logout), never to the session log, and
  * stops by itself 120 s after the first traced key or after 4000 lines.

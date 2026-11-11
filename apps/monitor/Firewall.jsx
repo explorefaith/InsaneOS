@@ -4,7 +4,7 @@
 //   - Trusted apps: allowed without logging (explicit denials still apply);
 //   - Restricted apps: one checkbox per restriction (no internet = "LAN only", no LAN, no network,
 //     no incoming connections, and the non-network ones: camera, microphone…). Every one is
-//     enforced (docs/FIREWALL.md, "Non-network restrictions"). The "LordOS" row is the desktop
+//     enforced (docs/FIREWALL.md, "Non-network restrictions"). The "Insane OS" row is the desktop
 //     itself: it does not offer files, USB, clipboard or Bluetooth, which the shell always uses.
 //     For Linux apps each checkbox says when it applies (all at once, files at the next launch)
 //     and the clipboard isn't offered yet; a help line per restriction says what it covers.
@@ -13,7 +13,7 @@
 import { View, Text, Button, Segmented, ScrollView, GroupBox, useTheme, useLocale, useStore, useLauncherApps, firewall, firewallState, spacing, typeScale, errorText, netModel } from '@lordos/sdk';
 import { useState } from 'react';
 
-// Firewall id of a launcher app: the built-in ones run inside LordOS.
+// Firewall id of a launcher app: the built-in ones run inside Insane OS.
 // Isolated built-in apps (Passwords) have their own scope, like a package.
 const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'lordos');
 // The desktop shell and the built-in apps share "lordos": these would cut the desktop off itself.
@@ -24,7 +24,7 @@ const LINUX_NOT_YET = ['no-clipboard'];
 // sound streams, notifications), except files: the app's view is built when it starts.
 const NEXT_LAUNCH = ['no-files'];
 const isLinux = (id) => id.startsWith('desktop:');
-// (0.8.5) LordOS's components with their own scope (Mail, Store, Printers, Terminal, Blocklists): they
+// (0.8.5) Insane OS's components with their own scope (Mail, Store, Printers, Terminal, Blocklists): they
 // take restrictions like an app; the system services (system:*) and the VPN row never do
 const { COMPONENTS } = netModel;
 const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('lordos:') && !COMPONENTS[id].system);

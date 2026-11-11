@@ -1,4 +1,4 @@
-/* lpk.c — LordOS native app packages (.lpk).
+/* lpk.c — Insane OS native app packages (.lpk).
  *
  * An .lpk is a tar (ustar), gzip-compressed or not, with:
  *   manifest.json   id, name, version, permissions… (see docs/NATIVE-APPS.md)

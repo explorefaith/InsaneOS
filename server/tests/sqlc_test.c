@@ -141,7 +141,7 @@ static void test_socket(void) {
     CHECK(!sql_socket_ok("/run/user/1000/bus", NULL), "session bus");
     CHECK(!sql_socket_ok("/run/dbus/system_bus_socket", NULL), "system bus");
     CHECK(!sql_socket_ok("/run/systemd/private", NULL), "systemd");
-    CHECK(!sql_socket_ok("/run/lordos/cgroup.sock", NULL), "LordOS's own");
+    CHECK(!sql_socket_ok("/run/lordos/cgroup.sock", NULL), "Insane OS's own");
     CHECK(!sql_socket_ok("/tmp/.X11-unix/X0", NULL), "X11");
     CHECK(!sql_socket_ok("/srv/rt/wayland-0", "/srv/rt/"), "runtime dir");
     CHECK(sql_socket_ok("/run/userdata/mysql.sock", NULL), "a prefix is not a folder");

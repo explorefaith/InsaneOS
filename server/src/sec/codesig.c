@@ -1,4 +1,4 @@
-/* codesig.c — verified system code: the signed manifest of LordOS's own JavaScript and the
+/* codesig.c — verified system code: the signed manifest of Insane OS's own JavaScript and the
  * check of each file at load time (see codesig.h and docs/SIGNING.md, "Verified system code"). */
 #include "codesig.h"
 #include "json.h"
@@ -252,7 +252,7 @@ CodeState codesig_init_root(const char *root, const uint8_t pub[32], int release
     double t0 = now_ms();
     cs.release = release;
     if (!root || !realpath(root, cs.root) || (cs.rootfd = open(cs.root, O_RDONLY | O_DIRECTORY | O_CLOEXEC)) < 0) {
-        snprintf(cs.reason, sizeof cs.reason, "no LordOS folder");
+        snprintf(cs.reason, sizeof cs.reason, "no Insane OS folder");
         cs.root[0] = 0;
         cs.state = release ? CODE_INVALID : CODE_DEVELOPMENT;
         goto done;
@@ -323,7 +323,7 @@ const char *codesig_state_name(CodeState s) {
 }
 
 static void refuse(const char *rel, const char *why) {
-    fprintf(stderr, "code: REFUSED %s: %s — this LordOS component was modified and was not loaded\n", rel, why);
+    fprintf(stderr, "code: REFUSED %s: %s — this Insane OS component was modified and was not loaded\n", rel, why);
     pthread_mutex_lock(&cs_mu);
     int known = 0;
     for (int i = 0; i < cs.nrefused; i++) if (!strcmp(cs.refused[i].path, rel)) known = 1;
@@ -355,12 +355,12 @@ char *codesig_load(const char *path, size_t max, size_t *len, char *why, size_t 
         return NULL;
     }
     if (!rel || !valid_rel(rel)) {
-        /* outside LordOS's folder: only a development build without a signed manifest runs it */
-        if (cs.state != CODE_DEVELOPMENT) { snprintf(why, whylen, "not part of LordOS's system code"); refuse(path, why); return NULL; }
+        /* outside Insane OS's folder: only a development build without a signed manifest runs it */
+        if (cs.state != CODE_DEVELOPMENT) { snprintf(why, whylen, "not part of Insane OS's system code"); refuse(path, why); return NULL; }
         int fd = open(path, O_RDONLY | O_CLOEXEC | O_NOCTTY);
         if (fd >= 0) { buf = read_fd(fd, max, &n); close(fd); }
         if (!buf) { snprintf(why, whylen, "cannot read it"); return NULL; }
-        fprintf(stderr, "code: %s loaded unchecked (outside %s, development build)\n", path, cs.root[0] ? cs.root : "the LordOS folder");
+        fprintf(stderr, "code: %s loaded unchecked (outside %s, development build)\n", path, cs.root[0] ? cs.root : "the Insane OS folder");
         *len = n;
         return buf;
     }

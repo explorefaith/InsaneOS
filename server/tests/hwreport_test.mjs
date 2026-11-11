@@ -95,7 +95,7 @@ for (const s of ['alice', 'PF2ABCDE', '3c:22', 'HomeNet', 'renderD128', 'nvme0n1
   ok(`the built report leaves out ${s}`, !text.includes(s));
 eq('format, version, source', [built.format, built.version, built.source, built.createdAt, built.lordos], ['lordos-hwreport', 1, 'community', '2026-10-28', '0.8.7-beta']);
 eq('the bench keeps only listed fields', built.bench.results['cpu.js.1'], { value: 50, unit: 'runs/s' });
-ok('live from LordBench\'s flag', built.live === true);
+ok('live from InsaneBench\'s flag', built.live === true);
 eq('a bench of another version is left out', buildShareReport({ report: raw, bench: { ...bench, lordos: '0.8.6-beta' }, compat: [], schema, date: '2026-10-28' }).bench, null);
 ok('live from the report', buildShareReport({ report: { ...raw, software: { ...raw.software, live: true } }, compat: [], schema, date: '2026-10-28' }).live);
 ok('not live', !buildShareReport({ report: raw, compat: [], schema, date: '2026-10-28' }).live);
@@ -114,7 +114,7 @@ ok('the summary carries the boot class', summaryText(laptop).includes('boot: usb
 ok('the title says live', issueTitle(laptop).endsWith(', live)') && issueTitle(laptop).length <= TITLE_MAX);
 ok('a long machine name keeps the title short', issueTitle({ ...laptop, system: { ...laptop.system, machine: { vendor: 'V'.repeat(80), product: 'P'.repeat(80) } } }).length <= TITLE_MAX);
 const url = new URL(issueUrl(laptop));
-eq('the link goes to the template', [url.origin + url.pathname, url.searchParams.get('template'), url.searchParams.get('lordos')], ['https://github.com/lordbasex/LordOS/issues/new', 'hardware-report.yml', '0.8.7-beta']);
+eq('the link goes to the template', [url.origin + url.pathname, url.searchParams.get('template'), url.searchParams.get('lordos')], ['https://github.com/lordbasex/Insane OS/issues/new', 'hardware-report.yml', '0.8.7-beta']);
 eq('only the title, version and summary travel in the link', [...url.searchParams.keys()], ['template', 'title', 'lordos', 'summary']);
 ok('the summary is short', url.searchParams.get('summary').length <= 600 && issueUrl(laptop).length < 2000);
 ok('the summary has no report-only detail', !/i915.*46a8|totalKB|kernelConfig|results/.test(summaryText(laptop)));
@@ -129,10 +129,10 @@ ok('the page names the file', page.includes('Attach r.json'));
 
 // ---- the workflow's checks (lib.mjs) ----
 const body = `Summary\n\n[lordos-hwreport-2026-10-28.json](https://github.com/user-attachments/files/123456/lordos-hwreport-2026-10-28.json)\n
-https://github.com/lordbasex/LordOS/files/77/old.json and https://github.com/someone/else/files/88/evil.json
+https://github.com/lordbasex/Insane OS/files/77/old.json and https://github.com/someone/else/files/88/evil.json
 https://evil.example/user-attachments/files/1/x.json https://github.com/user-attachments/files/9/x.json.exe javascript:alert(1)`;
-eq('attachment links: GitHub\'s, this repository only, .json only', findAttachments(body, 'lordbasex/LordOS'),
-  ['https://github.com/user-attachments/files/123456/lordos-hwreport-2026-10-28.json', 'https://github.com/lordbasex/LordOS/files/77/old.json']);
+eq('attachment links: GitHub\'s, this repository only, .json only', findAttachments(body, 'lordbasex/Insane OS'),
+  ['https://github.com/user-attachments/files/123456/lordos-hwreport-2026-10-28.json', 'https://github.com/lordbasex/Insane OS/files/77/old.json']);
 eq('at most three', findAttachments(Array.from({ length: 6 }, (_, i) => `https://github.com/user-attachments/files/${i}/a.json`).join(' '), 'a/b').length, 3);
 eq('a bad repository name matches only user-attachments', findAttachments('https://github.com/x/y/files/1/a.json', '../x'), []);
 eq('allowed hosts', ['https://github.com/user-attachments/files/1/a.json', 'https://objects.githubusercontent.com/x', 'https://github-production-user-asset-6210df.s3.amazonaws.com/x',
@@ -253,7 +253,7 @@ const sn = { format: 'lordos-hwsnapshot', version: 1, generated: '2026-10-29', r
   { key: 'machine:LENOVO|21CB', component: 'suspend', name: 'LENOVO 21CB', lordos: '0.8.7', works: 1, limits: 0, no: 0, reports: 1, references: 0 },
 ] };
 const cf = communityFor(sn, laptop.system, '0.8.7-beta');
-eq('only the same LordOS version', cf.gpu, [{ name: 'Intel Corporation Alder Lake-UP3 GT2 [Iris Xe Graphics]', works: 2, limits: 1, no: 0, reports: 3, references: 0 }]);
+eq('only the same Insane OS version', cf.gpu, [{ name: 'Intel Corporation Alder Lake-UP3 GT2 [Iris Xe Graphics]', works: 2, limits: 1, no: 0, reports: 3, references: 0 }]);
 eq('rows with data', Object.keys(cf).sort(), ['gpu', 'suspend', 'wifi']);
 eq('another version sees none of it', communityFor(sn, laptop.system, '0.8.8'), {});
 eq('summary: works', communitySummary(cf.gpu), { works: 2, limits: 1, no: 0, reports: 3, references: 0, state: 'works', onlyReferences: false });

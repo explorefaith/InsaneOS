@@ -1,4 +1,4 @@
-We take the security of LordOS seriously and we're grateful to anyone who helps us find and fix problems. This page explains how to report a vulnerability and what you can expect from us.
+We take the security of Insane OS seriously and we're grateful to anyone who helps us find and fix problems. This page explains how to report a vulnerability and what you can expect from us.
 
 ## How to report a vulnerability
 
@@ -6,7 +6,7 @@ Write to us through **[our contact form](https://www.iperfex.com/contacto/?lang=
 
 Include, as far as you can:
 
-- the LordOS version (shown in the About LordOS app, for example "0.8.8 · Beta") and whether it is the ISO, the Raspberry Pi image or the Debian package;
+- the Insane OS version (shown in the About Insane OS app, for example "0.8.8 · Beta") and whether it is the ISO, the Raspberry Pi image or the Debian package;
 - the component affected (for example the compositor, the app sandbox, the per-app firewall, remote desktop, the password vault, the Store, the Debian installer script or the website);
 - the steps to reproduce it, a proof of concept if you have one, and the impact you see;
 - how you'd like to be credited, if at all.
@@ -17,14 +17,14 @@ You can write in English, Spanish or Portuguese.
 
 **In scope:**
 
-- LordOS's own code: `lord-server` (the display server and Wayland compositor), `lord-sessiond` and the login screen, the app sandbox and permission broker, `lord-netperm`, `lord-vault`, the mail, document and media helpers, the package engine, the native apps and the SDK;
+- Insane OS's own code: `lord-server` (the display server and Wayland compositor), `lord-sessiond` and the login screen, the app sandbox and permission broker, `lord-netperm`, `lord-vault`, the mail, document and media helpers, the package engine, the native apps and the SDK;
 - the release files and their signatures, and the Debian installer script (`lordos.org/install.sh`);
-- the configuration LordOS ships for the system (for example services it enables);
+- the configuration Insane OS ships for the system (for example services it enables);
 - the lordos.org website.
 
 **Out of scope** (report these to their own projects):
 
-- vulnerabilities in Debian packages, the Linux kernel, Mesa, browsers or other third-party software that also affect plain Debian ([Debian's security team](https://www.debian.org/security/)); tell us too if LordOS makes it worse;
+- vulnerabilities in Debian packages, the Linux kernel, Mesa, browsers or other third-party software that also affect plain Debian ([Debian's security team](https://www.debian.org/security/)); tell us too if Insane OS makes it worse;
 - third-party `.lpk` apps (report to their author; tell us if one escapes the sandbox);
 - attacks that need physical access to an unlocked computer, social engineering, or denial of service by flooding;
 - reports from automated scanners without a demonstrated impact, and missing best-practice headers with no security consequence.
@@ -53,7 +53,7 @@ We'll keep you informed, credit you in the release notes if you want, and publis
 
 ## Verifying releases
 
-Every release file (the ISO, the Raspberry Pi image and the `.deb`) is listed with its SHA-256 in `SHA256SUMS`, and `SHA256SUMS` is signed with the LordOS release key (Ed25519). The Debian installer script refuses to install when the signature is missing or invalid.
+Every release file (the ISO, the Raspberry Pi image and the `.deb`) is listed with its SHA-256 in `SHA256SUMS`, and `SHA256SUMS` is signed with the Insane OS release key (Ed25519). The Debian installer script refuses to install when the signature is missing or invalid.
 
 - Public key: [lordos-release.pub.pem](/lordos-release.pub.pem)
 - Fingerprint (SHA-256 of the DER public key):

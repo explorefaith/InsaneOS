@@ -225,7 +225,7 @@ static void decide(void) {
     REFUSES(esp_fat, 0, "install.free.espNotFat");
     REFUSES(esp_read, 0, "install.free.espUnreadable");
     REFUSES(esp_free, FSP_ESP_MIN_FREE - 1, "install.free.espFull");
-    REFUSES(esp_has_ours, 1, "install.free.espHasLordOS");
+    REFUSES(esp_has_ours, 1, "install.free.espHasInsane OS");
     REFUSES(boot_tool, 0, "install.free.noBootTool");
 
     /* no ESP, two ESPs */

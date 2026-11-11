@@ -4,7 +4,7 @@
 // "puerta": tmux habla un protocolo de líneas (%begin/%end, %output, %layout-change…).
 // El servidor (server/src/term/term.c) manda la salida de cada panel directo a una sesión
 // virtual; acá se arma el resto: cada ventana de tmux es una pestaña de una ventana de
-// LordOS y cada panel de tmux un panel nativo. Dividir, cerrar o abrir pestañas en esa
+// Insane OS y cada panel de tmux un panel nativo. Dividir, cerrar o abrir pestañas en esa
 // ventana se traduce a comandos de tmux, y el tamaño de la ventana se le informa con
 // refresh-client. Esc en la puerta desconecta (detach); la sesión de tmux sigue viva.
 import { term, wm, windows as wmWindows, t as T } from '@lordos/sdk';
@@ -67,7 +67,7 @@ function paneSid(c, num) {
       term.feed(sid, `\x1b[H\x1b[2J${lines.join('\r\n')}`);
       const rows = term.info(sid)?.rows || 24;
       if ([x, y, ph].every(Number.isFinite)) {
-        // la fila del cursor se cuenta desde abajo: el panel de LordOS puede tener otra altura
+        // la fila del cursor se cuenta desde abajo: el panel de Insane OS puede tener otra altura
         const last = Math.min(lines.length, rows) - 1;
         const row = Math.max(0, Math.min(rows - 1, last - (ph - 1) + y));
         term.feed(sid, `\x1b[${row + 1};${x + 1}H`);
@@ -214,7 +214,7 @@ term.onAny((sid, type, data) => {
   else if (type === 'resize') resized(sid);
 });
 
-// Si se cierra la ventana de LordOS que muestra tmux, se desconecta (tmux sigue vivo).
+// Si se cierra la ventana de Insane OS que muestra tmux, se desconecta (tmux sigue vivo).
 wmWindows.subscribe(() => {
   const ids = new Set(wmWindows.get().map((w) => w.id));
   for (const c of ctls.values()) if (c.wid && !ids.has(c.wid) && !getWin(c.wid)) { term.tmuxCommand(c.gw, 'detach-client'); c.wid = null; }

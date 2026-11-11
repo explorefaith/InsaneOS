@@ -1,4 +1,4 @@
-// i18n-check.mjs — checks the LordOS language catalogs.
+// i18n-check.mjs — checks the Insane OS language catalogs.
 //
 //   node tools/i18n-check.mjs            every language in assets/locales
 //   node tools/i18n-check.mjs pt         just one (or a pack: path to lordos-lang-xx.json)

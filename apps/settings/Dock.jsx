@@ -2,7 +2,7 @@
 // only while a window covers it, always: issue #46) and recent apps; in the Classic theme, the taskbar
 // position. Saved in settings.json (sdk/dock.js: DOCK_DEFAULTS) and the theme applies it live, including
 // the work area. «Reset Dock to defaults» puts the theme's apps back (dock.reset), after a confirmation in the page.
-// Menu Bar (Taskbar in Lord Classic) and Control Center: what the bar and the panel show (issue #58,
+// Menu Bar (Taskbar in Insane Classic) and Control Center: what the bar and the panel show (issue #58,
 // sdk/menubarmodel.js); everything is on until the user turns it off.
 import {
   View, Text, Button, useTheme, useLocale, useSettings, Toggle, Slider, Segmented, dockPrefs, dockHideSettings, DOCK_HIDE_MODES, dock, themes,
@@ -90,7 +90,7 @@ function MenuBarSection({ classic }) {
   const { t: tr } = useLocale();
   const [s, set] = useSettings();
   const p = menuBarPrefs(s);
-  // text: the row's own text keys when they differ from the setting's (the taskbar's wording in Lord Classic)
+  // text: the row's own text keys when they differ from the setting's (the taskbar's wording in Insane Classic)
   const row = (key, on, hint, text = key) => (
     <SettingRow key={key} label={tr(`settings.dock.menubar.${text}`)} hint={hint ? tr(`settings.dock.menubar.${text}Hint`) : undefined}>
       <Toggle small on={on} onChange={(v) => set(menuBarPatch(s, key, v))} />
@@ -98,7 +98,7 @@ function MenuBarSection({ classic }) {
   );
   return (
     <Section title={tr(classic ? 'settings.dock.menubar.titleTaskbar' : 'settings.dock.menubar.title')} footer={tr('settings.dock.menubar.footer')}>
-      {/* a full bar on each display: Lord Flow's menu bar, Lord Classic's taskbar (the same setting) */}
+      {/* a full bar on each display: Insane Flow's menu bar, Insane Classic's taskbar (the same setting) */}
       {row('everyDisplay', menuBarEveryDisplay(s), true, classic ? 'everyDisplayTaskbar' : 'everyDisplay')}
       {getApp('cleaner') ? row('cleaner', cleanerItemShown(s), true) : null}
       {row('keyboard', p.keyboard, true)}
@@ -109,7 +109,7 @@ function MenuBarSection({ classic }) {
   );
 }
 
-// Lord Flow's Control Center: the tiles that can go. Dark mode, transparency, sound and the wallpaper stay.
+// Insane Flow's Control Center: the tiles that can go. Dark mode, transparency, sound and the wallpaper stay.
 function ControlCenterSection() {
   const { t: tr } = useLocale();
   const [s, set] = useSettings();

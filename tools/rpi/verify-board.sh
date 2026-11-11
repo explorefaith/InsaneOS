@@ -1,10 +1,10 @@
 #!/bin/sh
-# verify-board.sh — checks a Raspberry Pi freshly flashed with the LordOS image and prints a
+# verify-board.sh — checks a Raspberry Pi freshly flashed with the Insane OS image and prints a
 # PASS/FAIL table. See docs/RASPBERRY.md, "After flashing".
 #
 # Usage, on the board (as root, or with sudo, so the kernel log and listening sockets are visible):
 #   sudo sh verify-board.sh                    # system checks only (nothing to install)
-#   sudo sh verify-board.sh --repo ~/LordOS    # also builds the tree and runs make -C server test-full
+#   sudo sh verify-board.sh --repo ~/Insane OS    # also builds the tree and runs make -C server test-full
 #                                              # (needs the build packages of "Developing on the board")
 #
 # It changes nothing on the system: it only reads /sys, /proc, the kernel log and the configs, and
@@ -34,8 +34,8 @@ MODEL=$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || echo unknown)
 KREL=$(uname -r)
 row INFO "board" "$MODEL"
 case "$KREL" in
-    *-lordos-rpi-*|*-lordos.*-rpi-*) row PASS "kernel (LordOS build)" "$KREL" ;;
-    *) row FAIL "kernel (LordOS build)" "$KREL is not a -lordos[.<rev>]-rpi-* kernel (Raspberry Pi's has no Landlock)" ;;
+    *-lordos-rpi-*|*-lordos.*-rpi-*) row PASS "kernel (Insane OS build)" "$KREL" ;;
+    *) row FAIL "kernel (Insane OS build)" "$KREL is not a -lordos[.<rev>]-rpi-* kernel (Raspberry Pi's has no Landlock)" ;;
 esac
 PS=$(getconf PAGESIZE 2>/dev/null || echo ?)
 case "$KREL:$PS" in
@@ -122,8 +122,8 @@ else row WARN "GPU (EGL on GBM)" "eglinfo missing (mesa-utils)"; fi
 SLOG=$(ls -t /home/*/.cache/lordos/session.log 2>/dev/null | head -1)
 if [ -n "$SLOG" ]; then
     G=$(grep -m1 'gpu:' "$SLOG" | sed 's/^.*gpu: //')
-    if echo "$G" | grep -q 'GPU composition'; then row PASS "LordOS GPU composition" "$G"
-    else row WARN "LordOS GPU composition" "${G:-no gpu: line} ($SLOG)"; fi
+    if echo "$G" | grep -q 'GPU composition'; then row PASS "Insane OS GPU composition" "$G"
+    else row WARN "Insane OS GPU composition" "${G:-no gpu: line} ($SLOG)"; fi
 fi
 
 # ---- fan and temperature ----
@@ -195,7 +195,7 @@ else row FAIL "lordos.service" "$(systemctl is-active lordos.service)"; fi
 
 # ---- the test suites (optional: needs the tree and the build packages) ----
 if [ -n "$REPO" ]; then
-    if [ ! -f "$REPO/server/Makefile" ]; then row FAIL "test-full" "$REPO is not a LordOS tree"
+    if [ ! -f "$REPO/server/Makefile" ]; then row FAIL "test-full" "$REPO is not a Insane OS tree"
     else
         OWNER=$(stat -c %U "$REPO")
         LOG=/tmp/lordos-verify-tests.log
@@ -218,7 +218,7 @@ if [ -n "$REPO" ]; then
         else row FAIL "sandbox-test" "$SB/3 ok (see $LOG)"; fi
     fi
 else
-    row INFO "test-full" "not run (pass --repo <LordOS tree> with the build packages installed)"
+    row INFO "test-full" "not run (pass --repo <Insane OS tree> with the build packages installed)"
 fi
 
 echo

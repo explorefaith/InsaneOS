@@ -14,7 +14,7 @@
  * fds, and start serving. What arrives afterwards never adds file permissions.
  *
  * Replies carry the request id. An image (page, font sample) comes back in a
- * sealed memfd with premultiplied ARGB32 pixels (those of cairo and of the LordOS engine). */
+ * sealed memfd with premultiplied ARGB32 pixels (those of cairo and of the Insane OS engine). */
 #ifndef LORD_DOC_PROTO_H
 #define LORD_DOC_PROTO_H
 

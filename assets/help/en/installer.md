@@ -1,13 +1,13 @@
 ---
-title: Install LordOS
+title: Install Insane OS
 app: installer
 section: apps
 order: 40
 keywords: install, disk, live, usb, installer
 ---
-# Install LordOS
+# Install Insane OS
 
-In the live system (the LordOS USB stick or CD), the **Install LordOS** assistant copies the system
+In the live system (the Insane OS USB stick or CD), the **Install Insane OS** assistant copies the system
 to the disk.
 
 1. Language, region and time zone.

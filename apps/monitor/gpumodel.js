@@ -239,9 +239,9 @@ export function apiTags(libs, driver = '') {
   return out;
 }
 
-// ---- LordOS's AI engines ----
+// ---- Insane OS's AI engines ----
 
-// The helpers LordOS starts for AI work. gpu: whether the engine can use the GPU at all.
+// The helpers Insane OS starts for AI work. gpu: whether the engine can use the GPU at all.
 export const AI_ENGINES = [
   { id: 'voice', bins: ['lord-tts'], front: 'lord-say', gpu: true },
   { id: 'ocr', bins: ['lord-ocr'], gpu: false },

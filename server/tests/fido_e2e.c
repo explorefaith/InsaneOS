@@ -33,7 +33,7 @@ int main(void) {
     int n = fidodev_list(devs, 8), soft = -1;
     for (int i = 0; i < n; i++) {
         printf("key: %s «%s» %04x:%04x\n", devs[i].path, devs[i].name, devs[i].vid, devs[i].pid);
-        if (strstr(devs[i].name, "LordOS Soft FIDO2")) soft = i;
+        if (strstr(devs[i].name, "Insane OS Soft FIDO2")) soft = i;
     }
     check(soft >= 0, "fidodev_list finds the software authenticator");
     if (soft < 0) return 1;

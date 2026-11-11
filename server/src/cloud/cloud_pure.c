@@ -518,7 +518,7 @@ int cloud_auth_token(const char *out, char *tok, size_t n, char *opts, size_t on
             if (ok) memcpy(tok, t, tl + 1);
             size_t ol = 0;
             for (const JVal *x = d.root->kid; ok && x; x = x->next) {
-                /* the token apart, never a client's id or secret (those are LordOS's own), nothing refused by name */
+                /* the token apart, never a client's id or secret (those are Insane OS's own), nothing refused by name */
                 if (x->type != J_STR || !strcmp(x->key, "token") || !strcmp(x->key, "client_id") || !strcmp(x->key, "client_secret")) continue;
                 if (cloud_option_refused(x->key, "string") || !cloud_value_ok(x->str)) continue;
                 if (!opt_member(opts, on, &ol, x->key, x->str)) ok = 0;
@@ -560,7 +560,7 @@ const char *cloud_default_answer(const char *opt, const char *def) {
 /* ---- browsing (7.3) ---- */
 
 int cloud_mount_opts(char *out, size_t n) {
-    /* LordOS decides what stays (7.2): no age or size limit, uploads 5 s after the last change. Durations in nanoseconds.
+    /* Insane OS decides what stays (7.2): no age or size limit, uploads 5 s after the last change. Durations in nanoseconds.
      * DirCacheTime: a folder is listed from the provider once an hour at most while it is read (the default, 5 minutes,
      * made Files wait for the provider on every visit after that); PollInterval: rclone's own default, written down
      * because the long cache counts on it where the provider has change notifications. */
