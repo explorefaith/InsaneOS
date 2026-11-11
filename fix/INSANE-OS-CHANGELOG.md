@@ -1,12 +1,11 @@
 # INSANE OS — Changelog (this fork)
 
 ## 0.8.8.6-insane.5 — full rebrand: every name and the mark itself
-- Full rename, inside and out: `lord*` → `insane*` across ~2000 files — binaries
-  (`lord-server` → `insane-server`), packages, IPC methods (`lord.*` → `insane.*`),
-  config paths (`~/.config/lordos` → `~/.config/insaneos`), systemd units, docs, URLs
-  (`lordos.org` → `insaneos.org`, `github.com/lordbasex` → `github.com/insaneos`).
-  165 file/directory renames (`git mv`), text replaced in 1831 files; the EFF/diceware
-  wordlist data is untouched (upstream data, not branding)
+- Full rename, inside and out: every trace of the previous name became `insane*` across
+  ~2000 files — binaries (`insane-server`), packages, IPC methods (`insane.*`),
+  config paths (`~/.config/insaneos`), systemd units, docs, URLs (`insaneos.org`,
+  `github.com/insaneos`). 165 file/directory renames (`git mv`), text replaced in 1831
+  files; the EFF/diceware wordlist data is untouched (upstream data, not branding)
 - New mark: an orange apple (body, stem, leaf) with an amber → deep-orange radial gradient,
   replacing the burst/crown everywhere — app icons (16–1024), menu-bar glyphs, the wordmark's
   front mark, Plymouth splash, GRUB menu, favicon, social card, wallpapers, `insaneos-fetch`

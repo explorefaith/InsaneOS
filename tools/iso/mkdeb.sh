@@ -287,7 +287,7 @@ find "$PKG/usr/share/themes" -type d -exec chmod 755 {} +; find "$PKG/usr/share/
 # GTK's defaults where the session can't give its own: the window buttons of apps that draw their
 # title bar (#52; docs/WAYLAND.md). GLib's dpkg trigger compiles the schema override.
 install -D -m 644 assets/gtk/90_insaneos.gschema.override "$PKG/usr/share/glib-2.0/schemas/90_insaneos.gschema.override"
-# COEXIST=1: installing beside an older desktop package (lordos) that owns /etc/gtk-*/settings.ini.
+# COEXIST=1: installing beside an older desktop package that owns /etc/gtk-*/settings.ini.
 # The paths would clash and dpkg would refuse to unpack; the session gives apps its own values
 # through the settings portal, so leaving the old file in place costs nothing.
 if [ "${COEXIST:-0}" != 1 ]; then
