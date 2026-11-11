@@ -44,14 +44,17 @@ export function WindowShell({ win, style, children, onMouseDown, resizable = tru
   const m = resizable && !win.maximized && !tv ? WINDOW_EDGE : 0;
   const inner = useRef(null);
   if (!inner.current) inner.current = (n) => { if (n && n.id) fxNodes.set(win.id, n.id); else fxNodes.delete(win.id); };
-  const radius = typeof style?.borderRadius === 'number' ? style.borderRadius : 0;
+  // the frame's style may be an array (the theme layers the open/minimize effects over it): flattened
+  // before the spread below, which of an array would take its indexes as keys and lose every property
+  const st = Array.isArray(style) ? Object.assign({}, ...style) : style;
+  const radius = typeof st?.borderRadius === 'number' ? st.borderRadius : 0;
   useEffect(() => { frameRadii.set(win.id, radius); }, [win.id, radius]);
   useEffect(() => () => frameRadii.delete(win.id), [win.id]);
   const place = tv ? { transform: `translate(${tv.x - geo.x}px, ${tv.y - geo.y}px) scale(${tv.scale})`, transformOrigin: 'left top' } : fx && here ? fx : null;
   return (
     <View ref={wm.frameRef(win.id, m)} onMouseDown={tv ? undefined : onMouseDown}
       style={{ position: 'absolute', left: geo.x - m, top: geo.y - m, width: geo.w + 2 * m, height: geo.h + 2 * m, display: here && (!win.minimized || tv || leaving) ? 'flex' : 'none', ...(tv ? { pointerEvents: 'box-none' } : null) }}>
-      <View ref={inner.current} style={{ position: 'absolute', left: m, top: m, right: m, bottom: m, ...style, ...place }}>
+      <View ref={inner.current} style={{ position: 'absolute', left: m, top: m, right: m, bottom: m, ...st, ...place }}>
         {tv ? h(OverviewPlaceholder, { win, scale: tv.scale }) : null}
         {children}
         {tv ? h(OverviewCover, { id: win.id, scale: tv.scale, radius: win.maximized ? 0 : 8 }) : null}

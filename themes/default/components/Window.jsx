@@ -89,7 +89,7 @@ export function Window({ win, app, t, focused, fx }) {
   const [enter, setEnter] = useState(() => (s?.reduceMotion ? 1 : 0));
   const glass = !win.fullscreen && !win.maximized && app.glass ? glassPrefs(s || {}) : { on: false, alpha: 1, blur: 0 };
   useEffect(() => {
-    if (!enter || enter >= 1) return undefined;
+    if (enter >= 1) return undefined;               // reduce motion starts at 1: no animation
     const iv = setInterval(() => setEnter((v) => Math.min(1, v + 0.2)), 16);
     return () => clearInterval(iv);
   }, []);

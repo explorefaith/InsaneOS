@@ -1767,7 +1767,21 @@ static void frame_dump_maybe(Server *s, const Out *o) {
     char path[4096];
     if (dump_state == 2) snprintf(path, sizeof path, dump_pattern, (int)s->frames);
     else snprintf(path, sizeof path, "%s", dump_pattern);
-    if (stbi_write_png(path, o->scene.w, o->scene.h, 4, px, o->scene.w * 4)) dump_n++;
+    /* The canvas stores 0xAARRGGBB words (memory bytes B,G,R,A); PNG wants R,G,B,A: the channels
+     * are swapped into a copy of the frame. */
+    size_t n = (size_t)o->scene.w * o->scene.h;
+    uint8_t *rgb = malloc(n * 4);
+    if (!rgb) return;
+    for (size_t i = 0; i < n; i++) {
+        uint32_t p = px[i];
+        rgb[i * 4] = (uint8_t)(p >> 16);
+        rgb[i * 4 + 1] = (uint8_t)(p >> 8);
+        rgb[i * 4 + 2] = (uint8_t)p;
+        rgb[i * 4 + 3] = (uint8_t)(p >> 24);
+    }
+    int ok = stbi_write_png(path, o->scene.w, o->scene.h, 4, rgb, o->scene.w * 4);
+    free(rgb);
+    if (ok) dump_n++;
 }
 
 /* Does this display have something to show? (damage, a moved cursor on it, a fullscreen app) */
