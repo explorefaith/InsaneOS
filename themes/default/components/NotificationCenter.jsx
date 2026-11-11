@@ -114,7 +114,7 @@ export function NotificationCenter({ t, top, onClose, area, at = null }) {
   const calH = p.calendar ? 290 : 0;
   const listH = Math.max(140, Math.min(460, area.h - top - calH - 40));
   const panel = (children, extra) => (
-    <View style={{ width: W, borderRadius: 16, overflow: 'hidden', backgroundColor: t.panelBg, backdropFilter: `blur(${t.blur}px)`,
+    <View style={{ width: W, borderRadius: 16, overflow: 'hidden', backgroundColor: t.panelBg, backdropFilter: t.glassFilter,
       border: `1px solid ${t.windowBorder}`, boxShadow: '0 16px 40px rgba(0,0,0,0.4)', ...extra }}>{children}</View>
   );
   return (

@@ -22,14 +22,18 @@ const gradients = [
 ];
 export const wallpapers = [...insaneosWallpapers, ...gradients];
 
-export function makeTheme({ mode, accent, effects, glassBlur, glassTransparency }) {
+export function makeTheme({ mode, accent, effects, glassBlur, glassTransparency, glassSaturate }) {
   const dark = mode === 'dark';
   // Glass (0.8.8.8, Settings → Wallpaper): the transparency slider pulls every glass surface's
   // alpha towards a floor of 0.06 (almost clear); 0 keeps today's colours exactly. The blur
-  // slider is the backdrop-blur radius in px. Both are off without effects.
+  // slider is the backdrop-blur radius in px, the saturation one boosts the blurred colours
+  // (1 keeps them). All are off without effects.
   const gt = effects ? Math.max(0, Math.min(1, Number.isFinite(glassTransparency) ? glassTransparency : 0.3)) : 0;
   const ga = (base) => Math.max(0.04, base + (0.06 - base) * gt);
   const gb = effects ? Math.max(0, Math.min(64, Number.isFinite(glassBlur) ? Math.round(glassBlur) : 24)) : 0;
+  const gs = effects && gb ? Math.max(1, Math.min(2, Number.isFinite(glassSaturate) ? glassSaturate : 1.2)) : 1;
+  // the backdrop filter the glass surfaces use: the blur's radius and its saturation
+  const glassFilter = gb ? `blur(${gb}px) saturate(${gs})` : undefined;
   return {
     mode,
     accent: accents[accent] || accents.azul,
@@ -37,6 +41,8 @@ export function makeTheme({ mode, accent, effects, glassBlur, glassTransparency 
     wallpapers,
     effects,
     glassBlur: gb,
+    glassSaturate: gs,
+    glassFilter,
     glassAlpha: (base) => ga(base),
     text: dark ? '#f5f5f7' : '#1d1d1f',
     textDim: dark ? 'rgba(235,235,245,0.55)' : 'rgba(60,60,67,0.6)',

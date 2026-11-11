@@ -88,6 +88,7 @@ static const StyleProp props[] = {
     P("shadowOffsetX", ST_FLOAT, shadow_x, NULL),
     P("shadowOffsetY", ST_FLOAT, shadow_y, NULL),
     P("backdropBlur", ST_FLOAT, backdrop_blur, NULL),
+    P("backdropSaturate", ST_FLOAT, backdrop_saturate, NULL),
     P("fontSize", ST_FLOAT, font_size, NULL),
     P("lineHeight", ST_FLOAT, line_height, NULL),
     P("fontWeight", ST_FLOAT, font_weight, NULL),

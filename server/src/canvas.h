@@ -34,7 +34,7 @@ void canvas_rrect_stroke(Canvas *c, float x, float y, float w, float h, float r,
 void canvas_shadow(Canvas *c, float x, float y, float w, float h, float r,
                    float dx, float dy, float blur, uint32_t argb);
 /* backdrop-filter: blur() over what is already drawn, clipped to the rounded rectangle. */
-void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r, int radius);
+void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r, int radius, float sat);
 
 /* Corners: save before painting a node with overflow:hidden and restore afterwards. */
 typedef struct { int x[4], y[4], n; uint32_t *buf; } Corners;

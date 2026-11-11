@@ -372,7 +372,7 @@ function Greeter() {
         <View style={{ position: 'absolute', left: 0, top: Math.round(H * 0.6) - avatarSize - lift, width: W, alignItems: 'center',
           opacity: 0.15 + 0.85 * ease, transform: `translateY(${Math.round((1 - ease) * 20)}px)` }}>
           <View style={{ alignItems: 'center', paddingHorizontal: 44, paddingVertical: 24, borderRadius: 26,
-            backgroundColor: 'rgba(8,8,20,0.36)', backdropFilter: 'blur(30px)',
+            backgroundColor: 'rgba(8,8,20,0.36)', backdropFilter: 'blur(30px) saturate(1.2)',
             border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 22px 60px rgba(0,0,0,0.45)' }}>
             {user ? <Avatar user={user} size={avatarSize} /> : null}
             <Text style={{ marginTop: 14, fontSize: 16, fontWeight: 600, color: '#fff', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>

@@ -16,9 +16,11 @@ export const accents = {
 
 export const wallpapers = insaneosWallpapers;
 
-export function makeTheme({ mode, accent, effects }) {
+export function makeTheme({ mode, accent, effects, glassBlur, glassSaturate }) {
   const dark = mode === 'dark';
   const glass = effects !== false;
+  const gb = glass ? Math.max(0, Math.min(64, Number.isFinite(glassBlur) ? Math.round(glassBlur) : 28)) : 0;
+  const gs = glass && gb ? Math.max(1, Math.min(2, Number.isFinite(glassSaturate) ? glassSaturate : 1.2)) : 1;
   return {
     mode,
     accent: accents[accent] || accents.azul,
@@ -61,7 +63,9 @@ export function makeTheme({ mode, accent, effects }) {
     panelFoot: dark ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.035)',
     tile: dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.75)',
     tileBorder: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-    blur: glass ? 28 : 0,
+    blur: gb,
+    glassSaturate: gs,
+    glassFilter: gb ? `blur(${gb}px) saturate(${gs})` : undefined,
     shadow: dark ? '0 16px 40px rgba(0,0,0,0.55)' : '0 16px 40px rgba(0,0,0,0.22)',
   };
 }

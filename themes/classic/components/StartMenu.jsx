@@ -220,7 +220,7 @@ export function StartMenu({ t, box, onClose, isOnBar }) {
   const hoverBg = t.mode === 'dark' ? '#2e2e33' : '#e6e6ea';
   return (
     <View ref={ref} style={{ position: 'absolute', ...box, borderRadius: 10, overflow: 'hidden',
-      backgroundColor: t.panelBg, backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
+      backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
       <View style={{ height: 72, paddingHorizontal: 28, justifyContent: 'center' }}>
         <SearchField value={query} onChange={setQuery} onKeyDown={onKey} autoFocus placeholder={tr('shell.classic.searchHint')}
           onCancel={() => { if (!query) onClose(); }} style={{ height: 34 }} />

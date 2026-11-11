@@ -112,7 +112,7 @@ void media_annotate(uint32_t *px, int w, int h, const MediaOp *ops, int n, int o
         case 'z': {
             /* strong blur (three passes): for hiding data, it can't be «unblurred» by eye */
             int r = (int)fmaxf(8, width * 3);
-            for (int k = 0; k < 3; k++) canvas_backdrop_blur(&c, x0, y0, bw, bh, 0, r);
+            for (int k = 0; k < 3; k++) canvas_backdrop_blur(&c, x0, y0, bw, bh, 0, r, 1);
             break;
         }
         case 'f':

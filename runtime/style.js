@@ -191,8 +191,11 @@ function expand(k, v, out) {
       return;
     }
     case 'backdropFilter': {
-      const m = String(v).match(/blur\(\s*([\d.]+)/);
+      const s = String(v);
+      const m = s.match(/blur\(\s*([\d.]+)/);
       out.backdropBlur = m ? parseFloat(m[1]) : 0;
+      const st = s.match(/saturate\(\s*([\d.]+)\s*\)/);
+      if (st) out.backdropSaturate = parseFloat(st[1]);
       return;
     }
     case 'background': case 'backgroundImage': {

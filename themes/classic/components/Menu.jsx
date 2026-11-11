@@ -70,7 +70,7 @@ export function Menu({ t, items: raw, x, y, above, onClose, width = 240, boxRef 
   return (
     <Layer name="popover">
       <View ref={(n) => { ref.current = n; if (boxRef) boxRef.current = n; }} style={{ position: 'absolute', left, top, width, padding: 5, borderRadius: t.menuRadius,
-        backgroundColor: t.panelBg, backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
+        backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
         {H > maxH ? <ScrollView style={{ height: maxH - 10 }}>{rows}</ScrollView> : rows}
       </View>
     </Layer>

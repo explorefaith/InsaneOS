@@ -39,6 +39,7 @@ typedef struct {
     float grad_angle;
     float radius, border_width, opacity;
     float shadow_blur, shadow_x, shadow_y, backdrop_blur;
+    float backdrop_saturate;    /* the backdrop blur's saturation boost (1 = the colours as they are) */
     float font_size, line_height, font_weight;
     float translate_x, translate_y;
     float z_index;

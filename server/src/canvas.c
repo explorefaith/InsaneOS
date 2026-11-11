@@ -654,7 +654,7 @@ static void blur_up(void *ctx, int j0, int j1) {
     free(vrow);
 }
 
-void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r, int radius) {
+void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r, int radius, float sat) {
     Blur b = { .c = c, .x = x, .y = y, .w = w, .h = h };
     if (radius < 1 || w <= 0 || h <= 0 || !bounds(c, x, y, w, h, &b.x0, &b.y0, &b.x1, &b.y1)) return;
     /* Margin so the edge takes color from outside, as in CSS. */
@@ -682,6 +682,20 @@ void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r
         blur_phase(&b, b.sh, small, blur_rows);
         blur_phase(&b, b.sh, small, blur_copy);
         blur_phase(&b, b.sw, small, blur_cols);
+    }
+    /* the glass's saturation boost, on the small buffer before it goes up: every channel moves
+     * away from the pixel's luma by sat (1 keeps the colours), never past its own alpha (the
+     * canvas is premultiplied) */
+    if (sat < 0.999f || sat > 1.001f) {
+        for (long i = 0; i < small; i++) {
+            uint32_t p = b.buf[i];
+            uint32_t a = p >> 24, r6 = (p >> 16) & 255, g6 = (p >> 8) & 255, b6 = p & 255;
+            uint32_t luma = (r6 * 77 + g6 * 151 + b6 * 28) >> 8;
+            r6 = (uint32_t)fmaxf(0, fminf((float)a, luma + ((float)r6 - luma) * sat));
+            g6 = (uint32_t)fmaxf(0, fminf((float)a, luma + ((float)g6 - luma) * sat));
+            b6 = (uint32_t)fmaxf(0, fminf((float)a, luma + ((float)b6 - luma) * sat));
+            b.buf[i] = a << 24 | r6 << 16 | g6 << 8 | b6;
+        }
     }
     b.r = fix_radius(r, w, h);
     b.cx = x + w * 0.5f; b.cy = y + h * 0.5f; b.hw = w * 0.5f; b.hh = h * 0.5f;

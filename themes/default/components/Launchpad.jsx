@@ -29,7 +29,7 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   return (
     <View onClick={onClose} style={{
       position: 'absolute', left: area.x, top: area.y, width: area.w, height: area.h, alignItems: 'center',
-      backgroundColor: t.effects ? 'rgba(10,10,16,0.35)' : 'rgba(18,18,24,0.94)', backdropFilter: `blur(${t.effects ? 32 : 0}px)`,
+      backgroundColor: t.effects ? 'rgba(10,10,16,0.35)' : 'rgba(18,18,24,0.94)', backdropFilter: t.effects ? `blur(32px) saturate(${t.glassSaturate || 1.2})` : undefined,
     }}>
       <View onClick={(e) => e.stopPropagation()} style={{ marginTop: 48, width: 260 }}>
         <TextInput value={query} onChange={setQuery} placeholder={tr('shell.launchpad.search')} autoFocus

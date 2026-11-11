@@ -17,6 +17,7 @@ void style_defaults(Style *s) {
     s->font_weight = 400;
     s->grad_angle = 180;
     s->text_align = TEXT_START;
+    s->backdrop_saturate = 1;               /* the blur's saturation: 1 keeps the colours */
 }
 
 Node *node_new(int type) {

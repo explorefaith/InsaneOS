@@ -134,7 +134,7 @@ export function Menu({ x, y, items, onClose, anchor, width: minWidth = 220, abov
     <>
     <View ref={ref} style={{
       position: 'absolute', left: x, top: y, width, height: scrolls ? height : undefined, paddingVertical: scrolls ? 0 : 5, borderRadius: 9,
-      backgroundColor: t.panelBg, backdropFilter: `blur(${t.blur}px)`, border: `1px solid ${t.windowBorder}`,
+      backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 12px 32px rgba(0,0,0,0.35)', overflow: 'hidden',
     }}>
       {scrolls

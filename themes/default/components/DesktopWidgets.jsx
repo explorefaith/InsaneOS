@@ -74,12 +74,13 @@ function Card({ widget, children }) {
   const t = on ? Math.max(0, Math.min(1, Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3)) : 0;
   const alpha = Math.max(0.04, 0.92 + (0.24 - 0.92) * t);    // paper white, pulled towards glass
   const blur = on ? Math.max(0, Math.min(64, Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24)) : 0;
+  const sat = on && blur ? Math.max(1, Math.min(2, Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2)) : 1;
   return (
     <View style={[{
       position: 'absolute', left: widget.x, top: widget.y, width: widget.w,
       padding: 20, borderRadius: 18, gap: 4,
       backgroundColor: `rgba(252,251,247,${alpha.toFixed(3)})`,
-      backdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
+      backdropFilter: blur > 0 ? `blur(${blur}px) saturate(${sat})` : undefined,
       border: `1px solid rgba(20,20,30,${(0.08 + 0.06 * t).toFixed(3)})`,
       boxShadow: '0 10px 30px rgba(20,20,40,0.14)',
     }, widget.style]}>

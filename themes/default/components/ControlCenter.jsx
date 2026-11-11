@@ -199,7 +199,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   return (
     <View ref={ref} style={{
       position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 16,
-      backgroundColor: t.panelBg, backdropFilter: `blur(${t.blur}px)`, border: `1px solid ${t.windowBorder}`,
+      backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
     }}>
       <View style={{ flexDirection: 'row', gap: 10 }}>

@@ -247,7 +247,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
       [pos === 'top' ? 'borderBottomWidth' : 'borderTopWidth']: 1 };
   return (
     <View ref={barRef} style={{ position: 'absolute', ...edge, alignItems: 'center', borderColor: t.barBorder,
-      backgroundColor: t.barBg, backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined }}>
+      backgroundColor: t.barBg, backdropFilter: t.glassFilter }}>
       {center ? <View style={{ flex: 1 }} /> : null}
       {apps}
       <View style={{ flex: 1, flexDirection: vert ? 'column' : 'row', justifyContent: 'flex-end', alignItems: 'center' }}>{tray}</View>

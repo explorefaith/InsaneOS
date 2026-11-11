@@ -438,7 +438,7 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
   const label = !hit ? '' : hit.trash ? tr('shell.trash.name') : hit.launcher ? tr('shell.menu.apps') : appName(hit);
   const tip = (
     <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 7, backgroundColor: t.panelBg,
-      backdropFilter: `blur(${t.blur}px)`, border: `1px solid ${t.windowBorder}` }}>
+      backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}` }}>
       <Text style={{ fontSize: 12, fontWeight: 500, color: t.text, whiteSpace: 'nowrap' }}>{label}</Text>
     </View>
   );
@@ -479,7 +479,7 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
       <View onMouseMove={(e) => setM(vert ? e.y : e.x)} onMouseLeave={() => setM(null)}
         style={{ position: 'absolute', ...box, direction: 'ltr' }}>
         <View style={{ position: 'absolute', ...back, borderRadius: 20,
-          backgroundColor: t.dockBg, backdropFilter: `blur(${t.blur}px)`, border: `1px solid ${t.dockBorder}` }} />
+          backgroundColor: t.dockBg, backdropFilter: t.glassFilter, border: `1px solid ${t.dockBorder}` }} />
         {sepLines.map((c, i) => (
           <View key={`sep${i}`} style={vert ? { position: 'absolute', top: c, height: 1, width: BASE * 0.7, [position]: PAD + BASE * 0.15, backgroundColor: t.dockBorder }
             : { position: 'absolute', left: c, width: 1, height: BASE * 0.7, bottom: PAD + BASE * 0.15, backgroundColor: t.dockBorder }} />

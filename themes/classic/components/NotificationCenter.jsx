@@ -108,7 +108,7 @@ export function NotificationCenter({ t, at, onClose, isOnBar }) {
   const listH = Math.max(140, at.height - (cal ? calH + 12 : 0));
   const panel = (children, h, extra) => (
     <View style={{ width: W, height: h, borderRadius: 10, overflow: 'hidden', backgroundColor: t.panelBg,
-      backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow, ...extra }}>{children}</View>
+      backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow, ...extra }}>{children}</View>
   );
   return (
     <View ref={ref} style={{ position: 'absolute', left: at.left, top: at.top, width: W, gap: 12 }}>

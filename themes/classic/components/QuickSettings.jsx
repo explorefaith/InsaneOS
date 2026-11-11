@@ -61,7 +61,7 @@ export function QuickSettings({ t, at, onClose, isOnBar }) {
   const H = at.height;
   return (
     <View ref={ref} style={{ position: 'absolute', ...at.pos, width: W, borderRadius: 10, overflow: 'hidden',
-      backgroundColor: t.panelBg, backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
+      backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
       <View style={{ padding: 16, gap: 14, maxHeight: H }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           <Toggle t={t} on={net.online} label={tr('shell.cc.network')} detail={net.online ? (net.vpn ? `${net.name} · VPN` : net.name) : tr('shell.cc.offline')}

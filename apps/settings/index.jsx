@@ -5,7 +5,7 @@
 import {
   View, Text, Image, useTheme, useSettings, shortcutList, shortcutsRev, themes, session, keyboard, admin, languages, setLanguage, useLocale,
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
-  spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
+  spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, heavyVideoWarning, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
   restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -327,6 +327,11 @@ function MotionWallpapers({ login }) {
     media.probe(path).then((info) => {
       const why = userVideoProblem(info, codecs);
       if (why) { setMsg(tr(`settings.motion.problem.${why}`)); return; }
+      // a heavy file still plays (the format is the gate), but the user should know what it costs
+      const heavy = heavyVideoWarning(info);
+      if (heavy) setMsg(tOptional(`settings.motion.heavy.${heavy}`) || (heavy === '4k'
+        ? 'That video is 4K — it will cost a lot to play as a wallpaper. 1080p at 30 fps looks the same behind your windows.'
+        : 'That video is over 45 fps — wallpapers look the same at 30 fps and cost half as much to play.'));
       const id = `user:${Date.now()}`;
       set({ motionUser: [...(s.motionUser || []), { id, name: path.split('/').pop(), path }] });
       choose(id);
@@ -512,6 +517,14 @@ function Wallpapers() {
             <Slider value={Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3} min={0} max={1} width={180}
               onChange={(v) => set({ glassTransparency: Math.round(v * 100) / 100 })} />
             <Text style={cap}>{`${Math.round((Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3) * 100)} %`}</Text>
+          </View>
+        </SettingRow>
+        <SettingRow label={tOptional('settings.glass.saturation') || 'Saturation'} stack>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.s, direction: 'ltr' }}>
+            <Text style={cap}>{tOptional('settings.glass.neutral') || 'Neutral'}</Text>
+            <Slider value={Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2} min={1} max={2} width={180}
+              onChange={(v) => set({ glassSaturate: Math.round(v * 100) / 100 })} />
+            <Text style={cap}>{`${Math.round((Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2) * 100)} %`}</Text>
           </View>
         </SettingRow>
       </Section>

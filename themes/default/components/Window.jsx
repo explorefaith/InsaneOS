@@ -80,10 +80,11 @@ function glassPrefs(s) {
   const on = s.effects !== false;
   const t = on ? Math.max(0, Math.min(1, Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3)) : 0;
   const blur = on ? Math.max(0, Math.min(64, Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24)) : 0;
+  const sat = on && blur ? Math.max(1, Math.min(2, Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2)) : 1;
   // a window is bigger than a widget: it starts fully opaque and the slider pulls it towards
   // 30 % alpha, so 30 % transparency (the default) reads clearly as glass but stays readable
   const alpha = Math.max(0.25, 1 - 0.7 * t);
-  return { on: on && blur > 0, alpha, blur };
+  return { on: on && blur > 0, alpha, blur, sat };
 }
 
 export function Window({ win, app, t, focused, fx }) {
@@ -171,7 +172,7 @@ export function Window({ win, app, t, focused, fx }) {
   return (
     <WindowShell win={win} leaving={!!fx} onMouseDown={() => wm.focus(win.id)} style={[{
       borderRadius: win.maximized ? 0 : 12, backgroundColor: app.transparent ? 'transparent' : (glass.on ? hexA(t.windowBg, glass.alpha) : t.windowBg), overflow: 'hidden',
-      backdropFilter: glass.on ? `blur(${glass.blur}px)` : undefined,
+      backdropFilter: glass.on ? `blur(${glass.blur}px) saturate(${glass.sat})` : undefined,
       // a transparent app (the Terminal) has nothing behind its border: the border is drawn opaque
       border: `1px solid ${app.transparent ? solidOver(t.windowBorder, t.titleBg) : t.windowBorder}`,
       boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.55)' : '0 10px 28px rgba(0,0,0,0.32)',

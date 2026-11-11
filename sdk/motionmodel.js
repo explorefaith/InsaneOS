@@ -49,6 +49,17 @@ export function userVideoProblem(info, codecs) {
   return codecs.includes(fmt) ? null : 'format';
 }
 
+// A file that will cost much more than a wallpaper needs: 4K, or a high frame rate. A warning,
+// not a refusal — it plays if the format decodes in hardware; 1080p 30 fps is what a moving
+// wallpaper needs, and that is what the message recommends. The probe answers the raw shape
+// ({streams: […]}) or a flat {codec, width…}: both are read here.
+export function heavyVideoWarning(info) {
+  const v = info && (info.streams || []).find((s) => s.type === 'video') || info || {};
+  if ((v.width || 0) >= 3840 || (v.height || 0) >= 2160) return '4k';
+  if ((v.fps || 0) > 45) return 'fps';
+  return null;
+}
+
 // Random: a different one from the last, among those on disk.
 export function nextRandom(ids, last, pick = Math.random) {
   const list = ids.filter((i) => i !== last);

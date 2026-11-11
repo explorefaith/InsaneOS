@@ -160,7 +160,7 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
     <View style={{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }}>
       <View style={{
         position: 'absolute', left: area.x, top: area.y, width: area.w, height, flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: `blur(${t.blur}px)`,
+        paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: t.glassFilter,
       }}>
         <BarItem t={t} active={open?.name === 'logo'} anchorRef={refs.logo} onClick={() => toggle('logo', refs.logo)}>
           <InsaneGlyph size={16} color={t.menuText} />

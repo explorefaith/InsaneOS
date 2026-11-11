@@ -74,7 +74,7 @@ function SnapLayouts({ t, win, at, onEnter, onLeave, onDone }) {
     <Layer name="popover">
       <View onMouseEnter={onEnter} onMouseLeave={onLeave}
         style={{ position: 'absolute', left: Math.max(6, left), top: at.y, width: W, padding: 12, gap: 8, borderRadius: t.menuRadius + 2,
-          backgroundColor: t.panelBg, backdropFilter: t.blur ? `blur(${t.blur}px)` : undefined, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
+          backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`, boxShadow: t.shadow }}>
         <Text style={{ fontSize: 11, fontWeight: 600, color: t.textDim, textAlign: 'start' }}>{tr('shell.classic.snapLayouts')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, direction: 'ltr' }}>
           {LAYOUTS.map((l, li) => (
