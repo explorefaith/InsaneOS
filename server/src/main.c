@@ -29,6 +29,8 @@
 #include "keyboard.h"
 #include "ui/js_sys.h"
 #include "canvas.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 #include "par.h"
 #include "input.h"
 #include "kms.h"
@@ -1741,6 +1743,33 @@ static void present_memory(Server *s, Out *o, int index, int feed, Rect drawn) {
     o->cdirty = 0;
 }
 
+/* ---- headless frame dump (tests and screenshots: INSANE_DUMP_FRAME=/path/frame%d.png) ---- */
+static const char *dump_pattern;
+static int dump_every = 1, dump_max = 1, dump_n, dump_state;
+
+/* Writes the composed frame of a headless session as a PNG, one in INSANE_DUMP_EVERY frames
+ * (default all) up to INSANE_DUMP_MAX of them (default 1). The pattern may hold one %d for the
+ * frame counter. Nothing when the variable is unset; a failed write is tried again on later
+ * frames. The session runs the same with it on or off. */
+static void frame_dump_maybe(Server *s, const Out *o) {
+    if (!dump_state) {
+        dump_pattern = getenv("INSANE_DUMP_FRAME");
+        if (!dump_pattern) { dump_state = -1; return; }
+        const char *e = getenv("INSANE_DUMP_EVERY");
+        if (e) { int v = atoi(e); if (v > 0) dump_every = v; }
+        e = getenv("INSANE_DUMP_MAX");
+        if (e) { int v = atoi(e); if (v > 0) dump_max = v; }
+        dump_state = strchr(dump_pattern, '%') ? 2 : 1;
+    }
+    if (dump_state < 0 || dump_n >= dump_max || s->frames % dump_every) return;
+    const uint32_t *px = wl_fullscreen_active() ? o->frame : o->scene.px;
+    if (!px) return;
+    char path[4096];
+    if (dump_state == 2) snprintf(path, sizeof path, dump_pattern, (int)s->frames);
+    else snprintf(path, sizeof path, "%s", dump_pattern);
+    if (stbi_write_png(path, o->scene.w, o->scene.h, 4, px, o->scene.w * 4)) dump_n++;
+}
+
 /* Does this display have something to show? (damage, a moved cursor on it, a fullscreen app) */
 static int out_needs(const Server *s, const Out *o) {
     if (!o->on) return 0;
@@ -2066,6 +2095,7 @@ static int render_frame(Server *s) {
         Rect drawn = paint_out(s, o, 0, 1);
         if (drawn.x1 > drawn.x0) fph.gdrag = paint_gdrag_last(&fph.gdrag_why, &fph.gdrag_sub);
         present_memory(s, o, 0, 1, drawn);
+        frame_dump_maybe(s, o);
         fph_main = 1;                           /* presented at the end of this frame (below) */
     } else {
         for (int i = 0; i < OUT_MAX; i++) {
@@ -2615,7 +2645,9 @@ int main(int argc, char **argv) {
         double zd = media_reap_timeout();
         if (zd >= 0 && (delay < 0 || zd < delay)) delay = zd;
         /* sin monitor y sin nadie mirando no se dibuja (al conectarse alguien llega un cuadro entero) */
-        int unseen = s.headless && !mirror_watchers() && !media_needs_cpu();   /* recording the screen: yes */
+        static int force_render = -1;           /* INSANE_HEADLESS_RENDER: draw with no viewer (tests, INSANE_DUMP_FRAME) */
+        if (force_render < 0) force_render = getenv("INSANE_HEADLESS_RENDER") != NULL;
+        int unseen = s.headless && !mirror_watchers() && !media_needs_cpu() && !force_render;   /* recording the screen: yes */
         if (!s.headless && display_is_off()) unseen = 1;     /* screen off after idle (DPMS): nothing to draw */
         /* nothing is drawn: the Linux apps waiting for a frame get it at most once a second (wl.c) */
         if (unseen) {
