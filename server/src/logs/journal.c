@@ -1,6 +1,6 @@
 /* journal.c — our own reader for systemd journal files (format from
  * systemd/src/libsystemd/sd-journal/journal-def.h, versions 187 to 257). Used by the Logs app
- * (lord.logs, as the user: it reads only the files that the kernel and journald's ACLs let it
+ * (insane.logs, as the user: it reads only the files that the kernel and journald's ACLs let it
  * read) and by the helper's logs-system action (root, for administrators).
  *
  * The format, in short (all little-endian, objects aligned to 8):

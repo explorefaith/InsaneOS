@@ -11,8 +11,8 @@
  * versions it matches; otherwise the first general pin matching its source; otherwise the source's
  * own priority (500, 100 for backports, 1 for experimental). Nothing here is written or executed;
  * the files are world-readable configuration owned by root. */
-#ifndef LORD_PKG_PIN_H
-#define LORD_PKG_PIN_H
+#ifndef INSANE_PKG_PIN_H
+#define INSANE_PKG_PIN_H
 
 #include "idx.h"
 

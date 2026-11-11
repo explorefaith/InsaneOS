@@ -7,7 +7,7 @@ import {
   View, Text, Button, EmptyState, useTheme, useStore, admin, typeScale, spacing, t, direction,
   suggestions, refreshSuggestions, reevaluateSuggestions, dismissSuggestion, markSuggestionsSeen,
   fanCase,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 
 // ---- drawn glyphs (monochrome on a tinted tile) ----
 
@@ -83,7 +83,7 @@ function Card({ s, deb }) {
   const [error, setError] = useState('');
   const isAdmin = admin.available();
   const nonfree = !s.free;
-  const ask = () => setPlan(lord.pkg.plan({ install: s.install }));
+  const ask = () => setPlan(insane.pkg.plan({ install: s.install }));
   const confirm = () => {
     const extra = plan.items.some((i) => i.action === 'remove' && !i.requested);
     deb.runJob('pkg-install', `${s.install.join(' ')}${extra ? ' --allow-remove' : ''}`, t('store.suggest.job', { name: loc(s, 'title') }));

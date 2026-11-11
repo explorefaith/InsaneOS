@@ -2,7 +2,7 @@
 // value; more rules with +), sorting by a click on a column's header, a cell edited in place (Enter writes it with an
 // UPDATE keyed by the primary key, Esc leaves it), and rows added, duplicated and deleted. A table without a primary or
 // unique key, a view and a locked connection only show their rows, and say why.
-import { View, Text, TextInput, ContextMenu, ConfirmDialog, ScrollView, clipboard, useKeyboard, t as tr } from '@lordos/sdk';
+import { View, Text, TextInput, ContextMenu, ConfirmDialog, ScrollView, clipboard, useKeyboard, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { usePal, Btn, IconBtn, Popup, Field, Sheet, Foot, FootText, Note, Check } from './ui.jsx';
 import { Grid } from './grid.jsx';

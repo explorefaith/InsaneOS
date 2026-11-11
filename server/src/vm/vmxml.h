@@ -8,8 +8,8 @@
  *   - namespace prefixes are dropped: an element or attribute is looked up by its local name ("rasd:Address" is
  *     "Address"), which is all the importer needs and never resolves a URL.
  * The unit test (tests/vm_test.c) runs it over truncated and randomly mutated inputs under ASan. */
-#ifndef LORD_VM_XML_H
-#define LORD_VM_XML_H
+#ifndef INSANE_VM_XML_H
+#define INSANE_VM_XML_H
 
 #include <stddef.h>
 

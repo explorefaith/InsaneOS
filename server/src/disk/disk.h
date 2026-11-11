@@ -1,12 +1,12 @@
 /* disk.h — disks and partitions for the Disks app (see docs/SYSTEM.md, "Disks").
  *
  * disk.c reads without root: /sys/block, the udev database (/run/udev/data/b<major>:<minor>) and
- * /proc/self/mountinfo. It is used by lord-server (lord.disks, js_disk.c) and by the admin helper
+ * /proc/self/mountinfo. It is used by insane-server (insane.disks, js_disk.c) and by the admin helper
  * (disk_admin.c), which validates with these same functions on the root side.
  * smart.c holds the parsers (pure functions) for ATA SMART and the NVMe health log; the helper
  * reads them with SG_IO / NVME_IOCTL_ADMIN_CMD (action disk-smart). */
-#ifndef LORD_DISK_H
-#define LORD_DISK_H
+#ifndef INSANE_DISK_H
+#define INSANE_DISK_H
 
 #include <stddef.h>
 #include <stdint.h>

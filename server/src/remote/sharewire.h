@@ -4,8 +4,8 @@
  *
  * The framing is proto.h's: u32 length (of what follows, little endian), u8 type, data. Unlike the
  * session socket, nothing here is lenient: a wrong length or an unknown type ends the connection. */
-#ifndef LORD_REMOTE_SHAREWIRE_H
-#define LORD_REMOTE_SHAREWIRE_H
+#ifndef INSANE_REMOTE_SHAREWIRE_H
+#define INSANE_REMOTE_SHAREWIRE_H
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,20 +1,20 @@
-/* broker.h — the "broker": the only channel between an isolated .lpk app (lord-server --app) and
- * lord-server. The SDK inside the app process proxies the lord.* calls over this socket;
- * lord-server checks the permission for each one (server/src/sec/perms.c) and, if needed, draws
+/* broker.h — the "broker": the only channel between an isolated .lpk app (insane-server --app) and
+ * insane-server. The SDK inside the app process proxies the insane.* calls over this socket;
+ * insane-server checks the permission for each one (server/src/sec/perms.c) and, if needed, draws
  * the system prompt. See appclient.c (app side), brokersrv.c (server side) and
  * docs/PRIVACY.md.
  *
  * Protocol: SOCK_SEQPACKET messages. Each message = BrokerHdr + payload (text/JSON). Replies
  * carry the same reqid. The file picker (powerbox) and the devices pass
  * fds via SCM_RIGHTS. */
-#ifndef LORD_SEC_BROKER_H
-#define LORD_SEC_BROKER_H
+#ifndef INSANE_SEC_BROKER_H
+#define INSANE_SEC_BROKER_H
 
 #include <stddef.h>
 #include <stdint.h>
 #include <poll.h>
 
-#define BROKER_FD_ENV "LORD_BROKER_FD"
+#define BROKER_FD_ENV "INSANE_BROKER_FD"
 #define BROKER_MAX_MSG (1024 * 1024)
 
 enum BrokerOp {
@@ -35,20 +35,20 @@ enum BrokerOp {
     BOP_CAMERA,         /* payload "list" | "open dev w h [tag codec kbps]" | "live tag" | "mic sid 0|1" | "ring sid" (→ read-only ring fd) | "ack sid id" |
                          * "size sid w h" | "photo sid mirror name" | "record sid mirror mic name" |
                          * "recstop sid" | "close sid". See brokercam.c */
-    BOP_VAULT_FIDO = 40,/* (Passwords only) open the FIDO2 key for lord-vault after the `usb` permission →
+    BOP_VAULT_FIDO = 40,/* (Passwords only) open the FIDO2 key for insane-vault after the `usb` permission →
                          * "name"; the app never gets the device (docs/PASSWORDS.md) */
     BOP_CLIP_SECRET,    /* payload "seconds\0text": a secret to the clipboard, marked sensitive (out of
                          * the history, x-kde-passwordManagerHint) and cleared after `seconds` if unchanged */
     BOP_KEYRING,        /* payload "op\0service\0account\0label\0secret" (op: get | set | delete | list) → the
                          * app's own session-keyring items, owner = the verified app id (brokerkr.c,
                          * docs/PASSWORDS.md). Error replies carry an error code line (keyring.*) */
-    BOP_MAIL,           /* (system Mail, Calendar, Contacts, Reminders only) lord-maild through lord-server:
+    BOP_MAIL,           /* (system Mail, Calendar, Contacts, Reminders only) insane-maild through insane-server:
                          * payload "verb\0rest", fds via SCM_RIGHTS for "req"/"reqm". Replies and events
                          * come back as "mail" events, in chunks. See brokermail.c, docs/PRIVACY.md */
     BOP_SYS_OPEN,       /* (those same system apps only) payload "app\0new\0json": open another of them
                          * with these args (Mail → Calendar for an invitation, Contacts → a new message) */
     BOP_PROBE,          /* (the system package `sysprobe` only, app/probe.c) payload: JSON of what its sandbox
-                         * refused; lord-server adds the process's own status and keeps it for lord.sysinfo */
+                         * refused; insane-server adds the process's own status and keeps it for insane.sysinfo */
     BOP_TEXT_FOCUS,     /* payload "on y h": a text field of the app took or lost focus (window coordinates).
                          * Only a hint for the on-screen keyboard: no text, and no way to press a key */
     BOP_COMPANION,      /* (a packaged app only) no payload, nothing taken from the app: the id is the connection's.
@@ -73,7 +73,7 @@ typedef struct {
 
 #define BROKER_REQ 0xffff
 
-/* ---- server side (lord-server, brokersrv.c) ---- */
+/* ---- server side (insane-server, brokersrv.c) ---- */
 
 /* Registers a new broker for app <id> (pid, for the cgroup/monitor). Returns -1 if there is no
  * room. main.c polls the fd. */
@@ -84,16 +84,16 @@ void brokersrv_dispatch(struct pollfd *pfd, int n);
 /* Delivers pending prompts and indicator changes to JS. */
 typedef void (*BrokerEventFn)(const char *kind, const char *json);
 void brokersrv_events(BrokerEventFn fn);
-/* User's answer to a prompt (from JS: lord.broker.resolve). */
+/* User's answer to a prompt (from JS: insane.broker.resolve). */
 void brokersrv_resolve(uint32_t reqid, int allow);
 int  brokersrv_count(void);
-/* The app on broker fd `fd` was spawned with a channel to lord-vault (system Passwords app): it may
+/* The app on broker fd `fd` was spawned with a channel to insane-vault (system Passwords app): it may
  * use BOP_VAULT_FIDO. */
 void brokersrv_set_vault(int fd);
 /* The app on broker fd `fd` is a system package (assets/sysapps, verified by app_package_dir): it
- * keeps the keyring owner and lord-maild access it had in-process. */
+ * keeps the keyring owner and insane-maild access it had in-process. */
 void brokersrv_set_system(int fd);
-/* The app on broker fd `fd` lives in the third root (sec/pkgapp.h), as lord-server found it, not as it says. */
+/* The app on broker fd `fd` lives in the third root (sec/pkgapp.h), as insane-server found it, not as it says. */
 void brokersrv_set_packaged(int fd);
 /* The user chose an item of an app's status menu. */
 void brokersrv_status_click(const char *app, const char *item);
@@ -116,7 +116,7 @@ void brokersrv_tick(void);
 /* The user revoked a permission in Settings → Privacy: the app is notified (it releases the
  * device) and its indicator is turned off. */
 void brokersrv_revoke(const char *app, const char *perm);
-/* The user picked a file in the system dialog (powerbox): lord-server opens it and passes
+/* The user picked a file in the system dialog (powerbox): insane-server opens it and passes
  * the fd to the app. Empty or NULL path = cancelled. */
 void brokersrv_pick_result(uint32_t reqid, const char *path);
 /* The user picked an item from an app's menu (from the system menu bar): the app is notified
@@ -126,7 +126,7 @@ void brokersrv_menu_click(const char *app, const char *item);
 const char *brokersrv_menus(const char *app);
 /* System Information's last sandbox probe (BOP_PROBE): JSON { probe, proc, at } or NULL. */
 const char *brokersrv_probe_result(void);
-/* The microphone (and later the camera) runs in lord-server: its PipeWire socket has to be
+/* The microphone (and later the camera) runs in insane-server: its PipeWire socket has to be
  * serviced in the main loop. */
 int  brokersrv_audio_pollfds(struct pollfd *pfd, int max);
 void brokersrv_audio_dispatch(struct pollfd *pfd, int n);

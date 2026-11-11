@@ -4,8 +4,8 @@
  * antialiasing at any zoom, with borders, arcs from "this machine" and one dot per place. All on
  * its own thread: the screen thread requests a frame (map_request) and later collects it
  * (map_take) when it's ready, without waiting. */
-#ifndef LORD_MAP_H
-#define LORD_MAP_H
+#ifndef INSANE_MAP_H
+#define INSANE_MAP_H
 
 #include <stdint.h>
 

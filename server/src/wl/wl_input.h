@@ -1,8 +1,8 @@
 /* wl_input.h — gestures and touches for Wayland apps (wl_input.c): zwp_pointer_gestures_v1
  * (pinch, swipe, hold), fine touchpad scrolling (axis_source finger, axis_stop,
  * axis_value120) and wl_touch for touchscreens. Used by tp/tp_route.c. */
-#ifndef LORD_WL_INPUT_H
-#define LORD_WL_INPUT_H
+#ifndef INSANE_WL_INPUT_H
+#define INSANE_WL_INPUT_H
 
 #include <stdint.h>
 

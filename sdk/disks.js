@@ -1,7 +1,7 @@
 // disks.js — disks and partitions (Disks app; see docs/SYSTEM.md, "Disks").
 //
 //   const [list, reload] = useDisks()       // updates itself on mount, unmount or plug-in
-//   disks.list()  disks.tools()             // lord.disks, read-only and without root
+//   disks.list()  disks.tools()             // insane.disks, read-only and without root
 //
 // Anything that changes something goes through the helper with the closed disk-* actions
 // (admin.run): disk-smart, disk-mount, disk-unmount, disk-eject, disk-format, disk-label,
@@ -14,7 +14,7 @@ import { stat } from './fs.js';
 const listeners = new Set();
 let timer = null;
 
-globalThis.__lordDisks = () => {
+globalThis.__insaneDisks = () => {
   // udev events come in bursts: coalesce them into one
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
@@ -23,7 +23,7 @@ globalThis.__lordDisks = () => {
   }, 150);
 };
 
-const api = () => (typeof lord !== 'undefined' && lord.disks ? lord.disks : null);
+const api = () => (typeof insane !== 'undefined' && insane.disks ? insane.disks : null);
 
 export const disks = {
   available: () => !!api(),
@@ -39,15 +39,15 @@ export const disks = {
   },
 };
 
-// The formats that come with the Store's Disk Formats item (docs/FILES.md); lord-server asks the same in disk-mount.
+// The formats that come with the Store's Disk Formats item (docs/FILES.md); insane-server asks the same in disk-mount.
 export const COMMERCIAL_FORMATS = ['vfat', 'exfat', 'ntfs', 'hfsplus', 'apfs'];
-const FORMATS_MARK = '/usr/lib/lordos/disk-formats.enabled';
+const FORMATS_MARK = '/usr/lib/insaneos/disk-formats.enabled';
 export const diskFormatsOn = () => { try { stat(FORMATS_MARK); return true; } catch (e) { return false; } };
 const there = (path) => { try { stat(path); return true; } catch (e) { return false; } };
 // APFS's driver is the item's optional part: the item can be in without it, and it can be added later on the same page
-const apfsMissing = () => there('/usr/lib/lordos/disk-formats.apfs') && !there('/usr/share/doc/apfs-dkms');
+const apfsMissing = () => there('/usr/lib/insaneos/disk-formats.apfs') && !there('/usr/share/doc/apfs-dkms');
 export const needsDiskFormats = (fstype) => COMMERCIAL_FORMATS.includes(fstype) && (!diskFormatsOn() || (fstype === 'apfs' && apfsMissing()));
-export const openDiskFormats = () => wm.open('store', { args: { page: 'commercial', app: 'lordos-disk-formats' } });
+export const openDiskFormats = () => wm.open('store', { args: { page: 'commercial', app: 'insaneos-disk-formats' } });
 
 export function useDisks() {
   const [list, setList] = useState(disks.list);

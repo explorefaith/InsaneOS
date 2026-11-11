@@ -6,7 +6,7 @@ const eq = (name, a, b) => { if (JSON.stringify(a) !== JSON.stringify(b)) { cons
 const home = '/home/ana';
 const usb = { path: '/run/media/ana/USB', fs: 'vfat', name: 'USB' };
 
-eq('local disks only', localDisks([usb, { path: '/media/ana/nas', fs: 'cifs' }, { path: `${home}/.local/share/lordos/remote/x`, fs: 'fuse.sshfs' }, { path: `${home}/.local/share/lordos/remote/y`, fs: 'ext4' }], home), [usb]);
+eq('local disks only', localDisks([usb, { path: '/media/ana/nas', fs: 'cifs' }, { path: `${home}/.local/share/insaneos/remote/x`, fs: 'fuse.sshfs' }, { path: `${home}/.local/share/insaneos/remote/y`, fs: 'ext4' }], home), [usb]);
 eq('no list', localDisks(null, home), []);
 
 eq('empty start', startFolder('', home), home);
@@ -26,7 +26,7 @@ eq('in home', labels(`${home}/a/b`), ['ana', 'a', 'b']);
 eq('crumb paths', pathCrumbs(`${home}/a/b`, home).map((c) => c.path), [home, `${home}/a`, `${home}/a/b`]);
 eq('run media', labels(`${usb.path}/x`), ['USB', 'x']);
 eq('media', labels('/media/ana/D/x'), ['D', 'x']);
-eq('server', labels(`${home}/.local/share/lordos/remote/s/x`), ['s', 'x']);
+eq('server', labels(`${home}/.local/share/insaneos/remote/s/x`), ['s', 'x']);
 eq('whole tree', labels('/etc/ssh'), ['/', 'etc', 'ssh']);
 eq('root', pathCrumbs('/', home).map((c) => c.path), ['/']);
 eq('short fits', fitCrumbs([1, 2, 3]), [1, 2, 3]);

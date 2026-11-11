@@ -7,8 +7,8 @@
  * Every parser rejects instead of guessing. The browser's SDP is only accepted over the remote
  * desktop's own authenticated WebSocket; everything else here arrives on the bridge's UDP socket, an
  * ICE-TCP connection or the TURN server's stream, and is parsed before any cryptography looks at it. */
-#ifndef LORD_REMOTE_RTCWIRE_H
-#define LORD_REMOTE_RTCWIRE_H
+#ifndef INSANE_REMOTE_RTCWIRE_H
+#define INSANE_REMOTE_RTCWIRE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -20,7 +20,7 @@ int  rw_addr_text(const char *s, RwAddr *a);           /* dotted quad or RFC 429
 void rw_addr_format(const RwAddr *a, char *out, size_t n);
 int  rw_addr_equal(const RwAddr *x, const RwAddr *y);  /* address and port */
 
-/* Settings → Sharing's ICE servers (validated by the admin helper and again by lord-sessiond):
+/* Settings → Sharing's ICE servers (validated by the admin helper and again by insane-sessiond):
  * "host:port" with a DNS name ([A-Za-z0-9.-], 1..63), an IPv4 or an [IPv6], port 1..65535. */
 int  rw_ice_server_valid(const char *s);
 /* A TURN user name: 1..128 printable ASCII, no space, quote or backslash. Password: 1..128 printable ASCII. */
@@ -165,7 +165,7 @@ int  rw_tcp_frame(const uint8_t *p, size_t n, size_t *len);
  * 8656 §6.2; we never bind channels, so ChannelData is refused). 1 (*len = the whole message), 0 not
  * yet, -1 never. */
 int  rw_stun_stream(const uint8_t *p, size_t n, size_t *len);
-/* The first ICE check on a new ICE-TCP connection, read by lord-sessiond's root connection child
+/* The first ICE check on a new ICE-TCP connection, read by insane-sessiond's root connection child
  * (before any bridge is involved): a STUN binding request whose USERNAME starts with the 8 routing
  * characters [A-Za-z0-9] of the bridge it is for (our ufrag is <route><4 random>, see rtc.c). 0 and
  * route[9], or -1. Nothing else of the message is trusted here: the bridge checks its integrity. */

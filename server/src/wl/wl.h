@@ -1,6 +1,6 @@
-/* wl.h — lord-server's Wayland compositor: GTK and Qt apps as Insane OS windows (see wl.c). */
-#ifndef LORD_WL_H
-#define LORD_WL_H
+/* wl.h — insane-server's Wayland compositor: GTK and Qt apps as Insane OS windows (see wl.c). */
+#ifndef INSANE_WL_H
+#define INSANE_WL_H
 
 #include "../canvas.h"
 #include "../keyboard.h"
@@ -25,7 +25,7 @@ int  wl_frame_unseen(unsigned time_ms);
  * (0 left, 1 middle, 2 right). Returns 1 if the pointer is over a Wayland app and 2 if
  * it is over one of its popup menus (drawn on top of everything: the click is not the theme's). */
 int  wl_pointer(float x, float y, struct Node *hit, int moved, int nbuttons, const int *down, const int *button, int wheel);
-/* While lord-server moves or resizes a window (ui/grab.c): no app receives the pointer
+/* While insane-server moves or resizes a window (ui/grab.c): no app receives the pointer
  * (they are sent leave) and only the button count is tracked. */
 void wl_pointer_grab(int nbuttons, const int *down);
 /* 0: the key is the shell's; 1: it went to the focused app; 2: it went to the app as another key
@@ -39,10 +39,10 @@ const char *wl_focus_app(void);         /* the isolated app with the keyboard, o
 const char *wl_focus_primary(size_t *n);    /* the text the app with the keyboard selected (primary selection), or NULL */
 const char *wl_node_app(int node);      /* the isolated app whose window that node is, or NULL */
 int  wl_node_pid(int node);             /* the Wayland client pid of that node's toplevel, or 0
-                                           (never lord-server's own pid; X11 windows give Xwayland's
+                                           (never insane-server's own pid; X11 windows give Xwayland's
                                            pid, which callers must skip by name) */
 
-/* From JS (lord.wayland) */
+/* From JS (insane.wayland) */
 void wl_set_focus(int id);              /* 0: no Wayland app has the keyboard */
 void wl_focus_terminal(int on);         /* the app with the keyboard is a terminal emulator: ❖C is Ctrl+Shift+C */
 void wl_close(int id);                  /* asks the app to close the window */
@@ -70,7 +70,7 @@ void wl_set_pointer_scale(int pct);         /* the display under the pointer: cu
 void wl_paint_begin(void);
 void wl_paint_keep(void);                /* saves the windows noted so far (paint.c, «what is below») */
 void wl_paint_kept(void);                /* and notes them again in another frame */
-void wl_paint_save(void);                /* keeps the frame's list of windows (LORD_PAINT_VERIFY) */
+void wl_paint_save(void);                /* keeps the frame's list of windows (INSANE_PAINT_VERIFY) */
 void wl_paint_restore(void);             /* and puts it back */
 void wl_paint_holes(int on);             /* 0: wl_paint only notes the window, without opening the hole */
 int  wl_draws_meet(Rect r);              /* GPU path: an app window noted below the UI (layer 0) meets r (physical px of the view being painted) */
@@ -107,7 +107,7 @@ int         wl_clip_is_image(void);
 const unsigned char *wl_clip_png(size_t *len);   /* the copied PNG, or NULL */
 const char *wl_clip_image_origin(void);
 int         wl_clip_image_sensitive(void);
-int         wl_clip_use_image(const char *path);   /* only $XDG_RUNTIME_DIR/lordos/clip-N.png */
+int         wl_clip_use_image(const char *path);   /* only $XDG_RUNTIME_DIR/insaneos/clip-N.png */
 /* rich text: the HTML that goes with the clipboard's current text (NULL if none); set it right after the text */
 const char *wl_clip_html(size_t *len);
 void        wl_clip_set_html(const char *html, size_t n);

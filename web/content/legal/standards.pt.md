@@ -10,7 +10,7 @@ O Insane OS é feito por uma equipe pequena, e tentamos trabalhar como fazem os 
 
 ## Conformidade de licenças de código aberto: ISO/IEC 5230 (OpenChain)
 
-**O que fazemos:** um inventário de cada componente de terceiros incluído e sua licença no [THIRD_PARTY.md](https://github.com/lordbasex/Insane OS/blob/main/THIRD_PARTY.md); avisos de licença na página de [Licenças](/legal/licenses/), no repositório e no arquivo de copyright de cada pacote do Debian; uma lista de materiais de software (SBOM) em SPDX 2.3, gerada por `tools/release/make-sbom.sh` e anexada a cada versão a partir da 0.8.0 beta; o processo está documentado em [docs/COMPLIANCE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/COMPLIANCE.md). As contribuições entram sob a mesma licença MIT com uma assinatura de conformidade (veja [Contribuir](/legal/contributing/)).
+**O que fazemos:** um inventário de cada componente de terceiros incluído e sua licença no [THIRD_PARTY.md](https://github.com/insaneos/Insane OS/blob/main/THIRD_PARTY.md); avisos de licença na página de [Licenças](/legal/licenses/), no repositório e no arquivo de copyright de cada pacote do Debian; uma lista de materiais de software (SBOM) em SPDX 2.3, gerada por `tools/release/make-sbom.sh` e anexada a cada versão a partir da 0.8.0 beta; o processo está documentado em [docs/COMPLIANCE.md](https://github.com/insaneos/Insane OS/blob/main/docs/COMPLIANCE.md). As contribuições entram sob a mesma licença MIT com uma assinatura de conformidade (veja [Contribuir](/legal/contributing/)).
 
 **O que falta:** uma política de código aberto por escrito; uma pessoa designada como responsável pela conformidade; treinamento para quem contribui; uma autocertificação OpenChain.
 
@@ -24,7 +24,7 @@ O Insane OS é feito por uma equipe pequena, e tentamos trabalhar como fazem os 
 
 Aplicamos algumas práticas descritas pela ISO/IEC 27001, só onde elas são reais:
 
-- **Privilégio mínimo:** os apps rodam no próprio sandbox (Landlock, seccomp, cgroups, sem capacidades), e os processos auxiliares que lidam com dados não confiáveis (e-mail, documentos, mídia, o cofre de senhas) ficam sem privilégios e sem acesso à rede, como documenta o [docs/PRIVACY.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PRIVACY.md). As credenciais de publicação do site só podem gravar num bucket de armazenamento e atualizar uma distribuição da CDN.
+- **Privilégio mínimo:** os apps rodam no próprio sandbox (Landlock, seccomp, cgroups, sem capacidades), e os processos auxiliares que lidam com dados não confiáveis (e-mail, documentos, mídia, o cofre de senhas) ficam sem privilégios e sem acesso à rede, como documenta o [docs/PRIVACY.md](https://github.com/insaneos/Insane OS/blob/main/docs/PRIVACY.md). As credenciais de publicação do site só podem gravar num bucket de armazenamento e atualizar uma distribuição da CDN.
 - **Versões assinadas:** cada arquivo de uma versão aparece num `SHA256SUMS` assinado (veja [Assinatura de código](/legal/code-signing/)).
 - **Custódia de chaves:** a chave de assinatura de versões fica só na máquina do mantenedor, nunca no repositório nem numa máquina de compilação, com uma cópia de segurança offline.
 

@@ -10,10 +10,10 @@ by hand; official power supply; `ondemand` governor.
 Reproduce:
 
 ```sh
-lordos-sysreport report --json > sysreport.json
-lordos-testbench --gl --auto 30 > testbench.json      # inside a Insane OS session
+insaneos-sysreport report --json > sysreport.json
+insaneos-testbench --gl --auto 30 > testbench.json      # inside a Insane OS session
 free -m                                                  # whole system
 sudo sh -c 'for f in /proc/[0-9]*/smaps_rollup; do ...'  # PSS per process: see tools/results/collect.sh
 systemd-analyze
-lordos-sysreport bench --full --json > lordbench.json
+insaneos-sysreport bench --full --json > insanebench.json
 ```

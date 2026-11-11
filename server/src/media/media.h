@@ -1,14 +1,14 @@
-/* media.h — media in lord-server (see media.c and docs/MEDIA.md).
+/* media.h — media in insane-server (see media.c and docs/MEDIA.md).
  *
- * lord-server NEVER links FFmpeg: it launches its helper lord-media (fixed path, no arguments) and
+ * insane-server NEVER links FFmpeg: it launches its helper insane-media (fixed path, no arguments) and
  * passes it the files already open. What lives here:
  *   - the helpers (player, camera, recordings and two «workers» for short jobs);
  *   - the image «sources» that a `media` node (<MediaView>) draws: video frames over
  *     shared memory, decoded photos, screenshots;
  *   - the captures: screen, recording and remote desktop, always with the protected
  *     windows (`protected`) in black. */
-#ifndef LORD_MEDIA_H
-#define LORD_MEDIA_H
+#ifndef INSANE_MEDIA_H
+#define INSANE_MEDIA_H
 
 #include <poll.h>
 #include <stdint.h>

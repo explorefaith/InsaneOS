@@ -1,5 +1,5 @@
 // dialogs.jsx — Go to Folder, Connect to Server and Files → Settings: sheets inside the window.
-import { View, Text, Button, TextInput, ScrollView, Toggle, Segmented, useTheme, fs, addListener, spacing, typeScale, t as tr } from '@lordos/sdk';
+import { View, Text, Button, TextInput, ScrollView, Toggle, Segmented, useTheme, fs, addListener, spacing, typeScale, t as tr } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TAG_COLORS } from './glyphs.jsx';
 import { SIDEBAR_ITEMS, setPrefs, useFilesPrefs, toggleFavorite } from './prefs.js';
@@ -27,7 +27,7 @@ function completions(value) {
   const cut = p.lastIndexOf('/');
   const dir = p.slice(0, cut) || '/', head = p.slice(cut + 1).toLowerCase();
   try {
-    return lord.fs.list(dir).filter((e) => e.dir && (head.startsWith('.') || !e.name.startsWith('.')) && e.name.toLowerCase().startsWith(head)).map((e) => `${dir === '/' ? '' : dir}/${e.name}`).sort((a, b) => a.localeCompare(b)).slice(0, 8);
+    return insane.fs.list(dir).filter((e) => e.dir && (head.startsWith('.') || !e.name.startsWith('.')) && e.name.toLowerCase().startsWith(head)).map((e) => `${dir === '/' ? '' : dir}/${e.name}`).sort((a, b) => a.localeCompare(b)).slice(0, 8);
   } catch (e) { return []; }
 }
 

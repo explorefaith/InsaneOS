@@ -6,7 +6,7 @@ import {
   View, Text, ScrollView, Toggle, useStore, notifyHistory, clearNotifyHistory, settings, notifyPrefs, dndActive, useSettings,
   getApp, appName, formatTime, formatDate, monthName, weekdayName, locale, addListener, t as tr, menuBarPrefs, monthCells, weekStartFor,
   openCalendarApp,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { BellGlyph, CloseGlyph, Chevron } from '../glyphs.jsx';
 

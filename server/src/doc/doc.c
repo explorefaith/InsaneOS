@@ -1,4 +1,4 @@
-/* doc.c — lord-doc sessions on the lord-server side (see doc.h and proto.h). */
+/* doc.c — insane-doc sessions on the insane-server side (see doc.h and proto.h). */
 #include "doc.h"
 #include "proto.h"
 #include "wire.h"
@@ -85,14 +85,14 @@ static void wake(void) {
     if (wakefd >= 0 && write(wakefd, &one, sizeof one) < 0) { /* a wakeup is already pending */ }
 }
 
-/* Measurements in the log: LORD_DOC_TRACE=1 or the file ~/.cache/lordos/doc-trace */
+/* Measurements in the log: INSANE_DOC_TRACE=1 or the file ~/.cache/insaneos/doc-trace */
 static int trace(void) {
     static int t = -1;
     if (t < 0) {
         char p[1024];
         const char *h = getenv("HOME");
-        snprintf(p, sizeof p, "%s/.cache/lordos/doc-trace", h ? h : "/nonexistent");
-        t = getenv("LORD_DOC_TRACE") || access(p, F_OK) == 0;
+        snprintf(p, sizeof p, "%s/.cache/insaneos/doc-trace", h ? h : "/nonexistent");
+        t = getenv("INSANE_DOC_TRACE") || access(p, F_OK) == 0;
     }
     return t;
 }
@@ -119,19 +119,19 @@ static int helper_path(char *out, size_t size, const char *name) {
 static int helper_ok(const char *path) {
     struct stat st, me;
     if (stat(path, &st) || !S_ISREG(st.st_mode) || !(st.st_mode & S_IXUSR)) return -1;
-    /* owned by the same user as lord-server (or by root) and writable by nobody else */
+    /* owned by the same user as insane-server (or by root) and writable by nobody else */
     if (stat("/proc/self/exe", &me) || (st.st_uid != 0 && st.st_uid != me.st_uid) || (st.st_mode & 022)) return -1;
     return 0;
 }
 
 int doc_available(void) {
-    if (!helper[0] && helper_path(helper, sizeof helper, "lord-doc")) return -1;
+    if (!helper[0] && helper_path(helper, sizeof helper, "insane-doc")) return -1;
     return helper_ok(helper);
 }
 
-/* lord-ocr: the same helper loop with Tesseract only (h_ocr.c), for sessions of mode "ocr" */
+/* insane-ocr: the same helper loop with Tesseract only (h_ocr.c), for sessions of mode "ocr" */
 int doc_ocr_available(void) {
-    if (!ocr_helper[0] && helper_path(ocr_helper, sizeof ocr_helper, "lord-ocr")) return -1;
+    if (!ocr_helper[0] && helper_path(ocr_helper, sizeof ocr_helper, "insane-ocr")) return -1;
     return helper_ok(ocr_helper);
 }
 
@@ -202,13 +202,13 @@ static int spawn(Sess *s) {
     const char *home = getenv("HOME");
     if (home) { snprintf(henv, sizeof henv, "HOME=%s", home); envp[ne++] = henv; }
     envp[ne++] = "LANG=C.UTF-8";
-    const char *assets = getenv("LORD_DOC_FONTS");
-    if (assets) { snprintf(fenv, sizeof fenv, "LORD_DOC_FONTS=%s", assets); envp[ne++] = fenv; }
-    if (getenv("LORD_DOC_DEBUG")) envp[ne++] = "LORD_DOC_DEBUG=1";
+    const char *assets = getenv("INSANE_DOC_FONTS");
+    if (assets) { snprintf(fenv, sizeof fenv, "INSANE_DOC_FONTS=%s", assets); envp[ne++] = fenv; }
+    if (getenv("INSANE_DOC_DEBUG")) envp[ne++] = "INSANE_DOC_DEBUG=1";
     int ocr = !strcmp(s->mode, "ocr");
     if (ocr) envp[ne++] = "OMP_THREAD_LIMIT=1";       /* Tesseract's OpenMP: one thread is plenty for a selection */
     envp[ne] = NULL;
-    char *argv[] = { ocr ? "lord-ocr" : "lord-doc", NULL };
+    char *argv[] = { ocr ? "insane-ocr" : "insane-doc", NULL };
     pid_t pid;
     int r = posix_spawn(&pid, ocr ? ocr_helper : helper, &fa, &at, argv, envp);
     posix_spawn_file_actions_destroy(&fa);
@@ -379,7 +379,7 @@ static void on_message(Sess *s) {
     json_free(&d);
     doc_msg_free(&m);
     if (trace())
-        fprintf(stderr, "lord-doc: request %u: queue %.1f ms, helper %.1f ms\n", q->op, q->sent - q->queued, now_ms() - q->sent);
+        fprintf(stderr, "insane-doc: request %u: queue %.1f ms, helper %.1f ms\n", q->op, q->sent - q->queued, now_ms() - q->sent);
     req_free(q);
     s->inflight = NULL;
     pending--;

@@ -108,7 +108,7 @@ def main():
                 print('DIFFERENT', font, t)
                 if verbose:
                     print('  harfbuzz:', want)
-                    print('  lordos  :', got)
+                    print('  insaneos  :', got)
     print(f"{total - bad}/{total} identical to HarfBuzz")
     sys.exit(1 if bad else 0)
 

@@ -6,9 +6,9 @@
 // Rectangles are { x, y, w, h }. A "view" is how the image is drawn: { ox, oy, s } (image pixel → view
 // pixel: ox + x·s). The pixel operations themselves are in C (server/src/media/imgops.c).
 
-export const MAX_SIDE = 8192;                       // the largest side lord-media decodes (MP_MAX_DIM)
+export const MAX_SIDE = 8192;                       // the largest side insane-media decodes (MP_MAX_DIM)
 export const CROP_PRESETS = ['free', 'original', 'square', '16:9', '4:3'];
-// Pictures the editor opens (decoded by lord-media); only PNG and JPEG are written back in place.
+// Pictures the editor opens (decoded by insane-media); only PNG and JPEG are written back in place.
 export const MARKUP_RE = /\.(png|jpe?g|webp|bmp|gif|tiff?|heic|heif|avif)$/i;
 const REPLACE_RE = /\.(png|jpe?g)$/i;
 
@@ -138,10 +138,10 @@ export function resizeSize(w, h, side, value, keep) {
 }
 
 // The pixelate block for an image: big enough that text in it can't be read (about 1/60 of the larger
-// side, never under 8 pixels), within what lord-server accepts (8..200).
+// side, never under 8 pixels), within what insane-server accepts (8..200).
 export const pixelBlock = (iw, ih) => clamp(Math.round(Math.max(iw || 0, ih || 0) / 60), 8, 200);
 
-// A drawn redaction rectangle → the annotation lord-server draws.
+// A drawn redaction rectangle → the annotation insane-server draws.
 export function redactOp(type, x1, y1, x2, y2, iw, ih, color = '#000000') {
   const op = { type: type === 'pixelate' ? 'pixelate' : 'fill', x1: Math.min(x1, x2), y1: Math.min(y1, y2), x2: Math.max(x1, x2), y2: Math.max(y1, y2), color };
   if (op.type === 'pixelate') op.size = pixelBlock(iw, ih);
@@ -165,7 +165,7 @@ export function savePlan(path, suffix, now = Date.now()) {
     replace: !!path && REPLACE_RE.test(path),
     format: jpeg ? 'jpeg' : 'png',
     copy: (n = 1) => `${dir}/${base} (${suffix}${n > 1 ? ` ${n}` : ''}).${ext}`,
-    temp: path ? `${dir}/.${base}.lordos-edit-${now}.${ext}` : null,
+    temp: path ? `${dir}/.${base}.insaneos-edit-${now}.${ext}` : null,
   };
 }
 

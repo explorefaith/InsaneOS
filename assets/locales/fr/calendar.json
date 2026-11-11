@@ -81,7 +81,7 @@
   "today": "Aujourd’hui",
   "toggleSidebar": "Afficher ou masquer les calendriers",
   "unavailable": "Les calendriers ne sont pas disponibles",
-  "unavailableHint": "Le service de mail et de calendrier (lord-maild) n’est pas en cours d’exécution ou n’est pas installé.",
+  "unavailableHint": "Le service de mail et de calendrier (insane-maild) n’est pas en cours d’exécution ou n’est pas installé.",
   "untitled": "Nouvel événement",
   "view.day": "Jour",
   "view.month": "Mois",

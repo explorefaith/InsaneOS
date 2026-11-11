@@ -176,7 +176,7 @@ char *sysreport_json(const SysReport *r) {
     const SrSoftware *s = &r->sw;
     jkey(&b, &f, "software"); hb_printf(&b, "{"); g = 1;
     js(&b, &g, "os", s->os); js(&b, &g, "osId", s->os_id); js(&b, &g, "osVersion", s->os_version);
-    js(&b, &g, "kernel", s->kernel); js(&b, &g, "lordos", s->lordos); js(&b, &g, "lsm", s->lsm);
+    js(&b, &g, "kernel", s->kernel); js(&b, &g, "insaneos", s->insaneos); js(&b, &g, "lsm", s->lsm);
     jn(&b, &g, "landlockAbi", s->landlock_abi, -1); jb(&b, &g, "bpfLsm", s->bpf_lsm); jb(&b, &g, "cgroup2", s->cgroup2);
     jb(&b, &g, "live", s->live);
     js(&b, &g, "bootMedium", s->boot_medium); jn(&b, &g, "bootLinkMbps", s->boot_link_mbps, -1);
@@ -190,8 +190,8 @@ char *sysreport_json(const SysReport *r) {
     }
     hb_printf(&b, "}");
     jkey(&b, &g, "services"); hb_printf(&b, "{"); int h = 1;
-    jb(&b, &h, "lord-sessiond", s->sessiond); jb(&b, &h, "lord-netd", s->netd);
-    jb(&b, &h, "lord-netperm", s->netperm); jb(&b, &h, "lord-fand", s->fand);
+    jb(&b, &h, "insane-sessiond", s->sessiond); jb(&b, &h, "insane-netd", s->netd);
+    jb(&b, &h, "insane-netperm", s->netperm); jb(&b, &h, "insane-fand", s->fand);
     hb_printf(&b, "}}");
 
     hb_printf(&b, "}\n");
@@ -244,7 +244,7 @@ char *sysreport_markdown(const SysReport *r) {
     hb_printf(&b, "| Secure Boot |"); cell(&b, m->secure_boot < 0 ? "" : m->secure_boot ? "on" : "off"); hb_printf(&b, "\n");
     hb_printf(&b, "| System |"); cell(&b, r->sw.os); hb_printf(&b, "\n");
     hb_printf(&b, "| Kernel |"); cell(&b, r->sw.kernel); hb_printf(&b, "\n");
-    hb_printf(&b, "| Insane OS |"); cell(&b, r->sw.lordos); hb_printf(&b, "\n");
+    hb_printf(&b, "| Insane OS |"); cell(&b, r->sw.insaneos); hb_printf(&b, "\n");
     if (r->sw.live || r->sw.boot_medium[0]) {
         static const char *const media[][2] = {
             { "internal", "an internal disk" }, { "usb", "a USB drive" }, { "sd", "an SD card" },

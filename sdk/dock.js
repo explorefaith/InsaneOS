@@ -19,13 +19,13 @@
 //   registerDockActions('settings', () => [{ id: 'network', label: 'settings.section.network', args: { section: 'network' } }])
 import { createElement as h } from 'react';
 import { useEffect } from 'react';
-import { addListener } from '@lordos/runtime';
+import { addListener } from '@insaneos/runtime';
 import { settings } from './settings.js';
 import { createStore, useStore } from './store.js';
 import { useWindows, wm, windowTitle, appIdOf, getApp, windows, setDisplayAssignment, isLiveSystem, activeDesktop, onActiveDesktop } from './windows.js';
 import { pickWindow } from './desktopmodel.js';
 import { desktopSuffix } from './desktops.js';
-import { screen, onScreenChange, displayFor } from '@lordos/runtime';
+import { screen, onScreenChange, displayFor } from '@insaneos/runtime';
 import { useLauncherApps, launchApp, linuxAppFor, shortAppName, windowAppName, LetterIcon, windowIcon } from './apps.js';
 import { t, locale } from './i18n.js';
 import { restoredIds } from './sessionrestore.jsx';
@@ -62,7 +62,7 @@ const launcherKey = (id) => {
   return p.kind === 'desktop' ? `desktop:${p.key}` : p.key;
 };
 
-// ---- pinned (in ~/.config/lordos/settings.json → dockPinned) ----
+// ---- pinned (in ~/.config/insaneos/settings.json → dockPinned) ----
 
 let themeDefaults = [FIRST, LAUNCHER];
 const dockOpened = new Map();         // running unpinned and pinned groups, in the order they opened
@@ -228,7 +228,7 @@ export function useDockEntries(defaults = [], opts = {}) {
 }
 
 // Opens a Dock item through the existing safe paths only: wm.open / launchPackage(id) /
-// lord.apps.launch(desktop id), all inside launchApp. No other way to run anything.
+// insane.apps.launch(desktop id), all inside launchApp. No other way to run anything.
 export function launchDockItem(id) {
   const p = parseDockId(id);
   if (!p || p.kind === 'shell') return false;
@@ -256,7 +256,7 @@ export function dockActivate(e) {
 // the broker, so its process closes its own windows and then ends.
 export function quitApp(wins) {
   const iso = wins.find((w) => w.args?.pkg && w.args?.appId);
-  if (iso && typeof lord !== 'undefined' && lord.broker && typeof lord.broker.quit === 'function' && lord.broker.quit(iso.args.appId)) return;
+  if (iso && typeof insane !== 'undefined' && insane.broker && typeof insane.broker.quit === 'function' && insane.broker.quit(iso.args.appId)) return;
   for (const w of [...wins]) wm.close(w.id);
 }
 
@@ -271,23 +271,23 @@ export function quitFrontApp() {
 // ---- quick actions ----
 
 // Can the session hand args and «new window» to an isolated built-in app's process?
-const isolatedArgs = () => typeof lord !== 'undefined' && !!lord.broker && typeof lord.broker.openArgs === 'function';
+const isolatedArgs = () => typeof insane !== 'undefined' && !!insane.broker && typeof insane.broker.openArgs === 'function';
 
 // The quick actions of a Dock item: a Insane OS app's (manifest "dockActions" + registerDockActions),
-// or a Linux app's desktop actions (Actions= in its .desktop, run by lord.apps.launchAction).
+// or a Linux app's desktop actions (Actions= in its .desktop, run by insane.apps.launchAction).
 export function dockQuickActions(e) {
   const p = parseDockId(e.id);
   if (!p) return [];
   if (p.kind === 'desktop') {
-    if (typeof lord === 'undefined' || typeof lord.apps?.actions !== 'function') return [];
+    if (typeof insane === 'undefined' || typeof insane.apps?.actions !== 'function') return [];
     let list = [];
-    try { list = lord.apps.actions(p.key, locale.get().lang) || []; } catch (err) { list = []; }
-    return list.filter((a) => a && a.id && a.name).map((a) => ({ label: a.name, onClick: () => lord.apps.launchAction(p.key, a.id) }));
+    try { list = insane.apps.actions(p.key, locale.get().lang) || []; } catch (err) { list = []; }
+    return list.filter((a) => a && a.id && a.name).map((a) => ({ label: a.name, onClick: () => insane.apps.launchAction(p.key, a.id) }));
   }
   if (p.kind !== 'app') return [];                          // .lpk: launchPackage takes no arguments
   const app = getApp(p.key);
   // an isolated built-in app (its own process) gets the action's args through the session
-  // (sdk/packages.js isolatedApp → lord.broker.openArgs)
+  // (sdk/packages.js isolatedApp → insane.broker.openArgs)
   if (!app || (app.isolated && !isolatedArgs())) return [];
   let fromModule = [];
   try { fromModule = actionProviders.get(p.key)?.() || []; } catch (err) { fromModule = []; }
@@ -478,6 +478,6 @@ setDisplayAssignment((key) => {
 });
 // once per session, a few seconds after it starts (never in the live system's first run, never in an
 // isolated app's process), each through launchDockItem: the same safe paths as a Dock click
-if (typeof lord !== 'undefined' && typeof lord.appId !== 'string' && typeof lord.greeter === 'undefined' && !isLiveSystem()) {
+if (typeof insane !== 'undefined' && typeof insane.appId !== 'string' && typeof insane.greeter === 'undefined' && !isLiveSystem()) {
   setTimeout(() => { for (const id of loginApps()) { if (restoredIds.has(id)) continue; try { launchDockItem(id); } catch (e) { /* uninstalled */ } } }, 3000);
 }

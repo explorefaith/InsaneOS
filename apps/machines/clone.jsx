@@ -1,8 +1,8 @@
 // Copy a machine (the approved mock "Clone"): Clone, a new machine that runs beside this one with its own identity,
 // or Duplicate, an exact copy with the same identity (6.3). The sheet says how the disk is copied on this computer's
 // file system before anything happens: shared by reflink (btrfs, XFS), a frozen shared base with an overlay for each
-// machine (ext4), or a full copy. lord-vm does it with the machine off.
-import { View, Text, TextInput, Toggle, t as tr } from '@lordos/sdk';
+// machine (ext4), or a full copy. insane-vm does it with the machine off.
+import { View, Text, TextInput, Toggle, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { usePal, Btn, Sheet } from './ui.jsx';
 import { cloneMethod, cloneHostname, hostnameValid } from './model.js';
@@ -21,12 +21,12 @@ function Kind({ on, title, text, foot, onClick }) {
   );
 }
 
-// m: the machine (from lord.vm.list); fromSnapshot: { tag, name } to make a Clone of that moment
+// m: the machine (from insane.vm.list); fromSnapshot: { tag, name } to make a Clone of that moment
 export function CloneSheet({ m, fromSnapshot, running, onClose, onDone }) {
   const p = usePal();
   const [kind, setKind] = useState('clone');
   const [name, setName] = useState(fromSnapshot ? `${m.name} ${fromSnapshot.name}`.slice(0, 64) : tr('machines.clone.defaultName', { name: m.name }).slice(0, 64));
-  const [info] = useState(() => lord.vm.cloneInfo(m.dir) || {});
+  const [info] = useState(() => insane.vm.cloneInfo(m.dir) || {});
   const [job, setJob] = useState(0);
   const [fail, setFail] = useState('');
   // the Clone's own identity inside the guest (6.3): a hostname, a new machine-id and SSH keys at its first start
@@ -38,10 +38,10 @@ export function CloneSheet({ m, fromSnapshot, running, onClose, onDone }) {
   useEffect(() => {
     if (!job) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(job);
+      const r = insane.vm.job(job);
       if (!r || !r.done) return;
       setJob(0);
-      if (!r.ok) { setFail(r.out.trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || r.out.trim()); return; }
+      if (!r.ok) { setFail(r.out.trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || r.out.trim()); return; }
       let out = {};
       try { out = JSON.parse(r.out.trim().split('\n').pop()); } catch (e) { out = {}; }
       if (out.dir) writeMeta(out.dir, { cloneOf: m.id, cloneKind: fromSnapshot ? 'clone' : kind });
@@ -51,7 +51,7 @@ export function CloneSheet({ m, fromSnapshot, running, onClose, onDone }) {
   }, [job]);
   const go = () => {
     setFail('');
-    const id = lord.vm.clone(m.dir, { name: name.trim(), duplicate: kind === 'duplicate' && !fromSnapshot, linked: how === 'linked', fromSnapshot: fromSnapshot?.tag,
+    const id = insane.vm.clone(m.dir, { name: name.trim(), duplicate: kind === 'duplicate' && !fromSnapshot, linked: how === 'linked', fromSnapshot: fromSnapshot?.tag,
       keepIdentity: isClone && keepId, hostname: isClone && !keepId ? host : undefined });
     if (!id) setFail(tr('machines.cfg.refused')); else setJob(id);
   };

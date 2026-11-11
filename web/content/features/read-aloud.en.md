@@ -40,9 +40,9 @@ The recording stays in your account, on this computer. **Use a recording…** do
 
 ## How it protects you
 
-- **The engine is locked in.** Speech is made by `lord-tts`, a small helper that runs in Insane OS's helper sandbox: no network, no sockets, no starting programs, and it can write only to its own cache folder. It is the only program that links the speech libraries. When it uses the graphics card, it may open only the card's render node, never the display that `lord-server` drives.
-- **Your text never goes in a command line.** `lord-server` starts `lord-say` from a fixed path, with fixed arguments, and gives it the text as a sealed memory file. The only thing the interface can choose is a voice name, checked in C.
-- **Saving can't be pointed elsewhere.** `lord-server` checks the folder you chose, creates the file there and renames it when the audio is done, so `say` never sees a path.
+- **The engine is locked in.** Speech is made by `insane-tts`, a small helper that runs in Insane OS's helper sandbox: no network, no sockets, no starting programs, and it can write only to its own cache folder. It is the only program that links the speech libraries. When it uses the graphics card, it may open only the card's render node, never the display that `insane-server` drives.
+- **Your text never goes in a command line.** `insane-server` starts `insane-say` from a fixed path, with fixed arguments, and gives it the text as a sealed memory file. The only thing the interface can choose is a voice name, checked in C.
+- **Saving can't be pointed elsewhere.** `insane-server` checks the folder you chose, creates the file there and renames it when the audio is done, so `say` never sees a path.
 - **A Linux app's selection stays with it.** The desktop reads it only while that app has the keyboard, and it never reaches JavaScript.
 - **Isolated apps can't use it.** Installed `.lpk` apps have no voice API.
 
@@ -59,10 +59,10 @@ Measured on one PC, an Intel i9-10900 with a Radeon RX 580: about 10 seconds of 
 
 ## Read the source
 
-- [docs/VOICE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/VOICE.md): the design, models, voices and tests
-- [server/src/doc/h_tts.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/doc/h_tts.c): `lord-tts`, the sandboxed engine
-- [server/src/tts/speak.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/tts/speak.c): how `lord-server` starts `lord-say`
-- [server/src/ui/js_voice.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_voice.c): the `lord.voice` API
-- [apps/settings/PersonalVoice.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/settings/PersonalVoice.jsx) and [sdk/livespeech.jsx](https://github.com/lordbasex/Insane OS/blob/main/sdk/livespeech.jsx): Personal Voice and Live Speech
+- [docs/VOICE.md](https://github.com/insaneos/Insane OS/blob/main/docs/VOICE.md): the design, models, voices and tests
+- [server/src/doc/h_tts.c](https://github.com/insaneos/Insane OS/blob/main/server/src/doc/h_tts.c): `insane-tts`, the sandboxed engine
+- [server/src/tts/speak.c](https://github.com/insaneos/Insane OS/blob/main/server/src/tts/speak.c): how `insane-server` starts `insane-say`
+- [server/src/ui/js_voice.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/js_voice.c): the `insane.voice` API
+- [apps/settings/PersonalVoice.jsx](https://github.com/insaneos/Insane OS/blob/main/apps/settings/PersonalVoice.jsx) and [sdk/livespeech.jsx](https://github.com/insaneos/Insane OS/blob/main/sdk/livespeech.jsx): Personal Voice and Live Speech
 
 Speech comes from Kyutai's Pocket TTS (model weights under CC-BY-4.0), run by audio.cpp (Apache-2.0) and its ggml (MIT).

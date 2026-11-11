@@ -1,7 +1,7 @@
 // ui.jsx — the building blocks of every Settings page, on top of the SDK's GroupBox (docs/DESIGN.md,
 // "Settings"): a page column, titled sections (inset grouped boxes with hairlines between rows),
 // rows with the control or the value at the trailing edge, form rows, a pop-up button, a page header, badges and notes.
-import { View, Text, useTheme, addListener, GroupBox as InsetBox, spacing, typeScale, createStore, useStore, screen, ScrollView, Overlay } from '@lordos/sdk';
+import { View, Text, useTheme, addListener, GroupBox as InsetBox, spacing, typeScale, createStore, useStore, screen, ScrollView, Overlay } from '@insaneos/sdk';
 import { createElement as h, useEffect, useRef, useState } from 'react';
 
 
@@ -195,12 +195,12 @@ function PopUpLayer() {
   useEffect(() => {
     if (!p) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, h] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, h] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
       if (!inside(menu.current) && !inside(p.node)) popup.set(null);
     });
   }, [p]);
   if (!p || !p.node) return null;
-  const [, by, bw, bh] = lord.getLayout(p.node.id);
+  const [, by, bw, bh] = insane.getLayout(p.node.id);
   const rows = p.options.length;
   const mh = rows * 24 + 12;
   const below = by + bh + 4 + Math.min(mh, 320) < screen.height - 70;

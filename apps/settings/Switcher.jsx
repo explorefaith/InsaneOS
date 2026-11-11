@@ -1,5 +1,5 @@
 // Settings → Keyboard: the app switcher (sdk/appswitcher.jsx, sdk/switchermodel.js), the same in every theme.
-import { useSettings, Toggle, Segmented, TextInput, themes, runningApps, switcherPrefs, validColor, useLauncherApps } from '@lordos/sdk';
+import { useSettings, Toggle, Segmented, TextInput, themes, runningApps, switcherPrefs, validColor, useLauncherApps } from '@insaneos/sdk';
 import { useState } from 'react';
 import { Section, SettingRow } from './ui.jsx';
 

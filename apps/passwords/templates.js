@@ -1,10 +1,10 @@
 // templates.js — the built-in categories, each with its field template and its glyph (glyphs.jsx),
 // and the field types. Names are translated when drawn (t('passwords.cat.<id>'),
 // t('passwords.field.<key>')): that is why they are functions and not constants with text.
-import { t } from '@lordos/sdk';
+import { t } from '@insaneos/sdk';
 import { GLYPH_KINDS } from './glyphs.jsx';
 
-// Fields of each template: k = key (stable, lord-vault uses it: "password" goes into the report,
+// Fields of each template: k = key (stable, insane-vault uses it: "password" goes into the report,
 // "totp" gives codes, "expiry" warns before it expires), t = type.
 const F = (k, type = 'text', extra = {}) => ({ k, t: type, ...extra });
 

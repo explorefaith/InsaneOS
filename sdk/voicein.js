@@ -10,7 +10,7 @@ import * as media from './media.js';
 let recId = 0, guard = 0, seq = 0, busyTranscribing = false;
 
 const say = (body) => { try { notify({ app: 'settings', title: 'Dictation', body, sound: false }); } catch { /* headless */ } };
-const dir = () => `${lord.fs.home()}/.cache/lordos/dictation`;
+const dir = () => `${insane.fs.home()}/.cache/insaneos/dictation`;
 
 export const dictating = () => !!recId;
 
@@ -61,5 +61,5 @@ async function transcribe(path) {
     .split('\n').map((l) => l.trim()).filter(Boolean).join(' ').trim();
   if (!text) { say('nothing heard (or whisper.cpp is missing — see Settings → AI → Dictation)'); return; }
   try { clipboard.set(text); } catch { /* clipboard refused */ }
-  try { lord.wayland.paste(); } catch { /* nothing focused */ }
+  try { insane.wayland.paste(); } catch { /* nothing focused */ }
 }

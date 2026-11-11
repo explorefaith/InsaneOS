@@ -1,4 +1,4 @@
-// trackpad.js — touchpad and touchscreens: settings (settings.trackpad → lord.input.configure,
+// trackpad.js — touchpad and touchscreens: settings (settings.trackpad → insane.input.configure,
 // live) and desktop actions when swiping with 3 fingers (or 4). See docs/TRACKPAD.md.
 //
 // The theme chooses what each direction does with registerGestureActions({ up, down, left, right }):
@@ -6,7 +6,7 @@
 // switch windows (the one behind comes to the front) and up/down do nothing. The themes give left and
 // right to sdk/desktops.js desktopSwipe, which switches desktops and with only one falls back to that.
 import { useEffect } from 'react';
-import { addListener } from '@lordos/runtime';
+import { addListener } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { windows, activeDesktop } from './windows.js';
@@ -34,10 +34,10 @@ export const TRACKPAD_DEFAULTS = {
   swipe4: false,            // 4-finger swipe: desktop actions (otherwise they go to the apps)
 };
 
-const native = () => typeof lord !== 'undefined' && lord.input;
+const native = () => typeof insane !== 'undefined' && insane.input;
 export const trackpadConfig = () => ({ ...TRACKPAD_DEFAULTS, ...(settings.get().trackpad || {}) });
 
-function apply() { if (native()) lord.input.configure(trackpadConfig()); }
+function apply() { if (native()) insane.input.configure(trackpadConfig()); }
 apply();
 let applied = settings.get().trackpad;
 settings.subscribe(() => {
@@ -45,11 +45,11 @@ settings.subscribe(() => {
   if (now !== applied) { applied = now; apply(); }
 });
 
-// Devices (lord-sessiond lends them when showing the session on the monitor: they are re-scanned).
-export const trackpadDevices = createStore(native() ? lord.input.devices() : []);
+// Devices (insane-sessiond lends them when showing the session on the monitor: they are re-scanned).
+export const trackpadDevices = createStore(native() ? insane.input.devices() : []);
 export function refreshTrackpads() {
   if (!native()) return;
-  const list = lord.input.devices();
+  const list = insane.input.devices();
   if (JSON.stringify(list) !== JSON.stringify(trackpadDevices.get())) trackpadDevices.set(list);
 }
 export function useTrackpads() {
@@ -93,7 +93,7 @@ addListener('swipe', (e) => {
     acc = null;
     if (e.phase === 'cancel' || Math.max(Math.abs(x), Math.abs(y)) < 60) return;
     const dir = Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : (y < 0 ? 'up' : 'down');
-    lastSwipe.set({ dir, fingers, at: lord.now() });
+    lastSwipe.set({ dir, fingers, at: insane.now() });
     const fn = actions[dir] || DEFAULTS[dir];
     if (fn) fn({ dir, fingers });
   }

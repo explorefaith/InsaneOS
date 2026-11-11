@@ -1,6 +1,6 @@
 // format.js — sizes, speeds and times for the Insane OS Imager. Card and stick sizes are shown in
 // decimal units, as they are printed on them (a "32 GB" card holds about 31.9 × 10⁹ bytes).
-import { formatNumber, t } from '@lordos/sdk';
+import { formatNumber, t } from '@insaneos/sdk';
 
 export function formatSize(n) {
   if (!Number.isFinite(n) || n <= 0) return '—';

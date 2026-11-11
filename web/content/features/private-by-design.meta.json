@@ -39,9 +39,9 @@
     {
       "file": "docs/privacy-file-picker.png",
       "caption": {
-        "en": "The system file dialog: lord-server draws it and the app receives only the chosen file.",
-        "es": "El diálogo de archivos del sistema: lo dibuja lord-server y la app recibe solo el archivo elegido.",
-        "pt": "O diálogo de arquivos do sistema: o lord-server o desenha e o app recebe só o arquivo escolhido."
+        "en": "The system file dialog: insane-server draws it and the app receives only the chosen file.",
+        "es": "El diálogo de archivos del sistema: lo dibuja insane-server y la app recibe solo el archivo elegido.",
+        "pt": "O diálogo de arquivos do sistema: o insane-server o desenha e o app recebe só o arquivo escolhido."
       }
     },
     {
@@ -104,9 +104,9 @@
         {
           "id": "broker",
           "label": {
-            "en": "Broker in lord-server",
-            "es": "Broker en lord-server",
-            "pt": "Broker no lord-server"
+            "en": "Broker in insane-server",
+            "es": "Broker en insane-server",
+            "pt": "Broker no insane-server"
           },
           "sub": {
             "en": "Looks up the stored decision (perms.c)",
@@ -329,18 +329,18 @@
             "pt": "/dev/videoN"
           },
           "sub": {
-            "en": "Opened by lord-server after consent",
-            "es": "Lo abre lord-server después del permiso",
-            "pt": "Aberto pelo lord-server após o consentimento"
+            "en": "Opened by insane-server after consent",
+            "es": "Lo abre insane-server después del permiso",
+            "pt": "Aberto pelo insane-server após o consentimento"
           },
           "tone": "kernel"
         },
         {
           "id": "media",
           "label": {
-            "en": "lord-media",
-            "es": "lord-media",
-            "pt": "lord-media"
+            "en": "insane-media",
+            "es": "insane-media",
+            "pt": "insane-media"
           },
           "sub": {
             "en": "Sandboxed decoder; frames into a sealed ring",
@@ -352,9 +352,9 @@
         {
           "id": "ls",
           "label": {
-            "en": "lord-server",
-            "es": "lord-server",
-            "pt": "lord-server"
+            "en": "insane-server",
+            "es": "insane-server",
+            "pt": "insane-server"
           },
           "sub": {
             "en": "Validates every acknowledgement",
@@ -408,9 +408,9 @@
         }
       ],
       "caption": {
-        "en": "Revoking the permission kills the app's lord-media and the stream stops at once.",
-        "es": "Revocar el permiso mata el lord-media de la app y la imagen se corta al instante.",
-        "pt": "Revogar a permissão encerra o lord-media do app e a imagem para na hora."
+        "en": "Revoking the permission kills the app's insane-media and the stream stops at once.",
+        "es": "Revocar el permiso mata el insane-media de la app y la imagen se corta al instante.",
+        "pt": "Revogar a permissão encerra o insane-media do app e a imagem para na hora."
       }
     }
   ],

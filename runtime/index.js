@@ -1,4 +1,4 @@
-// @lordos/runtime — React renderer for lord-server (same model as React Native):
+// @insaneos/runtime — React renderer for insane-server (same model as React Native):
 // the <View>, <Text> and <Image> components are native nodes drawn by the server in C.
 import Reconciler from 'react-reconciler';
 import { ConcurrentRoot, DefaultEventPriority, NoEventPriority } from 'react-reconciler/constants';
@@ -11,21 +11,21 @@ export { setLayout, getLayout, layouts, modifiers } from './keymap.js';
 export const View = 'view';
 export const Text = 'text';
 export const Image = 'image';
-// <Terminal session={id} />: grid of a lord.term session drawn in C.
+// <Terminal session={id} />: grid of a insane.term session drawn in C.
 export const Terminal = 'terminal';
-// <Surface surface={id} />: window of a Linux (Wayland) app composited by lord-server.
+// <Surface surface={id} />: window of a Linux (Wayland) app composited by insane-server.
 export const Surface = 'surface';
-// <MediaView media={id} />: video, photo, capture or camera from lord.media (docs/MEDIA.md); drawn by C.
+// <MediaView media={id} />: video, photo, capture or camera from insane.media (docs/MEDIA.md); drawn by C.
 export const MediaView = 'media';
-export const screen = { width: lord.screen.width, height: lord.screen.height, displays: [], mirror: false };
+export const screen = { width: insane.screen.width, height: insane.screen.height, displays: [], mirror: false };
 // Displays (docs/DISPLAYS.md): the desktop is one logical space (screen.width × height) and every
 // display shows a rectangle of it: { id, name, x, y, w, h, scale, main }. The menu bar and the Dock
 // go on the main one; windows can be on any display or span two.
 function readDisplays() {
-  const d = lord.screen.displays;
+  const d = insane.screen.displays;
   screen.displays = Array.isArray(d) && d.length ? d.map((x) => ({ ...x }))
     : [{ id: 0, name: '', x: 0, y: 0, w: screen.width, h: screen.height, scale: 100, main: true }];
-  screen.mirror = !!lord.screen.mirror;
+  screen.mirror = !!insane.screen.mirror;
 }
 readDisplays();
 export const displays = () => screen.displays;
@@ -52,17 +52,17 @@ export function displayFor(r) {
   return best || displayAt(r.x + r.w / 2, r.y + r.h / 2);
 }
 // The screen can change size (session viewed from another monitor or from the browser):
-// lord-server updates lord.screen and calls __lordScreen.
+// insane-server updates insane.screen and calls __insaneScreen.
 const screenListeners = new Set();
 let rootNode = 0;
 export function onScreenChange(fn) { screenListeners.add(fn); return () => screenListeners.delete(fn); }
-globalThis.__lordScreen = () => {
+globalThis.__insaneScreen = () => {
   const old = { width: screen.width, height: screen.height, displays: screen.displays, mirror: screen.mirror };
-  screen.width = lord.screen.width;
-  screen.height = lord.screen.height;
+  screen.width = insane.screen.width;
+  screen.height = insane.screen.height;
   readDisplays();
-  if (rootNode) { lord.setStyle(rootNode, 'width', screen.width); lord.setStyle(rootNode, 'height', screen.height); }
-  for (const c of layerNodes.values()) { lord.setStyle(c.id, 'width', screen.width); lord.setStyle(c.id, 'height', screen.height); }
+  if (rootNode) { insane.setStyle(rootNode, 'width', screen.width); insane.setStyle(rootNode, 'height', screen.height); }
+  for (const c of layerNodes.values()) { insane.setStyle(c.id, 'width', screen.width); insane.setStyle(c.id, 'height', screen.height); }
   for (const fn of screenListeners) { try { fn(screen, old); } catch (e) { console.error('pantalla:', e?.message || e); } }
 };
 
@@ -106,14 +106,14 @@ function applyProps(inst, prev, next) {
     inst.style = style;
     flats.set(inst, flatCopy(flat, style));
   }
-  if (prev.src !== next.src) lord.setProp(inst.id, 'src', next.src ?? null);
-  if (prev.session !== next.session) lord.setProp(inst.id, 'session', next.session ?? 0);
-  if (prev.surface !== next.surface) lord.setProp(inst.id, 'surface', next.surface ?? 0);
-  if (prev.media !== next.media) lord.setProp(inst.id, 'media', next.media ?? 0);
+  if (prev.src !== next.src) insane.setProp(inst.id, 'src', next.src ?? null);
+  if (prev.session !== next.session) insane.setProp(inst.id, 'session', next.session ?? 0);
+  if (prev.surface !== next.surface) insane.setProp(inst.id, 'surface', next.surface ?? 0);
+  if (prev.media !== next.media) insane.setProp(inst.id, 'media', next.media ?? 0);
   // protected: the node (and what's inside) comes out black in screenshots, recordings and remote desktop
-  if (!!prev.protected !== !!next.protected) lord.setProp(inst.id, 'protected', !!next.protected);
+  if (!!prev.protected !== !!next.protected) insane.setProp(inst.id, 'protected', !!next.protected);
   // <Image pixels={{ width, height, data }} />: RGBA canvas (a new object for each frame)
-  if (prev.pixels !== next.pixels && next.pixels) lord.setProp(inst.id, 'pixels', next.pixels);
+  if (prev.pixels !== next.pixels && next.pixels) insane.setProp(inst.id, 'pixels', next.pixels);
 }
 
 function attach(parent, child) {
@@ -125,7 +125,7 @@ let updatePriority = NoEventPriority;
 
 // react-reconciler 0.34 host interface (React 19), mutation mode like React Native.
 const host = {
-  rendererPackageName: '@lordos/runtime',
+  rendererPackageName: '@insaneos/runtime',
   rendererVersion: '0.8.4',
   supportsMutation: true,
   supportsPersistence: false,
@@ -138,36 +138,36 @@ const host = {
   scheduleMicrotask: (fn) => queueMicrotask(fn),
 
   createInstance(type, props) {
-    const inst = { id: lord.createNode(type), type, props, style: {}, parent: null };
+    const inst = { id: insane.createNode(type), type, props, style: {}, parent: null };
     register(inst);
     applyProps(inst, {}, props);
     return inst;
   },
   createTextInstance(text) {
-    const inst = { id: lord.createNode('raw'), type: 'raw', props: {}, style: {}, parent: null };
-    lord.setText(inst.id, text);
+    const inst = { id: insane.createNode('raw'), type: 'raw', props: {}, style: {}, parent: null };
+    insane.setText(inst.id, text);
     return inst;
   },
-  appendInitialChild(parent, child) { lord.appendChild(parent.id, child.id); attach(parent, child); },
-  appendChild(parent, child) { lord.appendChild(parent.id, child.id); attach(parent, child); },
-  appendChildToContainer(container, child) { lord.appendChild(container.id, child.id); attach(container, child); layerCount(container, 1); },
-  insertBefore(parent, child, before) { lord.insertBefore(parent.id, child.id, before.id); attach(parent, child); },
-  insertInContainerBefore(container, child, before) { lord.insertBefore(container.id, child.id, before.id); attach(container, child); layerCount(container, 1); },
-  removeChild(parent, child) { lord.removeChild(parent.id, child.id); },
-  removeChildFromContainer(container, child) { lord.removeChild(container.id, child.id); layerCount(container, -1); },
-  detachDeletedInstance(inst) { unregister(inst); lord.destroy(inst.id); },
+  appendInitialChild(parent, child) { insane.appendChild(parent.id, child.id); attach(parent, child); },
+  appendChild(parent, child) { insane.appendChild(parent.id, child.id); attach(parent, child); },
+  appendChildToContainer(container, child) { insane.appendChild(container.id, child.id); attach(container, child); layerCount(container, 1); },
+  insertBefore(parent, child, before) { insane.insertBefore(parent.id, child.id, before.id); attach(parent, child); },
+  insertInContainerBefore(container, child, before) { insane.insertBefore(container.id, child.id, before.id); attach(container, child); layerCount(container, 1); },
+  removeChild(parent, child) { insane.removeChild(parent.id, child.id); },
+  removeChildFromContainer(container, child) { insane.removeChild(container.id, child.id); layerCount(container, -1); },
+  detachDeletedInstance(inst) { unregister(inst); insane.destroy(inst.id); },
   clearContainer() {},
 
   finalizeInitialChildren: () => false,
   // React 19: no prepareUpdate; commitUpdate receives the type and the old and new props
   commitUpdate(inst, _type, prev, next) { applyProps(inst, prev, next); inst.props = next; },
-  commitTextUpdate(inst, _old, text) { lord.setText(inst.id, text); },
+  commitTextUpdate(inst, _old, text) { insane.setText(inst.id, text); },
   resetTextContent() {},
   shouldSetTextContent: () => false,
-  hideInstance(inst) { lord.setStyle(inst.id, 'display', 'none'); },
-  unhideInstance(inst) { lord.setStyle(inst.id, 'display', inst.style.display ?? 'flex'); },
-  hideTextInstance(inst) { lord.setText(inst.id, ''); },
-  unhideTextInstance(inst, text) { lord.setText(inst.id, text); },
+  hideInstance(inst) { insane.setStyle(inst.id, 'display', 'none'); },
+  unhideInstance(inst) { insane.setStyle(inst.id, 'display', inst.style.display ?? 'flex'); },
+  hideTextInstance(inst) { insane.setText(inst.id, ''); },
+  unhideTextInstance(inst, text) { insane.setText(inst.id, text); },
 
   getRootHostContext: () => ({}),
   getChildHostContext: (ctx) => ctx,
@@ -240,17 +240,17 @@ export function onShellKeyboard(fn) { keyboardWatchers.add(fn); return () => key
 
 // ---- layers: one stacking order for the whole screen (sdk/layers.js, docs/LAYERS.md) ----
 // Each layer is a root node of the screen's size, above the React tree (zIndex > 0) and
-// pointerEvents 'box-none' (lord-server never hits the layer itself, only what is in it), so paint
+// pointerEvents 'box-none' (insane-server never hits the layer itself, only what is in it), so paint
 // order and hit testing follow the same order. Content goes in with createPortal.
 const layerNodes = new Map();                 // zIndex → container
 export function layerContainer(z) {
   if (!rootNode || !(z > 0)) return null;
   let c = layerNodes.get(z);
   if (!c) {
-    const id = lord.createNode('view');
+    const id = insane.createNode('view');
     for (const [k, v] of [['position', 'absolute'], ['left', 0], ['top', 0], ['width', screen.width], ['height', screen.height],
-      ['pointerEvents', 'box-none'], ['zIndex', z]]) lord.setStyle(id, k, v);
-    lord.appendChild(rootNode, id);
+      ['pointerEvents', 'box-none'], ['zIndex', z]]) insane.setStyle(id, k, v);
+    insane.appendChild(rootNode, id);
     c = { id, isContainer: true, layer: z, count: 0 };
     layerNodes.set(z, c);
   }
@@ -263,15 +263,15 @@ export function createPortal(children, container, key = null) {
 }
 
 export function render(element) {
-  const rootId = lord.createNode('view');
+  const rootId = insane.createNode('view');
   rootNode = rootId;
-  lord.setStyle(rootId, 'width', screen.width);
-  lord.setStyle(rootId, 'height', screen.height);
-  lord.setRoot(rootId);
+  insane.setStyle(rootId, 'width', screen.width);
+  insane.setStyle(rootId, 'height', screen.height);
+  insane.setRoot(rootId);
   const container = { id: rootId, isContainer: true };
   const report = (kind) => (e) => console.error(`react (${kind}):`, e?.message ? `${e.message}\n${e.stack || ''}` : e);
   // React 19: uncaught errors, errors caught by a boundary, and recoverable ones, separately
-  const root = reconciler.createContainer(container, ConcurrentRoot, null, false, null, 'lord',
+  const root = reconciler.createContainer(container, ConcurrentRoot, null, false, null, 'insane',
     report('error'), report('capturado'), report('recuperable'), null);
   reconciler.updateContainer(element, root, null, null);
   return root;
@@ -290,12 +290,12 @@ export function useClock(format = (d) => d.toISOString(), intervalMs = 1000) {
 }
 
 export function useStats(intervalMs = 2000) {
-  const [stats, setStats] = useState(() => lord.stats());
+  const [stats, setStats] = useState(() => insane.stats());
   useEffect(() => {
-    const id = setInterval(() => setStats(lord.stats()), intervalMs);
+    const id = setInterval(() => setStats(insane.stats()), intervalMs);
     return () => clearInterval(id);
   }, [intervalMs]);
   return stats;
 }
 
-export const system = { version: lord.version };
+export const system = { version: insane.version };

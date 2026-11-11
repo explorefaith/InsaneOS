@@ -1,7 +1,7 @@
 /* wasm_int.h — internal structures of the interpreter (wasm.c decodes/validates/compiles,
  * wasm_run.c instantiates and runs). */
-#ifndef LORD_WASM_INT_H
-#define LORD_WASM_INT_H
+#ifndef INSANE_WASM_INT_H
+#define INSANE_WASM_INT_H
 
 #include "wasm.h"
 

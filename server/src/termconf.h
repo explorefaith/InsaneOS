@@ -1,14 +1,14 @@
 /* termconf.h — the Terminal's own configuration file (docs/TERMINAL.md, "Configuration file"): profiles, color
  * schemes, key mappings, shortcuts and the hotkey, apart from settings.json. By default
- * ~/.config/lordos/terminal.json; the user may choose another file in the home folder or on a mounted disk, and then
+ * ~/.config/insaneos/terminal.json; the user may choose another file in the home folder or on a mounted disk, and then
  * the default one is kept as a copy of the last good version (the cache) for when that place isn't there.
  *
  * A profile can type a command when a session opens, so the file is a launch path: written only here (atomically,
  * 0600, fsync, five rotating backups), and the active file and its family (".tmp…", ".1"…".5") are protected from
- * lord.fs (fsops_protect_file). Nothing here creates a missing folder for a chosen file: a disk that isn't mounted
+ * insane.fs (fsops_protect_file). Nothing here creates a missing folder for a chosen file: a disk that isn't mounted
  * must not get an empty configuration in its mount point. */
-#ifndef LORD_TERMCONF_H
-#define LORD_TERMCONF_H
+#ifndef INSANE_TERMCONF_H
+#define INSANE_TERMCONF_H
 
 #include <stddef.h>
 

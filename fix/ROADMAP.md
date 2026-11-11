@@ -1,4 +1,4 @@
-# 🗺️ LordOS macOS-ification — Master Roadmap (multi-phase)
+# 🗺️ InsaneOS macOS-ification — Master Roadmap (multi-phase)
 
 **নিয়ম:** প্রতিটা phase = source patch → build → verify → তোমার কাছে টেস্ট → তারপর পরেরটা।
 এক phase-এর সমস্যা ধরা পড়লে আলাদা করে ঠিক করা যায়, সব একসাথে নয়।
@@ -22,7 +22,7 @@
 5. ✅ **Auto dark mode** — `settings.autoDark {on, from, to}` — রাতে dark, দিনে light (default: on, 19:00–07:00)
 6. ✅ **Dynamic wallpaper** — `settings.dynamicWallpaper {on, day, night, from, to}` (engine রেডি; Settings UI Phase 2)
 7. ✅ **Menu bar CPU/Temp widget** — ঘড়ির পাশে `34% · 62°` (4s refresh)
-8. ✅ **Text replacement** — `settings.textReplace = {omw: 'on my way'}` — LordOS-এর নিজের টেক্সট ফিল্ডে (Linux apps-এ Phase 2: IME hook)
+8. ✅ **Text replacement** — `settings.textReplace = {omw: 'on my way'}` — InsaneOS-এর নিজের টেক্সট ফিল্ডে (Linux apps-এ Phase 2: IME hook)
 
 ## 🟡 Phase 2 — শুরু হলো (সত্য যাচাই + Settings UI)
 
@@ -39,7 +39,7 @@
 **বাকি আছে (reboot-টেস্টের পরে):** snap preview overlay, Stage Manager, thumbnail drag-to-app (DnD), Universal Clipboard, system-wide text replacement (ime.c)
 
 **Phase 2 দ্বিতীয় ধাপ (এই build-এ):**
-- ✅ **Battery Charge Limit UI** — Settings → Energy: 80/85/90/95/Full dropdown → নতুন root admin action `battery-limit` (sysfs লেখে + `/etc/lordos/battery-limit`-এ মনে রাখে, boot service সেটা apply করে)
+- ✅ **Battery Charge Limit UI** — Settings → Energy: 80/85/90/95/Full dropdown → নতুন root admin action `battery-limit` (sysfs লেখে + `/etc/insaneos/battery-limit`-এ মনে রাখে, boot service সেটা apply করে)
 - ✅ **যাচাইয়ে জানা গেল আরও:** Snap preview **already আছে** (sdk/windows.js-এ snap zones + edges polling — window edge-এ টানলেই কাজ করবে)
 
 **সত্যিকারের defer (design/protocol লাগবে, Phase 3-এর সাথে):**
@@ -56,10 +56,10 @@
 6. **Per-app volume mixer** — Control Center
 7. **Dynamic wallpaper Settings UI** — day/night picker
 8. **Hot Corners Settings UI** + power profile Settings page
-9. **Universal Clipboard** (LAN, lord-lan দিয়ে)
+9. **Universal Clipboard** (LAN, insane-lan দিয়ে)
 10. **Screenshot thumbnail drag-to-app** — DnD protocol কাজ
 11. **Text replacement system-wide** — ime.c hook
-12. **Battery limit Settings toggle** — lord.admin op
+12. **Battery limit Settings toggle** — insane.admin op
 
 ## 🔴 Phase 3 — বড় প্রজেক্ট
 

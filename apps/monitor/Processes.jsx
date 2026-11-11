@@ -3,7 +3,7 @@
 // statistics, open files and ports), from the toolbar, a right-click menu, a double click and the
 // keyboard (⌘/Ctrl+I, Delete).
 //
-// The user's own processes are signalled by lord-server itself (lord.monitor.signal); another
+// The user's own processes are signalled by insane-server itself (insane.monitor.signal); another
 // user's or root's go through the root helper's proc-signal / proc-info (administrators only).
 // Both check the process's start time, so a PID reused meanwhile is never hit, and both refuse
 // the protected ones (PID 1, kernel threads, the session, Insane OS's services and helpers,
@@ -12,7 +12,7 @@ import {
   View, Text, ScrollView, Segmented, SearchField, ToolbarButton, Button, GroupBox, FormRow, typeScale, spacing, useTheme, useLocale,
   useStore, useSettings, useKeyboard, createStore, monitor, monitorProcesses, monitorDetail, firewall, firewallState, formatNumber,
   formatDate, formatTime, addListener, appName,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { fmt, AppGlyph, Table, Cell, isolatedAppOf } from './index.jsx';
 
@@ -26,12 +26,12 @@ const layerRoot = { current: null };            // the window-sized box the laye
 
 let adminCache = null;
 const isAdmin = () => {
-  if (adminCache == null) { try { adminCache = !!lord.system.info().admin; } catch (e) { adminCache = false; } }
+  if (adminCache == null) { try { adminCache = !!insane.system.info().admin; } catch (e) { adminCache = false; } }
   return adminCache;
 };
 
 const myUid = (procs) => procs?.list.find((p) => p.self)?.uid;
-const procLabel = (tr, p) => (p.app === 'lordos' ? tr('monitor.lordos') : isolatedAppOf(p) ? appName(isolatedAppOf(p)) : p.name);
+const procLabel = (tr, p) => (p.app === 'insaneos' ? tr('monitor.insaneos') : isolatedAppOf(p) ? appName(isolatedAppOf(p)) : p.name);
 const findProc = (procs, sel) => (sel ? procs?.list.find((p) => p.pid === sel.pid && p.st === sel.st) || null : null);
 
 // ---- icons (drawn: a circle with a cross, and a circled "i") ----
@@ -173,7 +173,7 @@ export function ProcessLayers({ active }) {
 }
 
 function bounds() {
-  try { const l = lord.getLayout(layerRoot.current.id); return { w: l[2], h: l[3] }; } catch (e) { return { w: 900, h: 580 }; }
+  try { const l = insane.getLayout(layerRoot.current.id); return { w: l[2], h: l[3] }; } catch (e) { return { w: 900, h: 580 }; }
 }
 
 function RowMenu({ p, x, y }) {
@@ -184,7 +184,7 @@ function RowMenu({ p, x, y }) {
   useEffect(() => addListener('pointerdown', (e) => {
     const n = ref.current;
     if (!n) return;
-    const [bx, by, bw, bh] = lord.getLayout(n.id);
+    const [bx, by, bw, bh] = insane.getLayout(n.id);
     if (!(e.x >= bx && e.x <= bx + bw && e.y >= by && e.y <= by + bh)) put({ menu: null });
   }), []);
   const items = [

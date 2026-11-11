@@ -9,13 +9,13 @@
  * person's name inside one) are on screen only: the trees hold them all, and no report may carry them.
  *
  *   build/sysreport-test                       the tests (make test)
- * lordos-fetch's summary is checked on the same trees: with --share it carries none of those values
+ * insaneos-fetch's summary is checked on the same trees: with --share it carries none of those values
  * either, and without color it has no escape codes.
  *
  *   build/sysreport-test smbios                the memory module lines of this machine, as the
  *                                              hw-memory-modules action gives them (root)
  *   build/sysreport-test fixture <dir> <kind>  writes a fake tree (amd, intel, nvidia, rpi5, vm), for
- *                                              `lordos-sysreport report --root <dir>` */
+ *                                              `insaneos-sysreport report --root <dir>` */
 #include "sysreport/sysreport.h"
 #include "sysreport/periph.h"
 #include "sysreport/ids.h"
@@ -253,7 +253,7 @@ static void fixture(const char *r, const char *kind) {
     kernel(r, "6.12.43+deb13-amd64");
     put(r, "proc/meminfo", "MemTotal:       32768000 kB\nMemFree:  1 kB\nSwapTotal:       2097148 kB\n");
     put(r, "proc/asound/cards", " 0 [Generic        ]: HDA-Intel - HD-Audio Generic\n                      HD-Audio Generic at 0xfcd00000 irq 89\n");
-    put(r, "run/lordos/netperm.sock", "");
+    put(r, "run/insaneos/netperm.sock", "");
     if (!strcmp(kind, "amd")) {
         put(r, "sys/class/dmi/id/sys_vendor", "Micro-Star International Co., Ltd.\n");
         put(r, "sys/class/dmi/id/product_name", "MS-7C02\n");
@@ -387,7 +387,7 @@ static int contains(const char *hay, const char *needle) { return hay && strstr(
 static SysReport *run(const char *root, char **json, char **md) {
     SysReport *r = calloc(1, sizeof *r);
     sysreport_collect(r, root, NULL, NULL);
-    snprintf(r->sw.lordos, sizeof r->sw.lordos, "0.8.5-beta");
+    snprintf(r->sw.insaneos, sizeof r->sw.insaneos, "0.8.5-beta");
     *json = sysreport_json(r);
     *md = sysreport_markdown(r);
     JDoc doc;
@@ -546,7 +546,7 @@ static void test_fetch(const char *kind) {
     fixture(root, kind);
     SysReport *r = calloc(1, sizeof *r);
     sysreport_collect(r, root, NULL, NULL);
-    snprintf(r->sw.lordos, sizeof r->sw.lordos, "0.8.5-beta");
+    snprintf(r->sw.insaneos, sizeof r->sw.insaneos, "0.8.5-beta");
     FetchLive l;
     fetch_live(&l, root, 1);
     CHECK(!l.user[0] && !l.host[0], "%s: --share has no names", kind);
@@ -623,13 +623,13 @@ static void test_smbios(void) {
 static void test_facts(void) {
     char root[] = "/tmp/sysreport-facts-XXXXXX";
     if (!mkdtemp(root)) { printf("mkdtemp\n"); exit(2); }
-    put(root, "proc/self/status", "Name:\tlord-server\nUmask:\t0022\nState:\tS\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\n");
-    put(root, "proc/self/cgroup", "0::/system.slice/lordos.service/lordos-session-1000/server\n");
+    put(root, "proc/self/status", "Name:\tinsane-server\nUmask:\t0022\nState:\tS\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\n");
+    put(root, "proc/self/cgroup", "0::/system.slice/insaneos.service/insaneos-session-1000/server\n");
     char p[1024];
-    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/lordos.service/lordos-session-1000/server", root); mkdirs(p);
-    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/lordos.service/lordos-session-1000/app-lordos-media.scope", root); mkdirs(p);
-    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/lordos.service/lordos-session-1000/app-lordos-chromium.scope", root); mkdirs(p);
-    put(root, "sys/fs/cgroup/system.slice/lordos.service/lordos-session-1000/cgroup.procs", "");
+    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/server", root); mkdirs(p);
+    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/app-insaneos-media.scope", root); mkdirs(p);
+    snprintf(p, sizeof p, "%s/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/app-insaneos-chromium.scope", root); mkdirs(p);
+    put(root, "sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/cgroup.procs", "");
     put(root, "proc/net/tcp", "  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode\n"
         "   0: 0100007F:0277 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 1 1\n"
         "   1: 3400A8C0:1629 0500A8C0:C350 01 00000000:00000000 00:00000000 00000000     0        0 2 1\n");
@@ -639,7 +639,7 @@ static void test_facts(void) {
     sr_facts(&f, root);
     int me_root = getuid() == 0;
     CHECK(f.uid == 1000 && f.euid == 1000, "facts: uid %d/%d", f.uid, f.euid);
-    CHECK(!strcmp(f.cgroup, "/system.slice/lordos.service/lordos-session-1000/server"), "facts: cgroup %s", f.cgroup);
+    CHECK(!strcmp(f.cgroup, "/system.slice/insaneos.service/insaneos-session-1000/server"), "facts: cgroup %s", f.cgroup);
     CHECK(f.leaf_root == me_root && f.parent_root == me_root && f.app_scopes == 2, "facts: owners %d %d scopes %d", f.leaf_root, f.parent_root, f.app_scopes);
     CHECK(sr_tcp_listening(root, 5673) == 0, "facts: 5673 only connected, not listening");
     CHECK(sr_tcp_listening(root, 631) == 1 && sr_tcp_listening(root, 22) == 1, "facts: listening v4 and v6");
@@ -678,13 +678,13 @@ static void test_pi_firmware(void) {
     const char *p5 = "sys/devices/platform/soc@107c000000/soc@107c000000:firmware/get_throttled";
     const char *p4 = "sys/devices/platform/soc/soc:firmware/get_throttled";
     /* a Pi 5 with the Insane OS kernel: rpi_volt only */
-    pi_case("lordos ok", 1, NULL, NULL, "0\n", -1, 0, "\"throttled\":null,\"underVoltageAlarm\":false}", NULL,
+    pi_case("insaneos ok", 1, NULL, NULL, "0\n", -1, 0, "\"throttled\":null,\"underVoltageAlarm\":false}", NULL,
             "no under-voltage in the last 2 s (rpi_volt); throttling not reported by this kernel", "since boot");
-    pi_case("lordos alarm", 1, NULL, NULL, "1\n", -1, 1, "\"throttled\":null,\"underVoltageAlarm\":true}", NULL,
+    pi_case("insaneos alarm", 1, NULL, NULL, "1\n", -1, 1, "\"throttled\":null,\"underVoltageAlarm\":true}", NULL,
             "; under-voltage in the last 2 s (rpi_volt)", "slowed");
-    pi_case("lordos bad alarm", 1, NULL, NULL, "yes\n", -1, -1, "\"throttled\":null,\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
-    pi_case("lordos alarm 01", 1, NULL, NULL, "01\n", -1, -1, "\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
-    pi_case("lordos no alarm file", 1, NULL, NULL, "", -1, -1, "\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
+    pi_case("insaneos bad alarm", 1, NULL, NULL, "yes\n", -1, -1, "\"throttled\":null,\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
+    pi_case("insaneos alarm 01", 1, NULL, NULL, "01\n", -1, -1, "\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
+    pi_case("insaneos no alarm file", 1, NULL, NULL, "", -1, -1, "\"underVoltageAlarm\":null}", NULL, NULL, "voltage");
     /* an older kernel with get_throttled and no rpi_volt: the sticky bits are since boot */
     pi_case("old pi4 sticky", 1, p4, "0x50000\n", NULL, 0x50000, -1, "\"throttled\":327680,\"underVoltageAlarm\":null}", NULL,
             "; under-voltage since boot; slowed down since boot (get_throttled 0x50000)", NULL);
@@ -901,7 +901,7 @@ static void test_boot(void) {
     /* live from a USB 2 stick behind a hub, copied to RAM (medium still mounted) */
     r = boot_root();
     put(r, "proc/self/mountinfo", "41 29 8:17 / /run/live/medium ro - iso9660 /dev/sdb1 ro\n");
-    put(r, "proc/cmdline", "BOOT_IMAGE=/live/vmlinuz boot=live toram lordos.lang=en\n");
+    put(r, "proc/cmdline", "BOOT_IMAGE=/live/vmlinuz boot=live toram insaneos.lang=en\n");
     boot_dev(r, "8:17", "devices/pci0000:00/0000:00:14.0/usb1/1-2/1-2.4/1-2.4:1.0/host5/target5:0:0/5:0:0:0/block/sdb/sdb1", 1);
     put(r, "sys/devices/pci0000:00/0000:00:14.0/usb1/1-2/speed", "480\n");
     put(r, "sys/devices/pci0000:00/0000:00:14.0/usb1/1-2/1-2.4/speed", "480\n");
@@ -1021,14 +1021,14 @@ static void test_boot(void) {
     boot_check(r, "usb no speed", 0, "usb", -1, 0);
 }
 
-/* The kernel command line, by whole words (the live ISO's "Check this computer": lordos.check=1). */
+/* The kernel command line, by whole words (the live ISO's "Check this computer": insaneos.check=1). */
 static void test_cmdline_has(void) {
-    const char *w = "lordos.check=1";
-    CHECK(sysreport_cmdline_has("boot=live lordos.check=1 lordos.lang=en\n", w), "cmdline: in the middle");
-    CHECK(sysreport_cmdline_has("boot=live lordos.check=1\n", w), "cmdline: at the end");
-    CHECK(sysreport_cmdline_has("lordos.check=1", w), "cmdline: alone");
-    CHECK(!sysreport_cmdline_has("boot=live lordos.lang=en\n", w), "cmdline: not there");
-    CHECK(!sysreport_cmdline_has("xlordos.check=1 lordos.check=10 lordos.check=0\n", w), "cmdline: only the whole word");
+    const char *w = "insaneos.check=1";
+    CHECK(sysreport_cmdline_has("boot=live insaneos.check=1 insaneos.lang=en\n", w), "cmdline: in the middle");
+    CHECK(sysreport_cmdline_has("boot=live insaneos.check=1\n", w), "cmdline: at the end");
+    CHECK(sysreport_cmdline_has("insaneos.check=1", w), "cmdline: alone");
+    CHECK(!sysreport_cmdline_has("boot=live insaneos.lang=en\n", w), "cmdline: not there");
+    CHECK(!sysreport_cmdline_has("xinsaneos.check=1 insaneos.check=10 insaneos.check=0\n", w), "cmdline: only the whole word");
     CHECK(sysreport_cmdline_has("fetch=http://x/y boot=live", "fetch="), "cmdline: a word that ends in =");
 }
 

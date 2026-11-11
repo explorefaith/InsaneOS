@@ -51,9 +51,9 @@ static HwSnapState check_signed(const char *text, char *err, size_t n) {
 }
 
 #define DEV(key, comp, ver, w, l, no, rep, ref) \
-    "{\"key\":\"" key "\",\"component\":\"" comp "\",\"name\":\"A device\",\"lordos\":\"" ver "\",\"works\":" #w ",\"limits\":" #l \
+    "{\"key\":\"" key "\",\"component\":\"" comp "\",\"name\":\"A device\",\"insaneos\":\"" ver "\",\"works\":" #w ",\"limits\":" #l \
     ",\"no\":" #no ",\"reports\":" #rep ",\"references\":" #ref "}"
-#define SNAP(devs) "{\"format\":\"lordos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[" devs "]}\n"
+#define SNAP(devs) "{\"format\":\"insaneos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[" devs "]}\n"
 
 static const char GOOD[] = SNAP(DEV("pci:1af4:1050", "gpu", "0.8.7", 1, 0, 0, 1, 1) "," DEV("gpu:v3d", "gpu", "0.8.7", 1, 1, 0, 2, 1));
 
@@ -84,12 +84,12 @@ static void test_check(void) {
 
     /* the structure */
     static const char *const invalid[] = {
-        "{\"format\":\"lordos-hwsnapshot\",\"version\":2,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[]}",
+        "{\"format\":\"insaneos-hwsnapshot\",\"version\":2,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[]}",
         "{\"format\":\"other\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[]}",
-        "{\"format\":\"lordos-hwsnapshot\",\"version\":1,\"generated\":\"29/10/2026\",\"reports\":2,\"devices\":[]}",
-        "{\"format\":\"lordos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":-1,\"devices\":[]}",
-        "{\"format\":\"lordos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":{}}",
-        "{\"format\":\"lordos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[],\"extra\":1}",
+        "{\"format\":\"insaneos-hwsnapshot\",\"version\":1,\"generated\":\"29/10/2026\",\"reports\":2,\"devices\":[]}",
+        "{\"format\":\"insaneos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":-1,\"devices\":[]}",
+        "{\"format\":\"insaneos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":{}}",
+        "{\"format\":\"insaneos-hwsnapshot\",\"version\":1,\"generated\":\"2026-10-29\",\"reports\":2,\"devices\":[],\"extra\":1}",
         "[1,2,3]",
         SNAP(DEV("nocolon", "gpu", "0.8.7", 1, 0, 0, 1, 0)),
         SNAP(DEV("pci:1:2", "camera", "0.8.7", 1, 0, 0, 1, 0)),
@@ -100,9 +100,9 @@ static void test_check(void) {
         SNAP(DEV("pci:1:2", "gpu", "0.8.7", 1, 0, 0, 2, 0)),           /* counts don't add up */
         SNAP(DEV("pci:1:2", "gpu", "0.8.7", 1, 0, 0, 1, 2)),           /* more references than reports */
         SNAP(DEV("pci:1:2", "gpu", "0.8.7", 0, 0, 0, 0, 0)),           /* no report */
-        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"bad\\u0007name\",\"lordos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"),
-        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"x\",\"lordos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1}"),
-        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"x\",\"lordos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0,\"x\":1}"),
+        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"bad\\u0007name\",\"insaneos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"),
+        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"x\",\"insaneos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1}"),
+        SNAP("{\"key\":\"pci:1:2\",\"component\":\"gpu\",\"name\":\"x\",\"insaneos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0,\"x\":1}"),
     };
     for (size_t i = 0; i < sizeof invalid / sizeof invalid[0]; i++) {
         HwSnapState s = check_signed(invalid[i], err, sizeof err);
@@ -114,10 +114,10 @@ static void test_check(void) {
     memset(key, 'k', sizeof key);
     key[0] = 'p'; key[1] = ':';
     key[HWSNAP_KEY_MAX] = 0;
-    snprintf(text, sizeof text, SNAP("{\"key\":\"%s\",\"component\":\"gpu\",\"name\":\"x\",\"lordos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"), key);
+    snprintf(text, sizeof text, SNAP("{\"key\":\"%s\",\"component\":\"gpu\",\"name\":\"x\",\"insaneos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"), key);
     CHECK(check_signed(text, err, sizeof err) == HWSNAP_OK, "a key at the limit");
     key[HWSNAP_KEY_MAX] = 'k'; key[HWSNAP_KEY_MAX + 1] = 0;
-    snprintf(text, sizeof text, SNAP("{\"key\":\"%s\",\"component\":\"gpu\",\"name\":\"x\",\"lordos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"), key);
+    snprintf(text, sizeof text, SNAP("{\"key\":\"%s\",\"component\":\"gpu\",\"name\":\"x\",\"insaneos\":\"0.8.7\",\"works\":1,\"limits\":0,\"no\":0,\"reports\":1,\"references\":0}"), key);
     CHECK(check_signed(text, err, sizeof err) == HWSNAP_INVALID, "a key past the limit");
     /* too big: refused before the signature */
     char *big = malloc(HWSNAP_MAX + 2);

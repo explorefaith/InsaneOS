@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" font-family="Inter, 'DejaVu Sans', Arial, sans-serif">
   <rect width="1200" height="640" fill="#ffffff"/>
-  <text x="40" y="48" font-size="26" font-weight="700" fill="#1d2433">Immutable LordOS (prototype): A/B disk layout and boot assessment</text>
+  <text x="40" y="48" font-size="26" font-weight="700" fill="#1d2433">Immutable InsaneOS (prototype): A/B disk layout and boot assessment</text>
   <text x="40" y="76" font-size="15" fill="#5b6475">GPT disk as built by tools/immutable/build.sh — verified in QEMU (UEFI) on VM 122, 2026-10-19</text>
 
   <!-- disk layout -->
@@ -8,12 +8,12 @@
     <rect x="40" y="100" width="150" height="110" rx="8" fill="#e8eefc" stroke="#3b5bdb" stroke-width="2"/>
     <text x="115" y="128" text-anchor="middle" font-weight="700" fill="#1d2433">ESP (FAT)</text>
     <text x="115" y="150" text-anchor="middle" fill="#334">systemd-boot</text>
-    <text x="115" y="170" text-anchor="middle" fill="#334">lordos_2.efi</text>
-    <text x="115" y="190" text-anchor="middle" fill="#334">lordos_3+0-3.efi</text>
+    <text x="115" y="170" text-anchor="middle" fill="#334">insaneos_2.efi</text>
+    <text x="115" y="190" text-anchor="middle" fill="#334">insaneos_3+0-3.efi</text>
 
     <rect x="200" y="100" width="230" height="110" rx="8" fill="#e6f6ec" stroke="#2f9e44" stroke-width="2"/>
     <text x="315" y="128" text-anchor="middle" font-weight="700" fill="#1d2433">usr slot A (EROFS, ro)</text>
-    <text x="315" y="150" text-anchor="middle" fill="#334">lordos_usr_&lt;v&gt;</text>
+    <text x="315" y="150" text-anchor="middle" fill="#334">insaneos_usr_&lt;v&gt;</text>
     <text x="315" y="170" text-anchor="middle" fill="#334">UUID = first 128 bits</text>
     <text x="315" y="190" text-anchor="middle" fill="#334">of the root hash</text>
 
@@ -54,7 +54,7 @@
 
     <rect x="290" y="280" width="200" height="80" rx="10" fill="#f8f9fb" stroke="#adb5bd"/>
     <text x="390" y="312" text-anchor="middle" font-weight="700" fill="#1d2433">2. New entry</text>
-    <text x="390" y="334" text-anchor="middle" fill="#334">lordos_&lt;v&gt;+3.efi</text>
+    <text x="390" y="334" text-anchor="middle" fill="#334">insaneos_&lt;v&gt;+3.efi</text>
     <text x="390" y="352" text-anchor="middle" fill="#334">3 boot tries</text>
 
     <rect x="540" y="280" width="200" height="80" rx="10" fill="#f8f9fb" stroke="#adb5bd"/>
@@ -74,7 +74,7 @@
     <rect x="700" y="420" width="290" height="80" rx="10" fill="#e6f6ec" stroke="#2f9e44" stroke-width="2"/>
     <text x="845" y="452" text-anchor="middle" font-weight="700" fill="#1d2433">OK → marked good</text>
     <text x="845" y="474" text-anchor="middle" fill="#334">systemd-bless-boot renames it</text>
-    <text x="845" y="492" text-anchor="middle" fill="#334">to lordos_&lt;v&gt;.efi (verified, v2)</text>
+    <text x="845" y="492" text-anchor="middle" fill="#334">to insaneos_&lt;v&gt;.efi (verified, v2)</text>
 
     <rect x="1010" y="420" width="160" height="80" rx="10" fill="#fff0f0" stroke="#e03131" stroke-width="2"/>
     <text x="1090" y="452" text-anchor="middle" font-weight="700" fill="#1d2433">Fails</text>

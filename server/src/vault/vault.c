@@ -1,14 +1,14 @@
-/* vault.c — lord-vault: the passwords and keyring helper (see docs/PASSWORDS.md).
+/* vault.c — insane-vault: the passwords and keyring helper (see docs/PASSWORDS.md).
  *
- * lord-server (vclient.c) launches it from a fixed path (next to its own binary), without
+ * insane-server (vclient.c) launches it from a fixed path (next to its own binary), without
  * arguments, with the control channel on fd 3. Before reading a single vault:
- *   - no core dumps or ptrace (PR_SET_DUMPABLE 0, RLIMIT_CORE 0), it dies with lord-server;
+ *   - no core dumps or ptrace (PR_SET_DUMPABLE 0, RLIMIT_CORE 0), it dies with insane-server;
  *   - it receives the vaults folder (an fd) over the control channel and, if there is one, the
  *     socket already connected to the session's D-Bus bus; and confines itself with
  *     sandbox_apply_helper: no network, no new sockets, no exec, no files except that folder
  *     (and the fds passed to it later).
  * Decrypted data lives only in the secrets arena (smem.h: mlock, MADV_DONTDUMP, wiped on
- * lock). It serves several channels: the control one (lord-server) and those of the Passwords app.
+ * lock). It serves several channels: the control one (insane-server) and those of the Passwords app.
  * Slow work that waits for a person (touching the FIDO2 key) runs in a separate thread; Argon2id
  * (≈0.5–1 s) runs in the loop. */
 #include "vault_int.h"
@@ -229,7 +229,7 @@ int vault_unlock_with(Vault *v, int type, const VFactors *f, char *err, size_t e
             vj_free(&j);
         }
     }
-    if (debug) fprintf(stderr, "lord-vault: %s abierta (ranura %d, %s, %.0f ms de KDF, %d entradas)\n",
+    if (debug) fprintf(stderr, "insane-vault: %s abierta (ranura %d, %s, %.0f ms de KDF, %d entradas)\n",
                        v->file, slot, slot_type_name(h.slots[slot].type), kdf_ms, m.n);
     event_v("unlocked", (int)(v - vaults));
     if (v == &vaults[V_LOGIN]) keyring_lock_changed();
@@ -1237,14 +1237,14 @@ static void op_import(Chan *c, uint32_t id, Vault *v, const Vj *j, const VMsg *m
     imp_free(&L);
     int sr = vault_save(v);
     if (sr != VF_OK) { reply_err(c, id, vf_strerror(sr)); return; }
-    static const char *kn[] = { "unknown", "kdbx", "keepassxc-csv", "bitwarden-json", "bitwarden-csv", "chrome-csv", "firefox-csv", "apple-csv", "lordos-csv" };
+    static const char *kn[] = { "unknown", "kdbx", "keepassxc-csv", "bitwarden-json", "bitwarden-csv", "chrome-csv", "firefox-csv", "apple-csv", "insaneos-csv" };
     VjB b;
     vb_init(&b);
     vb_open(&b, '{');
     vb_kb(&b, "ok", 1);
     vb_ki(&b, "count", count);
     vb_ki(&b, "cats", added);
-    vb_ks(&b, "format", kind >= 0 && kind <= IMP_LORD_CSV ? kn[kind] : "?");
+    vb_ks(&b, "format", kind >= 0 && kind <= IMP_INSANE_CSV ? kn[kind] : "?");
     vb_kn(&b, "ms", round(ms));
     vb_close(&b, '}');
     reply(c, id, &b);
@@ -1495,7 +1495,7 @@ static void handle_request(Chan *c, VMsg *m) {
     uint32_t id = m->id;
     int vi = vault_of(&j);
     Vault *v = &vaults[vi];
-    if (debug > 1) fprintf(stderr, "lord-vault: op %s (%s)\n", op, vi == V_MAIN ? "main" : "login");
+    if (debug > 1) fprintf(stderr, "insane-vault: op %s (%s)\n", op, vi == V_MAIN ? "main" : "login");
     if (!strcmp(op, "status")) { vault_probe(&vaults[V_MAIN]); if (!vaults[V_LOGIN].unlocked) vault_probe(&vaults[V_LOGIN]); VjB b; vb_init(&b); status_json(&b); reply(c, id, &b); }
     else if (!strcmp(op, "create")) op_create(c, id, &j, m);
     else if (!strcmp(op, "unlock")) op_unlock(c, id, &j, m);
@@ -1617,7 +1617,7 @@ static void handle_request(Chan *c, VMsg *m) {
     vj_free(&j);
 }
 
-/* ================= control (lord-server only) ================= */
+/* ================= control (insane-server only) ================= */
 
 static void handle_ctl(Chan *c, VMsg *m) {
     Vj j;
@@ -1670,23 +1670,23 @@ static void lockdown(void) {
                                SYS_fsync, SYS_fdatasync, -1 };
     int rw[2] = { vault_dirfd, -1 };
     static const char *ro[] = { NULL };
-    SandboxHelperCfg cfg = { .name = "lordos-vault", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024, .rw_dir_fds = rw, .ro_dir_fds = NULL };
+    SandboxHelperCfg cfg = { .name = "insaneos-vault", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024, .rw_dir_fds = rw, .ro_dir_fds = NULL };
     int mask = sandbox_apply_helper(&cfg);
-    if (debug) fprintf(stderr, "lord-vault[%d]: caja=%#x\n", getpid(), (unsigned)mask);
+    if (debug) fprintf(stderr, "insane-vault[%d]: caja=%#x\n", getpid(), (unsigned)mask);
 }
 
 int main(void) {
     signal(SIGPIPE, SIG_IGN);
     prctl(PR_SET_PDEATHSIG, SIGTERM);
     sm_harden_process();
-    debug = getenv("LORD_VAULT_DEBUG") ? atoi(getenv("LORD_VAULT_DEBUG")) + 1 : 0;
+    debug = getenv("INSANE_VAULT_DEBUG") ? atoi(getenv("INSANE_VAULT_DEBUG")) + 1 : 0;
     if (debug < 0) debug = 1;
     /* nothing inherited except 0–3 */
     for (int fd = 4; fd < 1024; fd++) close(fd);
     /* 1) init: the vaults folder (and maybe the bus) */
     VMsg m;
     if (vw_recv(CTL_FD, &m, &smalloc)) return 1;
-    if (m.kind != VW_CTL || m.nfds < 1) { fprintf(stderr, "lord-vault: the folder is missing\n"); return 1; }
+    if (m.kind != VW_CTL || m.nfds < 1) { fprintf(stderr, "insane-vault: the folder is missing\n"); return 1; }
     vault_dirfd = m.fds[0];
     m.fds[0] = -1;
     int busfd = -1;
@@ -1717,7 +1717,7 @@ int main(void) {
         /* auto-lock */
         Vault *mv = &vaults[V_MAIN];
         if (mv->unlocked && mv->autolock_s > 0 && !fj.busy && now_ms() - mv->last_use > mv->autolock_s * 1000.0) {
-            if (debug) fprintf(stderr, "lord-vault: automatic lock\n");
+            if (debug) fprintf(stderr, "insane-vault: automatic lock\n");
             vault_lock(mv);
         }
         if (r <= 0) continue;

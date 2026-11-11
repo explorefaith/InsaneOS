@@ -1,6 +1,6 @@
 /* vpn.h — common pieces of IPsec, PPTP, OpenConnect and Fortinet (see vpn.c). */
-#ifndef LORD_NET_VPN_H
-#define LORD_NET_VPN_H
+#ifndef INSANE_NET_VPN_H
+#define INSANE_NET_VPN_H
 
 #include <signal.h>
 #include <stdint.h>

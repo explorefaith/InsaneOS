@@ -5,8 +5,8 @@
  *     HMAC-SHA512 (TOTP-SHA512) and HKDF-SHA256 (RFC 5869).
  * The native vault uses only Monocypher (XChaCha20-Poly1305, Argon2id, BLAKE2b).
  * SHA-256/512 are those of server/src/pkg/crypto.c. */
-#ifndef LORD_VAULT_VCRYPTO_H
-#define LORD_VAULT_VCRYPTO_H
+#ifndef INSANE_VAULT_VCRYPTO_H
+#define INSANE_VAULT_VCRYPTO_H
 
 #include <stddef.h>
 #include <stdint.h>

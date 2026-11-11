@@ -1,5 +1,5 @@
-/* fetch.c — lord-fetch: downloads the subscribed blocklists over HTTPS for lord-server, sandboxed
- * (see fetchproto.h). With lord-sessiond and lord-maild, the only binaries that link OpenSSL. */
+/* fetch.c — insane-fetch: downloads the subscribed blocklists over HTTPS for insane-server, sandboxed
+ * (see fetchproto.h). With insane-sessiond and insane-maild, the only binaries that link OpenSSL. */
 #include "fetchproto.h"
 #include "../doc/wire.h"
 #include "../fw/fwlists.h"
@@ -103,7 +103,7 @@ static void get(uint32_t id, const char *json, size_t len, int fd) {
     }
     size_t bytes = r.blen;
     http_resp_free(&r);
-    int mfd = doc_memfd("lord-fetch-list", out, olen);
+    int mfd = doc_memfd("insane-fetch-list", out, olen);
     free(out);
     if (mfd < 0) { fail(id, "oom", ""); return; }
     JBuf b;
@@ -122,10 +122,10 @@ int main(void) {
     setrlimit(RLIMIT_CORE, &nocore);
     signal(SIGPIPE, SIG_IGN);
     struct stat st;
-    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "lord-fetch: started by lord-server only\n"); return 2; }
-    if (net_init()) { fprintf(stderr, "lord-fetch: TLS init failed\n"); return 3; }
+    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "insane-fetch: started by insane-server only\n"); return 2; }
+    if (net_init()) { fprintf(stderr, "insane-fetch: TLS init failed\n"); return 3; }
     SandboxHelperCfg cfg = {
-        .name = "lordos-fetch",          /* cgroup scope lordos-fetch.scope (lord-sessiond creates it) */
+        .name = "insaneos-fetch",          /* cgroup scope insaneos-fetch.scope (insane-sessiond creates it) */
         .ro_paths = NULL,
         .extra_syscalls = (int[]){ -1 },
         .allow_ioctl_classes = 0,

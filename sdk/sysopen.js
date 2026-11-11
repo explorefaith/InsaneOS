@@ -1,12 +1,12 @@
 // sysopen.js — opening things for the isolated system apps (docs/PRIVACY.md, "System apps in their
-// own process"). Mail, Calendar, Contacts and Reminders run as `lord-server --app <id>` and cannot
-// open files or other apps themselves; lord-server checks what they ask (sec/brokermail.c) and the
+// own process"). Mail, Calendar, Contacts and Reminders run as `insane-server --app <id>` and cannot
+// open files or other apps themselves; insane-server checks what they ask (sec/brokermail.c) and the
 // session does it here:
 //
 //   openFileWithApps(path, name)   the same rules as Files: our apps for documents, images and media,
 //                                  the default app for the rest, otherwise reveal it in Files. Used by
 //                                  Mail in-process and, for the isolated Mail, on a cached attachment
-//                                  lord-server validated ("mailopen" broker event).
+//                                  insane-server validated ("mailopen" broker event).
 //   revealPath(path)
 //   "launch" broker event          one of these apps opens another one with args (no paths).
 import { wm, getApp } from './windows.js';
@@ -21,7 +21,7 @@ export const revealPath = (path) => wm.open('files', { new: true, args: { path: 
 export function openUrl(url) {
   try {
     const def = defaultOpenerId('x-scheme-handler/https');
-    return !!def && lord.apps.launchUri(def.replace(/\.desktop$/, ''), url);
+    return !!def && insane.apps.launchUri(def.replace(/\.desktop$/, ''), url);
   } catch (e) { return false; }
 }
 
@@ -32,7 +32,7 @@ export function openCalendarApp(at) {
   try { def = defaultFor('calendar'); } catch (e) { def = null; }
   const native = nativeOf(def);
   if (def && !native) {
-    try { if (lord.apps.launch(def.replace(/\.desktop$/, ''))) return true; } catch (e) { /* not installed any more */ }
+    try { if (insane.apps.launch(def.replace(/\.desktop$/, ''))) return true; } catch (e) { /* not installed any more */ }
   }
   if (!getApp('calendar')) return false;
   wm.open('calendar', at ? { args: { at } } : undefined);
@@ -51,11 +51,11 @@ export function openFileWithApps(path, name) {
     return true;
   }
   try {
-    const def = defaultOpenerId(typeof lord !== 'undefined' && lord.mime ? lord.mime.guess(n) : '');
+    const def = defaultOpenerId(typeof insane !== 'undefined' && insane.mime ? insane.mime.guess(n) : '');
     const native = nativeOf(def);
     if (native && getApp(native)) return wm.open(native, { new: true, args: { path } });
-    if (def && lord.apps.launchWith(def.replace(/\.desktop$/, ''), path)) return true;
-    if (lord.apps.launchWith('', path)) return true;
+    if (def && insane.apps.launchWith(def.replace(/\.desktop$/, ''), path)) return true;
+    if (insane.apps.launchWith('', path)) return true;
   } catch (e) { /* no default app */ }
   return revealPath(path);
 }
@@ -63,7 +63,7 @@ export function openFileWithApps(path, name) {
 // the session side (privacy.js forwards these broker events here)
 const SYSTEM_APPS = ['mail', 'calendar', 'contacts', 'reminders'];
 if (typeof globalThis !== 'undefined') {
-  globalThis.__lordSysOpen = (kind, data) => {
+  globalThis.__insaneSysOpen = (kind, data) => {
     if (!data) return;
     if (kind === 'mailopen' && typeof data.path === 'string') openFileWithApps(data.path, data.name);
     else if (kind === 'launch' && SYSTEM_APPS.includes(data.app) && getApp(data.app)) {

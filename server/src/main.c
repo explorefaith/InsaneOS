@@ -1,6 +1,6 @@
 #include <dirent.h>
 /*
- * lord-server — servidor gráfico de Insane OS, escrito desde cero.
+ * insane-server — servidor gráfico de Insane OS, escrito desde cero.
  *
  * Toma la placa de video (DRM/KMS) y el input (evdev) directamente del kernel, sin X11,
  * Wayland, libdrm ni libinput. La interfaz la define un tema React que corre en QuickJS
@@ -220,7 +220,7 @@ typedef struct {
     int cursor_mode, cursor_hx, cursor_hy, hw_cursor, hw_cursor_ok;
     GpuTex *cursor_tex;
     int cursor_tex_w, cursor_tex_h;
-    /* session without a monitor (lord-sessiond shows it on the monitor or the remote desktop): it is
+    /* session without a monitor (insane-sessiond shows it on the monitor or the remote desktop): it is
      * drawn in memory, without DRM or evdev; greeter = the login screen */
     int headless, greeter, shift;
     double last_render;
@@ -289,7 +289,7 @@ static Out *main_out(Server *s) { return &s->out[s->out[s->main_out].on ? s->mai
 static int flip_instant, flip_told;
 static double pace_next;                /* the next frame's slot when frames are paced in software, ms */
 
-static FPipe fpipe;                     /* LORD_PIPELINE (fpipe.h), read once at startup */
+static FPipe fpipe;                     /* INSANE_PIPELINE (fpipe.h), read once at startup */
 static void prep_undo_all(Server *s) { for (int i = 0; i < OUT_MAX; i++) prep_undo(&s->out[i]); }
 
 static int any_flip_pending(const Server *s) {
@@ -420,26 +420,26 @@ static int drop_privileges(const char *user) {
     if (geteuid() != 0) return 0;
     if (!user) user = getenv("SUDO_USER");
     if (!user) {
-        fprintf(stderr, "lord-server: warning, still running as root (use sudo or --user)\n");
+        fprintf(stderr, "insane-server: warning, still running as root (use sudo or --user)\n");
         return 0;
     }
     struct passwd *pw = getpwnam(user);
-    if (!pw || pw->pw_uid == 0) { fprintf(stderr, "lord-server: invalid user '%s'\n", user); return -1; }
+    if (!pw || pw->pw_uid == 0) { fprintf(stderr, "insane-server: invalid user '%s'\n", user); return -1; }
     if (prctl(PR_SET_KEEPCAPS, 1) || initgroups(pw->pw_name, pw->pw_gid) ||
         setgid(pw->pw_gid) || setuid(pw->pw_uid)) {
-        perror("lord-server: dropping privileges");
+        perror("insane-server: dropping privileges");
         return -1;
     }
     struct __user_cap_header_struct hdr = { _LINUX_CAPABILITY_VERSION_3, 0 };
     struct __user_cap_data_struct caps[2];
     memset(caps, 0, sizeof caps);
     caps[0].effective = caps[0].permitted = 1u << CAP_SYS_TTY_CONFIG;
-    if (syscall(SYS_capset, &hdr, caps)) perror("lord-server: capset");
+    if (syscall(SYS_capset, &hdr, caps)) perror("insane-server: capset");
     prctl(PR_SET_KEEPCAPS, 0);
-    if (setuid(0) == 0) { fprintf(stderr, "lord-server: could not drop privileges\n"); return -1; }
+    if (setuid(0) == 0) { fprintf(stderr, "insane-server: could not drop privileges\n"); return -1; }
     setenv("HOME", pw->pw_dir, 1);
     setenv("USER", pw->pw_name, 1);
-    fprintf(stderr, "lord-server: running as %s (uid %d)\n", pw->pw_name, (int)pw->pw_uid);
+    fprintf(stderr, "insane-server: running as %s (uid %d)\n", pw->pw_name, (int)pw->pw_uid);
     return 0;
 }
 
@@ -608,7 +608,7 @@ static void full_damage(Server *s) {
 }
 static void remote_refresh(void) { full_damage(remote_server); }
 
-/* The displays for JS (lord.screen.displays) and the Wayland apps (one wl_output each). */
+/* The displays for JS (insane.screen.displays) and the Wayland apps (one wl_output each). */
 static void publish_displays(Server *s) {
     WlOutput wo[OUT_MAX];
     char json[4096];
@@ -623,7 +623,7 @@ static void publish_displays(Server *s) {
         memset(w, 0, sizeof *w);
         *w = (WlOutput){ o->v.x, o->v.y, o->v.w, o->v.h, o->v.pw, o->v.ph, s->headless ? 60000 : mode_refresh_mhz(&o->kms.mode),
                          out_scale(o), o->d.mm_w, o->d.mm_h, "", "" };
-        if (s->headless) { snprintf(w->name, sizeof w->name, "LORD-1"); snprintf(w->desc, sizeof w->desc, "Insane OS display"); }
+        if (s->headless) { snprintf(w->name, sizeof w->name, "INSANE-1"); snprintf(w->desc, sizeof w->desc, "Insane OS display"); }
         else { snprintf(w->name, sizeof w->name, "%s", o->d.connector); snprintf(w->desc, sizeof w->desc, "%s", o->d.name); }
         if (len < (int)sizeof json - 300) {
             char name[140];
@@ -659,7 +659,7 @@ static void set_size(Server *s, int w, int h) {
         s->main_out = 0;
     }
     int changed = w != s->W || h != s->H;
-    if (changed) fprintf(stderr, "lord-server: desktop %dx%d → %dx%d\n", s->W, s->H, w, h);
+    if (changed) fprintf(stderr, "insane-server: desktop %dx%d → %dx%d\n", s->W, s->H, w, h);
     s->W = w;
     s->H = h;
     ui.width = (float)w;
@@ -752,10 +752,10 @@ static int gpu_start(Server *s);
 /* Does someone need the frame in memory, composed by the CPU? Recording the screen does. The remote
  * desktop doesn't any more (docs/REMOTE.md, "Video (WebRTC)"): with the GPU composing, the frame is
  * read back once (gpu_read_next) for every viewer. Only protected windows still need the CPU path
- * (they are painted black in a CPU copy of the scene, media/capture.c); LORD_REMOTE_GPU=0 forces it. */
+ * (they are painted black in a CPU copy of the scene, media/capture.c); INSANE_REMOTE_GPU=0 forces it. */
 static int remote_needs_cpu(void) {
     if (!mirror_watchers()) return 0;
-    const char *e = getenv("LORD_REMOTE_GPU");
+    const char *e = getenv("INSANE_REMOTE_GPU");
     return (e && !strcmp(e, "0")) || media_protected_count() > 0;
 }
 static int need_cpu(void) { return remote_needs_cpu() || media_needs_cpu(); }
@@ -938,7 +938,7 @@ static void outputs_apply(Server *s) {
     }
     display_resync_done(ok, &p);
     tp_set_rotation(display_touch_rotation());   /* a touchscreen turns with its panel */
-    /* the login screen opens its clock and users on this session's main display (lord-sessiond keeps
+    /* the login screen opens its clock and users on this session's main display (insane-sessiond keeps
      * the connector for it, docs/DISPLAYS.md): only a change is sent */
     static char told_main[32];
     if (ok && !s->greeter && p.n > 1 && strcmp(told_main, p.o[p.main].connector)) {
@@ -953,12 +953,12 @@ static void outputs_apply(Server *s) {
     s->cursor_dirty = 1;
 }
 
-/* ---- the monitor, lent by lord-sessiond (docs/SESSIONS.md) ----
- * fds[0] is the card (lord-sessiond already made it master), the rest keyboards and mice. The
- * session draws on the card like a plain lord-server: with GPU if there is one, direct scanout of
- * fullscreen and hardware cursor. When switching user, lord-sessiond takes the master away and
+/* ---- the monitor, lent by insane-sessiond (docs/SESSIONS.md) ----
+ * fds[0] is the card (insane-sessiond already made it master), the rest keyboards and mice. The
+ * session draws on the card like a plain insane-server: with GPU if there is one, direct scanout of
+ * fullscreen and hardware cursor. When switching user, insane-sessiond takes the master away and
  * revokes the input (EVIOCREVOKE); before that it sends RP_UNDISPLAY. */
-/* lord-sessiond: a keyboard, mouse or touchpad plugged in while the session is on the monitor */
+/* insane-sessiond: a keyboard, mouse or touchpad plugged in while the session is on the monitor */
 static void remote_input_add(const int *fds, int n) {
     Server *s = remote_server;
     if (s->headless) { for (int i = 0; i < n; i++) close(fds[i]); return; }
@@ -977,7 +977,7 @@ static void parked_drop(void) {
     parked_n = 0;
 }
 
-/* Boot splash hand-off: lord-sessiond lent the card with RP_DISPLAY_KEEP; RP_SHOWN goes back once
+/* Boot splash hand-off: insane-sessiond lent the card with RP_DISPLAY_KEEP; RP_SHOWN goes back once
  * the first frame is on the screen (docs/SESSIONS.md, "Boot splash"). */
 static int splash_wait;
 
@@ -987,7 +987,7 @@ static void display_attach(const int *fds, int n, int flags) {
     Server *s = remote_server;
     parked_drop();                      /* a new RP_DISPLAY replaces what was waiting */
     if (n < 1) return;
-    /* lord-sessiond lends the monitor only after taking it back, so a session still on the screen
+    /* insane-sessiond lends the monitor only after taking it back, so a session still on the screen
      * missed that: what it holds is stale (revoked input, no DRM master). Leave it and take the new one,
      * or the screen stays black. */
     if (!s->headless) {
@@ -1272,21 +1272,21 @@ static Box paint_ui(Server *s) {
     return d;
 }
 
-/* LORD_PAINT_VERIFY=N (checking the partial repaints, docs/LAYERS.md): every N-th frame painted on a
+/* INSANE_PAINT_VERIFY=N (checking the partial repaints, docs/LAYERS.md): every N-th frame painted on a
  * display, the whole tree is painted again into a scratch canvas with nothing kept from earlier frames
  * (paint_root_full: no drag layer, no copy of what is below it, no skipped node) and the pixels that
  * differ from the display's frame are counted on stderr. Off by default; it only reads the frame. The
  * terminals and Linux apps note where they were painted, so with N = 1 a terminal's change during a
  * drag always repaints the whole layer: use N > 1 to check the layer's partial repaints. On a frame
  * whose dragged window the GPU composites (GPU drag, skip) the scene is stale there and skip is left out:
- * LORD_GPU_VERIFY checks those pixels against the CPU's. */
+ * INSANE_GPU_VERIFY checks those pixels against the CPU's. */
 static void paint_verify(Out *o, int index, Rect skip) {
     static int every = -1;
     static long frames[OUT_MAX];
     static uint32_t *px;
     static size_t cap;
     if (every < 0) {
-        const char *e = getenv("LORD_PAINT_VERIFY");
+        const char *e = getenv("INSANE_PAINT_VERIFY");
         every = e ? atoi(e) : 0;
         if (every < 0) every = 0;
     }
@@ -1489,7 +1489,7 @@ static int gpu_start(Server *s) {
     s->out[0].gpu = 0;
     for (int i = 1; i < OUT_MAX; i++)           /* the other displays: their own surfaces on the same context */
         if (s->out[i].on) s->out[i].gpu = gpu_add_output(&s->out[i].kms);
-    s->hw_cursor = getenv("LORD_SW_CURSOR") == NULL;
+    s->hw_cursor = getenv("INSANE_SW_CURSOR") == NULL;
     for (int i = 0; i < OUT_MAX && s->hw_cursor; i++)
         if (s->out[i].on && s->out[i].gpu >= 0 && kms_cursor_image(&s->out[i].kms, arrow, 64, 64, 0, 0)) s->hw_cursor = 0;
     s->hw_cursor_ok = s->hw_cursor;
@@ -1574,11 +1574,11 @@ static void render(Server *s) {
 }
 
 /* Frame statistics per display count and scale (docs/DISPLAYS.md, "Measurements"): with
- * LORD_FRAME_STATS=1 one line every 300 frames with the average work per frame. */
+ * INSANE_FRAME_STATS=1 one line every 300 frames with the average work per frame. */
 static struct { long n; double work, paint, present; } fstat_;
 static void frame_stats(Server *s, double work, double paint) {
     static int on = -1;
-    if (on < 0) on = getenv("LORD_FRAME_STATS") != NULL;
+    if (on < 0) on = getenv("INSANE_FRAME_STATS") != NULL;
     if (!on) return;
     fstat_.n++;
     fstat_.work += work;
@@ -2161,7 +2161,7 @@ static int render_frame(Server *s) {
     return !prep_only;
 }
 
-/* Cambio de tema pedido desde JS (lord.themes.use): se descarta el contexto JS y el árbol. */
+/* Cambio de tema pedido desde JS (insane.themes.use): se descarta el contexto JS y el árbol. */
 /* Loads the first theme that passes the verified-code check (sec/codesig.c): the one asked for,
  * then the default and the classic theme next to it; if none can be loaded because the system code
  * was modified, the built-in recovery screen (never a blank screen). The login screen goes straight
@@ -2171,7 +2171,7 @@ static int start_theme(const char *theme, int greeter, char *used, size_t n) {
     int r = js_init(theme);
     if (r == 0) return 0;
     if (r != JS_REFUSED && codesig_state() != CODE_INVALID) return -1;
-    if (r == JS_REFUSED) snprintf(ui.theme_failed, sizeof ui.theme_failed, "%s", theme);   /* lord.themes.use won't go back to it */
+    if (r == JS_REFUSED) snprintf(ui.theme_failed, sizeof ui.theme_failed, "%s", theme);   /* insane.themes.use won't go back to it */
     if (!greeter && codesig_state() != CODE_INVALID) {
         char root[PATH_MAX], tmp[PATH_MAX];
         snprintf(tmp, sizeof tmp, "%s", theme);
@@ -2186,7 +2186,7 @@ static int start_theme(const char *theme, int greeter, char *used, size_t n) {
             if (!strcmp(alt, theme) || access(alt, R_OK)) continue;
             js_shutdown();
             ui_reset();
-            fprintf(stderr, "lord-server: theme %s was not loaded, trying %s\n", theme, alt);
+            fprintf(stderr, "insane-server: theme %s was not loaded, trying %s\n", theme, alt);
             if (js_init(alt) == 0) { snprintf(used, n, "%s", alt); return 0; }
         }
     }
@@ -2195,7 +2195,7 @@ static int start_theme(const char *theme, int greeter, char *used, size_t n) {
     return js_init_recovery(greeter);
 }
 
-/* lord-server --check-apps: what lord.sign.status says of each installed app, as text, for lordos-issue and a person at a
+/* insane-server --check-apps: what insane.sign.status says of each installed app, as text, for insaneos-issue and a person at a
  * terminal: a home app against its saved original, a packaged app against its signature. It changes nothing. */
 static int check_apps(void) {
     int bad = 0;
@@ -2215,7 +2215,7 @@ static int check_apps(void) {
     if (d) closedir(d);
     const char *home = getenv("HOME");
     char dir[PATH_MAX];
-    d = home && (size_t)snprintf(dir, sizeof dir, "%s/.local/share/lordos/apps", home) < sizeof dir ? opendir(dir) : NULL;
+    d = home && (size_t)snprintf(dir, sizeof dir, "%s/.local/share/insaneos/apps", home) < sizeof dir ? opendir(dir) : NULL;
     static PkgStatus st;
     while (d && (e = readdir(d))) {
         if (!lpk_valid_id(e->d_name) || pkg_status(e->d_name, &st)) continue;
@@ -2230,7 +2230,7 @@ static int check_apps(void) {
     return bad;
 }
 
-/* lord-server --check-code [root]: checks the signed manifest and every file it lists, the way a
+/* insane-server --check-code [root]: checks the signed manifest and every file it lists, the way a
  * session would load them (docs/SIGNING.md, "Verified system code"). Used by tools/iso/mkdeb.sh
  * and for troubleshooting. Exit 0 when everything matches; 1 otherwise; with --require-signed, a
  * development (unsigned) manifest also fails. */
@@ -2242,7 +2242,7 @@ static int check_code(int argc, char **argv) {
         else root = argv[i];
     }
     char exe[PATH_MAX], def[PATH_MAX];
-    if (!root) {                                    /* next to this binary: <root>/bin/lord-server */
+    if (!root) {                                    /* next to this binary: <root>/bin/insane-server */
         ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
         if (k <= 0) return 1;
         exe[k] = 0;
@@ -2274,17 +2274,17 @@ static int switch_theme(const char *current) {
     char path[sizeof ui.theme_request];
     snprintf(path, sizeof path, "%s", ui.theme_request);
     ui.theme_request[0] = 0;
-    fprintf(stderr, "lord-server: cambiando a tema %s\n", path);
+    fprintf(stderr, "insane-server: cambiando a tema %s\n", path);
     share_shell_gone();                 /* the indicator goes with the old shell */
     js_shutdown();
     ui_reset();
     term_detach_all();
     if (js_init(path)) {
-        fprintf(stderr, "lord-server: the theme failed, going back to %s\n", current);
+        fprintf(stderr, "insane-server: the theme failed, going back to %s\n", current);
         snprintf(ui.theme_failed, sizeof ui.theme_failed, "%s", path);
         js_shutdown();
         ui_reset();
-        if (js_init(current)) fprintf(stderr, "lord-server: %s did not load again either\n", current);
+        if (js_init(current)) fprintf(stderr, "insane-server: %s did not load again either\n", current);
         wl_remap_all();
         return -1;
     }
@@ -2306,7 +2306,7 @@ static int hw_heads(Kms **out, int max) {
 static void hw_redraw(void) { if (hw_server) full_damage(hw_server); }
 static const DisplayHost hw_host = { hw_kms, hw_redraw, js_hw_event, hw_heads };
 
-const char *lord_composition(void) {
+const char *insane_composition(void) {
     Server *s = hw_server;
     if (!s) return "";
     if (gpu_active()) return "gpu";
@@ -2343,8 +2343,8 @@ int main(int argc, char **argv) {
     if (argc > 1 && !strcmp(argv[1], "--check-apps")) return check_apps();
     /* a packaged app's companion (app/companion.c): checks the signed package, then becomes it, in its sandbox */
     if (argc > 1 && !strcmp(argv[1], "--companion")) return companion_main(argc, argv);
-    /* «modo app»: lord-server --app <id> corre una app .lpk como cliente Wayland aislado
-     * (app/appclient.c). El id ya viene validado del propio lord-server (no de JS). */
+    /* «modo app»: insane-server --app <id> corre una app .lpk como cliente Wayland aislado
+     * (app/appclient.c). El id ya viene validado del propio insane-server (no de JS). */
     if (argc >= 3 && !strcmp(argv[1], "--app")) {
         const char *fonts = "../assets/fonts", *host = "../assets/app-host.bundle.js";
         for (int i = 3; i + 1 < argc; i++) {
@@ -2368,14 +2368,14 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--shell") && i + 1 < argc) shell = argv[++i];
         else if (!strcmp(argv[i], "--user") && i + 1 < argc) user = argv[++i];
         else if (!strcmp(argv[i], "--headless") && i + 1 < argc) {
-            /* sesión sin monitor para el escritorio remoto (la lanza lord-sessiond) */
+            /* sesión sin monitor para el escritorio remoto (la lanza insane-sessiond) */
             int w = 0, h = 0;
             if (sscanf(argv[++i], "%dx%d", &w, &h) != 2 || w < 640 || h < 480 || w > 3840 || h > 2400) { usage(argv[0]); return 2; }
             s.headless = 1;
             s.W = w & ~1;
             s.H = h & ~1;
         }
-        else if (!strcmp(argv[i], "--greeter")) s.greeter = 1;      /* pantalla de ingreso (lord-sessiond) */
+        else if (!strcmp(argv[i], "--greeter")) s.greeter = 1;      /* pantalla de ingreso (insane-sessiond) */
         else if (!strcmp(argv[i], "--debug")) s.debug = 1;
         else if (!strcmp(argv[i], "--profile")) paint_profile = 1;
         else { usage(argv[0]); return 2; }
@@ -2430,11 +2430,11 @@ int main(int argc, char **argv) {
     }
 
     /* Privileged helper (a closed set of actions: region, time zone, language packs). The
-     * login screen has none: what needs root is done by lord-sessiond. */
+     * login screen has none: what needs root is done by insane-sessiond. */
     const char *session_user = s.greeter ? NULL : user ? user : getenv("SUDO_USER");
-    if (session_user && admin_start(session_user)) fprintf(stderr, "lord-server: no administration helper\n");
-    /* Insane OS networking: with lord-sessiond the network belongs to the system (lord-netd brings it
-     * up at boot) and net-restore only confirms; without it (a standalone lord-server) this
+    if (session_user && admin_start(session_user)) fprintf(stderr, "insane-server: no administration helper\n");
+    /* Insane OS networking: with insane-sessiond the network belongs to the system (insane-netd brings it
+     * up at boot) and net-restore only confirms; without it (a standalone insane-server) this
      * session's helper brings it up (see net_act_restore and docs/NETWORK.md) */
     else if (session_user) admin_send("net-restore", "", 0);
     int ok = drop_privileges(user) == 0;
@@ -2443,9 +2443,9 @@ int main(int argc, char **argv) {
         char log[1024];
         snprintf(log, sizeof log, "%s/.cache", getenv("HOME"));
         mkdir(log, 0700);
-        snprintf(log, sizeof log, "%s/.cache/lordos", getenv("HOME"));
+        snprintf(log, sizeof log, "%s/.cache/insaneos", getenv("HOME"));
         mkdir(log, 0700);
-        snprintf(log, sizeof log, "%s/.cache/lordos/%s", getenv("HOME"), s.greeter ? "greeter.log" : "session.log");
+        snprintf(log, sizeof log, "%s/.cache/insaneos/%s", getenv("HOME"), s.greeter ? "greeter.log" : "session.log");
         if (!freopen(log, "w", stderr)) { /* carries on without a log */ }
         setvbuf(stderr, NULL, _IOLBF, 0);
     }
@@ -2453,7 +2453,7 @@ int main(int argc, char **argv) {
      * comparison and copies; same pixels as one thread. Its threads sleep between jobs, and jobs only
      * run inside a frame on this thread, so the processes this server forks never inherit a busy one.
      * Here, before this server starts any process or thread: it takes the real-time priority
-     * lord-sessiond allows and lowers that limit to 0, so nothing started later inherits it. */
+     * insane-sessiond allows and lowers that limit to 0, so nothing started later inherits it. */
     par_init(0);
     /* GPU (Mesa) after dropping root: if there is no usable one, the CPU path goes on */
     /* Settings' hardware pages: displays, uevents, Bluetooth, power profiles (src/hw) */
@@ -2467,31 +2467,31 @@ int main(int argc, char **argv) {
         struct stat st;
         if (K0(&s)->fd >= 0 && fstat(K0(&s)->fd, &st) == 0) wl_set_drm_device(st.st_rdev);
     }
-    if (ok && wl_start()) fprintf(stderr, "lord-server: no Wayland (Linux apps will not be able to open)\n");
+    if (ok && wl_start()) fprintf(stderr, "insane-server: no Wayland (Linux apps will not be able to open)\n");
     /* X11 apps: an X socket now, Xwayland only when one connects (wl/xwayland.c); not on the login screen */
     else if (ok && !s.greeter && session_user) xwl_init();
     publish_displays(&s);                   /* one wl_output per display */
-    if (ok && net_open()) fprintf(stderr, "lord-server: no network notifications (rtnetlink)\n");
+    if (ok && net_open()) fprintf(stderr, "insane-server: no network notifications (rtnetlink)\n");
     /* Backups: a thread running as the user, nice 19 and idle I/O (backup/backup.c) */
     if (ok && !s.greeter && getenv("HOME") && session_user) backup_start(getenv("HOME"), session_user);
     /* Cloud: rclone rcd on a Unix socket, started when there is an account (cloud/cloud.c, docs/CLOUD.md) */
-    if (ok && !s.greeter && getenv("HOME") && session_user && js_cloud_start(getenv("HOME"))) fprintf(stderr, "lord-server: no Cloud\n");
-    if (ok && snd_start()) fprintf(stderr, "lord-server: no PipeWire for now (sound); it retries on its own\n");
+    if (ok && !s.greeter && getenv("HOME") && session_user && js_cloud_start(getenv("HOME"))) fprintf(stderr, "insane-server: no Cloud\n");
+    if (ok && snd_start()) fprintf(stderr, "insane-server: no PipeWire for now (sound); it retries on its own\n");
     if (ok && !s.greeter) portal_start();   /* dark mode, accent and buttons for GTK/GNOME/Qt (ui/portal.c) */
     if (ok && !s.greeter) term_restore();   /* shells still alive from the previous start */
     netrec_init(ok && !s.greeter && session_user != NULL);   /* the Monitor's traffic history (monitor/netrec.c) */
-    if (getenv("LORD_DAMAGE") && !strcmp(getenv("LORD_DAMAGE"), "multi")) paint_multi_damage = 1;   /* several damaged rectangles (paint.c; off by default) */
+    if (getenv("INSANE_DAMAGE") && !strcmp(getenv("INSANE_DAMAGE"), "multi")) paint_multi_damage = 1;   /* several damaged rectangles (paint.c; off by default) */
     remote_server = &s;
     tp_route_init(&tp_host);
     static const MirrorInput mirror_in = { remote_pointer, remote_button, remote_wheel, remote_key, remote_clip, remote_clients,
                                            remote_refresh, remote_resize, remote_greeter, display_attach, display_detach,
                                            remote_scroll, remote_pinch, remote_input_add, remote_notice };
-    if (ok && mirror_start(s.W, s.H, &mirror_in)) fprintf(stderr, "lord-server: no remote desktop (socket)\n");
+    if (ok && mirror_start(s.W, s.H, &mirror_in)) fprintf(stderr, "insane-server: no remote desktop (socket)\n");
     /* never for the login screen: that session has no share socket at all */
     static const ShareHost share_host = { remote_pointer, remote_button, remote_wheel, remote_scroll, remote_key, remote_clip, remote_resize, share_activity,
                                           share_text, js_share_event, share_no_taps, share_person, share_surface_up, share_key_protected,
                                           share_point_protected, share_restricted };
-    if (ok && !s.greeter && share_start(&share_host)) fprintf(stderr, "lord-server: no screen-sharing API (socket)\n");
+    if (ok && !s.greeter && share_start(&share_host)) fprintf(stderr, "insane-server: no screen-sharing API (socket)\n");
     char current[sizeof ui.theme_request];
     if (ok) ok = start_theme(theme, s.greeter, current, sizeof current) == 0;
     if (ok && !s.greeter) {                  /* the app host as bytecode for isolated apps (app/apphost_bc.c) */
@@ -2518,9 +2518,9 @@ int main(int argc, char **argv) {
     sigemptyset(&stop_sa.sa_mask);
     sigaction(SIGINT, &stop_sa, NULL);
     sigaction(SIGTERM, &stop_sa, NULL);
-    keylag_init(s.greeter);                 /* key latency trace, only with LORD_INPUT_DEBUG=1 (keylag.h) */
-    fpipe_init(&fpipe, getenv("LORD_PIPELINE"));
-    fprintf(stderr, "lord-server: frame pipeline %s (LORD_PIPELINE: unset or 0 off, 1 while frames are heavy, 2 always)\n",
+    keylag_init(s.greeter);                 /* key latency trace, only with INSANE_INPUT_DEBUG=1 (keylag.h) */
+    fpipe_init(&fpipe, getenv("INSANE_PIPELINE"));
+    fprintf(stderr, "insane-server: frame pipeline %s (INSANE_PIPELINE: unset or 0 off, 1 while frames are heavy, 2 always)\n",
             fpipe.mode == FPIPE_OFF ? "off" : fpipe.mode == FPIPE_ALWAYS ? "always" : "while frames are heavy");
     int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
 
@@ -2611,7 +2611,7 @@ int main(int argc, char **argv) {
         mirror_tick();                      /* remote desktop video: lossless tiles once still, the encoder */
         double mrd = mirror_timeout();
         if (mrd >= 0 && (delay < 0 || mrd < delay)) delay = mrd;
-        media_reap();                       /* a stopped lord-media: not left a zombie */
+        media_reap();                       /* a stopped insane-media: not left a zombie */
         double zd = media_reap_timeout();
         if (zd >= 0 && (delay < 0 || zd < delay)) delay = zd;
         /* sin monitor y sin nadie mirando no se dibuja (al conectarse alguien llega un cuadro entero) */
@@ -2691,7 +2691,7 @@ int main(int argc, char **argv) {
         if (bkbase >= 0) pfd[n++] = (struct pollfd){ backup_fd(), POLLIN, 0 };
         int clbase = cloud_fd() >= 0 ? n : -1;
         if (clbase >= 0) pfd[n++] = (struct pollfd){ cloud_fd(), POLLIN, 0 };
-        int fabase = fsasync_fd() >= 0 ? n : -1;                 /* lord.fs.*Async answers (Files on slow mounts) */
+        int fabase = fsasync_fd() >= 0 ? n : -1;                 /* insane.fs.*Async answers (Files on slow mounts) */
         if (fabase >= 0) pfd[n++] = (struct pollfd){ fsasync_fd(), POLLIN, 0 };
         int sbase = snd_fd() >= 0 ? n : -1;
         if (sbase >= 0) pfd[n++] = (struct pollfd){ snd_fd(), POLLIN, 0 };
@@ -2709,7 +2709,7 @@ int main(int argc, char **argv) {
         n += nbrk;
         int abr = n, nabr = brokersrv_audio_pollfds(pfd + n, 16);  /* micrófono de las apps aisladas (PipeWire) */
         n += nabr;
-        int medbase = n, nmed = media_pollfds(pfd + n, 40);      /* ayudantes lord-media y sus streams de PipeWire */
+        int medbase = n, nmed = media_pollfds(pfd + n, 40);      /* ayudantes insane-media y sus streams de PipeWire */
         n += nmed;
         int hwbase = n, nhw = hw_pollfds(pfd + n, 7);            /* uevents and the system bus (src/hw) */
         n += nhw;
@@ -2749,7 +2749,7 @@ int main(int argc, char **argv) {
             if (pfd[2 + i].revents & (POLLERR | POLLHUP | POLLNVAL)) lost[nlost++] = i;
         }
         /* un dispositivo que dejó de servir (desenchufado, o revocado al cambiar de sesión): se cierra
-         * solo ese. Dejar el monitor lo decide únicamente lord-sessiond (RP_UNDISPLAY), nunca un error */
+         * solo ese. Dejar el monitor lo decide únicamente insane-sessiond (RP_UNDISPLAY), nunca un error */
         for (int k = nlost - 1; k >= 0; k--) input_remove(&s.input, lost[k]);
         if (nlost) wl_input_devices_changed();
         if (s.input.count || nlost) keyboards_check(&s);
@@ -2786,7 +2786,7 @@ int main(int argc, char **argv) {
         }
         if (splash_wait && !s.headless && main_out(&s)->kms.presented) {
             splash_wait = 0;
-            mirror_shown();                 /* lord-sessiond: the boot splash can go */
+            mirror_shown();                 /* insane-sessiond: the boot splash can go */
         }
         hw_events();
         media_events(js_media_event);
@@ -2802,7 +2802,7 @@ int main(int argc, char **argv) {
     wl_close_all(LOGOUT_CLOSE_MS);        /* the apps close as if the user did it, before wl_stop() */
     cloud_stop();                         /* B11: every cloud folder unmounted (lazily if busy), then rclone quits */
     if (s.renders)
-        fprintf(stderr, "lord-server: %ld frames, %ld UI renders, layout %.2f ms, paint %.2f ms (average)\n",
+        fprintf(stderr, "insane-server: %ld frames, %ld UI renders, layout %.2f ms, paint %.2f ms (average)\n",
                 s.frames, s.renders, s.layout_total / s.renders, s.paint_total / s.renders);
     input_close(&s.input);
     share_stop();

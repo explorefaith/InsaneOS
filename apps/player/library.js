@@ -1,13 +1,13 @@
 // library.js — the Player's music and video library.
 //
-// Walks ~/Music and ~/Videos (bounded), reads the tags with media.probe (lord-media, in the
-// background) and stores what it read in ~/.cache/lordos/music.json (by path, size and date), so
+// Walks ~/Music and ~/Videos (bounded), reads the tags with media.probe (insane-media, in the
+// background) and stores what it read in ~/.cache/insaneos/music.json (by path, size and date), so
 // next time nothing that did not change is read again.
-import { fs, media, userDirs, createStore } from '@lordos/sdk';
+import { fs, media, userDirs, createStore } from '@insaneos/sdk';
 
 export const AUDIO = /\.(mp3|ogg|oga|opus|flac|wav|m4a|aac|wma|aif|aiff|ape|mka)$/i;
 export const VIDEO = /\.(mp4|mkv|webm|avi|mov|m4v|wmv|flv|mpg|mpeg|ogv|ts|3gp)$/i;
-const CACHE = '.cache/lordos/music.json';
+const CACHE = '.cache/insaneos/music.json';
 
 export const library = createStore({ tracks: [], videos: [], scanning: false, done: 0, total: 0 });
 
@@ -73,7 +73,7 @@ export async function scan() {
   }
   library.set({ scanning: false });
   if (todo.length || Object.keys(cache).length !== Object.keys(next).length) {
-    try { fs.mkdir('.cache/lordos'); } catch (e) { /* already there */ }
+    try { fs.mkdir('.cache/insaneos'); } catch (e) { /* already there */ }
     try { fs.write(CACHE, JSON.stringify(next)); } catch (e) { /* no disk */ }
   }
   running = false;

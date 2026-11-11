@@ -1,7 +1,7 @@
 /* wg.c — WireGuard with our own generic netlink (no wg-quick or wireguard-tools), root side.
  *
  * It imports the usual .conf ([Interface]/[Peer]), saves it normalized (only the keys we
- * understand) in /etc/lordos/net/vpn/<name>.conf (0600) with its public metadata in
+ * understand) in /etc/insaneos/net/vpn/<name>.conf (0600) with its public metadata in
  * <name>.json (0644). On connect: creates the "wireguard" interface, passes it keys and peers
  * (WG_CMD_SET_DEVICE), addresses, MTU, AllowedIPs routes and DNS. With 0.0.0.0/0 or ::/0 it does
  * the same as wg-quick: fwmark 51820 on the tunnel, default route in table 51820 and the

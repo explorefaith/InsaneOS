@@ -1,11 +1,11 @@
 /* pkagent.c — see pkagent.h.
  *
  * Why it registers per process. polkit finds an agent by the subject's logind session, and a Insane OS
- * session has none it can see: lord-server and its apps live under lordos.service's own cgroup tree
+ * session has none it can see: insane-server and its apps live under insaneos.service's own cgroup tree
  * (docs/PRIVACY.md, "Root-owned app scopes"), so sd_pid_get_session and sd_pid_get_owner_uid both
  * fail for them. Moving that tree under user.slice would move the firewall, the Monitor and every
  * scope with it. polkit's other way is an agent for one process, the one pkttyagent --process uses:
- * /usr/bin/pkexec here is lord-pkexec, which asks this file to register for the process that called
+ * /usr/bin/pkexec here is insane-pkexec, which asks this file to register for the process that called
  * it, waits for the answer and execs the real pkexec, with the same pid and arguments.
  *
  * The password. Keys of this computer's keyboards reach pkagent_key before anything else, so they
@@ -42,10 +42,10 @@
 #define POLKIT_PATH "/org/freedesktop/PolicyKit1/Authority"
 #define POLKIT_IF   POLKIT ".Authority"
 #define AGENT_IF    POLKIT ".AuthenticationAgent"
-#define AGENT_PATH  "/org/lordos/PolicyKit1/AuthenticationAgent"
+#define AGENT_PATH  "/org/insaneos/PolicyKit1/AuthenticationAgent"
 #define E_CANCELLED POLKIT ".Error.Cancelled"
 #define HELPER      "/usr/lib/polkit-1/polkit-agent-helper-1"
-#define SOCK_NAME   "lordos-pkagent.sock"
+#define SOCK_NAME   "insaneos-pkagent.sock"
 #define MAX_REQ     4                   /* waiting requests; a fifth is refused */
 #define MAX_REG     64                  /* registered processes */
 #define MAX_TRIES   3
@@ -395,7 +395,7 @@ static void on_owner(const char *name, const char *who) {
     show();
 }
 
-/* ---- registering a process (lord-pkexec) ---- */
+/* ---- registering a process (insane-pkexec) ---- */
 
 static void put_subject(DBuf *b, unsigned pid, unsigned long long start) {
     dw_struct(b);

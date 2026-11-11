@@ -1,12 +1,12 @@
 /* folderrole.h — which IMAP folder is the account's Sent, Drafts, Trash, Junk, Archive… (docs/MAIL.md).
- * Pure functions (no I/O, no locks), shared by lord-maild and tests/mail_test.c.
+ * Pure functions (no I/O, no locks), shared by insane-maild and tests/mail_test.c.
  *
  * A role comes from the server's SPECIAL-USE flags (RFC 6154) when it sends them, otherwise from
  * the folder's name. Each role goes to at most one folder per account: a flagged folder always
  * wins over a name match, and a name only counts for a top-level folder or a direct child of
  * INBOX ("Trash", "INBOX.Trash", "INBOX/Trash"), never for a user folder deeper in the tree. */
-#ifndef LORD_MAIL_FOLDERROLE_H
-#define LORD_MAIL_FOLDERROLE_H
+#ifndef INSANE_MAIL_FOLDERROLE_H
+#define INSANE_MAIL_FOLDERROLE_H
 
 /* The role a LIST flag list gives ("\HasNoChildren \Sent " → "sent"), or "". */
 const char *folder_flag_role(const char *flags);

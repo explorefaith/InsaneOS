@@ -1,16 +1,16 @@
-/* lock_seat.c — plays lord-sessiond's monitor part for a lock (issue #36; run by tests/lock_e2e.sh).
+/* lock_seat.c — plays insane-sessiond's monitor part for a lock (issue #36; run by tests/lock_e2e.sh).
  *
  *   sudo build/lock-seat <session remote.sock> <greeter remote.sock> <card|-> <prefix> <wait_ms> [hold_ms]
  *
- * The same steps lord-sessiond takes (docs/SESSIONS.md): it lends the card to the session (RP_SEAT,
+ * The same steps insane-sessiond takes (docs/SESSIONS.md): it lends the card to the session (RP_SEAT,
  * RP_DISPLAY), saves what the screen shows as <prefix>-1-desktop.bmp, and waits up to <wait_ms> for the
- * session's lock request (RP_SESSION {"a":"lock",...}). Then, after <hold_ms> (the time lord-sessiond
+ * session's lock request (RP_SESSION {"a":"lock",...}). Then, after <hold_ms> (the time insane-sessiond
  * takes, to see that a sleep waits for it), it takes the monitor back (RP_UNDISPLAY, drop master),
  * lends it to the login screen in lock mode with the session's idle state (dark, off, sleep,
  * sleepLeft), answers its hello and saves <prefix>-2-lock.bmp; if the lock said dark, it then moves the
  * pointer (RP_PTR, as input does) and saves <prefix>-3-lock-woken.bmp.
  * With "-" for the card (a VM whose one card the running desktop holds) nothing is lent: the session and
- * the login screen run with LORD_IDLE_HEADLESS=1 and the pictures are their frames in memory, taken as a
+ * the login screen run with INSANE_IDLE_HEADLESS=1 and the pictures are their frames in memory, taken as a
  * remote viewer does (RP_VIDEO + RP_VMODE: the lossless tiles once the screen is still).
  * Prints one line per step with the milliseconds since it started. Exit 3: no lock came.
  * A test tool only: it is never installed. */
@@ -263,9 +263,9 @@ int main(int argc, char **argv) {
         return 3;
     }
     say("the session asked to lock: %s", lock);
-    if (hold > 0) { usleep((useconds_t)hold * 1000); say("held %d ms (lord-sessiond's work)", hold); }
+    if (hold > 0) { usleep((useconds_t)hold * 1000); say("held %d ms (insane-sessiond's work)", hold); }
     send_msg(s, RP_UNDISPLAY, NULL, 0, -1);
-    close(s);                           /* lord-sessiond closes right after RP_UNDISPLAY */
+    close(s);                           /* insane-sessiond closes right after RP_UNDISPLAY */
     if (card >= 0) { ioctl(card, DRM_IOCTL_DROP_MASTER, 0); close(card); }
     say("the monitor was taken from the session");
 
@@ -275,13 +275,13 @@ int main(int argc, char **argv) {
     view_sock = argv[2];
     card = lend(g, argv[3]);
     char mode[256];
-    snprintf(mode, sizeof mode, "{\"t\":\"mode\",\"mode\":\"lock\",\"user\":\"lord\",\"dark\":%s,\"off\":%d,\"sleep\":%d,\"sleepLeft\":%d}",
+    snprintf(mode, sizeof mode, "{\"t\":\"mode\",\"mode\":\"lock\",\"user\":\"insane\",\"dark\":%s,\"off\":%d,\"sleep\":%d,\"sleepLeft\":%d}",
              dark ? "true" : "false", jint(lock, "off"), jint(lock, "sleep"), jint(lock, "sleepLeft"));
     send_json(g, RP_GREETER_IN, mode);
     say("the login screen has the monitor, in lock mode: %s", mode);
     if (read_until(g, 8000, RP_GREETER, "\"hello\"", NULL, 0) == RP_GREETER) {
-        send_json(g, RP_GREETER_IN, "{\"t\":\"hello\",\"mode\":\"lock\",\"user\":\"lord\",\"last\":\"lord\",\"host\":\"lordos\",\"layouts\":\"us\","
-                                    "\"variants\":\"\",\"lang\":\"en_US.UTF-8\",\"users\":[{\"name\":\"lord\",\"full\":\"Lord\",\"color\":\"#0a84ff\","
+        send_json(g, RP_GREETER_IN, "{\"t\":\"hello\",\"mode\":\"lock\",\"user\":\"insane\",\"last\":\"insane\",\"host\":\"insaneos\",\"layouts\":\"us\","
+                                    "\"variants\":\"\",\"lang\":\"en_US.UTF-8\",\"users\":[{\"name\":\"insane\",\"full\":\"Insane\",\"color\":\"#0a84ff\","
                                     "\"image\":\"\",\"admin\":true,\"open\":true}]}");
         say("answered the login screen's hello");
     }

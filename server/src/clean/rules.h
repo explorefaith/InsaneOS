@@ -1,7 +1,7 @@
 /* rules.h — Cleaner's compiled rule table (rules.c). There are no rule files and no commands: a rule
  * names a fixed location, or a project output proved by what is around it, and picks from the fixed list of actions. */
-#ifndef LORD_CLEAN_RULES_H
-#define LORD_CLEAN_RULES_H
+#ifndef INSANE_CLEAN_RULES_H
+#define INSANE_CLEAN_RULES_H
 
 #include <stddef.h>
 
@@ -47,7 +47,7 @@ const char *clean_action_name(CleanAction a);
 int clean_root_fits(const char *root, const char *rel, char *star, size_t n);
 
 #ifdef CLEAN_TEST
-void clean_rules_override(const CleanRule *t, int n);   /* tests only: not in lord-server */
+void clean_rules_override(const CleanRule *t, int n);   /* tests only: not in insane-server */
 #endif
 
 #endif

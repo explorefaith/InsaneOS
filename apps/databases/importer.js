@@ -1,8 +1,8 @@
 // importer.js — finding Sequel Ace's and Sequel Pro's Favorites.plist in the home folder and on the user's mounted
 // disks (another computer's disk: /media/<user>/<disk>/Users/<name>/…), without holding the desktop: the folders are
-// listed and the files looked up with the asynchronous lord.fs calls, and only a file that is there and not on a network
+// listed and the files looked up with the asynchronous insane.fs calls, and only a file that is there and not on a network
 // share is read (docs/DATABASES.md, "Importing").
-import { fs } from '@lordos/sdk';
+import { fs } from '@insaneos/sdk';
 import { candidatePaths, importSequel } from './plist.js';
 
 const MAX_PLIST = 4 * 1024 * 1024;

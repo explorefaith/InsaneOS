@@ -1,7 +1,7 @@
 // privacy.js — per-app permissions with system-drawn prompts, camera/microphone indicators and the frame
 // of the Settings → Privacy page (see docs/PRIVACY.md).
 //
-// The permission state is kept by the server (lord.perms, server/src/sec/perms.c) in a
+// The permission state is kept by the server (insane.perms, server/src/sec/perms.c) in a
 // file apps cannot write. Here we have:
 //   - the queue of permission prompts, which THE SYSTEM DRAWS (PermissionPrompt), never the app;
 //   - requestPermission(app, perm): returns a promise with true/false, asking only
@@ -11,7 +11,7 @@
 //     own section to the Privacy page, without touching its code.
 import { appStatusEvent } from './appstatus.jsx';
 import { createElement as h, Fragment, useRef } from 'react';
-import { View, Text, mainBox } from '@lordos/runtime';
+import { View, Text, mainBox } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { statusPanelAt } from './statusitems.js';
 import { t, locale, direction, regionData } from './i18n.js';
@@ -19,16 +19,16 @@ import { appName } from './i18n.js';
 import { getApp } from './windows.js';
 import { osk } from './osk.js';
 
-const api = () => (typeof lord !== 'undefined' && lord.perms) || null;
+const api = () => (typeof insane !== 'undefined' && insane.perms) || null;
 
-export const PERMISSIONS = (() => { try { return api() ? lord.perms.names() : []; } catch (e) { return []; } })();
+export const PERMISSIONS = (() => { try { return api() ? insane.perms.names() : []; } catch (e) { return []; } })();
 
 // ---- permission state ----
 export const perms = {
   names: () => PERMISSIONS,
-  get: (app, perm) => { try { return api() ? lord.perms.get(app, perm) : 'ask'; } catch (e) { return 'ask'; } },
-  set(app, perm, state) { try { return api() ? lord.perms.set(app, perm, state) : false; } finally { permsRev.set((v) => v + 1); } },
-  list: () => { try { return api() ? lord.perms.list() : []; } catch (e) { return []; } },
+  get: (app, perm) => { try { return api() ? insane.perms.get(app, perm) : 'ask'; } catch (e) { return 'ask'; } },
+  set(app, perm, state) { try { return api() ? insane.perms.set(app, perm, state) : false; } finally { permsRev.set((v) => v + 1); } },
+  list: () => { try { return api() ? insane.perms.list() : []; } catch (e) { return []; } },
 };
 export const permsRev = createStore(0);   // goes up when something changes (to redraw Privacy)
 
@@ -36,13 +36,13 @@ export const permsRev = createStore(0);   // goes up when something changes (to 
 const queue = createStore([]);            // [{ id, app, perm, resolve }]
 let seq = 1;
 
-const inApp = () => typeof lord !== 'undefined' && lord.broker && typeof lord.broker.request === 'function';
+const inApp = () => typeof insane !== 'undefined' && insane.broker && typeof insane.broker.request === 'function';
 
 // Requests a permission: if there is already a decision, it respects it; if not, it queues a system prompt.
-// Inside an isolated app (lord-server --app), it goes through the broker: the prompt is drawn by
-// lord-server, not the app.
+// Inside an isolated app (insane-server --app), it goes through the broker: the prompt is drawn by
+// insane-server, not the app.
 export function requestPermission(app, perm) {
-  if (inApp()) { try { return Promise.resolve(!!lord.broker.request(perm)); } catch (e) { return Promise.resolve(false); } }
+  if (inApp()) { try { return Promise.resolve(!!insane.broker.request(perm)); } catch (e) { return Promise.resolve(false); } }
   const st = perms.get(app, perm);
   if (st === 'allow') return Promise.resolve(true);
   if (st === 'deny') return Promise.resolve(false);
@@ -52,9 +52,9 @@ export function requestPermission(app, perm) {
 }
 
 // The server (compositor) receives prompts from isolated apps through the broker: it shows the
-// system prompt and, with the answer, calls lord.broker.resolve. Indicators too.
+// system prompt and, with the answer, calls insane.broker.resolve. Indicators too.
 if (typeof globalThis !== 'undefined') {
-  globalThis.__lordBroker = (kind, data) => {
+  globalThis.__insaneBroker = (kind, data) => {
     try {
       if (kind === 'prompt') {
         // perm 'keyring': the app asks for an item another app saved (owner); see docs/PASSWORDS.md
@@ -64,13 +64,13 @@ if (typeof globalThis !== 'undefined') {
       } else if (kind === 'textfocus') {
         osk.appField(data.app, !!data.on, data.y, data.h);      // only a hint; sdk/osk.js
       } else if (kind === 'menu') {
-        if (typeof globalThis.__lordApplyAppMenus === 'function') globalThis.__lordApplyAppMenus(data.app);
+        if (typeof globalThis.__insaneApplyAppMenus === 'function') globalThis.__insaneApplyAppMenus(data.app);
       } else if (kind === 'pick') {
-        if (typeof globalThis.__lordBrokerPick === 'function') globalThis.__lordBrokerPick(data.reqid, data.app, data.save, data.suggest);
+        if (typeof globalThis.__insaneBrokerPick === 'function') globalThis.__insaneBrokerPick(data.reqid, data.app, data.save, data.suggest);
       } else if (kind === 'mailopen' || kind === 'launch') {
-        // an isolated system app asked the session to open an attachment or another app; lord-server
+        // an isolated system app asked the session to open an attachment or another app; insane-server
         // checked it (sec/brokermail.c), sdk/sysopen.js does it
-        if (typeof globalThis.__lordSysOpen === 'function') globalThis.__lordSysOpen(kind, data);
+        if (typeof globalThis.__insaneSysOpen === 'function') globalThis.__insaneSysOpen(kind, data);
       } else if (kind === 'device') {
         if (data.off) brokerDevicesByApp(data.app, null, false);
         else brokerDevicesByApp(data.app, data.kind, !!data.on);
@@ -82,8 +82,8 @@ if (typeof globalThis !== 'undefined') {
 function answer(item, allow) {
   queue.set((q) => q.filter((x) => x.id !== item.id));
   if (item.broker != null) {
-    // prompt from an isolated app: lord-server saves the decision and answers the app
-    try { lord.broker.resolve(item.broker, allow); } catch (e) { /* server without broker */ }
+    // prompt from an isolated app: insane-server saves the decision and answers the app
+    try { insane.broker.resolve(item.broker, allow); } catch (e) { /* server without broker */ }
   } else {
     perms.set(item.app, item.perm, allow ? 'allow' : 'deny');
     if (item.resolve) item.resolve(allow);
@@ -121,13 +121,13 @@ const glyph = (p) => (p === 'camera' ? '📷' : p === 'microphone' ? '🎙' : p 
 
 // ---- camera/microphone indicators ----
 // Own source (isolated .lpk apps: the broker knows and reflects it here with markDeviceUse) +
-// the Monitor's source (Linux apps, via PipeWire: globalThis.__lordos.monitorDevices, phase 2).
+// the Monitor's source (Linux apps, via PipeWire: globalThis.__insaneos.monitorDevices, phase 2).
 const brokerDevices = createStore([]);    // [{ app, kind: 'camera'|'microphone' }]
 
 export function markDeviceUse(app, kind, on) {
-  // Inside an isolated app, it is reported through the broker (lord-server shows the indicator).
-  if (typeof lord !== 'undefined' && lord.broker && typeof lord.broker.device === 'function') {
-    try { lord.broker.device(kind, !!on); } catch (e) { /* */ }
+  // Inside an isolated app, it is reported through the broker (insane-server shows the indicator).
+  if (typeof insane !== 'undefined' && insane.broker && typeof insane.broker.device === 'function') {
+    try { insane.broker.device(kind, !!on); } catch (e) { /* */ }
     return;
   }
   brokerDevices.set((list) => {
@@ -146,7 +146,7 @@ function brokerDevicesByApp(app, kind, on) {
 }
 
 function monitorDeviceStore() {
-  try { return globalThis.__lordos && globalThis.__lordos.monitorDevices; } catch (e) { return null; }
+  try { return globalThis.__insaneos && globalThis.__insaneos.monitorDevices; } catch (e) { return null; }
 }
 
 // [{ kind, apps: [name] }] for each device in use.
@@ -197,10 +197,10 @@ export function registerPrivacySection(section) {
 // Language, region (with its formats) and direction (RTL) also go live to isolated apps.
 function publishLocale() {
   try {
-    if (typeof lord === 'undefined' || !lord.broker || typeof lord.broker.publish !== 'function') return;
+    if (typeof insane === 'undefined' || !insane.broker || typeof insane.broker.publish !== 'function') return;
     const l = locale.get();
     // rf: glibc's formats for the region, which the app can't read itself (sdk/i18n.js regionData)
-    lord.broker.publish('locale', JSON.stringify({ lang: l.lang, region: l.region || '', dir: direction(), rf: regionData(l.region || '') }));
+    insane.broker.publish('locale', JSON.stringify({ lang: l.lang, region: l.region || '', dir: direction(), rf: regionData(l.region || '') }));
   } catch (e) { /* no broker */ }
 }
 publishLocale();
@@ -209,11 +209,11 @@ locale.subscribe(publishLocale);
 // Isolated apps can find out that the user revoked a permission from them (to release the
 // camera or the microphone). In-process nothing happens (revocation is immediate in the broker).
 export function onPermissionRevoked(fn) {
-  try { return typeof globalThis.__lordOnRevoke === 'function' ? globalThis.__lordOnRevoke(fn) : () => {}; } catch (e) { return () => {}; }
+  try { return typeof globalThis.__insaneOnRevoke === 'function' ? globalThis.__insaneOnRevoke(fn) : () => {}; } catch (e) { return () => {}; }
 }
 
-// Microphone for an isolated app: lord-server owns the PipeWire stream and passes the app
+// Microphone for an isolated app: insane-server owns the PipeWire stream and passes the app
 // a READ-ONLY ring (see docs/PRIVACY.md). micLevel() gives the level (RMS 0..1).
-export function micStart() { try { return !!(lord.broker && lord.broker.micStart && lord.broker.micStart()); } catch (e) { return false; } }
-export function micStop() { try { lord.broker && lord.broker.micStop && lord.broker.micStop(); } catch (e) { /* */ } }
-export function micLevel() { try { return (lord.broker && lord.broker.micLevel) ? lord.broker.micLevel() : 0; } catch (e) { return 0; } }
+export function micStart() { try { return !!(insane.broker && insane.broker.micStart && insane.broker.micStart()); } catch (e) { return false; } }
+export function micStop() { try { insane.broker && insane.broker.micStop && insane.broker.micStop(); } catch (e) { /* */ } }
+export function micLevel() { try { return (insane.broker && insane.broker.micLevel) ? insane.broker.micLevel() : 0; } catch (e) { return 0; } }

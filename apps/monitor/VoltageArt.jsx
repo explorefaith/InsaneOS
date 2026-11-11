@@ -1,6 +1,6 @@
 // Monitor → Voltage: the machine's board with its power path in the color of the power state, as Cooling draws the
 // case with its fan. Drawn with views; nothing here moves, so it costs nothing while the view is open.
-import { View, useTheme } from '@lordos/sdk';
+import { View, useTheme } from '@insaneos/sdk';
 import { BOARD_ART } from './voltart.js';
 
 const Box = ([x, y, w, h, color, r], tone, key) => (

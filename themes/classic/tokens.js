@@ -2,7 +2,7 @@
 // apps (sdk/theme.js); the shape keys (controlRadius, menuHighlight, selection, inputFocus,
 // buttonBorder, popupBg) restyle the SDK's shared controls, so every app takes this look without
 // being changed. The rest belongs to this theme (docs/DESIGN.md, "Insane Classic").
-import { lordosWallpapers } from '@lordos/sdk';
+import { insaneosWallpapers } from '@insaneos/sdk';
 
 // The same names as the default theme's, so the user's accent survives a theme switch.
 export const accents = {
@@ -14,7 +14,7 @@ export const accents = {
   grafito: '#6b7280',
 };
 
-export const wallpapers = lordosWallpapers;
+export const wallpapers = insaneosWallpapers;
 
 export function makeTheme({ mode, accent, effects }) {
   const dark = mode === 'dark';

@@ -1,11 +1,11 @@
-/* fsops.c — file operations for lord.fs (the Files app).
+/* fsops.c — file operations for insane.fs (the Files app).
  *
  * Roots: everything works only inside the home folder and the user's mounts
  * (/media/$USER/… and /run/media/$USER/…: USB sticks and disks), and never writes in the
  * protected folders (fsops_protected: the launcher's, the installed apps and the settings).
  *
  * - Copy and move: in a dedicated thread per job (FsJob), so a large copy does not freeze the
- *   interface; JS polls the progress with lord.fs.jobs(). Recursive, keeps permissions and
+ *   interface; JS polls the progress with insane.fs.jobs(). Recursive, keeps permissions and
  *   dates, never overwrites anything (O_EXCL) and copies symbolic links as links. Moving is a
  *   rename; across different disks it copies and then deletes the original.
  * - Trash: the freedesktop.org specification (the same as GNOME and KDE): the home folder's
@@ -52,7 +52,7 @@ static char home[PATH_MAX], media1[PATH_MAX], media2[PATH_MAX], remote_root[PATH
 
 void fsops_init(const char *h, const char *user) {
     pathf(home, sizeof home, "%s", h);
-    pathf(remote_root, sizeof remote_root, "%s/.local/share/lordos/remote", home);
+    pathf(remote_root, sizeof remote_root, "%s/.local/share/insaneos/remote", home);
     pathf(media1, sizeof media1, "/media/%s", user && *user ? user : "-");
     pathf(media2, sizeof media2, "/run/media/%s", user && *user ? user : "-");
 }
@@ -78,17 +78,17 @@ int fsops_readable(const char *real) {
 }
 
 static const char *const protect[] = { "/.local/share/applications", "/.config/autostart",
-                                           "/.local/share/lordos/apps", "/.config/lordos/settings.json",
-                                           "/.config/lordos/permisos.json",
-                                           "/.config/lordos/firewall.json", /* network permissions: an app does not write its own rules */
-                                           "/.config/lordos/fwlists.json",  /* (0.8.5) subscribed blocklists: only lord.fw */
-                                           "/.config/lordos/fwlists.txt",   /* their compiled entries, read by lord-netperm */
-                                           "/.cache/lordos/fwlists",        /* their downloads: only lord-server writes them */
-                                           "/.config/lordos/backup.json",   /* Backups: decides where the data goes */
-                                           "/.config/lordos/mail",          /* Mail accounts and trusted certificates: only lord.mail.saveConfig (docs/MAIL.md) */
-                                           "/.local/share/lordos/mail",     /* Mail cache: only lord-maild writes it */
-                                           "/.local/share/lordos/vault",    /* Passwords vaults: only lord-vault writes them (docs/PASSWORDS.md) */
-                                           "/.config/lordos/databases",     /* Databases favorites (hosts, trusted certificates): only lord.sql.saveFavorites (docs/DATABASES.md) */
+                                           "/.local/share/insaneos/apps", "/.config/insaneos/settings.json",
+                                           "/.config/insaneos/permisos.json",
+                                           "/.config/insaneos/firewall.json", /* network permissions: an app does not write its own rules */
+                                           "/.config/insaneos/fwlists.json",  /* (0.8.5) subscribed blocklists: only insane.fw */
+                                           "/.config/insaneos/fwlists.txt",   /* their compiled entries, read by insane-netperm */
+                                           "/.cache/insaneos/fwlists",        /* their downloads: only insane-server writes them */
+                                           "/.config/insaneos/backup.json",   /* Backups: decides where the data goes */
+                                           "/.config/insaneos/mail",          /* Mail accounts and trusted certificates: only insane.mail.saveConfig (docs/MAIL.md) */
+                                           "/.local/share/insaneos/mail",     /* Mail cache: only insane-maild writes it */
+                                           "/.local/share/insaneos/vault",    /* Passwords vaults: only insane-vault writes them (docs/PASSWORDS.md) */
+                                           "/.config/insaneos/databases",     /* Databases favorites (hosts, trusted certificates): only insane.sql.saveFavorites (docs/DATABASES.md) */
                                            NULL };
 
 static char pfile[FSOPS_PF_COUNT][PATH_MAX];
@@ -118,7 +118,7 @@ int fsops_protected(const char *real) {
 }
 
 /* The same two questions with every protected path resolved first (a link anywhere on its way followed), for a
- * folder handed outside lord.fs, such as a machine's writable share: with ~/.config a link to another disk, the real
+ * folder handed outside insane.fs, such as a machine's writable share: with ~/.config a link to another disk, the real
  * folder holding settings.json is not under home/.config, and a lexical check would miss it. A protected path that
  * doesn't exist yet is taken as written. */
 /* p with its longest existing prefix resolved and the rest added back as written: a protected file that doesn't exist
@@ -169,7 +169,7 @@ int fsops_protected_below(const char *real) {
 
 static double now_ms(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t); return t.tv_sec * 1e3 + t.tv_nsec / 1e6; }
 
-/* err buffers carry code lines (errcode.h): lord.fs throws them translated */
+/* err buffers carry code lines (errcode.h): insane.fs throws them translated */
 static void seterr(char *e, size_t n, const char *code) { if (e && n) lerr_set(e, n, code, NULL); }
 static void seterrno(char *e, size_t n, int no) { if (e && n) lerr_set(e, n, "sys.errno", "errno", lerr_errno(no), NULL); }
 
@@ -821,9 +821,9 @@ static void unescape_mount(char *s) {
 int fsops_share_fs(const char *t) { return !strcmp(t, "fuse.rclone") || !strcmp(t, "cifs") || !strcmp(t, "smb3") || !strcmp(t, "nfs") || !strcmp(t, "nfs4"); }
 
 /* ---- shares that stopped answering ----
- * lord.fs runs on the interface's thread, and a call on a network mount whose server went away
+ * insane.fs runs on the interface's thread, and a call on a network mount whose server went away
  * blocks in the kernel: tens of seconds on SMB, minutes on NFSv4 even when soft (measured, docs/FILES.md).
- * So before lord.fs touches a path under a share, a thread of its own asks the server (statvfs) and
+ * So before insane.fs touches a path under a share, a thread of its own asks the server (statvfs) and
  * the caller waits at most SHARE_WAIT_MS. While that question hangs the share counts as down, without
  * waiting. What it can't cover: a server that dies inside the SHARE_OK_MS an answer is trusted. */
 #define SHARE_WAIT_MS 800
@@ -964,8 +964,8 @@ void fs_volumes(FsVolFn fn, void *ud) {
     fclose(f);
 }
 
-/* ---- resolving lord.fs paths, listing and stat (shared by the interface's thread and fsasync.c) ----
- * The same functions answer lord.fs.list / stat / trash on the interface's thread and their Async variants on fsasync.c's
+/* ---- resolving insane.fs paths, listing and stat (shared by the interface's thread and fsasync.c) ----
+ * The same functions answer insane.fs.list / stat / trash on the interface's thread and their Async variants on fsasync.c's
  * workers, so a path is checked by exactly the same rules wherever it runs. Thread-safe: no static buffers, getpwuid_r. */
 
 static void full_of(const char *path, char *full, size_t n) {
@@ -1028,7 +1028,7 @@ int fsops_resolve_stat(const char *path, char *target, size_t n, int *down) {
 }
 
 /* A folder Files shows with a lock: the system's permissions don't let this user open it, or it is one of the
- * pseudo-filesystems lord.fs doesn't read (fsops_readable). */
+ * pseudo-filesystems insane.fs doesn't read (fsops_readable). */
 static int dir_locked(const char *path) {
     char real[PATH_MAX];
     if (!realpath(path, real) || !fsops_readable(real)) return 1;

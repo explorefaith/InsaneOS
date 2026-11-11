@@ -1,7 +1,7 @@
 // Settings.jsx — vault settings (ways to unlock, recovery key, auto-lock, clipboard, Argon2id),
 // import and export, and editing categories and tags. Each sheet is built from inset groups
 // (Group) with the one primary action in the footer (docs/DESIGN.md).
-import { View, Text, useTheme, useStore, Button, TextInput, Segmented, requestPermission, t, formatDate } from '@lordos/sdk';
+import { View, Text, useTheme, useStore, Button, TextInput, Segmented, requestPermission, t, formatDate } from '@insaneos/sdk';
 import { useState } from 'react';
 import { app, req, refreshStatus, reload, errorText, toast, setMeta, setCats, setTags, APP_ID } from './api.js';
 import { allCategories, BUILTIN, ICONS, COLORS, FIELD_TYPES, catName, builtinById } from './templates.js';
@@ -42,7 +42,7 @@ export function SettingsSheet({ onClose }) {
     if (add === 'keyfile' || add === 'passkey') { if (!path) { setErr(t('passwords.create.needKeyPath')); return; } args.newkey = true; files = fileReq([path, 'w']); }
     if (add === 'fido') {
       if (!(await requestPermission(APP_ID, 'usb'))) throw Object.assign(new Error(''), { code: 'fido-denied' });
-      const a = lord.vault.fidoAttach(APP_ID);
+      const a = insane.vault.fidoAttach(APP_ID);
       if (!a.ok) throw Object.assign(new Error(''), { code: a.error });
       if (pin) args.pin = pin;
     }

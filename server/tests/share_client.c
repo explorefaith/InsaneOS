@@ -2,7 +2,7 @@
  * A tool, not part of make test.
  *   share-client api    <sock> <script>   client of share.sock
  *   share-client mirror <sock> <script>   client of remote.sock
- *   share-client bridge <sock> <uid>      as root: the order lord-sessiond's bridge uses
+ *   share-client bridge <sock> <uid>      as root: the order insane-sessiond's bridge uses
  * A script is words, run in order; what arrives is counted and printed as "type count" at the end:
  *   start F C K | query | stop | lock | awake N | hear N | key CODE V | ptr X Y | btn B D | keyframe | rate K | resize W H
  *   text S | clip S | raw TYPE N (a message of N zero bytes) | junk (a wrong length)
@@ -94,7 +94,7 @@ static int until(int type, int ms) {
 
 static int reason_of(const char *s) { for (int i = 0; i < SW_REASONS; i++) if (!strcmp(sw_reason_name(i), s)) return i; return -1; }
 
-/* What lord-sessiond's bridge does: connect as root, then give root up and go on with the same socket. */
+/* What insane-sessiond's bridge does: connect as root, then give root up and go on with the same socket. */
 static int bridge(uid_t uid) {
     out(RP_HELLO, "127.0.0.1 test", 14);
     if (setgroups(0, NULL) || setresgid(uid, uid, uid) || setresuid(uid, uid, uid)) return 6;

@@ -1,9 +1,9 @@
 // appstatus.jsx — third-party items by the clock (docs/GO-LINK.md, section 7). An app runs isolated and has no code in the
-// shell: it sends a description through the broker, lord-server keeps only the known fields (sec/statusitem.c), and
+// shell: it sends a description through the broker, insane-server keeps only the known fields (sec/statusitem.c), and
 // this draws it. The icon is a file of the app's own package, the texts are plain text, and a choice goes back as an id.
 // The item leaves with the app, or when the permission is revoked.
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, Image, addListener } from '@lordos/runtime';
+import { View, Text, Image, addListener } from '@insaneos/runtime';
 import { useStore, createStore } from './store.js';
 import { useTheme } from './theme.js';
 import { Overlay } from './layers.js';
@@ -14,7 +14,7 @@ const specs = createStore({});            // app id → { icon, title, alert, me
 const off = new Map();                    // app id → unregister
 
 function Menu({ app, spec, th, close }) {
-  const pick = (id) => { close(); try { lord.broker.statusClick(app, id); } catch (e) { /* the app left */ } };
+  const pick = (id) => { close(); try { insane.broker.statusClick(app, id); } catch (e) { /* the app left */ } };
   return h(View, { style: { minWidth: 200, maxWidth: 320, padding: 6, borderRadius: 10, backgroundColor: th.menu || th.surface, border: `1px solid ${th.border}`, boxShadow: '0 12px 32px rgba(0,0,0,0.4)' } },
     spec.title ? h(Text, { style: { fontSize: 12, fontWeight: 600, color: th.textDim, padding: 6, textAlign: 'start' } }, spec.title) : null,
     ...spec.menu.map((m, i) => (m.line
@@ -33,7 +33,7 @@ function AppItem({ app, height }) {
   useEffect(() => {
     if (!open) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
       if (!inside(panel.current) && !inside(btn.current)) setOpen(false);
     });
   }, [open]);

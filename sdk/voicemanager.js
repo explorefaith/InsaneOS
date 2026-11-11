@@ -2,14 +2,14 @@
 // language, and the person's own voices (docs/VOICE.md, phase 3; Settings → AI → Voice, apps/settings/AI.jsx).
 //
 //   scanVoices()                        → { es: { standard, hd, voices: { standard: Set, hd: Set } }, …, own: [names] }
-//                                         what `say` finds: /usr/share/lordos/voice (the packages) and
-//                                         ~/.local/share/lordos/voice (the person's), the same rules as say.c
-//   installVoices(names, onProgress)    pkg-install of lordos-voice-* packages (an administrator, the signed APT
+//                                         what `say` finds: /usr/share/insaneos/voice (the packages) and
+//                                         ~/.local/share/insaneos/voice (the person's), the same rules as say.c
+//   installVoices(names, onProgress)    pkg-install of insaneos-voice-* packages (an administrator, the signed APT
 //                                         repository); onProgress({ done, total }) while downloading
 //   removeVoices(names)                 pkg-remove
-//   voiceConf() / setVoiceConf(patch)   ~/.config/lordos/voice.json, which `say` reads: { voices: { es: 'lola' },
+//   voiceConf() / setVoiceConf(patch)   ~/.config/insaneos/voice.json, which `say` reads: { voices: { es: 'lola' },
 //                                         quality: 'auto'|'standard'|'hd', backend: 'auto'|'cpu'|'gpu' }
-//   addOwnVoice(name, wavPath)          a voice to clone: copies a WAV into ~/.local/share/lordos/voice/voices
+//   addOwnVoice(name, wavPath)          a voice to clone: copies a WAV into ~/.local/share/insaneos/voice/voices
 //   ownVoiceName(text)                  a file name from what the person typed
 //   removeOwnVoice(name)                to the Trash (it can be restored there)
 //
@@ -18,9 +18,9 @@ import * as fs from './fs.js';
 import { admin } from './admin.js';
 import { VOICE_LANGS, modelPackage, voicePackage } from './voicecatalog.js';
 
-const SYS = '/usr/share/lordos/voice';
-const userRoot = () => `${fs.home()}/.local/share/lordos/voice`;
-const CONF = '.config/lordos/voice.json';
+const SYS = '/usr/share/insaneos/voice';
+const userRoot = () => `${fs.home()}/.local/share/insaneos/voice`;
+const CONF = '.config/insaneos/voice.json';
 
 const isFile = (p) => { try { const s = fs.stat(p); return !!s && !s.dir; } catch (e) { return false; } };
 function names(dir, ext) {
@@ -50,7 +50,7 @@ export function parseProgress(line) {
 }
 
 const pkgNames = (list) => {
-  const ok = (list || []).filter((n) => typeof n === 'string' && /^lordos-voice-[a-z0-9-]+$/.test(n));
+  const ok = (list || []).filter((n) => typeof n === 'string' && /^insaneos-voice-[a-z0-9-]+$/.test(n));
   if (!ok.length || ok.length !== list.length) throw new Error('not a voice package');
   return ok.join(' ');
 };
@@ -79,7 +79,7 @@ export function voiceConf() {
 export function setVoiceConf(patch) {
   const cur = voiceConf();
   const next = { ...cur, ...patch, ...(patch.voices ? { voices: { ...(cur.voices || {}), ...patch.voices } } : null) };
-  try { fs.mkdir('.config/lordos'); } catch (e) { /* already there */ }
+  try { fs.mkdir('.config/insaneos'); } catch (e) { /* already there */ }
   fs.write(CONF, `${JSON.stringify(next, null, 2)}\n`);
   return next;
 }
@@ -96,7 +96,7 @@ export function addOwnVoice(name, wavPath) {
   const n = ownVoiceName(name);
   if (!n) throw new Error('name');
   const dir = userRoot() + '/voices';
-  for (const d of ['.local', '.local/share', '.local/share/lordos', '.local/share/lordos/voice', '.local/share/lordos/voice/voices']) {
+  for (const d of ['.local', '.local/share', '.local/share/insaneos', '.local/share/insaneos/voice', '.local/share/insaneos/voice/voices']) {
     try { fs.mkdir(d); } catch (e) { /* there */ }
   }
   fs.write(`${dir}/${n}.wav`, fs.read(wavPath, { binary: true }));

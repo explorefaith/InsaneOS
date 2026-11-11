@@ -1,7 +1,7 @@
 // Structure (the approved mock): the table's fields (type, length, unsigned, zerofill, binary, null, key, default, extra,
 // collation) and its indexes. A field or index added, changed or removed waits in the footer as ALTER TABLE …; Apply
 // shows the whole statement before it runs. A view's structure is read only.
-import { View, Text, TextInput, ConfirmDialog, t as tr } from '@lordos/sdk';
+import { View, Text, TextInput, ConfirmDialog, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { usePal, Btn, IconBtn, Check, Popup, Field, Sheet, Foot, FootText, CodeBlock, Note, MONO } from './ui.jsx';
 import { Grid } from './grid.jsx';

@@ -1,6 +1,6 @@
 /* ime.h — input methods for Korean, Japanese and Chinese (see ime.c). */
-#ifndef LORD_IME_H
-#define LORD_IME_H
+#ifndef INSANE_IME_H
+#define INSANE_IME_H
 
 #include <stddef.h>
 

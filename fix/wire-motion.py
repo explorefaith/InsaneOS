@@ -4,7 +4,7 @@ adds it to settings.motionUser (the user's own motion wallpapers) and selects it
 every display (settings.motion). Runs as the user; edits settings.json only."""
 import json
 
-p = '/home/explorearafat/.config/lordos/settings.json'
+p = '/home/explorearafat/.config/insaneos/settings.json'
 d = json.load(open(p))
 mu = [x for x in (d.get('motionUser') or []) if x.get('id') != 'insane-galaxy']
 mu.append({'id': 'insane-galaxy', 'name': 'insane-galaxy.mp4', 'path': '/home/explorearafat/Videos/insane-galaxy.mp4'})

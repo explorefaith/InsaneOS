@@ -161,7 +161,7 @@ void img_rotate(const uint32_t *src, int w, int h, int turns, uint32_t *dst) {
     img_rotated_size(w, h, t, &ow, &oh);
     for (int y = 0; y < oh; y++)
         for (int x = 0; x < ow; x++) {
-            int sx = x, sy = y;                   /* the same mapping as lord-media's edit job */
+            int sx = x, sy = y;                   /* the same mapping as insane-media's edit job */
             if (t == 1) { sx = y; sy = h - 1 - x; }
             else if (t == 2) { sx = w - 1 - x; sy = h - 1 - y; }
             else if (t == 3) { sx = w - 1 - y; sy = x; }

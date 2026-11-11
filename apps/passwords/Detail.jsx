@@ -4,7 +4,7 @@
 // largeTitle header, fields in an inset group, one primary action (Edit / Save).
 import {
   View, Text, Image, useTheme, useStore, Button, TextInput, Toggle, ScrollView, Markdown, EmptyState, textDirection, direction, wm, formatDate, formatTime, formatBytes, t,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { app, req, copySecret, copyText, revealField, upsertItem, dropItem, toast, errorText, appMode } from './api.js';
 import { builtinById, fieldLabel, templateFields, allCategories, catName, FIELD_TYPES } from './templates.js';
@@ -20,7 +20,7 @@ const DAY = 86400;
 // ---- the list's right-click menu: copy anything of an item without opening it ----
 
 // Menu items for item `id` of vault `v` (ContextMenu's shape): its title, every field with a value, its 2FA
-// code and its notes. A hidden value is asked of lord-vault only when one is picked.
+// code and its notes. A hidden value is asked of insane-vault only when one is picked.
 export async function copyMenuItems(v, id) {
   const e = (await req('get', { v, id })).entry;
   const items = [];
@@ -349,7 +349,7 @@ function usePaneWidth(ref, initial) {
   const [w, setW] = useState(initial);
   useEffect(() => {
     const id = setTimeout(() => {
-      try { if (ref.current) { const nw = lord.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } } catch (x) { /* not laid out */ }
+      try { if (ref.current) { const nw = insane.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } } catch (x) { /* not laid out */ }
     }, 20);
     return () => clearTimeout(id);
   });

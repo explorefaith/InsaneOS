@@ -1,8 +1,8 @@
 // Window frame: draggable title bar, traffic lights, shadow. The content is the app
 // (the SDK's AppHost); the theme only decides how the frame looks. Moving and resizing (invisible
-// borders on all 4 sides and 4 corners, <WindowShell>) is done by lord-server in C
+// borders on all 4 sides and 4 corners, <WindowShell>) is done by insane-server in C
 // (docs/WINDOWS.md); the JS drag below is only kept for a maximized window.
-import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings } from '@lordos/sdk';
+import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -57,6 +57,27 @@ function CsdLights({ win, t, focused }) {
   );
 }
 
+// Glass windows (0.8.8.8): an app whose manifest says "glass": true (Settings) gets a
+// translucent background and a real backdrop blur, so the wallpaper — the live video — shows
+// through faintly. The engine's backdrop blur samples the same canvas the wallpaper paints
+// into (insane-server src/ui/paint.c), and it reads a margin of twice the radius, so the
+// rounded corners take colour from outside like CSS. Sliders: Settings → Wallpaper → Glass.
+function hexA(hex, a) {
+  const m = /^#([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return hex;                                       // non-hex token: leave as it is
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a.toFixed(3)})`;
+}
+function glassPrefs(s) {
+  const on = s.effects !== false;
+  const t = on ? Math.max(0, Math.min(1, Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3)) : 0;
+  const blur = on ? Math.max(0, Math.min(64, Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24)) : 0;
+  // a window is bigger than a widget: it starts fully opaque and the slider pulls it towards
+  // 30 % alpha, so 30 % transparency (the default) reads clearly as glass but stays readable
+  const alpha = Math.max(0.25, 1 - 0.7 * t);
+  return { on: on && blur > 0, alpha, blur };
+}
+
 export function Window({ win, app, t, focused, fx }) {
   const drag = useRef(null);
   const [hover, setHover] = useState(false);
@@ -66,6 +87,7 @@ export function Window({ win, app, t, focused, fx }) {
   // a JS ramp because the engine has no style transitions (the minimize effect works the same way)
   const [s] = useSettings();
   const [enter, setEnter] = useState(() => (s?.reduceMotion ? 1 : 0));
+  const glass = !win.fullscreen && !win.maximized && app.glass ? glassPrefs(s || {}) : { on: false, alpha: 1, blur: 0 };
   useEffect(() => {
     if (!enter || enter >= 1) return undefined;
     const iv = setInterval(() => setEnter((v) => Math.min(1, v + 0.2)), 16);
@@ -120,7 +142,8 @@ export function Window({ win, app, t, focused, fx }) {
 
   return (
     <WindowShell win={win} leaving={!!fx} onMouseDown={() => wm.focus(win.id)} style={[{
-      borderRadius: win.maximized ? 0 : 12, backgroundColor: app.transparent ? 'transparent' : t.windowBg, overflow: 'hidden',
+      borderRadius: win.maximized ? 0 : 12, backgroundColor: app.transparent ? 'transparent' : (glass.on ? hexA(t.windowBg, glass.alpha) : t.windowBg), overflow: 'hidden',
+      backdropFilter: glass.on ? `blur(${glass.blur}px)` : undefined,
       // a transparent app (the Terminal) has nothing behind its border: the border is drawn opaque
       border: `1px solid ${app.transparent ? solidOver(t.windowBorder, t.titleBg) : t.windowBorder}`,
       boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.55)' : '0 10px 28px rgba(0,0,0,0.32)',
@@ -128,7 +151,7 @@ export function Window({ win, app, t, focused, fx }) {
     }, enterStyle]}>
       <View onMouseDown={(e) => { if (!wm.beginMove(win.id)) drag.current = { x0: e.x, y0: e.y, rel: geo.w ? (e.x - geo.x) / geo.w : 0.5, moving: false }; }}
         onDoubleClick={() => wm.toggleMaximize(win.id)}
-        style={{ height: TITLE_H, flexDirection: 'row', alignItems: 'center', paddingLeft: 14, backgroundColor: t.titleBg }}>
+        style={{ height: TITLE_H, flexDirection: 'row', alignItems: 'center', paddingLeft: 14, backgroundColor: glass.on ? hexA(t.titleBg, glass.alpha * 0.55) : t.titleBg }}>
         <Text style={{ position: 'absolute', left: 0, right: 0, top: 0, lineHeight: TITLE_H, textAlign: 'center',
           fontSize: 13, fontWeight: 600, color: focused ? t.text : t.textDim, pointerEvents: 'none', whiteSpace: 'nowrap',
           paddingHorizontal: 80 }}>{windowTitle(win)}</Text>

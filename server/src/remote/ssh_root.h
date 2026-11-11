@@ -1,7 +1,7 @@
 /* ssh_root.h — remote login as root over SSH, an advanced option off by default (see ssh_root.c and
  * docs/REMOTE.md, "Root over SSH (advanced)"). */
-#ifndef LORD_SSH_ROOT_H
-#define LORD_SSH_ROOT_H
+#ifndef INSANE_SSH_ROOT_H
+#define INSANE_SSH_ROOT_H
 
 #include "../admin.h"
 #include <stddef.h>

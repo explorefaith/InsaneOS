@@ -1,7 +1,7 @@
 /* admin.c — minimal privileged helper of Insane OS (like polkit in GNOME, but with a closed
  * list of actions).
  *
- * lord-server starts as root (to open DRM and evdev) and drops privileges right away.
+ * insane-server starts as root (to open DRM and evdev) and drops privileges right away.
  * Just before that, it creates this helper: a child process that stays root, with no screen, no
  * input and no other descriptor, connected to the server by a socketpair. It only understands
  * the actions in the `actions` table (below) and each one validates its argument on its own,
@@ -25,7 +25,7 @@
  * Unsolicited notices go with id 0: "0 EVENT text". Long actions (installing packages)
  * run in a child process, so several can be in progress at once. It only serves if the
  * session user is an administrator (sudo, admin or wheel group), except for the actions
- * marked A_ANYONE (connecting to a network, as in NetworkManager). It exits when lord-server
+ * marked A_ANYONE (connecting to a network, as in NetworkManager). It exits when insane-server
  * closes the connection, and with it the resident processes (wpa_supplicant, VPN, DHCP). */
 #include "admin.h"
 #include "pkg/pkg.h"
@@ -77,7 +77,7 @@
 static int out_fd = -1;                 /* socket, or the pipe to the helper in a child */
 static int cur_id;
 
-/* lord-netd (the system network, see below): in its main process, replies go to the client that
+/* insane-netd (the system network, see below): in its main process, replies go to the client that
  * asked (cur_client) and events (id 0) to everyone. It is 0 in child processes. */
 static int netd_main;
 static int cur_client = -1;
@@ -251,7 +251,7 @@ typedef struct {
     int done;                           /* already sent OK/ERR */
     int raw;                            /* external program: each line is wrapped in an EVENT */
     char name[32];                      /* resident */
-    int client;                         /* lord-netd: client that requested the action (-1: none) */
+    int client;                         /* insane-netd: client that requested the action (-1: none) */
     char buf[2048];
     size_t len;
 } Kid;
@@ -298,8 +298,8 @@ int admin_daemon_fork(const char *name, void (*fn)(void *), void *arg) {
     pid_t pid = fork();
     if (pid == 0) {
         close(p[0]);
-        /* only the pipe: neither lord-server's socket nor, in lord-netd, its lock and socket
-         * (otherwise a DHCP client outliving a dead lord-netd would keep the next one from starting) */
+        /* only the pipe: neither insane-server's socket nor, in insane-netd, its lock and socket
+         * (otherwise a DHCP client outliving a dead insane-netd would keep the next one from starting) */
         int keep = fcntl(p[1], F_DUPFD, 3);
         for (int f = 3; f < 1024; f++) if (f != keep) close(f);
         out_fd = keep;
@@ -380,7 +380,7 @@ enum { A_FORK = 1, A_ANYONE = 2 };
 
 typedef void (*ActionFn)(const AdminReq *r, const char *arg, size_t len);
 
-#ifndef LORD_NETD
+#ifndef INSANE_NETD
 static void act_locale_gen(const char *name);
 static void act_system_locale(const char *name);
 static void act_timezone(const char *zone);
@@ -392,11 +392,11 @@ static void a_langpack(const AdminReq *r, const char *a, size_t n) { (void)r; (v
 
 /* battery-limit: "5".."100" — the charge threshold in percent for every battery that exposes
  * charge_control_end_threshold (ThinkPads and most modern laptops). 100 lifts the limit. The
- * value is also kept in /etc/lordos/battery-limit so the boot service re-applies it. */
+ * value is also kept in /etc/insaneos/battery-limit so the boot service re-applies it. */
 static void act_battery_limit(const char *arg) {
     int pct = atoi(arg && *arg ? arg : "80");
     if (pct < 5 || pct > 100) pct = 80;
-    FILE *f = fopen("/etc/lordos/battery-limit", "w");
+    FILE *f = fopen("/etc/insaneos/battery-limit", "w");
     if (f) { fprintf(f, "%d\n", pct); fclose(f); }
     char path[128];
     for (int i = 0; i < 4; i++) {
@@ -409,7 +409,7 @@ static void act_battery_limit(const char *arg) {
 }
 static void a_battery_limit(const AdminReq *r, const char *a, size_t n) { (void)r; (void)n; act_battery_limit(a); }
 
-/* dictate-transcribe: the path of a WAV recorded with lord.media.audioRecord. Finds a
+/* dictate-transcribe: the path of a WAV recorded with insane.media.audioRecord. Finds a
  * whisper.cpp binary and a ggml model, runs the transcription locally and prints the text
  * on this action's own output stream (each line arrives at the app as a log line). Nothing
  * leaves the computer: the helper only reads that one recording. A_FORK: runs in a child
@@ -424,7 +424,7 @@ static void a_dictate_transcribe(const AdminReq *r, const char *arg, size_t n) {
     for (int i = 0; bins[i] && !bin[0]; i++) if (!access(bins[i], X_OK)) snprintf(bin, sizeof bin, "%s", bins[i]);
     if (!bin[0]) { dprintf(3, "dictate: whisper.cpp is not installed (Settings → AI → Dictation)\n"); return; }
     glob_t g;
-    static const char *const pats[] = { "/usr/local/share/lordos-whisper/ggml-*.bin", "/usr/local/share/whisper/ggml-*.bin",
+    static const char *const pats[] = { "/usr/local/share/insaneos-whisper/ggml-*.bin", "/usr/local/share/whisper/ggml-*.bin",
         "/root/.cache/whisper/ggml-*.bin", "/home/*/.cache/whisper/ggml-*.bin", "/home/*/.local/share/whisper/ggml-*.bin", NULL };
     for (int i = 0; pats[i] && !model[0]; i++)
         if (!glob(pats[i], GLOB_NOSORT, NULL, &g)) {
@@ -454,11 +454,11 @@ static void a_optimize_now(const AdminReq *r, const char *arg, size_t n) {
     dprintf(3, "done\n");
 }
 
-#endif /* LORD_NETD */
+#endif /* INSANE_NETD */
 
 static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
-#ifdef LORD_NETD
-    /* lord-netd: networking only (docs/NETWORK.md, "The network belongs to the system") */
+#ifdef INSANE_NETD
+    /* insane-netd: networking only (docs/NETWORK.md, "The network belongs to the system") */
     NET_ADMIN_ACTIONS
 #else
     { "locale-gen", a_locale_gen, A_FORK },
@@ -483,7 +483,7 @@ static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
     PROC_ADMIN_ACTIONS
     SHARE_ADMIN_ACTIONS
     SGRANT_ADMIN_ACTIONS
-#endif /* LORD_NETD: other modules' actions go above this line */
+#endif /* INSANE_NETD: other modules' actions go above this line */
 };
 #define N_ACTIONS (sizeof actions / sizeof actions[0])
 
@@ -492,7 +492,7 @@ int admin_known(const char *action) {
     return 0;
 }
 
-#ifndef LORD_NETD
+#ifndef INSANE_NETD
 /* Valid region name supported by glibc: "es_AR.UTF-8", "en_IN.UTF-8" (localename.h). */
 static int supported_locale(const char *name) {
     size_t n = strlen(name);
@@ -563,11 +563,11 @@ static void act_locale_gen(const char *name) {
     if (!mem) { admin_err("sys.outOfMemory", NULL); return; }
     if (!found) fprintf(mem, "%s\n", want);
     fclose(mem);
-    int fd = open("/etc/locale.gen.lordos", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    int fd = open("/etc/locale.gen.insaneos", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
     int ok = fd >= 0 && write(fd, buf, len) == (ssize_t)len;
     if (fd >= 0) ok = close(fd) == 0 && ok;
     free(buf);
-    if (!ok || rename("/etc/locale.gen.lordos", "/etc/locale.gen")) { admin_err("sys.writeFailed", "path", "/etc/locale.gen", NULL); return; }
+    if (!ok || rename("/etc/locale.gen.insaneos", "/etc/locale.gen")) { admin_err("sys.writeFailed", "path", "/etc/locale.gen", NULL); return; }
     const char *const argv[] = { "/usr/sbin/locale-gen", NULL };
     int r = admin_run(argv);
     if (r == 0) admin_ok("locale.generated", "name", name, NULL);
@@ -577,11 +577,11 @@ static void act_locale_gen(const char *name) {
 static void act_system_locale(const char *name) {
     if (!supported_locale(name) && strcmp(name, "C.UTF-8")) { admin_err("locale.unsupported", "name", name, NULL); return; }
     if (!locale_generated(name)) { admin_err("locale.notGenerated", "name", name, NULL); return; }
-    int fd = open("/etc/default/locale.lordos", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    int fd = open("/etc/default/locale.insaneos", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
     if (fd < 0) { admin_err("sys.writeFailed", "path", "/etc/default/locale", NULL); return; }
     dprintf(fd, "LANG=%s\n", name);
     close(fd);
-    if (rename("/etc/default/locale.lordos", "/etc/default/locale")) { admin_err("sys.writeFailed", "path", "/etc/default/locale", NULL); return; }
+    if (rename("/etc/default/locale.insaneos", "/etc/default/locale")) { admin_err("sys.writeFailed", "path", "/etc/default/locale", NULL); return; }
     admin_ok("locale.systemSet", "name", name, NULL);
 }
 
@@ -596,8 +596,8 @@ static void act_timezone(const char *zone) {
     const char *const argv[] = { "/usr/bin/timedatectl", "set-timezone", zone, NULL };
     if (access(argv[0], X_OK) == 0 && admin_run(argv) == 0) { admin_ok("tz.set", "zone", zone, NULL); return; }
     /* without systemd: the /etc/localtime link and /etc/timezone, like dpkg-reconfigure */
-    unlink("/etc/localtime.lordos");
-    if (symlink(path, "/etc/localtime.lordos") || rename("/etc/localtime.lordos", "/etc/localtime")) { admin_err("sys.writeFailed", "path", "/etc/localtime", NULL); return; }
+    unlink("/etc/localtime.insaneos");
+    if (symlink(path, "/etc/localtime.insaneos") || rename("/etc/localtime.insaneos", "/etc/localtime")) { admin_err("sys.writeFailed", "path", "/etc/localtime", NULL); return; }
     FILE *f = fopen("/etc/timezone", "w");
     if (f) { fprintf(f, "%s\n", zone); fclose(f); }
     admin_ok("tz.set", "zone", zone, NULL);
@@ -677,7 +677,7 @@ static void act_langpack(const char *arg) {
     else admin_err("sys.programFailed", "program", "apt-get", "code", lerr_int(r), NULL);
 }
 
-#endif /* LORD_NETD */
+#endif /* INSANE_NETD */
 
 /* Takes the complete requests "<id> <action> <length>\n<argument>" out of the buffer and calls fn
  * for each (the argument in its own NUL-terminated memory; fn does not free it). */
@@ -706,7 +706,7 @@ static void parse_requests(char *in, size_t *inlen, ReqFn fn, void *ctx) {
 }
 
 /* Runs action a (already authorized) with req: in a child if A_FORK (which keeps only its output
- * pipe). client: in lord-netd, who gets its replies (-1 in a session's helper). */
+ * pipe). client: in insane-netd, who gets its replies (-1 in a session's helper). */
 static void run_action(size_t a, AdminReq *req, int id, const char *arg, size_t len, int client) {
     if (actions[a].flags & A_FORK) {
         Kid *k = kid_new();
@@ -715,7 +715,7 @@ static void run_action(size_t a, AdminReq *req, int id, const char *arg, size_t 
         pid_t pid = fork();
         if (pid == 0) {
             close(p[0]);
-            /* none of lord-server's or lord-netd's client sockets: only the pipe */
+            /* none of insane-server's or insane-netd's client sockets: only the pipe */
             int keep = fcntl(p[1], F_DUPFD, 3);
             for (int f = 3; f < 1024; f++) if (f != keep) close(f);
             out_fd = keep;
@@ -736,19 +736,19 @@ static size_t find_action(const char *name) {
     return a;
 }
 
-/* ---- the system network: lord-netd (docs/NETWORK.md, "The network belongs to the system") ----
+/* ---- the system network: insane-netd (docs/NETWORK.md, "The network belongs to the system") ----
  *
- * The network doesn't belong to a session: lord-netd brings it up, a small root process that
- * lord-sessiond starts and supervises at boot (before anyone logs in). It serves only the net-*
- * actions of this same table, on /run/lordos/netd.sock (0600, root only: the sessions' helpers).
- * Each helper introduces itself with "HELLO <user>" and lord-netd works out again whether that
+ * The network doesn't belong to a session: insane-netd brings it up, a small root process that
+ * insane-sessiond starts and supervises at boot (before anyone logs in). It serves only the net-*
+ * actions of this same table, on /run/insaneos/netd.sock (0600, root only: the sessions' helpers).
+ * Each helper introduces itself with "HELLO <user>" and insane-netd works out again whether that
  * user is an administrator. Replies go to the helper that asked; events (id 0) go to all of them.
- * The resident processes (DHCP, wpa_supplicant, VPN) are lord-netd's children, so they outlive
- * sessions logging in and out. Without lord-netd (a standalone lord-server, in development) the
+ * The resident processes (DHCP, wpa_supplicant, VPN) are insane-netd's children, so they outlive
+ * sessions logging in and out. Without insane-netd (a standalone insane-server, in development) the
  * session's helper runs the network itself, as before. */
-#define NETD_SOCK  "/run/lordos/netd.sock"
-#define NETD_MARK  "/run/lordos/netd.enabled"     /* created by lord-sessiond when it starts lord-netd */
-#define NETD_VPNS  "/run/lordos/netd-vpns"        /* VPNs that are up: restored if lord-netd restarts */
+#define NETD_SOCK  "/run/insaneos/netd.sock"
+#define NETD_MARK  "/run/insaneos/netd.enabled"     /* created by insane-sessiond when it starts insane-netd */
+#define NETD_VPNS  "/run/insaneos/netd-vpns"        /* VPNs that are up: restored if insane-netd restarts */
 
 /* session helper side */
 static int netd_fd = -1;
@@ -785,7 +785,7 @@ static void netd_lost(void) {
     netd_npending = 0;
 }
 
-/* What lord-netd sends goes to lord-server unchanged (the ids are this session's). */
+/* What insane-netd sends goes to insane-server unchanged (the ids are this session's). */
 static void netd_read(void) {
     ssize_t r = read(netd_fd, netd_buf + netd_len, sizeof netd_buf - 1 - netd_len);
     if (r < 0 && (errno == EINTR || errno == EAGAIN)) return;
@@ -808,7 +808,7 @@ static void netd_read(void) {
     if (netd_len >= sizeof netd_buf - 1) netd_len = 0;
 }
 
-/* 1: no lord-netd (the session runs the network); 0: forwarded; -1: it should be there and isn't. */
+/* 1: no insane-netd (the session runs the network); 0: forwarded; -1: it should be there and isn't. */
 static int netd_forward(int id, const char *action, const char *arg, size_t len) {
     if (netd_connect()) return access(NETD_MARK, F_OK) == 0 ? -1 : 1;
     char head[128];
@@ -838,8 +838,8 @@ static void helper_request(int id, const char *action, char *arg, size_t len, vo
 
 static void helper(int fd, const char *user) {
     out_fd = fd;
-    prctl(PR_SET_NAME, "lord-admin");
-    prctl(PR_SET_PDEATHSIG, SIGTERM);       /* if lord-server dies, the helper does too */
+    prctl(PR_SET_NAME, "insane-admin");
+    prctl(PR_SET_PDEATHSIG, SIGTERM);       /* if insane-server dies, the helper does too */
     signal(SIGPIPE, SIG_IGN);
     umask(022);
     struct passwd *pw = getpwnam(user);
@@ -854,11 +854,11 @@ static void helper(int fd, const char *user) {
     char *in = malloc(ADMIN_ARG_MAX + 512);
     size_t inlen = 0;
     if (!in) _exit(1);
-    /* lord-netd: connect now (to receive network events) and reconnect when lord-sessiond restarts
+    /* insane-netd: connect now (to receive network events) and reconnect when insane-sessiond restarts
      * it (the socket appears again: inotify, no polling) */
     netd_connect();
     int ino = inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
-    if (ino >= 0 && inotify_add_watch(ino, "/run/lordos", IN_CREATE | IN_MOVED_TO) < 0) { close(ino); ino = -1; }
+    if (ino >= 0 && inotify_add_watch(ino, "/run/insaneos", IN_CREATE | IN_MOVED_TO) < 0) { close(ino); ino = -1; }
 
     for (;;) {
         struct pollfd pfd[MAX_KIDS + 3];
@@ -894,7 +894,7 @@ static void helper(int fd, const char *user) {
     _exit(0);
 }
 
-/* lord-netd side */
+/* insane-netd side */
 #define NETD_MAX_CLIENTS 32
 
 typedef struct {
@@ -910,17 +910,17 @@ static NetdClient clients[NETD_MAX_CLIENTS];
 
 static void netd_route(int id, const char *line, size_t n) {
     if (id == 0) {
-        /* event: to every session, and to the log (the journal, through lord-sessiond) */
+        /* event: to every session, and to the log (the journal, through insane-sessiond) */
         const char *t = memchr(line, ' ', n);
         if (t) { t = memchr(t + 1, ' ', n - (size_t)(t + 1 - line)); }
-        if (t) fprintf(stderr, "lord-netd: %.*s", (int)(n - (size_t)(t + 1 - line)), t + 1);
+        if (t) fprintf(stderr, "insane-netd: %.*s", (int)(n - (size_t)(t + 1 - line)), t + 1);
         for (int i = 0; i < NETD_MAX_CLIENTS; i++) if (clients[i].fd >= 0 && clients[i].hello) write_fd_all(clients[i].fd, line, n);
         return;
     }
     if (cur_client >= 0 && cur_client < NETD_MAX_CLIENTS && clients[cur_client].fd >= 0) write_fd_all(clients[cur_client].fd, line, n);
 }
 
-#ifdef LORD_NETD
+#ifdef INSANE_NETD
 static void netd_drop(int c) {
     close(clients[c].fd);
     clients[c].fd = -1;
@@ -929,7 +929,7 @@ static void netd_drop(int c) {
     for (int i = 0; i < MAX_KIDS; i++) if (kids[i].client == c) kids[i].client = -1;     /* its reply has nowhere to go now */
 }
 
-/* List of VPNs that are up (one per line): to reconnect them if lord-netd restarts. */
+/* List of VPNs that are up (one per line): to reconnect them if insane-netd restarts. */
 static void netd_vpn_note(const char *name, int up) {
     char *t = NULL, line[64];
     size_t tl = 0;
@@ -994,12 +994,12 @@ static void netd_hello(NetdClient *c) {
 int admin_netd_serve(void) {
     signal(SIGPIPE, SIG_IGN);
     umask(022);
-    prctl(PR_SET_NAME, "lord-netd");
-    mkdir("/run/lordos", 0755);
-    /* only one: if one is already running (it outlived a lord-sessiond restart), this one exits */
-    int lk = open("/run/lordos/netd.lock", O_RDWR | O_CREAT | O_CLOEXEC, 0600);
-    if (lk < 0 || flock(lk, LOCK_EX | LOCK_NB)) { fprintf(stderr, "lord-netd: another instance is already running\n"); return 3; }
-    FILE *pf = fopen("/run/lordos/netd.pid", "w");
+    prctl(PR_SET_NAME, "insane-netd");
+    mkdir("/run/insaneos", 0755);
+    /* only one: if one is already running (it outlived a insane-sessiond restart), this one exits */
+    int lk = open("/run/insaneos/netd.lock", O_RDWR | O_CREAT | O_CLOEXEC, 0600);
+    if (lk < 0 || flock(lk, LOCK_EX | LOCK_NB)) { fprintf(stderr, "insane-netd: another instance is already running\n"); return 3; }
+    FILE *pf = fopen("/run/insaneos/netd.pid", "w");
     if (pf) { fprintf(pf, "%d\n", (int)getpid()); fclose(pf); }
     for (int i = 0; i < NETD_MAX_CLIENTS; i++) clients[i].fd = -1;
 
@@ -1010,7 +1010,7 @@ int admin_netd_serve(void) {
     mode_t old = umask(077);            /* 0600: root only (the sessions' helpers) */
     int bad = lfd < 0 || bind(lfd, (struct sockaddr *)&sa, sizeof sa) || listen(lfd, 16);
     umask(old);
-    if (bad || rename(sa.sun_path, NETD_SOCK)) { fprintf(stderr, "lord-netd: cannot open %s: %s\n", NETD_SOCK, strerror(errno)); return 1; }
+    if (bad || rename(sa.sun_path, NETD_SOCK)) { fprintf(stderr, "insane-netd: cannot open %s: %s\n", NETD_SOCK, strerror(errno)); return 1; }
 
     /* the network at boot: saved configs, DHCP, known Wi-Fi and DNS */
     netd_main = 1;
@@ -1018,7 +1018,7 @@ int admin_netd_serve(void) {
     AdminReq sys = { .user = sys_user, .home = sys_home, .uid = 0, .gid = 0, .admin = 1 };
     cur_client = -1;
     net_act_restore(&sys, "system", 6);
-    /* VPNs that were up before lord-netd restarted (not those from before a shutdown) */
+    /* VPNs that were up before insane-netd restarted (not those from before a shutdown) */
     {
         FILE *f = fopen(NETD_VPNS, "r");
         char line[64];
@@ -1028,7 +1028,7 @@ int admin_netd_serve(void) {
         }
         if (f) fclose(f);
     }
-    fprintf(stderr, "lord-netd: ready (%s)\n", NETD_SOCK);
+    fprintf(stderr, "insane-netd: ready (%s)\n", NETD_SOCK);
     int watch = net_watch_open();
 
     for (;;) {
@@ -1075,7 +1075,7 @@ int admin_netd_serve(void) {
         net_watch_run(pfd[1].revents != 0);
     }
 }
-#endif /* LORD_NETD */
+#endif /* INSANE_NETD */
 
 /* ---- server side ---- */
 
@@ -1096,7 +1096,7 @@ int admin_start(const char *user) {
         int null = open("/dev/null", O_RDWR);
         if (null >= 0) { dup2(null, 0); dup2(null, 1); }
         syscall(SYS_close_range, 4, ~0u, 0);
-        /* the real-time limit lord-sessiond gave the compositor (par.h) is not the helper's: the
+        /* the real-time limit insane-sessiond gave the compositor (par.h) is not the helper's: the
          * processes it drops to another user (the Store's download child) must not inherit it */
         struct rlimit rtp = { 0, 0 };
         setrlimit(RLIMIT_RTPRIO, &rtp);

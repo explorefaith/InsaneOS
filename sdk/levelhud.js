@@ -1,7 +1,7 @@
 // levelhud.js — the brief level indicator of the volume, screen brightness and keyboard-light keys
 // (docs/SHORTCUTS.md). sdk/hwkeys.js calls showLevel after each press; a theme mounts <LevelHud />
 // above its windows, as it does <DesktopHud />. The login and lock screens are another session
-// (lord-sessiond) and never mount it.
+// (insane-sessiond) and never mount it.
 //
 //   showLevel(kind, fraction, muted)   kind: 'volume' | 'brightness' | 'keylight', fraction 0..1
 //
@@ -9,7 +9,7 @@
 // segments. It stays LEVEL_HUD_MS after the last press, so a held key keeps it up, then fades out by
 // setting its node's opacity (no React render per frame); with Reduce motion it just goes.
 import { createElement as h } from 'react';
-import { View, mainDisplay } from '@lordos/runtime';
+import { View, mainDisplay } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme } from './theme.js';
@@ -19,7 +19,7 @@ import { LEVEL_HUD_MS, LEVEL_SEGMENTS, litSegments, speakerWaves, hudOpacity } f
 const hud = createStore(null);          // { kind, fraction, muted } while shown
 let timer = 0, at = 0, panel = null;
 
-const setOpacity = (o) => { if (panel) try { lord.setStyle(panel, 'opacity', o); } catch (e) { /* closed meanwhile */ } };
+const setOpacity = (o) => { if (panel) try { insane.setStyle(panel, 'opacity', o); } catch (e) { /* closed meanwhile */ } };
 
 function tick() {
   const o = hudOpacity(Date.now() - at, !!settings.get().reduceMotion);

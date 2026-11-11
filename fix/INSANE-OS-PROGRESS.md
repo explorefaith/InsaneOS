@@ -3,7 +3,7 @@
 Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKED.
 
 ## Session 1 (bugfix round)
-- DONE  lord-server CPU burn root-caused (8/12 ms IPC pollers never clearing) and fixed
+- DONE  insane-server CPU burn root-caused (8/12 ms IPC pollers never clearing) and fixed
         (idle backoff, sdk/vault.js + doc.js + mail.js; installed via rebrand build)
 - DONE  Screenshot permission (permisos.json deny → allow) + shortcut audit (PrintScreen/❖⇧3/4/5)
 - DONE  Mouse speed (settings was 1 = 2× cursor), pointer size, natural-scroll reset
@@ -13,7 +13,7 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
 - TEST-ON-SCREEN  all of the above (user confirmed desktop smooth)
 
 ## Session 2 (rebrand + features)
-- DONE  Rebrand LordOS → Insane OS: 981 files, display strings, 158 locale files, theme names
+- DONE  Rebrand InsaneOS → Insane OS: 981 files, display strings, 158 locale files, theme names
         (Insane Flow/Insane Classic), wordmark + glyph components, docs; internal names
         (binaries/paths/URLs/API) intentionally unchanged (user: no logic/URL changes)
 - DONE  New brand rendered: chaotic burst mark, app icons 16–1024, glyphs, wordmark mark
@@ -21,7 +21,7 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
 - DONE  Traffic lights on ALL windows incl. CSD (Chromium/GTK overlay), hidden on fullscreen
 - DONE  macOS-style window capture (hover → highlight → click; drag = area)
 - DONE  Ctrl+Shift+S shortcut
-- DONE  Pressure-based background freezer + log (lordos-smooth-freeze user service)
+- DONE  Pressure-based background freezer + log (insaneos-smooth-freeze user service)
 - DONE  Hot corners (3 default actions, configurable), Power Mode tile, battery limit
         (skipped: this battery has no charge_threshold sysfs — hardware), login chime (C synth),
         auto dark, dynamic wallpaper engine, menu bar CPU·temp widget, text replacement,

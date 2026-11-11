@@ -2,16 +2,16 @@ El código de Insane OS es software libre bajo la licencia MIT, y podés hacer c
 
 ## Qué incluye la marca
 
-- el nombre **Insane OS** y el logotipo (**Lord**OS, en Plus Jakarta Sans);
+- el nombre **Insane OS** y el logotipo (**Insane**OS, en Plus Jakarta Sans);
 - el logo de la corona, el ícono de la app, el símbolo de la corona y sus variantes;
 - **Lumo**, el guardián de Insane OS, en todas sus poses y dibujos.
 
-Los archivos oficiales y las reglas para usarlos (espacio libre, colores, tamaños mínimos) están en el [kit de marca](https://github.com/lordbasex/Insane OS/blob/main/docs/LORDOS-BRAND.md).
+Los archivos oficiales y las reglas para usarlos (espacio libre, colores, tamaños mínimos) están en el [kit de marca](https://github.com/insaneos/Insane OS/blob/main/docs/INSANEOS-BRAND.md).
 
 ## Qué podés hacer sin pedir permiso
 
 - **Nombrar el proyecto**, por ejemplo "funciona en Insane OS", "un tema para Insane OS" o "compatible con Insane OS".
-- **Enlazar** a lordos.org o al repositorio, con el nombre o con el logo sin modificar.
+- **Enlazar** a insaneos.org o al repositorio, con el nombre o con el logo sin modificar.
 - **Escribir sobre Insane OS**: artículos, reseñas, videos, tutoriales, libros, charlas y clases, con capturas de pantalla, el nombre y el logo.
 - **Usar los logos y a Lumo del kit de marca, sin modificar**, siguiendo sus reglas: sin estirarlos, cambiarles el color, usar otras fuentes, agregar efectos ni redibujarlos.
 - **Compartir las imágenes de Insane OS sin modificar** (la ISO, la imagen para Raspberry Pi o el `.deb`) tal como las publicamos, por ejemplo en un espejo o en un pendrive para un amigo.

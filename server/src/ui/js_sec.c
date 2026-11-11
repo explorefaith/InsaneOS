@@ -1,4 +1,4 @@
-/* js_sec.c — lord.perms and lord.sign (see js_sec.h). Strict input validation; the permission
+/* js_sec.c — insane.perms and insane.sign (see js_sec.h). Strict input validation; the permission
  * state lives in perms.c (a file the apps cannot write). */
 #include "js_sec.h"
 #include "js_sys.h"
@@ -12,7 +12,7 @@
 
 #include <string.h>
 
-/* ---- lord.perms ---- */
+/* ---- insane.perms ---- */
 
 static const char *state_name(PermState s) { return s == PERM_ALLOW ? "allow" : s == PERM_DENY ? "deny" : "ask"; }
 static PermState state_from(const char *s) { return s && !strcmp(s, "allow") ? PERM_ALLOW : s && !strcmp(s, "deny") ? PERM_DENY : PERM_ASK; }
@@ -70,7 +70,7 @@ static const JSCFunctionListEntry perms_funcs[] = {
     JS_CFUNC_DEF("names", 0, f_perm_names),
 };
 
-/* ---- lord.sign ---- */
+/* ---- insane.sign ---- */
 
 static void put_sig(JSContext *c, JSValue o, const LpkSigInfo *si) {
     JS_SetPropertyStr(c, o, "trust", JS_NewString(c, sig_trust_name(si->trust)));
@@ -81,7 +81,7 @@ static void put_sig(JSContext *c, JSValue o, const LpkSigInfo *si) {
     if (si->revoked) JS_SetPropertyStr(c, o, "revokedWhy", JS_NewString(c, si->revoked_why));
 }
 
-/* lord.sign.status(id) → { installed, hasOriginal, modified, trust, signer, revoked, version,
+/* insane.sign.status(id) → { installed, hasOriginal, modified, trust, signer, revoked, version,
  *                          changed: [{ path, kind }] } */
 static JSValue f_sign_status(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
@@ -121,7 +121,7 @@ static JSValue f_sign_restore(JSContext *c, JSValueConst t, int argc, JSValueCon
     return JS_TRUE;
 }
 
-/* lord.sign.share(id, manifestText, relativeOutput) → path of the created .lpk (in the home
+/* insane.sign.share(id, manifestText, relativeOutput) → path of the created .lpk (in the home
  * folder; the UI picks where with the powerbox, but here it is built at a validated path). */
 static JSValue f_sign_share(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
@@ -158,7 +158,7 @@ static const JSCFunctionListEntry sign_funcs[] = {
     JS_CFUNC_DEF("userKey", 0, f_sign_userkey),
 };
 
-/* lord.broker.resolve(reqid, allow): the user's answer to a permission prompt from an isolated
+/* insane.broker.resolve(reqid, allow): the user's answer to a permission prompt from an isolated
  * app (from sdk/privacy.js). It only exists in the compositor process. */
 static JSValue f_broker_resolve(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
@@ -167,8 +167,8 @@ static JSValue f_broker_resolve(JSContext *c, JSValueConst t, int argc, JSValueC
     brokersrv_resolve((uint32_t)reqid, JS_ToBool(c, argv[1]));
     return JS_UNDEFINED;
 }
-/* lord.broker.publish(type, json): the theme publishes its tokens ("theme") or the language ("locale") and
- * lord-server forwards them live to the isolated apps. */
+/* insane.broker.publish(type, json): the theme publishes its tokens ("theme") or the language ("locale") and
+ * insane-server forwards them live to the isolated apps. */
 static JSValue f_broker_publish(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     const char *kind = JS_ToCString(c, argv[0]);
@@ -204,7 +204,7 @@ static JSValue f_broker_menu_click(JSContext *c, JSValueConst t, int argc, JSVal
     if (item) JS_FreeCString(c, item);
     return JS_UNDEFINED;
 }
-/* lord.broker.quit(app) → true if the isolated app is running and was asked to quit (❖Q, Dock →
+/* insane.broker.quit(app) → true if the isolated app is running and was asked to quit (❖Q, Dock →
  * Quit). The app closes its own windows, so its close guards still apply. */
 static JSValue f_broker_quit(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -213,7 +213,7 @@ static JSValue f_broker_quit(JSContext *c, JSValueConst t, int argc, JSValueCons
     if (app) JS_FreeCString(c, app);
     return JS_NewBool(c, ok);
 }
-/* lord.broker.openArgs(app, json, newWindow) → true if delivered or kept: args for an isolated app
+/* insane.broker.openArgs(app, json, newWindow) → true if delivered or kept: args for an isolated app
  * (wm.open(id, { args }) in the session, e.g. a notification's "Open" or the Dock's "New message").
  * Sent as an "open" event now if the app runs, or when it starts (sdk/packages.js isolatedApp). */
 static JSValue f_broker_open_args(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -246,10 +246,10 @@ static const JSCFunctionListEntry broker_funcs[] = {
     JS_CFUNC_DEF("quit", 1, f_broker_quit),
 };
 
-/* ---- lord.code: verified system code (sec/codesig.c, docs/SIGNING.md "Verified system code") ----
- *   lord.code.status() → { state: 'verified'|'development'|'invalid'|'unchecked', signed, release,
+/* ---- insane.code: verified system code (sec/codesig.c, docs/SIGNING.md "Verified system code") ----
+ *   insane.code.status() → { state: 'verified'|'development'|'invalid'|'unchecked', signed, release,
  *                          version, files, ms, reason, refused: [{ path, reason }] }
- *   lord.code.takeRefused() → the refusals not reported yet ([{ path, reason }]); each is returned once
+ *   insane.code.takeRefused() → the refusals not reported yet ([{ path, reason }]); each is returned once
  *                          per session, for the "This Insane OS component was modified" notification. */
 static JSValue refusal_obj(JSContext *c, const CodeRefusal *r) {
     JSValue o = JS_NewObject(c);
@@ -293,17 +293,17 @@ static const JSCFunctionListEntry code_funcs[] = {
     JS_CFUNC_DEF("takeRefused", 0, f_code_take),
 };
 
-void js_sec_register(JSContext *c, JSValue lord) {
+void js_sec_register(JSContext *c, JSValue insane) {
     JSValue code = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, code, code_funcs, sizeof code_funcs / sizeof code_funcs[0]);
-    JS_SetPropertyStr(c, lord, "code", code);
+    JS_SetPropertyStr(c, insane, "code", code);
     JSValue perms = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, perms, perms_funcs, sizeof perms_funcs / sizeof perms_funcs[0]);
-    JS_SetPropertyStr(c, lord, "perms", perms);
+    JS_SetPropertyStr(c, insane, "perms", perms);
     JSValue sign = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, sign, sign_funcs, sizeof sign_funcs / sizeof sign_funcs[0]);
-    JS_SetPropertyStr(c, lord, "sign", sign);
+    JS_SetPropertyStr(c, insane, "sign", sign);
     JSValue broker = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, broker, broker_funcs, sizeof broker_funcs / sizeof broker_funcs[0]);
-    JS_SetPropertyStr(c, lord, "broker", broker);
+    JS_SetPropertyStr(c, insane, "broker", broker);
 }

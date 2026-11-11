@@ -1,8 +1,8 @@
 // Settings → Bluetooth: on/off, my devices (connect, disconnect, forget) and nearby devices
-// (pair). BlueZ over the system bus, from lord-server (server/src/hw/bt.c); PIN and passkey
+// (pair). BlueZ over the system bus, from insane-server (server/src/hw/bt.c); PIN and passkey
 // requests are drawn by the system (sdk/hardware.jsx, BluetoothPrompt). Headphones and speakers
 // show up in Sound through PipeWire. See docs/SETTINGS.md, "Bluetooth".
-import { View, Text, useTheme, useLocale, Toggle, Button, admin, useBluetooth, onBluetoothResult, setBluetoothPower } from '@lordos/sdk';
+import { View, Text, useTheme, useLocale, Toggle, Button, admin, useBluetooth, onBluetoothResult, setBluetoothPower } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { GroupBox, SettingRow, PageHeader, Note, Stack } from './ui.jsx';
 
@@ -36,7 +36,7 @@ function Device({ d, tr }) {
     return (
       <SettingRow icon={<DeviceIcon icon={d.icon} />} label={d.name} hint={d.rssi != null ? tr('prefs.bt.signal', { dbm: d.rssi }) : ''}>
         {d.busy ? <Text style={{ fontSize: 12, color: t.textDim }}>{tr('prefs.bt.pairing')}</Text>
-          : <Button small label={tr('prefs.bt.connect')} onClick={() => lord.bt.pair(d.path)} />}
+          : <Button small label={tr('prefs.bt.connect')} onClick={() => insane.bt.pair(d.path)} />}
       </SettingRow>
     );
   }
@@ -44,9 +44,9 @@ function Device({ d, tr }) {
     <SettingRow icon={<DeviceIcon icon={d.icon} />} label={d.name} hint={`${status}${battery}`}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         {!d.busy && <Button small label={d.connected ? tr('prefs.bt.disconnect') : tr('prefs.bt.connect')}
-          onClick={() => (d.connected ? lord.bt.disconnect(d.path) : lord.bt.connect(d.path))} />}
+          onClick={() => (d.connected ? insane.bt.disconnect(d.path) : insane.bt.connect(d.path))} />}
         {/* MenuButton's menu would sit under the next group (zIndex only orders siblings) */}
-        <Button small plain destructive label={tr('prefs.bt.forget')} onClick={() => lord.bt.forget(d.path)} />
+        <Button small plain destructive label={tr('prefs.bt.forget')} onClick={() => insane.bt.forget(d.path)} />
       </View>
     </SettingRow>
   );
@@ -64,9 +64,9 @@ export function BluetoothSettings() {
   const [search, setSearch] = useState(0);
   useEffect(() => {
     if (!a?.powered) return undefined;
-    lord.bt.discover(true);
-    const stop = setTimeout(() => lord.bt.discover(false), SEARCH_MS);
-    return () => { clearTimeout(stop); lord.bt.discover(false); };
+    insane.bt.discover(true);
+    const stop = setTimeout(() => insane.bt.discover(false), SEARCH_MS);
+    return () => { clearTimeout(stop); insane.bt.discover(false); };
   }, [a?.powered, a?.path, search]);
   useEffect(() => onBluetoothResult((r) => {
     if (r.ok || r.op === 'stop') { if (r.ok && r.op !== 'stop') setErr(''); return; }

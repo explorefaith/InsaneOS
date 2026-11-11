@@ -6,7 +6,7 @@ Usage:
 
 Generates (with the Python standard library only, no network):
   assets/monitor/land.bin             country outlines (Natural Earth 1:50m, public domain),
-                                      simplified and in hundredths of a degree; lord-server
+                                      simplified and in hundredths of a degree; insane-server
                                       fills them as vectors at any zoom (server/src/monitor/map.c)
   assets/monitor/geoip-country.mmdb.xz   IP → country (DB-IP Lite Country, CC BY 4.0), in a minimal
                                       MaxMind DB format (only {"country": {"iso_code"}}), compressed with xz
@@ -18,7 +18,7 @@ Downloads (by hand, once):
   https://download.db-ip.com/free/dbip-country-lite-YYYY-MM.csv.gz   (decompressed)
 
 land.bin format (little-endian):
-  "LORDMAP1", u32 countries; per country: 2 ISO bytes (or "--"), i16 bbox[4] (lon0 lat0 lon1 lat1),
+  "INSANEMAP1", u32 countries; per country: 2 ISO bytes (or "--"), i16 bbox[4] (lon0 lat0 lon1 lat1),
   u16 rings; per ring: u32 points and i16 (lon, lat) × points, in hundredths of a degree.
   Inner rings (holes) are stored as regular rings: filled even-odd.
 """
@@ -105,7 +105,7 @@ def build_land(geojson, out):
             npts += len(r)
         count += 1
     with open(out, 'wb') as f:
-        f.write(b'LORDMAP1' + struct.pack('<I', count) + blob)
+        f.write(b'INSANEMAP1' + struct.pack('<I', count) + blob)
     return count, npts
 
 
@@ -241,7 +241,7 @@ def build_mmdb(csv_path, out):
     meta += mm_str('build_epoch') + mm_uint(int(time.time()), 9)
     meta += mm_str('languages') + bytes([0x00, 0x04])   # empty array
     db = bytes(tree) + b'\x00' * 16 + data + b'\xab\xcd\xefMaxMind.com' + meta
-    # compressed with xz (LZMA2 only, CRC64): lord-server decompresses it with its own xz
+    # compressed with xz (LZMA2 only, CRC64): insane-server decompresses it with its own xz
     with open(out, 'wb') as f:
         f.write(lzma.compress(db, format=lzma.FORMAT_XZ, check=lzma.CHECK_CRC64, preset=9 | lzma.PRESET_EXTREME))
     return node_count, len(merged)

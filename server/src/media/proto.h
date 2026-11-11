@@ -1,12 +1,12 @@
-/* proto.h — protocol between lord-server and its helper lord-media (see docs/MEDIA.md).
+/* proto.h — protocol between insane-server and its helper insane-media (see docs/MEDIA.md).
  *
  * One SOCK_SEQPACKET socket per helper: each packet is a MediaMsg plus an optional payload
  * ("key=value" text per line or short JSON) and up to MP_MAX_FDS descriptors (SCM_RIGHTS).
- * lord-media never opens paths: every file, device or socket reaches it already open through here.
+ * insane-media never opens paths: every file, device or socket reaches it already open through here.
  * Video frames travel over shared memory (memfd sealed against shrinking), not over
  * the socket. */
-#ifndef LORD_MEDIA_PROTO_H
-#define LORD_MEDIA_PROTO_H
+#ifndef INSANE_MEDIA_PROTO_H
+#define INSANE_MEDIA_PROTO_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -54,7 +54,7 @@ enum {
 };
 
 enum {
-    /* lord-server → lord-media */
+    /* insane-server → insane-media */
     MM_JOB = 1,         /* v[0] = MK_* or MW_*; payload = key=value parameters */
     MM_SIZE,            /* v[0], v[1]: size of the box where it's shown (px) */
     MM_PLAY,
@@ -74,7 +74,7 @@ enum {
     MM_RATE,            /* live encoder: v[0] = target kbit/s */
     MM_LINK,            /* camera: fd = live link (live.h); v[0] = 1 VP8, 0 H.264; v[1] = kbit/s. Its pictures also go there */
 
-    /* lord-media → lord-server */
+    /* insane-media → insane-server */
     MM_INFO = 64,       /* payload = JSON with the file's information */
     MM_RING,            /* fd = frames memfd; v[0] = gen, v[1] = width, v[2] = height, v[3] = slots */
     MM_FRAME,           /* id = gen << 8 | slot; v[0] = pts ms */
@@ -93,7 +93,7 @@ enum {
                            v[3] = why skipped (VBS_*) */
 };
 
-/* MK_VBENCH's measurements, in order; lord-server maps them to its own ids (bench/lbvideo.c) */
+/* MK_VBENCH's measurements, in order; insane-server maps them to its own ids (bench/lbvideo.c) */
 enum { VB_H264_1080, VB_HEVC_1080, VB_VP9_1080, VB_AV1_1080, VB_H264_2160, VB_HEVC_2160, VB_ENC_H264, VB_ENC_VP8, VB_COUNT };
 enum { VBR_STEP = 0, VBR_RESULT, VBR_SKIP };
 enum { VBS_NOCODEC = 1, VBS_FAILED, VBS_MODE };

@@ -10,7 +10,7 @@
 import {
   View, Text, screen, appName, useLocale, addListener, t as tr, useStore, settings, dockDrag, dockPoof, beginDockDrag,
   registerDockTarget, dockDragJustEnded, refreshTrash, Layer, useDockCovered,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const GAP = 8, PAD = 9, MARGIN = 6;

@@ -1,7 +1,7 @@
 // Step 5 — review, confirm and write: download (resumable) → signature → write → read back and
 // compare → first-run file → eject. Progress, speed and time left; cancelling is safe (the card is
 // wiped so it never looks half-bootable).
-import { View, Text, Button, useTheme, useLocale, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Button, useTheme, useLocale, typeScale, spacing } from '@insaneos/sdk';
 import { platform } from '../platform.js';
 import { app, set, run, cancel, isBusy } from '../state.js';
 import { deviceById, deviceLabel, COOLERS } from '../core/catalog.js';

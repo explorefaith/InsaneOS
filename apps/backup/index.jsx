@@ -1,5 +1,5 @@
 // Backups — scheduled snapshots of the home folder to an external disk or a folder, like Time
-// Machine (see docs/SYSTEM.md). The engine lives in lord-server (lord.backup): a lowest-priority
+// Machine (see docs/SYSTEM.md). The engine lives in insane-server (insane.backup): a lowest-priority
 // thread that copies only what changed and hard-links the rest. This app picks the destination,
 // schedule and exclusions, shows progress, and lets you browse backups by date and restore a
 // file, a folder or everything.
@@ -7,7 +7,7 @@ import {
   View, Text, ScrollView, Segmented, Toggle, Button, TextInput, useTheme, useBackup, backup, fs, wm, t as tr, errorText,
   formatBytes, formatDate, formatTime, formatNumber, direction,
   Toolbar, ToolbarButton, ToolbarSpacer, MenuButton, SidebarItem, SectionTitle, EmptyState, GroupBox, FormRow, Hairline, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 // ---- icon: a clock with a returning arrow (drawn with View) ----
@@ -66,7 +66,7 @@ function useWidth(ref, initial) {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!ref.current) return;
-      const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+      const lw = Math.round(insane.getLayout(ref.current.id)[2]);
       if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
     }, 20);
     return () => clearTimeout(id);

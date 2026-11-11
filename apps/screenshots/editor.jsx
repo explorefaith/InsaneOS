@@ -2,9 +2,9 @@
 // from Photos or Files' Quick Preview (media.js openMarkup). Arrow, box, line, text and blur; redaction
 // (pixelate, solid fill); crop with aspect presets, resize and quarter turns; Save (in place, the previous
 // file goes to the Trash) and Save as copy. Transcribe copies the text in a dragged area (or the whole picture
-// with a click) to the clipboard: the picture without the annotations, read by the sandboxed lord-ocr (media.ocr).
+// with a click) to the clipboard: the picture without the annotations, read by the sandboxed insane-ocr (media.ocr).
 //
-// The pixels live in lord-server: each crop, resize or turn is a new picture (media.crop/resize/rotate,
+// The pixels live in insane-server: each crop, resize or turn is a new picture (media.crop/resize/rotate,
 // server/src/media/imgops.c) and the annotations of each step are drawn over it (media.annotate). Undo
 // goes back over the annotations, then over the steps (the last MAX_STEPS pictures are kept). The math
 // (rectangles, presets, sizes, file names) is in sdk/imageeditmodel.js, tested in node.
@@ -12,7 +12,7 @@ import {
   View, Text, MediaView, Button, Toggle, Segmented, TextInput, Toolbar, ToolbarButton, ToolbarGroup, ToolbarDivider, ToolbarSpacer, Hairline,
   useTheme, useAppWindow, useKeyboard, useStore, windows, wm, t as tr, media, fs, addListener, errorText, imageEdit as M,
   clipboard, settings,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { ocrLangs, cleanText, transcribeRect } from './ocr.js';
 
@@ -56,7 +56,7 @@ export function Editor({ handle, path: firstPath, app, newCapturePath, onSaved }
   // the layout is known only after a frame: the overlays follow it one frame later (bars shown, window resized)
   useEffect(() => {
     const check = () => {
-      const l = box.current ? lord.getLayout(box.current.id) : null;
+      const l = box.current ? insane.getLayout(box.current.id) : null;
       if (l && (!lay || l.some((x, i) => x !== lay[i]))) setLay(l);
     };
     const tms = [30, 120, 300].map((ms) => setTimeout(check, ms));
@@ -66,7 +66,7 @@ export function Editor({ handle, path: firstPath, app, newCapturePath, onSaved }
   });
   useEffect(() => { wm.setTitle(win.id, tr('screenshots.markupTitle', { name: path ? nameOf(path) : tr('apps.screenshots') })); }, [path]);
 
-  // a picture file: decoded by lord-media, copied into lord-server's memory and turned upright (EXIF)
+  // a picture file: decoded by insane-media, copied into insane-server's memory and turned upright (EXIF)
   useEffect(() => {
     if (handle || !firstPath) return undefined;
     const img = media.image(app, firstPath);
@@ -116,7 +116,7 @@ export function Editor({ handle, path: firstPath, app, newCapturePath, onSaved }
   };
 
   // where the picture is drawn in the box
-  const layout = () => (box.current ? lord.getLayout(box.current.id) : [0, 0, 1, 1]);
+  const layout = () => (box.current ? insane.getLayout(box.current.id) : [0, 0, 1, 1]);
   const view = () => { const [, , bw, bh] = layout(); return M.fitView(iw, ih, bw, bh); };
   const at = (x, y) => { const [lx, ly] = layout(); return M.toImagePoint(x - lx, y - ly, view()); };
   const bounds = { x: 0, y: 0, w: iw, h: ih };

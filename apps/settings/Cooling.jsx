@@ -1,11 +1,11 @@
 // Settings → Cooling (docs/FANS.md): the detected cooling hardware drawn at the top with the live
 // temperature and fan speed, the fan profile (or "let the system decide"), the curve (draggable in
-// the custom profile), "full speed for a while" and, on a Raspberry Pi 5, the case. lord-fand (root)
-// does the work; this page only sends validated requests through lord.fan.
+// the custom profile), "full speed for a while" and, on a Raspberry Pi 5, the case. insane-fand (root)
+// does the work; this page only sends validated requests through insane.fan.
 import {
   View, Text, useTheme, useLocale, Segmented, Toggle, Button, admin, useFan, useStore, fanCase, fanControl, refreshFan,
   coolingVariant, CoolingArt, FanCurveChart, formatTemp, formatNumber, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useState } from 'react';
 import { GroupBox, SettingRow, ValueRow, PopUp, Stack, Note, tint } from './ui.jsx';
 
@@ -60,7 +60,7 @@ export function CoolingSettings() {
   const run = (code) => setErr(code ? tr(`errors.${code}`) : '');
 
   if (s === undefined) return <Stack><Note>{tr('cooling.loading')}</Note></Stack>;
-  // lord-fand says whether this user may change the fans (an administrator); the case is an admin action
+  // insane-fand says whether this user may change the fans (an administrator); the case is an admin action
   const isAdmin = !!s?.canChange;
   const controllable = !!s && s.fans.length > 0;
   const custom = s?.custom?.length ? s.custom : PRESET_CURVE;

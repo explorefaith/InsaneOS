@@ -49,8 +49,8 @@ const char *cgroup_self(void) {
     return path;
 }
 
-/* Directory where the app scope is created. In the delegated session, lord-server runs in the leaf
- * ".../lordos-session-<uid>/server": scopes go as siblings, in the parent directory (which
+/* Directory where the app scope is created. In the delegated session, insane-server runs in the leaf
+ * ".../insaneos-session-<uid>/server": scopes go as siblings, in the parent directory (which
  * has the controllers enabled). If the parent isn't writable, its own cgroup is tried
  * (works if it has no controllers). If neither, there's no delegated subtree. */
 static int base_dir(char *out, size_t n) {
@@ -89,22 +89,22 @@ static int write_at(int dirfd, const char *leaf, const char *val) {
     return w == (ssize_t)n ? 0 : -1;
 }
 
-/* Is this a scope name lord-sessiond agrees to create? "app-lordos-<id>.scope" (Linux and .lpk
- * apps, lord-media) or "lordos-<helper>.scope" (lord-doc, lord-vault), never "lordos-session-…". */
+/* Is this a scope name insane-sessiond agrees to create? "app-insaneos-<id>.scope" (Linux and .lpk
+ * apps, insane-media) or "insaneos-<helper>.scope" (insane-doc, insane-vault), never "insaneos-session-…". */
 int cgroup_scope_name_ok(const char *name) {
     size_t n = name ? strlen(name) : 0;
     if (n < 8 || n > 90 || strcmp(name + n - 6, ".scope")) return 0;
-    if (strncmp(name, "app-lordos-", 11) && (strncmp(name, "lordos-", 7) || !strncmp(name, "lordos-session-", 15))) return 0;
+    if (strncmp(name, "app-insaneos-", 11) && (strncmp(name, "insaneos-", 7) || !strncmp(name, "insaneos-session-", 15))) return 0;
     for (const char *p = name; *p; p++)
         if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '-' || *p == '.' || *p == '_' || *p == '@')) return 0;
     return !strstr(name, "..");
 }
 
-/* Ask lord-sessiond (root) over CGROUP_SOCK to move THIS process into the scope. Returns 0 when
- * placed, -1 when refused or unanswered, -2 when there is no lord-sessiond (development). In a
- * lord-sessiond session (LORDOS_SESSIOND) it waits up to 3 s for a restarting lord-sessiond. */
+/* Ask insane-sessiond (root) over CGROUP_SOCK to move THIS process into the scope. Returns 0 when
+ * placed, -1 when refused or unanswered, -2 when there is no insane-sessiond (development). In a
+ * insane-sessiond session (INSANEOS_SESSIOND) it waits up to 3 s for a restarting insane-sessiond. */
 static int enter_via_sessiond(const char *name, const CgroupLimits *lim) {
-    int managed = getenv("LORDOS_SESSIOND") != NULL;
+    int managed = getenv("INSANEOS_SESSIOND") != NULL;
     struct sockaddr_un a = { .sun_family = AF_UNIX };
     snprintf(a.sun_path, sizeof a.sun_path, "%s", CGROUP_SOCK);
     int fd = -1;
@@ -120,7 +120,7 @@ static int enter_via_sessiond(const char *name, const CgroupLimits *lim) {
         struct timespec ts = { 0, 100 * 1000 * 1000 };
         nanosleep(&ts, NULL);
     }
-    if (fd < 0) { fprintf(stderr, "cgroup: lord-sessiond does not answer (%s); %s runs without a scope\n", CGROUP_SOCK, name); return -1; }
+    if (fd < 0) { fprintf(stderr, "cgroup: insane-sessiond does not answer (%s); %s runs without a scope\n", CGROUP_SOCK, name); return -1; }
     struct timeval tv = { 3, 0 };
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
     char req[160], rep[128];
@@ -128,9 +128,9 @@ static int enter_via_sessiond(const char *name, const CgroupLimits *lim) {
     ssize_t r = n > 0 && n < (int)sizeof req ? send(fd, req, (size_t)n, MSG_NOSIGNAL) : -1;
     if (r == n) r = recv(fd, rep, sizeof rep - 1, 0);
     close(fd);
-    if (r <= 0) { fprintf(stderr, "cgroup: no reply from lord-sessiond; %s runs without a scope\n", name); return -1; }
+    if (r <= 0) { fprintf(stderr, "cgroup: no reply from insane-sessiond; %s runs without a scope\n", name); return -1; }
     rep[r] = 0;
-    if (strncmp(rep, "ok", 2)) { fprintf(stderr, "cgroup: lord-sessiond refused %s: %s\n", name, rep); return -1; }
+    if (strncmp(rep, "ok", 2)) { fprintf(stderr, "cgroup: insane-sessiond refused %s: %s\n", name, rep); return -1; }
     return 0;
 }
 
@@ -139,7 +139,7 @@ int cgroup_enter(const char *name, const CgroupLimits *lim) {
     for (const char *p = name; *p; p++)
         if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '-' || *p == '.' || *p == '_' || *p == '@'))
             { fprintf(stderr, "cgroup: invalid name %s\n", name); return -1; }
-    /* With lord-sessiond the scopes belong to root (root-owned cgroup.procs): it creates them and
+    /* With insane-sessiond the scopes belong to root (root-owned cgroup.procs): it creates them and
      * moves us, so an app cannot migrate to another cgroup of the session. Without it
      * (development) we fall back to the old self-migration. */
     int via = enter_via_sessiond(name, lim);
@@ -210,15 +210,15 @@ int cgroup_service_init(void) {
     int r = lfd >= 0 ? write_at(lfd, "cgroup.procs", "0") : -1;
     if (lfd >= 0) close(lfd);
     close(fd);
-    if (r) { fprintf(stderr, "cgroup: lordos.service without Delegate=yes (could not use the supervisor leaf)\n"); return -1; }
+    if (r) { fprintf(stderr, "cgroup: insaneos.service without Delegate=yes (could not use the supervisor leaf)\n"); return -1; }
     enable_controllers(svc);        /* now the root has no processes: it can enable controllers */
-    /* sessions that survived a restart (or were delegated by an older lord-sessiond): back to root */
+    /* sessions that survived a restart (or were delegated by an older insane-sessiond): back to root */
     DIR *dir = opendir(svc);
     struct dirent *e;
     while (dir && (e = readdir(dir))) {
         unsigned u;
         char tail;
-        if (sscanf(e->d_name, "lordos-session-%u%c", &u, &tail) != 1) continue;
+        if (sscanf(e->d_name, "insaneos-session-%u%c", &u, &tail) != 1) continue;
         int sfd = openat(dirfd(dir), e->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
         if (sfd >= 0) { cgroup_harden_session(sfd); close(sfd); }
     }
@@ -228,7 +228,7 @@ int cgroup_service_init(void) {
 
 int cgroup_enter_root(const char *name) {
     if (geteuid() != 0 || !cgroup_scope_name_ok(name)) return -1;
-    const char *self = cgroup_self();                   /* ".../lordos-session-<uid>/server" */
+    const char *self = cgroup_self();                   /* ".../insaneos-session-<uid>/server" */
     char dir[PATH_MAX];
     if (!self[0] || (size_t)snprintf(dir, sizeof dir, CG_ROOT "%s", self) >= sizeof dir) return -1;
     char *sl = strrchr(dir, '/');
@@ -237,7 +237,7 @@ int cgroup_enter_root(const char *name) {
     if (!sl || strcmp(sl, "/server")) return -1;
     *sl = 0;
     const char *sess = strrchr(dir, '/');
-    if (!sess || sscanf(sess + 1, "lordos-session-%u%c", &uid, &tail) != 1) return -1;
+    if (!sess || sscanf(sess + 1, "insaneos-session-%u%c", &uid, &tail) != 1) return -1;
     int fd = open(dir, O_PATH | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0) return -1;
     int fresh = !mkdirat(fd, name, 0755);
@@ -273,9 +273,9 @@ int cgroup_delegate_session(unsigned uid, unsigned gid) {
     char svc[PATH_MAX], sess[PATH_MAX];
     (void)gid;
     if (service_root(svc, sizeof svc)) return -1;
-    if (access(svc, W_OK)) { fprintf(stderr, "cgroup: lordos.service without Delegate=yes; session %u runs without a subtree\n", uid); return -1; }
+    if (access(svc, W_OK)) { fprintf(stderr, "cgroup: insaneos.service without Delegate=yes; session %u runs without a subtree\n", uid); return -1; }
     enable_controllers(svc);
-    if ((size_t)snprintf(sess, sizeof sess, "%s/lordos-session-%u", svc, uid) >= sizeof sess) return -1;
+    if ((size_t)snprintf(sess, sizeof sess, "%s/insaneos-session-%u", svc, uid) >= sizeof sess) return -1;
     if (mkdir(sess, 0755) && errno != EEXIST) { fprintf(stderr, "cgroup: could not create the subtree of session %u: %s\n", uid, strerror(errno)); return -1; }
     enable_controllers(sess);
     int sfd = open(sess, O_PATH | O_DIRECTORY | O_CLOEXEC);
@@ -288,19 +288,19 @@ int cgroup_delegate_session(unsigned uid, unsigned gid) {
      * (docs/BENCHMARK.md, "The desktop under load"). Best effort: without the cpu controller it stays. */
     if (lfd >= 0) write_at(lfd, "cpu.weight", CG_SERVER_CPU_WEIGHT);
     if (lfd < 0 || write_at(lfd, "cgroup.procs", "0")) { fprintf(stderr, "cgroup: could not move session %u to its leaf: %s\n", uid, strerror(errno)); if (lfd >= 0) close(lfd); close(sfd); return -1; }
-    /* The subtree stays root-owned (it used to be chowned to the user). lord-sessiond creates the
+    /* The subtree stays root-owned (it used to be chowned to the user). insane-sessiond creates the
      * app scopes on request (cgroup_place_serve) with a root-owned cgroup.procs, so no user
      * process can migrate to another cgroup of the session (see docs/PRIVACY.md). */
     close(lfd);
     cgroup_harden_session(sfd);
     close(sfd);
-    fprintf(stderr, "cgroup: session %u in lordos-session-%u (root-owned scopes)\n", uid, uid);
+    fprintf(stderr, "cgroup: session %u in insaneos-session-%u (root-owned scopes)\n", uid, uid);
     return 0;
 }
 
 int app_scope_enter(const char *id) {
     char name[96];
-    if (snprintf(name, sizeof name, "app-lordos-%s.scope", id) >= (int)sizeof name || !cgroup_scope_name_ok(name)) {
+    if (snprintf(name, sizeof name, "app-insaneos-%s.scope", id) >= (int)sizeof name || !cgroup_scope_name_ok(name)) {
         fprintf(stderr, "cgroup: %s can't be an app scope\n", id);
         return -1;
     }
@@ -308,7 +308,7 @@ int app_scope_enter(const char *id) {
     return cgroup_enter(name, &lim);
 }
 
-/* ---- lord-sessiond side: placing a session process into its app scope ---- */
+/* ---- insane-sessiond side: placing a session process into its app scope ---- */
 
 /* "0::<path>" of /proc/<pid>/cgroup, or -1. */
 static int proc_cgroup(pid_t pid, char *out, size_t n) {
@@ -328,8 +328,8 @@ static int proc_cgroup(pid_t pid, char *out, size_t n) {
     return r;
 }
 
-/* The executable of the peer must be a Insane OS binary from bindir (lord-server, lord-media,
- * lord-doc…). A binary replaced while it runs shows up as "<path> (deleted)": still accepted. */
+/* The executable of the peer must be a Insane OS binary from bindir (insane-server, insane-media,
+ * insane-doc…). A binary replaced while it runs shows up as "<path> (deleted)": still accepted. */
 static int exe_trusted(pid_t pid, const char *bindir, int insecure) {
     char p[64], exe[PATH_MAX];
     snprintf(p, sizeof p, "/proc/%d/exe", (int)pid);
@@ -364,23 +364,23 @@ int cgroup_place_serve(int cfd, const char *bindir, int insecure) {
     int cpu = 0;
     if (sscanf(req, "enter %95s %ld %ld %d", name, &mh, &mm, &cpu) != 4 || !cgroup_scope_name_ok(name)) { reply(cfd, "err request"); return -1; }
     if (cr.uid < 1000 || cr.uid >= 60000) { reply(cfd, "err uid"); return -1; }
-    /* The peer must still be in its session's «server» leaf: lord-server itself, or a child it
+    /* The peer must still be in its session's «server» leaf: insane-server itself, or a child it
      * forked right before exec. A process already in an app scope (an app) can never ask. */
     char svc[PATH_MAX], want[PATH_MAX], have[PATH_MAX];
     if (service_root(svc, sizeof svc)) { reply(cfd, "err service"); return -1; }
     const char *rel = svc + strlen(CG_ROOT);
-    if ((size_t)snprintf(want, sizeof want, "%s/lordos-session-%u/server", rel, (unsigned)cr.uid) >= sizeof want) return -1;
+    if ((size_t)snprintf(want, sizeof want, "%s/insaneos-session-%u/server", rel, (unsigned)cr.uid) >= sizeof want) return -1;
     if (proc_cgroup(cr.pid, have, sizeof have) || strcmp(have, want)) { reply(cfd, "err not in the session leaf"); return -1; }
     if (!exe_trusted(cr.pid, bindir, insecure)) { reply(cfd, "err untrusted executable"); return -1; }
     char sess[PATH_MAX];
-    if ((size_t)snprintf(sess, sizeof sess, "%s/lordos-session-%u", svc, (unsigned)cr.uid) >= sizeof sess) return -1;
+    if ((size_t)snprintf(sess, sizeof sess, "%s/insaneos-session-%u", svc, (unsigned)cr.uid) >= sizeof sess) return -1;
     int sfd = open(sess, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     if (sfd < 0) { reply(cfd, "err no session subtree"); return -1; }
     if (mkdirat(sfd, name, 0755) && errno != EEXIST) { close(sfd); reply(cfd, "err mkdir"); return -1; }
     int dfd = openat(sfd, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     close(sfd);
     if (dfd < 0) { reply(cfd, "err open"); return -1; }
-    chown_root_dir(dfd);            /* a scope left by an older lord-sessiond may be the user's */
+    chown_root_dir(dfd);            /* a scope left by an older insane-sessiond may be the user's */
     char val[64];
     if (mh > 0 && mh <= 65536) { snprintf(val, sizeof val, "%ld", mh * 1024L * 1024L); write_at(dfd, "memory.high", val); }
     if (mm > 0 && mm <= 65536) { snprintf(val, sizeof val, "%ld", mm * 1024L * 1024L); write_at(dfd, "memory.max", val); }

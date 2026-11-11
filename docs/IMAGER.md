@@ -19,7 +19,7 @@ It is not a web page: a browser can't write a whole disk.
 | ![Customise: cooling](imager/native-10-tab-cooling.png) | ![Customise: cooling](imager/desktop-07-cooling.png) |
 | ![Writing](imager/native-15-writing.png) | ![Writing](imager/desktop-11-writing-dark.png) |
 | ![Done](imager/native-18-done.png) | ![Done](imager/desktop-12-done-dark.png) |
-| ![The Linux download running inside Insane OS](imager/desktop-13-linux-in-lordos.png) | ![The Linux download, written through udisks2](imager/desktop-14-linux-done.png) |
+| ![The Linux download running inside Insane OS](imager/desktop-13-linux-in-insaneos.png) | ![The Linux download, written through udisks2](imager/desktop-14-linux-done.png) |
 
 ## The steps
 
@@ -49,17 +49,17 @@ apps/imager/
   state.js                 the wizard state and the write pipeline
   core/                    validators, the first-run file writer, profiles, the release list (plain JS)
   data/                    time zones and keyboard layouts (Debian 13's tzdata and xkb-data)
-  platform.js              Insane OS: lord.disks, lord.imager, the admin actions, lord.fs
+  platform.js              Insane OS: insane.disks, insane.imager, the admin actions, insane.fs
 desktop/imager/
-  web/sdk.jsx              DOM versions of the few @lordos/sdk primitives the UI uses
+  web/sdk.jsx              DOM versions of the few @insaneos/sdk primitives the UI uses
   web/platform.js          the same functions as apps/imager/platform.js, over Tauri commands
   build-web.mjs            builds apps/imager against those two files (esbuild)
-  core/                    lordos-imager-core (Rust): signature, .xz index, write and verify, drives, secrets
+  core/                    insaneos-imager-core (Rust): signature, .xz index, write and verify, drives, secrets
   src-tauri/               the Tauri shell and its commands
 ```
 
 The interface imports only View, Text, Image, ScrollView, TextInput, Button, Lumo, useTheme,
-useKeyboard, t, typeScale, spacing and a store from `@lordos/sdk`; in the desktop build those come
+useKeyboard, t, typeScale, spacing and a store from `@insaneos/sdk`; in the desktop build those come
 from `web/sdk.jsx`, which draws them with HTML and Insane Flow's colors (light, dark or automatic).
 The texts are the same catalogs (`assets/locales/<lang>/imager.json`, plus errors, status, mascot
 and countries), so both apps speak English, Spanish, Portuguese, French and Italian identically. The desktop app's language is the globe at the bottom of its sidebar (English, Español and Português first, then the others, then the computer's language).
@@ -72,12 +72,12 @@ same `.xz` files, the same password and Wi-Fi vectors).
 
 ### In Insane OS
 
-`lord-server` runs as the user and never executes anything. Everything that needs root is one of
+`insane-server` runs as the user and never executes anything. Everything that needs root is one of
 four closed admin actions in `server/src/imager/imager_admin.c` (table `IMAGER_ADMIN_ACTIONS`):
 
 | Action | Argument | What it does |
 |---|---|---|
-| `imager-fetch` | `meta`, or `file\n<tag>\n<name>\n<size>` | `/usr/bin/curl` **as the user** (setresuid, no new privileges, no curlrc, https only also after redirects) fetches `https://api.github.com/repos/lordbasex/Insane OS/releases?per_page=10` or `https://github.com/lordbasex/Insane OS/releases/download/<tag>/<name>` into `~/.cache/lordos/imager` (resumable `.part`; the tag and name are validated; only images and the two signature files). Root never parses what arrives. |
+| `imager-fetch` | `meta`, or `file\n<tag>\n<name>\n<size>` | `/usr/bin/curl` **as the user** (setresuid, no new privileges, no curlrc, https only also after redirects) fetches `https://api.github.com/repos/insaneos/Insane OS/releases?per_page=10` or `https://github.com/insaneos/Insane OS/releases/download/<tag>/<name>` into `~/.cache/insaneos/imager` (resumable `.part`; the tag and name are validated; only images and the two signature files). Root never parses what arrives. |
 | `imager-fetch-cancel` | none | stops this user's download |
 | `imager-cache-clear` | none | deletes the imager's cache, as the user, one level of release folders |
 | `imager-write` | `<disk>\n<size>\n<model>\n<serial>\nofficial\|custom\n<image>[\n<SHA256SUMS>\n<SHA256SUMS.sig>]` | writes the image to a whole disk (below) |
@@ -107,10 +107,10 @@ four closed admin actions in `server/src/imager/imager_admin.c` (table `IMAGER_A
    zeroed, so a half-written card never looks bootable. Cancelling is `disk-cancel <disk>`.
 
 The first-run file then goes onto the card's boot partition the way any file goes onto a USB stick:
-`disk-mount` mounts it for the user under `/media/<user>`, `lord.fs.write` writes the file, and
+`disk-mount` mounts it for the user under `/media/<user>`, `insane.fs.write` writes the file, and
 `disk-unmount` and `disk-eject` finish. The board validates the file again (below).
 
-`lord.imager` (`server/src/ui/js_imager.c`) only computes: `hashPassword` (yescrypt with libcrypt,
+`insane.imager` (`server/src/ui/js_imager.c`) only computes: `hashPassword` (yescrypt with libcrypt,
 Debian's default), `wifiPsk` (PBKDF2-HMAC-SHA1, 4096 rounds), `checkSums` (the signature check, so
 the UI can show it before writing) and `imageInfo` (size and uncompressed size of a file in the
 user's folders). It writes nothing and runs nothing.
@@ -135,7 +135,7 @@ user's folders). It writes nothing and runs nothing.
     locked and dismounted before writing. PowerShell (and any other helper process) is started with
     `CREATE_NO_WINDOW`, so no console window ever appears: up to 0.8.6 each drive listing opened an
     empty PowerShell window over the app, once per poll
-    ([#73](https://github.com/lordbasex/Insane OS/issues/73)).
+    ([#73](https://github.com/insaneos/Insane OS/issues/73)).
   - **Drive polling:** the app asks for the list 2 s after the previous answer came back (never two at
     once). On Windows the core answers from the last `Get-Disk` listing unless the disks changed: a
     fingerprint taken without starting a process (each `\\.\PhysicalDriveN` opened with no access
@@ -145,16 +145,16 @@ user's folders). It writes nothing and runs nothing.
 - **The same pipeline** as in Insane OS: signature and hash before erasing, decompression while
   writing with the file hashed again, read back and compare, wipe on failure or cancel.
 - **Secrets** are derived in Rust: the password as SHA-512 crypt with 200 000 rounds (`$6$`, accepted
-  by every Linux PAM and by `lordos-firstrun`), the Wi-Fi key as the WPA2 PSK.
-- **Test devices:** `LORDOS_IMAGER_TEST_DEVICES=<folder>` also lists disk images (Mac download) or loop
+  by every Linux PAM and by `insaneos-firstrun`), the Wi-Fi key as the WPA2 PSK.
+- **Test devices:** `INSANEOS_IMAGER_TEST_DEVICES=<folder>` also lists disk images (Mac download) or loop
   devices (Linux) whose backing file is inside that folder, and nothing else; disk images attached
-  for any other purpose are never listed. `LORDOS_IMAGER_TEST_STATE=<file.json>` opens the window at
+  for any other purpose are never listed. `INSANEOS_IMAGER_TEST_STATE=<file.json>` opens the window at
   a given step with given choices, for tests and documentation screenshots; it can start a write only
   to such a test device. Neither is ever set by the app.
 
 ## The first-run file
 
-`lordos-firstrun.txt` on the boot partition (FAT, `bootfs`), written by both imagers
+`insaneos-firstrun.txt` on the boot partition (FAT, `bootfs`), written by both imagers
 (`apps/imager/core/firstrun.js`) and read once by the Pi on its first boot.
 
 - UTF-8 text, LF or CRLF, a BOM allowed, at most 64 KiB, no NUL or control characters.
@@ -227,9 +227,9 @@ auto_updates=1
 
 ### On the board
 
-`lordos-rpi-firstboot.service` (`/usr/lib/lordos/rpi/firstboot`, docs/RASPBERRY.md, "First boot")
-runs `/usr/lib/lordos/bin/lordos-firstrun apply /boot/firmware/lordos-firstrun.txt` on the first
-boot, before the user section. `lordos-firstrun` (`server/src/firstrun/`) parses the file with the
+`insaneos-rpi-firstboot.service` (`/usr/lib/insaneos/rpi/firstboot`, docs/RASPBERRY.md, "First boot")
+runs `/usr/lib/insaneos/bin/insaneos-firstrun apply /boot/firmware/insaneos-firstrun.txt` on the first
+boot, before the user section. `insaneos-firstrun` (`server/src/firstrun/`) parses the file with the
 strict parser above (`fr_parse`, pure), and only if it is valid applies it, as root:
 
 | Part | How |
@@ -237,13 +237,13 @@ strict parser above (`fr_parse`, pure), and only if it is valid applies it, as r
 | Computer name | `/etc/hostname`, the `127.0.1.1` line of `/etc/hosts` |
 | Time zone, language, keyboard | `/etc/localtime` → zoneinfo, `/etc/timezone`, `/etc/locale.conf` (Debian 13's `/etc/default/locale` points there), `/etc/default/keyboard` |
 | Wi-Fi country | `cfg80211.ieee80211_regdom=` in `cmdline.txt` (one line kept) |
-| Wi-Fi | `/etc/lordos/net/wifi/<ssid hex>.json` and `.key` (0600, `psk=<hex>`), the format Settings → Network uses; lord-netd now accepts a derived key there (WPA2; a WPA3-only network needs the password itself) |
-| User | `useradd` and `usermod -p <hash>` (fixed paths, the values as arguments, never a shell), groups `sudo audio video input render` (and `pipewire plugdev lpadmin bluetooth netdev` when they exist), linger, the home folders in the chosen language, `~/.config/lordos/settings.json` (language, keyboard, theme, mode, accent, wallpaper, `updates.autoCheck`) and `~/.config/locale.conf`; the setup account is then removed by `firstboot` |
-| Automatic login | `AUTOLOGIN=<user>` (or empty) in `/etc/lordos/session.conf` |
-| SSH | `systemctl enable` + `start --no-block ssh.service`; with keys only, `~/.ssh/authorized_keys` (0600 in a 0700 folder) and `/etc/ssh/sshd_config.d/05-lordos-keys-only.conf` (`PasswordAuthentication no`, `KbdInteractiveAuthentication no`); root never logs in (10-lordos.conf) |
-| Remote desktop | `/etc/lordos/remote/config` with `enabled=1`, `port=5673`, `allow=all`, `net=lan` (local network only) — the same file Settings → Sharing writes, with the 0.8.3 defaults (TLS, the lockout after 3 failed sign-ins) |
+| Wi-Fi | `/etc/insaneos/net/wifi/<ssid hex>.json` and `.key` (0600, `psk=<hex>`), the format Settings → Network uses; insane-netd now accepts a derived key there (WPA2; a WPA3-only network needs the password itself) |
+| User | `useradd` and `usermod -p <hash>` (fixed paths, the values as arguments, never a shell), groups `sudo audio video input render` (and `pipewire plugdev lpadmin bluetooth netdev` when they exist), linger, the home folders in the chosen language, `~/.config/insaneos/settings.json` (language, keyboard, theme, mode, accent, wallpaper, `updates.autoCheck`) and `~/.config/locale.conf`; the setup account is then removed by `firstboot` |
+| Automatic login | `AUTOLOGIN=<user>` (or empty) in `/etc/insaneos/session.conf` |
+| SSH | `systemctl enable` + `start --no-block ssh.service`; with keys only, `~/.ssh/authorized_keys` (0600 in a 0700 folder) and `/etc/ssh/sshd_config.d/05-insaneos-keys-only.conf` (`PasswordAuthentication no`, `KbdInteractiveAuthentication no`); root never logs in (10-insaneos.conf) |
+| Remote desktop | `/etc/insaneos/remote/config` with `enabled=1`, `port=5673`, `allow=all`, `net=lan` (local network only) — the same file Settings → Sharing writes, with the 0.8.3 defaults (TLS, the lockout after 3 failed sign-ins) |
 | Bluetooth off | a soft block of every Bluetooth radio through `/dev/rfkill` (`RFKILL_OP_CHANGE_ALL`), kept across boots by systemd-rfkill; Settings → Bluetooth turns it back on |
-| Cooling | `/etc/lordos/fan.json` with the profile (and `PROFILE` to `lord-fand` if it is already running); performance: `/etc/tmpfiles.d/lordos-cpu-governor.conf` sets the `performance` governor at boot; a block of our own in `config.txt` between `# >>> lordos-firstrun` and `# <<< lordos-firstrun`: `arm_freq=2600` for the mild overclock (fan only), `arm_freq=2000` for the conservative profile without cooling |
+| Cooling | `/etc/insaneos/fan.json` with the profile (and `PROFILE` to `insane-fand` if it is already running); performance: `/etc/tmpfiles.d/insaneos-cpu-governor.conf` sets the `performance` governor at boot; a block of our own in `config.txt` between `# >>> insaneos-firstrun` and `# <<< insaneos-firstrun`: `arm_freq=2600` for the mild overclock (fan only), `arm_freq=2000` for the conservative profile without cooling |
 
 The file is then **shredded** (overwritten with random bytes, then zeros, `fsync`, deleted) whatever
 the outcome; `firstboot` deletes it too if anything is left. On an SD card the flash controller may
@@ -258,7 +258,7 @@ created. `--root DIR --boot DIR` apply into a mounted image for tests (`useradd`
 
 | Cooler | Profiles | What they set |
 |---|---|---|
-| Case with a fan, active cooler | **Balanced** (default), Performance, Quiet; optional mild overclock | lord-fand's curve (docs/FANS.md): Balanced 55 °C → 30 %, Performance 45 °C → 40 % plus the `performance` CPU governor, Quiet 60 °C → 30 %; overclock 2.6 GHz instead of 2.4 GHz with no extra voltage |
+| Case with a fan, active cooler | **Balanced** (default), Performance, Quiet; optional mild overclock | insane-fand's curve (docs/FANS.md): Balanced 55 °C → 30 %, Performance 45 °C → 40 % plus the `performance` CPU governor, Quiet 60 °C → 30 %; overclock 2.6 GHz instead of 2.4 GHz with no extra voltage |
 | Passive case | Balanced (default), Conservative | no fan to drive; Conservative caps the clock at 2.0 GHz |
 | Nothing | **Conservative** (default), Balanced | 2.0 GHz so a bare board doesn't reach the 85 °C throttle within minutes |
 
@@ -287,17 +287,17 @@ On the development machine (the Mac download is built on one), with Rust (rustup
 ```sh
 desktop/imager/scripts/build-mac.sh
 # → desktop/imager/target/release/bundle/macos/Insane OS Imager.app (6.3 MB)
-#   desktop/imager/target/universal-apple-darwin/release/bundle/dmg/lordos_imager_0.8.8.6_universal.dmg (7.5 MB)
+#   desktop/imager/target/universal-apple-darwin/release/bundle/dmg/insaneos_imager_0.8.8.6_universal.dmg (7.5 MB)
 ```
 
 **Signing (since 2026-10-19):** the download is built for both processor families
 (`--target universal-apple-darwin`), signed with the maintainer's code-signing identity (team
 `UR4X327NVD`, hardened runtime, timestamp), notarized and stapled, so it opens without warnings.
 `scripts/build-mac.sh` does all of it when `IMAGER_SIGN_IDENTITY` is set and a notarization profile
-named `lordos-notary` exists in the keychain (created once by the maintainer with
-`xcrun notarytool store-credentials lordos-notary --apple-id <id> --team-id UR4X327NVD`; the
+named `insaneos-notary` exists in the keychain (created once by the maintainer with
+`xcrun notarytool store-credentials insaneos-notary --apple-id <id> --team-id UR4X327NVD`; the
 password never goes into the repository or a script). The Insane OS release key
-(`~/.config/lordos-release/`) signs release files, not apps, and is not used here. Without
+(`~/.config/insaneos-release/`) signs release files, not apps, and is not used here. Without
 `IMAGER_SIGN_IDENTITY` the build stays unsigned and the first launch needs a right click → Open.
 
 ### Linux download
@@ -306,8 +306,8 @@ In a Debian 13 container (Docker), so the host needs nothing but Docker:
 
 ```sh
 desktop/imager/scripts/build-linux.sh
-# → desktop/imager/target/linux/lordos_imager_0.8.8.6_amd64.deb (4.1 MB, depends on udisks2 and WebKitGTK 4.1)
-#   desktop/imager/target/linux/lordos-imager (7.6 MB)
+# → desktop/imager/target/linux/insaneos_imager_0.8.8.6_amd64.deb (4.1 MB, depends on udisks2 and WebKitGTK 4.1)
+#   desktop/imager/target/linux/insaneos-imager (7.6 MB)
 ```
 
 ### Windows download
@@ -317,8 +317,8 @@ xwin downloads), NSIS for the installer:
 
 ```sh
 desktop/imager/scripts/build-windows.sh
-# → desktop/imager/target/windows/lordos_imager_0.8.8.6_x64_setup.exe (3.3 MB)
-#   desktop/imager/target/windows/lordos-imager.exe (6.2 MB, requireAdministrator)
+# → desktop/imager/target/windows/insaneos_imager_0.8.8.6_x64_setup.exe (3.3 MB)
+#   desktop/imager/target/windows/insaneos-imager.exe (6.2 MB, requireAdministrator)
 ```
 
 **Version.** The Imager's own version follows Insane OS's numbering (four numbers for a point release, like
@@ -333,7 +333,7 @@ The installer is unsigned (Tauri signs only when it builds on that platform itse
 was never pushed or run.
 
 The containers keep their own `node_modules` and cargo target folders in named volumes
-(`lordos-imager-*`), so the host's are never mixed in; `docker volume rm` them to start clean.
+(`insaneos-imager-*`), so the host's are never mixed in; `docker volume rm` them to start clean.
 
 ## Tests
 
@@ -345,18 +345,18 @@ The containers keep their own `node_modules` and cargo target folders in named v
 | `tests/imager_core_test.mjs` | the shared JS: validators, the first-run writer (and every file it writes parsed by the C parser), profiles without secrets, the release list (with hostile names and tags) | 79 checks |
 | `desktop/imager/core` (`cargo test`) | the Rust core: the same signature fixtures and the 0.8.0 signature over the 0.8.1 list, the key fingerprint, the `.xz` index, the IEEE 802.11i PSK vector, glibc's SHA-512 crypt vectors, write + verify of raw and two-stream `.xz` images to a file standing in for a device, refusals (too large, a changed file wipes the device), cancel in the middle wipes the device; in `drives.rs`, the Mac SD slot rule and the drive poll (2 s … 60 s backoff after failures, a new listing only when the disk fingerprint changes or after 30 s) | 7 tests, on the development machine and on Linux; the 3 drive-poll unit tests (issue #73) not run yet |
 | `server/tests/imager_write_test.sh` (root, VM 116) | `imager-write` against a virtual USB stick (the kernel's USB gadget over a file): 17 refusals (internal disk even for an administrator, system disk, partition, wrong size/model/serial, tampered list, another release's signature, missing signature, unlisted image, too large, broken `.xz`, a link to `/etc/shadow`, a file outside the home, not an image, missing signature lines, a control character), a custom image and the official 0.8.1 image written and read back independently, cancel in the middle (first MiB wiped), another user can't cancel | 24/24 |
-| `server/tests/firstrun_image_test.sh` (root, VM 116) | the real 0.8.3 Raspberry Pi image written by `imager-write`, the first-run file put on its boot partition as the user, then `lordos-firstrun --root --boot`: every file it should write, owners and modes, nothing else changed in `cmdline.txt`/`config.txt`, no Wi-Fi password anywhere, the file shredded, and a broken file applies nothing | 25/25 |
+| `server/tests/firstrun_image_test.sh` (root, VM 116) | the real 0.8.3 Raspberry Pi image written by `imager-write`, the first-run file put on its boot partition as the user, then `insaneos-firstrun --root --boot`: every file it should write, owners and modes, nothing else changed in `cmdline.txt`/`config.txt`, no Wi-Fi password anywhere, the file shredded, and a broken file applies nothing | 25/25 |
 | Native app on VM 116 | the whole flow with the 0.8.3 image to the virtual stick: written and verified; the first-run file it wrote parses, its yescrypt hash verifies with `crypt(3)` and its PSK matches `pbkdf2_hmac` | ✓ |
-| Desktop app (Mac download, on the development machine) | the whole flow through the app's own commands (`LORDOS_IMAGER_TEST_STATE`, no simulated input) to a 16 GB disk image: download of 0.8.3 from GitHub, signature, image check, write, read back (the same SHA-256 as the native write, `b623f7a8…`), the first-run file on the boot partition (it parses, glibc accepts its SHA-512 hash, the PSK matches) | ✓ |
+| Desktop app (Mac download, on the development machine) | the whole flow through the app's own commands (`INSANEOS_IMAGER_TEST_STATE`, no simulated input) to a 16 GB disk image: download of 0.8.3 from GitHub, signature, image check, write, read back (the same SHA-256 as the native write, `b623f7a8…`), the first-run file on the boot partition (it parses, glibc accepts its SHA-512 hash, the PSK matches) | ✓ |
 | Linux download inside Insane OS (VM 116) | the `.deb`'s binary as a Wayland app in the Insane OS session: lists only the virtual stick (2 disks hidden), downloads 0.8.3 again, signature, image check, write and read back through udisks2's `OpenDevice` (the same SHA-256); without a polkit agent udisks2 answers "not authorized" and nothing on the drive is touched, with a test rule standing in for the agent the write goes through | ✓ |
 | Downloads on VM 116 | `imager-fetch meta`, the two signature files, the 558 MB image cancelled at 335 MB and resumed from the `.part` | ✓ |
 
 ## Not done or not verified yet
 
 - **Not booted on a real Raspberry Pi:** the first-run file was applied with `--root` to the real
-  0.8.3 image (arm64) from an amd64 build, and the image's own `firstboot` script runs `lordos-firstrun`
-  but wasn't executed (no board was reflashed, as asked). Since 0.8.4 the `lordos` package ships
-  `lordos-firstrun`, so the Pi image published with 0.8.4.1 reads the file (a 0.8.4 image build
+  0.8.3 image (arm64) from an amd64 build, and the image's own `firstboot` script runs `insaneos-firstrun`
+  but wasn't executed (no board was reflashed, as asked). Since 0.8.4 the `insaneos` package ships
+  `insaneos-firstrun`, so the Pi image published with 0.8.4.1 reads the file (a 0.8.4 image build
   applied a file from the Imager's writer with `--root/--boot`: 26/26, `ISO.md`, "Release test (0.8.4
   Beta, October 19–25)"); images up to 0.8.3
   ignore it and start in setup mode. A real first boot from a card the Imager prepared is still not

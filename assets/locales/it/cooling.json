@@ -3,7 +3,7 @@
   "leftM": "Massima velocità · {m} min rimanenti",
   "leftHM": "Massima velocità · {h} h {m} min rimanenti",
   "serviceOff": "Il servizio delle ventole non è in esecuzione",
-  "serviceOffHint": "Il servizio delle ventole (lord-fand) non è in esecuzione. Il kernel o il firmware continuano a raffreddare il computer.",
+  "serviceOffHint": "Il servizio delle ventole (insane-fand) non è in esecuzione. Il kernel o il firmware continuano a raffreddare il computer.",
   "firmwareManaged": "Ventole gestite dal firmware",
   "firmwareHint": "Queste ventole riportano la loro velocità, ma è il firmware a controllarle. Insane OS non le tocca.",
   "noFans": "Nessuna ventola controllabile",

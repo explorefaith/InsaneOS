@@ -1,7 +1,7 @@
 // Settings → Privacy — per-app permissions («Privacy & Security»). Lists each
 // permission with the apps that requested it and lets you revoke it. The Monitor adds its own section
 // through registerPrivacySection (see sdk/privacy.js); this page does not know about the Monitor.
-import { View, Text, useTheme, useLocale, Segmented, useStore, perms, permsRev, privacySections, useIndicators, share, shareRev, packages, appName, getApp, spacing, typeScale } from '@lordos/sdk';
+import { View, Text, useTheme, useLocale, Segmented, useStore, perms, permsRev, privacySections, useIndicators, share, shareRev, packages, appName, getApp, spacing, typeScale } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Badge, Note, StatusDot, tint } from './ui.jsx';
 
 // Small monochrome pictures for the permissions whose usual symbols are color emoji.

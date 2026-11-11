@@ -1,7 +1,7 @@
 // art.jsx — the Insane OS Imager's drawings, made of views (no product photos or renders, no other
 // project's artwork): the board, a PC, a USB stick, an SD card, the coolers and the two desktop
 // styles. Shared by the native and desktop apps.
-import { View, Text, useTheme } from '@lordos/sdk';
+import { View, Text, useTheme } from '@insaneos/sdk';
 
 const abs = (x, y, w, h, extra) => ({ position: 'absolute', left: x, top: y, width: w, height: h, ...extra });
 
@@ -192,7 +192,7 @@ export function ThemeArt({ theme, mode, accent = '#0a84ff', width = 150 }) {
   );
 }
 
-// The app icon: the crown's violet, an SD card with a down arrow
+// The app icon: the apple's violet, an SD card with a down arrow
 export function ImagerIcon({ size: s }) {
   return (
     <View style={{ width: s, height: s, borderRadius: s * 0.225, background: 'linear-gradient(160deg, #B46CFF, #4F46E5)',

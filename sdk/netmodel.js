@@ -1,5 +1,5 @@
 // netmodel.js — Monitor → Network's list, second generation (0.8.5, docs/MONITOR.md): search tokens,
-// filters, grouping into a tree and sorting. Pure functions, no lord.* (tests/netmodel_test.mjs).
+// filters, grouping into a tree and sorting. Pure functions, no insane.* (tests/netmodel_test.mjs).
 //
 // The input is a flat list of flows, one per (app, destination, port):
 //   { app, appName, name, addr, port, proto: 'tcp'|'udp'|'other', dir: 'out'|'in', rx, tx, rateRx, rateTx,
@@ -17,19 +17,19 @@
 
 // Insane OS's own parts that use the network, each a row of its own (0.8.5): label key, the built-in app
 // whose icon it shows (or a glyph), whether the firewall can block it, and what blocking it means.
-//   lordos:<name>  in its own scope (sec/netconn.h): the kernel enforces its rules
+//   insaneos:<name>  in its own scope (sec/netconn.h): the kernel enforces its rules
 //   system:<name>  an essential system service: shown, never blocked
-//   lordos:vpn     the VPN tunnels (their interfaces' counters): shown, managed in Settings → Network
+//   insaneos:vpn     the VPN tunnels (their interfaces' counters): shown, managed in Settings → Network
 export const COMPONENTS = {
-  'lordos:mail': { label: 'monitor.comp.mail', icon: 'mail', hint: 'monitor.comp.mailHint' },
-  'lordos:store': { label: 'monitor.comp.store', icon: 'store', hint: 'monitor.comp.storeHint', warn: 'monitor.comp.storeWarn' },
-  'lordos:print': { label: 'monitor.comp.print', glyph: 'printer', hint: 'monitor.comp.printHint' },
-  'lordos:terminal': { label: 'monitor.comp.terminal', icon: 'terminal', hint: 'monitor.comp.terminalHint' },
-  'lordos:lan': { label: 'monitor.comp.lan', glyph: 'network', hint: 'monitor.comp.lanHint' },
-  'lordos:sql': { label: 'monitor.comp.sql', glyph: 'database', hint: 'monitor.comp.sqlHint' },
-  'lordos:lists': { label: 'monitor.comp.lists', glyph: 'shield', hint: 'monitor.comp.listsHint' },
-  'lordos:machines': { label: 'monitor.comp.machines', icon: 'machines', hint: 'monitor.comp.machinesHint' },
-  'lordos:vpn': { label: 'monitor.comp.vpn', glyph: 'tunnel', hint: 'monitor.comp.vpnHint', system: true },
+  'insaneos:mail': { label: 'monitor.comp.mail', icon: 'mail', hint: 'monitor.comp.mailHint' },
+  'insaneos:store': { label: 'monitor.comp.store', icon: 'store', hint: 'monitor.comp.storeHint', warn: 'monitor.comp.storeWarn' },
+  'insaneos:print': { label: 'monitor.comp.print', glyph: 'printer', hint: 'monitor.comp.printHint' },
+  'insaneos:terminal': { label: 'monitor.comp.terminal', icon: 'terminal', hint: 'monitor.comp.terminalHint' },
+  'insaneos:lan': { label: 'monitor.comp.lan', glyph: 'network', hint: 'monitor.comp.lanHint' },
+  'insaneos:sql': { label: 'monitor.comp.sql', glyph: 'database', hint: 'monitor.comp.sqlHint' },
+  'insaneos:lists': { label: 'monitor.comp.lists', glyph: 'shield', hint: 'monitor.comp.listsHint' },
+  'insaneos:machines': { label: 'monitor.comp.machines', icon: 'machines', hint: 'monitor.comp.machinesHint' },
+  'insaneos:vpn': { label: 'monitor.comp.vpn', glyph: 'tunnel', hint: 'monitor.comp.vpnHint', system: true },
   'system:dns': { label: 'monitor.comp.dns', glyph: 'dns', hint: 'monitor.comp.dnsHint', system: true },
   'system:time': { label: 'monitor.comp.time', glyph: 'clock', hint: 'monitor.comp.timeHint', system: true },
   'system:network': { label: 'monitor.comp.network', glyph: 'network', hint: 'monitor.comp.networkHint', system: true },
@@ -37,13 +37,13 @@ export const COMPONENTS = {
 export const isSystemId = (id) => !!COMPONENTS[id]?.system || /^system:/.test(id || '');
 
 // (0.8.8.6) A running virtual machine's traffic is the Machines component's: its QEMU and passt run in
-// app-lordos-lordos-vm-<id>.scope, which lord-netperm and Monitor (fw_scope_app) both read as
-// lordos:machines, so the Machines rule decides for the guest. conn.c adds the machine's id ("cgSub");
+// app-insaneos-insaneos-vm-<id>.scope, which insane-netperm and Monitor (fw_scope_app) both read as
+// insaneos:machines, so the Machines rule decides for the guest. conn.c adds the machine's id ("cgSub");
 // the row names the machines: "Machines · Ubuntu 24.04". ids: the ids seen, names: { id: name }.
 // Which row a connection of conn.c's list belongs to: a socket made in an app's scope is that app's
 // ("cgApp"), whoever holds it (Mail's connector's are Mail's, a guest's are Machines'); otherwise
-// lord-server's own, then the app, the executable or the process name.
-export const connAppKey = (c) => c.cgApp || (c.self ? 'lordos' : c.app || c.exe || c.name || '?');
+// insane-server's own, then the app, the executable or the process name.
+export const connAppKey = (c) => c.cgApp || (c.self ? 'insaneos' : c.app || c.exe || c.name || '?');
 
 export function machinesLabel(base, ids, names = {}) {
   const list = [...new Set([...(ids || [])].map((id) => names?.[id]).filter((s) => typeof s === 'string' && s))];

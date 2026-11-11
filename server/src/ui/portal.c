@@ -3,7 +3,7 @@
  * title bar buttons and the GTK 3 theme, and follow Insane OS's changes live (SettingChanged).
  * Uses Passwords' own D-Bus client (vault/dbus.c). See docs/WAYLAND.md, "GTK and GNOME apps".
  *
- * GTK 3 outside Flatpak doesn't read the portal: it reads GSettings. lord-server gives the apps
+ * GTK 3 outside Flatpak doesn't read the portal: it reads GSettings. insane-server gives the apps
  * GSETTINGS_BACKEND=keyfile and writes those same keys to ~/.config/glib-2.0/settings/keyfile, which
  * GLib watches: GTK 3 also changes live (without dconf or running gsettings). */
 #include "portal.h"
@@ -159,7 +159,7 @@ static const char introspect_xml[] =
 
 /* ---- org.freedesktop.portal.FileChooser ----
  * For apps that have no file dialog of their own and ask the desktop for one. The shell draws it
- * (hw event "portal-file", sdk/filepicker.jsx) and answers with lord.portal.chosen. The answer goes
+ * (hw event "portal-file", sdk/filepicker.jsx) and answers with insane.portal.chosen. The answer goes
  * only to the app that asked, on the Request object it was given. It says version 2 on purpose: the
  * browsers want 3 before they leave their own dialog, so they keep it. */
 #define FC_IFACE  "org.freedesktop.portal.FileChooser"
@@ -231,7 +231,7 @@ static void file_chooser(const DMsg *m, const char *mode) {
     size_t t = 0;
     for (const char *s = token; *s && t + 1 < sizeof tok; s++)
         if ((*s >= 'a' && *s <= 'z') || (*s >= 'A' && *s <= 'Z') || (*s >= '0' && *s <= '9') || *s == '_') tok[t++] = *s;
-    if (!t) snprintf(tok, sizeof tok, "lordos%d", p->id);
+    if (!t) snprintf(tok, sizeof tok, "insaneos%d", p->id);
     snprintf(p->handle, sizeof p->handle, "%s/request/%s/%s", OBJ_PATH, who, tok);
     HBuf j = { 0 };
     hb_printf(&j, "{\"id\":%d,\"mode\":\"%s\",\"multiple\":%s,\"title\":", p->id,
@@ -472,7 +472,7 @@ static void keyfile_write(void) {
     snprintf(dir, sizeof dir, "%s/.config/glib-2.0/settings", home);
     mkdir(dir, 0700);
     snprintf(path, sizeof path, "%s/keyfile", dir);
-    snprintf(tmp, sizeof tmp, "%s/.keyfile-lordos", dir);
+    snprintf(tmp, sizeof tmp, "%s/.keyfile-insaneos", dir);
     char *buf = NULL;
     FILE *f = fopen(path, "r");
     if (f) {

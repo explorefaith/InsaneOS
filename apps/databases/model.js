@@ -10,7 +10,7 @@ export const quoteId = (name) => `\`${String(name ?? '').replace(/`/g, '``')}\``
 // `db`.`table` (just `table` without a database)
 export const qualified = (db, table) => (db ? `${quoteId(db)}.${quoteId(table)}` : quoteId(table));
 
-// how lord-sql sends a binary value (a column with charset 63): "\u0000hex:<hex>"
+// how insane-sql sends a binary value (a column with charset 63): "\u0000hex:<hex>"
 export const HEX_PREFIX = '\u0000hex:';
 export const isHexValue = (v) => typeof v === 'string' && v.startsWith(HEX_PREFIX);
 export const hexOf = (v) => (isHexValue(v) ? v.slice(HEX_PREFIX.length) : '');
@@ -21,7 +21,7 @@ export const hexOf = (v) => (isHexValue(v) ? v.slice(HEX_PREFIX.length) : '');
 const ESC = { '\0': '\\0', '\n': '\\n', '\r': '\\r', '\\': '\\\\', "'": "''", '\x1a': '\\Z' };
 export const escapeString = (s) => String(s).replace(/[\0\n\r\\'\x1a]/g, (c) => ESC[c]);
 // text from the server or the editor inside a RegExp: every metacharacter literal (security scan F3: a table named
-// "(.+)+!" made completion backtrack and froze lord-server's JS thread)
+// "(.+)+!" made completion backtrack and froze insane-server's JS thread)
 export const reEscape = (s) => String(s).replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
 
 // A value as a MySQL literal: NULL, a number, X'…' for binary, or a quoted string.
@@ -818,6 +818,6 @@ export function columnWidths(columns, rows, { min = 60, max = 360, charW = 7.4, 
 export const NUMERIC_TYPE_NAMES = new Set(['TINY', 'SHORT', 'LONG', 'LONGLONG', 'INT24', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NEWDECIMAL', 'TINYINT', 'SMALLINT', 'MEDIUMINT', 'INT', 'BIGINT', 'YEAR']);
 export const isNumericColumn = (col) => !!col && NUMERIC_TYPE_NAMES.has(String(col.typeName || '').toUpperCase());
 
-// lord-sql's error codes the app knows (each has databases.err.<code>)
+// insane-sql's error codes the app knows (each has databases.err.<code>)
 export const ERROR_CODES = ['unavailable', 'notfound', 'dns', 'connect', 'tls', 'cert', 'auth', 'sql', 'closed', 'busy', 'toolarge', 'unsupported'];
 export const errorCode = (e) => (ERROR_CODES.includes(e?.code) ? e.code : 'other');

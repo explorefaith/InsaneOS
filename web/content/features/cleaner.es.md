@@ -21,7 +21,7 @@ Pensalo como vaciar una casa con cuidado. Alguien la recorre y hace una lista, s
 - **Duplicados** encuentra copias exactas en las carpetas que elijas y, si lo pedís, imágenes parecidas. No se selecciona nada por vos.
 - **Actividad** registra lo que se ejecutó: cantidades y tamaños, nunca una ruta.
 
-Una cosa sí queda en el disco con nombres adentro: el mapa de almacenamiento se guarda entre sesiones, en `~/.cache/lordos/cleaner-map.txt`, legible solo por tu usuario. Tiene nombres y tamaños de carpetas, y se queda en esta computadora. Viene activado: lo apagás en Ajustes o lo borrás con Borrar en Actividad. Un mapa guardado no tiene nada sobre lo que se pueda actuar; para limpiar, analizás otra vez.
+Una cosa sí queda en el disco con nombres adentro: el mapa de almacenamiento se guarda entre sesiones, en `~/.cache/insaneos/cleaner-map.txt`, legible solo por tu usuario. Tiene nombres y tamaños de carpetas, y se queda en esta computadora. Viene activado: lo apagás en Ajustes o lo borrás con Borrar en Actividad. Un mapa guardado no tiene nada sobre lo que se pueda actuar; para limpiar, analizás otra vez.
 
 [[shot:1]]
 
@@ -31,9 +31,9 @@ Las reglas de limpieza nunca alcanzan cookies, sesiones, historial ni contraseñ
 
 ## Cómo se mantiene seguro
 
-El análisis corre en `lord-clean`, un helper aislado que solo puede leer. Los planes se arman en `lord-server`, no en la app, y la app solo tiene identificadores de candidatos, nunca la autoridad para tocar una ruta. Todo se comprueba otra vez justo antes de actuar, incluidos los archivos que probaron una carpeta de proyecto.
+El análisis corre en `insane-clean`, un helper aislado que solo puede leer. Los planes se arman en `insane-server`, no en la app, y la app solo tiene identificadores de candidatos, nunca la autoridad para tocar una ruta. Todo se comprueba otra vez justo antes de actuar, incluidos los archivos que probaron una carpeta de proyecto.
 
-Los archivos de caché regenerables bajo carpetas fijas se pueden borrar de verdad, como tu propio usuario, y solo por este camino: `lord.fs` sigue sin tener un borrado general. Todo lo demás, incluidas las carpetas de proyectos, va a la Papelera, desde donde se puede restaurar. Tres acciones de administración cerradas limpian los archivos del sistema, cada una confirmada; en un sistema de prueba descartable hicieron lo que dicen sus reglas.
+Los archivos de caché regenerables bajo carpetas fijas se pueden borrar de verdad, como tu propio usuario, y solo por este camino: `insane.fs` sigue sin tener un borrado general. Todo lo demás, incluidas las carpetas de proyectos, va a la Papelera, desde donde se puede restaurar. Tres acciones de administración cerradas limpian los archivos del sistema, cada una confirmada; en un sistema de prueba descartable hicieron lo que dicen sus reglas.
 
 ## Lo que cuesta su movimiento
 

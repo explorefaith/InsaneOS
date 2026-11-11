@@ -103,7 +103,7 @@ func files(home string) {
 	_, err = os.ReadDir(filepath.Join(home, "Documents"))
 	works("list a visible folder", err)
 	runtime.KeepAlive(lst)
-	for _, p := range []string{"/etc/passwd", "/etc/shadow", "/proc/self/status", "/proc/1/environ", "/sys/kernel/mm", "/tmp", "/usr/bin", "/usr/lib", "/dev/null", "/dev/urandom", "/var/lib/lordos", "/run/lordos"} {
+	for _, p := range []string{"/etc/passwd", "/etc/shadow", "/proc/self/status", "/proc/1/environ", "/sys/kernel/mm", "/tmp", "/usr/bin", "/usr/lib", "/dev/null", "/dev/urandom", "/var/lib/insaneos", "/run/insaneos"} {
 		_, err = os.ReadFile(p)
 		if e, ok := err.(*os.PathError); ok && e.Err == syscall.EISDIR {
 			_, err = os.ReadDir(p)
@@ -124,9 +124,9 @@ func files(home string) {
 	denied("change a file in the home folder", os.WriteFile(filepath.Join(home, "probe-home.txt"), []byte("x"), 0o644))
 	denied("truncate a file in the home folder", os.Truncate(filepath.Join(home, "probe-home.txt"), 0))
 	denied("delete a file in the home folder", os.Remove(filepath.Join(home, "probe-home.txt")))
-	works("write its own app-data folder", os.WriteFile(filepath.Join(home, ".local/share/lordos/appdata/pkgtest/x"), []byte("x"), 0o600))
-	works("rename in its own app-data folder", os.Rename(filepath.Join(home, ".local/share/lordos/appdata/pkgtest/x"), filepath.Join(home, ".local/share/lordos/appdata/pkgtest/y")))
-	denied("write another app's data", os.WriteFile(filepath.Join(home, ".local/share/lordos/appdata/other/x"), []byte("x"), 0o644))
+	works("write its own app-data folder", os.WriteFile(filepath.Join(home, ".local/share/insaneos/appdata/pkgtest/x"), []byte("x"), 0o600))
+	works("rename in its own app-data folder", os.Rename(filepath.Join(home, ".local/share/insaneos/appdata/pkgtest/x"), filepath.Join(home, ".local/share/insaneos/appdata/pkgtest/y")))
+	denied("write another app's data", os.WriteFile(filepath.Join(home, ".local/share/insaneos/appdata/other/x"), []byte("x"), 0o644))
 	denied("write in .config", os.WriteFile(filepath.Join(home, ".config/x"), []byte("x"), 0o644))
 	denied("write /tmp", os.WriteFile("/tmp/companion-x", []byte("x"), 0o644))
 	denied("symlink in Downloads", os.Symlink("/etc/passwd", filepath.Join(dl, "l")))
@@ -173,7 +173,7 @@ func sockets() {
 	denied("netlink audit", err)
 	_, err = syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	denied("socketpair", err)
-	_, err = net.Dial("unix", os.Getenv("HOME")+"/rt/lordos/remote.sock")
+	_, err = net.Dial("unix", os.Getenv("HOME")+"/rt/insaneos/remote.sock")
 	denied("connect a named socket", err)
 	_, err = net.Dial("unix", "/run/dbus/system_bus_socket")
 	denied("connect the system bus", err)

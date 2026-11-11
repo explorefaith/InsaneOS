@@ -1,16 +1,16 @@
-/* fsasync.c — lord.fs.listAsync / statAsync / trashAsync / freeAsync / mkdirAsync / renameAsync: the calls Files makes on a folder that may be
+/* fsasync.c — insane.fs.listAsync / statAsync / trashAsync / freeAsync / mkdirAsync / renameAsync: the calls Files makes on a folder that may be
  * slow to answer (a Cloud account mounted by rclone, a Connect to Server or SMB/NFS share), run on worker threads.
  *
- * lord-server is one thread for input, layout, painting and JS. A readdir, stat or rename on a FUSE mount waits for the
+ * insane-server is one thread for input, layout, painting and JS. A readdir, stat or rename on a FUSE mount waits for the
  * daemon behind it (rclone asks the provider; while it deletes or lists a folder the kernel also holds that folder's
  * lock, so every other lookup in it waits too): on the interface's thread that froze the whole desktop (0.8.8.7 fix).
  * Here each request is resolved, checked and run on a worker; the answer comes back through an eventfd the main loop
- * polls, and lord-server calls __lordFsReply(req, answer).
+ * polls, and insane-server calls __insaneFsReply(req, answer).
  *
  * Security: the request carries the path exactly as JS gave it. The worker resolves it with the same fsops.c functions
- * the synchronous lord.fs calls use (fsops_resolve_readable / _target / _stat: the roots, the pseudo-filesystems, the
+ * the synchronous insane.fs calls use (fsops_resolve_readable / _target / _stat: the roots, the pseudo-filesystems, the
  * protected folders, a share that stopped answering), then fstrash_put adds its own checks (fsops_protected_below).
- * Nothing new is reachable: the operations are a closed list (list, stat, free, and three writes lord.fs already had:
+ * Nothing new is reachable: the operations are a closed list (list, stat, free, and three writes insane.fs already had:
  * move to the Trash, new folder, rename), each the synchronous call's own checks and code on another thread. */
 #include "fsasync.h"
 #include "fsops.h"
@@ -99,7 +99,7 @@ static char *error_json(const char *line) {
 
 static char *errno_json(int e) { char l[128]; lerr_set(l, sizeof l, "sys.errno", "errno", lerr_errno(e), NULL); return error_json(l); }
 
-/* the same answers lord.fs's synchronous calls throw (js_sys.c fs_path_error) */
+/* the same answers insane.fs's synchronous calls throw (js_sys.c fs_path_error) */
 static char *path_error(int r, int down) { return error_json(r == -2 ? "fs.protected" : down ? "share.notResponding" : "fs.outsideHome"); }
 
 /* ---- the operations ---- */
@@ -123,7 +123,7 @@ static void list_cb(void *ud, const FsEntry *e) {
     if (e->locked) jw_s(w, ",\"locked\":true");
     jw_s(w, ",\"size\":"); jw_num(w, e->size);
     jw_s(w, ",\"mtime\":"); jw_num(w, e->mtime);
-    /* what the list view's extra columns ask lord.fs.stat for, so they don't ask the slow file system again */
+    /* what the list view's extra columns ask insane.fs.stat for, so they don't ask the slow file system again */
     char mode[8];
     snprintf(mode, sizeof mode, "%04o", e->mode & 07777);
     jw_s(w, ",\"mode\":"); jw_str(w, mode);
@@ -198,7 +198,7 @@ static char *op_free(const char *path) {
     return strdup(b);
 }
 
-/* as lord.fs.mkdir: a new folder (the parent must exist) */
+/* as insane.fs.mkdir: a new folder (the parent must exist) */
 static char *op_mkdir(const char *path) {
     char target[PATH_MAX + 300];
     int down = 0, r = fsops_resolve_target(path, target, sizeof target, NULL, 0, &down);
@@ -207,7 +207,7 @@ static char *op_mkdir(const char *path) {
     return strdup("{\"ok\":true}");
 }
 
-/* as lord.fs.rename: both names resolved like destinations, then fsops_rename's own checks */
+/* as insane.fs.rename: both names resolved like destinations, then fsops_rename's own checks */
 static char *op_rename(const char *from, const char *to) {
     char a[PATH_MAX + 300], b[PATH_MAX + 300], err[256] = "";
     int down = 0, r = fsops_resolve_target(from, a, sizeof a, NULL, 0, &down);

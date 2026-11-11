@@ -1,8 +1,8 @@
-/* vmkeys.h — Linux evdev key codes (what lord-server's input gives) to QEMU's "qnum" numbers, which
+/* vmkeys.h — Linux evdev key codes (what insane-server's input gives) to QEMU's "qnum" numbers, which
  * org.qemu.Display1.Keyboard takes: the PC set-1 scan code, with 0x80 added for the E0-prefixed ones. Codes 1–83
  * are the same in both. 0: no such key (dropped). */
-#ifndef LORD_VM_KEYS_H
-#define LORD_VM_KEYS_H
+#ifndef INSANE_VM_KEYS_H
+#define INSANE_VM_KEYS_H
 
 #include <stdint.h>
 

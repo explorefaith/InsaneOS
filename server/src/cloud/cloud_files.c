@@ -772,10 +772,10 @@ char *cf_delete(const char *const *paths, int n, int *req) {
 }
 
 /* ---- search inside an account (N2) ----
- * lord.fs.search doesn't enter mounts (the interface's thread must not wait on a server). cloud.search walks the mount in a
+ * insane.fs.search doesn't enter mounts (the interface's thread must not wait on a server). cloud.search walks the mount in a
  * thread of its own, with a budget (15 s, 50 000 entries, 16 levels, 500 hits), and answers once: { hits, complete }. The
  * walk goes through rclone's directory cache, so a folder listed lately costs nothing and an unreachable server only slows
- * this thread. Names are matched without case, as lord.fs.search. */
+ * this thread. Names are matched without case, as insane.fs.search. */
 
 typedef struct { int req; char *root, *needle; long long end; int seen, depth_max; JBuf hits; int nhits, complete; } SearchJob;
 

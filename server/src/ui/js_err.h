@@ -4,12 +4,12 @@
  *   if (lpk_open(path, &pk, err, sizeof err)) return js_throw_line(c, err);   // err holds a code line
  *
  * The thrown Error has `code` ("fs.outsideHome") and `params` ({ path }) and, as its message, the
- * text in the user's language: the SDK registers globalThis.__lordErrorText(code, params)
+ * text in the user's language: the SDK registers globalThis.__insaneErrorText(code, params)
  * (sdk/errors.js), so existing `catch (e) { show(e.message) }` code keeps working. Without the
  * SDK (tests) the message is the code line itself. A line that is not a code (prose from an older
  * path) is thrown as is. */
-#ifndef LORD_JS_ERR_H
-#define LORD_JS_ERR_H
+#ifndef INSANE_JS_ERR_H
+#define INSANE_JS_ERR_H
 
 #include "quickjs.h"
 #include "../errcode.h"
@@ -60,7 +60,7 @@ static inline JSValue js_throw_line(JSContext *c, const char *line)
     JSValue params = js_err_params(c, line);
     JSValue msg = JS_UNDEFINED;
     JSValue g = JS_GetGlobalObject(c);
-    JSValue fn = JS_GetPropertyStr(c, g, "__lordErrorText");
+    JSValue fn = JS_GetPropertyStr(c, g, "__insaneErrorText");
     if (JS_IsFunction(c, fn)) {
         JSValue argv[2] = { code, params };
         msg = JS_Call(c, fn, JS_UNDEFINED, 2, argv);

@@ -1,4 +1,4 @@
-/* brokersrv.c — lado servidor del broker (ver broker.h). Corre dentro de lord-server (el
+/* brokersrv.c — lado servidor del broker (ver broker.h). Corre dentro de insane-server (el
  * compositor). Atiende los pedidos de cada app .lpk aislada, verifica los permisos
  * (perms.c) y, cuando hace falta consentimiento, le pide a la interfaz que dibuje el aviso del
  * sistema (nunca lo dibuja la app). */
@@ -138,7 +138,7 @@ void brokersrv_pick_result(uint32_t ui, const char *path) {
         name = name ? name + 1 : path;
         if (path && path[0] && restrict_blocks_pkg(picks[i].id, FW_R_NO_FILES)) path = NULL;   /* restricted meanwhile */
         if (path && path[0]) {
-            /* lord-server abre el archivo con los permisos del usuario; la app recibe solo el fd */
+            /* insane-server abre el archivo con los permisos del usuario; la app recibe solo el fd */
             f = open(path, picks[i].save ? (O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC) : (O_RDONLY | O_CLOEXEC), 0644);
         }
         if (f >= 0) { send_reply_fd(picks[i].fd, reqid, BST_OK, name, (uint32_t)strlen(name), f); close(f); }
@@ -179,7 +179,7 @@ void brokersrv_revoke(const char *app, const char *perm) {
     if (!strcmp(perm, "microphone")) for (int i = 0; i < MAX_APPS; i++)
         if (apps[i].used && !strcmp(apps[i].id, app) && apps[i].mic) { maudio_close(apps[i].mic); apps[i].mic = NULL; }
     if (!strcmp(perm, "microphone")) brokercam_revoke_mic(app);
-    if (!strcmp(perm, "camera")) brokercam_revoke(app);     /* kills its lord-media: the stream stops now */
+    if (!strcmp(perm, "camera")) brokercam_revoke(app);     /* kills its insane-media: the stream stops now */
     if (!strcmp(perm, "status-item")) for (int i = 0; i < MAX_APPS; i++) if (apps[i].used && !strcmp(apps[i].id, app)) status_off(&apps[i]);
     if (!strcmp(perm, "camera") || !strcmp(perm, "microphone"))
         queue_evt("device", "{\"app\":\"%s\",\"kind\":\"%s\",\"on\":false}", app, perm);
@@ -191,7 +191,7 @@ static void comp_link_close(AppConn *a) {
     a->comp_link = 0;
 }
 
-/* Companions are lord-server's children: gone ones are reaped here, never waited for. */
+/* Companions are insane-server's children: gone ones are reaped here, never waited for. */
 static void comp_tick(void) {
     for (int i = 0; i < MAX_APPS; i++) {
         if (comp_dying[i] > 0 && waitpid(comp_dying[i], NULL, WNOHANG) != 0) comp_dying[i] = 0;
@@ -313,7 +313,7 @@ static void clip_secret_tick(void) {
     if (due == BCLIP_WIPE_TEXT) term_clipboard_wipe();      /* a picture came after it: it stays */
     if (due != BCLIP_CLEAR_ALL) return;
     term_set_clipboard("", 0);
-    term_clipboard_mark("lordos", 0);
+    term_clipboard_mark("insaneos", 0);
     bclip_cleared(clip_gen());
 }
 
@@ -389,7 +389,7 @@ static int data_path(const char *id, const char *rel, char *out, size_t n) {
     const char *home = getenv("HOME");
     if (!home || !rel || rel[0] == '/' || strstr(rel, "..")) return -1;
     char base[PATH_MAX], real[PATH_MAX];
-    if ((size_t)snprintf(base, sizeof base, "%s/.local/share/lordos/appdata/%s", home, id) >= sizeof base) return -1;
+    if ((size_t)snprintf(base, sizeof base, "%s/.local/share/insaneos/appdata/%s", home, id) >= sizeof base) return -1;
     if ((size_t)snprintf(out, n, "%s/%s", base, rel) >= n) return -1;
     /* el padre tiene que caer dentro de base (sin symlinks que escapen) */
     char tmp[PATH_MAX];
@@ -464,7 +464,7 @@ static void probe_store(int pid, const char *payload, uint32_t len) {
 
 const char *brokersrv_probe_result(void) { return probe_have ? probe_json : NULL; }
 
-/* The app asks; everything else comes from what lord-server knows about this connection. The package is read here
+/* The app asks; everything else comes from what insane-server knows about this connection. The package is read here
  * only for what it declares: checking it takes time, so that happens in the child, before anything of it runs. */
 static void companion_start(AppConn *a, uint32_t reqid) {
     int fd = a->fd;
@@ -514,7 +514,7 @@ static void handle(AppConn *a, BrokerHdr *h, char *payload, int *fds, int nfds) 
         break;
     case BOP_FS_HOME: {
         char p[PATH_MAX];
-        snprintf(p, sizeof p, "%s/.local/share/lordos/appdata/%s", getenv("HOME"), a->id);
+        snprintf(p, sizeof p, "%s/.local/share/insaneos/appdata/%s", getenv("HOME"), a->id);
         send_reply(fd, h->reqid, BST_OK, p, (uint32_t)strlen(p));
         break;
     }
@@ -635,7 +635,7 @@ static void handle(AppConn *a, BrokerHdr *h, char *payload, int *fds, int nfds) 
         break;
     }
     case BOP_PICK: {
-        /* payload: "save\0suggestedName"; the dialog is drawn by lord-server, never by the app */
+        /* payload: "save\0suggestedName"; the dialog is drawn by insane-server, never by the app */
         if (deny_restricted(fd, h->reqid, a->id, FW_R_NO_FILES)) break;
         int save = payload[0] == '1';
         const char *suggest = memchr(payload, 0, h->len);
@@ -713,7 +713,7 @@ static void handle(AppConn *a, BrokerHdr *h, char *payload, int *fds, int nfds) 
     }
     case BOP_PROBE: {
         /* System Information's sandbox probe (app/probe.c): only the system package `sysprobe`, a
-         * bounded JSON payload; lord-server adds what only it can read about that process */
+         * bounded JSON payload; insane-server adds what only it can read about that process */
         JDoc doc;
         if (!a->sys || strcmp(a->id, "sysprobe") || !h->len || h->len > 8192 || json_parse(payload, h->len, &doc, NULL, 0)) {
             send_reply(fd, h->reqid, BST_DENIED, NULL, 0);
@@ -726,7 +726,7 @@ static void handle(AppConn *a, BrokerHdr *h, char *payload, int *fds, int nfds) 
     }
     case BOP_VAULT_FIDO: {
         /* only the system Passwords app (spawned with a vault channel), only with `usb` allowed; the
-         * hidraw fd goes from here straight to lord-vault */
+         * hidraw fd goes from here straight to insane-vault */
         if (!a->vault) { send_reply(fd, h->reqid, BST_DENIED, NULL, 0); break; }
         if (deny_restricted(fd, h->reqid, a->id, FW_R_NO_USB)) break;
         if (perm_get(a->id, PERM_USB) != PERM_ALLOW) { send_reply(fd, h->reqid, BST_DENIED, NULL, 0); break; }
@@ -776,9 +776,9 @@ int brokersrv_pollfds(struct pollfd *pfd, int max) {
         pfd[n].revents = 0;
         n++;
     }
-    int mf = brokermail_pollfd();                /* lord-maild answered an isolated app */
+    int mf = brokermail_pollfd();                /* insane-maild answered an isolated app */
     if (mf >= 0 && n < max) { pfd[n].fd = mf; pfd[n].events = POLLIN; pfd[n].revents = 0; n++; }
-    /* last: wakes the loop when lord-vault answers a keyring request (brokersrv_tick reads it) */
+    /* last: wakes the loop when insane-vault answers a keyring request (brokersrv_tick reads it) */
     int kf = brokerkr_pollfd();
     if (kf >= 0 && n < max) { pfd[n].fd = kf; pfd[n].events = POLLIN; pfd[n].revents = 0; n++; }
     return n;
@@ -794,7 +794,7 @@ void brokersrv_dispatch(struct pollfd *pfd, int n) {
         char *buf = malloc(BROKER_MAX_MSG + 1);
         if (!buf) continue;
         struct iovec iov[2] = { { &h, sizeof h }, { buf, BROKER_MAX_MSG } };
-        /* up to 16 fds (files for lord-maild, BOP_MAIL only; closed for anything else) */
+        /* up to 16 fds (files for insane-maild, BOP_MAIL only; closed for anything else) */
         char cbuf[CMSG_SPACE(16 * sizeof(int))];
         struct msghdr m = { .msg_iov = iov, .msg_iovlen = 2, .msg_control = cbuf, .msg_controllen = sizeof cbuf };
         ssize_t r = recvmsg(apps[i].fd, &m, MSG_CMSG_CLOEXEC);

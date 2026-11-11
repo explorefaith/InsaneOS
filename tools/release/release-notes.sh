@@ -8,9 +8,9 @@
 #
 # <version> is the CHANGELOG version, with or without a leading "v" (e.g. 0.8.0-beta).
 # Environment:
-#   LORDOS_FILE_VERSION  the version in the file names (default: <version> without its
+#   INSANEOS_FILE_VERSION  the version in the file names (default: <version> without its
 #                        pre-release suffix, e.g. 0.8.0, which is package.json's "version")
-#   LORDOS_CHANGELOG     the changelog to read (default: CHANGELOG.md at the repository root)
+#   INSANEOS_CHANGELOG     the changelog to read (default: CHANGELOG.md at the repository root)
 # See docs/RELEASING.md.
 set -eu
 
@@ -23,17 +23,17 @@ esac
 
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
-changelog=${LORDOS_CHANGELOG:-$root/CHANGELOG.md}
+changelog=${INSANEOS_CHANGELOG:-$root/CHANGELOG.md}
 [ -r "$changelog" ] || { echo "release-notes.sh: cannot read $changelog" >&2; exit 1; }
 
 tag=v$version
-filever=${LORDOS_FILE_VERSION:-${version%%-*}}
-# the Imager is released only when it changes: lordos.imager in package.json names the release that holds it
+filever=${INSANEOS_FILE_VERSION:-${version%%-*}}
+# the Imager is released only when it changes: insaneos.imager in package.json names the release that holds it
 imagerver=$(sed -n 's/.*"imager": *"\([0-9.]*\)".*/\1/p' "$root/package.json" | head -1)
 imagerver=${imagerver:-$filever}
 case $version in *-*) imagertag=v$imagerver-${version#*-} ;; *) imagertag=v$imagerver ;; esac
-imagerdl=https://github.com/lordbasex/Insane OS/releases/download/$imagertag
-repo=https://github.com/lordbasex/Insane OS
+imagerdl=https://github.com/insaneos/Insane OS/releases/download/$imagertag
+repo=https://github.com/insaneos/Insane OS
 blob=$repo/blob/$tag
 
 # The section: from "## [<version>]" up to the next "## [" heading or the link references.
@@ -86,25 +86,25 @@ cat <<EOF
 
 | File | What it is |
 |---|---|
-| \`lordos-live-${filever}-amd64.iso\` | Live and installable image for 64-bit PCs (UEFI and BIOS). Write it to a USB stick as is; Secure Boot off. |
-| \`lordos-${filever}-amd64.ova\` | Virtual machine image for VirtualBox and VMware: open it and the machine is imported. You create your own account on its first boot. |
-| \`lordos-live-${filever}-arm64.iso\` | Live and installable image for generic arm64 machines and virtual machines with UEFI. Secure Boot off. |
-| \`lordos-${filever}-rpi5-arm64.img.xz\` | Image for the Raspberry Pi 5, for the Insane OS Imager (below) or Raspberry Pi Imager ("Use custom"), an SD card or an NVMe drive. |
-| \`lordos_${filever}_amd64.deb\` | The Insane OS package for an existing Debian 13 on a PC (installed by \`install.sh\`, or with \`apt install ./…\`). |
-| \`lordos_${filever}_arm64.deb\` | The same package for Debian 13 on arm64. |
-| \`lordos-rclone_<version>_amd64.deb\`, \`lordos-rclone_<version>_arm64.deb\` | Upstream rclone, built from its release tag, for Cloud and Connect to Server; the Insane OS package depends on it (\`install.sh\` installs it with the package). MIT. |
-| \`lordos-hwdata_<date>_all.deb\` | The signed tested-hardware snapshot for System Information's Compatibility panel, which the Insane OS package depends on (both architectures; \`install.sh\` installs it with the package, or \`apt install ./lordos-hwdata_…_all.deb ./lordos_…\`). Newer ones arrive through Store → Updates between releases. |
-| [\`lordos_imager_${imagerver}_universal.dmg\`](${imagerdl}/lordos_imager_${imagerver}_universal.dmg) | Insane OS Imager for Mac (both processor families, signed and notarized): writes Insane OS to an SD card or a USB stick and prepares the Raspberry Pi 5's first boot. |
-| [\`lordos_imager_${imagerver}_x64_setup.exe\`](${imagerdl}/lordos_imager_${imagerver}_x64_setup.exe) | Insane OS Imager for Windows (64-bit installer; not code-signed yet, so the system asks before running it). |
-| [\`lordos_imager_${imagerver}_amd64.deb\`](${imagerdl}/lordos_imager_${imagerver}_amd64.deb) | Insane OS Imager for Linux (Debian 13 and similar, amd64; needs udisks2). |
-| \`install.sh\` | The one-line installer for Debian 13: \`curl -fsSL https://lordos.org/install.sh \| sh\`. It checks the signature before installing. |
+| \`insaneos-live-${filever}-amd64.iso\` | Live and installable image for 64-bit PCs (UEFI and BIOS). Write it to a USB stick as is; Secure Boot off. |
+| \`insaneos-${filever}-amd64.ova\` | Virtual machine image for VirtualBox and VMware: open it and the machine is imported. You create your own account on its first boot. |
+| \`insaneos-live-${filever}-arm64.iso\` | Live and installable image for generic arm64 machines and virtual machines with UEFI. Secure Boot off. |
+| \`insaneos-${filever}-rpi5-arm64.img.xz\` | Image for the Raspberry Pi 5, for the Insane OS Imager (below) or Raspberry Pi Imager ("Use custom"), an SD card or an NVMe drive. |
+| \`insaneos_${filever}_amd64.deb\` | The Insane OS package for an existing Debian 13 on a PC (installed by \`install.sh\`, or with \`apt install ./…\`). |
+| \`insaneos_${filever}_arm64.deb\` | The same package for Debian 13 on arm64. |
+| \`insaneos-rclone_<version>_amd64.deb\`, \`insaneos-rclone_<version>_arm64.deb\` | Upstream rclone, built from its release tag, for Cloud and Connect to Server; the Insane OS package depends on it (\`install.sh\` installs it with the package). MIT. |
+| \`insaneos-hwdata_<date>_all.deb\` | The signed tested-hardware snapshot for System Information's Compatibility panel, which the Insane OS package depends on (both architectures; \`install.sh\` installs it with the package, or \`apt install ./insaneos-hwdata_…_all.deb ./insaneos_…\`). Newer ones arrive through Store → Updates between releases. |
+| [\`insaneos_imager_${imagerver}_universal.dmg\`](${imagerdl}/insaneos_imager_${imagerver}_universal.dmg) | Insane OS Imager for Mac (both processor families, signed and notarized): writes Insane OS to an SD card or a USB stick and prepares the Raspberry Pi 5's first boot. |
+| [\`insaneos_imager_${imagerver}_x64_setup.exe\`](${imagerdl}/insaneos_imager_${imagerver}_x64_setup.exe) | Insane OS Imager for Windows (64-bit installer; not code-signed yet, so the system asks before running it). |
+| [\`insaneos_imager_${imagerver}_amd64.deb\`](${imagerdl}/insaneos_imager_${imagerver}_amd64.deb) | Insane OS Imager for Linux (Debian 13 and similar, amd64; needs udisks2). |
+| \`install.sh\` | The one-line installer for Debian 13: \`curl -fsSL https://insaneos.org/install.sh \| sh\`. It checks the signature before installing. |
 | \`SHA256SUMS\` | The SHA-256 of every file in this release. |
 | \`SHA256SUMS.sig\` | The Ed25519 signature of \`SHA256SUMS\` with the Insane OS release key (base64). |
-| \`lordos_${filever}_<arch>.spdx.json\` | Software bill of materials (SPDX 2.3) for each package: what it bundles and the Debian packages it depends on. |
+| \`insaneos_${filever}_<arch>.spdx.json\` | Software bill of materials (SPDX 2.3) for each package: what it bundles and the Debian packages it depends on. |
 
 ## Verifying the downloads
 
-The Insane OS release public key is \`lordos-release.pub.pem\` ([in the repository](${blob}/tools/release/lordos-release.pub.pem), or at https://lordos.org/lordos-release.pub.pem). Its fingerprint, the SHA-256 of the DER public key, is:
+The Insane OS release public key is \`insaneos-release.pub.pem\` ([in the repository](${blob}/tools/release/insaneos-release.pub.pem), or at https://insaneos.org/insaneos-release.pub.pem). Its fingerprint, the SHA-256 of the DER public key, is:
 
 \`\`\`
 c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e
@@ -113,9 +113,9 @@ c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e
 With OpenSSL 3, in the folder with the downloads:
 
 \`\`\`sh
-openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum   # must match the fingerprint
+openssl pkey -pubin -in insaneos-release.pub.pem -outform DER | sha256sum   # must match the fingerprint
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 \`\`\`
 
@@ -123,9 +123,9 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 ## Links
 
-- Website: [lordos.org](https://lordos.org)
-- The project paper: [lordos.org/paper](https://lordos.org/paper/)
+- Website: [insaneos.org](https://insaneos.org)
+- The project paper: [insaneos.org/paper](https://insaneos.org/paper/)
 - Documentation: [docs/README.md](${blob}/docs/README.md)
-- Security policy and reporting a vulnerability: [lordos.org/legal/security](https://lordos.org/legal/security/)
+- Security policy and reporting a vulnerability: [insaneos.org/legal/security](https://insaneos.org/legal/security/)
 - Full changelog: [CHANGELOG.md](${blob}/CHANGELOG.md)
 EOF

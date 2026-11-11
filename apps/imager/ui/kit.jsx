@@ -6,7 +6,7 @@
 // Keyboard: Tab / Shift+Tab move a focus ring through every Press and Field of the visible step,
 // Enter or Space activates, Escape goes back (docs/IMAGER.md, "Accessibility"). The desktop app
 // uses the browser's own focus instead (platform.domFocus) and gets real screen-reader labels.
-import { View, Text, ScrollView, TextInput, Lumo, useTheme, useKeyboard, typeScale, spacing, createStore, useStore } from '@lordos/sdk';
+import { View, Text, ScrollView, TextInput, Lumo, useTheme, useKeyboard, typeScale, spacing, createStore, useStore } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { platform } from '../platform.js';
 

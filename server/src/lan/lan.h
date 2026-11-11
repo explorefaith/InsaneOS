@@ -1,13 +1,13 @@
-/* lan.h — Files → Network, lord-server's side (docs/FILES.md, "Network"). Off until the page is
+/* lan.h — Files → Network, insane-server's side (docs/FILES.md, "Network"). Off until the page is
  * opened: one bounded pass over the local network on a thread of its own, the answers read by the
- * sandboxed lord-lan helper. lord-server decides every address; JS names none.
+ * sandboxed insane-lan helper. insane-server decides every address; JS names none.
  *
  * What a pass touches: interfaces with a real device and a private IPv4 address; mDNS on those
  * links; ports 445 and 2049 of the known neighbours and of the interface's subnet (at most its /24),
  * at most LAN_RATE connections a second; port 111 and mountd only where 2049 answered; port 22 and a
  * reverse mDNS question only for the machines that turned out to be there. */
-#ifndef LORD_LAN_H
-#define LORD_LAN_H
+#ifndef INSANE_LAN_H
+#define INSANE_LAN_H
 
 #define LAN_RATE 30                     /* TCP connections a second */
 #define LAN_REST_S 30                   /* the button: a new pass at most this often */

@@ -1,6 +1,6 @@
 /* thbrk.h — Thai word breaking with the libthai-data dictionary (see thbrk.c). */
-#ifndef LORD_THBRK_H
-#define LORD_THBRK_H
+#ifndef INSANE_THBRK_H
+#define INSANE_THBRK_H
 
 #include <stdint.h>
 

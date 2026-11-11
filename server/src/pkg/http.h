@@ -4,8 +4,8 @@
  * (switches to nobody, no groups, unable to escalate again) before touching the network, and
  * that sends it the bytes over a pipe. The root process only writes those bytes to a temporary
  * file in its folder, counts the size and computes the SHA-256: it interprets nothing that arrives. */
-#ifndef LORD_PKG_HTTP_H
-#define LORD_PKG_HTTP_H
+#ifndef INSANE_PKG_HTTP_H
+#define INSANE_PKG_HTTP_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -33,8 +33,8 @@ typedef void (*FetchProgress)(uint64_t done, uint64_t total, void *ud);
 /* Downloads the n files in order (reusing the connection to the same server). Returns the
  * number that ended with 200 or 304; each item reports its own. */
 int fetch_batch(FetchItem *items, int n, FetchProgress cb, void *ud);
-/* The same, with the download child in another component's scope (a root-owned lordos-net-<name>.scope of the
- * session: fw/rules.h FW_COMPONENTS) instead of the Store's: Machines' system downloads use lordos-net-machines.scope. */
+/* The same, with the download child in another component's scope (a root-owned insaneos-net-<name>.scope of the
+ * session: fw/rules.h FW_COMPONENTS) instead of the Store's: Machines' system downloads use insaneos-net-machines.scope. */
 int fetch_batch_in(FetchItem *items, int n, FetchProgress cb, void *ud, const char *scope);
 
 /* HTTP dates (RFC 1123) */

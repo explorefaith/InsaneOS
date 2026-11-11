@@ -1,9 +1,9 @@
 // Snapshots (the approved mock "Snapshots"): a machine's timeline, each snapshot with its picture, name, when and what
-// it holds, then Now; the selected one can be gone back to or deleted. lord-vm does the work (6.2): qcow2 internal
+// it holds, then Now; the selected one can be gone back to or deleted. insane-vm does the work (6.2): qcow2 internal
 // snapshots of the system disk and the UEFI variables together, with the memory when the machine runs, under
 // operation.json, the entry in snapshots.json written last. Going back to a snapshot with memory on a machine that's
 // off starts it from there.
-import { View, Text, Image, TextInput, ScrollView, Toggle, useAppWindow, wm, fs, formatDate, formatTime, t as tr } from '@lordos/sdk';
+import { View, Text, Image, TextInput, ScrollView, Toggle, useAppWindow, wm, fs, formatDate, formatTime, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { stateView, snapName, snapSize, thumbSrc } from './model.js';
 import { usePal, has, bytes, Btn, Sheet, markColors } from './ui.jsx';
@@ -12,7 +12,7 @@ import { openMachine } from './library.jsx';
 import { CloneSheet } from './clone.jsx';
 
 const when = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : `${formatDate(d)}, ${formatTime(d)}`; };
-const errOf = (out) => (out || '').trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || (out || '').trim();
+const errOf = (out) => (out || '').trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || (out || '').trim();
 
 // the node on the timeline, over the line that joins one snapshot to the next
 function Node({ on, last }) {
@@ -52,19 +52,19 @@ export function Snapshots({ dir, name: name0 }) {
   const thumb = useRef(0);
   const load = () => {
     if (!has()) return;
-    const x = lord.vm.list().find((y) => y.dir === dir) || null;
+    const x = insane.vm.list().find((y) => y.dir === dir) || null;
     setM(x);
-    const s = lord.vm.snaps(dir);
+    const s = insane.vm.snaps(dir);
     if (s) { setList(s.list); setLim({ max: s.max, warn: s.warn }); }
     try { thumb.current = fs.stat(`${dir}/thumb.png`)?.mtime || 0; } catch (e) { thumb.current = 0; }
   };
   useEffect(() => { load(); const timer = setInterval(load, 2000); return () => clearInterval(timer); }, []);
   useEffect(() => { wm.setTitle(winId, tr('machines.snap.title', { name: m?.name || name0 })); }, [m?.name]);
-  // the job lord-vm runs; `then` follows a success (a snapshot before going back, then going back)
+  // the job insane-vm runs; `then` follows a success (a snapshot before going back, then going back)
   useEffect(() => {
     if (!busy) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(busy.job);
+      const r = insane.vm.job(busy.job);
       if (!r || !r.done) return;
       const b = busy;
       setBusy(null);
@@ -84,7 +84,7 @@ export function Snapshots({ dir, name: name0 }) {
     const timer = setInterval(() => {
       const n = gridRef.current;
       if (!n) return;
-      const w = lord.getLayout(n.id)[2];
+      const w = insane.getLayout(n.id)[2];
       const c = Math.max(1, Math.floor((w + 12) / 208));
       if (w > 0) setCols((x) => (x === c ? x : c));
     }, 500);
@@ -98,11 +98,11 @@ export function Snapshots({ dir, name: name0 }) {
   const cur = list.find((s) => s.tag === sel) || null;
   const run = (job, what, extra = {}) => { if (!job) { setMsg({ ok: false, text: tr('machines.cfg.refused') }); return false; } setMsg(null); setBusy({ job, what, ...extra }); return true; };
   const take = (name, then) => {
-    const r = lord.vm.snapTake(dir, name);
+    const r = insane.vm.snapTake(dir, name);
     if (!r) { setMsg({ ok: false, text: tr('machines.cfg.refused') }); return; }
     run(r.job, 'take', { then });
   };
-  const revert = (s) => run(lord.vm.snapRevert(dir, s.tag), 'revert', { tag: s.tag });
+  const revert = (s) => run(insane.vm.snapRevert(dir, s.tag), 'revert', { tag: s.tag });
   const full = list.length >= lim.max;
 
   return (
@@ -182,7 +182,7 @@ export function Snapshots({ dir, name: name0 }) {
       {del ? (
         <Sheet title={tr('machines.snap.deleteTitle', { name: del.name })} onCancel={() => setDel(null)} actions={[
           <Btn key="c" label={tr('machines.cancel')} onClick={() => setDel(null)} />,
-          <Btn key="d" danger label={tr('machines.snap.delete')} onClick={() => { const s = del; setDel(null); if (run(lord.vm.snapDelete(dir, s.tag), 'delete')) setSel(null); }} />,
+          <Btn key="d" danger label={tr('machines.snap.delete')} onClick={() => { const s = del; setDel(null); if (run(insane.vm.snapDelete(dir, s.tag), 'delete')) setSel(null); }} />,
         ]}>
           <Text style={{ fontSize: 13, color: p.dim, textAlign: 'start', lineHeight: 1.5 }}>{tr('machines.snap.deleteText')}</Text>
         </Sheet>

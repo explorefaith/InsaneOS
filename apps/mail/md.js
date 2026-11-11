@@ -2,7 +2,7 @@
 // the marks for you and a preview shows the result), and goes out as text/plain plus a simple
 // text/html made here. The HTML is ours, built from parsed markdown: nothing the user types is
 // passed through as raw HTML.
-import { parseMarkdown, parseInline } from '@lordos/sdk';
+import { parseMarkdown, parseInline } from '@insaneos/sdk';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const safeUrl = (u) => (/^(https?:|mailto:)/i.test(u) ? u : '#');

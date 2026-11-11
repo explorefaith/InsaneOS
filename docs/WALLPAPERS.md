@@ -7,8 +7,8 @@ them: there is no software mode.
 
 A moving wallpaper plays only when **both** hold:
 
-- the GPU composes the session (`lord.media.composition()` is `gpu`);
-- the hardware decodes the file's format (`lord.media.hwDecode()`).
+- the GPU composes the session (`insane.media.composition()` is `gpu`);
+- the hardware decodes the file's format (`insane.media.hwDecode()`).
 
 If either is missing, the section is disabled with one line, "Moving wallpapers need a compatible GPU.", and a chosen
 wallpaper shows its still poster. H.264 is used only where it is decoded in hardware. The login screen follows the same
@@ -46,23 +46,23 @@ Videos are downloaded on demand by closed admin actions (`server/src/hw/wallpape
 
 | Action | Who | What |
 |---|---|---|
-| `wallpaper-get "<id> <variant>"` | anyone | downloads a catalog file to `/var/lib/lordos/wallpapers/<sha256>.mp4` |
+| `wallpaper-get "<id> <variant>"` | anyone | downloads a catalog file to `/var/lib/insaneos/wallpapers/<sha256>.mp4` |
 | `wallpaper-remove "<id> <variant>"` | admin | deletes it |
 | `wallpaper-login "<id> <variant>"` or `default` | admin | the login screen plays it (`login.mp4`) or the built-in one |
 
 JS names an entry, never a URL or a path. The base must be the project's GitHub owner on `raw.githubusercontent.com`, the
-bytes go through `fetch_batch` (a child as `nobody`, in the Store's scope, so the firewall sees `lordos:store`), and a file
-whose size or hash isn't the catalog's is deleted. `lord-media` keeps its sandbox and receives an open file, and
+bytes go through `fetch_batch` (a child as `nobody`, in the Store's scope, so the firewall sees `insaneos:store`), and a file
+whose size or hash isn't the catalog's is deleted. `insane-media` keeps its sandbox and receives an open file, and
 `media_open_input` accepts those two system folders besides the user's own files. `server/tests/wallpaper_find_test.c` covers the lookup.
 
 An added video stays in the user's files. It needs at most 10 s and a format this machine decodes in hardware.
 
 ## The login screen
 
-The greeter can't read a user's settings, so the choice reaches it as a file: `/var/lib/lordos/wallpapers/login.mp4`, else
-the built-in `crown.hevc.mp4` or `crown.h264.mp4`.
+The greeter can't read a user's settings, so the choice reaches it as a file: `/var/lib/insaneos/wallpapers/login.mp4`, else
+the built-in `apple.hevc.mp4` or `apple.h264.mp4`.
 
-Before 0.8.7 the login screen composed on the CPU: `lordos-greeter` couldn't open `/dev/dri/renderD128`. It now joins
+Before 0.8.7 the login screen composed on the CPU: `insaneos-greeter` couldn't open `/dev/dri/renderD128`. It now joins
 `render` and `video` (`install.sh`, the ISO, the Pi image, migration 006). That gives the login screen's process the GPU
 driver's attack surface; it already ran Mesa in software.
 
@@ -70,7 +70,7 @@ driver's attack surface; it already ran Mesa in software.
 
 Hardware HEVC needs Raspberry Pi's FFmpeg, pinned in `/etc/apt/preferences.d/raspberrypi` (migration 006 adds the pin on
 upgrades, and the next `apt` update brings the packages). That FFmpeg opens the decoder by path, so for this one job,
-`MK_PLAY` with `hwaccel=v4l2request`, `lord-media` may open two exact device files found from sysfs before the sandbox,
+`MK_PLAY` with `hwaccel=v4l2request`, `insane-media` may open two exact device files found from sysfs before the sandbox,
 reads `/sys/class`, `/sys/bus` and `/run/udev`, and gets the V4L2 and media controller ioctl classes.
 
 ## Measurements
@@ -78,11 +78,11 @@ reads `/sys/class`, `/sys/bus` and `/run/udev`, and gets the V4L2 and media cont
 | Machine | Case | Result |
 |---|---|---|
 | Pi 5, login, trial build | 1080p60 H.264, software decode, CPU composition | about 156 % of one core |
-| Pi 5, login, 0.8.7 | 1080p60 HEVC, hardware decode, GPU composition | `lord-media` 41 %, `lord-server` 147 % of one core, 30 s, SoC 52 °C with its case |
+| Pi 5, login, 0.8.7 | 1080p60 HEVC, hardware decode, GPU composition | `insane-media` 41 %, `insane-server` 147 % of one core, 30 s, SoC 52 °C with its case |
 
-Decoding is in hardware; each frame is then read back and converted to BGRA in `lord-media`, and `lord-server` paints it. That copy is why the total stays high. Showing the decoder's buffer directly on the GPU is the next step, planned for a later release.
+Decoding is in hardware; each frame is then read back and converted to BGRA in `insane-media`, and `insane-server` paints it. That copy is why the total stays high. Showing the decoder's buffer directly on the GPU is the next step, planned for a later release.
 
-Settings → Wallpaper has a switch at the top, Desktop or Login screen, and the same tiles choose for that target: a video (`wallpaper-login "<id> <variant>"`) or a still wallpaper (`wallpaper-login "still <id>"`, kept in `/var/lib/lordos/wallpapers/login-still`, shown with no video at all).
+Settings → Wallpaper has a switch at the top, Desktop or Login screen, and the same tiles choose for that target: a video (`wallpaper-login "<id> <variant>"`) or a still wallpaper (`wallpaper-login "still <id>"`, kept in `/var/lib/insaneos/wallpapers/login-still`, shown with no video at all).
 
 ## Your own pictures
 
@@ -90,9 +90,9 @@ Settings → Wallpaper → Your pictures takes a PNG or JPEG, for the desktop or
 
 | Action | Who | What |
 |---|---|---|
-| `wallpaper-image "<path>"` | anyone | makes the user's copy, `~/.local/share/lordos/wallpapers/<name>.jpg` and `.thumb.jpg`, and answers its name, 16 hex digits |
+| `wallpaper-image "<path>"` | anyone | makes the user's copy, `~/.local/share/insaneos/wallpapers/<name>.jpg` and `.thumb.jpg`, and answers its name, 16 hex digits |
 | `wallpaper-image "remove <name>"` | anyone | deletes that copy |
-| `wallpaper-login-image "<name>"` | admin | the login screen shows that copy: `/var/lib/lordos/wallpapers/login-<name>.jpg`, with `image:<name>` in `login-still` |
+| `wallpaper-login-image "<name>"` | admin | the login screen shows that copy: `/var/lib/insaneos/wallpapers/login-<name>.jpg`, with `image:<name>` in `login-still` |
 
 Root never opens the user's file and never decodes it. A child gives up root for good (`setresuid`, no new privileges, a CPU limit, 30 s from the parent) and closes every file of the helper before it reads anything, so a link to a file only root can read fails, as it would for the user. The file must be a regular file and the last step of its path can't be a link (`O_NOFOLLOW`, and `O_NONBLOCK` so a pipe can't hang it). `wallpaper-login-image` takes a name, not a path; the child reconverts the copy and sends the bytes through a pipe, and root only checks that they are a finished JPEG of an allowed size before writing them to a root-owned file, readable by all, with a name that follows its content. So the greeter, a separate user with no access to any home, only reads a system folder, and a new choice is never hidden by an image cached under the old name. Every other choice for the login screen deletes the stored picture.
 
@@ -102,7 +102,7 @@ Settings offers 1×, 0.75×, 0.5× and 0.25×. A slower speed decodes fewer fram
 
 Choosing a still wallpaper turns the moving one off, since it would stay in front. A new player can start while the last one still holds the decoder, so a stop nobody asked for is retried four times, half a second apart; the tile shows a spinner until the video plays.
 
-A moving wallpaper plays with `hwOnly`: if the hardware decoder doesn't start, or fails, `lord-media` stops rather than decoding in software, and the still image stays.
+A moving wallpaper plays with `hwOnly`: if the hardware decoder doesn't start, or fails, `insane-media` stops rather than decoding in software, and the still image stays.
 
 ## The collection
 

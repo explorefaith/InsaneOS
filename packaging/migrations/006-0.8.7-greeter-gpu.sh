@@ -1,11 +1,11 @@
 # 0.8.7: the login screen composes on the GPU and decodes its moving wallpaper in hardware
-# (docs/WALLPAPERS.md): lordos-greeter joins render and video. On the Raspberry Pi, FFmpeg comes from Raspberry
+# (docs/WALLPAPERS.md): insaneos-greeter joins render and video. On the Raspberry Pi, FFmpeg comes from Raspberry
 # Pi's archive, the only one that drives the Pi 5's HEVC decoder; the next update brings it.
-# LORDOS_MIGRATION_ROOT is for tests only.
-R=${LORDOS_MIGRATION_ROOT:-}
-if [ -z "$R" ] && getent passwd lordos-greeter >/dev/null 2>&1; then
+# INSANEOS_MIGRATION_ROOT is for tests only.
+R=${INSANEOS_MIGRATION_ROOT:-}
+if [ -z "$R" ] && getent passwd insaneos-greeter >/dev/null 2>&1; then
     for g in render video; do
-        getent group "$g" >/dev/null 2>&1 && usermod -aG "$g" lordos-greeter
+        getent group "$g" >/dev/null 2>&1 && usermod -aG "$g" insaneos-greeter
     done
 fi
 P="$R/etc/apt/preferences.d/raspberrypi"

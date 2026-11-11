@@ -1,7 +1,7 @@
 # Fans and cooling
 
 Insane OS drives the fans by temperature from the first boot, before anyone logs in, and keeps doing
-it if a session crashes. A small root service, `lord-fand`, reads the CPU temperature every two
+it if a session crashes. A small root service, `insane-fand`, reads the CPU temperature every two
 seconds and writes each fan's duty from a profile. **Settings → Cooling** picks the profile, edits a
 custom curve and runs the fans at full speed for a while; **Monitor → Cooling** shows the same
 hardware live, with the curve and a temperature/fan history.
@@ -10,10 +10,10 @@ hardware live, with the curve and a temperature/fan history.
 
 | Piece | Code |
 |---|---|
-| Root service | `server/src/fan/fand.c` (`lord-fand`), unit `tools/iso/rootfs/etc/systemd/system/lord-fand.service` |
+| Root service | `server/src/fan/fand.c` (`insane-fand`), unit `tools/iso/rootfs/etc/systemd/system/insane-fand.service` |
 | Curves, presets, `fan.json`, socket requests | `server/src/fan/fancurve.c` (pure, tested) |
 | Temperature and fan discovery, duty writes, giving control back | `server/src/fan/fanhw.c` |
-| Session API `lord.fan` | `server/src/ui/js_fan.c` (registered from `js_hw.c`) |
+| Session API `insane.fan` | `server/src/ui/js_fan.c` (registered from `js_hw.c`) |
 | Shared UI: status store, illustrations, curve chart | `sdk/cooling.jsx` |
 | Settings → Cooling | `apps/settings/Cooling.jsx` |
 | Monitor → Cooling | `apps/monitor/Cooling.jsx` |
@@ -22,7 +22,7 @@ hardware live, with the curve and a temperature/fan history.
 
 ## What it drives
 
-`lord-fand` scans sysfs once at start (`fanhw_scan`). A client never names a path or a device: it
+`insane-fand` scans sysfs once at start (`fanhw_scan`). A client never names a path or a device: it
 only picks a profile, and the daemon drives every fan it found.
 
 | Kind | Found as | How it is driven |
@@ -36,7 +36,7 @@ Temperature source, first match: a thermal zone of type `cpu-thermal`, `x86_pkg_
 `cpu_thermal`; then hwmon `k10temp`, `coretemp`, `zenpower` or `cpu_thermal` (`temp1_input`);
 then `thermal_zone0`. Without a readable temperature the fans run at 100 %.
 
-`lord-fand --detect` prints what it found. On the Raspberry Pi 5 used for testing:
+`insane-fand --detect` prints what it found. On the Raspberry Pi 5 used for testing:
 
 ```
 board: Raspberry Pi 5
@@ -97,9 +97,9 @@ cooling device to four active trip points of `cpu-thermal` (50, 60, 67.5 and 75 
    number of steps is fixed too.
 2. **Write `pwm1` directly** and keep the kernel out of the way.
 
-Insane OS does (2), with the kernel as a **backstop**: while `lord-fand` drives the fan it moves the
+Insane OS does (2), with the kernel as a **backstop**: while `insane-fand` drives the fan it moves the
 four active trips to 78, 80, 82 and 84 °C (the critical 110 °C trip is never touched). Below that
-the kernel's `step_wise` governor leaves `pwm1` alone; if `lord-fand` ever hangs and the board gets
+the kernel's `step_wise` governor leaves `pwm1` alone; if `insane-fand` ever hangs and the board gets
 hot, the kernel still spins the fan up by itself (the firmware throttles at 85 °C). Each tick the
 daemon reads `pwm1` back and rewrites it if it differs, so a kernel step in between (seen for a few
 seconds after a large change, while the governor's state settles) is corrected within 2 s.
@@ -110,8 +110,8 @@ the cooling device's `cur_state` is set to the level the kernel would pick for t
 temperature, so there is no gap. This happens:
 
 - on `SIGTERM`/`SIGINT` (stop, shutdown, package removal);
-- in `lord-fand --restore`, the unit's `ExecStopPost`, which also runs after `SIGKILL` or a crash.
-  Before taking a fan the daemon writes what it is about to change to `/run/lordos/fand.restore`
+- in `insane-fand --restore`, the unit's `ExecStopPost`, which also runs after `SIGKILL` or a crash.
+  Before taking a fan the daemon writes what it is about to change to `/run/insaneos/fand.restore`
   (`trip <index> <m°C>`, `enable <channel> <value> <device path>`); `--restore` rescans, applies only
   values that match a fan the scan found (range-checked) and deletes the file;
 - at start, if that file exists (a previous run died): restore first, then scan, so the raised
@@ -121,7 +121,7 @@ A motherboard channel gets its original `pwmN_enable` (usually 2 or 5, the chip'
 
 ## Configuration and protocol
 
-`/etc/lordos/fan.json` is written only by `lord-fand` (temporary file, `fsync`, `rename`), and read
+`/etc/insaneos/fan.json` is written only by `insane-fand` (temporary file, `fsync`, `rename`), and read
 only if it is a root-owned regular file nobody else can write. Strict reader (`sec/json.c`):
 unknown keys, wrong types or an invalid curve make it fall back to the defaults.
 
@@ -129,7 +129,7 @@ unknown keys, wrong types or an invalid curve make it fall back to the defaults.
 {"version":1,"profile":"balanced","hyst":3,"custom":[[55,30],[60,55],[65,100]],"force":"off","forceUntil":0}
 ```
 
-`/run/lordos/fand.sock` (0666), one line per connection, at most 255 bytes, printable ASCII:
+`/run/insaneos/fand.sock` (0666), one line per connection, at most 255 bytes, printable ASCII:
 
 | Request | Who | Answer |
 |---|---|---|
@@ -137,7 +137,7 @@ unknown keys, wrong types or an invalid curve make it fall back to the defaults.
 | `PROFILE auto\|quiet\|balanced\|performance\|always\|custom` | administrators | `OK` or `ERR <code>` |
 | `CURVE 55:30,60:55,65:100` | administrators | sets the custom curve and selects it |
 | `FORCE off\|on\|<1..1440 minutes>` | administrators | full speed |
-| `GPUFAN <n> auto\|<0..100>` | administrators | (0.8.8.6) GPU fan `n` of lord-fand's own scan by hand (clamped to 30–100 %) or back to automatic; `ERR fan.noGpuFan`, `ERR fan.gpuRefused` |
+| `GPUFAN <n> auto\|<0..100>` | administrators | (0.8.8.6) GPU fan `n` of insane-fand's own scan by hand (clamped to 30–100 %) or back to automatic; `ERR fan.noGpuFan`, `ERR fan.gpuRefused` |
 
 `STATUS` also has `gpuFans` (0.8.8.6): `id`, `chip` (`amdgpu`), `slot` (the PCI slot, so Monitor matches it to its
 card), `mode` (`auto` or `manual`), `set` (the duty asked for, -1 in automatic), `pct` (read back from `pwm1`; some cards
@@ -149,24 +149,24 @@ admin helper). Errors are codes (`fan.notAdmin`, `fan.badRequest`, `fan.saveFail
 translates them. A client that does not finish its line in one second is dropped; at most eight at
 a time.
 
-On the session side `lord.fan` (`js_fan.c`) validates everything again before sending, never waits
+On the session side `insane.fan` (`js_fan.c`) validates everything again before sending, never waits
 more than 300 ms for an answer, and `sdk/cooling.jsx` only polls (every 2 s) while a Cooling view
 is on screen.
 
 ## GPU fans (0.8.8.6)
 
-The maintainer approved a narrow exception for this (AGENTS.md, `lord-fand`): an AMD graphics card's fan set by hand,
-only inside `lord-fand`, never in `lord-server`, and only `amdgpu`.
+The maintainer approved a narrow exception for this (AGENTS.md, `insane-fand`): an AMD graphics card's fan set by hand,
+only inside `insane-fand`, never in `insane-server`, and only `amdgpu`.
 
-- **Found by lord-fand's own scan:** hwmon `amdgpu` with `pwm1`, `pwm1_enable` and `fan1_input`; `pwm1_min`/`pwm1_max`
+- **Found by insane-fand's own scan:** hwmon `amdgpu` with `pwm1`, `pwm1_enable` and `fan1_input`; `pwm1_min`/`pwm1_max`
   give the range (0–255 otherwise). Clients name the card by its index in that scan, never a path or a raw PWM value.
 - **By hand:** `GPUFAN <n> <pct>` from an administrator: the percentage is clamped to **30–100 %** (`fan_gpu_pct`), and
   refused while the card is at 85 °C or more. Before the first write, `pwm1_enable` and `pwm1` go into
-  `/run/lordos/fand.restore` (`gpufan <enable> <pwm> <device>`), then `pwm1_enable=1` and the duty. The curve's own
+  `/run/insaneos/fand.restore` (`gpufan <enable> <pwm> <device>`), then `pwm1_enable=1` and the duty. The curve's own
   notes stay in the same file while it drives the case fans.
 - **Back to automatic** (`pwm1_enable=2`, the card's own fan table) when asked (`GPUFAN <n> auto`), and by itself:
   above **85 °C** on any of the card's sensors (edge, junction, memory), after **3 ticks** in a row (6 s) that couldn't
-  read or write it, when **the session of the user who set it ends** (no `lord-server` of that uid in `/proc`; uid 0 has
+  read or write it, when **the session of the user who set it ends** (no `insane-server` of that uid in `/proc`; uid 0 has
   no session to follow), and on stop, restart and crash (`--restore`, `ExecStopPost`: a `gpufan` note puts the card back
   to automatic). It is never saved in `fan.json`: after a reboot the card is always automatic.
 - **Each tick** (2 s), while set by hand: the backstop, the session, and the card's state; after a suspend the driver
@@ -175,10 +175,10 @@ only inside `lord-fand`, never in `lord-server`, and only `amdgpu`.
   (`pci0000:40` and the like on some workstation boards) is read-only under the unit; writing fails and the fan goes back
   to automatic with `error`.
 - **Monitor → GPU** shows the control (an Automatic switch and a 30–100 % slider) only to administrators (`canChange`)
-  and only for the card whose PCI slot lord-fand reports; everyone else sees whether it is automatic or set by hand.
-  `lord.fan.setGpuFan(n, 'auto' | pct)` (`js_fan.c`) validates again.
+  and only for the card whose PCI slot insane-fand reports; everyone else sees whether it is automatic or set by hand.
+  `insane.fan.setGpuFan(n, 'auto' | pct)` (`js_fan.c`) validates again.
 
-`lord-fand --detect` on the RX 580 machine (Polaris, read-only):
+`insane-fand --detect` on the RX 580 machine (Polaris, read-only):
 
 ```
 board: other
@@ -192,13 +192,13 @@ no controllable fans
 
 ## The service
 
-`lord-fand.service` starts early (`sysinit.target`, before `lordos.service`), `Restart=always`,
+`insane-fand.service` starts early (`sysinit.target`, before `insaneos.service`), `Restart=always`,
 and is enabled by the package's `postinst` (also in the ISO and Raspberry Pi image chroots). It is
-hardened like `lord-netperm.service`, and more:
+hardened like `insane-netperm.service`, and more:
 
 - no capabilities at all (`CapabilityBoundingSet=` empty: root owns the sysfs files it writes);
 - `RestrictAddressFamilies=AF_UNIX`, `PrivateNetwork=yes`, `IPAddressDeny=any`;
-- `ProtectSystem=strict` with only `/etc/lordos`, `/run/lordos`, `/sys/devices/platform`,
+- `ProtectSystem=strict` with only `/etc/insaneos`, `/run/insaneos`, `/sys/devices/platform`,
   `/sys/devices/virtual/thermal` and `/sys/devices/pci0000:00` writable; `ProtectHome=yes`,
   `PrivateDevices=yes` (it uses no device node);
 - `SystemCallFilter=@system-service` minus `@privileged @resources @mount @clock @debug @module
@@ -218,7 +218,7 @@ config and socket); the unit never passes them.
   fan can be driven. Light and dark variants (`docs/polish/fans-*.png`).
 - The fan turns at a speed proportional to the real duty (eased; still at 0 %), and the fins warm
   from blue (40 °C) through amber (65 °C) to orange-red (80 °C). The rotors are turned with
-  `lord.setStyle(id, 'rotate', degrees)` on their nodes at 20 frames per second, with no React render per
+  `insane.setStyle(id, 'rotate', degrees)` on their nodes at 20 frames per second, with no React render per
   frame (until 0.8.6, they were sent as a `transform` key the engine doesn't have, so they
   stood still between React renders and the session log got `js: unsupported style 'transform'`); the timer
   stops at 0 %, while the window is minimized and with **Appearance → Reduce motion** (a new
@@ -228,10 +228,10 @@ config and socket); the unit never passes them.
   points can be dragged (temperature between their neighbours, duty in 5 % steps, never below the
   previous point); Add step / Remove step / Reset.
 - Monitor shows the curve next to a three-minute temperature/fan history (Monitor's own chart), the
-  profile, the step, every fan, and a **Full speed for 30 min** button (same `lord.fan.force`).
-- Controls are enabled when `lord-fand` says the user may change them (`canChange`).
+  profile, the step, every fan, and a **Full speed for 30 min** button (same `insane.fan.force`).
+- Controls are enabled when `insane-fand` says the user may change them (`canChange`).
 
-Measured on VM 116, headless `lord-server` with Monitor → Cooling open and the fan at 55 %, 30 s
+Measured on VM 116, headless `insane-server` with Monitor → Cooling open and the fan at 55 %, 30 s
 with nobody watching: **2.4 % CPU** with the animation, **1.9 %** with Reduce motion (the
 difference, about 0.5 % of one core, is the spinning fan). A first version that re-rendered React
 on every frame cost 8.9 %.
@@ -249,7 +249,7 @@ into a scratch folder and read; **none of them was executed**.
 - **Fan:** a 30 mm PWM blower plugged into the **Raspberry Pi 5 fan header** (manual, assembly
   step 4: "Connect the blower FAN cable … to the exposed Raspberry Pi 5 FAN Port"; features table:
   "actively controlled by the Raspberry Pi OS"). So it is the `pwmfan` board fan above, driven by
-  `lord-fand` like the Active Cooler. Measured on the user's case: 0 RPM stopped, about 2 700 RPM at
+  `insane-fand` like the Active Cooler. Measured on the user's case: 0 RPM stopped, about 2 700 RPM at
   30 %, 4 500–4 700 at 55 %, 6 700–7 400 at 100 %.
 - **No microcontroller, no HAT EEPROM.** On the user's Raspberry Pi 5 in this case there is no
   `/proc/device-tree/hat`, and with I2C bus 1 enabled at runtime (`dtparam i2c_arm=on`, removed
@@ -272,15 +272,15 @@ into a scratch folder and read; **none of them was executed**.
 
 **Detection.** The case has no EEPROM or I2C device, and its USB hub and DAC only appear after the USB-C controller is a host. So on a Raspberry Pi 5 with no case chosen, once, the Store's suggestions run the admin action `rpi-case-detect`: it loads the `dwc2` overlay until the next restart, writes nothing to the boot partition, and looks on that controller for the hub 1a86:8091 and the audio chip 0d8c:0014, as read on one Argon ONE V5. Found, the overlay stays, so the ports and sound work at once, and a card offers keeping them on. Not found, it is removed. A later unit with other chips isn't found, and is still chosen by hand. Settings → Cooling on a
 Raspberry Pi 5 shows **Case: None or another case / Argon ONE V5 case**; choosing the Argon runs
-the admin action `rpi-case argon-one-v5`, which writes `/boot/firmware/lordos-case.txt` (fixed
+the admin action `rpi-case argon-one-v5`, which writes `/boot/firmware/insaneos-case.txt` (fixed
 text, included at the end of `config.txt` by the image) and takes effect after a restart. Any other
 case gets nothing Argon-specific. The illustration shows the Argon only after it is chosen.
 
 | The vendor script | Insane OS |
 |---|---|
-| Fan daemon (Python, I2C or GPIO) | `lord-fand` (C, root, hardened); the V5's fan is on the fan header |
-| Fan curve config `/etc/argononed.conf` | Settings → Cooling, `/etc/lordos/fan.json` |
-| `dtoverlay=dwc2,dr_mode=host` (front USB, audio) | `rpi-case argon-one-v5` → `lordos-case.txt` |
+| Fan daemon (Python, I2C or GPIO) | `insane-fand` (C, root, hardened); the V5's fan is on the fan header |
+| Fan curve config `/etc/argononed.conf` | Settings → Cooling, `/etc/insaneos/fan.json` |
+| `dtoverlay=dwc2,dr_mode=host` (front USB, audio) | `rpi-case argon-one-v5` → `insaneos-case.txt` |
 | `dtparam=nvme`, `pciex1_gen=3` | already in the Insane OS image's `config.txt` |
 | `usb_max_current_enable=1` | **not set**: it lets the board draw 1.6 A for USB, which is only safe with a 5 A supply; documented here instead |
 | `PSU_MAX_CURRENT=5000` in the bootloader EEPROM | **not done**: Insane OS does not change the bootloader configuration (Settings → Board firmware, 0.8.4.1, only applies Raspberry Pi's bootloader updates, never `rpi-eeprom-config`) |
@@ -304,20 +304,20 @@ case gets nothing Argon-specific. The illustration shows the Argon only after it
   which uid has a session.
   `build/fan-test mkfake DIR pi5|pc|none` builds a tree for manual runs and screenshots.
 - On the Raspberry Pi 5 in the Argon ONE V5 case (as root from the build folder, temporary config
-  and socket under `/run/lordos-test`): detection; Balanced kept the fan off at 50–53 °C during a
+  and socket under `/run/insaneos-test`): detection; Balanced kept the fan off at 50–53 °C during a
   4-thread `yes` load (the aluminium case is a large heatsink); test curves drove it to 55 % (4 500
   RPM) and full speed (7 400 RPM); `FORCE 30` and `FORCE off`; `PROFILE turbo` and garbage refused;
   `SIGTERM` and `kill -9` + `--restore` gave the trips back (50/60/67.5/75 °C, kernel state 1 at
   51 °C). The same binary under the unit's full hardening (`systemd-run` with the unit's
   properties): trips raised, `CURVE` applied and saved, and after killing only the main process
   `ExecStopPost` restored everything.
-- On VM 116: `make -C server test` passes; headless `lord-server` with a fake-sysfs `lord-fand`
+- On VM 116: `make -C server test` passes; headless `insane-server` with a fake-sysfs `insane-fand`
   for every variant, dark and light; the custom profile selected and a point dragged with the
   pointer (the daemon logged `CURVE 55:30,60:55,72:85`).
 
 ## Not done or untested
 
-- The fan curve under the packaged `lord-fand.service` on the real Raspberry Pi: the packaged unit
+- The fan curve under the packaged `insane-fand.service` on the real Raspberry Pi: the packaged unit
   runs there (the 0.8.4 update restarted it, `ISO.md`, "Release test (0.8.4 Beta)"), but the
   measurements above were taken with the unit's properties through `systemd-run`.
 - Real PC motherboards (`nct67xx`, `it87`) and laptops: fake sysfs only.
@@ -326,5 +326,5 @@ case gets nothing Argon-specific. The illustration shows the Argon only after it
 - Several board fans with different curves (all fans follow one profile).
 - Temperature from disks (the vendor daemon also had an HDD curve).
 - GPU fans by hand on real hardware: only fake sysfs and `--detect` on the RX 580 (nothing was written to it). To try:
-  as an administrator, Monitor → GPU, Automatic off, the slider; `lord-fand --restore` and logging out must put
+  as an administrator, Monitor → GPU, Automatic off, the slider; `insane-fand --restore` and logging out must put
   `pwm1_enable` back to 2.

@@ -1,5 +1,5 @@
 #!/bin/bash
-# netperm_measure.sh — connect() and throughput with lord-netperm off, on with no rules and on
+# netperm_measure.sh — connect() and throughput with insane-netperm off, on with no rules and on
 # with 400 rules (docs/FIREWALL.md, "Measurements"). In the VM, as the session user:
 #   bash server/tests/netperm_measure.sh
 # Everything is local (127.0.0.1): nothing is downloaded from the internet.
@@ -7,12 +7,12 @@ set -u
 cd "$(dirname "$0")/.."
 cc -O2 -o /tmp/netperm-bench tests/netperm_bench.c || exit 1
 U=$(id -u)
-SC=/sys/fs/cgroup/system.slice/lordos.service/lordos-session-$U/app-lordos-npbench.scope
-FW=~/.config/lordos/firewall.json
+SC=/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-$U/app-insaneos-npbench.scope
+FW=~/.config/insaneos/firewall.json
 BACKUP=$(mktemp); HAD=0
 [ -f "$FW" ] && { cp "$FW" "$BACKUP"; HAD=1; }
-reload() { python3 -c 'import socket,struct,time;s=socket.socket(socket.AF_UNIX);s.connect("/run/lordos/netperm.sock");s.sendall(struct.pack("<IB",1,1));time.sleep(0.5)'; }
-finish() { if [ $HAD = 1 ]; then cp "$BACKUP" "$FW"; else rm -f "$FW"; fi; sudo systemctl start lord-netperm; sleep 1; reload; sudo rmdir "$SC" 2>/dev/null; rm -f "$BACKUP"; }
+reload() { python3 -c 'import socket,struct,time;s=socket.socket(socket.AF_UNIX);s.connect("/run/insaneos/netperm.sock");s.sendall(struct.pack("<IB",1,1));time.sleep(0.5)'; }
+finish() { if [ $HAD = 1 ]; then cp "$BACKUP" "$FW"; else rm -f "$FW"; fi; sudo systemctl start insane-netperm; sleep 1; reload; sudo rmdir "$SC" 2>/dev/null; rm -f "$BACKUP"; }
 trap finish EXIT
 sudo mkdir -p "$SC"
 inscope() { sudo bash -c "echo \$\$ > $SC/cgroup.procs; exec setpriv --reuid=$U --regid=$(id -g) --init-groups $*"; }
@@ -27,9 +27,9 @@ run() {
     for i in 1 2 3; do inscope /tmp/netperm-bench 20000; done
     thru
 }
-sudo systemctl stop lord-netperm; sleep 0.5
-run "lord-netperm off"
-sudo systemctl start lord-netperm; sleep 1.5
+sudo systemctl stop insane-netperm; sleep 0.5
+run "insane-netperm off"
+sudo systemctl start insane-netperm; sleep 1.5
 echo '{"v":1,"mode":"silent","trusted":[],"restricted":{},"rules":[]}' > "$FW"; reload
 run "on, no rules (silent: every new connection is counted and reported)"
 python3 - "$FW" <<'PY'

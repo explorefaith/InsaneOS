@@ -1,6 +1,6 @@
 // What a full scan found: one headline, what it is made of, "Review all", and a card per module with its real
 // number and the real things behind it. A card appears only for what the scan really found.
-import { View, Image, cleaner, useThumb, t as tr, formatBytes, formatNumber, typeScale, spacing } from '@lordos/sdk';
+import { View, Image, cleaner, useThumb, t as tr, formatBytes, formatNumber, typeScale, spacing } from '@insaneos/sdk';
 import { useMemo } from 'react';
 import { Label, Glass, GlassButton, Enter, CountUp, Tile, Bar, useFrame, usePal } from './ui.jsx';
 import { folderKinds, folderKind } from './storage.jsx';

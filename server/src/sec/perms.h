@@ -1,12 +1,12 @@
 /* perms.h — per-app permissions with system-drawn prompts (see perms.c and docs/PRIVACY.md).
  *
  * Each permission of each app has a state: ask (the first time), allowed or denied.
- * Decisions are stored per user in ~/.config/lordos/permisos.json, a file that
- * apps can NOT write (it's on lord.fs's deny list, like settings.json). The
+ * Decisions are stored per user in ~/.config/insaneos/permisos.json, a file that
+ * apps can NOT write (it's on insane.fs's deny list, like settings.json). The
  * broker (and, while apps run in the same context, the system SDK) looks it up here:
  * the lookup is O(1) over an in-memory table. */
-#ifndef LORD_SEC_PERMS_H
-#define LORD_SEC_PERMS_H
+#ifndef INSANE_SEC_PERMS_H
+#define INSANE_SEC_PERMS_H
 
 #include <stddef.h>
 
@@ -44,8 +44,8 @@ void perm_forget(const char *app_id);
 typedef struct { char app[48]; Perm perm; PermState state; long long when; } PermEntry;
 int perm_list(PermEntry *out, int max);
 
-/* Loads permisos.json (once). The path is added to lord.fs's deny list. */
+/* Loads permisos.json (once). The path is added to insane.fs's deny list. */
 void perm_init(const char *home);
-const char *perm_file_suffix(void);         /* "/.config/lordos/permisos.json" for the deny list */
+const char *perm_file_suffix(void);         /* "/.config/insaneos/permisos.json" for the deny list */
 
 #endif

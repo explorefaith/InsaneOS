@@ -1,7 +1,7 @@
 /* shape.h — shaping of a text run with a single font, script and direction: mirroring
  * in RTL, Arabic joining forms, GSUB and GPOS (otf.c). See shape.c. */
-#ifndef LORD_SHAPE_H
-#define LORD_SHAPE_H
+#ifndef INSANE_SHAPE_H
+#define INSANE_SHAPE_H
 
 #include <stdint.h>
 

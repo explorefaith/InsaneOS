@@ -8,8 +8,8 @@
  *   - physical px: the display's own pixels (its mode, after rotation).
  *   - scale: physical px per logical px, in percent (100 to 300 in 25 % steps).
  */
-#ifndef LORD_OUTPUTS_H
-#define LORD_OUTPUTS_H
+#ifndef INSANE_OUTPUTS_H
+#define INSANE_OUTPUTS_H
 
 #include "canvas.h"
 

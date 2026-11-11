@@ -1,6 +1,6 @@
-/* draw.h — lordos-testbench's pixel drawing (see draw.c). */
-#ifndef LORD_TESTBENCH_DRAW_H
-#define LORD_TESTBENCH_DRAW_H
+/* draw.h — insaneos-testbench's pixel drawing (see draw.c). */
+#ifndef INSANE_TESTBENCH_DRAW_H
+#define INSANE_TESTBENCH_DRAW_H
 
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
 /* defaults_test.c — the default app for a MIME type (apps_default_for in src/apps.c, the files in
- * src/hw/defaults.c) and lord.apps.launchWith('', path) on top of it, over a fake XDG tree: a
+ * src/hw/defaults.c) and insane.apps.launchWith('', path) on top of it, over a fake XDG tree: a
  * temporary folder stands for "/" (defaults_set_root) with its own /usr/share/applications,
  * /etc/xdg and /usr/share/mime/globs2, and a temporary HOME.
  *
@@ -7,7 +7,7 @@
  * (by desktop id, then mimeinfo.cache order); Hidden, NoDisplay, Terminal, a missing TryExec, an Exec
  * without a file code or with a missing program skipped; the system's mimeapps.list/defaults.list
  * (in the specification's order, an uninstalled entry skipped); the user's choice wins, also as
- * "lordos-<app>.desktop"; [Removed Associations]; going back to automatic; ids and paths outside
+ * "insaneos-<app>.desktop"; [Removed Associations]; going back to automatic; ids and paths outside
  * the launcher's folders ignored. The launched app copies the file it was given to a marker. */
 #include "apps.h"
 #include "fsops.h"
@@ -99,7 +99,7 @@ static int opened(const char *id) {
 }
 
 int main(void) {
-    snprintf(root, sizeof root, "/tmp/lord-defaults-XXXXXX");
+    snprintf(root, sizeof root, "/tmp/insane-defaults-XXXXXX");
     if (!mkdtemp(root)) { perror("mkdtemp"); return 1; }
     snprintf(home, sizeof home, "%s/home", root);
     const char *dirs[] = { "/usr", "/usr/share", "/usr/share/applications", "/usr/share/mime", "/usr/local", "/usr/local/share",
@@ -111,7 +111,7 @@ int main(void) {
     snprintf(userapps, sizeof userapps, "%s/.local/share/applications", home);
     setenv("HOME", home, 1);
     unsetenv("XDG_CONFIG_HOME");
-    unsetenv("LORDOS_SESSIOND");
+    unsetenv("INSANEOS_SESSIOND");
     defaults_set_root(root);
     char real[512];
     if (!realpath(home, real)) { perror(home); return 1; }
@@ -149,9 +149,9 @@ int main(void) {
     app(0, "aa-hidden", "text/html;", "Hidden=true\n", NULL);
     app(0, "ab-nodisplay", "text/html;", "NoDisplay=true\n", NULL);
     app(0, "ac-terminal", "text/html;", "Terminal=true\n", NULL);
-    app(0, "ad-tryexec", "text/html;", "TryExec=/nonexistent/lord-browser\n", NULL);
-    app(0, "ae-nofile", "text/html;", NULL, "/bin/cp /etc/hostname /tmp/lord-defaults-never");
-    app(0, "af-noprog", "text/html;", NULL, "/nonexistent/lord-browser %u");
+    app(0, "ad-tryexec", "text/html;", "TryExec=/nonexistent/insane-browser\n", NULL);
+    app(0, "ae-nofile", "text/html;", NULL, "/bin/cp /etc/hostname /tmp/insane-defaults-never");
+    app(0, "af-noprog", "text/html;", NULL, "/nonexistent/insane-browser %u");
     app(0, "ag-other", "text/plain;", NULL, NULL);
     app(0, "ah-onlyshow", "text/html;", "OnlyShowIn=GNOME;\n", NULL);
     CHECK("unusable apps: none", is("text/html", NULL, 0));
@@ -189,16 +189,16 @@ int main(void) {
     app(0, "mail-only", "x-scheme-handler/mailto;", NULL, NULL);
     sysfile("/etc/xdg/mimeapps.list", "[Default Applications]\ntext/html=mail-only.desktop;\n");
     CHECK("/etc/xdg first; a default need not declare the type", is("text/html", "mail-only.desktop", APPS_DEFAULT_LISTED));
-    sysfile("/etc/xdg/mimeapps.list", "[Default Applications]\ntext/html=lordos-photos.desktop;\n");
-    CHECK("a system lordos- entry is not installed: skipped", is("text/html", "zeta-browser.desktop", APPS_DEFAULT_LISTED));
+    sysfile("/etc/xdg/mimeapps.list", "[Default Applications]\ntext/html=insaneos-photos.desktop;\n");
+    CHECK("a system insaneos- entry is not installed: skipped", is("text/html", "zeta-browser.desktop", APPS_DEFAULT_LISTED));
     sysfile("/etc/xdg/mimeapps.list", NULL);
 
     /* 5. the user's choice wins */
     userlist("[Default Applications]\ntext/html=beta-browser.desktop;\n");
     CHECK("the user's choice", is("text/html", "beta-browser.desktop", APPS_DEFAULT_USER));
-    CHECK("lord.mime.get sees it", defaults_lookup("text/html", id, sizeof id) == 0 && !strcmp(id, "beta-browser.desktop"));
-    userlist("[Default Applications]\ntext/html=lordos-editor.desktop;\n");
-    CHECK("the user's lordos- choice", is("text/html", "lordos-editor.desktop", APPS_DEFAULT_USER));
+    CHECK("insane.mime.get sees it", defaults_lookup("text/html", id, sizeof id) == 0 && !strcmp(id, "beta-browser.desktop"));
+    userlist("[Default Applications]\ntext/html=insaneos-editor.desktop;\n");
+    CHECK("the user's insaneos- choice", is("text/html", "insaneos-editor.desktop", APPS_DEFAULT_USER));
     CHECK("launchWith('') leaves it to the theme", apps_launch_with("", page) != 0);
     userlist("[Default Applications]\ntext/html=ghost.desktop;\n");
     CHECK("an uninstalled user choice falls through", is("text/html", "zeta-browser.desktop", APPS_DEFAULT_LISTED));

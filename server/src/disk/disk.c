@@ -539,7 +539,7 @@ int disk_watch_dispatch(void) {
     return changed;
 }
 
-/* The disk's identity as lord.disks.list() shows it (the Insane OS Imager re-checks it right before
+/* The disk's identity as insane.disks.list() shows it (the Insane OS Imager re-checks it right before
  * writing, so a stick swapped under the same name is refused): the model (sysfs or udev; a loop
  * device's backing file) and the short serial (udev, may be empty). */
 int disk_identity(const char *name, char *model, size_t mn, char *serial, size_t sn) {

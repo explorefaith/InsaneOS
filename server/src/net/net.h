@@ -1,29 +1,29 @@
 /* net.h — Insane OS's own networking and VPN (see docs/NETWORK.md).
  *
  * Two sides:
- *  - lord-server (no root): reads the state with rtnetlink (interfaces, addresses, routes,
- *    counters) and listens for changes; lord.net (ui/js_net.c) exposes it to JS.
+ *  - insane-server (no root): reads the state with rtnetlink (interfaces, addresses, routes,
+ *    counters) and listens for changes; insane.net (ui/js_net.c) exposes it to JS.
  *  - the privileged helper (admin.c, root): the "net-*" actions in the table below:
  *    configuring interfaces, our own DHCP client, Wi-Fi (wpa_supplicant), WireGuard (our own
  *    netlink) and OpenVPN. */
-#ifndef LORD_NET_H
-#define LORD_NET_H
+#ifndef INSANE_NET_H
+#define INSANE_NET_H
 
 #include <stddef.h>
 #include "../admin.h"
 
-/* ---- lord-server side ---- */
+/* ---- insane-server side ---- */
 
 int  net_open(void);                    /* rtnetlink notification socket; 0 ok */
 int  net_fd(void);                      /* for poll; -1 if not there */
-/* There were notifications: consumes them and, if something changed, calls fn once (JS __lordNet). */
+/* There were notifications: consumes them and, if something changed, calls fn once (JS __insaneNet). */
 void net_dispatch(void (*fn)(const char *what));
 
-/* JSON (malloc; the caller frees) for lord.net. NULL on failure. */
+/* JSON (malloc; the caller frees) for insane.net. NULL on failure. */
 char *net_interfaces_json(void);
 char *net_routes_json(void);
 char *net_dns_json(void);
-char *net_vpn_list_json(void);          /* public metadata from /etc/lordos/net/vpn */
+char *net_vpn_list_json(void);          /* public metadata from /etc/insaneos/net/vpn */
 char *net_wifi_known_json(void);
 /* [{type, available, optional, package, insecure}] of the VPN types */
 char *net_vpn_types_json(void);
@@ -55,17 +55,17 @@ void net_act_vpn_delete(const AdminReq *r, const char *arg, size_t len);
 void net_act_vpn_status(const AdminReq *r, const char *arg, size_t len);
 void net_act_vpn_enable(const AdminReq *r, const char *arg, size_t len);
 
-/* lord-netd: interfaces that appear after boot (a radio whose firmware is still loading, a USB adapter).
+/* insane-netd: interfaces that appear after boot (a radio whose firmware is still loading, a USB adapter).
  * net_watch_open returns the fd for poll; net_watch_timeout the poll timeout (-1: nothing is waiting);
  * net_watch_run(fd was readable) goes after each poll. */
 int  net_watch_open(void);
 int  net_watch_timeout(void);
 void net_watch_run(int readable);
-/* lord-netd: the computer is going to sleep (1) or woke (0); source for the log ("logind", "clock").
+/* insane-netd: the computer is going to sleep (1) or woke (0); source for the log ("logind", "clock").
  * On waking, wired DHCP clients renew and each Wi-Fi interface is checked and, if it carries nothing,
  * re-associated or turned off and on (wake.c). net_watch_run also notices a wake nobody announced. */
 void net_wake_event(int sleeping, const char *source);
-/* lord-netd: logind's PrepareForSleep over the system bus (sleepbus.c). net_sleep_poll gives the fd
+/* insane-netd: logind's PrepareForSleep over the system bus (sleepbus.c). net_sleep_poll gives the fd
  * (-1: not connected) and its poll events; net_sleep_timeout when to try connecting again (-1: never);
  * net_sleep_run goes after each poll and calls net_wake_event. */
 int  net_sleep_poll(short *events);

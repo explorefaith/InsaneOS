@@ -1,7 +1,7 @@
-// media.js — video, music, photos, screenshots, camera and recorder (lord.media, see docs/MEDIA.md).
+// media.js — video, music, photos, screenshots, camera and recorder (insane.media, see docs/MEDIA.md).
 //
-// Decoding and encoding is done by lord-media, an isolated helper (no network or file access)
-// that lord-server launches on demand; here we only request things by id and receive events.
+// Decoding and encoding is done by insane-media, an isolated helper (no network or file access)
+// that insane-server launches on demand; here we only request things by id and receive events.
 //
 //   const id = media.play('player', path, { loop: false });   // a player
 //   <MediaView media={id} style={{ flex: 1 }} />              // where it's shown (C draws it)
@@ -9,12 +9,12 @@
 //   media.control(id, 'seek', 30000)
 //
 // Errors (the `error` of a job result and of a player's state) are code lines such as
-// "media.notAnImage": show them with errorText() (sdk/errors.js). 'crash' means lord-media died.
+// "media.notAnImage": show them with errorText() (sdk/errors.js). 'crash' means insane-media died.
 //
 // Camera, microphone and screen ask for permission (requestPermission, the system prompt) and the
 // server checks it again. While in use, the menu bar indicators light up.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text, Image, MediaView, addListener } from '@lordos/runtime';
+import { View, Text, Image, MediaView, addListener } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { requestPermission, markDeviceUse } from './privacy.js';
 import { t } from './i18n.js';
@@ -24,12 +24,12 @@ import { wm } from './windows.js';
 import { canMarkup } from './imageeditmodel.js';
 import { waitFor } from './doc.js';
 
-const api = () => (typeof lord !== 'undefined' && lord.media) || null;
+const api = () => (typeof insane !== 'undefined' && insane.media) || null;
 const listeners = new Map();          // id → Set(fn(type, data))
 const pending = new Map();            // job id → resolve
 export const thumbRev = createStore(0);   // goes up when a thumbnail arrives
 
-globalThis.__lordMedia = (id, type, data) => {
+globalThis.__insaneMedia = (id, type, data) => {
   if (type === 'job') {
     const done = pending.get(data && data.id);
     if (done) { pending.delete(data.id); done(data); }
@@ -68,7 +68,7 @@ export const media = {
   info: (id) => call('info', id),
   // photos: id of a decoded image ("ready" event with { width, height, orientation, animated })
   image(app, path) { const id = call('image', app, path); if (id) track(id); return id; },
-  // thumbnail in ~/.cache/lordos/thumbs (path) or null while it's being made (thumbRev arrives)
+  // thumbnail in ~/.cache/insaneos/thumbs (path) or null while it's being made (thumbRev arrives)
   thumb: (path, size = 256) => { try { return call('thumb', path, size); } catch (e) { return null; } },
   probe: (path) => job(() => call('probe', path)).then((r) => (r.ok ? r.result : null)),
   waveform: (path, bars = 200) => job(() => call('waveform', path, bars)).then((r) => (r.ok ? r.result : null)),
@@ -86,7 +86,7 @@ export const media = {
   crop: (id, x, y, w, hh, radius = 0) => call('crop', id, Math.round(x), Math.round(y), Math.round(w), Math.round(hh), Math.round(radius) || 0),
   // a few pixels of a screenshot or picture as RGBA bytes (Screenshots' magnifier and color picker), at most 64 × 64
   pixels: (id, x, y, w, hh) => call('pixels', id, Math.round(x), Math.round(y), Math.round(w), Math.round(hh)),
-  // the text in a screenshot or picture (the confined lord-ocr helper, Tesseract), in these languages
+  // the text in a screenshot or picture (the confined insane-ocr helper, Tesseract), in these languages
   // ('eng+spa'): resolves with the text; rejects with code no-language when that data isn't installed
   async ocr(id, langs) {
     const r = call('ocr', id, langs);
@@ -119,7 +119,7 @@ export const media = {
   cameras: () => call('cameras') || [],
   // A packaged app's live stream (docs/PACKAGED-APPS.md, "Live media"): what its companion hands over under `tag` shows in a <MediaView>.
   live(app, tag) { const id = call('live', app, tag); if (id) track(id); return id; },
-  // The microphone of a live stream, for a call: asks for the permission, and lord-server checks it again.
+  // The microphone of a live stream, for a call: asks for the permission, and insane-server checks it again.
   async liveMic(app, id, on) {
     if (on && !(await requestPermission(app, 'microphone'))) return false;
     return !!call('liveMic', id, on);
@@ -143,10 +143,10 @@ export const media = {
 };
 
 // The markup editor (Screenshots' editor: crop, resize, redact, arrows, text…) on a picture file, from
-// Photos and Files' Quick Preview. Only raster pictures lord-media decodes (imageeditmodel.js MARKUP_RE).
+// Photos and Files' Quick Preview. Only raster pictures insane-media decodes (imageeditmodel.js MARKUP_RE).
 export function openMarkup(path) {
   if (!path || !canMarkup(path)) return null;
-  const sw = (typeof lord !== 'undefined' && lord.screen) || { width: 1280, height: 800 };
+  const sw = (typeof insane !== 'undefined' && insane.screen) || { width: 1280, height: 800 };
   const w = Math.min(1100, sw.width - 80), h = Math.min(740, sw.height - 120);
   return wm.open('screenshots', { instance: `edit${Date.now().toString(36)}`, args: { path },
     frame: { x: Math.round((sw.width - w) / 2), y: 50, w, h } });

@@ -104,9 +104,9 @@
         {
           "id": "maild",
           "label": {
-            "en": "lord-maild",
-            "es": "lord-maild",
-            "pt": "lord-maild"
+            "en": "insane-maild",
+            "es": "insane-maild",
+            "pt": "insane-maild"
           },
           "sub": {
             "en": "Sandboxed: TLS, IMAP, SMTP, DAV, MIME, HTML; no sockets of its own",
@@ -118,9 +118,9 @@
         {
           "id": "connector",
           "label": {
-            "en": "Connector in lord-server",
-            "es": "Conector en lord-server",
-            "pt": "Conector no lord-server"
+            "en": "Connector in insane-server",
+            "es": "Conector en insane-server",
+            "pt": "Conector no insane-server"
           },
           "sub": {
             "en": "Connects only to servers in your accounts file",
@@ -174,9 +174,9 @@
         }
       ],
       "caption": {
-        "en": "The helper that parses untrusted mail can't open a connection; lord-server opens it only to approved servers and hands it over.",
-        "es": "El ayudante que lee correo no confiable no puede abrir una conexión; lord-server la abre solo hacia servidores aprobados y se la pasa.",
-        "pt": "O ajudante que lê e-mail não confiável não consegue abrir conexão; o lord-server abre só para servidores aprovados e a entrega."
+        "en": "The helper that parses untrusted mail can't open a connection; insane-server opens it only to approved servers and hands it over.",
+        "es": "El ayudante que lee correo no confiable no puede abrir una conexión; insane-server la abre solo hacia servidores aprobados y se la pasa.",
+        "pt": "O ajudante que lê e-mail não confiável não consegue abrir conexão; o insane-server abre só para servidores aprovados e a entrega."
       }
     }
   ],
@@ -184,9 +184,9 @@
     {
       "path": "server/src/mail/maild.c",
       "what": {
-        "en": "The lord-maild helper",
-        "es": "El ayudante lord-maild",
-        "pt": "O ajudante lord-maild"
+        "en": "The insane-maild helper",
+        "es": "El ayudante insane-maild",
+        "pt": "O ajudante insane-maild"
       }
     },
     {
@@ -208,9 +208,9 @@
     {
       "path": "server/src/ui/js_mail.c",
       "what": {
-        "en": "lord.mail, the session API",
-        "es": "lord.mail, la API de la sesión",
-        "pt": "lord.mail, a API da sessão"
+        "en": "insane.mail, the session API",
+        "es": "insane.mail, la API de la sesión",
+        "pt": "insane.mail, a API da sessão"
       }
     },
     {

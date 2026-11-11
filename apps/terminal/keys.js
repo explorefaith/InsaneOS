@@ -8,7 +8,7 @@
 //   · terminal.keyMap y perfil.keyMap: [{ combo, action, param }] con action = 'text' (enviar
 //     texto, admite \n \t \e \a \\ \xHH), 'escape' (Esc + texto), 'hex' ("0x1b 0x5b 0x41"),
 //     'ignore' o el nombre de una acción. Las del perfil ganan a las globales, y ambas a los atajos.
-import { createStore, t } from '@lordos/sdk';
+import { createStore, t } from '@insaneos/sdk';
 import { terminalSettings } from './profiles.js';
 
 const CODE_KEYS = {

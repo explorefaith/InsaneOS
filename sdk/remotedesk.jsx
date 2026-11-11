@@ -1,13 +1,13 @@
 // remotedesk.jsx — Remote Desk, the RDP and VNC app (docs/FILES.md, "Remote desktop"). Three kinds of window:
 //   the list (no args): a sidebar (Favorites, Devices), a toolbar (add, pictures or list, sort, show, search) and the saved
 //     computers as cards with the picture of their last session, or as rows;
-//   a session (args.connect: a device id): the remote screen drawn by the engine as a media node; lord-rdesk paints a
+//   a session (args.connect: a device id): the remote screen drawn by the engine as a media node; insane-rdesk paints a
 //     shared picture and takes the input from here. There is no client window;
 //   the settings (args.prefs): General, Credentials and Groups.
 // Addresses are in settings, passwords only in the keyring (sdk/lan.js, service rdesk://<credential id>/). The data and
 // its migration from older versions are in sdk/remotedeskmodel.js.
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, Image, MediaView, addListener } from '@lordos/runtime';
+import { View, Text, Image, MediaView, addListener } from '@insaneos/runtime';
 import { useTheme, popupBg } from './theme.js';
 import { useAppWindow, useWindowState, Segmented, SidebarItem, useKeyboard, hasTextFocus } from './components.jsx';
 import { useStore } from './store.js';
@@ -102,18 +102,18 @@ function Screen({ id, st, onEnd, focused, name, winId, folders, swap }) {
     const send = (e, on) => {
       const sym = on ? symOf(e) : down.current.get(e.code) || symOf(e);
       if (on) down.current.set(e.code, sym); else down.current.delete(e.code);
-      lord.rdesk.key(id, sym, scanOf(e), on ? 1 : 0);
+      insane.rdesk.key(id, sym, scanOf(e), on ? 1 : 0);
     };
     const a = addListener('keydown', (e) => send(e, true)), b = addListener('keyup', (e) => send(e, false));
     return () => { a(); b(); };
   }, [focused, id]);
   const at = (e) => {
-    const [x, y, w, ht] = lord.getLayout(box.current.id);
+    const [x, y, w, ht] = insane.getLayout(box.current.id);
     const k = Math.min(w / st.w, ht / st.h), ox = x + (w - st.w * k) / 2, oy = y + (ht - st.h * k) / 2;
     return [Math.max(0, Math.min(st.w - 1, Math.round((e.x - ox) / k))), Math.max(0, Math.min(st.h - 1, Math.round((e.y - oy) / k)))];
   };
   const last = useRef([0, 0]);          // a release has no position of its own
-  const ptr = (e, extra = 0) => { if (e) last.current = at(e); lord.rdesk.pointer(id, last.current[0], last.current[1], swapButtons(buttons.current, swap) | extra); };
+  const ptr = (e, extra = 0) => { if (e) last.current = at(e); insane.rdesk.pointer(id, last.current[0], last.current[1], swapButtons(buttons.current, swap) | extra); };
   useEffect(() => addListener('pointerup', (e) => { if (buttons.current) { buttons.current &= ~bit(e.button); ptr(null); } }), [id, swap]);
   const full = useStore(windows, (ws) => !!ws.find((w) => w.id === winId)?.fullscreen);
   const inset = full ? 0 : 36;
@@ -128,8 +128,8 @@ function Screen({ id, st, onEnd, focused, name, winId, folders, swap }) {
 
 function sendCad(id) {
   const keys = [[0xffe3, 29], [0xffe9, 56], [0xffff, 0x153]];
-  keys.forEach(([sym, scan]) => lord.rdesk.key(id, sym, scan, 1));
-  keys.reverse().forEach(([sym, scan]) => lord.rdesk.key(id, sym, scan, 0));
+  keys.forEach(([sym, scan]) => insane.rdesk.key(id, sym, scan, 1));
+  keys.reverse().forEach(([sym, scan]) => insane.rdesk.key(id, sym, scan, 0));
 }
 
 // The strip above a session: always there in a window, and at the top edge when the session fills the screen.
@@ -250,7 +250,7 @@ function Folders({ draft, set }) {
     bad ? h(Note, { color: RED }, tr('remotedesk.folderBad')) : null);
 }
 
-// what RDP brings over from this computer, and what lord-rdesk can't do yet
+// what RDP brings over from this computer, and what insane-rdesk can't do yet
 function DevicesTab({ draft, set }) {
   const t = useTheme();
   const rows = [['devKeyboard', true], ['devFolders', true, draft.folders.length ? tr('remotedesk.devFoldersOn', { count: draft.folders.length }) : tr('remotedesk.devFoldersOff')],
@@ -287,7 +287,7 @@ function DeviceSheet({ start, onCancel, onSaved }) {
     const d = { ...draft, id: draft.id || newId(), host: parsed.host, port: parsed.port, name: draft.name.trim(), folders: rdp ? draft.folders : [] };
     // a computer whose address changed isn't the one in its old picture or trusted certificate
     const moved = start.id && (start.host !== d.host || start.port !== d.port || start.proto !== d.proto);
-    if (moved && start.shot) { lord.rdesk?.forgetSnapshot?.(d.id); d.shot = 0; }
+    if (moved && start.shot) { insane.rdesk?.forgetSnapshot?.(d.id); d.shot = 0; }
     putDesks((x) => ({ devices: start.id ? x.devices.map((y) => (y.id === d.id ? d : y)) : [d, ...x.devices].slice(0, MAX_DEVICES) }));
     onSaved(d);
   };
@@ -490,7 +490,7 @@ function ListWindow({ winId, args }) {
     ]);
   }, [winId, sel, selected?.fav, selected?.proto, view, side, sort, r.sections]);
   const remove = (d) => {
-    lord.rdesk?.forgetSnapshot?.(d.id);
+    insane.rdesk?.forgetSnapshot?.(d.id);
     putDesks((x) => ({ devices: x.devices.filter((y) => y.id !== d.id) }));
     setAsk(null);
   };
@@ -598,24 +598,24 @@ function SessionWindow({ winId, devId, focused }) {
         { label: tr('remotedesk.disconnect'), disabled: !id, onClick: () => close() },
         { label: tr('remotedesk.sendCad'), disabled: !live || d?.proto !== 'rdp', onClick: () => sendCad(id) },
         { label: tr(full ? 'remotedesk.exitFullscreen' : 'remotedesk.fullscreen'), disabled: !live, onClick: () => wm.setFullscreen(winId, !full) },
-        { label: tr('remotedesk.refreshPicture'), disabled: !live, onClick: () => { if (lord.rdesk.snapshot(id, d.id)) putDevice(d.id, { shot: Date.now() }); } },
+        { label: tr('remotedesk.refreshPicture'), disabled: !live, onClick: () => { if (insane.rdesk.snapshot(id, d.id)) putDevice(d.id, { shot: Date.now() }); } },
         '-',
         { label: tr('remotedesk.editDevice'), disabled: !d, onClick: () => setEditing(true) },
       ] },
     ]);
   }, [winId, id, live, full, d?.proto]);
-  useEffect(() => () => { if (id && !windows.get().some((w) => w.id === winId)) lord.rdesk.close(id); }, [id]);
-  const stop = () => { if (id) lord.rdesk.close(id); setId(0); setSt(null); setEntered(false); wm.setFullscreen(winId, false); };
+  useEffect(() => () => { if (id && !windows.get().some((w) => w.id === winId)) insane.rdesk.close(id); }, [id]);
+  const stop = () => { if (id) insane.rdesk.close(id); setId(0); setSt(null); setEntered(false); wm.setFullscreen(winId, false); };
   const close = () => { stop(); secret.current = null; wm.close(winId); };
   const start = (sec) => {
     setError('');
     setPrompt(null);
     let [w, ht] = resSize(d.res);
     if (!w || d.proto === 'vnc') {
-      const l = root.current ? lord.getLayout(root.current.id) : [0, 0, 1280, 800];
+      const l = root.current ? insane.getLayout(root.current.id) : [0, 0, 1280, 800];
       w = Math.round(l[2]) & ~1; ht = Math.round(l[3] - 36) & ~1;
     }
-    const n = lord.rdesk.open(d.proto, d.host, Number(d.port) || 0, sec.user || '', sec.domain || '', sec.password || '', Math.max(w, 640), Math.max(ht, 480),
+    const n = insane.rdesk.open(d.proto, d.host, Number(d.port) || 0, sec.user || '', sec.domain || '', sec.password || '', Math.max(w, 640), Math.max(ht, 480),
       (d.folders || []).map((x) => [x.name, x.path, !!x.ro]), { admin: !!d.admin, scale: d.scale || 100, sound: SOUNDS.includes(d.sound) ? d.sound : 'here', depth: DEPTHS.includes(d.depth) ? d.depth : 32 });
     if (!n) { setError(tr('remotedesk.err.failed')); return; }
     secret.current = sec;
@@ -633,10 +633,10 @@ function SessionWindow({ winId, devId, focused }) {
     if (!id) return undefined;
     const timers = [];
     const timer = setInterval(() => {
-      const p = lord.rdesk.poll(id);
+      const p = insane.rdesk.poll(id);
       if (!p) return;
       const trusted = desksOf(settings.get()).certs || {};
-      if (p.cert && certCheck(trusted, keyOf(d), p.cert).kind === 'known') lord.rdesk.cert(id, 1);
+      if (p.cert && certCheck(trusted, keyOf(d), p.cert).kind === 'known') insane.rdesk.cert(id, 1);
       else setSt(p);
       if (p.state === 'connected') {
         setEntered((was) => {
@@ -647,7 +647,7 @@ function SessionWindow({ winId, devId, focused }) {
           if (sec?.saveTo && sec.password) { rememberCred(sec.saveTo, sec.password); secret.current = { ...sec, saveTo: null }; }
           if (d.full) wm.setFullscreen(winId, true);
           if (desksOf(settings.get()).pictures !== false) {
-            for (const ms of PICTURE_AT) timers.push(setTimeout(() => { if (lord.rdesk.snapshot(id, d.id)) putDevice(d.id, { shot: Date.now() }); }, ms));
+            for (const ms of PICTURE_AT) timers.push(setTimeout(() => { if (insane.rdesk.snapshot(id, d.id)) putDevice(d.id, { shot: Date.now() }); }, ms));
           }
           return true;
         });
@@ -670,7 +670,7 @@ function SessionWindow({ winId, devId, focused }) {
   }, [id]);
   const acceptCert = (ok) => {
     if (ok) putDesks((x) => ({ certs: { ...(x.certs || {}), [keyOf(d)]: st.cert } }));
-    lord.rdesk.cert(id, ok ? 1 : 0);
+    insane.rdesk.cert(id, ok ? 1 : 0);
     setSt({ ...st, cert: '' });
   };
   if (!d) return h(EmptyState, { mascot: 'confused', title: tr('remotedesk.err.gone'), action: h(Button, { label: tr('remotedesk.close'), onClick: close }) });
@@ -789,7 +789,7 @@ function PrefsWindow({ winId }) {
         h(Note, { key: 'ph' }, tr('remotedesk.picturesHint')),
         h(View, { key: 'pd', style: { flexDirection: 'row', alignItems: 'center', gap: 10 } },
           h(Button, { label: tr('remotedesk.picturesDelete'), disabled: !r.devices.some((d) => d.shot), onClick: () => {
-            r.devices.forEach((d) => { if (d.shot) lord.rdesk?.forgetSnapshot?.(d.id); });
+            r.devices.forEach((d) => { if (d.shot) insane.rdesk?.forgetSnapshot?.(d.id); });
             putDesks((x) => ({ devices: x.devices.map((d) => ({ ...d, shot: 0 })) }));
             setCleared(true);
           } }),

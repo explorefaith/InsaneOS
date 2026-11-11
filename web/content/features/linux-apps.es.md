@@ -18,11 +18,11 @@ El truco es un idioma en común. Las apps de Linux hablan **Wayland**, un protoc
 
 ## Cómo se abren
 
-Las apps con un archivo `.desktop` aparecen en el lanzador de apps, en el menú de inicio del tema Insane Classic y en Buscar, con sus íconos. Tocar una pasa por una puerta en `lord-server` que es angosta a propósito:
+Las apps con un archivo `.desktop` aparecen en el lanzador de apps, en el menú de inicio del tema Insane Classic y en Buscar, con sus íconos. Tocar una pasa por una puerta en `insane-server` que es angosta a propósito:
 
 1. La interfaz solo puede pasar el **id** de un archivo `.desktop` que ya esté instalado en `/usr/share/applications` o `~/.local/share/applications`, nunca un comando.
-2. `lord-server` vuelve a leer ese archivo, verifica que sea una aplicación real, visible y que no sea de terminal, y arma el comando a partir de su línea `Exec` según la especificación, sin shell y sin argumentos de quien llama. "Abrir con" en Archivos puede agregar exactamente un archivo, solo si la app declara los tipos de archivo que maneja y el archivo está en tu carpeta personal o en un disco que montaste.
-3. La app arranca en su propio cgroup, `app-lordos-<id>.scope`, creado por root, así el Monitor, el firewall por app y sus restricciones saben a qué app pertenece cada proceso. Si le restringiste a la app tus archivos, acá es también donde recibe su propia vista: sus propios espacios de nombres, una carpeta personal vacía con solo sus propias carpetas, y Landlock.
+2. `insane-server` vuelve a leer ese archivo, verifica que sea una aplicación real, visible y que no sea de terminal, y arma el comando a partir de su línea `Exec` según la especificación, sin shell y sin argumentos de quien llama. "Abrir con" en Archivos puede agregar exactamente un archivo, solo si la app declara los tipos de archivo que maneja y el archivo está en tu carpeta personal o en un disco que montaste.
+3. La app arranca en su propio cgroup, `app-insaneos-<id>.scope`, creado por root, así el Monitor, el firewall por app y sus restricciones saben a qué app pertenece cada proceso. Si le restringiste a la app tus archivos, acá es también donde recibe su propia vista: sus propios espacios de nombres, una carpeta personal vacía con solo sus propias carpetas, y Landlock.
 
 El JavaScript de Insane OS no puede escribir archivos `.desktop`, así que la interfaz no puede inventar un comando: solo puede elegir una app que ya está instalada.
 
@@ -40,7 +40,7 @@ El JavaScript de Insane OS no puede escribir archivos `.desktop`, así que la in
 - **Nítidas en cualquier escala.** Cada pantalla es un `wl_output` aparte, y la escala fraccionaria permite que GTK 4, Qt 6 y Chromium se dibujen nítidos al 125–175 %.
 - **Gestos del touchpad.** El driver de touchpad propio de Insane OS les pasa a las apps de Linux los gestos de pellizcar, deslizar y mantener, así que el zoom con pellizco funciona en los navegadores.
 - **Juegos y apps de GPU.** Con una GPU, las apps le pueden pasar a Insane OS buffers de GPU directamente (`linux-dmabuf`), usar pantalla completa de verdad, bloquear el puntero y recibir el movimiento crudo del mouse. En la 0.8.7, un bloqueo vale solo con el puntero sobre la ventana y el teclado en su app, y ❖Esc siempre lo libera.
-- **Las notificaciones** de las apps de Linux llegan por el servicio estándar de notificaciones, que provee `lord-server`, y se pueden configurar por app en Ajustes.
+- **Las notificaciones** de las apps de Linux llegan por el servicio estándar de notificaciones, que provee `insane-server`, y se pueden configurar por app en Ajustes.
 - **Contraseñas:** el Secret Service estándar lo sirve el llavero de Insane OS, así que los navegadores pueden guardar ahí sus secretos sin otro demonio de llavero.
 - **Forzar salida** (desde 0.8.5): en Insane Flow, Forzar salida… en el menú de la corona lista las apps abiertas y termina la elegida sin preguntarle. Para una app de Linux termina solo el proceso de esa app; a una app X11 se le pide que se cierre.
 - **Apps por defecto sin elegir** (desde 0.8.6): si no se eligió una app para un tipo de archivo, el archivo se abre con la predeterminada del sistema o con la primera app instalada que declara su tipo, que se muestra como "Automática" en Ajustes → Apps por defecto. Las apps elegidas quedan como están.
@@ -53,7 +53,7 @@ El JavaScript de Insane OS no puede escribir archivos `.desktop`, así que la in
 
 `wl_compositor`, `wl_subcompositor`, `wl_shm`, `wl_output` (uno por pantalla), `xdg_wm_base` con menús emergentes, `wl_seat` (puntero, teclado, táctil), `wl_data_device_manager` (portapapeles), `zxdg_decoration_manager_v1`, el protocolo de decoración del servidor de KDE, `zxdg_output_manager_v1`, `wp_fractional_scale_v1`, `wp_viewporter`, `zwp_linux_dmabuf_v1`, `wp_presentation`, `zwp_relative_pointer_manager_v1`, `zwp_pointer_constraints_v1`, `zwp_pointer_gestures_v1`, `wp_cursor_shape_manager_v1`, `zwp_primary_selection_device_manager_v1` (desde 0.8.3) y `zwp_idle_inhibit_manager_v1` (desde 0.8.5) y, en la 0.8.7, `zwp_text_input_manager_v3`, para el teclado en pantalla.
 
-**Comprobalo desde afuera** (desde 0.8.5): el **Banco de pruebas** (`lordos-testbench`) es una ventana con una carta de ajuste que revisa el servidor gráfico como lo ve cualquier app: los tiempos de los cuadros y cuándo llegan de verdad a la pantalla, cada tecla del teclado, el mouse y la rueda, y los protocolos Wayland que ofrece el sistema.
+**Comprobalo desde afuera** (desde 0.8.5): el **Banco de pruebas** (`insaneos-testbench`) es una ventana con una carta de ajuste que revisa el servidor gráfico como lo ve cualquier app: los tiempos de los cuadros y cuándo llegan de verdad a la pantalla, cada tecla del teclado, el mouse y la rueda, y los protocolos Wayland que ofrece el sistema.
 
 Ausente a propósito: cualquier protocolo que le permita a una app capturar la pantalla o las ventanas de otras apps.
 
@@ -71,7 +71,7 @@ Ausente a propósito: cualquier protocolo que le permita a una app capturar la p
 
 **¿Y apps como Chrome o Spotify?** (desde 0.8.5) Tienda → Comerciales instala apps gratis cuyo código fuente no es público desde los repositorios firmados de sus fabricantes, con la clave que fija Insane OS, y lo avisa antes de instalar nada.
 
-**¿Los paquetes llegan por HTTPS?** Desde Insane OS 0.8.5, sí para las fuentes `https://`: un helper chico y aislado, `lord-tls`, verifica el certificado y el nombre del servidor y cifra la descarga, así nadie en la red puede ver qué paquetes descargás, y una descarga segura nunca se manda de vuelta a HTTP sin cifrar. Hasta la 0.8.4.1 llegaban por `http://`. En los dos casos la seguridad viene de las firmas y los hashes: cada índice tiene que llevar una firma válida de una clave de confianza, no puede estar vencido ni ser más viejo que el que ya está guardado, y cada archivo se controla contra su SHA-256 antes de usarse, así que nadie en la red puede modificarlos.
+**¿Los paquetes llegan por HTTPS?** Desde Insane OS 0.8.5, sí para las fuentes `https://`: un helper chico y aislado, `insane-tls`, verifica el certificado y el nombre del servidor y cifra la descarga, así nadie en la red puede ver qué paquetes descargás, y una descarga segura nunca se manda de vuelta a HTTP sin cifrar. Hasta la 0.8.4.1 llegaban por `http://`. En los dos casos la seguridad viene de las firmas y los hashes: cada índice tiene que llevar una firma válida de una clave de confianza, no puede estar vencido ni ser más viejo que el que ya está guardado, y cada archivo se controla contra su SHA-256 antes de usarse, así que nadie en la red puede modificarlos.
 
 **¿Qué es la categoría Inteligencia Artificial?** (desde 0.8.5) Una página de la Tienda con una lista corta de herramientas de IA elegidas por Insane OS: agentes que programan (Claude Code, Codex, goose, opencode), editores (Visual Studio Code, Cursor), la app de escritorio de Claude, llama.cpp para correr modelos de lenguaje en tu equipo y whisper.cpp para pasar voz a texto. Las apps cuyo fabricante tiene un repositorio firmado se instalan desde ahí: la Tienda te dice primero qué repositorio agrega, y compara la clave del fabricante con la huella que fija Insane OS. Las demás vienen del repositorio firmado de Insane OS, compiladas por Insane OS desde fuentes verificadas o copiadas después de comprobar la firma del fabricante. llama.cpp baja un modelo la primera vez que lo ejecutás (`llama-server -hf <usuario>/<modelo>-GGUF`); corre en la CPU, y en una GPU por Vulkan, que todavía no se probó en hardware real.
 
@@ -85,10 +85,10 @@ Ausente a propósito: cualquier protocolo que le permita a una app capturar la p
 
 ## Leé el código
 
-- [server/src/wl/wl.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/wl/wl.c): el compositor Wayland y sus protocolos
-- [server/src/apps.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/apps.c): el lanzador de `.desktop`
-- [server/src/ui/portal.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/portal.c): el portal de configuración para GTK y libadwaita, y el portal FileChooser
-- [sdk/wayland.js](https://github.com/lordbasex/Insane OS/blob/main/sdk/wayland.js): las ventanas de Linux en el gestor de ventanas
-- [server/src/pkg](https://github.com/lordbasex/Insane OS/tree/main/server/src/pkg): el motor de paquetes Debian
-- [apps/store](https://github.com/lordbasex/Insane OS/tree/main/apps/store): la Tienda
-- [docs/WAYLAND.md](https://github.com/lordbasex/Insane OS/blob/main/docs/WAYLAND.md), [docs/PACKAGES.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PACKAGES.md), [docs/GPU.md](https://github.com/lordbasex/Insane OS/blob/main/docs/GPU.md)
+- [server/src/wl/wl.c](https://github.com/insaneos/Insane OS/blob/main/server/src/wl/wl.c): el compositor Wayland y sus protocolos
+- [server/src/apps.c](https://github.com/insaneos/Insane OS/blob/main/server/src/apps.c): el lanzador de `.desktop`
+- [server/src/ui/portal.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/portal.c): el portal de configuración para GTK y libadwaita, y el portal FileChooser
+- [sdk/wayland.js](https://github.com/insaneos/Insane OS/blob/main/sdk/wayland.js): las ventanas de Linux en el gestor de ventanas
+- [server/src/pkg](https://github.com/insaneos/Insane OS/tree/main/server/src/pkg): el motor de paquetes Debian
+- [apps/store](https://github.com/insaneos/Insane OS/tree/main/apps/store): la Tienda
+- [docs/WAYLAND.md](https://github.com/insaneos/Insane OS/blob/main/docs/WAYLAND.md), [docs/PACKAGES.md](https://github.com/insaneos/Insane OS/blob/main/docs/PACKAGES.md), [docs/GPU.md](https://github.com/insaneos/Insane OS/blob/main/docs/GPU.md)

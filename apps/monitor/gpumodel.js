@@ -1,4 +1,4 @@
-// gpumodel.js — Monitor → GPU's model (docs/MONITOR.md, "GPU"): lord.monitor.gpu()'s raw counters (server/src/monitor/
+// gpumodel.js — Monitor → GPU's model (docs/MONITOR.md, "GPU"): insane.monitor.gpu()'s raw counters (server/src/monitor/
 // gpustat.c) turned into what the tab and the Overview show. Pure functions with no UI and no SDK, tested by
 // server/tests/gpu_model_test.mjs. Nothing here makes up a number: what a driver doesn't report stays null.
 //
@@ -243,12 +243,12 @@ export function apiTags(libs, driver = '') {
 
 // The helpers Insane OS starts for AI work. gpu: whether the engine can use the GPU at all.
 export const AI_ENGINES = [
-  { id: 'voice', bins: ['lord-tts'], front: 'lord-say', gpu: true },
-  { id: 'ocr', bins: ['lord-ocr'], gpu: false },
+  { id: 'voice', bins: ['insane-tts'], front: 'insane-say', gpu: true },
+  { id: 'ocr', bins: ['insane-ocr'], gpu: false },
 ];
 
 // [{ id, pid, backend: 'gpu' | 'cpu' | null, api: 'vulkan' | null, quality, lang, state, mem, hidden }]: the engines
-// running now. The voice's backend, quality and language come from lord-say's note (its helper's /proc is closed: it
+// running now. The voice's backend, quality and language come from insane-say's note (its helper's /proc is closed: it
 // runs sandboxed and not dumpable, so its GPU memory is hidden unless the kernel lets us read it).
 export function aiEngines(raw, apps = []) {
   const procs = raw?.ai || [];
@@ -273,7 +273,7 @@ export function aiEngines(raw, apps = []) {
 
 export function createGpuState() { return { clients: new Map(), energy: new Map(), vms: new Map(), mono: 0 }; }
 
-const appKeyOf = (p) => (p.self ? 'app:lordos' : p.app ? `app:${p.app}` : `name:${p.name || p.pid}`);
+const appKeyOf = (p) => (p.self ? 'app:insaneos' : p.app ? `app:${p.app}` : `name:${p.name || p.pid}`);
 
 export function gpuStep(state, raw) {
   if (!raw || !Array.isArray(raw.cards)) return null;

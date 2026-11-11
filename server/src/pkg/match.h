@@ -1,10 +1,10 @@
 /* match.h — how a search text matches a package (0.8.8.4, #37): the words of the query against the
  * package name, the app's name, the app's summary and the package summary, case- and accent-blind,
  * with the query's words joined ("vs code" also finds "vscode") and at least one word needed when
- * not all of them are there. Pure functions: lord.pkg.search (ui/js_pkg.c) ranks with them and
+ * not all of them are there. Pure functions: insane.pkg.search (ui/js_pkg.c) ranks with them and
  * build/pkg-test tests them. The Store's catalog search (apps/store/search.js) follows the same rules. */
-#ifndef LORD_PKG_MATCH_H
-#define LORD_PKG_MATCH_H
+#ifndef INSANE_PKG_MATCH_H
+#define INSANE_PKG_MATCH_H
 
 #include <stddef.h>
 

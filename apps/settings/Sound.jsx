@@ -2,7 +2,7 @@
 import {
   View, Text, useTheme, useLocale, Slider, Toggle, Button, Segmented, useSound, useSoundPeak, sound, defaultSink,
   microphones, defaultSource, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect } from 'react';
 import { Stack, Section, SettingRow, Note, tint } from './ui.jsx';
 import { balanceOf, volumesFor, snapBalance } from './balance.js';

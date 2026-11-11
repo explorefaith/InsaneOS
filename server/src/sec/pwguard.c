@@ -5,7 +5,7 @@
  * We only use: core.hello, client.update_properties, core.get_registry, core.pong,
  * registry.bind (clients only), registry.destroy (a restricted app's capture streams) and
  * client.update_permissions; and we read core.ping/error/remove_id, registry.global /
- * global_remove and client.info. Everything is non-blocking: lord-server never waits for it. */
+ * global_remove and client.info. Everything is non-blocking: insane-server never waits for it. */
 #include "pwguard.h"
 #include "appid.h"
 #include "restrict.h"
@@ -513,7 +513,7 @@ static void resolve(PgClient *c) {
     else if (r > 0) {                                /* not in any app's scope */
         c->app[0] = 0;
         /* escaped to the user's service manager while restricted apps run: treated as restricted
-         * (like lord-netperm's per-user union) */
+         * (like insane-netperm's per-user union) */
         if (guard_armed && in_user_manager(pid)) c->unverified = 1;
     }
 }
@@ -521,14 +521,14 @@ static void resolve(PgClient *c) {
 /* Re-arms the guard: is any restricted app of this session running? (its scope is there) */
 static void arm(void) {
     char dir[96];
-    snprintf(dir, sizeof dir, "/sys/fs/cgroup/system.slice/lordos.service/lordos-session-%u", (unsigned)getuid());
+    snprintf(dir, sizeof dir, "/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-%u", (unsigned)getuid());
     DIR *d = opendir(dir);
     int armed = 0;
     struct dirent *e;
     while (d && (e = readdir(d)) && !armed) {
         char path[512], app[FW_APP_MAX];
-        if (strncmp(e->d_name, "app-lordos-", 11)) continue;
-        snprintf(path, sizeof path, "/system.slice/lordos.service/lordos-session-%u/%s", (unsigned)getuid(), e->d_name);
+        if (strncmp(e->d_name, "app-insaneos-", 11)) continue;
+        snprintf(path, sizeof path, "/system.slice/insaneos.service/insaneos-session-%u/%s", (unsigned)getuid(), e->d_name);
         if (appid_of_cgroup(path, app, sizeof app)) continue;
         armed = restrict_blocks(app, FW_R_NO_MIC) || restrict_blocks(app, FW_R_NO_CAMERA);
     }

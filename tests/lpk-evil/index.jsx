@@ -2,17 +2,17 @@
 // an isolated app should not be able to do. Shows the result of each attempt: with the Insane OS
 // sandbox (server/src/sec/sandbox.c) all of them must fail. See docs/PRIVACY.md.
 //
-// When apps run as their own process (lord-server --app <id>) these attempts hit
-// Landlock/seccomp. Meanwhile, the ones going through the SDK (lord.fs, clipboard) already
+// When apps run as their own process (insane-server --app <id>) these attempts hit
+// Landlock/seccomp. Meanwhile, the ones going through the SDK (insane.fs, clipboard) already
 // run into the server's restrictions; the native ones (socket, exec, ptrace) are covered by
 // sandbox-test. The app serves as a visible witness of the isolation.
-import { View, Text, ScrollView, useTheme, clipboard, fs } from '@lordos/sdk';
+import { View, Text, ScrollView, useTheme, clipboard, fs } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 
 const attempts = [
   ['Leer ~/.ssh/id_rsa', () => fs.read('.ssh/id_rsa')],
-  ['Leer settings.json', () => fs.read('.config/lordos/settings.json')],
-  ['Escribir fuera de mi carpeta', () => fs.write('.config/lordos/robado.txt', 'x')],
+  ['Leer settings.json', () => fs.read('.config/insaneos/settings.json')],
+  ['Escribir fuera de mi carpeta', () => fs.write('.config/insaneos/robado.txt', 'x')],
   ['Leer el portapapeles en silencio', () => clipboard.get()],
   ['Abrir /etc/shadow', () => fs.read('/etc/shadow')],
 ];

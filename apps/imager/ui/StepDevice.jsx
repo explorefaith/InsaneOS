@@ -1,7 +1,7 @@
 // Step 1 — the device, in two views: the kind (Raspberry Pi, a PC or a generic arm64 machine from a USB
 // stick), then, for a Raspberry Pi, which model (the Pi 5 or the Pi 500: the same image, other tips and
 // cooling). Boards Insane OS doesn't support yet are listed with their status.
-import { View, Text, useTheme, useLocale, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, useTheme, useLocale, typeScale, spacing } from '@insaneos/sdk';
 import { DEVICES, RAM_ADVICE, PI_MODELS, deviceById, deviceLabel } from '../core/catalog.js';
 import { chooseDevice, set } from '../state.js';
 import { Card, Badge, Group, SectionTitle, Press } from './kit.jsx';

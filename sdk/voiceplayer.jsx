@@ -5,10 +5,10 @@
 //   ⠿ drag it anywhere, to any display: it comes back there next time (settings.voice.pos; voiceplayermodel.js)
 //   ↻ read it again from the start · ⏸/▶ pause, go on · ■ stop (it stays, to read again) · ✕ stop and close
 //
-// The wave is lord.voice.levels(): how loud each band of what is heard now is, so it moves with the voice and stands
-// still in a pause. Its bars' heights are set on their nodes (lord.setStyle), not by a React render per frame.
+// The wave is insane.voice.levels(): how loud each band of what is heard now is, so it moves with the voice and stands
+// still in a pause. Its bars' heights are set on their nodes (insane.setStyle), not by a React render per frame.
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, addListener, displays, displayAt } from '@lordos/runtime';
+import { View, Text, addListener, displays, displayAt } from '@insaneos/runtime';
 import { useStore } from './store.js';
 import { ThemeContext, DEFAULT_TOKENS, shellTokens } from './theme.js';
 import { t } from './i18n.js';
@@ -85,12 +85,12 @@ export function VoicePlayer() {
     const id = setInterval(() => {
       const now = Date.now();
       let lv = null;
-      try { lv = lord.voice.levels(); } catch (e) { /* no lord.voice */ }
+      try { lv = insane.voice.levels(); } catch (e) { /* no insane.voice */ }
       prev = smoothBands(prev, lv, now - last);
       last = now;
       prev.forEach((v, i) => {
         const n = bars.current[i];
-        if (n) try { lord.setStyle(n, 'height', Math.round(BAR_MIN + v * (BAR_MAX - BAR_MIN))); } catch (e) { /* gone meanwhile */ }
+        if (n) try { insane.setStyle(n, 'height', Math.round(BAR_MIN + v * (BAR_MAX - BAR_MIN))); } catch (e) { /* gone meanwhile */ }
       });
     }, 33);
     return () => clearInterval(id);

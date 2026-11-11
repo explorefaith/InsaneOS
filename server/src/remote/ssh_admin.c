@@ -10,7 +10,7 @@
  * so the only way a Debian package reaches the system stays the Store's. These actions run
  * fixed programs at fixed paths and write only fixed text: no user text reaches sshd's
  * configuration or a command line. The safe defaults (PermitRootLogin no) are a drop-in shipped
- * by the lordos package (tools/iso/rootfs/etc/ssh/sshd_config.d/10-lordos.conf). */
+ * by the insaneos package (tools/iso/rootfs/etc/ssh/sshd_config.d/10-insaneos.conf). */
 #include "ssh_admin.h"
 
 #include <errno.h>
@@ -27,7 +27,7 @@
 #define SSH_UNIT      "/usr/lib/systemd/system/ssh.service"
 #define SSH_SOCKET    "/usr/lib/systemd/system/ssh.socket"
 #define DROPIN_DIR    "/etc/ssh/sshd_config.d"
-#define ALLOW_DROPIN  DROPIN_DIR "/11-lordos-allow.conf"
+#define ALLOW_DROPIN  DROPIN_DIR "/11-insaneos-allow.conf"
 #define ED25519_KEY   "/etc/ssh/ssh_host_ed25519_key"
 
 static const char allow_admins_text[] =
@@ -63,7 +63,7 @@ static int config_ok(void) {
 
 static int write_dropin(const char *path, const char *text) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos", path);
     if (mkdir(DROPIN_DIR, 0755) && errno != EEXIST) return -1;
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
     if (fd < 0) return -1;

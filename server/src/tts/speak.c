@@ -1,15 +1,15 @@
-/* speak.c — reading text aloud from the desktop (docs/VOICE.md, phase 2): lord-server starts lord-say.
+/* speak.c — reading text aloud from the desktop (docs/VOICE.md, phase 2): insane-server starts insane-say.
  *
- * lord-say is the `say` command (say.c); it holds no speech code and starts the sandboxed lord-tts itself. Here it is
- * started from the fixed path next to lord-server, never with the text in its arguments: the text is its stdin, a
- * sealed memfd, so the compositor never blocks writing it, and lord-say tells its language. A minimal environment: HOME, LANG (the
+ * insane-say is the `say` command (say.c); it holds no speech code and starts the sandboxed insane-tts itself. Here it is
+ * started from the fixed path next to insane-server, never with the text in its arguments: the text is its stdin, a
+ * sealed memfd, so the compositor never blocks writing it, and insane-say tells its language. A minimal environment: HOME, LANG (the
  * interface's language, for a text too short to tell), PATH (for PipeWire's pw-cat) and XDG_RUNTIME_DIR (PipeWire's
  * socket).
- * One reading at a time, in its own process group: a new one, or speak_stop, ends the one before (lord-say ends
- * lord-tts and pw-cat on SIGTERM). A pause stops the whole group (SIGSTOP), so pw-cat stops at once. Children are
+ * One reading at a time, in its own process group: a new one, or speak_stop, ends the one before (insane-say ends
+ * insane-tts and pw-cat on SIGTERM). A pause stops the whole group (SIGSTOP), so pw-cat stops at once. Children are
  * reaped here, never by a global waitpid.
  *
- * The player's wave: lord-say --levels writes the bands of each SAY_LEVEL_MS of audio to a pipe at its fd 3 as it plays
+ * The player's wave: insane-say --levels writes the bands of each SAY_LEVEL_MS of audio to a pipe at its fd 3 as it plays
  * it (levels.c), up to a pipe ahead of what is heard. speak_levels tells which one is playing by the time since the
  * first one came, less the pauses; when it runs out (the next sentence isn't ready) that clock waits. */
 #include "speak.h"
@@ -30,7 +30,7 @@
 
 static char say_path[PATH_MAX];
 static pid_t cur = -1;                  /* the reading in progress */
-static int last_exit = -1;              /* how the last one ended: lord-say's exit status, 130 when stopped */
+static int last_exit = -1;              /* how the last one ended: insane-say's exit status, 130 when stopped */
 static pid_t reap[16];                  /* stopped readings not yet reaped */
 static int nreap;
 static int paused;
@@ -39,7 +39,7 @@ static char *last_text;                 /* for speak_replay */
 static size_t last_n;
 static char last_lang[3], last_voice[64];
 
-/* the wave: the bands lord-say wrote, the last RING of them */
+/* the wave: the bands insane-say wrote, the last RING of them */
 #define RING 256
 static int lev_fd = -1;
 static uint8_t ring[RING][SAY_BANDS];
@@ -81,7 +81,7 @@ static void levels_drain(void) {
     }
 }
 
-/* next to lord-server, owned by its user or root, writable by nobody else */
+/* next to insane-server, owned by its user or root, writable by nobody else */
 static int find_say(void) {
     if (say_path[0]) return 0;
     char self[PATH_MAX];
@@ -90,9 +90,9 @@ static int find_say(void) {
     self[n] = 0;
     char *slash = strrchr(self, '/');
     size_t dir = slash ? (size_t)(slash - self) : 0;
-    if (!slash || dir + sizeof "/lord-say" > sizeof say_path) return -1;
+    if (!slash || dir + sizeof "/insane-say" > sizeof say_path) return -1;
     memcpy(say_path, self, dir);
-    memcpy(say_path + dir, "/lord-say", sizeof "/lord-say");
+    memcpy(say_path + dir, "/insane-say", sizeof "/insane-say");
     return 0;
 }
 
@@ -105,7 +105,7 @@ static int path_ok(const char *path) {
 int speak_available(void) {
     if (find_say()) return 0;
     char tts[PATH_MAX + 16];
-    snprintf(tts, sizeof tts, "%.*s/lord-tts", (int)(strrchr(say_path, '/') - say_path), say_path);
+    snprintf(tts, sizeof tts, "%.*s/insane-tts", (int)(strrchr(say_path, '/') - say_path), say_path);
     return path_ok(say_path) && path_ok(tts);
 }
 
@@ -120,10 +120,10 @@ void speak_stop(void) {
     reap_stopped();
     levels_close();
     if (cur <= 0) return;
-    kill(-cur, SIGTERM);                /* lord-say, and pw-cat with it; lord-say ends lord-tts */
+    kill(-cur, SIGTERM);                /* insane-say, and pw-cat with it; insane-say ends insane-tts */
     if (paused) kill(-cur, SIGCONT);    /* a stopped process takes the signal when it goes on */
     paused = 0;
-    if (saving) { saving = 0; save_end(0); }      /* the half-made file goes now; lord-say is reaped later */
+    if (saving) { saving = 0; save_end(0); }      /* the half-made file goes now; insane-say is reaped later */
     if (nreap < (int)(sizeof reap / sizeof reap[0])) reap[nreap++] = cur;
     else { kill(-cur, SIGKILL); waitpid(cur, NULL, 0); }
     cur = -1;
@@ -182,9 +182,9 @@ int speak_levels(uint8_t out[SAY_BANDS]) {
     return 1;
 }
 
-/* the text in a sealed memfd at offset 0: lord-say reads it as stdin */
+/* the text in a sealed memfd at offset 0: insane-say reads it as stdin */
 static int text_fd(const char *text, size_t n) {
-    int fd = memfd_create("lordos-say", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-say", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0) return -1;
     size_t done = 0;
     while (done < n) {
@@ -197,7 +197,7 @@ static int text_fd(const char *text, size_t n) {
     return fd;
 }
 
-/* lord-say, in its own process group, with a minimal environment: nothing else from lord-server's. stdin the text,
+/* insane-say, in its own process group, with a minimal environment: nothing else from insane-server's. stdin the text,
  * stdout out (or /dev/null), fd 3 lev (or nothing). */
 static int spawn_say(int in, int out, int lev, const char *lang, char *const argv[]) {
     int devnull = open("/dev/null", O_RDWR | O_CLOEXEC);
@@ -208,7 +208,7 @@ static int spawn_say(int in, int out, int lev, const char *lang, char *const arg
     posix_spawn_file_actions_adddup2(&fa, out >= 0 ? out : devnull, 1);
     posix_spawn_file_actions_adddup2(&fa, devnull, 2);
     if (lev >= 0) posix_spawn_file_actions_adddup2(&fa, lev, 3);
-    posix_spawn_file_actions_addclosefrom_np(&fa, lev >= 0 ? 4 : 3);    /* nothing of lord-server's (DRM, sockets) reaches it */
+    posix_spawn_file_actions_addclosefrom_np(&fa, lev >= 0 ? 4 : 3);    /* nothing of insane-server's (DRM, sockets) reaches it */
     posix_spawnattr_t at;
     posix_spawnattr_init(&at);
     sigset_t none, all;
@@ -276,7 +276,7 @@ int speak_start(const char *text, size_t n, const char *lang, const char *voice)
     int lev[2];
     if (pipe2(lev, O_CLOEXEC)) { close(in); return -1; }
     fcntl(lev[0], F_SETFL, O_RDONLY | O_NONBLOCK);
-    char *argv[] = { "lord-say", "--levels", vbuf[0] ? "-v" : NULL, vbuf[0] ? vbuf : NULL, NULL };
+    char *argv[] = { "insane-say", "--levels", vbuf[0] ? "-v" : NULL, vbuf[0] ? vbuf : NULL, NULL };
     int r = spawn_say(in, -1, lev[1], lang, argv);
     close(in);
     close(lev[1]);
@@ -301,7 +301,7 @@ int speak_preview(const char *lang, const char *voice) {
     char l[3], v[61];
     memcpy(l, lang, 3);
     memcpy(v, voice, vn + 1);
-    char *argv[] = { "lord-say", "--levels", "--preview", l, v, NULL };
+    char *argv[] = { "insane-say", "--levels", "--preview", l, v, NULL };
     int r = spawn_say(in, -1, lev[1], lang, argv);
     close(in);
     close(lev[1]);
@@ -310,9 +310,9 @@ int speak_preview(const char *lang, const char *voice) {
     return 0;
 }
 
-/* Saving: lord-say writes the WAV to its stdout, a new hidden file in the folder (opened here by its resolved path and
- * kept open, so the file is made in that folder whatever happens to the path meanwhile); when lord-say ends well it is
- * renamed to the name asked for, else removed. lord-say never sees a path. */
+/* Saving: insane-say writes the WAV to its stdout, a new hidden file in the folder (opened here by its resolved path and
+ * kept open, so the file is made in that folder whatever happens to the path meanwhile); when insane-say ends well it is
+ * renamed to the name asked for, else removed. insane-say never sees a path. */
 static int save_dir = -1;
 static char save_tmp[32], save_name[256];
 
@@ -339,13 +339,13 @@ int speak_save(const char *text, size_t n, const char *lang, const char *target)
     for (int tries = 0; out < 0 && tries < 16; tries++) {
         unsigned v;
         if (getentropy(&v, sizeof v)) break;
-        snprintf(save_tmp, sizeof save_tmp, ".lordos-say-%08x", v);
+        snprintf(save_tmp, sizeof save_tmp, ".insaneos-say-%08x", v);
         out = openat(dfd, save_tmp, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0644);
         if (out < 0 && errno != EEXIST) break;
     }
     if (out < 0) { close(dfd); return -1; }
     int in = text_fd(text, n);
-    char *argv[] = { "lord-say", "-o", "-", NULL };
+    char *argv[] = { "insane-say", "-o", "-", NULL };
     int r = in < 0 ? -1 : spawn_say(in, out, -1, lang, argv);
     if (in >= 0) close(in);
     close(out);

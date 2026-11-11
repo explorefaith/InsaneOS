@@ -19,7 +19,7 @@ import {
   useDockEntries, dockActivate, dockMenu, useStore, dockDrag, beginDockDrag, registerDockTarget, dockDragJustEnded,
   useTrash, openTrash, refreshTrash, trashMenu, StatusItems, PrivacyIndicators, keyboard, useSound, defaultSink, InsaneLogo,
   mainDisplay, toggleShowDesktop, menuBarPrefs,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 import { SearchGlyph, TaskViewGlyph, NetworkGlyph, SpeakerGlyph, BellGlyph, TrashGlyph } from '../glyphs.jsx';
@@ -35,9 +35,9 @@ export const TASKBAR_DEFAULT = ['files', 'terminal', 'store', 'settings'];
 // settings (a shared ticker: it polls only while one of them is shown, and they re-render only when it changes).
 const VPN = (i) => ['wireguard', 'tun', 'xfrm', 'ppp'].includes(i.type) || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name);
 export function readNet() {
-  if (typeof lord === 'undefined' || !lord.net) return { online: false, wifi: false, name: '', ip: '', vpn: 0 };
+  if (typeof insane === 'undefined' || !insane.net) return { online: false, wifi: false, name: '', ip: '', vpn: 0 };
   let ifs = [];
-  try { ifs = lord.net.interfaces(); } catch (e) { ifs = []; }
+  try { ifs = insane.net.interfaces(); } catch (e) { ifs = []; }
   const main = ifs.find((i) => !VPN(i) && i.type !== 'loopback' && i.addresses.some((a) => a.scope === 'global' && a.family === 4));
   return {
     online: !!main, wifi: main?.type === 'wifi', name: main?.name || '', vpn: ifs.filter((i) => VPN(i) && i.up).length,
@@ -101,7 +101,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
   const centerOf = (id) => {
     const n = refs.current.get(id);
     if (!n) return null;
-    const [x, y, w, h] = lord.getLayout(n.id);
+    const [x, y, w, h] = insane.getLayout(n.id);
     return vert ? y + h / 2 : x + w / 2;
   };
   const geo = useRef({});
@@ -110,10 +110,10 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
     hit(x, y) {
       const g = geo.current;
       if (!barRef.current) return null;
-      const [bx, by, bw, bh] = lord.getLayout(barRef.current.id);
+      const [bx, by, bw, bh] = insane.getLayout(barRef.current.id);
       if (!(x >= bx - 16 && x < bx + bw + 16 && y >= by - 16 && y < by + bh + 16)) return null;
       if (trashRef.current) {
-        const [tx, ty, tw, th] = lord.getLayout(trashRef.current.id);
+        const [tx, ty, tw, th] = insane.getLayout(trashRef.current.id);
         if (x >= tx && x < tx + tw && y >= ty && y < ty + th) return { trash: true, bar: g.barId };
       }
       const a = g.vert ? y : x;
@@ -123,7 +123,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
     },
     near(x, y) {
       if (!barRef.current) return false;
-      const [bx, by, bw, bh] = lord.getLayout(barRef.current.id);
+      const [bx, by, bw, bh] = insane.getLayout(barRef.current.id);
       const dx = x < bx ? bx - x : x > bx + bw ? x - bx - bw : 0, dy = y < by ? by - y : y > by + bh ? y - by - bh : 0;
       return Math.hypot(dx, dy) <= 60;
     },
@@ -138,8 +138,8 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
     const k = Math.max(0, Math.min(pinned.length, drag.over.index));
     const ref = refs.current.get((pinned[k] || pinned[pinned.length - 1])?.id);
     if (ref) {
-      const [bx, by] = lord.getLayout(barRef.current.id);
-      const [x, y, w, h] = lord.getLayout(ref.id);
+      const [bx, by] = insane.getLayout(barRef.current.id);
+      const [x, y, w, h] = insane.getLayout(ref.id);
       const at = pinned[k] ? (vert ? y - by - 3 : x - bx - 3) : (vert ? y - by + h + 1 : x - bx + w + 1);
       dropLine = vert ? { top: at, left: 8, right: 8, height: 2 } : { left: at, top: 8, bottom: 8, width: 2 };
     }
@@ -150,7 +150,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
     clearTimeout(tipTimer.current);
     tipTimer.current = setTimeout(() => {
       if (!node) return;
-      const [x, y, w, h] = lord.getLayout(node.id);
+      const [x, y, w, h] = insane.getLayout(node.id);
       setTip({ text, x: x + w / 2, y, w, h });
     }, 600);
   };

@@ -1,5 +1,5 @@
 // cloudcheck.js — Check This Account (docs/CLOUD.md 19): one account's files checked end to end through its folder
-// in ~/Cloud with lord.fs and cloud.* only, and the report people can send to mark a provider verified. Pure: the
+// in ~/Cloud with insane.fs and cloud.* only, and the report people can send to mark a provider verified. Pure: the
 // runner takes what it uses (env) so the tests run it against stand-ins (server/tests/cloud_model_test.mjs).
 //
 //   runCheck(account, env, onStep) → Promise<[{ id, result: 'pass'|'fail'|'skipped', ms, note }]>
@@ -32,8 +32,8 @@ export function hashBytes(bytes) {
 // one (a new bucket only when there is none: a valid bucket name, no dot first).
 export function checkFolder(acc, rootEntries, tag) {
   const dirs = (rootEntries || []).filter((e) => e.dir && !String(e.name).startsWith('.')).map((e) => e.name).sort();
-  if (acc.group === 'object') return dirs.length ? { path: `${acc.mount}/${dirs[0]}/.lordos-check-${tag}`, bucket: false } : { path: `${acc.mount}/lordos-check-${tag}`, bucket: true };
-  return { path: `${acc.mount}/.lordos-check-${tag}`, bucket: false };
+  if (acc.group === 'object') return dirs.length ? { path: `${acc.mount}/${dirs[0]}/.insaneos-check-${tag}`, bucket: false } : { path: `${acc.mount}/insaneos-check-${tag}`, bucket: true };
+  return { path: `${acc.mount}/.insaneos-check-${tag}`, bucket: false };
 }
 
 const code = (e) => { const c = e && (e.code || (typeof e === 'string' ? e : '')); return /^[a-z][A-Za-z]*\.[A-Za-z.]+$/.test(String(c || '')) ? c : 'error'; };
@@ -101,11 +101,11 @@ export async function runCheck(acc, env, onStep = () => {}) {
       });
     } else skipRest('free');
   } else skipRest('up');
-  // always clean up what the check made (lord.fs has no delete: the folder moves out of the cloud into a scratch
+  // always clean up what the check made (insane.fs has no delete: the folder moves out of the cloud into a scratch
   // folder of the home, then to the Trash and out of it)
   if (made) {
     const okDel = await run('delete', async () => {
-      const scratch = `${fs.home()}/.cache/lordos-cloud-check-${tag}`;
+      const scratch = `${fs.home()}/.cache/insaneos-cloud-check-${tag}`;
       const job = fs.move(folder, scratch);
       const done = await until(() => !(fs.jobs() || []).some((j) => j.id === job && !j.done && !j.failed), JOB_TIMEOUT);
       const j = (fs.jobs() || []).find((x) => x.id === job);
@@ -166,7 +166,7 @@ export const checkWorks = (steps) => {
 
 // ---- GitHub ----
 
-export const ISSUE_BASE = 'https://github.com/lordbasex/Insane OS/issues/new';
+export const ISSUE_BASE = 'https://github.com/insaneos/Insane OS/issues/new';
 export const ISSUE_URL_MAX = 7000;
 const TRUNC = '\n[truncated]';
 export function issueUrl({ label, report = '', version = '' } = {}) {

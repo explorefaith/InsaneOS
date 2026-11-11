@@ -20,11 +20,11 @@ static void seterr(char *e, size_t n, const char *code) { if (e && n) lerr_set(e
 
 void termconf_init(const char *h) {
     snprintf(home, sizeof home, "%s", h ? h : "");
-    if (snprintf(def, sizeof def, "%s/.config/lordos/terminal.json", home) >= (int)sizeof def) def[0] = 0;
+    if (snprintf(def, sizeof def, "%s/.config/insaneos/terminal.json", home) >= (int)sizeof def) def[0] = 0;
     custom[0] = 0;
     char s[PATH_MAX];
     fsops_protect_file(FSOPS_PF_TERMINAL, def);
-    if (snprintf(s, sizeof s, "%s/.config/lordos/settings.json", home) < (int)sizeof s)
+    if (snprintf(s, sizeof s, "%s/.config/insaneos/settings.json", home) < (int)sizeof s)
         fsops_protect_file(FSOPS_PF_SETTINGS, s);       /* its .tmp and the migration's .bak */
     fsops_protect_file(FSOPS_PF_TERMINAL_CUSTOM, "");
 }
@@ -219,7 +219,7 @@ int termconf_migrate(const char *txt, size_t len, char *err, size_t n) {
     if (!def[0]) { seterr(err, n, "termconf.badPath"); return -1; }
     if (!lstat(def, &st)) { seterr(err, n, "termconf.exists"); return -1; }
     char s[PATH_MAX + 40], bak[PATH_MAX + 80];
-    snprintf(s, sizeof s, "%s/.config/lordos/settings.json", home);
+    snprintf(s, sizeof s, "%s/.config/insaneos/settings.json", home);
     snprintf(bak, sizeof bak, "%s.pre-terminal-migration.bak", s);
     if (lstat(bak, &st) && !lstat(s, &st) && copy_file(s, bak)) { seterr(err, n, "termconf.backupFailed"); return -1; }
     double mt;

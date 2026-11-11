@@ -1,7 +1,7 @@
 // classic_taskbar_test.mjs — (0.8.8.6) Insane Classic's taskbar on every display. Bundles
 // tests/classic_taskbar_scene.mjs with esbuild (as the theme is built) together with the whole theme
 // (themes/classic/index.jsx, its startShell caught by a shim so the scene renders the shell itself) over a stub
-// `lord` whose screen has three monitors, runs it, and reads its checks. Needs node and the repository's
+// `insane` whose screen has three monitors, runs it, and reads its checks. Needs node and the repository's
 // node_modules (esbuild, react, react-reconciler).
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
@@ -23,13 +23,13 @@ const NS = new Set();
 for (const d of ['sdk', 'runtime', 'themes/classic', 'themes/classic/components']) {
   for (const f of readdirSync(path.join(root, d))) {
     if (!/\.(m?js|jsx)$/.test(f)) continue;
-    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/lord\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
+    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/insane\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
   }
 }
 
-// A stub lord: nodes, their styles and texts (and which ones left the tree); lord.getLayout answers from a map the
+// A stub insane: nodes, their styles and texts (and which ones left the tree); insane.getLayout answers from a map the
 // scene fills (the bars' rectangles), far off screen otherwise; settings saved in memory; the network polls counted.
-const MOCK = `globalThis.__lordTest = (() => {
+const MOCK = `globalThis.__insaneTest = (() => {
   const styles = new Map(), texts = new Map(), parents = new Map(), removed = new Set(), layouts = new Map();
   const counts = { netPolls: 0 };
   let nextId = 1, saved = '{}';
@@ -54,14 +54,14 @@ const MOCK = `globalThis.__lordTest = (() => {
   };
   for (const ns of ${JSON.stringify([...NS])}) if (!(ns in base)) base[ns] = undefined;
   const noop = () => undefined;
-  globalThis.lord = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
+  globalThis.insane = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
   return { styles, texts, parents, removed, layouts, counts };
 })();`;
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-classic-taskbar-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-classic-taskbar-'));
 let bad = 0, n = 0;
 try {
-  // the theme's startShell hands its element to the scene; @lordos/apps has the taskbar's default pins and Calculator
+  // the theme's startShell hands its element to the scene; @insaneos/apps has the taskbar's default pins and Calculator
   const shim = path.join(dir, 'sdk-shim.js');
   writeFileSync(shim, `export * from ${JSON.stringify(path.join(root, 'sdk', 'index.js'))};\n`
     + 'export function startShell(element) { globalThis.__shellElement = element; }\n');
@@ -72,7 +72,7 @@ try {
   const out = await esbuild.build({
     entryPoints: [path.join(here, scene)], bundle: true, write: false, format: 'esm',
     platform: 'node', target: 'es2022', nodePaths, logLevel: 'error', jsx: 'automatic',
-    alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js'), '@lordos/sdk': shim, '@lordos/apps': appsStub },
+    alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js'), '@insaneos/sdk': shim, '@insaneos/apps': appsStub },
     define: { 'process.env.NODE_ENV': '"production"' },
     banner: { js: MOCK },
   });

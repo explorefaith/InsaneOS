@@ -1,5 +1,5 @@
 // Done — Lumo celebrates; what to do next with the card, and how to find the board on the network.
-import { View, Text, Button, ScrollView, Lumo, useTheme, useLocale, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Button, ScrollView, Lumo, useTheme, useLocale, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
 import { platform } from '../platform.js';
 import { app, restart } from '../state.js';
@@ -27,7 +27,7 @@ export function DoneStep({ s }) {
   const { t: tr } = useLocale();
   const dev = deviceById(s.device);
   const r = s.job?.result || {};
-  const host = `${s.cfg.hostname || 'lordos-pi'}.local`;
+  const host = `${s.cfg.hostname || 'insaneos-pi'}.local`;
   const announced = useRef(false);
   useEffect(() => {
     if (announced.current) return;

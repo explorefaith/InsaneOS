@@ -262,15 +262,15 @@ static void test_chromium_disk(void) {
     chrome_values(get("h1/.config/chromium/Default/Preferences"), &f, &th);
     CHECK(f == 1 && th == 1, "Default on (%d %d)", f, th);
     CHECK(strstr(get("h1/.config/chromium/Default/Preferences"), "\"zz\":1") != NULL, "other keys kept");
-    CHECK(!strcmp(get("h1/.config/chromium/Default/Preferences.lordos-backup"), orig), "backup is the original");
+    CHECK(!strcmp(get("h1/.config/chromium/Default/Preferences.insaneos-backup"), orig), "backup is the original");
     chrome_values(get("h1/.config/chromium/Profile 1/Preferences"), &f, &th);
     CHECK(f == 1 && th == 1, "Profile 1 on");
-    CHECK(!strcmp(get("h1/.config/chromium/Profile 2/Preferences"), before2) && !exists("h1/.config/chromium/Profile 2/Preferences.lordos-backup"),
+    CHECK(!strcmp(get("h1/.config/chromium/Profile 2/Preferences"), before2) && !exists("h1/.config/chromium/Profile 2/Preferences.insaneos-backup"),
           "malformed profile untouched, no backup");
     CHECK(!strcmp(get("h1/target.json"), "{}"), "a linked Preferences is never followed");
     CHECK(!strcmp(get("h1/.config/chromium/System Profile/Preferences"), "{}") && !strcmp(get("h1/.config/chromium/Profile x/Preferences"), "{}"),
           "other folders untouched");
-    CHECK(!exists("h1/.config/chromium/Default/Preferences.lordos-tmp"), "no temporary file left");
+    CHECK(!exists("h1/.config/chromium/Default/Preferences.insaneos-tmp"), "no temporary file left");
     {
         char p[1024];
         struct stat st;
@@ -329,7 +329,7 @@ static void test_brave_disk(void) {
     chrome_values(get("h3/.config/BraveSoftware/Brave-Browser/Default/Preferences"), &f, &th);
     CHECK(f == 1 && th == 1, "Brave Default: own bar and the GTK theme (%d %d)", f, th);
     CHECK(strstr(get("h3/.config/BraveSoftware/Brave-Browser/Default/Preferences"), "\"rewards\":{}") != NULL, "Brave's own keys kept");
-    CHECK(!strcmp(get("h3/.config/BraveSoftware/Brave-Browser/Default/Preferences.lordos-backup"), fresh), "Brave backup");
+    CHECK(!strcmp(get("h3/.config/BraveSoftware/Brave-Browser/Default/Preferences.insaneos-backup"), fresh), "Brave backup");
     brf_chromium_state(cfg, &son, &soff);
     CHECK(soff == 0 && son == 3, "state after on: %d on, %d off", son, soff);
     brf_chromium_apply(cfg, 0, &r);
@@ -378,7 +378,7 @@ static void test_firefox_disk(void) {
     CHECK(!exists("h2/.config/mozilla/firefox/aaaa.default/user.js"), "prefs.js already 1: no line needed");
     char *u = get("h2/.config/mozilla/firefox/bbbb.default-esr/user.js");
     CHECK(u && !strncmp(u, "user_pref(\"x.y\", 2);\nuser_pref(\"browser.tabs.inTitlebar\", 1);", 61), "line appended: %s", u ? u : "");
-    CHECK(!strcmp(get("h2/.config/mozilla/firefox/bbbb.default-esr/user.js.lordos-backup"), "user_pref(\"x.y\", 2);"), "user.js backup");
+    CHECK(!strcmp(get("h2/.config/mozilla/firefox/bbbb.default-esr/user.js.insaneos-backup"), "user_pref(\"x.y\", 2);"), "user.js backup");
     CHECK(!strcmp(get("h2/.mozilla/firefox/cccc.mine/user.js"), "user_pref(\"browser.tabs.inTitlebar\", 0);\n"), "own line untouched");
 
     brf_firefox_apply(cfg, home, 1, &r);

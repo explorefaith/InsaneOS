@@ -58,45 +58,45 @@ static FwDecision dec(FwStore *s, const char *app, const char *ip, uint16_t port
 
 static void test_canon(void) {
     char o[FW_APP_MAX];
-    CHECK(!fw_app_canon("lordos", o, sizeof o) && !strcmp(o, "lordos"));
+    CHECK(!fw_app_canon("insaneos", o, sizeof o) && !strcmp(o, "insaneos"));
     CHECK(!fw_app_canon("desktop:org.chromium.Chromium", o, sizeof o) && !strcmp(o, "desktop:org.chromium.Chromium"));
-    CHECK(!fw_app_canon("app-lordos-lpk-sudoku.scope", o, sizeof o) && !strcmp(o, "lpk:sudoku"));
-    CHECK(!fw_app_canon("app-lordos-org.mozilla.firefox.scope", o, sizeof o) && !strcmp(o, "desktop:org.mozilla.firefox"));
+    CHECK(!fw_app_canon("app-insaneos-lpk-sudoku.scope", o, sizeof o) && !strcmp(o, "lpk:sudoku"));
+    CHECK(!fw_app_canon("app-insaneos-org.mozilla.firefox.scope", o, sizeof o) && !strcmp(o, "desktop:org.mozilla.firefox"));
     CHECK(!fw_app_canon("/usr/bin/curl", o, sizeof o) && !strcmp(o, "/usr/bin/curl"));
     const char *bad[] = { "", "desktop:", ":x", "a b", "a\"b", "/usr/../bin/sh", "/usr//bin", "/usr/bin/", "rel/path",
-                          "app-lordos-lpk-a:b.scope", "x\n", "\xc3\xa1" };
+                          "app-insaneos-lpk-a:b.scope", "x\n", "\xc3\xa1" };
     for (size_t i = 0; i < sizeof bad / sizeof *bad; i++) CHECK(fw_app_canon(bad[i], o, sizeof o) == -1);
     /* (0.8.5) the components' scopes */
-    CHECK(!fw_component_scope("lordos-net-mail.scope", o, sizeof o) && !strcmp(o, "lordos:mail"));
-    CHECK(!fw_component_scope("lordos-net-terminal.scope", o, sizeof o) && !strcmp(o, "lordos:terminal"));
-    CHECK(!fw_app_canon("lordos:store", o, sizeof o) && !strcmp(o, "lordos:store"));
-    const char *badsc[] = { "lordos-net-evil.scope", "lordos-net-.scope", "lordos-net-mail", "lordos-net-mail.scope.scope",
-                            "lordos-maild.scope", "app-lordos-mail.scope", "lordos-net-Mail.scope", NULL };
+    CHECK(!fw_component_scope("insaneos-net-mail.scope", o, sizeof o) && !strcmp(o, "insaneos:mail"));
+    CHECK(!fw_component_scope("insaneos-net-terminal.scope", o, sizeof o) && !strcmp(o, "insaneos:terminal"));
+    CHECK(!fw_app_canon("insaneos:store", o, sizeof o) && !strcmp(o, "insaneos:store"));
+    const char *badsc[] = { "insaneos-net-evil.scope", "insaneos-net-.scope", "insaneos-net-mail", "insaneos-net-mail.scope.scope",
+                            "insaneos-maild.scope", "app-insaneos-mail.scope", "insaneos-net-Mail.scope", NULL };
     for (int i = 0; badsc[i]; i++) CHECK(fw_component_scope(badsc[i], o, sizeof o) == -1);
     CHECK(fw_component_ok("lists") && !fw_component_ok("") && !fw_component_ok(NULL) && !fw_component_ok("vpn"));
     /* (0.8.8.6) a running machine's scope is the Machines component's (its guest's traffic), with its id */
     char vid[40];
-    CHECK(!fw_vm_scope("app-lordos-lordos-vm-0f8e2a6c-1b2d-4c3e-9a7b-112233445566.scope", vid, sizeof vid) &&
+    CHECK(!fw_vm_scope("app-insaneos-insaneos-vm-0f8e2a6c-1b2d-4c3e-9a7b-112233445566.scope", vid, sizeof vid) &&
           !strcmp(vid, "0f8e2a6c-1b2d-4c3e-9a7b-112233445566"));
-    CHECK(!fw_scope_app("app-lordos-lordos-vm-0f8e2a6c-1b2d-4c3e-9a7b-112233445566.scope", o, sizeof o) && !strcmp(o, "lordos:machines"));
-    CHECK(!fw_scope_app("lordos-net-machines.scope", o, sizeof o) && !strcmp(o, "lordos:machines"));
-    CHECK(!fw_scope_app("lordos-net-mail.scope", o, sizeof o) && !strcmp(o, "lordos:mail"));
-    CHECK(!fw_scope_app("app-lordos-firefox.scope", o, sizeof o) && !strcmp(o, "desktop:firefox"));
-    CHECK(!fw_scope_app("app-lordos-lpk-notes.scope", o, sizeof o) && !strcmp(o, "lpk:notes"));
-    CHECK(!fw_scope_app("app-lordos-lordos-vmdisplay.scope", o, sizeof o) && !strcmp(o, "desktop:lordos-vmdisplay"));
-    const char *badvm[] = { "app-lordos-lordos-vm-.scope", "app-lordos-lordos-vm-ABC.scope", "app-lordos-lordos-vm-x y.scope",
-                            "app-lordos-lordos-vm-0f8e2a6c", "app-lordos-lordos-vm-0f8e2a6c-1b2d-4c3e-9a7b-1122334455667.scope",
-                            "app-lordos-lordos-vm-../x.scope", "lordos-vm-0f8e.scope", NULL };
+    CHECK(!fw_scope_app("app-insaneos-insaneos-vm-0f8e2a6c-1b2d-4c3e-9a7b-112233445566.scope", o, sizeof o) && !strcmp(o, "insaneos:machines"));
+    CHECK(!fw_scope_app("insaneos-net-machines.scope", o, sizeof o) && !strcmp(o, "insaneos:machines"));
+    CHECK(!fw_scope_app("insaneos-net-mail.scope", o, sizeof o) && !strcmp(o, "insaneos:mail"));
+    CHECK(!fw_scope_app("app-insaneos-firefox.scope", o, sizeof o) && !strcmp(o, "desktop:firefox"));
+    CHECK(!fw_scope_app("app-insaneos-lpk-notes.scope", o, sizeof o) && !strcmp(o, "lpk:notes"));
+    CHECK(!fw_scope_app("app-insaneos-insaneos-vmdisplay.scope", o, sizeof o) && !strcmp(o, "desktop:insaneos-vmdisplay"));
+    const char *badvm[] = { "app-insaneos-insaneos-vm-.scope", "app-insaneos-insaneos-vm-ABC.scope", "app-insaneos-insaneos-vm-x y.scope",
+                            "app-insaneos-insaneos-vm-0f8e2a6c", "app-insaneos-insaneos-vm-0f8e2a6c-1b2d-4c3e-9a7b-1122334455667.scope",
+                            "app-insaneos-insaneos-vm-../x.scope", "insaneos-vm-0f8e.scope", NULL };
     for (int i = 0; badvm[i]; i++) CHECK(fw_vm_scope(badvm[i], vid, sizeof vid) == -1);
-    /* under the machines' prefix but not a machine: no app at all (never desktop:lordos-vm-…) */
+    /* under the machines' prefix but not a machine: no app at all (never desktop:insaneos-vm-…) */
     for (int i = 0; badvm[i]; i++) CHECK(fw_scope_app(badvm[i], o, sizeof o) == -1);
-    CHECK(fw_vm_scope("app-lordos-lordos-vm-0f8e.scope", vid, 4) == -1);   /* no room for the id */
+    CHECK(fw_vm_scope("app-insaneos-insaneos-vm-0f8e.scope", vid, 4) == -1);   /* no room for the id */
     CHECK(fw_scope_app("server", o, sizeof o) == -1 && fw_scope_app("", o, sizeof o) == -1 && fw_scope_app(NULL, o, sizeof o) == -1);
     char longid[200];
     memset(longid, 'a', sizeof longid - 1);
     longid[sizeof longid - 1] = 0;
     CHECK(fw_app_canon(longid, o, sizeof o) == -1);
-    CHECK(fw_app_canon("lordos", o, 3) == -1);
+    CHECK(fw_app_canon("insaneos", o, 3) == -1);
 }
 
 static void test_dest(void) {
@@ -187,7 +187,7 @@ static void test_mode_and_trusted(void) {
     d = dec(s, "", "8.8.8.8", 443, NULL);
     CHECK(d.verdict == FW_V_DENY);
     /* the cgroup scope is the same app */
-    d = dec(s, "app-lordos-a.scope", "8.8.8.8", 443, NULL);
+    d = dec(s, "app-insaneos-a.scope", "8.8.8.8", 443, NULL);
     CHECK(d.verdict == FW_V_DENY && d.reason == FW_BY_RULE);
     fw_store_free(s);
 }
@@ -460,7 +460,7 @@ static void test_lifetimes(void) {
 static FwStore *sample(void) {
     FwStore *s = fw_store_new();
     fw_set_mode(s, FW_MODE_ASK);
-    fw_set_trusted(s, "lordos", 1);
+    fw_set_trusted(s, "insaneos", 1);
     fw_set_trusted(s, "desktop:org.gnome.Maps", 1);
     fw_set_restricted(s, "lpk:game", FW_R_NO_INTERNET | FW_R_NO_CAMERA | FW_R_NO_NOTIFICATIONS);
     add(s, "desktop:org.chromium.Chromium", FW_OUT, "any", FW_ALLOW);
@@ -471,7 +471,7 @@ static FwStore *sample(void) {
     r = mk("lpk:game", FW_IN, "lan", FW_ALLOW);
     r.port_lo = r.port_hi = 27015; r.proto = FW_PROTO_UDP;
     fw_rule_add(s, &r, NULL);
-    add(s, "app-lordos-lpk-game.scope", FW_OUT, "10.0.0.0/8", FW_ALLOW);
+    add(s, "app-insaneos-lpk-game.scope", FW_OUT, "10.0.0.0/8", FW_ALLOW);
     return s;
 }
 
@@ -485,7 +485,7 @@ static void test_json(void) {
     CHECK(!fw_from_json(t, j1, n1, err, sizeof err));
     char *j2 = fw_to_json(t, NULL);
     CHECK(j2 && !strcmp(j1, j2));
-    CHECK(fw_mode(t) == FW_MODE_ASK && fw_is_trusted(t, "lordos") && fw_blocks(t, "lpk:game", FW_R_NO_CAMERA));
+    CHECK(fw_mode(t) == FW_MODE_ASK && fw_is_trusted(t, "insaneos") && fw_blocks(t, "lpk:game", FW_R_NO_CAMERA));
     CHECK(dec(t, "desktop:org.chromium.Chromium", "1.2.3.4", 443, "ad.doubleclick.net").verdict == FW_V_DENY);
     CHECK(dec(t, "desktop:org.chromium.Chromium", "1.2.3.4", 443, "example.com").verdict == FW_V_ALLOW);
     CHECK(dec(t, "lpk:game", "10.2.3.4", 443, NULL).verdict == FW_V_ALLOW);
@@ -510,27 +510,27 @@ static void test_json(void) {
     const char *bad[] = {
         "", "[]", "null", "{", "{\"v\":2}", "{}", "{\"v\":\"1\"}", "{\"v\":1,\"x\":1}", "{\"v\":1}{}",
         "{\"v\":1,\"mode\":\"loud\"}", "{\"v\":1,\"mode\":1}",
-        "{\"v\":1,\"trusted\":\"lordos\"}", "{\"v\":1,\"trusted\":[1]}", "{\"v\":1,\"trusted\":[\"a b\"]}",
-        "{\"v\":1,\"trusted\":[\"lordos\",\"lordos\"]}", "{\"v\":1,\"trusted\":[\"app-lordos-x.scope\"]}",
+        "{\"v\":1,\"trusted\":\"insaneos\"}", "{\"v\":1,\"trusted\":[1]}", "{\"v\":1,\"trusted\":[\"a b\"]}",
+        "{\"v\":1,\"trusted\":[\"insaneos\",\"insaneos\"]}", "{\"v\":1,\"trusted\":[\"app-insaneos-x.scope\"]}",
         "{\"v\":1,\"restricted\":[]}", "{\"v\":1,\"restricted\":{\"lpk:a\":[]}}",
         "{\"v\":1,\"restricted\":{\"lpk:a\":[\"no-wifi\"]}}", "{\"v\":1,\"restricted\":{\"lpk:a\":[\"no-mic\",\"no-mic\"]}}",
         "{\"v\":1,\"restricted\":{\"lpk:a\":\"no-mic\"}}", "{\"v\":1,\"trusted\":[\"lpk:a\"],\"restricted\":{\"lpk:a\":[\"no-mic\"]}}",
         "{\"v\":1,\"rules\":{}}", "{\"v\":1,\"rules\":[1]}", "{\"v\":1,\"rules\":[{}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"maybe\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"10.0.0.1/8\",\"action\":\"allow\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"dir\":\"up\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"0\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"9-1\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"65536\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":1.5}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"proto\":\"icmp\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"when\":-1}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"life\":\"once\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\",\"app\":\"lordos\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"*.\",\"action\":\"allow\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lord\\u0000os\",\"dst\":\"any\",\"action\":\"allow\"}]}",
-        "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"allow\"},]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"maybe\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"10.0.0.1/8\",\"action\":\"allow\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"dir\":\"up\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"0\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"9-1\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":\"65536\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"port\":1.5}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"proto\":\"icmp\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"when\":-1}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"life\":\"once\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\",\"app\":\"insaneos\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"*.\",\"action\":\"allow\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insane\\u0000os\",\"dst\":\"any\",\"action\":\"allow\"}]}",
+        "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"allow\"},]}",
     };
     size_t before = fw_rule_count(t);
     for (size_t i = 0; i < sizeof bad / sizeof *bad; i++) {
@@ -542,9 +542,9 @@ static void test_json(void) {
     CHECK(fw_rule_count(t) == before && fw_mode(t) == FW_MODE_ASK);
     /* the minimum is valid and leaves everything empty */
     CHECK(!fw_from_json(t, "{\"v\":1}", 7, err, sizeof err) && fw_rule_count(t) == 0 && fw_mode(t) == FW_MODE_SILENT);
-    const char *num = "{\"v\":1,\"rules\":[{\"app\":\"lordos\",\"dst\":\"any\",\"action\":\"deny\",\"port\":443}]}";
+    const char *num = "{\"v\":1,\"rules\":[{\"app\":\"insaneos\",\"dst\":\"any\",\"action\":\"deny\",\"port\":443}]}";
     CHECK(!fw_from_json(t, num, strlen(num), err, sizeof err) && fw_rule_count(t) == 1);
-    CHECK(dec(t, "lordos", "1.2.3.4", 443, NULL).verdict == FW_V_DENY && dec(t, "lordos", "1.2.3.4", 80, NULL).reason == FW_BY_MODE);
+    CHECK(dec(t, "insaneos", "1.2.3.4", 443, NULL).verdict == FW_V_DENY && dec(t, "insaneos", "1.2.3.4", 80, NULL).reason == FW_BY_MODE);
 
     /* random mutations of the good JSON: never crashes; if accepted, it is written and read back */
     srand(1234);
@@ -633,7 +633,7 @@ static uint32_t ref_decide(const FwRule *rules, int n, const FwQuery *q) {
 }
 
 static void test_random(void) {
-    static const char *apps[] = { "lordos", "desktop:a", "lpk:b" };
+    static const char *apps[] = { "insaneos", "desktop:a", "lpk:b" };
     static const char *names[] = { "a.com", "b.a.com", "c.b.a.com", "x.org", "y.x.org", "com", "org", "z.net" };
     FwStore *s = fw_store_new();
     fw_set_mode(s, FW_MODE_ASK);

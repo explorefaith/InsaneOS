@@ -2,15 +2,15 @@
  * methods and the HTTP request built for one, argument and path checks, the provider table, the website table,
  * reading `rclone authorize`'s output, the VFS cache metadata, the per-file status and the eviction choice.
  * Everything here is tested by tests/cloud_test.c. */
-#ifndef LORD_CLOUD_PURE_H
-#define LORD_CLOUD_PURE_H
+#ifndef INSANE_CLOUD_PURE_H
+#define INSANE_CLOUD_PURE_H
 
 #include <stddef.h>
 
-/* the binary of the lordos-rclone package; Connect to Server uses it too (lan/rconnect.c) */
-#define CLOUD_RCLONE "/usr/lib/lordos/rclone/rclone"
-/* firewall app desktop:lordos-cloud, scope app-lordos-lordos-cloud.scope (reserved: sec/cgroup.h app_scope_reserved) */
-#define CLOUD_SCOPE "lordos-cloud"
+/* the binary of the insaneos-rclone package; Connect to Server uses it too (lan/rconnect.c) */
+#define CLOUD_RCLONE "/usr/lib/insaneos/rclone/rclone"
+/* firewall app desktop:insaneos-cloud, scope app-insaneos-insaneos-cloud.scope (reserved: sec/cgroup.h app_scope_reserved) */
+#define CLOUD_SCOPE "insaneos-cloud"
 
 /* ---- the closed rc method table (4.2) ----
  * A method is named by this enum only; its path comes from a fixed table. Nothing takes a method name as text, so

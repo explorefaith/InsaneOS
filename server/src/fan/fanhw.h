@@ -1,4 +1,4 @@
-/* fanhw.h — lord-fand's hardware side: finds the CPU temperature and the fans it may drive, and
+/* fanhw.h — insane-fand's hardware side: finds the CPU temperature and the fans it may drive, and
  * writes their duty (docs/FANS.md). Everything is found under a sysfs root (normally "", so the
  * real /sys; tests/fan_test.c builds a fake tree). Paths never come from a client: a client only
  * picks a profile, and the daemon drives every fan it found.
@@ -18,8 +18,8 @@
  * FAN_GPU_FLOOR..100 %. It goes back to automatic (pwm1_enable=2) when asked, when the card passes
  * FANHW_GPU_BACKSTOP_C, after FANHW_GPU_ERRORS failed ticks, when the session that set it ends, and on stop,
  * restart and crash (the restore notes). It is never saved: a reboot always starts in automatic. */
-#ifndef LORD_FAN_HW_H
-#define LORD_FAN_HW_H
+#ifndef INSANE_FAN_HW_H
+#define INSANE_FAN_HW_H
 
 #define FANHW_MAX        8
 #define FANHW_MAX_RO     8
@@ -93,7 +93,7 @@ int  fanhw_scan(FanHw *h, const char *root);
 /* CPU temperature in milli-°C, or -1000000 if unreadable. */
 int  fanhw_temp(const FanHw *h);
 /* Takes manual control of every fan (hwmon: pwmN_enable=1; board: raise the trips). Writes what it
- * changed to state_path first (if not NULL) so `lord-fand --restore` can undo it after a crash. */
+ * changed to state_path first (if not NULL) so `insane-fand --restore` can undo it after a crash. */
 int  fanhw_take(FanHw *h, const char *state_path);
 /* Duty 0..100 to fan i (already through fan_output_pct). Rewrites only when the value read back
  * differs, so a kernel step in between is corrected on the next tick. */
@@ -124,7 +124,7 @@ void fanhw_gpu_auto(FanHw *h, int i, GpuRevert why, const char *state_path);
 /* One tick for a fan set by hand: the backstop, read/write errors, a resume that reset it. session: whether the
  * owner still has a session (fanhw_uid_has_session). */
 void fanhw_gpu_tick(FanHw *h, int i, int session, const char *state_path);
-/* Does uid have a running lord-server (a desktop session) under root/proc? Uid 0 always does. */
+/* Does uid have a running insane-server (a desktop session) under root/proc? Uid 0 always does. */
 int  fanhw_uid_has_session(const char *root, unsigned uid);
 /* Rewrites the restore notes for what is held now (cpu: the curve's fans and trips too); removes the file when
  * nothing is held. */

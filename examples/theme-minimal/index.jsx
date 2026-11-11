@@ -10,8 +10,8 @@ import {
   startShell, View, Text, Image, Layer, ScrollView, ThemeProvider, useSettings, useWindows, configureWindows, getApp, wm, AppHost,
   WindowShell, windowTitle, windowIcon, useAppMenus, windowMenuItems, useLauncherApps, launchApp, DesktopWidgets, PowerDialog,
   findWallpaper, wallpaperSrc, mainDisplay, screenDisplays, screen, useClock, formatTime, solidOver, session, t as tr,
-} from '@lordos/sdk';
-import { apps } from '@lordos/apps';
+} from '@insaneos/sdk';
+import { apps } from '@insaneos/apps';
 import { useState } from 'react';
 import { makeTheme } from './tokens.js';
 

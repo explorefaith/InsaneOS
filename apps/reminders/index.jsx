@@ -1,11 +1,11 @@
-// Reminders — to-do lists kept by lord-maild (local, or synced with CalDAV as VTODO): see
+// Reminders — to-do lists kept by insane-maild (local, or synced with CalDAV as VTODO): see
 // docs/MAIL.md. Smart lists (Today, Scheduled, All, Flagged, Completed) are filters over
 // reminders.items(); their alarms ring with the app closed (sdk/calendar.js, startReminders).
 import {
   View, Text, useTheme, useLocale, useKeyboard, useWindowState, usePim, reminders, calendars,
   Button, Toggle, Segmented, TextInput, ScrollView, Hairline, Toolbar, ToolbarButton, ToolbarSpacer, EmptyState, addListener,
   formatDate, formatTime, direction, t,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   RED, COLORS, sod, addDays, ymd, parseYmd, minutesOf, atMinutes, Sheet, Field, Choice, TextArea, DateField, TimeField, ColorSwatches,
@@ -291,7 +291,7 @@ function ReminderRow({ item, depth, color, lists, now, listName }) {
     if (editing == null) return undefined;
     return addListener('pointerdown', (e) => {
       if (!row.current) return;
-      const [x, y, w, h] = lord.getLayout(row.current.id);
+      const [x, y, w, h] = insane.getLayout(row.current.id);
       if (e.x < x || e.x > x + w || e.y < y || e.y > y + h) commit();
     });
   }, [editing != null]);

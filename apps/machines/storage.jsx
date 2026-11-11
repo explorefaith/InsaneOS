@@ -6,7 +6,7 @@
 // (the mock's "Downloads" in the bar; 3.9, "The Linux download cards"), shared by every account: each with its size and
 // the machines of this account whose CD drive has it; Remove (vm-image-remove, an administrator's action) asks first and
 // is refused while a running machine has it in its drive.
-import { View, Text, ScrollView, ConfirmDialog, useAppWindow, wm, fs, admin, t as tr } from '@lordos/sdk';
+import { View, Text, ScrollView, ConfirmDialog, useAppWindow, wm, fs, admin, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { storageRows, storageBar, stateView } from './model.js';
 import { usePal, has, bytes, Btn, Sheet, OsMark } from './ui.jsx';
@@ -17,12 +17,12 @@ import { downloadedImages, IMAGES_DIR } from './catalog.js';
 const readInfo = (sha) => JSON.parse(fs.read(`${IMAGES_DIR}/${sha}.json`));
 function listImages(ms) {
   let entries = [];
-  try { entries = lord.fs.list(IMAGES_DIR); } catch (e) { entries = []; }     // none downloaded yet: no folder
+  try { entries = insane.fs.list(IMAGES_DIR); } catch (e) { entries = []; }     // none downloaded yet: no folder
   return downloadedImages(CATALOG, entries, readInfo, ms, (m) => stateView(m.state, m.reason).active);
 }
 import { openSnapshots } from './library.jsx';
 
-const errOf = (out) => (out || '').trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || (out || '').trim();
+const errOf = (out) => (out || '').trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || (out || '').trim();
 
 export function Storage() {
   const p = usePal();
@@ -39,8 +39,8 @@ export function Storage() {
   const [removing, setRemoving] = useState(false);
   const load = () => {
     if (!has()) return;
-    const s = lord.vm.storage();
-    const ms = lord.vm.list();
+    const s = insane.vm.storage();
+    const ms = insane.vm.list();
     for (const m of s.machines) {
       const x = ms.find((y) => y.dir === m.dir);
       m.runState = x?.state; m.runReason = x?.reason;
@@ -49,12 +49,12 @@ export function Storage() {
     setSt(s); setList(ms); setImgs(listImages(ms));
   };
   useEffect(() => { wm.setTitle(winId, tr('machines.storage.title')); load(); const timer = setInterval(load, 5000); return () => clearInterval(timer); }, []);
-  // lord-vm jobs: the estimate, then the compaction
+  // insane-vm jobs: the estimate, then the compaction
   useEffect(() => {
     const j = est?.job || busy?.job;
     if (!j) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(j);
+      const r = insane.vm.job(j);
       if (!r || !r.done) return;
       if (est?.job) {
         let out = null;
@@ -82,7 +82,7 @@ export function Storage() {
     setRm(null); setRemoving(true); setMsg(null);
     try {
       await admin.run('vm-image-remove', x.sha, null, { quiet: true });
-      for (const d of x.dirs) { try { lord.vm.eject(d); } catch (e) { /* its card says the disc is missing */ } }   // off: their drives emptied
+      for (const d of x.dirs) { try { insane.vm.eject(d); } catch (e) { /* its card says the disc is missing */ } }   // off: their drives emptied
       setSel(null); setMsg({ ok: true, text: tr('machines.storage.dlRemoved', { name: imgName(x) }) }); }
     catch (e) { setMsg({ ok: false, text: e.code === 'admin.unavailable' ? tr('machines.dl.noHelper') : e.message }); }
     setRemoving(false); load();
@@ -169,7 +169,7 @@ export function Storage() {
             {msg ? <Text style={{ fontSize: 12, color: msg.ok ? p.dim : '#ff453a', textAlign: 'start' }}>{msg.text}</Text> : null}
             {m.snapshotCount ? <Btn label={tr('machines.storage.snapshots', { n: m.snapshotCount })} onClick={() => openSnapshots(m)} /> : null}
             <Btn label={busy ? tr('machines.storage.compacting') : tr('machines.storage.reclaim')} disabled={!!busy || !!est?.job || on}
-              onClick={() => { setMsg(null); const j = lord.vm.compact(m.dir, true); if (j) setEst({ job: j }); else setMsg({ ok: false, text: tr('machines.cfg.refused') }); }} />
+              onClick={() => { setMsg(null); const j = insane.vm.compact(m.dir, true); if (j) setEst({ job: j }); else setMsg({ ok: false, text: tr('machines.cfg.refused') }); }} />
             <Btn danger label={tr('machines.storage.trash', { size: bytes(m.frees) })} disabled={on || !!busy} onClick={() => setDel(m)} />
             {on ? <Text style={{ fontSize: 12, color: p.dim, textAlign: 'start' }}>{tr('machines.storage.whenOff')}</Text> : null}
           </> : cur && cur.base ? <>
@@ -177,7 +177,7 @@ export function Storage() {
             <Text style={{ fontSize: 12, lineHeight: 1.5, color: p.dim, textAlign: 'start' }}>{cur.users || cur.trash ? tr('machines.storage.baseUsed', { names: cur.names.join(', ') || '—', trash: cur.trash }) : tr('machines.storage.baseUnused')}</Text>
             <View style={{ flex: 1 }} />
             {!cur.users && !cur.trash ? <Btn danger label={tr('machines.storage.removeBase', { size: bytes(cur.size) })}
-              onClick={() => { setMsg(lord.vm.removeBase(cur.path) ? null : { ok: false, text: tr('machines.cfg.refused') }); setSel(null); load(); }} /> : null}
+              onClick={() => { setMsg(insane.vm.removeBase(cur.path) ? null : { ok: false, text: tr('machines.cfg.refused') }); setSel(null); load(); }} /> : null}
           </> : img ? <>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <OsMark id={img.id} size={32} />
@@ -203,7 +203,7 @@ export function Storage() {
         <Sheet title={tr('machines.storage.reclaimTitle', { name: m?.name || '' })} onCancel={() => setEst(null)} actions={[
           <Btn key="c" label={tr('machines.cancel')} onClick={() => setEst(null)} />,
           <Btn key="r" primary label={tr('machines.storage.reclaim')} disabled={!est.possible || est.allocated - est.required <= 0} onClick={() => {
-            const j = lord.vm.compact(m.dir, false);
+            const j = insane.vm.compact(m.dir, false);
             setEst(null);
             if (j) setBusy({ job: j, what: 'compact' }); else setMsg({ ok: false, text: tr('machines.cfg.refused') });
           }} />,

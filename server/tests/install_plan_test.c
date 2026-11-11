@@ -61,7 +61,7 @@ int main(void) {
     T(!install_hash_ok("!$6$locked$xxxxxxxxxxxxxxxxxxxxxxxx"));
     T(!install_hash_ok(""));
     /* SSH keys: one plain public key line */
-    T(install_ssh_key_ok("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGq7yT1pM4xK0bZ9w2vQe8Lh3sN5uR6tY7iO8pA9sD0f maintainer@lordos"));
+    T(install_ssh_key_ok("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGq7yT1pM4xK0bZ9w2vQe8Lh3sN5uR6tY7iO8pA9sD0f maintainer@insaneos"));
     T(install_ssh_key_ok("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGq7yT1pM4xK0bZ9w2vQe8Lh3sN5uR6tY7iO8pA9sD0f"));
     T(!install_ssh_key_ok("command=\"rm -rf /\" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGq7yT1pM4xK0bZ9w2vQe8Lh3sN5"));
     T(!install_ssh_key_ok("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGq7yT1pM4xK0bZ9w2vQe8Lh3sN5uR6t\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ"));

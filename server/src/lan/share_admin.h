@@ -1,6 +1,6 @@
 /* share_admin.h — the share-* admin actions (see share_admin.c, docs/FILES.md, "Network"). */
-#ifndef LORD_LAN_SHARE_ADMIN_H
-#define LORD_LAN_SHARE_ADMIN_H
+#ifndef INSANE_LAN_SHARE_ADMIN_H
+#define INSANE_LAN_SHARE_ADMIN_H
 
 #include "../admin.h"
 

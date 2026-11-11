@@ -1,6 +1,6 @@
 /* vmthumb.h — a machine's card picture (vmthumb.c). */
-#ifndef LORD_VMTHUMB_H
-#define LORD_VMTHUMB_H
+#ifndef INSANE_VMTHUMB_H
+#define INSANE_VMTHUMB_H
 
 #include <stdint.h>
 

@@ -1,4 +1,4 @@
-/* js_rdesk.c — lord.rdesk: the RDP and VNC apps (docs/FILES.md, "Remote desktop"). lord-server starts lord-rdesk in a
+/* js_rdesk.c — insane.rdesk: the RDP and VNC apps (docs/FILES.md, "Remote desktop"). insane-server starts insane-rdesk in a
  * scope of its own, gives it the job once and shares the picture, which the engine shows as a media node.
  *
  *   open(proto, host, port, user, domain, password, w, h, folders, { admin, scale, sound: 'here'|'there'|'none', depth }) → id, or 0
@@ -53,7 +53,7 @@ static int helper_path(char *bin, size_t n) {
     bin[l] = 0;
     char *s = strrchr(bin, '/');
     if (!s) return -1;
-    strcpy(s + 1, "lord-rdesk");
+    strcpy(s + 1, "insane-rdesk");
     struct stat st;
     return stat(bin, &st) || !S_ISREG(st.st_mode) || (st.st_uid != 0 && st.st_uid != geteuid()) || (st.st_mode & 022) ? -1 : 0;
 }
@@ -150,13 +150,13 @@ static JSValue f_open(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
                 sigprocmask(SIG_SETMASK, &none, NULL);
                 /* the same limits for both protocols: libfreerdp is what needs them */
                 CgroupLimits lim = { .mem_high_mb = 256, .mem_max_mb = 512, .cpu_percent = 0 };
-                if (cgroup_enter("app-lordos-lordos-rdesk.scope", &lim) && getenv("LORDOS_SESSIOND")) _exit(126);
-                char *args[] = { "lord-rdesk", NULL };
+                if (cgroup_enter("app-insaneos-insaneos-rdesk.scope", &lim) && getenv("INSANEOS_SESSIOND")) _exit(126);
+                char *args[] = { "insane-rdesk", NULL };
                 execve(bin, args, environ);
                 _exit(127);
             }
             close(sv[1]);
-            /* the sound plays here: lord-server's own stream, fed from a ring the helper writes (media/maudio.c) */
+            /* the sound plays here: insane-server's own stream, fed from a ring the helper writes (media/maudio.c) */
             MAudio *audio = NULL;
             int ring = -1;
             if (!strcmp(proto, "rdp") && wants_sound(c, argc, argv)) audio = maudio_open(0, "Remote Desk", host, "video", &ring);
@@ -201,7 +201,7 @@ static void set_size(Sess *s, int w, int h) {
     free(m->cache); m->cache = NULL; m->cache_w = m->cache_h = 0;
     m->map = map; m->map_len = len; m->px = (uint32_t *)map; m->w = w; m->h = h; m->opaque = 1; m->frame_seq++;
     s->media = m->id; s->w = w; s->h = h;
-    /* the media node keeps the sound from now on: lord-server's loop serves its stream, and closing the node ends it */
+    /* the media node keeps the sound from now on: insane-server's loop serves its stream, and closing the node ends it */
     if (s->audio && !m->audio) { m->audio = s->audio; s->audio = NULL; maudio_playing(m->audio, 1); }
     if (rd_send_picture(s->sock, fd)) s->state = RS_FAILED;
     close(fd);
@@ -282,8 +282,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("snapshot", 2, f_snapshot), JS_CFUNC_DEF("forgetSnapshot", 1, f_forget_snapshot),
 };
 
-void js_rdesk_register(JSContext *c, JSValue lord) {
+void js_rdesk_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "rdesk", o);
+    JS_SetPropertyStr(c, insane, "rdesk", o);
 }

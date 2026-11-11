@@ -1,4 +1,4 @@
-// cloud.js — Cloud: the person's cloud storage accounts (lord.cloud, server/src/cloud, docs/CLOUD.md section 17).
+// cloud.js — Cloud: the person's cloud storage accounts (insane.cloud, server/src/cloud, docs/CLOUD.md section 17).
 //
 //   const st = useCloud()              live State: { available, service, options, accounts, signin, recent }
 //   cloud.available() / cloud.state()
@@ -16,62 +16,62 @@
 //   cloud.emptyTrash(id) → Promise   cloud.measure(id) → Promise<{ bytes, count }>   cloud.delete(paths) → Promise (17.2)
 //   cloud.pause(id|null) / resume(id|null) / setOptions({ … }) / restart() / showLog()
 //
-// lord-server's cloud thread is rclone's only client; JS never reaches it. The state is pushed (__lordCloud),
+// insane-server's cloud thread is rclone's only client; JS never reaches it. The state is pushed (__insaneCloud),
 // at most twice a second, never polled. The two calls that talk to the provider (link, unlink) answer later.
 import { createStore, useStore } from './store.js';
 import { wm } from './windows.js';
 import { defaultOpenerId } from './defaults.js';
 
-const has = () => typeof lord !== 'undefined' && !!lord.cloud;
+const has = () => typeof insane !== 'undefined' && !!insane.cloud;
 const EMPTY = {
   available: false,
   service: { running: false, version: '', uptimeS: 0, rssKb: 0, restarts: 0 },
   options: { bwUp: 0, bwDown: 0, pauseOnBattery: true, pauseOnMetered: true, autoFree: true, freeBelowGb: 10 },
   accounts: [], signin: null, recent: [],
 };
-const read = () => { try { return (has() && lord.cloud.state()) || EMPTY; } catch (e) { return EMPTY; } };
+const read = () => { try { return (has() && insane.cloud.state()) || EMPTY; } catch (e) { return EMPTY; } };
 
 export const cloudState = createStore(read());
 const waiting = new Map();      // req → resolve
 
-globalThis.__lordCloud = (st) => { if (st && typeof st === 'object') cloudState.set(() => st); };
-globalThis.__lordCloudReply = (req, res) => {
+globalThis.__insaneCloud = (st) => { if (st && typeof st === 'object') cloudState.set(() => st); };
+globalThis.__insaneCloudReply = (req, res) => {
   const done = waiting.get(req);
   if (done) { waiting.delete(req); done(res); }
 };
 
 const later = (r) => (r && typeof r.then === 'function' ? r : r && r.req ? new Promise((resolve) => waiting.set(r.req, resolve)) : Promise.resolve(r || { error: 'cloud.failed' }));
-// a call of 17.2 the running lord-server may not have yet
-const maybe = (name, ...args) => (has() && typeof lord.cloud[name] === 'function' ? later(lord.cloud[name](...args)) : Promise.resolve({ error: 'cloud.unavailable' }));
+// a call of 17.2 the running insane-server may not have yet
+const maybe = (name, ...args) => (has() && typeof insane.cloud[name] === 'function' ? later(insane.cloud[name](...args)) : Promise.resolve({ error: 'cloud.unavailable' }));
 const paths = (p) => (Array.isArray(p) ? p : [p]).map(String);
 
-// lord-server opens the sign-in page itself; if the default browser isn't a Linux app it can launch, the session does
+// insane-server opens the sign-in page itself; if the default browser isn't a Linux app it can launch, the session does
 function openHere(url) {
   try {
     const def = defaultOpenerId('x-scheme-handler/http') || defaultOpenerId('x-scheme-handler/https');
-    return !!def && lord.apps.launchUri(def.replace(/\.desktop$/, ''), url);
+    return !!def && insane.apps.launchUri(def.replace(/\.desktop$/, ''), url);
   } catch (e) { return false; }
 }
 
 export const cloud = {
-  available: () => has() && !!lord.cloud.available(),
+  available: () => has() && !!insane.cloud.available(),
   state: () => cloudState.get(),
   // 17.2: a Promise, asked of rclone every time (an older server answered a list at once)
-  providers: () => (has() ? later(lord.cloud.providers()).then((l) => (Array.isArray(l) ? l : l && l.error ? Promise.reject(l) : [])) : Promise.reject({ error: 'cloud.unavailable' })),
+  providers: () => (has() ? later(insane.cloud.providers()).then((l) => (Array.isArray(l) ? l : l && l.error ? Promise.reject(l) : [])) : Promise.reject({ error: 'cloud.unavailable' })),
   // { accountId }: Sign In Again for that account (its id, whatever the name)
-  beginSignIn: (kind, name, opts = {}) => (has() ? lord.cloud.beginSignIn(String(kind), String(name), {
+  beginSignIn: (kind, name, opts = {}) => (has() ? insane.cloud.beginSignIn(String(kind), String(name), {
     clientId: opts.clientId ? String(opts.clientId) : '', clientSecret: opts.clientSecret ? String(opts.clientSecret) : '',
     accountId: opts.accountId ? String(opts.accountId) : '',
   }) : { error: 'cloud.unavailable' }),
   openSignInPage(id) {
     if (!has()) return false;
-    if (lord.cloud.openSignInPage(String(id))) return true;
+    if (insane.cloud.openSignInPage(String(id))) return true;
     const s = cloudState.get().signin;
     return !!(s && s.id === id && s.url) && openHere(s.url);
   },
-  cancelSignIn: (id) => has() && lord.cloud.cancelSignIn(String(id)),
+  cancelSignIn: (id) => has() && insane.cloud.cancelSignIn(String(id)),
   // { id } | { question: { state, name, help, type, examples, isPassword, required, default } } | { error } (17.2 item 3)
-  add: (kind, name, fields = {}, opts = {}) => (has() ? later(lord.cloud.add(String(kind), String(name), fields,
+  add: (kind, name, fields = {}, opts = {}) => (has() ? later(insane.cloud.add(String(kind), String(name), fields,
     { accountId: opts.accountId ? String(opts.accountId) : '' })) : Promise.resolve({ error: 'cloud.unavailable' })),
   // opts.applyToOthers (default true): a host's new key also for the other accounts that kept its old one (N4)
   answer: (state, value, opts = {}) => maybe('answer', String(state), String(value ?? ''), { applyToOthers: opts.applyToOthers !== false }),
@@ -80,33 +80,33 @@ export const cloud = {
   cancelMeasure: (id) => maybe('cancelMeasure', String(id)),
   // removes them in the cloud through the mount (the provider's own trash where it has one): paths strictly under ~/Cloud/<account>
   // search inside a cloud folder, off the interface's thread (N2): { hits: [{ path, dir, size, mtime }], complete }
-  search: (path, needle) => (has() ? later(lord.cloud.search(String(path), String(needle))) : Promise.resolve({ error: 'cloud.unavailable' })),
+  search: (path, needle) => (has() ? later(insane.cloud.search(String(path), String(needle))) : Promise.resolve({ error: 'cloud.unavailable' })),
   delete: (p) => maybe('delete', paths(p)),
-  remove: (id, { discardPending = false } = {}) => (has() ? lord.cloud.remove(String(id), { discardPending: !!discardPending }) : { error: 'cloud.unavailable' }),
-  rename: (id, name) => (has() ? lord.cloud.rename(String(id), String(name)) : { error: 'cloud.unavailable' }),
-  refreshAbout: (id) => has() && lord.cloud.refreshAbout(String(id)),
+  remove: (id, { discardPending = false } = {}) => (has() ? insane.cloud.remove(String(id), { discardPending: !!discardPending }) : { error: 'cloud.unavailable' }),
+  rename: (id, name) => (has() ? insane.cloud.rename(String(id), String(name)) : { error: 'cloud.unavailable' }),
+  refreshAbout: (id) => has() && insane.cloud.refreshAbout(String(id)),
   // accounts not connected (keyring was locked, offline) try again: call it after unlocking the keyring; null: all
-  retry: (id = null) => has() && lord.cloud.retry(id == null ? undefined : String(id)),
-  websiteUrl: (id) => (has() ? lord.cloud.websiteUrl(String(id)) : null),
-  status: (p) => (has() ? lord.cloud.status(paths(p)) || {} : {}),
+  retry: (id = null) => has() && insane.cloud.retry(id == null ? undefined : String(id)),
+  websiteUrl: (id) => (has() ? insane.cloud.websiteUrl(String(id)) : null),
+  status: (p) => (has() ? insane.cloud.status(paths(p)) || {} : {}),
   // a folder of an account that Files shows (docs/CLOUD.md 7.3): listed again in the background when it is old, its
   // subfolders listed ahead; the account's `listed` goes up when the folder itself was listed again
-  browse: (path) => { if (has() && typeof lord.cloud.browse === 'function') lord.cloud.browse(String(path)); },
-  keep: (p) => has() && lord.cloud.keep(paths(p)),
-  unkeep: (p) => has() && lord.cloud.unkeep(paths(p)),
-  free: (p) => (has() ? lord.cloud.free(paths(p)) : { freed: 0, skipped: [] }),
-  link: (path, expire = 'never') => (has() ? later(lord.cloud.link(String(path), String(expire))) : Promise.resolve({ error: 'cloud.unavailable' })),
-  unlink: (path) => (has() ? later(lord.cloud.unlink(String(path))) : Promise.resolve({ error: 'cloud.unavailable' })),
-  links: (id) => (has() ? lord.cloud.links(String(id)) || [] : []),
-  pause: (id = null) => has() && lord.cloud.pause(id == null ? undefined : String(id)),
-  resume: (id = null) => has() && lord.cloud.resume(id == null ? undefined : String(id)),
-  setOptions: (o) => (has() ? lord.cloud.setOptions({ ...o }) : { error: 'cloud.unavailable' }),
-  restart: () => has() && lord.cloud.restart(),
-  showLog: () => wm.open('logs', { new: true, args: { file: has() ? lord.cloud.logName() : 'cloud.log' } }),
-  // Not provided by lord-server in 0.8.8.5 (docs/CLOUD.md 17.1: one bandwidth limit for the whole daemon, metered
+  browse: (path) => { if (has() && typeof insane.cloud.browse === 'function') insane.cloud.browse(String(path)); },
+  keep: (p) => has() && insane.cloud.keep(paths(p)),
+  unkeep: (p) => has() && insane.cloud.unkeep(paths(p)),
+  free: (p) => (has() ? insane.cloud.free(paths(p)) : { freed: 0, skipped: [] }),
+  link: (path, expire = 'never') => (has() ? later(insane.cloud.link(String(path), String(expire))) : Promise.resolve({ error: 'cloud.unavailable' })),
+  unlink: (path) => (has() ? later(insane.cloud.unlink(String(path))) : Promise.resolve({ error: 'cloud.unavailable' })),
+  links: (id) => (has() ? insane.cloud.links(String(id)) || [] : []),
+  pause: (id = null) => has() && insane.cloud.pause(id == null ? undefined : String(id)),
+  resume: (id = null) => has() && insane.cloud.resume(id == null ? undefined : String(id)),
+  setOptions: (o) => (has() ? insane.cloud.setOptions({ ...o }) : { error: 'cloud.unavailable' }),
+  restart: () => has() && insane.cloud.restart(),
+  showLog: () => wm.open('logs', { new: true, args: { file: has() ? insane.cloud.logName() : 'cloud.log' } }),
+  // Not provided by insane-server in 0.8.8.5 (docs/CLOUD.md 17.1: one bandwidth limit for the whole daemon, metered
   // networks not known yet): an account's own options. Without it Settings disables those rows.
-  accountOptionsSupported: () => has() && typeof lord.cloud.setAccountOptions === 'function',
-  setAccountOptions: (id, o) => (has() && typeof lord.cloud.setAccountOptions === 'function' ? lord.cloud.setAccountOptions(String(id), o) : undefined),
+  accountOptionsSupported: () => has() && typeof insane.cloud.setAccountOptions === 'function',
+  setAccountOptions: (id, o) => (has() && typeof insane.cloud.setAccountOptions === 'function' ? insane.cloud.setAccountOptions(String(id), o) : undefined),
 };
 
 export const useCloud = () => useStore(cloudState);

@@ -5,7 +5,7 @@
 import {
   View, Text, useTheme, useLocale, useSettings, Toggle, Button, TextInput, ScrollView, SearchField, admin, useTimedate, clockPrefs, menuClock,
   formatDate, formatTime, useClock,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { GroupBox, SettingRow, PopUp, Note, Stack } from './ui.jsx';
 
@@ -19,7 +19,7 @@ const offsetText = (sec) => {
 function ZonePicker({ zone, onPick, tr }) {
   const t = useTheme();
   const [q, setQ] = useState('');
-  const [all] = useState(() => lord.time.zones().sort());
+  const [all] = useState(() => insane.time.zones().sort());
   const now = Math.floor(Date.now() / 1000);
   const needle = q.trim().toLowerCase().replace(/ /g, '_');
   const shown = (needle ? all.filter((z) => z.toLowerCase().includes(needle)) : all).slice(0, 400);
@@ -29,7 +29,7 @@ function ZonePicker({ zone, onPick, tr }) {
       <View style={{ height: 220, borderRadius: 8, border: `1px solid ${t.separator}` }}>
         <ScrollView style={{ padding: 4 }}>
           {shown.map((z) => {
-            const off = lord.time.zoneOffset ? lord.time.zoneOffset(z, now) : null;
+            const off = insane.time.zoneOffset ? insane.time.zoneOffset(z, now) : null;
             const on = z === zone;
             const parts = z.split('/');
             return (
@@ -72,23 +72,23 @@ export function DateTimeSettings() {
   const [s, set] = useSettings();
   const td = useTimedate();
   const c = clockPrefs(s);
-  const [zone, setZone] = useState(() => lord.time.zone());
+  const [zone, setZone] = useState(() => insane.time.zone());
   const [picking, setPicking] = useState(false);
   const [editing, setEditing] = useState(false);
   const [err, setErr] = useState('');
   const isAdmin = admin.available();
-  useEffect(() => { lord.timedate.refresh(); }, []);
+  useEffect(() => { insane.timedate.refresh(); }, []);
   const clock = useClock((d) => `${formatDate(d, 'long')} · ${formatTime(d, { seconds: true })}`, 1000);
   const preview = useClock((d) => menuClock(d), 1000);
   const patch = (x) => set({ clock: { ...c, ...x } });
   const ntp = !!td?.ntp;
-  const setNtp = (on) => admin.run('time-ntp', on ? 'on' : 'off').then(() => { setErr(''); lord.timedate.refresh(); }, (e) => setErr(e.message));
+  const setNtp = (on) => admin.run('time-ntp', on ? 'on' : 'off').then(() => { setErr(''); insane.timedate.refresh(); }, (e) => setErr(e.message));
   const pickZone = (z) => {
     setPicking(false);
-    admin.run('timezone', z).then(() => { lord.time.reload(); setZone(z); setErr(''); lord.timedate.refresh(); }, (e) => setErr(e.message));
+    admin.run('timezone', z).then(() => { insane.time.reload(); setZone(z); setErr(''); insane.timedate.refresh(); }, (e) => setErr(e.message));
   };
   const now = Math.floor(Date.now() / 1000);
-  const off = lord.time.zoneOffset ? lord.time.zoneOffset(zone, now) : null;
+  const off = insane.time.zoneOffset ? insane.time.zoneOffset(zone, now) : null;
   return (
     <Stack>
       <GroupBox footer={isAdmin ? '' : tr('prefs.time.needAdmin')}>

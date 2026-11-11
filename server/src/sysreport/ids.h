@@ -1,8 +1,8 @@
 /* ids.h — vendor, device and class names from the hwdata lists (`pci.ids` and `usb.ids`, the Debian
  * packages of the same names, /usr/share/misc). The file is read once into memory (at most 8 MB) and
  * searched in place; names are copied out as printable ASCII. A missing file only means no names. */
-#ifndef LORD_SYSREPORT_IDS_H
-#define LORD_SYSREPORT_IDS_H
+#ifndef INSANE_SYSREPORT_IDS_H
+#define INSANE_SYSREPORT_IDS_H
 
 #include <stddef.h>
 

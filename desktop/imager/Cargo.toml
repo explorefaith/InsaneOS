@@ -1,4 +1,4 @@
-# LordOS Imager for the three desktop platforms (docs/IMAGER.md, "The desktop app"): a Tauri shell
+# InsaneOS Imager for the three desktop platforms (docs/IMAGER.md, "The desktop app"): a Tauri shell
 # (src-tauri) around the same React UI as the native app, and the writer in a library (core) that
 # is tested on its own.
 [workspace]
@@ -9,7 +9,7 @@ resolver = "2"
 version = "0.8.86"   # semver for Cargo/Tauri; the version people see is ./VERSION (0.8.8.6)
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/lordbasex/LordOS"
+repository = "https://github.com/insaneos/InsaneOS"
 
 [profile.release]
 opt-level = "s"

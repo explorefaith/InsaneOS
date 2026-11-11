@@ -1,7 +1,7 @@
 // About Insane OS: real system data (/proc) and display server stats.
 import { version as reactVersion } from 'react';
 import { useMemo } from 'react';
-import { View, Text, Button, wm, InsaneLogo, InsaneWordmark, Lumo, screen, lordosVersion, useTheme, useSystemInfo, useServerStats, formatBytes, formatDuration, formatNumber, typeScale, codeStatus, isSystemApp, t as tr } from '@lordos/sdk';
+import { View, Text, Button, wm, InsaneLogo, InsaneWordmark, Lumo, screen, insaneosVersion, useTheme, useSystemInfo, useServerStats, formatBytes, formatDuration, formatNumber, typeScale, codeStatus, isSystemApp, t as tr } from '@insaneos/sdk';
 
 export function Icon({ size }) {
   return <InsaneLogo size={size} />;
@@ -33,7 +33,7 @@ function Badge({ color, label }) {
   );
 }
 
-// The state of Insane OS's own code, as lord-server checked it (docs/SIGNING.md, "Verified system code").
+// The state of Insane OS's own code, as insane-server checked it (docs/SIGNING.md, "Verified system code").
 const CODE = {
   verified: { color: '#30d158', key: 'about.codeVerified' },
   development: { color: '#ff9f0a', key: 'about.codeDevelopment' },
@@ -45,16 +45,16 @@ export default function About() {
   const info = useSystemInfo(5000);
   const st = useServerStats(2000);
   const cpu = info.cpu.replace(/\(R\)|\(TM\)|CPU|Processor/g, '').replace(/ Rev [\d.]+$/, '').replace(/\s+/g, ' ').trim();
-  const ver = lordosVersion(info);
+  const ver = insaneosVersion(info);
   const code = useMemo(() => codeStatus(), []);
-  const caseId = useMemo(() => { try { return lord.fan.caseConfig(); } catch (e) { return null; } }, []);
+  const caseId = useMemo(() => { try { return insane.fan.caseConfig(); } catch (e) { return null; } }, []);
   const cs = CODE[code.refused?.length ? 'invalid' : code.state] || CODE.development;
   const codeNote = code.state === 'verified' && !code.refused?.length ? tr('about.codeVerifiedNote', { count: code.files })
     : code.state === 'development' ? tr('about.codeDevNote') : null;
   return (
     <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16 }}>
       <Icon size={64} />
-      <View style={{ marginTop: 12 }}><InsaneWordmark size={typeScale.largeTitle} crown={false} /></View>
+      <View style={{ marginTop: 12 }}><InsaneWordmark size={typeScale.largeTitle} apple={false} /></View>
       <Text style={{ fontSize: typeScale.callout, color: t.textDim, marginTop: 2 }}>{ver.channel ? tr('about.versionChannel', { v: ver.version, channel: ver.channel }) : tr('about.version', { v: ver.version })}</Text>
       {ver.build ? <Text style={{ fontSize: typeScale.caption, color: t.textDim, marginTop: 1 }}>{tr('about.build', { b: ver.build })}</Text> : null}
       <View style={{ flexDirection: 'row', gap: 6, marginTop: 8 }}>
@@ -75,7 +75,7 @@ export default function About() {
           <InfoRow k={tr('about.bootTime')} v={tr(info.bootShown === 'session' ? 'about.bootToDesktop' : 'about.bootToLogin', { s: formatNumber(info.bootSeconds, 3) })} />
         ) : null}
         <View style={{ height: 1, backgroundColor: t.separator, marginVertical: 8, marginHorizontal: 24 }} />
-        <InfoRow k={tr('about.server')} v="lord-server (C · DRM/KMS · evdev)" />
+        <InfoRow k={tr('about.server')} v="insane-server (C · DRM/KMS · evdev)" />
         <InfoRow k={tr('about.engine')} v={`QuickJS + React ${reactVersion}`} />
         <InfoRow k={tr('about.codeLabel')} v={tr(cs.key)} />
         <InfoRow k={tr('about.display')} v={`${screen.width} × ${screen.height}`} />

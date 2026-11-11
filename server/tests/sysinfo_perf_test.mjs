@@ -12,34 +12,34 @@ const eq = (what, got, want) => {
 const near = (what, got, want) => eq(what, got != null && Math.abs(got - want) < 1e-9, true);
 
 const res = (over = {}) => ({
-  lordbench: 1, mode: 'full', status: 'done', stopReason: '', threads: 4, live: false, gpuKind: 'hardware', lordos: '0.8.6', kernel: 'k',
+  insanebench: 1, mode: 'full', status: 'done', stopReason: '', threads: 4, live: false, gpuKind: 'hardware', insaneos: '0.8.6', kernel: 'k',
   quiet: { quiet: true, busyPct: 2 }, before: { power: 'mains', governor: 'schedutil' }, after: { power: 'mains' }, storage: { kind: 'nvme' },
   session: { composition: 'gpu', displays: [{ mode: { w: 1920, h: 1080, refresh: 60000 } }, { mode: { w: 2560, h: 1440, refresh: 144000 } }] },
   results: { 'cpu.sha256.1': { value: 200 }, 'cpu.matmul.1': { value: 8 }, 'mem.latency': { value: 45, lowerBetter: true },
     'sustained.start': { value: 50 }, 'sustained.end': { value: 49 } },
   skipped: {}, ...over,
 });
-const ref = { lordbench: 1, results: { 'cpu.sha256.1': { value: 100 }, 'cpu.matmul.1': { value: 2 }, 'mem.latency': { value: 90 } } };
+const ref = { insanebench: 1, results: { 'cpu.sha256.1': { value: 100 }, 'cpu.matmul.1': { value: 2 }, 'mem.latency': { value: 90 } } };
 
-// every measurement of a peak run (lord-bench's and lord-media's) is in exactly one category
+// every measurement of a peak run (insane-bench's and insane-media's) is in exactly one category
 const ids = CATEGORIES.flatMap((c) => c.ids);
 eq('32 measurements, no repeats', [ids.length, new Set(ids).size], [32, 32]);
 eq('references have every measurement or say it was not measured', REFERENCES.every((r) => ids.every((id) => (r.results[id] && r.results[id].value > 0) !== (r.notMeasured || []).includes(id))), true);
 
 near('×2 SHA', ratio(res(), ref, 'cpu.sha256.1'), 2);
 // the engine's own workloads compare only within one Insane OS version
-const engRef = { lordbench: 1, results: { 'cpu.ui.1': { value: 20, lordos: '0.8.6' }, 'cpu.sha256.1': { value: 50 } } };
-const engRes = (v) => res({ lordos: v, results: { 'cpu.ui.1': { value: 40 }, 'cpu.sha256.1': { value: 100 } } });
+const engRef = { insanebench: 1, results: { 'cpu.ui.1': { value: 20, insaneos: '0.8.6' }, 'cpu.sha256.1': { value: 50 } } };
+const engRes = (v) => res({ insaneos: v, results: { 'cpu.ui.1': { value: 40 }, 'cpu.sha256.1': { value: 100 } } });
 near('engine id, same version', ratio(engRes('0.8.6'), engRef, 'cpu.ui.1'), 2);
 eq('engine id, another version: no ×N', ratio(engRes('0.8.7'), engRef, 'cpu.ui.1'), null);
 near('other ids ignore the version', ratio(engRes('0.8.7'), engRef, 'cpu.sha256.1'), 2);
-eq('every engine id of a reference carries its version', REFERENCES.every((r) => ENGINE_IDS.every((id) => !r.results[id] || typeof r.results[id].lordos === 'string')), true);
+eq('every engine id of a reference carries its version', REFERENCES.every((r) => ENGINE_IDS.every((id) => !r.results[id] || typeof r.results[id].insaneos === 'string')), true);
 near('latency: lower is better', ratio(res(), ref, 'mem.latency'), 2);
 eq('missing on one side', ratio(res(), ref, 'gpu.scene'), null);
 const cr = categoryRatios(res(), ref);
 near('CPU: geometric mean of ×2 and ×4', cr.cpu, Math.sqrt(8));
 eq('no GPU numbers: null', cr.gpu, null);
-eq('only the same InsaneBench version', comparableReferences({ lordbench: 99 }).length, 0);
+eq('only the same InsaneBench version', comparableReferences({ insanebench: 99 }).length, 0);
 
 // stability
 eq('clean run passes', stability(res()), { state: 'pass', notes: [] });
@@ -87,14 +87,14 @@ const ch = changes(res({ results: { 'cpu.sha256.1': { value: 220 }, 'mem.latency
 near('+10 %', ch['cpu.sha256.1'], 0.1);
 near('latency got worse', ch['mem.latency'], 45 / 50 - 1);
 eq('another mode: no comparison', changes(res({ mode: 'quick' }), res()), null);
-eq('another InsaneBench: no comparison', changes(res({ lordbench: 2 }), res()), null);
+eq('another InsaneBench: no comparison', changes(res({ insanebench: 2 }), res()), null);
 
 eq('samples, bad ones dropped', sustainedSeries({ sustained: { samples: [[10, 19.8, null], [20, -1, 50], 'x', [30, 19.7, 61.5]] } }), [[10, 19.8, null], [30, 19.7, 61.5]]);
 near('the slowest display sets the budget', refreshBudget(res()), 1000 / 60);
 eq('no displays', refreshBudget(res({ session: {} })), null);
 const at = Date.UTC(2026, 9, 27, 12) / 1000;
-eq('file name', fileName(at, () => false), 'lordbench-2026-10-27.json');
-eq('file name taken', fileName(at, (x) => x === 'lordbench-2026-10-27.json'), 'lordbench-2026-10-27-2.json');
+eq('file name', fileName(at, () => false), 'insanebench-2026-10-27.json');
+eq('file name taken', fileName(at, (x) => x === 'insanebench-2026-10-27.json'), 'insanebench-2026-10-27-2.json');
 
 // the desktop run
 const desk = (results, budgetMs = 1000 / 60) => ({ mode: 'desktop', frames: { budgetMs }, results });

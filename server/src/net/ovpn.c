@@ -3,7 +3,7 @@
  * Import: the .ovpn is read line by line and only the client options in the `allowed` list pass
  * (with the certificates and keys embedded <ca>…</ca>); any other one (up, down,
  * script-security, plugin, route-up, management, log, config, cd, setenv…) rejects the file.
- * It's saved in /etc/lordos/net/vpn/<name>.ovpn (0600) and the metadata in <name>.json.
+ * It's saved in /etc/insaneos/net/vpn/<name>.ovpn (0600) and the metadata in <name>.json.
  *
  * Connect: a resident process "vpn:<name>" writes the final config (the saved one + the
  * options Insane OS sets: interface, management interface over a Unix socket, verb 3,
@@ -110,7 +110,7 @@ int ovpn_import(const char *name, const char *text, char *err, size_t errn) {
         while (isspace((unsigned char)*args)) args++;
         if (in_list(windows_only, w)) { ignored++; continue; }
         if (in_list(blocks, w)) {
-            /* "ca file": it has to come embedded (lord.net.prepareOvpn does that) */
+            /* "ca file": it has to come embedded (insane.net.prepareOvpn does that) */
             if (strncmp(args, "[inline]", 8)) { lerr_set(err, errn, "ovpn.mustBeInline", "line", lerr_int(lineno), "option", w, NULL); rc = -1; break; }
             continue;
         }

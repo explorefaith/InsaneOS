@@ -1,6 +1,6 @@
-// classic_taskbar_scene.mjs — the scene of tests/classic_taskbar_test.mjs (not run by itself), 0.8.8.6: Lord
+// classic_taskbar_scene.mjs — the scene of tests/classic_taskbar_test.mjs (not run by itself), 0.8.8.6: Insane
 // Classic's taskbar on every display. The whole theme (themes/classic/index.jsx) through runtime/index.js and the
-// real SDK, over a stub `lord` (the bundle's banner) with three monitors side by side, the main one in the middle.
+// real SDK, over a stub `insane` (the bundle's banner) with three monitors side by side, the main one in the middle.
 // It checks a taskbar per display, each display's work area, one clock timer and one network poll for all the
 // bars, the start menu, quick settings and notifications opening on the display whose bar was clicked (and the
 // power menu's Lock still reaching the session there, #48), a pin dropped on one bar, the setting turned off,
@@ -15,15 +15,15 @@ globalThis.clearInterval = (id) => { live.delete(id); realClear(id); };
 const timers = (ms) => [...live.values()].filter((v) => v === ms).length;
 
 const sessionCalls = [];
-globalThis.lord.session = { managed: () => true, lock: () => { sessionCalls.push('lock'); return true; }, switchUser: () => true };
+globalThis.insane.session = { managed: () => true, lock: () => { sessionCalls.push('lock'); return true; }, switchUser: () => true };
 
 const React = (await import('react')).default;
-const rt = await import('@lordos/runtime');
-const sdk = await import('@lordos/sdk');
+const rt = await import('@insaneos/runtime');
+const sdk = await import('@insaneos/sdk');
 await import('../../themes/classic/index.jsx');
 const { startBox } = await import('../../themes/classic/components/StartMenu.jsx');
 
-const { texts, styles, parents, removed, layouts, counts } = globalThis.__lordTest;
+const { texts, styles, parents, removed, layouts, counts } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 const check = (name, got, want) => {
@@ -33,8 +33,8 @@ const check = (name, got, want) => {
 const attached = (id) => { for (let n = id; n; n = parents.get(n)) if (removed.has(n)) return false; return parents.has(id); };
 // x, y: where the press is (a press off every bar and outside an open panel closes the panel)
 const click = async (id, x = 10, y = 10) => {
-  globalThis.__lordEvent('down', id, x, y, 0); await flush();
-  globalThis.__lordEvent('up', id, x, y, 0); await flush();
+  globalThis.__insaneEvent('down', id, x, y, 0); await flush();
+  globalThis.__insaneEvent('up', id, x, y, 0); await flush();
 };
 
 // three monitors, the main one in the middle and taller
@@ -42,11 +42,11 @@ const L = { id: 41, name: 'DP-1', x: 0, y: 0, w: 1920, h: 1080, scale: 100, main
 const M = { id: 42, name: 'DP-2', x: 1920, y: 0, w: 2560, h: 1440, scale: 100, main: true };
 const R = { id: 43, name: 'HDMI-A-1', x: 4480, y: 0, w: 1920, h: 1080, scale: 100, main: false };
 const plug = async (list, mirror = false) => {
-  lord.screen.displays = list;
-  lord.screen.mirror = mirror;
-  lord.screen.width = Math.max(...list.map((d) => d.x + d.w));
-  lord.screen.height = Math.max(...list.map((d) => d.y + d.h));
-  globalThis.__lordScreen();
+  insane.screen.displays = list;
+  insane.screen.mirror = mirror;
+  insane.screen.width = Math.max(...list.map((d) => d.x + d.w));
+  insane.screen.height = Math.max(...list.map((d) => d.y + d.h));
+  globalThis.__insaneScreen();
   await flush();
 };
 
@@ -108,7 +108,7 @@ check('start menu: the power menu shows Lock', !!lockRow, true);
 const menuBox = [...styles].filter(([id, s]) => s.width === 220 && s.left != null && attached(id)).map(([, s]) => s)[0];
 check('start menu: the power menu stays on the right display', !!menuBox && menuBox.left >= R.x && menuBox.left + 220 <= R.x + R.w, true);
 await click(lockRow);
-check('start menu: Lock reaches lord.session.lock', sessionCalls.join(','), 'lock');
+check('start menu: Lock reaches insane.session.lock', sessionCalls.join(','), 'lock');
 check('start menu: closed after the click', panelAt(640).length, 0);
 
 // a pin dragged from the start menu and dropped on the right display's bar: only that bar shows where it lands
@@ -117,13 +117,13 @@ for (const b of bars()) {
   layouts.set(b.id, [d.x, d.y + d.h - 48, d.w, 48]);
 }
 sdk.beginDockDrag({ id: 'calculator', Icon: null, x: R.x + 300, y: 500, source: 'launcher' });
-globalThis.__lordEvent('move', 0, R.x + 900, R.h - 20, 0); await flush();
+globalThis.__insaneEvent('move', 0, R.x + 900, R.h - 20, 0); await flush();
 check('drag: over the right display\'s bar', sdk.dockDrag.get()?.over?.bar, R.id);
 const lines = () => [...styles].filter(([id, s]) => s.width === 2 && s.top === 8 && attached(id)).map(([id]) => barOf(id));
 check('drag: the drop line on that bar alone', lines(), [R.x]);
-globalThis.__lordEvent('move', 0, L.x + 900, L.h - 20, 0); await flush();
+globalThis.__insaneEvent('move', 0, L.x + 900, L.h - 20, 0); await flush();
 check('drag: over the left display\'s bar', [sdk.dockDrag.get()?.over?.bar, ...lines()], [L.id, L.x]);
-globalThis.__lordEvent('up', 0, L.x + 900, L.h - 20, 0); await flush();
+globalThis.__insaneEvent('up', 0, L.x + 900, L.h - 20, 0); await flush();
 check('drag: dropped on a bar, the app is pinned', sdk.dock.isPinned('calculator'), true);
 
 // quick settings on the right display; unplugging it closes the panel and takes its bar away

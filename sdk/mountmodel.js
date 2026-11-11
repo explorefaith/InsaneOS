@@ -1,6 +1,6 @@
 // mountmodel.js — which mount a path lies on (pure; sdk/fs.js isRemote, tests/files_remote_test.mjs).
 //
-// table: lord.fs.mounts() → [{ path, remote }]. The longest mount point that holds the path decides, as the kernel
+// table: insane.fs.mounts() → [{ path, remote }]. The longest mount point that holds the path decides, as the kernel
 // does: a local disk mounted inside a share is local, a Cloud account mounted in the home folder is remote.
 export function remoteOf(path, table) {
   let best = -1, remote = false;

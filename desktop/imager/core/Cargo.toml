@@ -1,6 +1,6 @@
 [package]
-name = "lordos-imager-core"
-description = "LordOS Imager: release signature, image reading and verified writing (no UI)"
+name = "insaneos-imager-core"
+description = "InsaneOS Imager: release signature, image reading and verified writing (no UI)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

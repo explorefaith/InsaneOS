@@ -1,9 +1,9 @@
 // Settings → Printers & Scanners. CUPS manages the queue and the drivers; this screen
-// speaks IPP to it over its local socket with lord-server's own client (lord.print). Adding,
+// speaks IPP to it over its local socket with insane-server's own client (insane.print). Adding,
 // removing and choosing the default are authorized by the CUPS policy (lpadmin group, which
 // administrators have). Driverless printing (IPP Everywhere) printers and eSCL scanners on the network
 // are found through mDNS. See docs/PRINTING.md.
-import { View, Text, Button, TextInput, useTheme, wm, print, queueName, t as tr, spacing, typeScale } from '@lordos/sdk';
+import { View, Text, Button, TextInput, useTheme, wm, print, queueName, t as tr, spacing, typeScale } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, FieldRow, Note, Actions, PageHeader, tint } from './ui.jsx';
 

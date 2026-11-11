@@ -21,30 +21,30 @@ browsers read it from local files.
 ## How it fits together
 
 ```
- boot ──▶ lord-server (session)                       lord-media (sandboxed helper)
+ boot ──▶ insane-server (session)                       insane-media (sandboxed helper)
           media/hwdec.c ── render nodes (open fds) ──▶ lm_hwprobe.c: VA-API profiles with the
             · virtual GPU? (DRM driver name)           decode (VLD) entrypoint → JSON
             · V4L2 m2m decoders (/dev/videoN)
-            · cache ~/.cache/lordos/video-hw.json (per boot_id)
-                │  lord.media.hwDecode()
+            · cache ~/.cache/insaneos/video-hw.json (per boot_id)
+                │  insane.media.hwDecode()
                 ▼
           sdk/video.js (at login and when the setting changes)
                 │  admin.run('video-optimize', '<mode> <on|off> <vp9 yes|no> <av1 yes|no>')
                 ▼
           admin helper (root, hw/hw_admin.c): fixed text only
-            /etc/chromium/policies/managed/lordos-video.json   ── managed storage of the extension
-            /etc/firefox-esr/lordos-video.js                    ── a default pref (AV1 off)
+            /etc/chromium/policies/managed/insaneos-video.json   ── managed storage of the extension
+            /etc/firefox-esr/insaneos-video.js                    ── a default pref (AV1 off)
                 │
                 ▼
-          Chromium + /usr/share/chromium/extensions/lordos-video (Debian loads every folder there)
+          Chromium + /usr/share/chromium/extensions/insaneos-video (Debian loads every folder there)
             stutter.js (extension world) ── reads the policy ── tells page.js which codecs to hold back
             page.js (page world)        ── MediaSource / canPlayType / mediaCapabilities say "no"
 ```
 
 ## 1. Detecting hardware decoding (`server/src/media/hwdec.c`)
 
-Asked once per boot (the first `lord.media.hwDecode()` call starts it; `sdk/video.js` makes that
-call at login) and cached in `~/.cache/lordos/video-hw.json` with `/proc/sys/kernel/random/boot_id`,
+Asked once per boot (the first `insane.media.hwDecode()` call starts it; `sdk/video.js` makes that
+call at login) and cached in `~/.cache/insaneos/video-hw.json` with `/proc/sys/kernel/random/boot_id`,
 because a live USB boots on a different computer each time.
 
 1. **Virtual GPU:** each `/dev/dri/renderD*` is opened and its DRM driver asked with
@@ -53,7 +53,7 @@ because a live USB boots on a different computer each time.
    virtual machine with a real GPU passed through (`i915`, `amdgpu`, …) is probed like any other
    computer. The machine's own name (DMI vendor and product, the CPU `hypervisor` flag) is only
    reported (`"vm"`), not used for the decision.
-2. **VA-API:** the real render nodes (up to four) go as open descriptors to `lord-media` (job
+2. **VA-API:** the real render nodes (up to four) go as open descriptors to `insane-media` (job
    `MK_HWPROBE`, `server/src/media/helper/lm_hwprobe.c`), the only binary that links libva. It
    locks itself in its usual sandbox first (`sandbox_apply_helper`, with the DRM ioctls), then
    lists the profiles and keeps those with the `VAEntrypointVLD` (decode) entrypoint: VP9 profile
@@ -63,7 +63,7 @@ because a live USB boots on a different computer each time.
    `VP90`/`AV01`/`H264`/`HEVC` (stateful). On the Raspberry Pi 5 only HEVC shows up. Cameras and
    other capture devices don't have that capability and are closed right away.
 
-The answer (`lord.media.hwDecode()`):
+The answer (`insane.media.hwDecode()`):
 
 ```json
 {"boot":"f31202b8-…","vm":"qemu","gpu":"virtio_gpu","virtualGpu":true,"vaapi":false,"vendor":"",
@@ -71,7 +71,7 @@ The answer (`lord.media.hwDecode()`):
 ```
 
 `reason` is `ok`, `virtualGpu`, `noDriver` (no VA-API driver and no V4L2 decoder) or `noProfiles`.
-`LORD_MEDIA_HW=0` (no hardware decoding for Insane OS's own player) also makes this answer "no".
+`INSANE_MEDIA_HW=0` (no hardware decoding for Insane OS's own player) also makes this answer "no".
 
 `build/hwdec-test` checks the virtual GPU list and the virtual machine names.
 
@@ -96,18 +96,18 @@ texts, so it needs no administrator. Every value is checked against its closed l
 (`hw_video_files` in `server/src/hw/hw_admin.c`, tested in `build/settings-hw-test`), and it writes,
 through a temporary file and `rename`, only when the text changes:
 
-- `/etc/chromium/policies/managed/lordos-video.json`: the extension's managed storage
+- `/etc/chromium/policies/managed/insaneos-video.json`: the extension's managed storage
   (`"3rdparty" → "extensions" → kadhcpnkalbaminbojfmbmlgoheicmjo`): `mode`, `autoLower`, `hwVp9`,
   `hwAv1`. The extension makes the decision.
-- `/etc/firefox-esr/lordos-video.js` (only if `/etc/firefox-esr` exists): `pref("media.av1.enabled",
+- `/etc/firefox-esr/insaneos-video.js` (only if `/etc/firefox-esr` exists): `pref("media.av1.enabled",
   false);` when AV1 is held back, nothing otherwise.
 
 Neither is a conffile: the package doesn't ship them, and its `postrm` removes them.
 
 ## 3. The extension (`assets/browser/video/`)
 
-Written for Insane OS (MIT), no third-party code. Installed by the `lordos` package into
-`/usr/share/chromium/extensions/lordos-video/`; Debian's Chromium wrapper (`/etc/chromium.d/extensions`)
+Written for Insane OS (MIT), no third-party code. Installed by the `insaneos` package into
+`/usr/share/chromium/extensions/insaneos-video/`; Debian's Chromium wrapper (`/etc/chromium.d/extensions`)
 passes every folder there to `--load-extension`, the same way Debian's own `webext-*` packages
 work. The manifest carries a public `key`, so its id is always `kadhcpnkalbaminbojfmbmlgoheicmjo`
 (the id the policy names). No background page, no network permission, only `storage`.
@@ -116,7 +116,7 @@ work. The manifest carries a public `key`, so its id is always `kadhcpnkalbaminb
 |---|---|---|
 | `page.js` | the page's, at `document_start` | wraps `MediaSource.isTypeSupported` (and `ManagedMediaSource`), `HTMLMediaElement.canPlayType` and `navigator.mediaCapabilities.decodingInfo` so they answer "not supported" for the held-back codecs (`vp09`/`vp9`, `av01`/`av1`); lowers the player's quality one step when asked |
 | `policy.js` | the extension's | reads the managed policy and decides: Never → nothing, Always → VP9 and AV1, Automatic → the codecs with `hwVp9`/`hwAv1` false; without a policy (another system) → nothing |
-| `stutter.js` | the extension's, at `document_start` | tells `page.js` the decision (a `lordos-video-codecs` event: the page's world can't read the policy), then watches the playing video's `getVideoPlaybackQuality()` |
+| `stutter.js` | the extension's, at `document_start` | tells `page.js` the decision (a `insaneos-video-codecs` event: the page's world can't read the policy), then watches the playing video's `getVideoPlaybackQuality()` |
 
 **Scope: YouTube only** (`www.`, `m.`, `music.` and `youtube-nocookie.com`, also embedded in other
 sites through its iframe). It is where the problem shows up most and where we can test it; the
@@ -146,14 +146,14 @@ HTML strings, and the site's styles don't reach it). Its texts come from the ext
 ## 4. Firefox ESR
 
 Debian's `firefox-esr` only installs signed extensions. Tested on VM 122 with Firefox ESR 153:
-the same extension (`manifest.firefox.json`, id `video@lordos.org`) forced through
+the same extension (`manifest.firefox.json`, id `video@insaneos.org`) forced through
 `/usr/lib/firefox-esr/distribution/policies.json` (`ExtensionSettings`, `force_installed`, a local
 `file://` XPI) is refused, and
 `about:policies` shows "Not fully applied"; with `xpinstall.signatures.required` set to false it
 installs and runs. Insane OS doesn't turn signature checking off for every extension to get this.
 
 So for now Firefox gets only what a preference can do: `media.av1.enabled = false` (a default
-pref in `/etc/firefox-esr/lordos-video.js`, which the user can still change in `about:config`).
+pref in `/etc/firefox-esr/insaneos-video.js`, which the user can still change in `about:config`).
 YouTube then sends VP9, which costs less than AV1. VP9 has no switch of its own in Firefox:
 `media.mediasource.vp9.enabled` doesn't change what `MediaSource.isTypeSupported` answers for WebM,
 and `media.webm.enabled` would turn off every WebM video. There is no stutter notice in Firefox.
@@ -162,12 +162,12 @@ and `media.webm.enabled` would turn off every WebM video. There is no stutter no
 needs the maintainer's account), ship the signed XPI and force it with Firefox's `policies.json`
 (`ExtensionSettings` with a local `install_url`; the distribution folder above is the one this
 Firefox was seen reading), and its
-settings with `"3rdparty": {"Extensions": {"video@lordos.org": {…}}}` in the same file (the root
+settings with `"3rdparty": {"Extensions": {"video@insaneos.org": {…}}}` in the same file (the root
 action would then write that file). To build the XPI to sign:
 
 ```sh
 cd assets/browser/video && mkdir -p /tmp/xpi && cp -r _locales *.js *.png schema.json /tmp/xpi/ &&
-  cp manifest.firefox.json /tmp/xpi/manifest.json && (cd /tmp/xpi && zip -r ../lordos-video.xpi .)
+  cp manifest.firefox.json /tmp/xpi/manifest.json && (cd /tmp/xpi && zip -r ../insaneos-video.xpi .)
 ```
 
 ## Measurements (VM 122)
@@ -214,6 +214,6 @@ make -C server test          # settings-hw-test (video-optimize), hwdec-test
 node tools/i18n-check.mjs
 ```
 
-On a VM: log in, then `cat ~/.cache/lordos/video-hw.json` and the two files above. On a YouTube
+On a VM: log in, then `cat ~/.cache/insaneos/video-hw.json` and the two files above. On a YouTube
 page in Chromium, `MediaSource.isTypeSupported('video/webm; codecs="vp9"')` answers false when VP9
 is held back.

@@ -29,7 +29,7 @@ Português first and then the other languages Insane OS ships.
 
 Everything is managed from **Settings → Language & Region** and **Settings → Keyboard**.
 
-## Screenshots (VM, real lord-server)
+## Screenshots (VM, real insane-server)
 
 | | |
 |---|---|
@@ -45,7 +45,7 @@ Everything is managed from **Settings → Language & Region** and **Settings →
 ## Interface text
 
 ```js
-import { t, useLocale, formatDate, formatTime, formatNumber } from '@lordos/sdk';
+import { t, useLocale, formatDate, formatTime, formatNumber } from '@insaneos/sdk';
 
 t('files.items', { count: 3 })     // "3 elementos" / "3 items" / "3 itens"
 t('about.version', { v: '0.5.0', m: 'M5' })
@@ -61,7 +61,7 @@ formatNumber(1234.5, 2)            // "1.234,50" (es_AR) / "1,234.50" (en_US)
 - App names come from `apps.json` (`appName(app)`); if there is no translation, from
   `manifest.json` (whose `name` and `description` are English).
 - **English is the default language** and the fallback: a new user, the greeter, the live system
-  (unless GRUB's Español, Português or Français entry passes `lordos.lang`; Italian is chosen in Settings, the boot menu has no room for another entry) and the installer start in English.
+  (unless GRUB's Español, Português or Français entry passes `insaneos.lang`; Italian is chosen in Settings, the boot menu has no room for another entry) and the installer start in English.
   A language saved in `settings.json` is always kept.
 - Changing the language remounts the whole interface. Windows, tabs and sessions live in stores
   and are kept. That's why lists containing text can't be module-level constants: they are built
@@ -72,7 +72,7 @@ formatNumber(1234.5, 2)            // "1.234,50" (es_AR) / "1,234.50" (en_US)
 ### Error and status messages
 
 The server never sends prose to the interface. Every error that can reach the UI (an `ERR` line of
-the privileged helper, a `lord.*` exception, an error field of an event) is a **code line**
+the privileged helper, a `insane.*` exception, an error field of an event) is a **code line**
 (`server/src/errcode.h`):
 
 ```
@@ -91,8 +91,8 @@ the translated description (`errors.errno.ENOENT`) and `reason=<code line>` is a
   `js_throw_code(c, "fs.x", "path", p, NULL)` / `js_throw_line(c, err)` (`server/src/ui/js_err.h`)
   for exceptions. Numbers with `lerr_int(n)`, errno with `lerr_errno(errno)`.
 - JS (`sdk/errors.js`): `admin.run()` rejects with an `Error` whose message is already translated
-  and that has `.code` and `.params`; `lord.*` exceptions too (the SDK registers
-  `globalThis.__lordErrorText`). For other channels, `errorText(lineOrError)` and
+  and that has `.code` and `.params`; `insane.*` exceptions too (the SDK registers
+  `globalThis.__insaneErrorText`). For other channels, `errorText(lineOrError)` and
   `statusText(line)`. Code that needs to react to an error compares `e.code`, never the text.
 - Logs and the journal stay English prose, for developers.
 - Tests match codes (`lerr_has(err, "pkg.removeAlso")`), not text.
@@ -109,7 +109,7 @@ and the **order, separators and clock** from the region: English with region pt_
 
 A region whose language has no `format.json` (English with `lt_LT`, `de_DE`, `pl_PL`…) takes its clock,
 numeric date order and separators from glibc's own data for that region (`LC_TIME` and `LC_NUMERIC`,
-read with `nl_langinfo_l` by `lord.locale.formats`, converted in `sdk/regionformat.js`): English with
+read with `nl_langinfo_l` by `insane.locale.formats`, converted in `sdk/regionformat.js`): English with
 region `de_DE` gives «08.11.2026 · 21:05 · 1.234.567,89». Before 0.8.8.6 such a region fell back to
 the interface language's formats, so English with `lt_LT` showed a 12-hour clock (#45). It needs the
 region generated (`locale-gen`), which Settings does when the region is chosen.
@@ -129,17 +129,17 @@ assets/locales/pt/meta.json   { "id": "pt", "name": "Português", "english": "Po
 ```
 
 The ones shipped with Insane OS are in `assets/locales/`; the user's in
-`~/.local/share/lordos/locales/` (they don't need root and win if both exist).
+`~/.local/share/insaneos/locales/` (they don't need root and win if both exist).
 
 To create one:
 
 ```sh
-node tools/i18n-pack.mjs new it "Italiano" Italian one-other it_IT    # lordos-lang-it.json, in English
+node tools/i18n-pack.mjs new it "Italiano" Italian one-other it_IT    # insaneos-lang-it.json, in English
 # translate the file's strings…
-node tools/i18n-check.mjs lordos-lang-it.json                           # missing keys and variables
+node tools/i18n-check.mjs insaneos-lang-it.json                           # missing keys and variables
 ```
 
-Then copy `lordos-lang-it.json` to your Downloads folder and use **Settings → Language & Region →
+Then copy `insaneos-lang-it.json` to your Downloads folder and use **Settings → Language & Region →
 Add**. Available plural rules: `one-other`, `zero-one-other`, `none`, `east-slavic`, `polish`,
 `czech-slovak`, `lithuanian`, `arabic`. `node tools/i18n-pack.mjs export pt` exports an existing language in
 the same format.
@@ -165,9 +165,9 @@ other) and `format.json` (2026-11-08, «2026 m. lapkričio 8 d., sekmadienis», 
 Translating the rest is welcome: add the missing keys to `assets/locales/lt/` and drop `"partial"`
 when `i18n-check` reports it complete.
 
-## Privileged helper (`lord-admin`)
+## Privileged helper (`insane-admin`)
 
-Whatever needs root is done by a small process that `lord-server` creates before dropping
+Whatever needs root is done by a small process that `insane-server` creates before dropping
 privileges (`server/src/admin.c`). It has no screen, input or other descriptors. It only
 understands a closed list of actions, each validated on its own side:
 
@@ -181,7 +181,7 @@ understands a closed list of actions, each validated on its own side:
 - It only serves the request if the session user is in the `sudo`, `admin` or `wheel` group.
 - Programs run with a fixed absolute path and a clean environment; a command is never built from user text.
 - The package list is compiled into the binary, not kept in an editable file.
-- It dies with `lord-server` (`PR_SET_PDEATHSIG`).
+- It dies with `insane-server` (`PR_SET_PDEATHSIG`).
 - From JS: `admin.run('locale-gen', 'pt_BR.UTF-8', onLog)` returns a promise. Progress
   (apt's lines, for example) arrives via `onLog` and via the `admin.busy` store.
 
@@ -194,7 +194,7 @@ actions are few and narrow.
 Any layout and variant is available (`latam`, `br`, `pt`, `us(intl)`, `fr(oss)`…), up to 4 at a
 time; the menu bar button switches to the next. A user who never chose one (no `keyboards` in
 settings.json) types with the computer's layout, `XKBLAYOUT`/`XKBVARIANT` in `/etc/default/keyboard`
-(`lord.keyboard.system()`), or `us` without it; the login screen and lord-server's first keymap use the
+(`insane.keyboard.system()`), or `us` without it; the login screen and insane-server's first keymap use the
 same file. Before 0.8.8.6 the default was `latam` whatever the computer had (#55); settings migration 4
 drops that saved default. Dead keys and compose sequences use the region's
 compose table (package `libx11-data`, which is data only). If XKB can't be loaded, the UI falls
@@ -295,7 +295,7 @@ recovery after an unknown word), with its syllable-start hints, dotted abbreviat
 dictionary, it breaks wherever a syllable can start. Khmer and Myanmar (no dictionary in Debian)
 break between syllables, without separating the final consonant (င် with asat, ញ់ with bantoc)
 from the syllable it closes; Lao, only at spaces. To test breaks without a screen:
-`LORD_WRAP=230 build/text-test salida.ppm "texto"…` (`tests/text_test.c`). If a word doesn't fit
+`INSANE_WRAP=230 build/text-test salida.ppm "texto"…` (`tests/text_test.c`). If a word doesn't fit
 on the line, it's broken anyway, but never inside a glyph cluster (a shaped syllable, a letter
 with its marks).
 
@@ -352,7 +352,7 @@ sources in **Settings → Keyboard → Input Methods**; the bar button (한, あ
 | Simplified Chinese (pinyin) | letters → candidates by frequency: the whole phrase, **initial-letter abbreviations** (`zg` → 这个/中国, `bjdx` → 北京大学, also `zhg`), phrases that start with what was typed (`zhongg` → 中国, 中国人) and those covering the beginning (the rest stays in composition); 1–9 or Space pick; − = turn the page; Enter leaves the letters | `rime-data-pinyin-simp` (65,000 characters and phrases) |
 
 The Debian language pack for Japanese or Chinese also installs its dictionary (and the CJK
-fonts). A custom dictionary can be put in `~/.local/share/lordos/ime/`.
+fonts). A custom dictionary can be put in `~/.local/share/insaneos/ime/`.
 
 Composition only happens when a text field or a terminal has focus: otherwise keys pass through
 as-is and app shortcuts keep working. With Ctrl/Alt/❖ whatever is pending is committed and the
@@ -392,7 +392,7 @@ terminal uses the script's Noto font first, so a word doesn't mix fonts.
 | Japanese phrases (`tests/ime-ja.txt`) | 16 / 18 (私は日本語を勉強しています, 東京に行きます, 学校へ行きました…) |
 | VM: Arabic interface with both themes, file names in 7 scripts, the three methods in the Terminal and in a text field | see screenshots |
 
-Memory: with the CJK fonts and both dictionaries loaded, lord-server goes from ~43 to 55 MB of
+Memory: with the CJK fonts and both dictionaries loaded, insane-server goes from ~43 to 55 MB of
 RSS (36 MB anonymous; 19 MB are the mapped fonts and dictionaries, which the kernel shares and
 can drop).
 
@@ -415,7 +415,7 @@ can drop).
 | ![phrase](ime-japanese-phrase.png) | |
 | Phrase conversion: 私は日本語を勉強しています, with the 私は segment focused | |
 
-The Arabic pack in the screenshots is a test pack (`docs/packs/lordos-lang-ar.json`): it
+The Arabic pack in the screenshots is a test pack (`docs/packs/insaneos-lang-ar.json`): it
 translates the desktop, Settings, Files, About and the Calculator; the Terminal stays in English.
 
 ## Pending
@@ -427,7 +427,7 @@ translates the desktop, Settings, Files, About and the Calculator; the Terminal 
 - Japanese with frequencies: Debian has no lightweight dictionary with frequencies (Mozc's data,
   `mozc-data`, comes in its own binary format); zhuyin, cangjie and hanja.
 - Translate the server's log messages (the ones that go to stderr, for developers).
-- `lord.locale.available()` marks as "generated" only what the server process already saw at
+- `insane.locale.available()` marks as "generated" only what the server process already saw at
   startup; Settings corrects it on screen after generating.
 - The first day of the week is Monday in Calendar, Contacts and Reminders whatever the region (glibc's
   `first_weekday` isn't read yet).

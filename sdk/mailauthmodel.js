@@ -1,4 +1,4 @@
-// mailauthmodel.js — Mail's account passwords and the session keyring: pure logic, no lord.* (issue #63;
+// mailauthmodel.js — Mail's account passwords and the session keyring: pure logic, no insane.* (issue #63;
 // server/tests/mail_auth_model_test.mjs). sdk/mail.js uses it.
 //
 //   keyringTrouble(code)                  what a failed keyring call means for Mail
@@ -6,7 +6,7 @@
 //   authAfterStatus(authFailed, acct, st) the "password needed" marks after a status event
 
 // 'locked': the keyring exists but is closed (automatic login, or the login password changed outside
-// Insane OS): the system prompt can open it. 'missing': this session has no keyring yet; lord-vault
+// Insane OS): the system prompt can open it. 'missing': this session has no keyring yet; insane-vault
 // creates it the next time the person logs in or unlocks the screen with their password (the prompt
 // cannot). 'error': anything else. null: no error.
 export function keyringTrouble(code) {
@@ -15,7 +15,7 @@ export function keyringTrouble(code) {
 }
 
 // Only a keyring that exists can be opened from the prompt, and the session asks once: Cancel is an
-// answer, so the next account (or the next boot of lord-maild) does not bring the box back.
+// answer, so the next account (or the next boot of insane-maild) does not bring the box back.
 export const askUnlock = (trouble, asked) => trouble === 'locked' && !asked;
 
 // An account that is connected again (the session answered its need-auth once the keyring opened, or

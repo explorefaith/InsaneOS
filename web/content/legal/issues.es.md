@@ -2,7 +2,7 @@
 
 ## Dónde reportar
 
-Usá [GitHub Issues](https://github.com/lordbasex/Insane OS/issues). Elegí la plantilla de reporte de error o de pedido de función; los issues en blanco están desactivados para que cada reporte traiga la información que necesitamos.
+Usá [GitHub Issues](https://github.com/insaneos/Insane OS/issues). Elegí la plantilla de reporte de error o de pedido de función; los issues en blanco están desactivados para que cada reporte traiga la información que necesitamos.
 
 Antes de escribir, revisá las [preguntas frecuentes](/faq/) y los issues que ya existen: quizás alguien ya lo reportó.
 
@@ -12,7 +12,7 @@ Antes de escribir, revisá las [preguntas frecuentes](/faq/) y los issues que ya
 
 ## Qué incluir en un reporte de error
 
-- **La salida de `lordos-issue`** (desde la 0.8.8): ejecutá `lordos-issue` en una terminal. Escribe `~/lordos-issue-<fecha>.txt` con los nombres y las direcciones reemplazados, y no envía nada. Leelo y después pegalo en el reporte: ya trae la versión y los datos del hardware de abajo.
+- **La salida de `insaneos-issue`** (desde la 0.8.8): ejecutá `insaneos-issue` en una terminal. Escribe `~/insaneos-issue-<fecha>.txt` con los nombres y las direcciones reemplazados, y no envía nada. Leelo y después pegalo en el reporte: ya trae la versión y los datos del hardware de abajo.
 - **La versión de Insane OS**, como aparece en la app Acerca de Insane OS (por ejemplo "0.8.8 · Beta").
 - **Cómo la instalaste:** la ISO (live o instalada), la imagen para Raspberry Pi 5 o el `.deb` en Debian 13.
 - **Tu hardware:** el modelo de la computadora o de la placa, la placa de video, la memoria y cualquier dispositivo que tenga que ver (impresora, touchpad, adaptador Wi-Fi, monitor).
@@ -43,7 +43,7 @@ Somos un equipo chico, así que esto son objetivos, no garantías:
 
 - confirmamos los reportes que llegan por el formulario de contacto en unos **5 días hábiles**;
 - clasificamos cada reporte: intentamos reproducirlo, pedimos más información si hace falta y le ponemos etiquetas y una prioridad;
-- los arreglos salen en la próxima versión que pueda incluirlos, y las notas de versión en [GitHub Releases](https://github.com/lordbasex/Insane OS/releases) los mencionan.
+- los arreglos salen en la próxima versión que pueda incluirlos, y las notas de versión en [GitHub Releases](https://github.com/insaneos/Insane OS/releases) los mencionan.
 
 ## Etiquetas
 

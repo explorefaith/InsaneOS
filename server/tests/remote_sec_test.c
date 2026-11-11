@@ -72,15 +72,15 @@ static void test_head(void) {
 }
 
 static void test_small(void) {
-    CHECK(rs_valid_username("lord") && rs_valid_username("_x") && rs_valid_username("a-b_9"));
-    CHECK(!rs_valid_username("") && !rs_valid_username("Lord") && !rs_valid_username("9a") && !rs_valid_username("-a"));
+    CHECK(rs_valid_username("insane") && rs_valid_username("_x") && rs_valid_username("a-b_9"));
+    CHECK(!rs_valid_username("") && !rs_valid_username("Insane") && !rs_valid_username("9a") && !rs_valid_username("-a"));
     CHECK(!rs_valid_username("a b") && !rs_valid_username("a$") && !rs_valid_username("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
     CHECK(rs_valid_username("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));      /* 32 */
-    CHECK(rs_valid_host("192.168.1.5:5673") && rs_valid_host("lordos.local") && rs_valid_host("[fe80::1]:5673") && rs_valid_host("[::1]"));
+    CHECK(rs_valid_host("192.168.1.5:5673") && rs_valid_host("insaneos.local") && rs_valid_host("[fe80::1]:5673") && rs_valid_host("[::1]"));
     CHECK(!rs_valid_host("") && !rs_valid_host("a b") && !rs_valid_host("a:0") && !rs_valid_host("a:65536") && !rs_valid_host("[zz]"));
     CHECK(!rs_valid_host("a..b") && !rs_valid_host("-a") && !rs_valid_host("a:5673x") && !rs_valid_host("a/b"));
     CHECK(rs_same_origin("https://10.0.0.5:5673", "10.0.0.5:5673"));
-    CHECK(rs_same_origin("https://Insane OS.local:5673", "lordos.local:5673"));
+    CHECK(rs_same_origin("https://Insane OS.local:5673", "insaneos.local:5673"));
     CHECK(!rs_same_origin("http://10.0.0.5:5673", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://evil.example", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://10.0.0.5:5673.evil", "10.0.0.5:5673"));
@@ -96,17 +96,17 @@ static void test_small(void) {
     memset(hex, 'a', 64);
     hex[64] = 0;
     char c[300];
-    snprintf(c, sizeof c, "theme=dark; __Host-lordos_remote=%s; x=y", hex);
-    CHECK(rs_cookie_token(c, "__Host-lordos_remote", tok) == 0 && !strcmp(tok, hex));
-    snprintf(c, sizeof c, "x__Host-lordos_remote=%s", hex);
-    CHECK(rs_cookie_token(c, "__Host-lordos_remote", tok) == -1);                  /* suffix match is not a match */
-    snprintf(c, sizeof c, "__Host-lordos_remote=%s; __Host-lordos_remote=%s", hex, hex);
-    CHECK(rs_cookie_token(c, "__Host-lordos_remote", tok) == -2);                  /* cookie tossing */
-    CHECK(rs_cookie_token("__Host-lordos_remote=ABC", "__Host-lordos_remote", tok) == -2);
+    snprintf(c, sizeof c, "theme=dark; __Host-insaneos_remote=%s; x=y", hex);
+    CHECK(rs_cookie_token(c, "__Host-insaneos_remote", tok) == 0 && !strcmp(tok, hex));
+    snprintf(c, sizeof c, "x__Host-insaneos_remote=%s", hex);
+    CHECK(rs_cookie_token(c, "__Host-insaneos_remote", tok) == -1);                  /* suffix match is not a match */
+    snprintf(c, sizeof c, "__Host-insaneos_remote=%s; __Host-insaneos_remote=%s", hex, hex);
+    CHECK(rs_cookie_token(c, "__Host-insaneos_remote", tok) == -2);                  /* cookie tossing */
+    CHECK(rs_cookie_token("__Host-insaneos_remote=ABC", "__Host-insaneos_remote", tok) == -2);
     hex[10] = 'G';
-    snprintf(c, sizeof c, "__Host-lordos_remote=%s", hex);
-    CHECK(rs_cookie_token(c, "__Host-lordos_remote", tok) == -2);
-    CHECK(rs_cookie_token("", "__Host-lordos_remote", tok) == -1);
+    snprintf(c, sizeof c, "__Host-insaneos_remote=%s", hex);
+    CHECK(rs_cookie_token(c, "__Host-insaneos_remote", tok) == -2);
+    CHECK(rs_cookie_token("", "__Host-insaneos_remote", tok) == -1);
     char clean[33];
     rs_log_clean("a\nb\"c\\d\x1b", 8, clean, sizeof clean);
     CHECK(!strcmp(clean, "a?b?c?d?"));
@@ -120,29 +120,29 @@ static int login(const char *body, char *user, char *pass, size_t *pl) {
 static void test_login(void) {
     char u[33], p[RS_PASS_MAX + 1], raw[33];
     size_t pl;
-    CHECK(login("user=lord&pass=s3cret", u, p, &pl) == RS_FORM_OK && !strcmp(u, "lord") && !strcmp(p, "s3cret") && pl == 6);
+    CHECK(login("user=insane&pass=s3cret", u, p, &pl) == RS_FORM_OK && !strcmp(u, "insane") && !strcmp(p, "s3cret") && pl == 6);
     CHECK(login("pass=a+b%26c%3D&user=bob", u, p, &pl) == RS_FORM_OK && !strcmp(u, "bob") && !strcmp(p, "a b&c="));
-    CHECK(login("user=lord&pass=%C3%B1", u, p, &pl) == RS_FORM_OK && pl == 2);
-    CHECK(login("user=lord", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=insane&pass=%C3%B1", u, p, &pl) == RS_FORM_OK && pl == 2);
+    CHECK(login("user=insane", u, p, &pl) == RS_FORM_BAD);
     CHECK(login("pass=x", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=lord&pass=x&x=1", u, p, &pl) == RS_FORM_BAD);                 /* unknown field */
-    CHECK(login("user=lord&user=root&pass=x", u, p, &pl) == RS_FORM_BAD);           /* duplicate */
-    CHECK(login("user=lord&pass=x&pass=y", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=lord&pass=x&", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("&user=lord&pass=x", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=lord&pass=%4", u, p, &pl) == RS_FORM_BAD);                    /* truncated escape */
-    CHECK(login("user=lord&pass=%zz", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=lord&pass=a b", u, p, &pl) == RS_FORM_BAD);                   /* raw space */
-    CHECK(login("user=lord&pass=a\"", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=lord&pass", u, p, &pl) == RS_FORM_BAD);
-    CHECK(login("user=Lord&pass=x", u, p, &pl) == RS_FORM_USER);
-    CHECK(login("user=lord%00x&pass=x", u, p, &pl) == RS_FORM_USER);                /* NUL in the name */
+    CHECK(login("user=insane&pass=x&x=1", u, p, &pl) == RS_FORM_BAD);                 /* unknown field */
+    CHECK(login("user=insane&user=root&pass=x", u, p, &pl) == RS_FORM_BAD);           /* duplicate */
+    CHECK(login("user=insane&pass=x&pass=y", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=insane&pass=x&", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("&user=insane&pass=x", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=insane&pass=%4", u, p, &pl) == RS_FORM_BAD);                    /* truncated escape */
+    CHECK(login("user=insane&pass=%zz", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=insane&pass=a b", u, p, &pl) == RS_FORM_BAD);                   /* raw space */
+    CHECK(login("user=insane&pass=a\"", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=insane&pass", u, p, &pl) == RS_FORM_BAD);
+    CHECK(login("user=Insane&pass=x", u, p, &pl) == RS_FORM_USER);
+    CHECK(login("user=insane%00x&pass=x", u, p, &pl) == RS_FORM_USER);                /* NUL in the name */
     CHECK(login("user=&pass=x", u, p, &pl) == RS_FORM_USER);
     CHECK(login("user=lo%20rd&pass=x", u, p, &pl) == RS_FORM_USER);
-    CHECK(login("user=lord&pass=", u, p, &pl) == RS_FORM_PASS);
-    CHECK(login("user=lord&pass=ab%00cd", u, p, &pl) == RS_FORM_PASS);              /* NUL in the password */
+    CHECK(login("user=insane&pass=", u, p, &pl) == RS_FORM_PASS);
+    CHECK(login("user=insane&pass=ab%00cd", u, p, &pl) == RS_FORM_PASS);              /* NUL in the password */
     char big[4200];
-    int o = sprintf(big, "user=lord&pass=");
+    int o = sprintf(big, "user=insane&pass=");
     memset(big + o, 'x', 1024);
     big[o + 1024] = 0;
     CHECK(login(big, u, p, &pl) == RS_FORM_OK && pl == 1024);
@@ -606,7 +606,7 @@ static void test_sdp(void) {
     CHECK(strstr(ans, want) && strstr(ans, "packetization-mode=1;profile-level-id=42e01f"));
     CHECK(strstr(ans, "a=candidate:10 1 udp 2130706431 192.168.1.5 40000 typ host\r\n"));
     CHECK(strstr(ans, "typ relay raddr 198.51.100.2 rport 5555\r\n") && strstr(ans, "a=sctp-port:5000"));
-    CHECK(strstr(ans, "a=ssrc:111 cname:lordos") && strstr(ans, "a=ssrc:222 cname:lordos") && strstr(ans, "a=rtpmap:111 opus/48000/2"));
+    CHECK(strstr(ans, "a=ssrc:111 cname:insaneos") && strstr(ans, "a=ssrc:222 cname:insaneos") && strstr(ans, "a=rtpmap:111 opus/48000/2"));
     CHECK(!strstr(ans, "RifL1w"));                                      /* never echoes the browser's secrets */
     CHECK(rw_sdp_answer(&o, &a, ans, 200) == -1);                       /* doesn't fit */
     CHECK(strstr(ans, "o=- 42 2 IN IP4") != NULL);                      /* first answer: version 2 */
@@ -794,7 +794,7 @@ static void test_stun(void) {
     CHECK(rw_stun_parse(o.b, o.n, &s) != 0);                            /* unknown address family */
     rw_so_init(&o, RW_TURN_ALLOCATE_ERR, tid);
     rw_so_attr(&o, RW_ATTR_ERROR, "\0\0\4\1Unauthorized", 16);
-    rw_so_attr(&o, RW_ATTR_REALM, "lordos.test", 11);
+    rw_so_attr(&o, RW_ATTR_REALM, "insaneos.test", 11);
     rw_so_attr(&o, RW_ATTR_NONCE, "abcdef", 6);
     CHECK(rw_stun_parse(o.b, o.n, &s) == 0 && s.error == 401 && s.rlen == 11 && s.nlen == 6);
     rw_so_init(&o, RW_TURN_ALLOCATE_ERR, tid);

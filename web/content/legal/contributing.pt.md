@@ -2,9 +2,9 @@ O Insane OS é software livre e as contribuições são bem-vindas: código, doc
 
 ## Como participar
 
-O repositório é público em [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). Você pode:
+O repositório é público em [github.com/insaneos/Insane OS](https://github.com/insaneos/Insane OS). Você pode:
 
-- experimentar o Insane OS e [relatar problemas](/legal/issues/) no [GitHub Issues](https://github.com/lordbasex/Insane OS/issues), com a saída do `lordos-issue` (a partir da 0.8.8: rode num terminal; ele escreve `~/lordos-issue-<data>.txt` com os nomes e os endereços substituídos, e não envia nada);
+- experimentar o Insane OS e [relatar problemas](/legal/issues/) no [GitHub Issues](https://github.com/insaneos/Insane OS/issues), com a saída do `insaneos-issue` (a partir da 0.8.8: rode num terminal; ele escreve `~/insaneos-issue-<data>.txt` com os nomes e os endereços substituídos, e não envia nada);
 - testá-lo no seu hardware e nos contar o que funciona e o que não funciona;
 - **acompanhar** (watch) o repositório ou dar uma **estrela** para saber das versões.
 
@@ -20,7 +20,7 @@ Para mudanças grandes (um app novo, um serviço do sistema novo, uma dependênc
 
 ## Licença das contribuições
 
-O Insane OS usa licenciamento **inbound = outbound** (a mesma licença na entrada e na saída): ao contribuir, você licencia a sua contribuição sob a mesma **licença MIT** do resto do projeto ([LICENSE](https://github.com/lordbasex/Insane OS/blob/main/LICENSE)). O copyright do seu trabalho continua sendo seu; não há cessão de direitos nem um acordo de contribuição separado para assinar.
+O Insane OS usa licenciamento **inbound = outbound** (a mesma licença na entrada e na saída): ao contribuir, você licencia a sua contribuição sob a mesma **licença MIT** do resto do projeto ([LICENSE](https://github.com/insaneos/Insane OS/blob/main/LICENSE)). O copyright do seu trabalho continua sendo seu; não há cessão de direitos nem um acordo de contribuição separado para assinar.
 
 ## Certificado de Origem do Desenvolvedor (sign-off)
 
@@ -42,14 +42,14 @@ Use o seu nome real (ou o nome pelo qual você é conhecido publicamente). Pull 
 
 - **Só em inglês.** Todo o código, os identificadores, os comentários, as mensagens de commit e a documentação em Markdown são escritos em inglês. A exceção são os textos que o usuário vê: eles ficam nos catálogos de idioma (`assets/locales/<idioma>/`) e passam pela tradução, com o inglês como idioma padrão.
 - **Os testes precisam passar.** Rode `make -C server test` para as suítes autônomas (e `make -C server test-full` quando mexer nos processos auxiliares ou no sandbox), e `node tools/i18n-check.mjs` quando mexer em textos que o usuário vê. Adicione um teste para cada bug corrigido e cada recurso adicionado, quando possível.
-- **C bem escrito.** C11 legível e modular, que compile sem avisos com `-Wall -Wextra`. Respeite a política de dependências do [docs/ARCHITECTURE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/ARCHITECTURE.md).
+- **C bem escrito.** C11 legível e modular, que compile sem avisos com `-Wall -Wextra`. Respeite a política de dependências do [docs/ARCHITECTURE.md](https://github.com/insaneos/Insane OS/blob/main/docs/ARCHITECTURE.md).
 - **Não afirme compatibilidade sem testar.** Se você diz que algo funciona com um hardware ou um app, é porque testou.
-- **Regras de marca.** Siga o [kit de marca](https://github.com/lordbasex/Insane OS/blob/main/docs/LORDOS-BRAND.md) para o logo, as cores e a grafia "Insane OS". Use nomes genéricos para os recursos e deixe fora dos textos públicos as marcas e os nomes de produtos de outras empresas; o `node tools/brand-check.mjs` verifica isso.
+- **Regras de marca.** Siga o [kit de marca](https://github.com/insaneos/Insane OS/blob/main/docs/INSANEOS-BRAND.md) para o logo, as cores e a grafia "Insane OS". Use nomes genéricos para os recursos e deixe fora dos textos públicos as marcas e os nomes de produtos de outras empresas; o `node tools/brand-check.mjs` verifica isso.
 - **Nada de segredos.** Nunca faça commit de chaves privadas, senhas ou dados pessoais.
 
 ## Traduções
 
-O Insane OS vem em quatro idiomas: inglês, espanhol, português e francês (desde a 0.8.8). Outros idiomas entram como **pacotes de idioma** montados a partir dos catálogos de tradução; veja o [docs/LANGUAGES.md](https://github.com/lordbasex/Insane OS/blob/main/docs/LANGUAGES.md). Correções nas traduções existentes também são bem-vindas.
+O Insane OS vem em quatro idiomas: inglês, espanhol, português e francês (desde a 0.8.8). Outros idiomas entram como **pacotes de idioma** montados a partir dos catálogos de tradução; veja o [docs/LANGUAGES.md](https://github.com/insaneos/Insane OS/blob/main/docs/LANGUAGES.md). Correções nas traduções existentes também são bem-vindas.
 
 ## Código de conduta
 

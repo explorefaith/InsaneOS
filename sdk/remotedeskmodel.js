@@ -21,7 +21,7 @@ export const MAX_CREDS = 50;
 const IPV4 = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 const LABEL = /^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
 export const isIp = (s) => IPV4.test(String(s || ''));
-// a host name lord.rdesk accepts (rconnect_host_ok): letters, digits, dots and dashes
+// a host name insane.rdesk accepts (rconnect_host_ok): letters, digits, dots and dashes
 export const hostOk = (s) => { const v = String(s || ''); return v.length > 0 && v.length <= 253 && /^[A-Za-z0-9][A-Za-z0-9.-]*$/.test(v); };
 // a name with dots whose labels are all valid (a domain name), not an IP
 export const isFqdn = (s) => { const v = String(s || '').replace(/\.$/, ''); return !isIp(v) && v.includes('.') && v.length <= 253 && v.split('.').every((l) => LABEL.test(l)) && /[A-Za-z]/.test(v); };
@@ -56,7 +56,7 @@ export function splitUser(text, domain = '') {
   if (i > 0 && i < s.length - 1 && !s.slice(i + 1).includes('\\')) return { user: s.slice(i + 1), domain: s.slice(0, i) };
   return { user: s, domain: d };
 }
-// what lord.rdesk accepts as user and domain (js_rdesk.c: rdesk_user_ok, rconnect_user_ok)
+// what insane.rdesk accepts as user and domain (js_rdesk.c: rdesk_user_ok, rconnect_user_ok)
 export const userOk = (s) => { const v = String(s || ''); return v.length <= 128 && !/^[-@]/.test(v) && /^[A-Za-z0-9._@-]*$/.test(v); };
 export const domainOk = (s) => { const v = String(s || ''); return v.length <= 64 && !v.startsWith('-') && /^[A-Za-z0-9._-]*$/.test(v); };
 // the sign-in name (DOMAIN\\user), and what the lists show: the display name when it has one
@@ -143,8 +143,8 @@ export function duplicate(d, list, copyName) {
 // what the remote side receives from the pointer: the left and right buttons swapped if asked (bit 1 left, 4 right)
 export const swapButtons = (b, on) => (!on ? b : (b & ~5) | ((b & 1) << 2) | ((b & 4) >> 2));
 
-// ~/.local/share/lordos/remote-desk/thumbs/<id>.png, with its version so a new picture is loaded again (ui/image.c)
-export const thumbPath = (home, d) => (d.shot && idOk(d.id) ? `${home}/.local/share/lordos/remote-desk/thumbs/${d.id}.png#${d.shot}` : '');
+// ~/.local/share/insaneos/remote-desk/thumbs/<id>.png, with its version so a new picture is loaded again (ui/image.c)
+export const thumbPath = (home, d) => (d.shot && idOk(d.id) ? `${home}/.local/share/insaneos/remote-desk/thumbs/${d.id}.png#${d.shot}` : '');
 
 // ---- .rdp files (the connection files remote desktop clients exchange): "key:type:value" lines ----
 // bytes → text: these files are often UTF-16 with a byte order mark

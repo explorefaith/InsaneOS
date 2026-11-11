@@ -17,7 +17,7 @@
   "flagged": "Contrassegnati",
   "addAccount": "Aggiungi account",
   "noAccounts": "Aggiungi un account di posta per iniziare. Funziona qualsiasi account IMAP/SMTP; i provider più diffusi vengono configurati per te.",
-  "unavailable": "L’assistente di Posta (lord-maild) non è installato.",
+  "unavailable": "L’assistente di Posta (insane-maild) non è installato.",
   "empty": "Nessun messaggio",
   "noSelection": "Nessun messaggio selezionato",
   "noSubject": "(nessun oggetto)",

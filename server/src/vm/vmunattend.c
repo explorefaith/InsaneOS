@@ -242,7 +242,7 @@ char *vmu_answer(const VmUnattend *u, const char **name) {
 
 char *vmu_meta_data(const VmUnattend *u, const char *instance) {
     Buf b = { 0 };
-    bput(&b, "instance-id: %s\nlocal-hostname: %s\n", instance && word_of(instance, 64, "-", 0) ? instance : "lordos-machine", u->hostname);
+    bput(&b, "instance-id: %s\nlocal-hostname: %s\n", instance && word_of(instance, 64, "-", 0) ? instance : "insaneos-machine", u->hostname);
     if (b.oom) { free(b.p); return NULL; }
     return b.p;
 }
@@ -290,7 +290,7 @@ int vmu_fat_image(const char *label, const VmuFile *files, int n, uint8_t **img,
     if (!d) return -1;
     static const uint8_t jmp[3] = { 0xEB, 0x3C, 0x90 };
     memcpy(d, jmp, 3);
-    memcpy(d + 3, "LORDOS  ", 8);
+    memcpy(d + 3, "INSANEOS  ", 8);
     le16(d + 11, 512); d[13] = 1; le16(d + 14, 1); d[16] = 2; le16(d + 17, FAT_ROOT); le16(d + 19, FAT_SECTORS);
     d[21] = 0xF8; le16(d + 22, FAT_LEN); le16(d + 24, 32); le16(d + 26, 64);
     d[36] = 0x80; d[38] = 0x29; le32(d + 39, 0x4C4F5244u);

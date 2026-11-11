@@ -1,8 +1,8 @@
-/* print.h — printers and scanners for lord.print (ui/js_print.c): each request runs in its own
+/* print.h — printers and scanners for insane.print (ui/js_print.c): each request runs in its own
  * thread (IPP to CUPS, mDNS, eSCL) and its result reaches JS with print_poll(). The compositor never
  * waits. See docs/PRINTING.md. */
-#ifndef LORD_PRINT_PRINT_H
-#define LORD_PRINT_PRINT_H
+#ifndef INSANE_PRINT_PRINT_H
+#define INSANE_PRINT_PRINT_H
 
 #include <stddef.h>
 

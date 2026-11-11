@@ -1,7 +1,7 @@
 /* mpulse.h — playback or recording stream for media over the PulseAudio protocol,
- * asynchronous, in lord-server (mpulse.c). */
-#ifndef LORD_MEDIA_MPULSE_H
-#define LORD_MEDIA_MPULSE_H
+ * asynchronous, in insane-server (mpulse.c). */
+#ifndef INSANE_MEDIA_MPULSE_H
+#define INSANE_MEDIA_MPULSE_H
 
 #include <stddef.h>
 #include <stdint.h>

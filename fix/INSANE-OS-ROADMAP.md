@@ -1,6 +1,6 @@
 # INSANE OS — Engineering Roadmap
 
-OS: Debian 13.7 (trixie) • kernel 6.12.116+deb13 • compositor: lord-server (Wayland + XWayland, C)
+OS: Debian 13.7 (trixie) • kernel 6.12.116+deb13 • compositor: insane-server (Wayland + XWayland, C)
 Machine: faith-pc • i5-8365U (8T) • 8GB RAM • NVMe 234GB • Intel UHD 620 (i915 + VA-API iHD)
 
 Phases: ✅ done & verified • 🟨 done, needs on-screen test • ⬜ pending • 🚫 blocked/deferred
@@ -36,7 +36,7 @@ auto security updates ✅ (this pass) • boot 23 s → userspace ~5 s ✅
 
 ## Phase 6 — Security & privacy 🟨
 AppArmor ✅ enabled (kernel Y, 105 profiles; enforcement snapshot in security-audit.txt)
-Firewall ✅ LordOS per-app (lord-netperm active; nftables libs present)
+Firewall ✅ InsaneOS per-app (insane-netperm active; nftables libs present)
 Auto security updates ✅ (unattended-upgrades, security origin only — OS updates stay with the Store)
 PAM + lock ✅ (native) • Privacy dashboard ✅ (native permisos) • package verification ✅ (signed repo + codesig)
 Backup/recovery ✅ (native Backup + REVERT.sh) • ⬜ LUKS (installer-time only) • ⬜ secure DNS toggle

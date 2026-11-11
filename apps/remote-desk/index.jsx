@@ -1,5 +1,5 @@
 // Remote Desk — saved computers and a connection over RDP or VNC; the picture is the backend's own window (sdk/remotedesk.jsx).
-import { View, RemoteDeskApp } from '@lordos/sdk';
+import { View, RemoteDeskApp } from '@insaneos/sdk';
 
 export function Icon({ size: s }) {
   const box = (x, y, w, h, color, r = 0, opacity = 1) => <View style={{ position: 'absolute', left: s * x, top: s * y, width: s * w, height: s * h, backgroundColor: color, borderRadius: s * r, opacity }} />;

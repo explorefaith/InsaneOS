@@ -4,7 +4,7 @@
   "admin.running": "{action}: {arg}…",
   "admin.system-locale": "Sistemos regionas",
   "admin.timezone": "Laiko juosta",
-  "admin.unavailable": "Administravimo pagalbinė programa neveikia: lord-server turi būti paleistas su sudo, o naudotojas turi priklausyti sudo grupei.",
+  "admin.unavailable": "Administravimo pagalbinė programa neveikia: insane-server turi būti paleistas su sudo, o naudotojas turi priklausyti sudo grupei.",
   "change": "Keisti…",
   "lang.hint": "Sąsajos tekstas. Taikoma iš karto; atviri langai ir terminalai išlieka.",
   "lang.pack": "įdiegtas paketas",
@@ -18,7 +18,7 @@
   "pack.imported": "Kalba {name} pridėta",
   "pack.install": "Įdiegti kalbai {lang}",
   "pack.invalid": "netinkamas paketas",
-  "pack.lordos": "Insane OS kalbų paketai",
+  "pack.insaneos": "Insane OS kalbų paketai",
   "pack.title": "Debian kalbų paketai",
   "region.generated": "Regionas {name} sugeneruotas",
   "region.hint": "Datos, laikas ir skaičiai, taip pat Linux programų kalba (LANG) naujuose terminaluose.",
@@ -68,6 +68,6 @@
   "lang.search": "Ieškoti kalbų",
   "lang.ready": "PARUOŠTOS NAUDOTI",
   "lang.notYet": "DAR NEIŠVERSTA",
-  "lang.notYetHint": "Insane OS dar neišversta į kalbą „{name}“. Jau dabar galite naudoti jos datų ir skaičių formatus, pasirinkę regioną žemiau, o kalbos paprašyti adresu github.com/lordbasex/Insane OS/issues.",
+  "lang.notYetHint": "Insane OS dar neišversta į kalbą „{name}“. Jau dabar galite naudoti jos datų ir skaičių formatus, pasirinkę regioną žemiau, o kalbos paprašyti adresu github.com/insaneos/Insane OS/issues.",
   "lang.none": "Jokia kalba neatitinka."
 }

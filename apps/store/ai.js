@@ -2,11 +2,11 @@
 // (apt/catalog.json, bundled at build time). An app whose maker has a signed APT repository
 // ("delivery": "direct") comes from that repository: the first install adds it, with the maker's key
 // whose fingerprint the catalog pins (pkg-source-add, server/src/pkg/sources_admin.c), over HTTPS. The
-// others come from Insane OS's own signed repository (lordos.org/apt), built or copied by Insane OS from
+// others come from Insane OS's own signed repository (insaneos.org/apt), built or copied by Insane OS from
 // verified sources (docs/UPDATES.md, "Mirrored apps (catalog)"). Installing goes through the package
 // engine like any Debian package: the plan first, then pkg-install.
 import { createElement as h, useState } from 'react';
-import { View, Text, Image, Button, Toggle, LetterIcon, useTheme, useStore, useSystemInfo, admin, locale, formatBytes, typeScale, spacing, t } from '@lordos/sdk';
+import { View, Text, Image, Button, Toggle, LetterIcon, useTheme, useStore, useSystemInfo, admin, locale, formatBytes, typeScale, spacing, t } from '@insaneos/sdk';
 import catalog from '../../apt/catalog.json';
 import { debian } from './debian.js';
 import { Card, CardGrid, Featured, FeaturedSkeleton, Pill, Shelf, nameColor } from './ui.js';
@@ -17,18 +17,18 @@ const lang2 = () => (locale.get().lang || 'en').split('-')[0];
 // the kernel's machine name as Debian names the architecture
 const DEB_ARCH = { x86_64: 'amd64', aarch64: 'arm64' };
 const summary = (a) => (a.summary && (a.summary[lang2()] || a.summary.en)) || '';
-const installed = (pkg) => { try { return !!(lord.pkg.info(pkg, {}) || {}).installed; } catch (e) { return false; } };
-const offered = (pkg) => { try { return !!lord.pkg.info(pkg, {}); } catch (e) { return false; } };
+const installed = (pkg) => { try { return !!(insane.pkg.info(pkg, {}) || {}).installed; } catch (e) { return false; } };
+const offered = (pkg) => { try { return !!insane.pkg.info(pkg, {}); } catch (e) { return false; } };
 
 // The icon of a catalog app: the package's own icon once it is in the lists, else its initial.
 function AiIcon({ a, size }) {
   let icon = null;
-  try { icon = offered(a.package) ? lord.pkg.icon(a.package) : null; } catch (e) { icon = null; }
+  try { icon = offered(a.package) ? insane.pkg.icon(a.package) : null; } catch (e) { icon = null; }
   return icon ? h(Image, { src: icon, style: { width: size, height: size, objectFit: 'contain' } }) : h(LetterIcon, { size, name: a.name.replace(/\.[a-z]+$/i, '') });
 }
 
 const kindOf = (a) => t(`store.ai.kind.${a.kind}`);
-const sizeOf = (a) => { try { const i = lord.pkg.info(a.package, {}); return i && i.installedSize ? formatBytes(i.installedSize) : ''; } catch (e) { return ''; } };
+const sizeOf = (a) => { try { const i = insane.pkg.info(a.package, {}); return i && i.installedSize ? formatBytes(i.installedSize) : ''; } catch (e) { return ''; } };
 const fitsHere = (a, here) => !here || !a.arches || a.arches.includes(here);
 
 function AiCard({ a, here, onOpen }) {
@@ -125,7 +125,7 @@ function MoreDrivers({ a }) {
   return h(View, { style: { gap: spacing.s, maxWidth: 680 } },
     h(View, { style: { flexDirection: 'row', alignItems: 'center', gap: spacing.m } },
       h(Text, { style: { flex: 1, fontSize: typeScale.callout, color: th.text, textAlign: 'start' } }, t('store.formats.optional')),
-      h(Button, { label: t('store.install'), disabled: !admin.available() || !!job, onClick: () => setPlan(lord.pkg.plan({ install: missing })) })),
+      h(Button, { label: t('store.install'), disabled: !admin.available() || !!job, onClick: () => setPlan(insane.pkg.plan({ install: missing })) })),
     plan ? h(debian.PlanView, { plan }) : null,
     plan ? h(View, { style: { flexDirection: 'row', gap: spacing.s, justifyContent: 'flex-end' } },
       h(Button, { label: t('store.cancel'), onClick: () => setPlan(null) }),
@@ -198,9 +198,9 @@ export function CatalogResults({ query, onOpen }) {
 }
 
 // The banner Insane OS publishes in its repository (apt/featured/featured.json and banner.png, signed with
-// the indexes and verified by the package engine; lord.pkg.featured()), or null.
+// the indexes and verified by the package engine; insane.pkg.featured()), or null.
 function published() {
-  try { return typeof lord.pkg.featured === 'function' ? lord.pkg.featured() : null; } catch (e) { return null; }
+  try { return typeof insane.pkg.featured === 'function' ? insane.pkg.featured() : null; } catch (e) { return null; }
 }
 const loc = (v) => (v && typeof v === 'object' ? v[lang2()] || v.en || '' : typeof v === 'string' ? v : '');
 
@@ -214,7 +214,7 @@ export function AiDiscover({ onOpen, onOpenDeb, onMore }) {
   const fresh = apps.filter((a) => !installed(a.package));
   const pool = fresh.length ? fresh : apps;
   let ready = false;
-  try { ready = lord.pkg.available(); } catch (e) { ready = false; }
+  try { ready = insane.pkg.available(); } catch (e) { ready = false; }
   const pub = ready ? published() : null;
   let banner;
   if (pub && pub.data) {

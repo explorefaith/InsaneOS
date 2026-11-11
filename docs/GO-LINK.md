@@ -43,7 +43,7 @@ Five findings shaped the rest. All **Read**.
    (`mirror.c:128`). This is why the API must be a separate door, and it's also what makes the proof of concept possible (section 11).
 3. **A locked session keeps existing.** Locking takes the monitor from the session; the session goes on drawing in memory for anyone
    watching (`docs/SESSIONS.md:40`, `:83`). 5673 is safe because its bridge cuts itself on the lock message
-   (`server/src/remote/conn.c:750-757`), not because frames stop. The API must end on the lock in `lord-server` itself.
+   (`server/src/remote/conn.c:750-757`), not because frames stop. The API must end on the lock in `insane-server` itself.
 4. **Two 5673 habits are wrong for a third party.** A new client gets the clipboard as it is at connection (`mirror.c:207`), and
    go-link's rule is that only what is copied afterwards leaves (go-link:`docs/security.md:43`). And `mirror_clipboard` doesn't look at
    the sensitive mark Passwords sets (`mirror.c:762`, `server/src/term/term.c:202`). The API applies both rules; 5673 stays as it is.
@@ -59,30 +59,30 @@ Five findings shaped the rest. All **Read**.
 |---|---|
 | System app in `assets/sysapps/<id>/` | Refused by design: every file Insane OS runs as JavaScript is in a manifest signed with the Insane OS release key (`docs/SIGNING.md:167-176`). It would also make go-link privileged. |
 | `.lpk` in the home folder | The JS works, with no helper: files are written 0644 (`server/src/lpk.c:219`), JS can't run commands (`docs/PAPER.md:33`), and the seccomp filter refuses `execve` and `AF_UNIX` sockets (`docs/PRIVACY.md:185-190`, `server/src/sec/sandbox.c:561-568`). A user-writable binary shouldn't run anyway. |
-| `.deb` with a `.desktop` file | The engine runs through the launcher in `app-lordos-<id>.scope`, unsandboxed by default (`docs/PRIVACY.md:40`). No native UI, and it couldn't talk to an isolated app. |
+| `.deb` with a `.desktop` file | The engine runs through the launcher in `app-insaneos-<id>.scope`, unsandboxed by default (`docs/PRIVACY.md:40`). No native UI, and it couldn't talk to an isolated app. |
 | `.deb` that adds a native app | Not possible: `app_package_dir` looks only in `assets/sysapps` and the home root (`server/src/app/appspawn.c:27-40`). |
-| `lord-rdesk` model | The right shape, but for Insane OS's own binary, found next to `lord-server` (`server/src/ui/js_rdesk.c:39-47`). `sandbox_apply_helper` also forbids all sockets (`docs/PRIVACY.md:283`), which an engine can't live with. |
+| `insane-rdesk` model | The right shape, but for Insane OS's own binary, found next to `insane-server` (`server/src/ui/js_rdesk.c:39-47`). `sandbox_apply_helper` also forbids all sockets (`docs/PRIVACY.md:283`), which an engine can't live with. |
 
 **Answer: the rules didn't allow it.** The changes below are the smallest safe set found, and D1 approved them. They're built:
 [PACKAGED-APPS.md](PACKAGED-APPS.md) says what was built where it differs from this design. The new command exception is in `docs/PAPER.md`.
 
 ### 3.2 The proposed change: a packaged app with a companion
 
-1. **A third root for apps, read-only.** `/usr/lib/lordos-apps/<id>/`, installed by a `.deb`, with the same layout as an unpacked
+1. **A third root for apps, read-only.** `/usr/lib/insaneos-apps/<id>/`, installed by a `.deb`, with the same layout as an unpacked
    `.lpk`. `app_package_dir` accepts it only if owned by root and not writable by group or others, the stricter form of the sysapps
-   check. It is never in `code-manifest.json`, never `system: true`, and runs as `lord-server --app <id>` in the usual sandbox.
+   check. It is never in `code-manifest.json`, never `system: true`, and runs as `insane-server --app <id>` in the usual sandbox.
 2. **Checked at every load as a package, not as Insane OS.** `contenido.json` and `firma.json` are verified with the existing code
    (`server/src/sec/sign.c`). A packaged app loads only if its key is a **Verified author** in Insane OS's signed catalog
    (`docs/SIGNING.md:64`, `:77`). So Insane OS says "this key may ship a packaged app", and go-link signs its own releases.
    An app update needs no Insane OS release. The key can be revoked with the catalog's list (`catalog_revoked`).
 3. **The manifest may name one companion:** `"companion": "engine"`, honored only in that root. The binary is listed in `contenido.json`,
    so go-link's signature covers it. A `.lpk` in the home folder saying the same is ignored.
-4. **One new broker op, `BOP_COMPANION`.** The app asks; `lord-server` takes the id from the verified connection, never from the
+4. **One new broker op, `BOP_COMPANION`.** The app asks; `insane-server` takes the id from the verified connection, never from the
    request. It accepts no path and no arguments. In the forked child, never in the compositor's thread, the binary is opened, hashed against
    the signed list, and run from that same descriptor with `execveat(AT_EMPTY_PATH)`, so there's no window between the check and the use.
    The hash runs in the child because it could take a large fraction of a second on a slow disk. To test.
-5. **It runs in the app's own scope,** `app-lordos-lpk-<id>.scope`. The child places itself before exec, which the placement service
-   accepts because it is still `lord-server` (`docs/PRIVACY.md:697-704`). Monitor and the firewall see one app, `lpk:<id>`. The scope's
+5. **It runs in the app's own scope,** `app-insaneos-lpk-<id>.scope`. The child places itself before exec, which the placement service
+   accepts because it is still `insane-server` (`docs/PRIVACY.md:697-704`). Monitor and the firewall see one app, `lpk:<id>`. The scope's
    limits are one core and 512 MB (`docs/PRIVACY.md:199`): whether the UI and the engine fit is **To test**, and raising them for a
    packaged app is a one-line change if not.
 6. **Two inherited descriptors,** and no others. Fd 3 goes to the app (the broker passes the other end with `SCM_RIGHTS`, as the
@@ -114,18 +114,18 @@ can read the home's visible files and send them out, not its hidden ones. It can
 
 ### 4.1 Shape
 
-A new file, `server/src/remote/share.c`, in `lord-server`, with its own socket, client table and parser. It doesn't reuse `Client` or
+A new file, `server/src/remote/share.c`, in `insane-server`, with its own socket, client table and parser. It doesn't reuse `Client` or
 `handle()` in `mirror.c`. Framing is the same as `proto.h` (u32 length, u8 type) and the media and input payloads keep their formats,
 so a client sees `RP_VFRAME`, `RP_AFRAME`, `RP_PTR`, `RP_BTN`, `RP_WHEEL`, `RP_KEY` and `RP_SETCLIP` as documented there.
 
 | Who connects | How |
 |---|---|
-| A companion | fd 4, connected by `lord-server` at spawn, id known (`lpk:<id>`) |
-| Any Linux app started by the launcher | `$XDG_RUNTIME_DIR/lordos/share.sock`, 0600. The id comes from the peer's root-owned scope (`appid_of_pid`, `server/src/sec/appid.h`), read through `SO_PEERPIDFD` so a dead pid can't be reused |
+| A companion | fd 4, connected by `insane-server` at spawn, id known (`lpk:<id>`) |
+| Any Linux app started by the launcher | `$XDG_RUNTIME_DIR/insaneos/share.sock`, 0600. The id comes from the peer's root-owned scope (`appid_of_pid`, `server/src/sec/appid.h`), read through `SO_PEERPIDFD` so a dead pid can't be reused |
 | Anything else | Refused with `no_identity`: Terminal programs, `systemd-run --user`, processes in no app scope |
 | An isolated `.lpk` with no companion | Not in the first version: it has no way to use a socket. A broker route can come later |
 
-The listener isn't created for the login screen's `lord-server`.
+The listener isn't created for the login screen's `insane-server`.
 
 **Client to system:** `SHARE_START {video, audio, input, clipboard}`, `RP_KEYFRAME`, `RP_RATE`, `RP_RESIZE`, `SHARE_AWAKE {on}`, `SHARE_LOCK`,
 `SHARE_STOP`, the input messages, and one new one, `SHARE_TEXT` (UTF-8, at most 1 KB), because go-link's text packet
@@ -144,10 +144,10 @@ in the manifest, or by a Linux app at its first `SHARE_START`. Existing `screen`
 
 - **The prompt** is system-drawn, in the `system` layer, on first use: `"go-link Desk" wants to share your screen with people you
   accept`, then the same for input. For a `desktop:` id it adds the program's path and "This app isn't verified".
-- **The store is root-owned:** `/var/lib/lordos/share/<uid>.json`. `permisos.json` is protected from isolated apps
+- **The store is root-owned:** `/var/lib/insaneos/share/<uid>.json`. `permisos.json` is protected from isolated apps
   (`docs/PRIVACY.md:360`) but an unsandboxed Linux app of the same user can edit it, and this permission is the one worth stealing.
   A new closed action `share-grant <id> <perm> allow|deny|ask`, marked `A_ANYONE` (`server/src/admin.c:370`), acts on the caller's own
-  uid only and validates the id. `lord-server` reads the file; nothing else writes it.
+  uid only and validates the id. `insane-server` reads the file; nothing else writes it.
 - **A Linux app's grant is tied to its id and executable path.** A changed path asks again.
 - **Revoking:** Settings → Privacy lists both permissions. Revoking ends a running share at once, in the same way the camera does
   (`docs/PRIVACY.md:367`). Uninstalling forgets it.
@@ -177,7 +177,7 @@ in the manifest, or by a Linux app at its first `SHARE_START`. Existing `screen`
 - **Keyframes:** on `RP_KEYFRAME`, at most one every 500 ms (target), because the encoder only makes them when asked (gop of 60 s,
   `server/src/media/helper/lm_stream.c:91`).
 - **A slow client** falls behind the same 3 MB limit as a 5673 viewer: it skips to the next keyframe (`mirror.c:38`, `:419`), and
-  `lord-server` never waits for it.
+  `insane-server` never waits for it.
 
 ### 4.5 Encoder start and stop
 
@@ -199,7 +199,7 @@ at 96 kbit/s (go-link:`docs/protocol.md:155`). Mono in a stereo-negotiated track
 | No monitor present, session drawn in memory | with a stored grant; first use gives `no_person` | composes at 60 Hz or more (`main.c:1958`). The indicator is in the picture, not seen by anyone at the machine, so only unattended links can get here (D3) |
 | Locked | no, `locked` | `SHARE_END {locked}`, synchronously in `mirror_session` (`mirror.c:515`), before another frame goes. No viewer can unlock: the login screen is another process |
 | Switched to another user | no, `away` | `SHARE_END {away}`. The person who accepted has left |
-| Login screen | never | a separate `lord-server` as `lordos-greeter`, no listener. It can't be shared or driven |
+| Login screen | never | a separate `insane-server` as `insaneos-greeter`, no listener. It can't be shared or driven |
 | Logged out | no | the socket closes |
 
 Protected windows stay black because the API takes the frame after `media_composed` (`main.c:1500`) or the GPU's read-back. With a
@@ -208,7 +208,7 @@ protected window on screen, that means the CPU path (`main.c:655-658`). On the "
 
 ### 4.7 Input
 
-- `lord-server` injects through the same functions as 5673 (`main.c:516-561`), with values validated by `share.c`'s own parser and with
+- `insane-server` injects through the same functions as 5673 (`main.c:516-561`), with values validated by `share.c`'s own parser and with
   rate limits (targets: 1,000 pointer moves and 200 keys a second).
 - **System surfaces take no API input.** While anything shows in the `overlay`, `modal` or `system` layers, the compositor already knows,
   because it drops keyboard focus (`docs/PRIVACY.md:459-464`). API input is dropped then: a visitor can't press Allow on a prompt, or
@@ -223,7 +223,7 @@ protected window on screen, that means the CPU path (`main.c:655-658`). On the "
 
 ## 5. One door at a time
 
-Enforced per session, in `lord-server`, by the single-threaded main loop, so whichever request arrives first wins. Another user's session
+Enforced per session, in `insane-server`, by the single-threaded main loop, so whichever request arrives first wins. Another user's session
 is independent: one user can be on 5673 while another shares through go-link.
 
 **What counts:** a 5673 viewer is a `remote.sock` client with `RP_HELLO` from root, not the seat (a local process can't block sharing).
@@ -272,13 +272,13 @@ All on 2026-11-02, with software encoders and decoders, on test builds. No claim
 | VP8 encoder, InsaneBench's clip | not run (quick mode) | 52.9 fps |
 | H.264 decoder, InsaneBench's 1080p clip | 381 fps | 250 fps |
 | x264 per frame in a real share | 7.00 ms, 1280×800, a mostly still desktop, 1,758 frames, VM 125 | 17.45 ms, 1920×1080, a moving card in a window, 534 frames |
-| A share running | `lord-server` 6.5 %, engine 3.7 %, `lord-media` 1.0 % of a core, still screen, VM 125 | `lord-server` 97 %, `lord-media` 52 %, engine 7 %, with a live session in a window on screen; the visitor got about 21 fps |
-| Viewing another computer, 640×480 at 30 fps in the window | `lord-media` 9 %, engine 9 %, 2.26 ms a picture, scaled, VM 125 | `lord-media` 22 %, `lord-server` 9 %, engine 3 %, 6.69 ms a picture, scaled |
-| One picture through `lord-media`, 1280×800 and 1920×1080, no scaling | 1.62 and 2.92 ms, VM 116 | 2.30 and 4.57 ms |
+| A share running | `insane-server` 6.5 %, engine 3.7 %, `insane-media` 1.0 % of a core, still screen, VM 125 | `insane-server` 97 %, `insane-media` 52 %, engine 7 %, with a live session in a window on screen; the visitor got about 21 fps |
+| Viewing another computer, 640×480 at 30 fps in the window | `insane-media` 9 %, engine 9 %, 2.26 ms a picture, scaled, VM 125 | `insane-media` 22 %, `insane-server` 9 %, engine 3 %, 6.69 ms a picture, scaled |
+| One picture through `insane-media`, 1280×800 and 1920×1080, no scaling | 1.62 and 2.92 ms, VM 116 | 2.30 and 4.57 ms |
 | App and engine in their scope (512 MB, one core) | 44.9 MB at peak during a two-way call, VM 125 | 33.8 MB at peak while sharing and viewing |
-| `lord-media` of a share or a stream | 57 MB at peak | 49 MB at peak |
+| `insane-media` of a share or a stream | 57 MB at peak | 49 MB at peak |
 
-So one core and 512 MB are plenty (D8 can stay closed), and the Pi at 1080p is limited by the compositor's read-back, not by x264: 97 % of a core there against 17 ms a frame, a ceiling near 57 fps. A share from a Pi with a moving picture isn't full rate. Standalone runs of `lord-media` showed more CPU in the process's total than its live threads add up to, when no box size is set; the cause wasn't found, the app always sets one, and those runs give times only.
+So one core and 512 MB are plenty (D8 can stay closed), and the Pi at 1080p is limited by the compositor's read-back, not by x264: 97 % of a core there against 17 ms a frame, a ceiling near 57 fps. A share from a Pi with a moving picture isn't full rate. Standalone runs of `insane-media` showed more CPU in the process's total than its live threads add up to, when no box size is set; the cause wasn't found, the app always sets one, and those runs give times only.
 
 **VA-API:** not measured. The lab has no hardware with it: VM 116 and VM 125 have a virtio display, and the Pi 5 has no H.264 encoder.
 
@@ -286,7 +286,7 @@ So one core and 512 MB are plenty (D8 can stay closed), and the Pi at 1080p is l
 
 The app is called **Desk go-link**. It has nothing to do with Remote Desk, Insane OS's RDP and VNC client: separate app, separate icon, separate
 code. It's a complete native copy of go-link's window: every view of the Fyne interface (`backend-device/internal/gui`, about 6,500 lines of
-Go) rebuilt in React with `@lordos/sdk`, pixel-faithful to go-link's window on the desktop systems it runs on, in layout, colors, sizes, spacing and texts, drawn natively by Insane OS's engine, rather than Insane OS's own style: the bar with the 9-digit code,
+Go) rebuilt in React with `@insaneos/sdk`, pixel-faithful to go-link's window on the desktop systems it runs on, in layout, colors, sizes, spacing and texts, drawn natively by Insane OS's engine, rather than Insane OS's own style: the bar with the 9-digit code,
 Session selector, Connect and the demo; the tabs; this computer's card with its code, link, copy, new code and status; My devices, Favorites
 and Recent sessions with their thumbnails and views; Settings; the connection request with its scam warning; the session panel, chat,
 calls, files, remote panels, network test and About. Texts come from go-link's catalogs.
@@ -307,35 +307,35 @@ permission and the indicator.
 | Icon in the top bar, by the clock | same menu as on the other platforms: the code, Disconnect, Open, Settings, Check for updates (opens the Store), Test my connection, About, Quit; red while a session lasts. The API is `statusItem` with the `status-item` permission ([PACKAGED-APPS.md](PACKAGED-APPS.md)) |
 | Visible as an app | in Applications and the Dock, with go-link's icon |
 | Update | off, by APT |
-| Connect to another computer | native, in the same window, as in go-link: the viewer's tabs and panels, with the picture and sound through live media ([PACKAGED-APPS.md](PACKAGED-APPS.md)). The engine passes what arrives, a sandboxed `lord-media` decodes it, and the app shows it in a `MediaView` |
+| Connect to another computer | native, in the same window, as in go-link: the viewer's tabs and panels, with the picture and sound through live media ([PACKAGED-APPS.md](PACKAGED-APPS.md)). The engine passes what arrives, a sandboxed `insane-media` decodes it, and the app shows it in a `MediaView` |
 | MCP for assistants, terminal | their views are copied too; what they run are other programs, which the sandbox's write rule doesn't allow today. Open: D9 |
 
 ## 8. Changes in go-link, by package
 
-Other platforms are untouched: everything new is under a `lordos` build tag, and existing files change only in their build lines. The
-build is `CGO_ENABLED=0 -tags headless,lordos`. Today's tags make that a small step: `headless` already drops X11 and Fyne
+Other platforms are untouched: everything new is under a `insaneos` build tag, and existing files change only in their build lines. The
+build is `CGO_ENABLED=0 -tags headless,insaneos`. Today's tags make that a small step: `headless` already drops X11 and Fyne
 (go-link:`pkg/capture/capture_linux.go:3`) and picks the stubs (go-link:`pkg/capture/capture_other.go:3`).
 
 | Package | Change |
 |---|---|
-| `pkg/lordshare` (new) | The client of section 4: framing, messages, input and output queues. No go-link types, so it can be tested alone. |
-| `pkg/capture` | `capture_lordos.go` with `Displays` (one) and the `Supported` answers; `capture_other.go` gets `&& !lordos`. The `Frame` type is a raw picture, so frames don't pass here. |
-| `pkg/inject` | `inject_lordos.go`: `Injector` over `lordshare`. Key codes to evdev with the table the Wayland backend already has (go-link:`pkg/inject/wayland_linux.go`). Positions in session pixels. `Trusted` answers from `remote-input`. |
-| `pkg/cursor` | `cursor_lordos.go` from `RP_CURSOR` and `RP_SHAPE`. "Pointer in the picture" isn't possible with encoded frames: the viewer draws it. |
-| `pkg/clipboard` | `clipboard_lordos.go` from `RP_CLIP` and `RP_SETCLIP`. |
+| `pkg/insaneshare` (new) | The client of section 4: framing, messages, input and output queues. No go-link types, so it can be tested alone. |
+| `pkg/capture` | `capture_insaneos.go` with `Displays` (one) and the `Supported` answers; `capture_other.go` gets `&& !insaneos`. The `Frame` type is a raw picture, so frames don't pass here. |
+| `pkg/inject` | `inject_insaneos.go`: `Injector` over `insaneshare`. Key codes to evdev with the table the Wayland backend already has (go-link:`pkg/inject/wayland_linux.go`). Positions in session pixels. `Trusted` answers from `remote-input`. |
+| `pkg/cursor` | `cursor_insaneos.go` from `RP_CURSOR` and `RP_SHAPE`. "Pointer in the picture" isn't possible with encoded frames: the viewer draws it. |
+| `pkg/clipboard` | `clipboard_insaneos.go` from `RP_CLIP` and `RP_SETCLIP`. |
 | `pkg/awake` | Tagged to `SHARE_AWAKE`. |
 | `internal/services` | New `encoded_source.go`, a `MediaSource` for encoded frames, with an optional interface on the sink: `EncodedFrame(codec, key, pts, data)` writes to the viewer's `sampleWriter` (go-link:`internal/services/video.go:208`), and `EncodedAudio` to the Opus track, skipping `VideoFrame`'s encoder per viewer (go-link:`internal/services/stream_service.go:633`). PLI maps to `RP_KEYFRAME`, the bandwidth estimate to `RP_RATE`, and `Hearing` gates `RP_AFRAME`. `pickCodec` (go-link:`internal/services/video.go:166`) gets a variant that never picks High. |
 | `internal/services/consent.go` | A `SocketConsent`: sends the request to the app and waits. The app gone means `ErrUnavailable`, so it fails closed as `NobodyToAsk` does (go-link:`internal/services/consent.go:46`). `LockScreen` gets a hook. |
 | `internal/appsock` (new) | The app's protocol on fd 3: one JSON text per `SOCK_SEQPACKET` message, 64 KB at most, one message type per field of `uiOptions` (go-link:`cmd/desk/ui.go:14`): status, code, consent, permissions, chat, files, settings, links. |
-| `cmd/desk` | `ui_lordos.go`, `runUI` over `appsock`; `ui_headless.go` gets `&& !lordos`. Under `lordos`, the `--test-*` flags aren't compiled, and `setConsent` is always set (go-link:`cmd/desk/main.go:533`). Configuration comes from the app's data folder. |
-| `internal/updater` | Nothing: only the GUI starts it (go-link:`internal/gui/update.go:53`), so a `lordos` build has none. Off by construction. |
-| `build/lordos` (new) | nFPM file, `go-link-desk-lordos`, installs to `/usr/lib/lordos-apps/go-link-desk/`, `Depends: lordos (>= 0.8.8~)`, no maintainer scripts. It doesn't conflict with the Linux package. |
-| `lordos-app/` (new) | The React app, built with a pinned `tools/lpk.mjs` and its `tree` mode. |
-| `frontend` | The `in_use` reason, the `/privacy/lordos` page. |
+| `cmd/desk` | `ui_insaneos.go`, `runUI` over `appsock`; `ui_headless.go` gets `&& !insaneos`. Under `insaneos`, the `--test-*` flags aren't compiled, and `setConsent` is always set (go-link:`cmd/desk/main.go:533`). Configuration comes from the app's data folder. |
+| `internal/updater` | Nothing: only the GUI starts it (go-link:`internal/gui/update.go:53`), so a `insaneos` build has none. Off by construction. |
+| `build/insaneos` (new) | nFPM file, `go-link-desk-insaneos`, installs to `/usr/lib/insaneos-apps/go-link-desk/`, `Depends: insaneos (>= 0.8.8~)`, no maintainer scripts. It doesn't conflict with the Linux package. |
+| `insaneos-app/` (new) | The React app, built with a pinned `tools/lpk.mjs` and its `tree` mode. |
+| `frontend` | The `in_use` reason, the `/privacy/insaneos` page. |
 
 ## 9. Packaging, Store and updates
 
-What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to fill, and Store → Remote access, which appears once the catalog has an entry with that section. How it reaches a person: the maintainer builds both `.deb`s with `lordos/`'s recipe and go-link's author key, whose public half Insane OS's signed catalog lists as a Verified author; they go up at desk.go-link.org; the entry gets the version, URLs and hashes and moves into `apt/catalog.json`; `apt/build.sh` fetches, checks the hash and control fields and adds them to the pool; the Store offers it. Without the author key in the catalog the app doesn't open: the local builds carry a catalog of their own for that reason, and it must not reach a release.
+What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to fill, and Store → Remote access, which appears once the catalog has an entry with that section. How it reaches a person: the maintainer builds both `.deb`s with `insaneos/`'s recipe and go-link's author key, whose public half Insane OS's signed catalog lists as a Verified author; they go up at desk.go-link.org; the entry gets the version, URLs and hashes and moves into `apt/catalog.json`; `apt/build.sh` fetches, checks the hash and control fields and adds them to the pool; the Store offers it. Without the author key in the catalog the app doesn't open: the local builds carry a catalog of their own for that reason, and it must not reach a release.
 
 1. **Published first at desk.go-link.org:** both `.deb` files with `SHA256SUMS` and its Ed25519 signature by the go-link update key
    (go-link:`docs/security.md:37`). Today releases live on the release host, so this is new hosting. Never re-uploaded: a fix is a new version.
@@ -346,7 +346,7 @@ What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to f
    (`docs/UPDATES.md:334-336`). Vendor packages are never modified (`apt/README.md:101`).
 4. **Store:** a new catalog section, `remote`, since it's neither AI nor commercial (`apps/store/ai.js:137`, `apps/store/index.jsx:345`), with
    the go-link name and vendor and a line saying it's a third-party app and how it differs from 5673. Recommended there and nowhere else: no
-   preinstall, no dependency of `lordos`, no first-run nudge. On a system below 0.8.8 the page says to update Insane OS first.
+   preinstall, no dependency of `insaneos`, no first-run nudge. On a system below 0.8.8 the page says to update Insane OS first.
 5. **Updates:** through APT and Store → Updates, as for any catalog app.
 6. **Privacy policy:** its own page at desk.go-link.org, linked from the Store item and from the app's About. It says what signalhub
    and TURN see, what stays on the computer, and that the app has no analytics.
@@ -359,7 +359,7 @@ What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to f
 | Signaling server in the middle, rewriting the SDP on both sides | Linked devices are protected: the proofs cover the fingerprints (go-link:`docs/security.md:82`). The person sees the request and decides | **Residual DTLS risk:** a code session has no such proof. The visitor's name is only declared. A server that controls both sides can read a session the person accepted, believing it was someone else. Proposed fix: a short code from both fingerprints, read out by voice, D5 |
 | A fake visitor | Knock, 60-second question, one at a time, name shown as declared (go-link:`docs/security.md:26-31`) | The scammer on the phone, go-link's own warning and panel stand against it |
 | TURN relay | Only DTLS and SRTP | Size and timing |
-| A bug in Pion or the engine, reached from the network | The sandbox of 3.3: nothing to write but Downloads and its own data, no `AF_UNIX`, no exec. The engine doesn't parse video: in a session to another computer, what a stranger's computer sends is decoded in `lord-media`'s sandbox | It can read the home's visible files and send them out (D2, D10). While a share runs, the attacker holds what fd 4 grants: the picture and any input given. The indicator and Stop remain, and system surfaces and protected windows stay out of reach |
+| A bug in Pion or the engine, reached from the network | The sandbox of 3.3: nothing to write but Downloads and its own data, no `AF_UNIX`, no exec. The engine doesn't parse video: in a session to another computer, what a stranger's computer sends is decoded in `insane-media`'s sandbox | It can read the home's visible files and send them out (D2, D10). While a share runs, the attacker holds what fd 4 grants: the picture and any input given. The indicator and Stop remain, and system surfaces and protected windows stay out of reach |
 | A visitor with control abuses the desktop | Permission boxes, the panel, Stop, 4.7's drops | They can do what the person can do in ordinary windows. That is what control means |
 | A visitor presses Allow, or changes their own permissions | System surfaces take no API input, and neither do the windows of the app holding the share: clicks, scrolling and keys aimed at them are dropped (`share_is_holder`, `server/src/main.c`). So a visitor can't accept for themselves, tick a permission or set a password | A Linux app's windows aren't covered, only a package's |
 | Another app abuses the API | Scope identity, prompt, root-owned store, indicator, no frames without it, one holder, no resize on a monitor session, rate limits, never blocks the compositor | **An unsandboxed Linux app runs as the user.** It can attach to an approved app, or edit its files. The permission is consent, not a sandbox, for Linux apps. Their isolation is what it is (`docs/PRIVACY.md:40`) |
@@ -367,7 +367,7 @@ What exists: `docs/drafts/go-link-desk-catalog-entry.json`, the entry ready to f
 | Same-uid access to `remote.sock` | Refused since `2825555c` (D6) | Root |
 | Links in `device.json` | Under the app's data folder, 0600, written by the engine (D10) | An unsandboxed app of the same user can add one. D3 weighs this |
 | A forged package | Signature at desk.go-link.org, pinned hash, Insane OS archive signature, Verified author check at each load, revocation | The go-link release computer, and the catalog's reviewer |
-| A locked session seen | Ended in `lord-server`, not by the client | A frame already in a socket or a viewer's decoder |
+| A locked session seen | Ended in `insane-server`, not by the client | A frame already in a socket or a viewer's decoder |
 | Secrets through the clipboard | Sensitive items and earlier copies never go | What the person copies during the session |
 | A viewer recording | go-link's own rule: a notice for honest viewers (go-link:`docs/security.md:71`) | A dishonest one records anyway |
 

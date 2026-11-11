@@ -727,10 +727,10 @@ function setPin(on) {
   $('bar').classList.toggle('pinned', on);
   $('pin').classList.toggle('on', on);
   $('pin').title = on ? T.pinOff : T.pinOn;
-  try { localStorage.setItem('lordos.rd.pin', on ? '1' : ''); } catch (e) {}
+  try { localStorage.setItem('insaneos.rd.pin', on ? '1' : ''); } catch (e) {}
 }
 let pinned = false;
-try { pinned = localStorage.getItem('lordos.rd.pin') === '1'; } catch (e) {}
+try { pinned = localStorage.getItem('insaneos.rd.pin') === '1'; } catch (e) {}
 setPin(pinned);
 $('pin').onclick = () => { pinned = !pinned; setPin(pinned); };
 const sup = support();

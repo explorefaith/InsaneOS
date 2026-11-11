@@ -1,8 +1,8 @@
-/* h_ocr.c — lord-ocr: the text in a picture (Screenshots' "copy the text", docs/MEDIA.md), with Tesseract.
+/* h_ocr.c — insane-ocr: the text in a picture (Screenshots' "copy the text", docs/MEDIA.md), with Tesseract.
  *
- * lord-ocr is lord-doc's helper loop (helper.c, built with LORD_HELPER_OCR) with only this part: the only binary
- * that links libtesseract (and what it brings: Leptonica, libarchive, libcurl, libgomp), so neither lord-server nor
- * lord-doc does. It gets the pixels in a memfd lord-server wrote, never a path; its sandbox reads /usr only (the
+ * insane-ocr is insane-doc's helper loop (helper.c, built with INSANE_HELPER_OCR) with only this part: the only binary
+ * that links libtesseract (and what it brings: Leptonica, libarchive, libcurl, libgomp), so neither insane-server nor
+ * insane-doc does. It gets the pixels in a memfd insane-server wrote, never a path; its sandbox reads /usr only (the
  * language data in /usr/share/tesseract-ocr) and has no network.
  *
  * DQ_OCR: fd (w × h premultiplied ARGB32, stride w*4) + {"w","h","langs":"eng+spa"} → {"text"}. The picture is

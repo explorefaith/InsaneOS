@@ -1,6 +1,6 @@
 /* deb.h — Debian formats: versions (like dpkg), deb822 fields and relationships between packages. */
-#ifndef LORD_PKG_DEB_H
-#define LORD_PKG_DEB_H
+#ifndef INSANE_PKG_DEB_H
+#define INSANE_PKG_DEB_H
 
 #include <stddef.h>
 

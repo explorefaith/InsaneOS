@@ -3,7 +3,7 @@
 // is open, from what the system already reports. There is no monitoring claim here, no memory "free up" and no
 // speed test. The status word has one written rule (statusWord) and appears only when it can be worked out.
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, Image, addListener } from '@lordos/runtime';
+import { View, Text, Image, addListener } from '@insaneos/runtime';
 import { useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme } from './theme.js';
@@ -14,7 +14,7 @@ import { Overlay } from './layers.js';
 import { registerStatusItem, statusPanelAt } from './statusitems.js';
 import { cleaner } from './cleaner.js';
 import { cleanerPalette } from './cleanertheme.js';
-import { lordosUpdateWaiting } from './updates.js';
+import { insaneosUpdateWaiting } from './updates.js';
 import { cleanerItemShown } from './menubarmodel.js';
 
 
@@ -32,9 +32,9 @@ function read(prev) {
   const st = cleaner.status();
   const si = call(() => systemInfo(), null);
   const mem = si && si.memTotalKB ? { total: si.memTotalKB * 1024, available: (si.memAvailableKB) * 1024 } : null;
-  const [t1, i1] = call(() => lord.system.cpuTimes(), [0, 0]);
-  const net = call(() => lord.monitor.netTotals(), null);
-  const fan = call(() => (lord.fan ? lord.fan.status() : null), null);
+  const [t1, i1] = call(() => insane.system.cpuTimes(), [0, 0]);
+  const net = call(() => insane.monitor.netTotals(), null);
+  const fan = call(() => (insane.fan ? insane.fan.status() : null), null);
   const r = { st, mem, t1, i1, net, temp: fan && fan.temp != null ? fan.temp : null, disks: Math.max(0, cleaner.volumes().length - 2), at: Date.now() };
   r.cpu = prev && t1 > prev.t1 ? Math.max(0, Math.min(1, 1 - (i1 - prev.i1) / (t1 - prev.t1))) : null;
   if (prev && prev.net && net) { const dt = (net.t - prev.net.t) || (r.at - prev.at) / 1000; r.up = Math.max(0, (net.tx - prev.net.tx) / dt); r.down = Math.max(0, (net.rx - prev.net.rx) / dt); }
@@ -51,7 +51,7 @@ function Card({ p, name, value, pct }) {
 
 function Panel({ p, onClose }) {
   const [d, setD] = useState(() => read(null));
-  const [waiting] = useState(() => call(lordosUpdateWaiting, false));   // read once, as the panel opens
+  const [waiting] = useState(() => call(insaneosUpdateWaiting, false));   // read once, as the panel opens
   useEffect(() => {
     const id = setInterval(() => setD((o) => read(o)), 2000);
     return () => clearInterval(id);
@@ -93,7 +93,7 @@ function CleanerItem({ height }) {
   useEffect(() => {
     if (!open) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
       if (!inside(panel.current) && !inside(btn.current)) setOpen(false);
     });
   }, [open]);

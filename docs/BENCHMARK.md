@@ -1,12 +1,12 @@
 # System Information, InsaneBench and hardware reports (proposal)
 
-**Status: design proposal. Built and released in 0.8.5-beta (2026-10-27; see "Work plan for 0.8.5" below): the collector, `lordos-sysreport report|fetch`, the System Information app (Overview, Hardware, Compatibility, Checks, Report), the Sandbox Probe and the shared measurement library `server/src/bench`. InsaneBench's first part was released in 0.8.6-beta (2026-10-30): the `lord-bench` helper, its CPU, memory, GPU, storage and sustained workloads, the interface (layout, paint, shaping) and video workloads, the desktop-impact mode (the compositor's frames, their phases and pointer-to-screen latency under load), the boot test, the guards, `lordos-sysreport bench` and System Information's Performance tab are built, with two of the three reference machines (VM 116 and the Raspberry Pi 5 16 GB; see "Built so far" under 0.8.6); the modest x86 PC reference is not, and moved to 0.8.7 with hardware video decoding (2026-10-29). Community reports were released in 0.8.7-beta (2026-11-01; see "Built so far" under 0.8.7: the report format, Share on GitHub, the issue form and its workflow, the catalogue and its signed snapshot in the Compatibility panel); a `checks` subcommand of `lordos-sysreport` is not built.** It plans three releases and a later stage:
+**Status: design proposal. Built and released in 0.8.5-beta (2026-10-27; see "Work plan for 0.8.5" below): the collector, `insaneos-sysreport report|fetch`, the System Information app (Overview, Hardware, Compatibility, Checks, Report), the Sandbox Probe and the shared measurement library `server/src/bench`. InsaneBench's first part was released in 0.8.6-beta (2026-10-30): the `insane-bench` helper, its CPU, memory, GPU, storage and sustained workloads, the interface (layout, paint, shaping) and video workloads, the desktop-impact mode (the compositor's frames, their phases and pointer-to-screen latency under load), the boot test, the guards, `insaneos-sysreport bench` and System Information's Performance tab are built, with two of the three reference machines (VM 116 and the Raspberry Pi 5 16 GB; see "Built so far" under 0.8.6); the modest x86 PC reference is not, and moved to 0.8.7 with hardware video decoding (2026-10-29). Community reports were released in 0.8.7-beta (2026-11-01; see "Built so far" under 0.8.7: the report format, Share on GitHub, the issue form and its workflow, the catalogue and its signed snapshot in the Compatibility panel); a `checks` subcommand of `insaneos-sysreport` is not built.** It plans three releases and a later stage:
 
 | Release | What |
 |---|---|
 | **0.8.5 — System Information** | Every piece of hardware detected, what Insane OS uses (above all the GPU), the services, the paper's claims checked on this machine, JSON/Markdown reports. |
 | **0.8.6 — InsaneBench** | Measurements of CPU, memory, GPU, the compositor, video and storage under recorded, reproducible conditions, with versioned results. |
-| **0.8.7 — Community hardware reports** | Publishing reports as GitHub issues, validating them, and a tested-hardware catalogue on lordos.org that the app also reads. Also InsaneBench's x86 PC reference and hardware video decoding, moved from 0.8.6 (2026-10-29), and GPU drag for the whole drag and the rest of the desktop under load on the Pi 5 (fewer pixels per frame, what slows V3D), moved on 2026-10-30. |
+| **0.8.7 — Community hardware reports** | Publishing reports as GitHub issues, validating them, and a tested-hardware catalogue on insaneos.org that the app also reads. Also InsaneBench's x86 PC reference and hardware video decoding, moved from 0.8.6 (2026-10-29), and GPU drag for the whole drag and the rest of the desktop under load on the Pi 5 (fewer pixels per frame, what slows V3D), moved on 2026-10-30. |
 | **Later — Lumo and AutoTune** | `ROADMAP.md`, "Lumo, the local assistant": explains a report and tunes settings from what the machine measured. |
 
 Each claim of the paper, how it is checked today and what is still missing: `PAPER-VALIDATION.md`.
@@ -24,24 +24,24 @@ clients so no logic is duplicated:
 server/src/sysreport/        collector + checks (library, read-only, no root)
 server/src/bench/            InsaneBench workloads (library)
         │
-        ├── lord-server: lord.sysinfo (js_hw.c) → apps/sysinfo        (the app)
-        ├── lordos-sysreport  report | fetch | bench [--quick|--full] [--json]  (CLI, runs as the user)
+        ├── insane-server: insane.sysinfo (js_hw.c) → apps/sysinfo        (the app)
+        ├── insaneos-sysreport  report | fetch | bench [--quick|--full] [--json]  (CLI, runs as the user)
         └── tests (fake sysfs trees, fixtures) and, later, Lumo's tools
 ```
 
-- **`lordos-sysreport`** is an ordinary user command in `/usr/bin` that the user or a test script
-  runs; `lord-server` never runs it. It writes the same JSON as the app, so reports can be made on
+- **`insaneos-sysreport`** is an ordinary user command in `/usr/bin` that the user or a test script
+  runs; `insane-server` never runs it. It writes the same JSON as the app, so reports can be made on
   a machine without a session (a headless Pi, a VM over SSH, CI).
-- **Shared with the Test Bench.** `lordos-testbench` (0.8.5, `src/testbench`, a Wayland client that checks
+- **Shared with the Test Bench.** `insaneos-testbench` (0.8.5, `src/testbench`, a Wayland client that checks
   the display server from the outside) and InsaneBench keep their own names and jobs, but the measurement
   pieces live once, in `server/src/bench/`, and both link them: `bench.c` (the clock; frame times with
   average, p50, p99 and frames that missed the refresh budget; presentation accounting with vblanks skipped
   and zero-copy frames; input-to-screen latency; the GL renderer's kind; JSON strings; the report written
-  atomically to `~/.local/state/lordos/<name>.json`) and `glscene.c` (the fixed 3D scene, drawn with GLES2
+  atomically to `~/.local/state/insaneos/<name>.json`) and `glscene.c` (the fixed 3D scene, drawn with GLES2
   in whatever context is current: the bench's wayland-egl window, InsaneBench's offscreen context). Tested by
   `build/bench-test`. InsaneBench's workloads go next to them.
-- **`lord-bench`** is the helper the app starts for workloads, launched like `lord-doc` and
-  `lord-media`: fixed path (`<lord-server dir>/lord-bench`), no arguments, minimal environment,
+- **`insane-bench`** is the helper the app starts for workloads, launched like `insane-doc` and
+  `insane-media`: fixed path (`<insane-server dir>/insane-bench`), no arguments, minimal environment,
   channel on fd 3, `sandbox_apply_helper()` before any work; it gets only the render node and a
   temporary file as fds. It links libc, Mesa's GBM/EGL/GLES (already used by the GPU path) and the
   vendored QuickJS (one of its workloads), nothing new. The CLI links the same library directly.
@@ -74,7 +74,7 @@ enter a report.
 Hardware → Computer shows the computer, the motherboard and the firmware (BIOS or UEFI vendor, version and date) from
 `/sys/class/dmi/id`; on a Raspberry Pi the model, the revision, and the bootloader's version and date from
 `/proc/device-tree/chosen/bootloader` (world-readable: the place `rpi-eeprom-update` itself looks first, so no
-`vcgencmd`, which needs root-only `/dev/vcio`); and the chosen case (`lord.fan.caseConfig()`).
+`vcgencmd`, which needs root-only `/dev/vcio`); and the chosen case (`insane.fan.caseConfig()`).
 
 **Serial numbers** are on this screen only, on request. `product_serial` and `board_serial` are root-only, so the
 **Show** button runs the closed `hw-serial-numbers` action (no arguments, read-only, administrators; `docs/SETTINGS.md`),
@@ -85,10 +85,10 @@ window is protected while they show (`wm.setProtected`), so screenshots, recordi
 `tests/sysreport_test.c` fills every fake machine with them and checks that no report carries them.
 
 **Input and peripherals** lists keyboards, mice, receivers and the rest of USB, the devices behind a wireless receiver
-(with their HID++ battery) and a laptop's built-in keyboard and touchpad (`lord.sysinfo.peripherals()`,
-`sysreport/periph.c`), plus BlueZ's paired or connected devices (`lord.bt`, with Battery1 where BlueZ has it, which for
+(with their HID++ battery) and a laptop's built-in keyboard and touchpad (`insane.sysinfo.peripherals()`,
+`sysreport/periph.c`), plus BlueZ's paired or connected devices (`insane.bt`, with Battery1 where BlueZ has it, which for
 an LE device usually means only while it is connected). This list is not in the report: a device names itself and
-that name can carry a person's, so `SysReport` has no place for these strings, `lordos-sysreport` and `lordos-fetch`
+that name can carry a person's, so `SysReport` has no place for these strings, `insaneos-sysreport` and `insaneos-fetch`
 don't link `periph.c`, and `apps/sysinfo/model.js` builds each row field by field, so no address or D-Bus path can come
 along. USB `serial`, an input device's `uniq` and `phys` and a power supply's `serial_number` are never read.
 
@@ -107,7 +107,7 @@ long name with the bus path dropped; a Raspberry Pi's HDMI outputs by port; anyt
 | Kernel driver loaded | the device's `driver` link (`amdgpu`, `i915`, `xe`, `nouveau`, `nvidia-drm`, `v3d`/`vc4`, `virtio_gpu`…) |
 | DRM/KMS available | a card node with connectors, modesetting working (`kms.c`) |
 | Render node | `/dev/dri/renderD*` openable by the session |
-| EGL context active | `lord-server` created one; the GL renderer string; hardware or software (llvmpipe) |
+| EGL context active | `insane-server` created one; the GL renderer string; hardware or software (llvmpipe) |
 | Composition | the GPU path is on, or the exact reason it's off (the same one the log gives) |
 | Direct scanout | seen during a fullscreen video or app, with the count since the session started |
 | Video decode | VA-API profiles per codec (`MK_HWPROBE`); on the Pi 5 the HEVC V4L2 decoder |
@@ -129,11 +129,11 @@ the test:
 
 | Id | Paper | Configured | Effective |
 |---|---|---|---|
-| `sec.server-user` | §2.2 | `lord-server`'s uid ≠ 0 | — |
+| `sec.server-user` | §2.2 | `insane-server`'s uid ≠ 0 | — |
 | `sec.app-sandbox` | §6.4 | `Seccomp: 2`, `NoNewPrivs: 1` on an isolated app | a probe app (a system package started like any isolated app) tries to read a file outside its grant, open a socket, `ptrace`, create a user namespace and reach another app's scope; every attempt must be refused |
-| `sec.helper-sandbox` | §6.7 | — | a child of the probe app that takes `sandbox_apply_helper()` checks that a unix socket, `exec`, `fork` and the app's data folder fail (0.8.5); `lord-bench` repeats it after its own lock-in on every InsaneBench run, with an internet socket, a new file and a system file too, shown in Performance's Stability verdict (0.8.6) |
+| `sec.helper-sandbox` | §6.7 | — | a child of the probe app that takes `sandbox_apply_helper()` checks that a unix socket, `exec`, `fork` and the app's data folder fail (0.8.5); `insane-bench` repeats it after its own lock-in on every InsaneBench run, with an internet socket, a new file and a system file too, shown in Performance's Stability verdict (0.8.6) |
 | `sec.landlock` | §6.4 | Landlock ABI ≥ 6 | covered by the probe app |
-| `sec.netperm` | §6.6 | `lord-netperm` running, programs attached, devices and Bluetooth programs loaded | the probe app, denied the network by a temporary rule, fails to connect to a local listener |
+| `sec.netperm` | §6.6 | `insane-netperm` running, programs attached, devices and Bluetooth programs loaded | the probe app, denied the network by a temporary rule, fails to connect to a local listener |
 | `sec.code` | §6.9 | manifest present | every loaded bundle verified in this session |
 | `sec.remote-closed` | §11.4 | remote desktop setting | nothing listens on 5673 when it's off |
 | `sec.cgroups` | §11.4 | root-owned session tree, one scope per app | — |
@@ -181,10 +181,10 @@ A versioned JSON (`schema: 1`) and a Markdown summary, saved to `~/Documents`:
 | CPU, one core and all cores | SHA-256 (`pkg/crypto.c`), deflate (built as xz decoding, below), a matrix multiply; Insane OS's own work: layout and paint of a fixed scene, shaping a fixed paragraph in several scripts, QuickJS running a fixed script |
 | Memory | bandwidth (copy, triad) and latency (pointer chase) |
 | GPU | offscreen GLES on the render node: fill rate, texture upload, composing N screen-size layers, timed with fences |
-| Compositor | `lord-server`'s own frame counters during a scripted window drag, CPU path and GPU path |
-| Video | short test clips we generate (H.264, HEVC, VP9, AV1; 1080p and 4K) decoded in `lord-media`, hardware and software (only software decoding is built, below); the remote desktop's encoders |
+| Compositor | `insane-server`'s own frame counters during a scripted window drag, CPU path and GPU path |
+| Video | short test clips we generate (H.264, HEVC, VP9, AV1; 1080p and 4K) decoded in `insane-media`, hardware and software (only software decoding is built, below); the remote desktop's encoders |
 | Storage | sequential and random I/O on a size-limited temporary file (Full only, with a warning on SD cards) |
-| Boot | the seconds from the kernel's start to the first frame on the monitor, recorded by `lord-sessiond` on every boot with the version and build (`/var/lib/lordos/boot-times.jsonl`, built in 0.8.5; [RESULTS.md](RESULTS.md), "Boot time"): InsaneBench reads that history, shows each version's median and spread over its boots (the first boot after an update apart: it builds caches), and with the user's consent can reboot N times in a row to measure it |
+| Boot | the seconds from the kernel's start to the first frame on the monitor, recorded by `insane-sessiond` on every boot with the version and build (`/var/lib/insaneos/boot-times.jsonl`, built in 0.8.5; [RESULTS.md](RESULTS.md), "Boot time"): InsaneBench reads that history, shows each version's median and spread over its boots (the first boot after an update apart: it builds caches), and with the user's consent can reboot N times in a row to measure it |
 | Sustained | several minutes of all-core load (Full only) |
 
 ### Frame times against the refresh budget
@@ -224,24 +224,24 @@ Three separate verdicts, never folded into one score:
 ### Built so far (released in 0.8.6-beta, 2026-10-30; written 2026-10-27 and 2026-10-28)
 
 Released in 0.8.6-beta. Checked during development on VM 116 (Proxmox VE, 8 vCPU of a Xeon Silver
-4108, 4 GB, virtio disk, no GPU passthrough: Mesa's llvmpipe) from a terminal (`build/lordbench-cli`) and
+4108, 4 GB, virtio disk, no GPU passthrough: Mesa's llvmpipe) from a terminal (`build/insanebench-cli`) and
 in an isolated headless session through System Information → Performance, and on a Raspberry Pi 5 16 GB
-(SD card, the Insane OS kernel 6.18.57-lordos.3, V3D 7.1, the fan on its header) from a terminal and in the
+(SD card, the Insane OS kernel 6.18.57-insaneos.3, V3D 7.1, the fan on its header) from a terminal and in the
 maintainer's own session on a 1920×1080 60 Hz monitor (HDMI-A-1 and HDMI-A-2 both tried), with a 0.8.6
 development package.
 
-- **`lord-bench`** (`server/src/bench/lbmain.c`, `mk/lordbench.mk`): launched by lord-server
+- **`insane-bench`** (`server/src/bench/lbmain.c`, `mk/insanebench.mk`): launched by insane-server
   (`bench/lbrun.c`) from its own folder only (owned by root or the user, not writable by others), no
-  arguments, `LANG` only (and `LORDOS_SESSIOND` in a lord-sessiond session), the channel on fd 3. It
-  receives one fixed-size request (`LbGo`, `bench/lbproto.h`) with at most two fds lord-server opened: the
+  arguments, `LANG` only (and `INSANEOS_SESSIOND` in a insane-sessiond session), the channel on fd 3. It
+  receives one fixed-size request (`LbGo`, `bench/lbproto.h`) with at most two fds insane-server opened: the
   GPU's render node (`/dev/dri/renderD128…`) and, for Full, an unnamed scratch file (`O_TMPFILE` in
   `~/.cache`, at most 1 GB and a quarter of the free space). Then it locks itself in with
-  `sandbox_apply_helper` before any work (scope `lordos-bench.scope`, 2 GB memory cap, read-only
+  `sandbox_apply_helper` before any work (scope `insaneos-bench.scope`, 2 GB memory cap, read-only
   `/usr/lib`, `/usr/share`, `/sys/dev/char`, `/sys/devices`, `/sys/firmware/devicetree` and `/dev/dri` for
   Mesa (without the last two, Mesa's loader on the Pi 5 could not identify the V3D device and every GPU
   measurement was skipped; the GPU itself is still reached only through the render node fd), DRM and dma-buf ioctls only when
   it got the render node, no sockets, no exec, threads only). It answers only with fixed-size records
-  (`LbMsg`: a measurement id, a value and its spread); lord-server checks each one (`lb_msg_valid`: the
+  (`LbMsg`: a measurement id, a value and its spread); insane-server checks each one (`lb_msg_valid`: the
   magic, a known kind and id, finite values in range) and writes the JSON itself. Stopping is a SIGKILL.
 - **Workloads** (`bench/lbwork.c`, `bench/lbui.c`, `bench/lbgpu.c`), each repeated three times and reported as the
   median with its spread (max − min), on one core and on all of them:
@@ -250,7 +250,7 @@ development package.
     decoder (`pkg/xz.c`; the text is generated at build time by `bench/lbcorpus.c` and compressed with
     `xz -9`), instead of the deflate in the design above; QuickJS running a fixed script (strings, JSON,
     sorting, objects, a regular expression), one runtime per thread.
-  - Insane OS's own interface work (`bench/lbui.c`), with the engine's real code linked into `lord-bench`
+  - Insane OS's own interface work (`bench/lbui.c`), with the engine's real code linked into `insane-bench`
     (`ui/node.c`, `style.c`, `layout.c`, `paint.c`, `text.c`, `canvas.c`, the shaper `otf.c`, `shape*.c`,
     `bidi.c`; the Wayland, terminal, media and GPU hooks of `paint.c` are stubs, as in `tests/engine_test.c`):
     - **Layout and paint** (`cpu.ui.1`, `cpu.ui.n`, frames per second): a fixed 1920×1080 scene built in C,
@@ -261,7 +261,7 @@ development package.
       lays the tree out, computes the damage and paints the whole screen; the glyph, text and shadow caches stay
       warm, as on a running desktop (one frame before the clock starts fills them). `cpu.ui.1` is everything on
       one core; `cpu.ui.n` the same frames with the paint's row-local loops split in bands over up to 8 threads
-      (`canvas_parallel`, the same pieces as lord-server's paint threads, `par.c`, without their real-time
+      (`canvas_parallel`, the same pieces as insane-server's paint threads, `par.c`, without their real-time
       priority), so it measures what the compositor's own threads gain, not N independent copies: the engine
       keeps one tree per process.
     - **Shaping** (`cpu.shape.1`, `cpu.shape.n`, runs per second, summed over the threads): one run shapes five
@@ -278,17 +278,17 @@ development package.
       Devanagari, Thai and CJK SC subset to exactly the characters of those paragraphs and their decompositions,
       with every layout feature and lookup they reach (`tools/gen-lbfonts.py`, run by hand when a paragraph
       changes; the results are committed in `server/src/bench/fonts` with their OFL licence, so every build shapes
-      with the same bytes; Inter is pinned by its SHA-256 in `mk/lordbench.mk`, `LB_INTER_SHA256`, and a new Inter
+      with the same bytes; Inter is pinned by its SHA-256 in `mk/insanebench.mk`, `LB_INTER_SHA256`, and a new Inter
       fails the build until the references are measured again). With each subset `build/shape-test` gives the
       same glyph positions as with the full system font, but it is not the same work: the subsets shape about
       12 % faster than the full fonts (fewer lookups, smaller coverage tables; VM 116, 587–631 against 514–560
       runs/s on one core), so the workload is comparable only with itself. Line breaking is not part of the run: the engine's Thai word breaker reads libthai's dictionary
       from a file. A trace of a run shows these workloads open nothing; the helper's sandbox, seccomp list and fds
-      are unchanged. `lord-bench` grows from 1.48 to 2.42 MB of code (about 0.63 MB of fonts) and 0.46 MB of
+      are unchanged. `insane-bench` grows from 1.48 to 2.42 MB of code (about 0.63 MB of fonts) and 0.46 MB of
       static data.
     - **They measure Insane OS's engine together with the machine.** An optimisation of `paint.c`, `layout.c` or the
       shaper changes these four numbers on the same hardware. So a reference value of one of them carries the
-      Insane OS version it was measured with (`"lordos"` in `apps/sysinfo/references.js`; `ENGINE_IDS` in
+      Insane OS version it was measured with (`"insaneos"` in `apps/sysinfo/references.js`; `ENGINE_IDS` in
       `perf.js`) and gives a "×N" only to a result of that same version; a release re-measures them on the
       reference machines.
   - Memory: copy and triad bandwidth on all cores (32 MB arrays in Quick, 128 MB in Full) and the
@@ -301,9 +301,9 @@ development package.
     cache for that file, random 4 KiB reads for 3 s; the file is emptied at the end and, being unnamed,
     disappears with the fd.
   - Sustained (Full only, 3 minutes from the app): the matrix product on every core, a sample every
-    10 s with the temperature lord-server read at that moment.
-- **Video** (after the helper's measurements, Quick and Full): a `lord-media` job (`MK_VBENCH`,
-  `media/helper/lm_vbench.c`, launched from lord-server's folder by `bench/lbvideo.c`, no fds at all). It makes its
+    10 s with the temperature insane-server read at that moment.
+- **Video** (after the helper's measurements, Quick and Full): a `insane-media` job (`MK_VBENCH`,
+  `media/helper/lm_vbench.c`, launched from insane-server's folder by `bench/lbvideo.c`, no fds at all). It makes its
   own test clips in memory from a synthetic picture (gradients, moving blocks and a little noise, the same every
   time) with this system's FFmpeg: H.264 (libx264 `veryfast`, 8 Mbit/s), HEVC (libx265 `ultrafast`), VP9 (libvpx
   realtime) and AV1 (SVT-AV1 preset 12, else libaom or rav1e) at 1080p, and H.264 and HEVC at 4K. Each clip is
@@ -311,18 +311,18 @@ development package.
   second, three times, as frames per second. Then the remote desktop's own encoders with their settings
   (`lm_stream_sw_encoder`: libx264 `ultrafast`/`zerolatency`, libvpx VP8 realtime) encode 1920×1080 frames as fast
   as they can. Quick measures H.264 at 1080p and the H.264 encoder; an encoder or decoder this FFmpeg lacks is
-  "skipped: no codec". lord-media answers only `MM_BENCH` records (a measurement, a kind, a rate in thousandths),
+  "skipped: no codec". insane-media answers only `MM_BENCH` records (a measurement, a kind, a rate in thousandths),
   checked by `lbv_record_valid` before they become results. Hardware decoding is not measured: neither test
   machine has it (no VA-API on VM 116; the Pi 5's HEVC decoder needs FFmpeg's `v4l2request`, which Debian's FFmpeg
   lacks; hardware decoding moved to 0.8.7).
-- **Desktop impact** (its own button, its own result file `lordbench-desktop.json`): after the quiet wait,
+- **Desktop impact** (its own button, its own result file `insanebench-desktop.json`): after the quiet wait,
   System Information opens a second window with a scene (cards, shadows and a square turned through
-  `lord.setStyle` with the engine's `rotate` key; until 0.8.6's frame-cost work it sent a `transform` key the engine
+  `insane.setStyle` with the engine's `rotate` key; until 0.8.6's frame-cost work it sent a `transform` key the engine
   doesn't have and stood still, so desktop results from before that change measured a lighter scene and aren't
-  comparable) and lord-server moves that window along a figure of eight through the drag's own path
-  (`lord.wm.script`, `grab_script_begin` in `ui/grab.c`: painted once into a layer, one step per frame, no JS per
-  frame). lord-server records every frame it builds and every frame the main display shows (`bench/lbframes.c`,
-  from `render()` and the page flips; one atomic read per frame when off): 10 s alone, then 10 s while `lord-bench`
+  comparable) and insane-server moves that window along a figure of eight through the drag's own path
+  (`insane.wm.script`, `grab_script_begin` in `ui/grab.c`: painted once into a layer, one step per frame, no JS per
+  frame). insane-server records every frame it builds and every frame the main display shows (`bench/lbframes.c`,
+  from `render()` and the page flips; one atomic read per frame when off): 10 s alone, then 10 s while `insane-bench`
   loads every core at the lowest priority (`LB_MODE_LOAD`: nice 19, idle I/O class) after 2 s of warm-up. Each
   phase gives the frames shown per second, the time to build a frame (median and 99th percentile) and the share of
   intervals between shown frames longer than 1.5 refresh periods; the load phase also gives the work the load
@@ -330,25 +330,25 @@ development package.
   late frames (problems above 25 %). Without a monitor the compositor draws only while someone watches (the
   remote desktop), so a headless session gives "skipped: too few frames" unless a viewer is connected.
 - **Pointer to screen** (in both phases of the desktop test): the scene's window is moved by a **synthetic pointer**
-  (`bench/lbinput.c`), a thread of lord-server that plays a 125 Hz mouse: each event is stamped with the monotonic
+  (`bench/lbinput.c`), a thread of insane-server that plays a 125 Hz mouse: each event is stamped with the monotonic
   clock when it is made, goes into a ring and is announced on an eventfd the main loop polls like an input device;
   the main loop takes the newest position once per frame, as it does with a real mouse's motion, and moves the
   window through the drag's path. Each event's latency ends at the presentation of the first frame that shows it or
   a later position (`lbf_input`, `lbf_built`, `lbf_presented` in `bench/lbframes.c`); the results are the median and
   the 99th percentile (`comp.in50/in99`, `desk.in50/in99`), and the verdict warns when the 99th percentile passes
-  three refresh periods. It measures lord-server's part (waking up, the frame, the flip), not the mouse, USB or the
+  three refresh periods. It measures insane-server's part (waking up, the frame, the flip), not the mouse, USB or the
   kernel's; the positions only move InsaneBench's own window. Without the thread the scene moves by the clock and the
   latency is "failed". On VM 116 without a monitor: 14.6 ms median and 25.2 ms p99 alone, 15.1 and 30.9 ms under
   load; on the Pi 5 (no monitor): about 15.7 and 27 ms alone, 22 and 52 ms under load ("The desktop under load").
 - **Boot time test** (Performance → Boot time, administrators): N boots in a row (3, 5 or 10). The closed admin
-  action `boot-test <n>` writes `/var/lib/lordos/boot-test` in a fixed format (`bench/boottest.c`) and the session
-  restarts as usual (its confirmation included). At each boot's first frame lord-sessiond records the boot with its
+  action `boot-test <n>` writes `/var/lib/insaneos/boot-test` in a fixed format (`bench/boottest.c`) and the session
+  restarts as usual (its confirmation included). At each boot's first frame insane-sessiond records the boot with its
   number in the test and, while boots are left, writes the file again and restarts 30 s later; the login screen
   shows the boot and the countdown with **Stop the test**, and a login there stops it too (`docs/SESSIONS.md`,
   "Boot time"). The test always ends: the count only goes down, a state older than 30 minutes is discarded, and
-  lord-sessiond reads the file again right before restarting. The Boot time group shows the latest test's median
+  insane-sessiond reads the file again right before restarting. The Boot time group shows the latest test's median
   and range per version.
-- **Guards and conditions** (`bench/lbcond.c`, read by lord-server, never by the helper): the hottest
+- **Guards and conditions** (`bench/lbcond.c`, read by insane-server, never by the helper): the hottest
   thermal zone (or the CPU's coretemp/k10temp/zenpower hwmon sensor) and the lowest passive and
   critical trip points; the x86 thermal throttle counters; the Raspberry Pi firmware's `get_throttled`
   flags and its `rpi_volt` under-voltage alarm; cpufreq, governor and ACPI platform profile; batteries
@@ -358,7 +358,7 @@ development package.
   tests stops when the throttle counters grow or the Pi firmware slowed the processor during the run (below);
   in the sustained test throttling is recorded with its time and temperature instead. The kind of disk under
   the scratch file is recorded (NVMe, SD/eMMC, SSD, HDD, USB, virtual, or RAM in the live session). Unit tests
-  on fake sysfs trees (`tests/lordbench_test.c`): an x86 laptop on battery, a Raspberry Pi 5 with the kernel
+  on fake sysfs trees (`tests/insanebench_test.c`): an x86 laptop on battery, a Raspberry Pi 5 with the kernel
   Insane OS ships, a Pi known only from its device tree, and an older Pi kernel with `get_throttled`.
 - **The Raspberry Pi firmware's throttling** (0.8.6, 2026-10-28; `bench/lbcond.c`; run on the Pi 5
   on 2026-10-29, below). On a Pi the firmware itself lowers the ARM clock on under-voltage, at its temperature limit
@@ -375,7 +375,7 @@ development package.
   - The frequency-capped, throttled and soft-limit bits are not exposed at all on this kernel; reading them
     would need the mailbox (`/dev/vcio`, `vcgencmd`), which InsaneBench never opens or runs.
 
-  So lord-server reads, world-readable and without exec or root: `rpi_volt`'s `in0_lcrit_alarm` (exactly `0`
+  So insane-server reads, world-readable and without exec or root: `rpi_volt`'s `in0_lcrit_alarm` (exactly `0`
   or `1`, anything else is unknown); `get_throttled` where a kernel has it (directly under a
   `/sys/devices/platform` node or its `<node>:firmware` child; 1-8 hex digits with an optional `0x` and a
   newline, nothing else, `rpifw_parse_throttled`; masked to the eight known bits: 0 under-voltage now, 1 ARM
@@ -401,14 +401,14 @@ development package.
   "It reached 80 °C, where the board's firmware starts slowing the processor down", and "The board reports low
   supply voltage" from `piFirmware` (older results keep using the end's bits), and Conditions gets a "Board
   firmware" row listing what happened, or what was watched when nothing did. Machines that are not a Pi get no
-  `piFirmware` and behave as before. **On the Pi 5** (2026-10-29, the Insane OS kernel 6.18.57-lordos.3, the official
+  `piFirmware` and behave as before. **On the Pi 5** (2026-10-29, the Insane OS kernel 6.18.57-insaneos.3, the official
   supply, InsaneBench → Desktop impact): `piFirmware` was `{"flags": false, "voltageAlarm": true, "underVoltage": false,
   "tempLimit": false, "tempLimitC": 80}`, `rpiUnderVoltageAlarm` 0 before and after and `in0_lcrit_alarm` 0: the
   `rpi_volt` alarm is there and reads 0, and `get_throttled` is absent as the source says (`vcgencmd get_throttled`,
   run by hand as root, said `0x0` throughout). Not verified yet: that the alarm reads `1` during an actual
   under-voltage, and how fast the Pi 5 reaches 80 °C without a cooler in the peak tests.
 
-  The reader is shared (`hw/rpifw.c`, `rpifw_read`: lord-server, `lordos-sysreport` and the tests link it), and
+  The reader is shared (`hw/rpifw.c`, `rpifw_read`: insane-server, `insaneos-sysreport` and the tests link it), and
   System Information's Raspberry Pi section uses it too (2026-10-29; before, it looked only for `get_throttled`, so on
   the Pi 5 with the Insane OS kernel its Power and Throttling rows were always empty). It shows what the kernel shows
   and leaves out the rest: with only `rpi_volt` (the Insane OS kernel), a Power row for the last few seconds ("No
@@ -420,12 +420,12 @@ development package.
   set, malformed and missing; older Pi 4 and Pi 5 kernels with `get_throttled`; both; neither; a machine that isn't
   a Pi); on the Pi 5 the shared reader gave InsaneBench the values above, while System Information's rows themselves
   were not looked at there.
-- **Helper-sandbox self-test** (`sec.helper-sandbox`, repeated inside `lord-bench`, `sandbox_tries` in
-  `bench/lbmain.c`): right after `sandbox_apply_helper` and before any work, in every mode, `lord-bench` tries six
+- **Helper-sandbox self-test** (`sec.helper-sandbox`, repeated inside `insane-bench`, `sandbox_tries` in
+  `bench/lbmain.c`): right after `sandbox_apply_helper` and before any work, in every mode, `insane-bench` tries six
   things that must fail: the Sandbox Probe's helper tries (`app/probe.c`) with its own versions of the data-folder
   one, plus an internet socket and a system file. A unix socket (`helperSocket`), an internet socket
   (`helperInet`), `execve` of `/usr/bin/true` (`helperExec`), `fork` (`helperFork`), a new unnamed file in `/tmp`
-  (`helperNewFile`, `O_TMPFILE`: lord-bench has no writable folder) and reading `/etc/passwd` (`helperRead`). None
+  (`helperNewFile`, `O_TMPFILE`: insane-bench has no writable folder) and reading `/etc/passwd` (`helperRead`). None
   could change anything if it worked: exec is called with an invalid environment pointer, so an exec the sandbox
   let through fails with `EFAULT` before anything is replaced (and counts as not refused); a socket or the unnamed
   file is closed at once; a forked child only exits. Each try is one fixed record (`LB_MSG_SANDBOX`: the try, refused
@@ -434,18 +434,18 @@ development package.
   state (results from before have none); the tries are named to the user in their language ("run a program", …).
   On a kernel without Landlock (no `SB_LANDLOCK_FS` in the sandbox mask) the two file tries are expected to work:
   that is the kernel's limit, already recorded in the mask, so they make the verdict warn ("Without Landlock in
-  this kernel the benchmark helper could still: …"), not fail. `lordos-sysreport bench` checks the same six by
+  this kernel the benchmark helper could still: …"), not fail. `insaneos-sysreport bench` checks the same six by
   name: "helper sandbox: N of 6 tries refused", a `NOT REFUSED: <id>` line for each one that worked or is
   missing (and "allowed without Landlock" for the file tries on such a kernel). On VM 116 all six were refused:
   `EPERM` from seccomp for the sockets, exec and fork, `EACCES` from Landlock for the two files.
-- **The result** (`~/.local/state/lordos/lordbench.json`, the previous one kept as
-  `lordbench-prev.json`; a refused run keeps the last result): InsaneBench's version, the mode, status and
+- **The result** (`~/.local/state/insaneos/insanebench.json`, the previous one kept as
+  `insanebench-prev.json`; a refused run keeps the last result): InsaneBench's version, the mode, status and
   stop reason, Insane OS and kernel versions, live or installed, threads, the quiet wait, conditions before
   and after, the disk kind, the GPU kind (hardware, virtual or software), the sandbox mask and the
   helper-sandbox self-test's tries, this
   session's composition and each active display's connector, mode, refresh, scale and rotation (no
   names, vendors or identities), every measurement with its unit, what was skipped and why, and the
-  sustained samples. `lord.sysinfo.bench.boots()` groups lord-sessiond's boot history by version
+  sustained samples. `insane.sysinfo.bench.boots()` groups insane-sessiond's boot history by version
   (median, range, the first boot after an update apart).
 - **System Information → Performance** (`apps/sysinfo/performance.jsx`, model in `perf.js`, tested in
   `server/tests/sysinfo_perf_test.mjs`): Quick and Full, progress by measurement, then the three verdicts
@@ -456,7 +456,7 @@ development package.
   "×N" and its change against the previous run, the conditions that differ from the previous run, the
   conditions, the boot times per version, and **Save to Documents** (the JSON). Nothing is sent.
 - **Reference machines** (`apps/sysinfo/references.js`): VM 116 and the Raspberry Pi 5 16 GB, each a Full run
-  copied from the `lordbench.json` it wrote (numbers below). A measurement added after a machine's run is listed in
+  copied from the `insanebench.json` it wrote (numbers below). A measurement added after a machine's run is listed in
   its `notMeasured` until it is measured again: the layout, paint and shaping numbers of both come from a later Full
   run (VM 116 on 2026-10-28, the Pi 5 on 2026-10-30, below), each with the Insane OS version it reported. The modest x86
   PC is added when measured (moved to 0.8.7 on 2026-10-29).
@@ -494,28 +494,28 @@ throttling does not fire on the Pi; the `rpi_volt` under-voltage alarm is read);
 temperature are the evidence that it did not throttle. (Since then the alarm is watched during the whole run and
 the firmware's documented 80 °C limit counts as throttling on a Pi: "The Raspberry Pi firmware's throttling" above.)
 
-Raspberry Pi 5 16 GB, the interface workloads, two Quick runs from a terminal (`lordos-sysreport bench --quick
+Raspberry Pi 5 16 GB, the interface workloads, two Quick runs from a terminal (`insaneos-sysreport bench --quick
 --json`, the arm64 build of the `perf-frame` branch, 2026-10-29; 39 s each, 36.4 → 40.8 °C, the `ondemand` governor,
 4 threads): layout and paint 39.31–39.37 fps on one core and 45.38–45.41 fps with the paint threads; shaping
 630.0–632.3 runs/s on one core and 2,521.7–2,526.7 runs/s on four (4.0×). The Pi's paint threads gain about 15 %
 (VM 116: 8 %). These are not in `references.js`: a reference comes from a Full run (next paragraph).
 
 Raspberry Pi 5 16 GB, the interface workloads for its reference, two Full runs from a terminal over SSH, without the
-monitor (`lordos-sysreport bench --full --json`, the arm64 build of main at 601b5d5 run from a folder in the home
-with `lord-bench` and `lord-media` next to it, not the installed 0.8.5 package's; the Insane OS kernel
-6.18.57-lordos.3, the `ondemand` governor, 4 threads, the fan on its header; 2026-10-30; the load average 0.00 and
+monitor (`insaneos-sysreport bench --full --json`, the arm64 build of main at 601b5d5 run from a folder in the home
+with `insane-bench` and `insane-media` next to it, not the installed 0.8.5 package's; the Insane OS kernel
+6.18.57-insaneos.3, the `ondemand` governor, 4 threads, the fan on its header; 2026-10-30; the load average 0.00 and
 35.3 °C before, the quiet check 0.4–0.5 % busy; the under-voltage alarm read 0 throughout, no throttling). The
-first run took 178 s and had no sustained part: `lordos-sysreport bench --full` passed no sustained time, although
+first run took 178 s and had no sustained part: `insaneos-sysreport bench --full` passed no sustained time, although
 its help says 3 minutes, so it was fixed to the app's 180 s (`CLI_SUSTAINED_S` in `sysreport/cli.c`) and run
 again: 358 s, 37.0 → 49.6 °C, 59.0 °C at most. The second run is the reference: layout and paint 39.22 fps on one
 core (spread 0.06) and 45.23 fps with the paint threads (spread 0.53); shaping 628.3 runs/s on one core and 2,514.0
 on four (4.0×). The first run gave 39.37, 45.28, 628.8 and 2,513.4: within 0.4 % of it, and within 0.6 % of the two
 Quick runs above. The sandbox self-test refused all six tries in both. Its other measurements were within 3.2 % of
 the 2026-10-27 run except the matrix product on four cores, 6.72 instead of 5.99 GFLOP/s (+12 %, both runs), the
-sustained load with it, 6.55 → 6.56 instead of 5.86 → 5.88 GFLOP/s (+12 %; the same `lord-bench` workload code;
+sustained load with it, 6.55 → 6.56 instead of 5.86 → 5.88 GFLOP/s (+12 %; the same `insane-bench` workload code;
 the cause was not looked for), the random 4K reads, 2,429–2,437 instead of 2,692 (−10 %), the GPU upload, 3,687–3,738
 instead of 3,897 MB/s (−4 to −5 %), and xz, 64.0 and 244.0 instead of 67.0 and 254.0 MB/s (−4 %); the reference keeps the 2026-10-27 values for those, and adds only the four interface
-workloads, with `"lordos": "0.8.5-beta"`, the version the run reported.
+workloads, with `"insaneos": "0.8.5-beta"`, the version the run reported.
 
 Desktop impact:
 
@@ -535,17 +535,17 @@ sent a style key the engine lacked); with it turning, see "The drag frame's cost
 
 #### The desktop under load (2026-10-28)
 
-**Cause.** lord-sessiond puts the compositor in the session's `server` cgroup and every app and helper in a
-scope next to it (`lordos-bench.scope` for InsaneBench's load). A process's nice value only counts against
+**Cause.** insane-sessiond puts the compositor in the session's `server` cgroup and every app and helper in a
+scope next to it (`insaneos-bench.scope` for InsaneBench's load). A process's nice value only counts against
 processes in the same cgroup; between cgroups the kernel shares the CPU by `cpu.weight`, and every one of them had
 the default, 100. So the load's nice 19 did nothing against the compositor, and any app keeping every core busy
 would do the same. Measured from `/proc/<pid>/task/*/schedstat` during the test (Pi 5, the session without its
 monitor, CPU composition): the compositor's main thread waited for a CPU 17 ms per second alone and **299 ms per
 second** under the load (1.05 ms each time it woke up), and its three paint threads waited longer than they ran.
 
-**Change.** lord-sessiond gives the `server` leaf `cpu.weight` 1000 when it creates a session
+**Change.** insane-sessiond gives the `server` leaf `cpu.weight` 1000 when it creates a session
 (`CG_SERVER_CPU_WEIGHT`, `sec/cgroup.c`); app scopes and helpers keep 100. Root writes it in the root-owned subtree
-it already manages; no new request or interface. Checked on VM 116: a session started by the new lord-sessiond has
+it already manages; no new request or interface. Checked on VM 116: a session started by the new insane-sessiond has
 `cpu.weight` 1000 on `server` and 100 on its scopes.
 
 **Measured** with the final InsaneBench of this version (the scene moved by the synthetic pointer, so the pointer
@@ -566,7 +566,7 @@ from; it was measured there together with the real-time priority (below).
 
 **Tried and dropped.** A 0.5 ms time slice for the compositor's threads (EEVDF's custom slice, `sched_setattr`):
 it looked like a gain at first, but the tool that set it from outside also gave it to the load; set only on the
-compositor's threads, as lord-server would, it made no difference (8–10 % late with weight 1000, 28–33 % with 100).
+compositor's threads, as insane-server would, it made no difference (8–10 % late with weight 1000, 28–33 % with 100).
 And turning the paint threads off when the frame waits for them under load: their own measurement showed they still
 saved time, so it never acted.
 
@@ -576,8 +576,8 @@ scheduler tick (4 ms on the Insane OS Pi kernel, `CONFIG_HZ=250`). Now the compo
 threads run at `SCHED_RR` priority 2 (the lowest real-time levels: ahead of every normal thread, behind the kernel's
 own), as KWin does for its compositor and Mutter for the thread that sends frames to the screen:
 
-- lord-sessiond starts the session's lord-server with `RLIMIT_RTPRIO` 2 and `RLIMIT_RTTIME` 5 s (soft; `remote/sess.c`).
-- lord-server takes it in `par_init` (`par.c`) right after dropping root, before it starts any process or other
+- insane-sessiond starts the session's insane-server with `RLIMIT_RTPRIO` 2 and `RLIMIT_RTTIME` 5 s (soft; `remote/sess.c`).
+- insane-server takes it in `par_init` (`par.c`) right after dropping root, before it starts any process or other
   thread: the main thread takes `SCHED_RR`, the paint threads inherit it, then the main thread adds
   `SCHED_RESET_ON_FORK`, so every thread and process it starts later (apps, helpers, Mesa's threads, InsaneBench's
   load) gets the normal policy. Then it lowers `RLIMIT_RTPRIO` to 0, soft and hard: nothing it starts can ask for
@@ -586,12 +586,12 @@ own), as KWin does for its compositor and Mutter for the thread that sends frame
 - A thread that runs 5 s of CPU on real time without blocking (a bug) gets `SIGXCPU`, and every thread goes back to
   the normal policy for the rest of the session; nothing is killed. The session log says which happened
   (`compositor at real-time priority 2 (SCHED_RR, N threads)`).
-- Without lord-sessiond, or on a kernel that refuses it (`CONFIG_RT_GROUP_SCHED`), nothing changes.
+- Without insane-sessiond, or on a kernel that refuses it (`CONFIG_RT_GROUP_SCHED`), nothing changes.
 
-Checked on VM 116 with the new lord-sessiond: the main thread is `SCHED_RR|SCHED_RESET_ON_FORK`, the 7 paint threads
-`SCHED_RR`, the other 22 threads and every child (`lord-admin`, `lord-vault`, `lord-maild`, `lord-doc`, the
-terminal's shell, `lord-bench`) `SCHED_OTHER` with a real-time limit of 0. Measured on VM 116 (8 vCPU, no monitor,
-CPU composition) under load, the session at weight 1000 laid out as lord-sessiond does, with the same limits; two
+Checked on VM 116 with the new insane-sessiond: the main thread is `SCHED_RR|SCHED_RESET_ON_FORK`, the 7 paint threads
+`SCHED_RR`, the other 22 threads and every child (`insane-admin`, `insane-vault`, `insane-maild`, `insane-doc`, the
+terminal's shell, `insane-bench`) `SCHED_OTHER` with a real-time limit of 0. Measured on VM 116 (8 vCPU, no monitor,
+CPU composition) under load, the session at weight 1000 laid out as insane-sessiond does, with the same limits; two
 runs each:
 
 | VM 116, under load | Build p99 | Late | Pointer to screen p50 | p99 | Load's CPU |
@@ -634,7 +634,7 @@ changed part of the window's layer is painted again; what is below the window is
 changed and is copied where the old rule painted everything; nodes the frame skips are no longer walked for their
 rounded corners; the GPU path's hole walk is skipped for a window without app windows; a turn or scale no longer
 lays its node out again; the JS timers no longer look at every pending timer; React sends fewer unchanged props;
-`lord.stats()` reads QuickJS's memory in O(1). On the GPU path the dragged window can also be composed by the GPU
+`insane.stats()` reads QuickJS's memory in O(1). On the GPU path the dragged window can also be composed by the GPU
 with the CPU's exact arithmetic ("GPU drag", `docs/GPU.md`, "The dragged window on the GPU").
 
 **Measured on the Pi 5 with its monitor** (1920×1080 at 60 Hz, GPU composition, the installed session with the
@@ -643,7 +643,7 @@ weight and the real-time priority, InsaneBench → Desktop impact; 2026-10-28):
 | Pi 5, monitor | Runs | Alone: frames shown | Build p99 | Late | Under load: frames shown | Build p50 | Late |
 |---|---|---|---|---|---|---|---|
 | Before (square turning) | 3 | 53.2–58.1 fps | 15.7–16.5 ms | 3.1–12.8 % | 23.6–25.1 fps | 19.8–20.3 ms | 100 % |
-| Frame-cost work, `LORD_GPU_DRAG=0` | 2 | 59.8–60.0 fps | 11.3–11.6 ms | 0–0.3 % | 30.1–30.3 fps | 12.9 ms | 98.1–99.2 % |
+| Frame-cost work, `INSANE_GPU_DRAG=0` | 2 | 59.8–60.0 fps | 11.3–11.6 ms | 0–0.3 % | 30.1–30.3 fps | 12.9 ms | 98.1–99.2 % |
 | Frame-cost work, GPU drag on | 3 | 52.2–52.9 fps | 21.3–21.7 ms | 13.5–15.0 % | 25.8–27.5 fps | 13.4–14.2 ms | 91.5–99.4 % |
 
 With GPU drag off the desktop is back at the refresh rate alone, and under the load the build fell from about
@@ -661,7 +661,7 @@ are the compositor's own times):
 | Pipeline and GPU drag off (**the defaults**) | 2 | 59.9 fps | 11.4–11.6 ms | 0.17 % | 30.5–31.1 fps | 13.2–13.3 ms | 89.5–96.2 % |
 | Pipeline off, GPU drag on | 3 | 59.9 fps | 11.4–11.7 ms | 0.17 % | 30.8–31.6 fps | 12.9–13.5 ms | 87.3–94.3 % |
 | Pipeline while frames are heavy, GPU drag on | 2 | 60.0 fps | 11.9–12.0 ms | 0 % | 33.0–36.2 fps | 13.9 ms | 65.8–81.6 % |
-| `LORD_GPU_VERIFY=1` (pipeline off, GPU drag on, every GPU drag frame read back) | 1 | 52.7 fps | 21.7 ms | 13.9 % | 26.6 fps | 14.6 ms | 97.2 % |
+| `INSANE_GPU_VERIFY=1` (pipeline off, GPU drag on, every GPU drag frame read back) | 1 | 52.7 fps | 21.7 ms | 13.9 % | 26.6 fps | 14.6 ms | 97.2 % |
 
 Pointer to screen (InsaneBench's synthetic pointer, p50 alone; p50 / p99 under load): both off 25.7–25.9 ms and
 48.5–49.0 / 66.3–80.6 ms; GPU drag on 25.5–25.7 ms and 48.8–49.0 / 66.1–79.4 ms; the pipeline 42.1–42.5 ms and
@@ -669,18 +669,18 @@ Pointer to screen (InsaneBench's synthetic pointer, p50 alone; p50 / p99 under l
 
 GPU drag no longer stalls: its self-test passes on V3D (`gpu: GPU drag on: … self-test: 11373321 pixels, every valid
 premultiplied combination and a 4096x2048 placement pass, the same as the CPU's, 341 ms`), the 138 frames
-`LORD_GPU_VERIFY=1` compared were all `differ=0 worst=0` (the read-back is what slows that run), and it composed 138
+`INSANE_GPU_VERIFY=1` compared were all `differ=0 worst=0` (the read-back is what slows that run), and it composed 138
 of 601 frames alone (refused: `layer` 214, `after` 241, `feed` 8) and 80 of 436 under load. Correct, but with no
 measurable gain (30.8–31.6 against 30.5–31.1 fps under load), so **GPU drag is off by default** since this run and
-`LORD_GPU_DRAG=1` turns it on (its self-test runs only then).
+`INSANE_GPU_DRAG=1` turns it on (its self-test runs only then).
 
 **The frame pipeline (0.8.6, measured on the Pi 5, off by default).** A frame that takes 13–16 ms to build cannot
 fit with the GPU's part in a 16.7 ms period while the next frame is started only after the flip. Now, while a flip
 is pending, the next frame's CPU part (input, JS frame callbacks, layout, paint into the scene) is done ahead, and at
 the flip only its upload, the GPU's draw and its flip are left (`docs/GPU.md`, "The frame pipeline"). Off by
-default since the Pi 5 run; `LORD_PIPELINE=1` turns it on while frames are heavy (more than 60 % of the period, 2
+default since the Pi 5 run; `INSANE_PIPELINE=1` turns it on while frames are heavy (more than 60 % of the period, 2
 frames in a row; off after 60 frames below 40 %, or at the first frame after more than half a second without one, so
-an idle desktop answers its next input without it) and `LORD_PIPELINE=2` keeps it on. Only with one display that has real page flips:
+an idle desktop answers its next input without it) and `INSANE_PIPELINE=2` keeps it on. Only with one display that has real page flips:
 without a monitor, with a driver paced in software or with several displays nothing changes. Expected on the Pi
 under the load: the frames shown every vblank instead of every other one as long as the CPU part stays under one
 period, with about the same pointer latency; that is a model (`build/fpipe-test` drives a display on a vblank
@@ -692,7 +692,7 @@ GPU's part, not the CPU's, is what passes the period there (below); every frame 
 CPU-late, 285 GPU-late), since a frame of about 11.5 ms with the GPU's part passes 60 % of the period even at 60 fps;
 and the pointer reached the screen 17 ms later alone (42 against 25.5 ms) and 29 ms later under load (78 against 49
 ms). Two to five frames a second do not pay for that latency, so the pipeline is **off by default** and the code
-stays for `LORD_PIPELINE=1`/`2`.
+stays for `INSANE_PIPELINE=1`/`2`.
 
 #### The 0.8.7 run on the Pi 5 (2026-10-31)
 
@@ -725,10 +725,10 @@ whose layer is about 4.5 Mpx.
 Without the frame pipeline a frame is started only after the last flip completed (one frame in flight), so any
 frame whose whole chain (the work before `render()`, the build, the GPU's own part, the flip) takes more than one
 period is shown a vblank late, and the rate locks at half the refresh. The build time alone (`desk.p50`/`p99`) can't
-tell which part was too long. So lord-server also records, for every frame the main display shows, while InsaneBench
+tell which part was too long. So insane-server also records, for every frame the main display shows, while InsaneBench
 records or while a scripted move runs (`bench/lbframes.c`: `lbf_phase_built` when the frame is submitted, at the
 end of `render()` or, for a frame the pipeline prepared, right after its submission; `lbf_phase_shown` at that
-frame's flip; all of it measured by lord-server itself, never by a helper):
+frame's flip; all of it measured by insane-server itself, never by a helper):
 
 | Phase (JSON key, `[p50, p99]` ms) | From → to |
 |---|---|
@@ -767,15 +767,15 @@ And counted per frame: `paintThreads` (the pool was on), `unshown` (`gpu_frame_e
 `gpuDragUploadMpx` and `catchUpMpx` (pixels per frame, average), and `gpuDrag`: `tried`, `taken`, `refused` by reason
 (`layer`, `clip`, `ancestor`, `app`, `after`, `post`, `feed`), `layer` refusals by cause (`invalid`, `rendering`,
 `holes`, `surfaces`, `premul`, `opacity`, `part`…), `wholeUploads` and `wholeMpx`. The result's `frames` object has
-`phases.alone` and `phases.load`; the session log gets `lordbench: desktop alone: phases, N frames (ms p50/p99): …`
+`phases.alone` and `phases.load`; the session log gets `insanebench: desktop alone: phases, N frames (ms p50/p99): …`
 and `… under load: …`, and the `drag (scripted): …` line ends with the same text for the whole move. Without a
 monitor a frame is "shown" when it ends (on the pacing grid), so `gpuMs` and the wait are 0. System Information does
 not show these yet; results keep comparing as before (no new result ids, InsaneBench 1).
 
-**Checked** on VM 116: `lordbench-test` feeds known frames (one on time, one queued after its vblank, one whose GPU
+**Checked** on VM 116: `insanebench-test` feeds known frames (one on time, one queued after its vblank, one whose GPU
 finished after it, one not shown, a prepared one) and checks each class, percentile, count and the text. A desktop
-run of the branch's lord-server in an isolated headless session (a test theme moving one window with
-`lord.wm.script` over 40 cards, CPU composition, one viewer on its `remote.sock`) wrote both objects: alone 601
+run of the branch's insane-server in an isolated headless session (a test theme moving one window with
+`insane.wm.script` over 40 cards, CPU composition, one viewer on its `remote.sock`) wrote both objects: alone 601
 frames, all on time, render 0.84/1.78 ms, paint 0.55/1.21 ms; under load 720–721 frames, 715–721 on time (three
 runs). Those are a check that it works, not a measurement (a small scene, no GPU). The GPU fields were not
 exercised there: VM 116 sessions are headless.
@@ -805,24 +805,24 @@ buffer-age scissor" and "What slows the GPU under CPU load").
 **What was run on the Pi 5** (2026-10-29; the package from this work installed, the monitor on, an autologin
 session, the variables set in the session's environment; the results above):
 1. InsaneBench → Desktop impact, twice with the build's defaults then (GPU drag where its self-test passes, the
-   pipeline while frames are heavy), three times with `LORD_PIPELINE=0`, and twice with `LORD_PIPELINE=0
-   LORD_GPU_DRAG=0` (the defaults now).
-2. From `~/.cache/lordos/session.log`: the `gpu: GPU drag on|off` line, the `lord-server: frame pipeline …` line, the
-   `lordbench: desktop … phases` lines and the `drag (scripted):` line, and from
-   `~/.local/state/lordos/lordbench-desktop.json` `frames.phases`.
+   pipeline while frames are heavy), three times with `INSANE_PIPELINE=0`, and twice with `INSANE_PIPELINE=0
+   INSANE_GPU_DRAG=0` (the defaults now).
+2. From `~/.cache/insaneos/session.log`: the `gpu: GPU drag on|off` line, the `insane-server: frame pipeline …` line, the
+   `insanebench: desktop … phases` lines and the `drag (scripted):` line, and from
+   `~/.local/state/insaneos/insanebench-desktop.json` `frames.phases`.
 3. Read under load: if most frames are `cpuLate`, the build is too long (`paintMs`, `uploadMs`, `beforeRenderMs`
    say which part, and `paintThreads` whether the pool helped); if `gpuLate`, the GPU's own work (`gpuMs`) is; if
    `onTime` is high and the rate still 30, the classification is wrong and the flip times must be looked at.
    With GPU drag, `gpuDrag.refused`/`gpuDrag.layer` say what keeps it off and `catchUpMpx` what the slices cost;
    with the pipeline, `prepared` and `heldMs` say how many frames were painted ahead and how long they waited.
-4. `LORD_GPU_VERIFY=1` once with GPU drag over a Desktop impact run: `gpu-verify: … differ=0` on every line.
+4. `INSANE_GPU_VERIFY=1` once with GPU drag over a Desktop impact run: `gpu-verify: … differ=0` on every line.
 5. A real screenshot of a dragged window on the monitor (its rounded corners, `docs/WINDOWS.md`): clean.
-6. `vcgencmd` every 2 s during one run (clocks, temperature, `get_throttled`), and `lordos-sysreport bench --quick
+6. `vcgencmd` every 2 s during one run (clocks, temperature, `get_throttled`), and `insaneos-sysreport bench --quick
    --json` twice (the interface workloads above).
 
-Boot: the Pi 5 reaches the login screen on its monitor 5.99 s after the kernel starts (lord-sessiond's record;
+Boot: the Pi 5 reaches the login screen on its monitor 5.99 s after the kernel starts (insane-sessiond's record;
 systemd-analyze gives 2.1 s kernel + 4.2 s userspace). Boots where the monitor was connected late took 61 and
-103 s, which is the wait for the monitor, not the boot. The N-boot test has its unit tests (`tests/lordbench_test.c`: the state file's format, parsing, ownership, staleness
+103 s, which is the wait for the monitor, not the boot. The N-boot test has its unit tests (`tests/insanebench_test.c`: the state file's format, parsing, ownership, staleness
 and countdown) and one run on the Pi 5 (2026-10-30, 3 boots with autologin: 7.66, 7.71 and 7.63 s, restarting and
 removing its state file on its own). That run was started by writing the state file, so the app's button and the
 login screen's countdown and Stop were not exercised.
@@ -833,10 +833,10 @@ screenshot predates the video and desktop parts):
 
 ![System Information → Performance](sysinfo-performance.png)
 
-**`lordos-sysreport bench [--quick | --full] [--json]`** (`sysreport/cli.c`): InsaneBench from a terminal, over SSH or
-in CI, through lord-server's own code (`bench/lbrun.c`, the same guards, helpers and result file as the app, which
-then shows it). It is installed as `/usr/lib/lordos/bin/lordos-sysreport` with `/usr/bin/lordos-sysreport` and
-`lordos-fetch` as links, because `lbrun` only starts the `lord-bench` and `lord-media` next to its own binary
+**`insaneos-sysreport bench [--quick | --full] [--json]`** (`sysreport/cli.c`): InsaneBench from a terminal, over SSH or
+in CI, through insane-server's own code (`bench/lbrun.c`, the same guards, helpers and result file as the app, which
+then shows it). It is installed as `/usr/lib/insaneos/bin/insaneos-sysreport` with `/usr/bin/insaneos-sysreport` and
+`insaneos-fetch` as links, because `lbrun` only starts the `insane-bench` and `insane-media` next to its own binary
 (`/proc/self/exe`; a group- or world-writable helper is refused, so a build tree made with umask 002 needs `chmod
 g-w`). Without a session the helpers get no cgroup scope, and the desktop test needs a session. One line per
 measurement (or the JSON with `--json`); exit 0 when the run finished, 1 when it didn't, and 3 when it finished
@@ -855,21 +855,21 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
 ## 0.8.7 — Community hardware reports
 
 - **Moved from 0.8.6** (decided by the maintainer on 2026-10-29): InsaneBench's modest x86 PC reference and
-  hardware video decoding in `lord-media` and the video workloads ("Built so far", the end of the 0.8.6 section).
+  hardware video decoding in `insane-media` and the video workloads ("Built so far", the end of the 0.8.6 section).
 - **Share on GitHub** saves the report as a small HTML page and opens it with the default browser
-  (the existing `lord.apps.launchWith('', path)` rule). That page opens GitHub's new-issue form with
+  (the existing `insane.apps.launchWith('', path)` rule). That page opens GitHub's new-issue form with
   the `hardware-report` template, title and summary filled in; the user attaches the JSON and
   submits it with their own account. Insane OS sends nothing by itself and holds no token.
 - A workflow validates each attached JSON against the schema, labels the issue by vendor and kind,
   and flags reports whose numbers are implausible for the hardware.
-- **lordos.org/hardware**: the catalogue built from accepted reports: GPUs and drivers tested,
+- **insaneos.org/hardware**: the catalogue built from accepted reports: GPUs and drivers tested,
   boards, laptops with suspend, battery and Wi-Fi, known problems and the version that fixed them,
   real Insane OS performance per device. The app's Compatibility panel reads a signed snapshot of it
   (downloaded with the package engine's checks), so it works offline.
 
 ### Built so far (released in 0.8.7-beta, 2026-11-01)
 
-- **The report format**: `apps/sysinfo/hwreport.schema.json`, a JSON Schema (`format: "lordos-hwreport"`,
+- **The report format**: `apps/sysinfo/hwreport.schema.json`, a JSON Schema (`format: "insaneos-hwreport"`,
   `version: 1`) that is an allow-list: every object closes its properties, and there is no field for serials,
   UUIDs, MAC or IP addresses, host or user names, Wi-Fi network names or paths. It holds a subset of System
   Information's report (machine, CPU, memory, GPUs, displays, storage, PCI and USB devices, network, audio,
@@ -898,10 +898,10 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
   classes, the speed (1–100,000) and the flag; the share preview, the issue summary (`boot: usb, 5000 Mbps`), the
   workflow's comment and a `boot:<class>` label show it; a copy to memory on an installed system, or a link speed on
   anything but USB, is flagged as implausible. System Information shows it in Software (*Started from*) and
-  `lordos-sysreport report` in the Overview (*Started*). VM 116 (ext4 on a SCSI disk) reports `internal`.
+  `insaneos-sysreport report` in the Overview (*Started*). VM 116 (ext4 on a SCSI disk) reports `internal`.
 - **Share on GitHub** (Report → *Share on GitHub…*, `apps/sysinfo/share.js`): a preview of the summary and of the
-  exact JSON first, then on every click (nothing remembered) the app writes `lordos-hwreport-<date>.json` and
-  `.html` to Documents (never over an existing file) and opens the page with `lord.apps.launchWith('', path)`. The
+  exact JSON first, then on every click (nothing remembered) the app writes `insaneos-hwreport-<date>.json` and
+  `.html` to Documents (never over an existing file) and opens the page with `insane.apps.launchWith('', path)`. The
   page is self-contained (no scripts, a CSP of `default-src 'none'`, light and dark, right to left for RTL
   languages, every value escaped), says in plain words what is shared and what never is, shows the summary, the
   steps, and one link to GitHub's new-issue form with the `hardware-report` template, the title, the version and
@@ -909,7 +909,7 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
   and the Compatibility states; at most 600 characters). The full JSON is attached by the user. Insane OS sends nothing
   and holds no token.
 - **The issue form and its workflow**: `.github/ISSUE_TEMPLATE/hardware-report.yml` (label `hardware-report`, the
-  `lordos` and `summary` fields the link fills, the file box, two confirmations) and
+  `insaneos` and `summary` fields the link fills, the file box, two confirmations) and
   `.github/workflows/hardware-report.yml` running `tools/hwreport/validate.mjs --github` on `issues`
   opened/edited/labeled with that label. The script reads the issue from the event file (no issue text passes
   through an expression or a shell), takes only GitHub attachment links of a fixed form (`user-attachments/files`,
@@ -927,7 +927,7 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
   credentials. Workflows for `issues` events run from the default branch, so it takes effect when this is merged.
 - **The catalogue**: `tools/hwreport/catalog.mjs` reads the accepted reports in `web/content/hardware/reports/`
   (each validated; a community report needs its issue number in `index.json`, which can also say which version
-  fixed a problem) and builds (a) the model of **lordos.org/hardware**, rendered by `web/build.mjs` in en, es and pt
+  fixed a problem) and builds (a) the model of **insaneos.org/hardware**, rendered by `web/build.mjs` in en, es and pt
   (machines with what works and four numbers, graphics cards and drivers, known problems and the version that
   fixed them, how to add a computer; labelled in development while the package version is below 0.8.7), and (b)
   `assets/hwreport/snapshot.json`: one entry per device key (PCI ids, a GPU, network, Wi-Fi or Bluetooth driver, a
@@ -939,10 +939,10 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
   the InsaneBench numbers of `references.js`.
 - **The signed snapshot**: `tools/release/sign-hwsnapshot.sh` rebuilds and signs it on the maintainer's machine with
   the release key (Ed25519, the same format as `code-manifest.sig`; the key never leaves it). It ships
-  in its own package, `lordos-hwdata` (`tools/iso/mkdeb-hwdata.sh`; a release build refuses an unsigned one),
-  which `lordos` depends on, and so it updates through the signed APT repository, also between releases (see
+  in its own package, `insaneos-hwdata` (`tools/iso/mkdeb-hwdata.sh`; a release build refuses an unsigned one),
+  which `insaneos` depends on, and so it updates through the signed APT repository, also between releases (see
   "Newer snapshots between releases" below, implemented on 2026-10-29).
-  `lord.sysinfo.community()` (`ui/js_hw.c`, no arguments, no path from JS) reads the two files from
+  `insane.sysinfo.community()` (`ui/js_hw.c`, no arguments, no path from JS) reads the two files from
   `<assets>/hwreport/` without following links (`sysreport/hwsnap.c`), verifies the signature with the key the
   build trusts before parsing anything, checks the structure (format, version, at most 1 MB and 20,000 entries,
   known components, x.y.z versions, whole counts that add up) and only then gives JS the snapshot; otherwise only
@@ -962,15 +962,15 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
   loop, btrfs, stacked mounts, a DVD, NFS, iSCSI, NBD, a live system fetched over the network, virtio, a loop
   device, a link that climbs out of `/sys`, a USB speed that isn't a number), each also checked for device names,
   serials, the mount point and the command line in the JSON and the Markdown.
-- **Checked on VM 116** in an isolated headless session, with `lord-server` built for a throwaway test key
+- **Checked on VM 116** in an isolated headless session, with `insane-server` built for a throwaway test key
   (`CODE_PUBKEY`) and the snapshot signed by `sign-hwsnapshot.sh` with that key: the Compatibility panel shows the
   reference machine's data for the virtio GPU, the network and the sound card; the same snapshot with one count
   changed is refused ("the signature didn't verify") and nothing is shown. Share on GitHub wrote both files; the
   JSON passed `validate.mjs` (`report:valid`, `kind:vm`, `gpu:virtual`, `cpu:intel`, `installed`). The headless
   session has no browser, so it said where the page is instead of opening it.
 - **Opening the page, checked on VM 116** (2026-10-29, isolated headless session of this branch, Chromium 156 from
-  Debian installed on the VM): Share on GitHub wrote `lordos-hwreport-2026-10-29.json` and `.html` to Documents and
-  `lord.apps.launchWith('', path)` opened the page in the browser, inside the session, from the user's default for
+  Debian installed on the VM): Share on GitHub wrote `insaneos-hwreport-2026-10-29.json` and `.html` to Documents and
+  `insane.apps.launchWith('', path)` opened the page in the browser, inside the session, from the user's default for
   `text/html`; the page showed the summary (with *Started from: Internal disk*), the steps and the link to the
   `hardware-report` form, and the JSON passed `validate.mjs` (`report:valid`, `kind:vm`, `gpu:virtual`, `cpu:intel`,
   `installed`, `boot:internal`). What it took on that VM, and what it says about real systems:
@@ -985,7 +985,7 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
     package, so with the stock `chromium.desktop` it exited ("Missing X server"). A system with `xwayland` (the
     Xwayland launcher gives launched apps `DISPLAY`) runs it as is. On the VM the test used a user entry in
     `~/.local/share/applications` with `--ozone-platform=wayland`, chosen as the default for `text/html`.
-  - **The test session's environment:** the isolated session must not set `LORDOS_SESSIOND` at all: with it set (even
+  - **The test session's environment:** the isolated session must not set `INSANEOS_SESSIOND` at all: with it set (even
     empty) the launcher, which can't place the app in its own scope outside a real session, refuses to start it
     (fail closed, as designed: `apps.log` said "could not place the app in its own scope: not launched").
 
@@ -999,28 +999,28 @@ composed per frame, what slows V3D under an all-core load, optionally a 1000 Hz 
 
 ### Newer snapshots between releases (implemented, option B)
 
-Until 2026-10-29 the signed snapshot shipped inside the `lordos` package, so the Compatibility panel only learned
+Until 2026-10-29 the signed snapshot shipped inside the `insaneos` package, so the Compatibility panel only learned
 about new reports when Insane OS itself was released. The goal is a newer snapshot between releases **without giving
-`lord-server` or any helper a new network power** (AGENTS.md: no generic network, the Store's download child and
-`lord-tls` only fetch packages, `lord-fetch` only fetches blocklists). The options:
+`insane-server` or any helper a new network power** (AGENTS.md: no generic network, the Store's download child and
+`insane-tls` only fetch packages, `insane-fetch` only fetches blocklists). The options:
 
 | | How | New network code | Verdict |
 |---|---|---|---|
-| A | Keep it in `lordos` (today) | none | Updates only with a release |
-| B | **A separate small package, `lordos-hwdata`**, in the signed APT repository | none: the existing package engine | **Chosen** (approved by the maintainer, 2026-10-29) and implemented |
-| C | `lord-server` downloads `snapshot.json` from lordos.org through the Store's download child and `lord-tls` | a new kind of download in the package engine (a URL that is not a package, a new admin action or engine call) | Not recommended: a new network job to review for one file |
-| D | `lord-fetch` downloads it next to the blocklists | a second job for `lord-fetch`, which AGENTS.md forbids | Rejected |
-| E | The user downloads it from lordos.org/hardware and opens it in System Information | none (a file the user picks, verified with the same key) | Possible later as a complement for machines that never update; clumsy as the main path |
+| A | Keep it in `insaneos` (today) | none | Updates only with a release |
+| B | **A separate small package, `insaneos-hwdata`**, in the signed APT repository | none: the existing package engine | **Chosen** (approved by the maintainer, 2026-10-29) and implemented |
+| C | `insane-server` downloads `snapshot.json` from insaneos.org through the Store's download child and `insane-tls` | a new kind of download in the package engine (a URL that is not a package, a new admin action or engine call) | Not recommended: a new network job to review for one file |
+| D | `insane-fetch` downloads it next to the blocklists | a second job for `insane-fetch`, which AGENTS.md forbids | Rejected |
+| E | The user downloads it from insaneos.org/hardware and opens it in System Information | none (a file the user picks, verified with the same key) | Possible later as a complement for machines that never update; clumsy as the main path |
 
-**B, in detail.** `lordos-hwdata` is an `Architecture: all` package holding only `snapshot.json` and
-`snapshot.json.sig` at the same place `lord.sysinfo.community()` already reads (`<assets>/hwreport/`), with a version
-of its own (the snapshot's date, `YYYY.MM.DD`, plus `.N` for a second one on the same day). The `lordos` package
-stops shipping the two files and `Depends: lordos-hwdata`; no released `lordos` has ever shipped them (they are new
+**B, in detail.** `insaneos-hwdata` is an `Architecture: all` package holding only `snapshot.json` and
+`snapshot.json.sig` at the same place `insane.sysinfo.community()` already reads (`<assets>/hwreport/`), with a version
+of its own (the snapshot's date, `YYYY.MM.DD`, plus `.N` for a second one on the same day). The `insaneos` package
+stops shipping the two files and `Depends: insaneos-hwdata`; no released `insaneos` has ever shipped them (they are new
 in 0.8.7), so no `Replaces`/`Breaks` dance is needed. Between releases the maintainer runs
 `tools/release/sign-hwsnapshot.sh` (as now), builds the package (a short `tools/iso/mkdeb-hwdata.sh`) and adds it to
-the repository with `tools/release/apt-repo.sh build live <deb>` and `publish`, exactly like a `lordos` build. On
+the repository with `tools/release/apt-repo.sh build live <deb>` and `publish`, exactly like a `insaneos` build. On
 every system the daily update check (`pkg-update`, `updates.autoCheck`) sees one available update and says so once,
-and Store → Updates → *Update all* (`pkg-upgrade`) installs it; `lord.sysinfo.community()` reads the files again on
+and Store → Updates → *Update all* (`pkg-upgrade`) installs it; `insane.sysinfo.community()` reads the files again on
 every call, so the panel shows the new data without restarting the session. Machines without internet get it from a
 `file:` copy of the repository, as any update.
 
@@ -1029,57 +1029,57 @@ APT archive key, by our own package engine) and then the snapshot's own Ed25519 
 (`sysreport/hwsnap.c`, before any parsing), so a package from anywhere else still can't change what the panel
 shows. Rolling back to an older snapshot needs a downgrade, which the engine never does on its own. The cost:
 one more package in the repository and in the release steps (`RELEASING.md`), the ISO and the Raspberry Pi image
-builds installing it next to `lordos` (`tools/iso/build.sh`, `tools/rpi/build-img.sh`), and a rule for the format:
-while any supported `lordos` reads format 1, `lordos-hwdata` keeps writing format 1; a format 2 needs
-`Breaks: lordos (<< <first version that reads it>)`. An older `lordos` with a newer snapshot works, since entries
+builds installing it next to `insaneos` (`tools/iso/build.sh`, `tools/rpi/build-img.sh`), and a rule for the format:
+while any supported `insaneos` reads format 1, `insaneos-hwdata` keeps writing format 1; a format 2 needs
+`Breaks: insaneos (<< <first version that reads it>)`. An older `insaneos` with a newer snapshot works, since entries
 are per Insane OS version and it shows only its own.
 
 **Implemented** (2026-10-29, branch `v087-hwreports`):
 
-- **The package:** `tools/iso/mkdeb-hwdata.sh <folder>` builds `lordos-hwdata_<version>_all.deb` (`Architecture: all`,
+- **The package:** `tools/iso/mkdeb-hwdata.sh <folder>` builds `insaneos-hwdata_<version>_all.deb` (`Architecture: all`,
   `Multi-Arch: foreign`) with only the two files, a copyright and a changelog. The version is the snapshot's
   `generated` date as `YYYY.MM.DD`, plus `.N` from `HWDATA_SERIAL=N` (1–99) for a second, different snapshot with the
   same date. It is reproducible: file times, the changelog's date and the archive's times (`SOURCE_DATE_EPOCH`) come
   from that date, so the same snapshot and signature give the same bytes (checked: two builds compared equal), which
   lets `apt-repo.sh` accept it again unchanged at the next release and still refuse a different one under the same
   version. `REQUIRE_SIGNED_CODE=1` refuses a missing signature and checks it with `openssl` against
-  `lordos-release.pub.pem` (`CODE_PUB` for a test key). It refuses a snapshot whose header is not format 1: the
+  `insaneos-release.pub.pem` (`CODE_PUB` for a test key). It refuses a snapshot whose header is not format 1: the
   format rule above, enforced until someone adds the `Breaks`.
-- **`lordos`:** `tools/iso/mkdeb.sh` no longer ships `assets/hwreport/` and adds `Depends: lordos-hwdata (>=
+- **`insaneos`:** `tools/iso/mkdeb.sh` no longer ships `assets/hwreport/` and adds `Depends: insaneos-hwdata (>=
   2026.10.27)`, the first format-1 snapshot. No `Replaces`/`Breaks`: checked against every release tag
   (`v0.8.0-beta` to `v0.8.5-beta`), none has `assets/hwreport/` in the tree or in its `mkdeb.sh`.
-- **Images:** `tools/iso/build.sh` and `tools/rpi/build-img.sh` build the package next to `lordos` (the Pi build on
+- **Images:** `tools/iso/build.sh` and `tools/rpi/build-img.sh` build the package next to `insaneos` (the Pi build on
   the host, since it is the same for every architecture) and install both in one `apt-get install`.
-- **`install.sh`** (Debian 13, where the Insane OS repository is not there yet): when the `lordos` package depends on
-  `lordos-hwdata`, it takes the newest `lordos-hwdata_<version>_all.deb` the release's signed `SHA256SUMS` lists
+- **`install.sh`** (Debian 13, where the Insane OS repository is not there yet): when the `insaneos` package depends on
+  `insaneos-hwdata`, it takes the newest `insaneos-hwdata_<version>_all.deb` the release's signed `SHA256SUMS` lists
   (or, with `--deb`, the one in the same folder, checked against the `SHA256SUMS` there when present), checks it the
   same way as the main package (SHA-256, then again on root's copy, `Package` and `Architecture`), and installs both;
   with none it stops before apt, unless a configured repository has it. `--uninstall` removes it too.
 - **The repository:** `tools/release/apt-repo.sh` adds it like any `.deb` (`apt-ftparchive` lists `all` packages in
-  the amd64 and arm64 indexes), but only if its snapshot verifies with `lordos-release.pub.pem`
-  (`LORDOS_HWDATA_PUB`, a test key, is accepted only for `staging`), and refuses a `lordos` that depends on it while
+  the amd64 and arm64 indexes), but only if its snapshot verifies with `insaneos-release.pub.pem`
+  (`INSANEOS_HWDATA_PUB`, a test key, is accepted only for `staging`), and refuses a `insaneos` that depends on it while
   the pool has none. `sign-hwsnapshot.sh` prints the version the package will have. The release folder and the
-  release notes' downloads table carry `lordos-hwdata_<date>_all.deb`.
+  release notes' downloads table carry `insaneos-hwdata_<date>_all.deb`.
 - **The steps:** a release adds the package to its folder and to `apt-repo.sh build`; a snapshot alone between
   releases is `sign-hwsnapshot.sh`, `mkdeb-hwdata.sh`, `apt-repo.sh build|publish|verify staging`, then `live`
   ([RELEASING.md](RELEASING.md), "A newer hardware snapshot between releases"; [UPDATES.md](UPDATES.md), "The
   tested-hardware snapshot").
-- **On the system:** nothing changed in C or JS. `lord.sysinfo.community()` already read the files on every call,
+- **On the system:** nothing changed in C or JS. `insane.sysinfo.community()` already read the files on every call,
   so a newer package shows in the panel without a restart, and a missing package (or folder) is `state: "missing"`
   ("no community data"), checked by `build/hwsnap-test`. A snapshot update is listed in Store → Updates with the
   other packages and announced by the daily check as "1 update is available".
   On screen it is *Tested hardware list* with the snapshot's date in the user's region, in the list and in the *Update
-  all* plan (below, in a test copy of the theme with `lord.pkg`'s answers faked, so nothing was installed):
+  all* plan (below, in a test copy of the theme with `insane.pkg`'s answers faked, so nothing was installed):
 
   ![Store → Updates with a faked snapshot update](hwreport-store-updates.png)
-- **Tests:** `build/pkg-test` (8 new checks, 112 in all): updating a 0.8.5 system's `lordos` to one that depends on
-  `lordos-hwdata` brings it in at its newest version, with *Update* (`pkg-install lordos`) and *Update all*
+- **Tests:** `build/pkg-test` (8 new checks, 112 in all): updating a 0.8.5 system's `insaneos` to one that depends on
+  `insaneos-hwdata` brings it in at its newest version, with *Update* (`pkg-install insaneos`) and *Update all*
   (`pkg-upgrade`); on a 0.8.7 system a newer snapshot alone is one upgrade and nothing else; the date versions sort
   as intended (`2026.11.05.1` > `2026.11.05` > `2026.10.29.9`). On VM 116: both packages built (`dpkg-deb --info` /
-  `--contents`: `lordos` has no `hwreport` entry and the `Depends`; `lordos-hwdata` has only its files, root-owned,
+  `--contents`: `insaneos` has no `hwreport` entry and the `Depends`; `insaneos-hwdata` has only its files, root-owned,
   644); the unsigned and the wrongly signed snapshot refused in release mode; `HWDATA_SERIAL` checked; `make -C server
-  test` passed (23 suites, 0 failed). In a `debian:trixie` container: apt refuses `lordos` alone ("Depends:
-  lordos-hwdata (>= 2026.10.27) but it is not installable"), installs both, upgrades `2026.10.27` to `2026.10.27.2`,
+  test` passed (23 suites, 0 failed). In a `debian:trixie` container: apt refuses `insaneos` alone ("Depends:
+  insaneos-hwdata (>= 2026.10.27) but it is not installable"), installs both, upgrades `2026.10.27` to `2026.10.27.2`,
   and removing the package leaves no `hwreport` folder; `install.sh`'s functions with a release signed by a test key
   (download through a `file:` URL, and `--deb`) take `2026.10.27.2`, refuse a changed file by its SHA-256, and stop
   before apt when there is none; `apt-repo.sh build staging` offline (a throwaway archive key, in the container) did
@@ -1090,7 +1090,7 @@ are per Insane OS version and it shows only its own.
 
 Left after 0.8.7: the first real community reports, a captured Raspberry Pi 5 report to replace the documented
 one, the rest of "From the live USB" (live references, the overlay's size; the boot menu entry is done), the staging test of
-`lordos-hwdata` above, and deciding whether Default Apps should fall back to an installed app
+`insaneos-hwdata` above, and deciding whether Default Apps should fall back to an installed app
 that declares a type when the user chose none (so a fresh account's Share on GitHub opens the page without a visit
 to Settings).
 
@@ -1126,14 +1126,14 @@ before installing.
 
 ### The boot entry (0.8.7; checked 2026-10-30)
 
-GRUB passes `lordos.check=1`. `lord.system.info().liveCheck` is a yes or no: `true` only on a live system and only for
+GRUB passes `insaneos.check=1`. `insane.system.info().liveCheck` is a yes or no: `true` only on a live system and only for
 that whole word in `/proc/cmdline` (`sysreport_cmdline_has`; nothing else of the command line reaches JS).
 `sdk/livestart.js` then opens System Information with `args: { tab: 'perf' }` instead of the installer, which stays in
 the launcher. The app takes only that one value and starts no measurement. No root work, no new power, no path from JS.
 
 ![The boot menu with the new entry](hwreport-boot-menu.png)
 
-![A real live boot with lordos.check=1](hwreport-boot-check.png)
+![A real live boot with insaneos.check=1](hwreport-boot-check.png)
 
 **Checked on VM 116, in QEMU with KVM, legacy BIOS:**
 
@@ -1141,49 +1141,49 @@ the launcher. The app takes only that one value and starts no measurement. No ro
   `grub-script-check` passes and the six lines show at 1024×768 and 800×600 (the first try, with a height of 300, hid
   the last line, which is how the count above was found). At 640×480, BIOS's last resort, also six, but the sixth
   line overlaps the keys hint at the bottom (both stay readable; the five lines above it don't overlap anything).
-- **The entry:** Down and Enter on that menu boot the 0.8.6 kernel with `lordos.check=1` on its command line (from the
+- **The entry:** Down and Enter on that menu boot the 0.8.6 kernel with `insaneos.check=1` on its command line (from the
   kernel's first line on the serial port; the test `grub.cfg` swapped `quiet loglevel=3` for a serial console, and the
   ISO has no system on it, so that run stops in the initramfs).
 - **The whole session:** the 0.8.6 live ISO, booted with that command line (QEMU's `-kernel`) and this branch's
-  `lord-server`, bundles and an unsigned code manifest laid over it from an extra initramfs, reached the desktop with
+  `insane-server`, bundles and an unsigned code manifest laid over it from an extra initramfs, reached the desktop with
   System Information on Performance and no installer window.
 - **In an isolated headless session** (a private mount namespace with a fake `/proc/cmdline` and `/run/live`): the same
-  with the flag; without it, and with `lordos.check=10`, the installer opens as always. With the flag and no live
+  with the flag; without it, and with `insaneos.check=10`, the installer opens as always. With the flag and no live
   system, it changes nothing: the first-login tour opens as on any new account, no System Information.
 - **Not tested:** a real ISO built from this branch (VM 116 has no room for a build), UEFI, the arm64 ISO, a USB stick, a
   real PC. The windows behind System Information (Files, About Insane OS) are the default theme's, as on every live boot.
 
 ## New interfaces, all under the rules of `AGENTS.md`
 
-- `lord.sysinfo` in `server/src/ui/js_hw.c`: `report()`, `markdown()`, `facts()`, `probe()` (built in
+- `insane.sysinfo` in `server/src/ui/js_hw.c`: `report()`, `markdown()`, `facts()`, `probe()` (built in
   0.8.5; the checks are evaluated in `apps/sysinfo/checks.js`); in 0.8.6
   `bench.start(mode, sustainedSeconds)`, `bench.poll()`, `bench.cancel()`, `bench.saved(which)`,
   `bench.boots()`, `bench.bootTest()`.
-- `lordos-sysreport`, a user command (not started by `lord-server`).
+- `insaneos-sysreport`, a user command (not started by `insane-server`).
 - One read-only admin action, `hw-memory-modules` (anyone, no arguments): SMBIOS memory device
   entries parsed strictly in C, returning slot, size, type, speed and manufacturer only.
 - The probe app for the effective checks: a signed system package started through the existing
-  `lord.apps.launchPackage(id)`; no new launcher path.
-- `lord-bench` (0.8.6), as above.
-- `lord.sysinfo.community()` in `server/src/ui/js_hw.c` (0.8.7): the catalogue's snapshot, only after
+  `insane.apps.launchPackage(id)`; no new launcher path.
+- `insane-bench` (0.8.6), as above.
+- `insane.sysinfo.community()` in `server/src/ui/js_hw.c` (0.8.7): the catalogue's snapshot, only after
   `sysreport/hwsnap.c` verified its signature with the release key; no arguments and no path from JS.
 - Data packages `pci.ids` and `usb.ids` (Debian, architecture `all`), documented in `VM-SETUP.md`.
 
 ## Work plan for 0.8.5
 
 **Built (2026-10-26):** `server/src/sysreport/` (the collector, `ids.c` for `pci.ids`/`usb.ids`, the JSON
-and Markdown output), `lordos-sysreport report [--json | --markdown]` in `/usr/bin` (package `lordos`,
+and Markdown output), `insaneos-sysreport report [--json | --markdown]` in `/usr/bin` (package `insaneos`,
 which recommends `pci.ids` and `usb.ids`), and `tests/sysreport_test.c`: five fake machines (AMD desktop,
 Intel laptop, Nvidia desktop, Raspberry Pi 5, VM) full of serials, UUIDs, MAC addresses, a host name, a
 user name, monitor serials and a MAC inside an interface name, none of which may reach a report
 (`build/sysreport-test fixture <dir> <kind>` writes one for `--root`). Checked on VM 116 against the real
-machine. `lordos-fetch` (the same binary under that name; `lordos-sysreport fetch`) shows the crown in
+machine. `insaneos-fetch` (the same binary under that name; `insaneos-sysreport fetch`) shows the apple in
 the brand colors beside a short summary (system, computer, kernel, uptime, packages, shell, display, CPU,
 GPU, memory, disk, isolation); the user and host names appear only on screen and `--share` leaves them out
 for a screenshot to post; `--color=auto|always|never`, `NO_COLOR` respected, true color when `COLORTERM`
 says so, plain ASCII without color. **The app (2026-10-26):** `apps/sysinfo` (also About Insane OS → System Report…) with Overview, Hardware and
-Compatibility, from `lord.sysinfo.report()` (`ui/js_hw.c`): the same report plus `session`, how this
-session composes the screen now (`lord_composition()` in `main.c`: `gpu`, `headless`, `no-display`,
+Compatibility, from `insane.sysinfo.report()` (`ui/js_hw.c`): the same report plus `session`, how this
+session composes the screen now (`insane_composition()` in `main.c`: `gpu`, `headless`, `no-display`,
 `rotated`, `capture` or `gpu-off`) and the GPU context (`gpu_info()`: the last `gpu_init` outcome as a
 fixed code, the renderer, render node, dmabuf import and direct scanouts since start). The layers and
 the Compatibility panel are worked out in `apps/sysinfo/model.js` (`server/tests/sysinfo_model_test.mjs`).
@@ -1195,9 +1195,9 @@ Checked on VM 116 in an isolated headless session (own home, runtime folder and 
 
 ![Compatibility](sysinfo-compatibility.png)
 
-**Report tab (2026-10-26):** the exact text that would be saved, as Markdown (`lord.sysinfo.markdown()`:
-`lordos-sysreport`'s text plus a "This session" section) or JSON (the report as `lord.sysinfo.report()`
-gives it); **Copy** and **Save to Documents** (`lordos-report-<date>.md|json`, `-2`, `-3`… never over an
+**Report tab (2026-10-26):** the exact text that would be saved, as Markdown (`insane.sysinfo.markdown()`:
+`insaneos-sysreport`'s text plus a "This session" section) or JSON (the report as `insane.sysinfo.report()`
+gives it); **Copy** and **Save to Documents** (`insaneos-report-<date>.md|json`, `-2`, `-3`… never over an
 existing file), with **Show in Files**. Nothing is sent anywhere: publishing is Share on GitHub (0.8.7), and the user does it.
 
 ![The Report tab](sysinfo-report.png)
@@ -1211,16 +1211,16 @@ so it shows disabled):
 
 ![Hardware → Memory](sysinfo-memory.png)
 
-**Checks, part 1 (2026-10-26):** what `lord-server` can see itself, evaluated in `apps/sysinfo/checks.js`
+**Checks, part 1 (2026-10-26):** what `insane-server` can see itself, evaluated in `apps/sysinfo/checks.js`
 (the thresholds are constants there, so they are signed with the theme bundle instead of a separate
-`checks.json`), from `lord.sysinfo.facts()` (`sysreport/facts.c`: lord-server's uid/euid from
+`checks.json`), from `insane.sysinfo.facts()` (`sysreport/facts.c`: insane-server's uid/euid from
 `/proc/self/status`, its cgroup and who owns it, the app scopes beside it, and whether anything
 listens on port 5673 in `/proc/net/tcp{,6}`): display server without root (§2.2), Landlock ABI ≥ 6
-(§6.4), `lord-netperm` running with cgroup BPF and the BPF LSM (§6.6), verified system code
+(§6.4), `insane-netperm` running with cgroup BPF and the BPF LSM (§6.6), verified system code
 (effective: every bundle loaded this session matched; §6.9), remote desktop closed when off
 (effective: nothing listens on its port; §11.4), the session's cgroup tree owned by root (only inside
-`…/lordos-session-<uid>/server`; §11.4), composition on the GPU (§7.3) and lord-server's memory now
-(measured, no pass or fail; §7.1). On VM 116 it found two real things: `lord-netperm` isn't installed
+`…/insaneos-session-<uid>/server`; §11.4), composition on the GPU (§7.3) and insane-server's memory now
+(measured, no pass or fail; §7.1). On VM 116 it found two real things: `insane-netperm` isn't installed
 there (the unit doesn't exist), and the first run refused a stale `app-host.bundle.js` in the test
 tree. Part 2 is below.
 
@@ -1228,28 +1228,28 @@ tree. Part 2 is below.
 
 **Checks, part 2: the Sandbox Probe (2026-10-26, approved by the maintainer).** A system package,
 `sysprobe` (`apps/sysprobe`, built into `assets/sysapps/sysprobe` like Passwords, hidden from the launcher
-with the new manifest field `"hidden": true`), started with the existing `lord.apps.launchPackage(id)`
+with the new manifest field `"hidden": true`), started with the existing `insane.apps.launchPackage(id)`
 like any isolated app: no new argument, path or exec. In app mode (`app/appclient.c`), for that system
 package only, `app/probe.c` runs instead of the app's code:
 
 1. **Before the app's sandbox**, while the process is single-threaded and has loaded nothing, it forks a
-   child that takes the decoding helpers' profile (`sandbox_apply_helper`, as `lord-doc` and `lord-media`)
+   child that takes the decoding helpers' profile (`sandbox_apply_helper`, as `insane-doc` and `insane-media`)
    and tries a unix socket, exec, fork and the app's data folder.
 2. It applies **the same sandbox as any isolated app** (same read-only folders, no network) and tries
    what must fail: the home folder, `/etc/passwd`, the root cgroup's `cgroup.procs`, an internet and a
    unix socket, `ptrace`, a user namespace, `mount`, `exec`. Its own data folder must work (the control:
    a probe that can't write there reports nothing it can be trusted for).
 3. It asks its broker for what must be refused: a path outside its folder, the clipboard without
-   permission, the FIDO2 device, `lord-maild`.
+   permission, the FIDO2 device, `insane-maild`.
 4. It sends the result as `BOP_PROBE` and exits, without a window. `brokersrv.c` takes `BOP_PROBE` only
    from that system package, validates the JSON (≤ 8 KB) and adds what only it can read: the process's
-   `NoNewPrivs`, `Seccomp` and `CapEff` and its cgroup with `memory.max`. `lord.sysinfo.probe()` returns
+   `NoNewPrivs`, `Seccomp` and `CapEff` and its cgroup with `memory.max`. `insane.sysinfo.probe()` returns
    the last result; `apps/sysinfo/checks.js` (`evaluateProbe`) turns it into four rows: the app sandbox
    (§6.4), the helper sandbox (§6.7), the broker (§6.5) and the app's own capped scope (§6.4).
 
 On VM 116, in the isolated headless session, every try was refused (9 + 4 + 4) and the process reported
 no_new_privs, seccomp mode 2 and no capabilities; the scope row is a warning there because that session
-isn't in a Insane OS session tree (lord-sessiond refused the scope, as it must). Its first run also caught a
+isn't in a Insane OS session tree (insane-sessiond refused the scope, as it must). Its first run also caught a
 mistake in the probe itself: stacking the helpers' profile inside the app's sandbox is refused by the
 app's seccomp (rightly), so the helper child now starts before it.
 
@@ -1260,9 +1260,9 @@ temporary rule), video decode and encode and Vulkan (shown as *Not checked*).
 
 1. `server/src/sysreport/`: collector, GPU layers, `pci.ids`/EDID readers, fake-sysfs fixtures
    (AMD desktop, Intel laptop, Nvidia desktop, Raspberry Pi 5, VM), the anonymization test,
-   `hw-memory-modules`, `lordos-sysreport report`.
+   `hw-memory-modules`, `insaneos-sysreport report`.
 2. The app: Overview, Hardware, Compatibility; About's button; en, es, pt; right to left.
-3. Checks, configured and effective, the probe app, thresholds signed in `apps/sysinfo/checks.js` (built); `lordos-sysreport checks` (not built yet).
+3. Checks, configured and effective, the probe app, thresholds signed in `apps/sysinfo/checks.js` (built); `insaneos-sysreport checks` (not built yet).
 4. Reports with preview; docs; screenshots on VMs; the first real reports: the Raspberry Pi 5 with a
    monitor and the maintainer's PC (Core i9-10900, Radeon RX 580), the first real AMD data in the
    project.

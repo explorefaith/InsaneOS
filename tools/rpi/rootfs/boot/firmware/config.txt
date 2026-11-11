@@ -15,7 +15,7 @@ disable_overscan=1
 display_auto_detect=1
 camera_auto_detect=1
 dtparam=audio=on
-# Full KMS: vc4 drives HDMI (the display) and v3d the 3D GPU. lord-server uses KMS without libdrm.
+# Full KMS: vc4 drives HDMI (the display) and v3d the 3D GPU. insane-server uses KMS without libdrm.
 # It must come AFTER camera_auto_detect/display_auto_detect: on the Pi 5 the firmware ignored a
 # dtoverlay line placed before them (no display at all, found on real hardware in 0.8.3/0.8.4).
 dtoverlay=vc4-kms-v3d
@@ -26,7 +26,7 @@ dtoverlay=vc4-kms-v3d
 # there are PCIe errors in `dmesg`, comment out the gen 3 line.
 dtparam=pciex1
 dtparam=pciex1_gen=3
-# Fan header (Active Cooler or a case fan): lord-fand drives it by temperature (docs/FANS.md);
+# Fan header (Active Cooler or a case fan): insane-fand drives it by temperature (docs/FANS.md);
 # without it the kernel does (cooling_fan in the device tree)
 
 [pi4]
@@ -35,4 +35,4 @@ arm_boost=1
 
 [all]
 # the case's extras, written by Settings -> Cooling (admin action rpi-case, docs/FANS.md)
-include lordos-case.txt
+include insaneos-case.txt

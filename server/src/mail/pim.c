@@ -1,4 +1,4 @@
-/* pim.c — calendars, reminders and address books of lord-maild, local and synced with CalDAV /
+/* pim.c — calendars, reminders and address books of insane-maild, local and synced with CalDAV /
  * CardDAV (see maild.h, dav.h and docs/MAIL.md).
  *
  * A collection is a calendar (events and/or to-dos) or an address book. Local ones live only
@@ -1111,7 +1111,7 @@ static void sync_failed(Account *a, Dav *d, const char *what) {
  * itself, the principal it names (current-user-principal), then /.well-known/caldav or
  * /.well-known/carddav on that server (RFC 6764). The other kind's home is noted too when the
  * server gives it. Homes are absolute URLs: a provider may put them on another host of its
- * domain (pNN-caldav.<domain>), which lord-server allows for this account. 0 ok. */
+ * domain (pNN-caldav.<domain>), which insane-server allows for this account. 0 ok. */
 static int discover(Dav *d, const char *start, int cal, char *calhome, char *cardhome, size_t cap) {
     char target[DAV_URL_MAX], first[DAV_URL_MAX];
     if (dav_href_resolve(start, start, first, sizeof first)) { snprintf(d->err, sizeof d->err, "bad URL"); return -1; }

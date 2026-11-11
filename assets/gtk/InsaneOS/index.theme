@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=InsaneOS
+Comment=InsaneOS para GTK 3
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=InsaneOS

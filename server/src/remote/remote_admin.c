@@ -1,22 +1,22 @@
 /* remote_admin.c — root actions of the remote desktop, in the privileged helper (admin.c).
  *
- *   remote-enable            turns the remote desktop on (enabled=1 and lord-sessiond rereads)
+ *   remote-enable            turns the remote desktop on (enabled=1 and insane-sessiond rereads)
  *   remote-disable           turns it off; sessions stay open (they show on the monitor)
  *   remote-config <lines>    allow=all|group, port=1024..65535, net=lan|list|any
- *   remote-block <cidr>      blocks an address or network until removed (/etc/lordos/remote/access)
- *   remote-unblock <cidr>    removes manual blocks inside it and asks lord-sessiond to lift the
- *                            failed-login blocks inside it (/var/lib/lordos/remote/requests)
+ *   remote-block <cidr>      blocks an address or network until removed (/etc/insaneos/remote/access)
+ *   remote-unblock <cidr>    removes manual blocks inside it and asks insane-sessiond to lift the
+ *                            failed-login blocks inside it (/var/lib/insaneos/remote/requests)
  *   remote-allow add|del <cidr>   the "only these addresses" list (net=list)
- *   remote-member <u>\n1|0   adds or removes a user from the lordos-remote group
- *   remote-kick <pid>        cuts a connection (only a pid from lord-sessiond's list)
+ *   remote-member <u>\n1|0   adds or removes a user from the insaneos-remote group
+ *   remote-kick <pid>        cuts a connection (only a pid from insane-sessiond's list)
  *   remote-ice <lines>       the WebRTC connection (docs/REMOTE.md, "Video (WebRTC)"):
  *                            stun=<host:port>[,…] (up to 4), turn=<host:port> (empty: none),
  *                            turn_transport=udp|tcp|tls, turn_fp=<sha-256> (TLS: a pinned certificate;
  *                            empty: the system's CAs), turn_user=<name>, turn_pass=<password> (kept in
  *                            turn.key, root 0600; never written to the config, the logs or an answer)
  *
- * The remote desktop is part of lord-sessiond (lordos.service, docs/SESSIONS.md): these
- * actions only change /etc/lordos/remote/config and notify it with SIGHUP. */
+ * The remote desktop is part of insane-sessiond (insaneos.service, docs/SESSIONS.md): these
+ * actions only change /etc/insaneos/remote/config and notify it with SIGHUP. */
 #include "remote_admin.h"
 #include "ipnet.h"
 #include "lockout.h"
@@ -35,13 +35,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define CONF_DIR "/etc/lordos/remote"
+#define CONF_DIR "/etc/insaneos/remote"
 #define RD_ACCESS_PATH CONF_DIR "/access"
 #define RD_TURN_KEY_PATH CONF_DIR "/turn.key"
 
 static int write_file(const char *path, const char *text, mode_t mode) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos", path);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, mode);
     if (fd < 0) return -1;
     size_t n = strlen(text);
@@ -83,7 +83,7 @@ static void conf_read(Conf *c) {
 }
 
 static int conf_write(const Conf *c) {
-    mkdir("/etc/lordos", 0755);
+    mkdir("/etc/insaneos", 0755);
     mkdir(CONF_DIR, 0755);
     char text[1600];
     int n = snprintf(text, sizeof text, "# Insane OS · remote desktop (Settings → Sharing). See docs/REMOTE.md\nenabled=%d\nport=%d\nallow=%s\nnet=%s\ninsecure_dev=%d\n",
@@ -97,9 +97,9 @@ static int conf_write(const Conf *c) {
     return write_file(CONF_DIR "/config", text, 0644);
 }
 
-/* the running lord-sessiond (the one from lordos.service): rereads the configuration on SIGHUP */
+/* the running insane-sessiond (the one from insaneos.service): rereads the configuration on SIGHUP */
 static pid_t sessiond_pid(void) {
-    const char *const a[] = { "/usr/bin/systemctl", "show", "--property=MainPID", "--value", "lordos.service", NULL };
+    const char *const a[] = { "/usr/bin/systemctl", "show", "--property=MainPID", "--value", "insaneos.service", NULL };
     char out[64] = "";
     if (admin_run_capture(a, out, sizeof out)) return -1;
     long pid = strtol(out, NULL, 10);
@@ -113,7 +113,7 @@ static pid_t sessiond_pid(void) {
     static const char deleted[] = " (deleted)";
     if ((size_t)l > sizeof deleted - 1 && !strcmp(exe + l - (sizeof deleted - 1), deleted)) exe[l - (sizeof deleted - 1)] = 0;
     const char *base = strrchr(exe, '/');
-    return base && !strcmp(base + 1, "lord-sessiond") ? (pid_t)pid : -1;
+    return base && !strcmp(base + 1, "insane-sessiond") ? (pid_t)pid : -1;
 }
 
 static void set_enabled(int on) {
@@ -128,7 +128,7 @@ static void set_enabled(int on) {
     /* waits for it to listen (status.json says running) */
     for (int i = 0; i < 40; i++) {
         char st[512] = "";
-        int fd = open("/run/lordos/status.json", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+        int fd = open("/run/insaneos/status.json", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
         if (fd >= 0) { ssize_t n = read(fd, st, sizeof st - 1); if (n > 0) st[n] = 0; close(fd); }
         if (strstr(st, "\"running\":true")) { admin_ok("remote.on", NULL); return; }
         usleep(100000);
@@ -166,8 +166,8 @@ void remote_act_config(const AdminReq *r, const char *arg, size_t len) {
             c.net = rs_net_mode(s);
         } else { admin_err("admin.invalidArgument", NULL); return; }
     }
-    if (c.group_only && !getgrnam("lordos-remote")) {
-        const char *const g[] = { "/usr/sbin/groupadd", "--system", "lordos-remote", NULL };
+    if (c.group_only && !getgrnam("insaneos-remote")) {
+        const char *const g[] = { "/usr/sbin/groupadd", "--system", "insaneos-remote", NULL };
         if (admin_run(g)) { admin_err("remote.groupFailed", NULL); return; }
     }
     if (conf_write(&c)) { admin_err("remote.configFailed", NULL); return; }
@@ -183,11 +183,11 @@ void remote_act_member(const AdminReq *r, const char *arg, size_t len) {
     if (sscanf(arg, "%39[a-z0-9_-]\n%d", user, &on) != 2 || (on != 0 && on != 1)) { admin_err("admin.invalidArgument", NULL); return; }
     struct passwd *pw = getpwnam(user);
     if (!pw || pw->pw_uid < 1000 || pw->pw_uid >= 60000) { admin_err("users.invalid", NULL); return; }
-    if (!getgrnam("lordos-remote")) {
-        const char *const g[] = { "/usr/sbin/groupadd", "--system", "lordos-remote", NULL };
+    if (!getgrnam("insaneos-remote")) {
+        const char *const g[] = { "/usr/sbin/groupadd", "--system", "insaneos-remote", NULL };
         if (admin_run(g)) { admin_err("remote.groupFailed", NULL); return; }
     }
-    const char *const a[] = { "/usr/bin/gpasswd", on ? "-a" : "-d", user, "lordos-remote", NULL };
+    const char *const a[] = { "/usr/bin/gpasswd", on ? "-a" : "-d", user, "insaneos-remote", NULL };
     if (admin_run(a)) admin_err("sys.programError", "program", "gpasswd", NULL); else admin_ok(on ? "remote.userAdded" : "remote.userRemoved", "name", user, NULL);
 }
 
@@ -196,9 +196,9 @@ void remote_act_kick(const AdminReq *r, const char *arg, size_t len) {
     char *end;
     long pid = strtol(arg, &end, 10);
     if (pid <= 1 || *end) { admin_err("admin.invalidArgument", NULL); return; }
-    /* only a connection that lord-sessiond (root) recorded in its list */
+    /* only a connection that insane-sessiond (root) recorded in its list */
     char status[16384] = "", want[40];
-    int fd = open("/run/lordos/status.json", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+    int fd = open("/run/insaneos/status.json", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
     struct stat st;
     if (fd < 0 || fstat(fd, &st) || st.st_uid != 0) { if (fd >= 0) close(fd); admin_err("remote.notRunning", NULL); return; }
     ssize_t n = read(fd, status, sizeof status - 1);
@@ -210,7 +210,7 @@ void remote_act_kick(const AdminReq *r, const char *arg, size_t len) {
     ssize_t l = readlink(link, exe, sizeof exe - 1);
     if (l > 0) exe[l] = 0;
     const char *base = l > 0 ? strrchr(exe, '/') : NULL;
-    if (!strstr(status, want) || !base || strcmp(base + 1, "lord-sessiond")) { admin_err("remote.noSuchConnection", NULL); return; }
+    if (!strstr(status, want) || !base || strcmp(base + 1, "insane-sessiond")) { admin_err("remote.noSuchConnection", NULL); return; }
     kill((pid_t)pid, SIGTERM);
     admin_ok("remote.disconnected", NULL);
 }
@@ -245,7 +245,7 @@ static void access_read(RsAccess *acc) {
 static int access_write(const RsAccess *acc) {
     char text[16384];
     if (rs_access_format(acc, text, sizeof text) < 0) return -1;
-    mkdir("/etc/lordos", 0755);
+    mkdir("/etc/insaneos", 0755);
     mkdir(CONF_DIR, 0755);
     return write_file(RD_ACCESS_PATH, text, 0600);
 }
@@ -278,8 +278,8 @@ void remote_act_unblock(const AdminReq *r, const char *arg, size_t len) {
     RsAccess acc;
     access_read(&acc);
     if (rs_access_del(acc.block, &acc.nblock, &c) && access_write(&acc)) { admin_err("remote.configFailed", NULL); return; }
-    /* the failed-login blocks belong to lord-sessiond: a request it reads on SIGHUP */
-    mkdir("/var/lib/lordos", 0755);
+    /* the failed-login blocks belong to insane-sessiond: a request it reads on SIGHUP */
+    mkdir("/var/lib/insaneos", 0755);
     mkdir(RL_FILE_DIR, 0700);
     struct stat st;
     if (lstat(RL_FILE_DIR, &st) || !S_ISDIR(st.st_mode) || st.st_uid != 0) { admin_err("remote.configFailed", NULL); return; }
@@ -315,14 +315,14 @@ void remote_act_allow(const AdminReq *r, const char *arg, size_t len) {
     admin_ok("remote.saved", NULL);
 }
 
-/* remote-failures: the recent failed sign-ins lord-sessiond keeps (Monitor → Network), read-only.
+/* remote-failures: the recent failed sign-ins insane-sessiond keeps (Monitor → Network), read-only.
  * One LOG code line per row, re-validated here: remote.failure key= count= first= last= user=. The user is
  * what was typed in the name field, already cleaned to printable ASCII; passwords are never kept. */
 void remote_act_failures(const AdminReq *r, const char *arg, size_t len) {
     (void)r; (void)arg;
     if (len) { admin_err("admin.invalidArgument", NULL); return; }
     char text[16384] = "";
-    int fd = open("/run/lordos/remote-failures", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+    int fd = open("/run/insaneos/remote-failures", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
     struct stat st;
     if (fd >= 0 && !fstat(fd, &st) && S_ISREG(st.st_mode) && st.st_uid == 0 && !(st.st_mode & 077)) {
         ssize_t n = read(fd, text, sizeof text - 1);
@@ -351,7 +351,7 @@ void remote_act_failures(const AdminReq *r, const char *arg, size_t len) {
 }
 
 /* remote-ice: the WebRTC connection's settings (Settings → Sharing → Connection). Every line is checked before
- * anything is written; the TURN password goes only to turn.key (root 0600), which lord-sessiond reads
+ * anything is written; the TURN password goes only to turn.key (root 0600), which insane-sessiond reads
  * for each video connection and hands to the bridge in memory. */
 void remote_act_ice(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
@@ -394,7 +394,7 @@ void remote_act_ice(const AdminReq *r, const char *arg, size_t len) {
     if (c.turn[0] && !c.turn_user[0]) { admin_err("remote.badTurnUser", NULL); goto out; }
     if (set_pass) {
         if (!c.turn[0]) { admin_err("admin.invalidArgument", NULL); goto out; }
-        mkdir("/etc/lordos", 0755);
+        mkdir("/etc/insaneos", 0755);
         mkdir(CONF_DIR, 0755);
         char line[140];
         snprintf(line, sizeof line, "%s\n", pass);

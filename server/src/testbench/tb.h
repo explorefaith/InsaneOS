@@ -1,7 +1,7 @@
-/* tb.h — what lordos-testbench's parts share: the connection, the window and the input serials
+/* tb.h — what insaneos-testbench's parts share: the connection, the window and the input serials
  * (testbench.c), and the protocol checklist (checks.c). */
-#ifndef LORD_TESTBENCH_TB_H
-#define LORD_TESTBENCH_TB_H
+#ifndef INSANE_TESTBENCH_TB_H
+#define INSANE_TESTBENCH_TB_H
 
 #include <stdint.h>
 #include <wayland-client.h>

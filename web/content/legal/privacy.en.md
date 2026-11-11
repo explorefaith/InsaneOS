@@ -1,4 +1,4 @@
-Insane OS has no accounts, no advertising and no tracking, on the website or in the distribution. Nobody sells, shares or keeps your data, because we never collect it. This policy has two parts: the **lordos.org website**, and the **Insane OS distribution** you install on your computer.
+Insane OS has no accounts, no advertising and no tracking, on the website or in the distribution. Nobody sells, shares or keeps your data, because we never collect it. This policy has two parts: the **insaneos.org website**, and the **Insane OS distribution** you install on your computer.
 
 ## Part 1: the website
 
@@ -8,14 +8,14 @@ The website is a set of static pages. It sets **no cookies** and keeps only two 
 
 | Key | What it holds | Why |
 |---|---|---|
-| `lordos-theme` | `light` or `dark` (nothing when you use automatic) | to show the theme you chose |
-| `lordos-lang-seen` | `1` | so the "this page is also in your language" suggestion appears only once |
+| `insaneos-theme` | `light` or `dark` (nothing when you use automatic) | to show the theme you chose |
+| `insaneos-lang-seen` | `1` | so the "this page is also in your language" suggestion appears only once |
 
 They never leave your browser and we can't read them. Clear them at any time from your browser's site data settings. See the [Cookies and statistics](/legal/cookies-and-statistics/).
 
 ### No analytics, no ads, no third-party code
 
-The website loads no analytics, no advertising, no social media widgets and no fonts or scripts from other servers: everything it needs is served from lordos.org.
+The website loads no analytics, no advertising, no social media widgets and no fonts or scripts from other servers: everything it needs is served from insaneos.org.
 
 ### Server logs
 
@@ -55,7 +55,7 @@ The time zone is never guessed from the network. Nothing in this table goes to t
 
 These connections happen only after an action of yours:
 
-- **Store and updates:** the package lists and packages come from the Debian mirrors in your apt sources (`deb.debian.org` and `security.debian.org` by default; on the Raspberry Pi, the kernel and firmware come from `archive.raspberrypi.com`). The Store refreshes them only when you press **Check for updates** (in the Store or in Settings → Updates) or install something, and checks every list with Debian's signatures. Insane OS's own updates come from Insane OS's signed repository at `lordos.org/apt`, fetched at the same time. Since 0.8.5 that repository also carries the Store's featured banner (taken only from a source whose signed index says it is Insane OS's, and checked against its hashes) and the list of apps on Store → Artificial Intelligence; `https://` sources are downloaded over HTTPS. Insane OS's own `.lpk` apps are installed from files you choose; there is no online catalog of `.lpk` apps.
+- **Store and updates:** the package lists and packages come from the Debian mirrors in your apt sources (`deb.debian.org` and `security.debian.org` by default; on the Raspberry Pi, the kernel and firmware come from `archive.raspberrypi.com`). The Store refreshes them only when you press **Check for updates** (in the Store or in Settings → Updates) or install something, and checks every list with Debian's signatures. Insane OS's own updates come from Insane OS's signed repository at `insaneos.org/apt`, fetched at the same time. Since 0.8.5 that repository also carries the Store's featured banner (taken only from a source whose signed index says it is Insane OS's, and checked against its hashes) and the list of apps on Store → Artificial Intelligence; `https://` sources are downloaded over HTTPS. Insane OS's own `.lpk` apps are installed from files you choose; there is no online catalog of `.lpk` apps.
 - **Apps from their makers' repositories** (since 0.8.5): installing an app from Store → Artificial Intelligence or Store → Commercial whose maker has its own repository first tells you whose repository it adds and its key fingerprint, then adds it, so from then on the Store and apt also fetch that maker's package lists. Removing the app removes that repository unless another installed app uses it. What the app itself connects to is up to its maker.
 - **Language packages:** adding a language in Settings can install its dictionaries and fonts from the same Debian mirrors.
 - **Printers and scanners:** Settings → Printers & Scanners asks the local network (mDNS) which printers and scanners are there, and talks only to local addresses.
@@ -67,7 +67,7 @@ These connections happen only after an action of yours:
 - **Wi-Fi, Bluetooth and VPNs:** only the networks, devices and VPN servers you choose.
 - **Remote desktop** is **off** by default (port 5673 closed). It listens only after you turn it on in Settings → Sharing. On the Raspberry Pi, remote desktop and the SSH server also stay off unless you put a `remote-desktop` or `ssh` switch file on the boot partition.
 - **Web browsers and other apps:** Firefox ESR, Chromium and any Linux app you install are separate programs from their own projects. They make the connections their settings allow, under their own privacy policies. Isolated `.lpk` apps reach the network only if you grant them the permission, and the per-app firewall shows and controls what each app connects to.
-- **The Debian installer script** (`curl -fsSL https://lordos.org/install.sh | sh`) contacts only `api.github.com` (to find the latest release), `github.com` (to download it and its signature) and your apt mirrors. It sends no telemetry.
+- **The Debian installer script** (`curl -fsSL https://insaneos.org/install.sh | sh`) contacts only `api.github.com` (to find the latest release), `github.com` (to download it and its signature) and your apt mirrors. It sends no telemetry.
 
 ### What stays on your computer
 

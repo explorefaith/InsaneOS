@@ -1,6 +1,6 @@
 /* input.h — keyboard and mouse read straight from evdev (/dev/input/event*), without libinput. */
-#ifndef LORD_INPUT_H
-#define LORD_INPUT_H
+#ifndef INSANE_INPUT_H
+#define INSANE_INPUT_H
 
 #include <linux/input.h>
 
@@ -28,10 +28,10 @@ typedef struct {
 typedef void (*InputHandler)(void *ud, const InputDevice *dev, const struct input_event *ev);
 
 int  input_open(Input *in);     /* opens and grabs (EVIOCGRAB) the useful devices */
-/* Same, with fds already opened and passed by lord-sessiond (useless ones are closed). */
+/* Same, with fds already opened and passed by insane-sessiond (useless ones are closed). */
 int  input_open_fds(Input *in, const int *fds, int n);
 void input_close(Input *in);
-/* Plugged in later (lord-sessiond, RP_INPUT_ADD): added to the existing ones. Returns how many were usable. */
+/* Plugged in later (insane-sessiond, RP_INPUT_ADD): added to the existing ones. Returns how many were usable. */
 int  input_add_fds(Input *in, const int *fds, int n);
 /* A device that disappeared (ENODEV, unplugged): only that one is closed. */
 void input_remove(Input *in, int idx);

@@ -1,17 +1,17 @@
 # Network and VPN in Insane OS
 
-Insane OS's networking is its own and runs directly on top of the kernel. It doesn't use NetworkManager, libnl, wg-quick or wireguard-tools, and it uses D-Bus for one thing only: `lord-netd` listens for logind's sleep and wake signal (see "After waking from sleep"). The code is in `server/src/net/` and has two sides:
+Insane OS's networking is its own and runs directly on top of the kernel. It doesn't use NetworkManager, libnl, wg-quick or wireguard-tools, and it uses D-Bus for one thing only: `insane-netd` listens for logind's sleep and wake signal (see "After waking from sleep"). The code is in `server/src/net/` and has two sides:
 
 | Side | What it does | Files |
 |---|---|---|
-| lord-server (without root) | Reads the state with rtnetlink (interfaces, addresses, routes, counters) and listens for changes. DNS comes from `/run/systemd/resolve/resolv.conf` or `/etc/resolv.conf`. It exposes it to JS as `lord.net`. | `state.c`, `ui/js_net.c` |
-| `lord-netd` (root, the system network) | Serves the `net-*` actions of `admin.c`'s closed list and owns the resident processes (DHCP, wpa_supplicant, VPN). `lord-sessiond` starts and supervises it at boot (see "The network belongs to the system"). Without `lord-sessiond`, the session's helper serves them, as before. | `actions.c`, `dhcp.c`, `wifi.c`, `wg.c`, `ovpn.c`, `ipsec.c` + `vici.c`, `vpnproc.c` (PPTP, OpenConnect, Fortinet), `vpn.c` (the common parts), `sys.c` |
+| insane-server (without root) | Reads the state with rtnetlink (interfaces, addresses, routes, counters) and listens for changes. DNS comes from `/run/systemd/resolve/resolv.conf` or `/etc/resolv.conf`. It exposes it to JS as `insane.net`. | `state.c`, `ui/js_net.c` |
+| `insane-netd` (root, the system network) | Serves the `net-*` actions of `admin.c`'s closed list and owns the resident processes (DHCP, wpa_supplicant, VPN). `insane-sessiond` starts and supervises it at boot (see "The network belongs to the system"). Without `insane-sessiond`, the session's helper serves them, as before. | `actions.c`, `dhcp.c`, `wifi.c`, `wg.c`, `ovpn.c`, `ipsec.c` + `vici.c`, `vpnproc.c` (PPTP, OpenConnect, Fortinet), `vpn.c` (the common parts), `sys.c` |
 | shared | Our own netlink, minimal cryptography (X25519, SHA-1/PBKDF2, base64), utilities | `nl.c`, `crypto.c`, `netpriv.h` |
 
-## The network belongs to the system: `lord-netd` (M9)
+## The network belongs to the system: `insane-netd` (M9)
 
 Up to M8 the network was brought up by the root helper of the **first session** that logged in
-(`/run/lordos/net-owner`). On an installed system that had three problems:
+(`/run/insaneos/net-owner`). On an installed system that had three problems:
 
 - there was no network before the first login, so the greeter showed the hostname instead of the
   IP and the remote desktop was unreachable;
@@ -22,70 +22,70 @@ Up to M8 the network was brought up by the root helper of the **first session** 
 Now the network belongs to the system, like NetworkManager or systemd-networkd:
 
 ```
-lordos.service
-└── lord-sessiond
-    └── lord-netd                       the network: DHCP, saved Wi-Fi, configs, DNS, VPN
+insaneos.service
+└── insane-sessiond
+    └── insane-netd                       the network: DHCP, saved Wi-Fi, configs, DNS, VPN
         ├── if:<if>                     DHCP client (our own code)
         ├── wpa:<if>                    wpa_supplicant
         └── vpn:<name>                  openvpn, charon, pppd…
-lord-server --user lord ── lord-admin ──┐  /run/lordos/netd.sock (0600, root only)
-lord-server --user ana  ── lord-admin ──┘  net-* actions are forwarded as they are
+insane-server --user insane ── insane-admin ──┐  /run/insaneos/netd.sock (0600, root only)
+insane-server --user ana  ── insane-admin ──┘  net-* actions are forwarded as they are
 ```
 
-- **What it is.** `lord-netd` is `admin.c` built with `LORD_NETD` (`server/src/net/netd.c` only has
+- **What it is.** `insane-netd` is `admin.c` built with `INSANE_NETD` (`server/src/net/netd.c` only has
   `main`). Its table has **only** the `net-*` actions, with the same validation, and it runs
   nothing those actions didn't already run. libc only.
 - **Its own cgroup leaf** (0.8.5): before its execve, the child moves itself into the root-owned
-  `lordos.service/netd` leaf (`cgroup_service_leaf`), next to lord-sessiond's `supervisor` leaf, so
+  `insaneos.service/netd` leaf (`cgroup_service_leaf`), next to insane-sessiond's `supervisor` leaf, so
   Monitor → Network can count the network service's own traffic ("Network service", never
-  blockable; `FIREWALL.md`, "The essential system services"). A lord-netd adopted from before the
+  blockable; `FIREWALL.md`, "The essential system services"). A insane-netd adopted from before the
   update stays where it was until it restarts.
-- **When it starts.** `lord-sessiond` starts it at boot, before the greeter
+- **When it starts.** `insane-sessiond` starts it at boot, before the greeter
   (`server/src/remote/netsup.c`):
-  - fixed path `<lord-sessiond's directory>/lord-netd`, root-owned and not writable by others
+  - fixed path `<insane-sessiond's directory>/insane-netd`, root-owned and not writable by others
     (unless `insecure_dev`);
   - no arguments and a minimal environment;
   - in its own session (`setsid`).
 
-  `lord-netd` runs `net-restore` by itself: the configs in `/etc/lordos/net/if`, DHCP on free
+  `insane-netd` runs `net-restore` by itself: the configs in `/etc/insaneos/net/if`, DHCP on free
   physical NICs, Wi-Fi with the saved networks, and DNS. That is why there is an IP before anyone
   logs in.
 - **Interfaces that come later.** A radio whose driver is still loading its firmware at that moment
-  isn't there yet, and one udev has yet to rename would be configured under the wrong name. `lord-netd`
+  isn't there yet, and one udev has yet to rename would be configured under the wrong name. `insane-netd`
   listens to link notifications (`net/ifwatch.c`) and gives each device its saved state once, when udev
   has finished with it (`/run/udev/data/n<index>`, 30 s at most). A device that appears after boot
   waits one more second so the system's network manager goes first, and is left alone if it took it.
   A device is remembered by index, so a later notification never undoes `net-down`. The same path
   serves a USB adapter plugged in later. Turning on an interface saved as `off`, or joining a Wi-Fi
   network on it, changes the saved method to `dhcp`, so it stays on at the next boot.
-- **Sessions** bring nothing up. Each session's helper connects to `/run/lordos/netd.sock`
+- **Sessions** bring nothing up. Each session's helper connects to `/run/insaneos/netd.sock`
   (`SO_PEERCRED`: uid 0 only), introduces itself with `HELLO <user>` and forwards every `net-*`
-  action as it is. `lord-netd` works out again whether that user is an administrator (groups sudo, admin or wheel)
+  action as it is. `insane-netd` works out again whether that user is an administrator (groups sudo, admin or wheel)
   and applies `A_ANYONE` as before. Replies go back to the helper that asked; events
   (`net dhcp…`, `net wifi…`, `net vpn…`) go to every session. Settings → Network didn't change.
 - **A session's `net-restore`** answers `OK net.restoreSystem` ("The network is managed by the system").
-- **Wi-Fi and VPN passwords** stay in `/etc/lordos/net/wifi` and `/etc/lordos/net/vpn` (root, 0600).
+- **Wi-Fi and VPN passwords** stay in `/etc/insaneos/net/wifi` and `/etc/insaneos/net/vpn` (root, 0600).
   They travel over the socket between two root processes and never go back to a session.
-- **If `lord-netd` exits,** `lord-sessiond` starts it again: it waits 1, 2, 4… up to 30 s, and goes
+- **If `insane-netd` exits,** `insane-sessiond` starts it again: it waits 1, 2, 4… up to 30 s, and goes
   back to 1 s if it had run for more than a minute.
   - Its DHCP client gets `SIGUSR1` (`PR_SET_PDEATHSIG`): it exits **without releasing the address**
-    and leaves the lease in `/run/lordos/dhcp/<if>.lease` (0600). The new client confirms it
+    and leaves the lease in `/run/insaneos/dhcp/<if>.lease` (0600). The new client confirms it
     (INIT-REBOOT) and connections are not dropped.
-  - VPNs that were up are reconnected (`/run/lordos/netd-vpns`).
+  - VPNs that were up are reconnected (`/run/insaneos/netd-vpns`).
   - wpa_supplicant does restart: Wi-Fi reassociates within a few seconds.
-- **If `lord-sessiond` restarts** (`KillMode=process`), `lord-netd` keeps running and the new
-  `lord-sessiond` **adopts** it: it reads `/run/lordos/netd.pid`, checks that it is a root process
-  named `lord-netd` and watches it with a `pidfd` in its `poll`, without polling. The lock
-  `/run/lordos/netd.lock` (`flock`) prevents two from running.
-- **Sessions reconnect:** when `lord-netd` restarts, each session's helper sees it come back with
-  inotify on `/run/lordos` (the socket is created under another name and renamed once it listens)
+- **If `insane-sessiond` restarts** (`KillMode=process`), `insane-netd` keeps running and the new
+  `insane-sessiond` **adopts** it: it reads `/run/insaneos/netd.pid`, checks that it is a root process
+  named `insane-netd` and watches it with a `pidfd` in its `poll`, without polling. The lock
+  `/run/insaneos/netd.lock` (`flock`) prevents two from running.
+- **Sessions reconnect:** when `insane-netd` restarts, each session's helper sees it come back with
+  inotify on `/run/insaneos` (the socket is created under another name and renamed once it listens)
   and reconnects. An action in progress answers `ERR netd.restarted` ("The system network service
   restarted; try again").
-- **Without `lord-sessiond`** (a standalone `lord-server`, in development) there is no
-  `/run/lordos/netd.enabled`, and the session's helper runs the network itself, as before (with
+- **Without `insane-sessiond`** (a standalone `insane-server`, in development) there is no
+  `/run/insaneos/netd.enabled`, and the session's helper runs the network itself, as before (with
   `net-owner`). With that mark, a session never brings the network up on its own.
 - **Resident processes no longer inherit the helper's descriptors** (`admin_daemon_fork` and
-  `A_FORK` actions keep only their pipe): a DHCP client that outlives `lord-netd` doesn't hold its
+  `A_FORK` actions keep only their pipe): a DHCP client that outlives `insane-netd` doesn't hold its
   lock or socket.
 
 ### After waking from sleep (issue #14)
@@ -93,7 +93,7 @@ lord-server --user ana  ── lord-admin ──┘  net-* actions are forwarded
 Some Wi-Fi radios lose their association while the computer sleeps and come back with the link
 "up": the kernel and wpa_supplicant never notice, there is no carrier change, and nothing reconnects
 until the card is turned off and on by hand (reported with the built-in card of a 2015 laptop).
-`lord-netd` now does what the person had to do:
+`insane-netd` now does what the person had to do:
 
 - **How it hears the wake.** logind's `PrepareForSleep(b)` signal on the system bus (`true` before
   sleeping, `false` after waking), with Insane OS's own D-Bus client (`server/src/vault/dbus.c`, libc
@@ -120,8 +120,8 @@ until the card is turned off and on by hand (reported with the built-in card of 
      wpa_supplicant with the saved networks, DHCP).
   4. Not working 20 s after that: it is logged as `failed` and left alone (no loop).
   An interface turned off meanwhile (`net-down`) is left alone.
-- **The log.** Each step goes to `lord-netd`'s log (`journalctl -u lordos`, lines starting with
-  `lord-netd: after sleep:` and `lord-netd: woke from sleep`) and as a `net wake …` notification
+- **The log.** Each step goes to `insane-netd`'s log (`journalctl -u insaneos`, lines starting with
+  `insane-netd: after sleep:` and `insane-netd: woke from sleep`) and as a `net wake …` notification
   (below).
 - **Tested (build VM, November 4):** `net-test wake` (the state machine: working, late association,
   fixed by re-associating, fixed by the card off and on, nothing helps, turned off meanwhile);
@@ -134,45 +134,45 @@ until the card is turned off and on by hand (reported with the built-in card of 
 
 ### Test (VM 119, October 17)
 
-VM 119 runs `lord-sessiond` installed like the `.deb`; it was not installed from the ISO (see
+VM 119 runs `insane-sessiond` installed like the `.deb`; it was not installed from the ISO (see
 `VM-SETUP.md`, step 23). `eth0` is managed by systemd-networkd (netplan) and Insane OS leaves it
 alone, so the test uses a Insane OS-managed NIC: the veth `lnt0`, whose peer is in the netns `lnt`
-with a `dnsmasq` there (`lordos-test-netns.service`, which starts before `lordos.service`), and
-`/etc/lordos/net/if/lnt0.conf` with `method=dhcp`.
+with a `dnsmasq` there (`insaneos-test-netns.service`, which starts before `insaneos.service`), and
+`/etc/insaneos/net/if/lnt0.conf` with `method=dhcp`.
 
 | Test | Result |
 |---|---|
-| Boot, nobody logged in | `lord-netd` started together with the greeter; `lnt0` had `10.77.0.96/24` after **3 s** |
+| Boot, nobody logged in | `insane-netd` started together with the greeter; `lnt0` had `10.77.0.96/24` after **3 s** |
 | Remote desktop before login | `curl https://10.77.0.96:5673/` from the netns: **200** |
-| `lord` logs in on the monitor, `ana` (created in Settings → Users) over the network | two helpers connected to `netd.sock`; Settings → Network shows `lnt0` "por DHCP" |
-| `lord` logs out (it was the "first" session) | `lnt0` keeps its IP |
+| `insane` logs in on the monitor, `ana` (created in Settings → Users) over the network | two helpers connected to `netd.sock`; Settings → Network shows `lnt0` "por DHCP" |
+| `insane` logs out (it was the "first" session) | `lnt0` keeps its IP |
 | `ana` logs out too: no session left | `lnt0` keeps its IP and the remote desktop answers 200 |
-| `kill -9` on `lord-netd` | restarted in 1 s, lease `resume`: the address **never dropped** (sampled every 0.5 s) |
-| `systemctl restart lordos` | `lord-netd still running (pid …): the network was not interrupted`; killing it afterwards: restarted and resumed the same way |
+| `kill -9` on `insane-netd` | restarted in 1 s, lease `resume`: the address **never dropped** (sampled every 0.5 s) |
+| `systemctl restart insaneos` | `insane-netd still running (pid …): the network was not interrupted`; killing it afterwards: restarted and resumed the same way |
 
 | | |
 |---|---|
 | ![greeter](network-login-screen.png) | ![Settings → Network](network-session.png) |
-| Greeter right after boot, nobody logged in: the IP at the bottom. On this VM it is `eth0`'s (netplan); `lnt0`'s (lord-netd) was already up, as the log shows | Logged in: `lnt0` "por DHCP", brought up by `lord-netd` |
+| Greeter right after boot, nobody logged in: the IP at the bottom. On this VM it is `eth0`'s (netplan); `lnt0`'s (insane-netd) was already up, as the log shows | Logged in: `lnt0` "por DHCP", brought up by `insane-netd` |
 | ![greeter, no sessions](network-login-screen-no-sessions.png) | |
 | Both users logged out: back at the greeter, the network stays up | |
 
-A fix that came out of the test: `systemctl restart lordos` failed with "Failed to spawn executor:
-Device or resource busy" while processes were still alive (greeter, sessions and now `lord-netd`):
+A fix that came out of the test: `systemctl restart insaneos` failed with "Failed to spawn executor:
+Device or resource busy" while processes were still alive (greeter, sessions and now `insane-netd`):
 systemd tries to put the new main process in the service cgroup's root, which has controllers
-enabled. `lordos.service` now has `DelegateSubgroup=supervisor`.
+enabled. `insaneos.service` now has `DelegateSubgroup=supervisor`.
 
 ## What's there (tested in the VM)
 
 | Feature | How | Status |
 |---|---|---|
 | Interfaces, addresses, routes, counters, DNS | rtnetlink without root | ✅ |
-| Change notifications | rtnetlink groups in lord-server's `poll` → `__lordNet` | ✅ |
+| Change notifications | rtnetlink groups in insane-server's `poll` → `__insaneNet` | ✅ |
 | DHCPv4 | Our own client (RFC 2131). Uses AF_PACKET, renews at T1 by unicast and asks again at T2. DHCPRELEASE when stopping. | ✅ against dnsmasq: lease, renewal and release |
 | Static IP | address/prefix, gateway and DNS | ✅ |
 | DNS | With systemd-resolved: `resolvectl` per interface. Without resolved: `/etc/resolv.conf`. | ✅ resolved |
 | Coexistence with systemd-networkd | System interfaces are shown but not touched. `net-manage` hands them to Insane OS and `net-unmanage` gives them back. | ✅ with a test interface |
-| Coexistence with NetworkManager | Interfaces with `managed=true` in `/run/NetworkManager/devices/<ifindex>` (read without D-Bus) are system interfaces too: lord-netd doesn't start DHCP or wpa_supplicant on them. `net-manage` only knows how to take them from systemd-networkd. | ✅ code; found on a Raspberry Pi OS board (2026-10-18), where lord-netd had started a second DHCP client and wpa_supplicant |
+| Coexistence with NetworkManager | Interfaces with `managed=true` in `/run/NetworkManager/devices/<ifindex>` (read without D-Bus) are system interfaces too: insane-netd doesn't start DHCP or wpa_supplicant on them. `net-manage` only knows how to take them from systemd-networkd. | ✅ code; found on a Raspberry Pi OS board (2026-10-18), where insane-netd had started a second DHCP client and wpa_supplicant |
 | Wi-Fi WPA2-Personal and open networks | wpa_supplicant (Debian) through its control socket. The PSK is computed with PBKDF2. | ✅ scan, wrong key, connection and DHCP, reconnection on restart, forget (with mac80211_hwsim + hostapd) |
 | Wi-Fi WPA3 (SAE) | `sae_password` and `key_mgmt WPA-PSK SAE` | ⚠️ untested: the test hostapd is WPA2 |
 | WireGuard | Our own generic netlink (`WG_CMD_SET_DEVICE`/`GET_DEVICE`) and our own X25519 keys | ✅ against the official `wg`: split and full tunnel (0.0.0.0/0 with fwmark and rules like wg-quick), DNS, status |
@@ -197,25 +197,25 @@ and whether there are active VPNs, and opens that section.
 | ![cc](control-center-network.png) | |
 | Control Center: network and active VPNs | |
 
-## JS API: `lord.net` (read-only, without root)
+## JS API: `insane.net` (read-only, without root)
 
 | Call | Returns |
 |---|---|
-| `lord.net.interfaces()` | `[{ name, index, type, kind, up, carrier, operstate, mac, mtu, master, managed, rxBytes, txBytes, rxPackets, txPackets, rxErrors, txErrors, addresses: [{ family: 4\|6, address, prefix, scope: 'global'\|'link'\|'host', dynamic, validLifetime }], config }]` |
-| `lord.net.routes()` | `[{ family, dst: 'default'\|'a.b.c.d/n', gateway, dev, metric, table, protocol: 'kernel'\|'boot'\|'static'\|'dhcp'\|'ra'\|n }]` (without the local table or the fe80::/64 routes) |
-| `lord.net.dns()` | `{ source: 'systemd-resolved'\|'resolv.conf', servers: [...], search: [...] }` |
-| `lord.net.config(if)` | `{ method, addresses: [], gateway, dns: [] }` or `null` (what Insane OS saved) |
-| `lord.net.vpnList()` | No secrets. `[{ name, type: 'wireguard', ifname, server, address, fullTunnel, publicKey, peers }` \| `{ name, type: 'openvpn', ifname, server, needsAuth, hasCredentials }` \| `{ name, type: 'ipsec', ifname, server, auth: 'eap'\|'psk'\|'cert', user, fullTunnel, insecure: false }` \| `{ name, type: 'pptp'\|'openconnect'\|'fortinet', ifname, server, user, fullTunnel, insecure }]` (`insecure: true` only for PPTP) |
-| `lord.net.vpnTypes()` | `[{ type, available, optional, package, insecure }]` for the six types: `wireguard`, `openvpn`, `ipsec`, `pptp` (included) and `openconnect`, `fortinet` (`optional: true`: if `available` is `false`, the UI shows "Enable" → `net-vpn-enable`). `package`: the Debian packages needed. |
-| `lord.net.wifiKnown()` | `[{ ssid, security: 'psk'\|'open' }]` |
-| `lord.net.prepareOvpn(path)` | Text of the `.ovpn` with `ca`/`cert`/`key`/`tls-auth`/`tls-crypt`/`extra-certs` inlined from the same folder. Only accepts files inside `$HOME`; if a file is missing, it throws an error. |
-| `globalThis.__lordNet(what)` | Signals that `'link'`, `'addr'` or `'route'` changed. The app asks for the data again. |
+| `insane.net.interfaces()` | `[{ name, index, type, kind, up, carrier, operstate, mac, mtu, master, managed, rxBytes, txBytes, rxPackets, txPackets, rxErrors, txErrors, addresses: [{ family: 4\|6, address, prefix, scope: 'global'\|'link'\|'host', dynamic, validLifetime }], config }]` |
+| `insane.net.routes()` | `[{ family, dst: 'default'\|'a.b.c.d/n', gateway, dev, metric, table, protocol: 'kernel'\|'boot'\|'static'\|'dhcp'\|'ra'\|n }]` (without the local table or the fe80::/64 routes) |
+| `insane.net.dns()` | `{ source: 'systemd-resolved'\|'resolv.conf', servers: [...], search: [...] }` |
+| `insane.net.config(if)` | `{ method, addresses: [], gateway, dns: [] }` or `null` (what Insane OS saved) |
+| `insane.net.vpnList()` | No secrets. `[{ name, type: 'wireguard', ifname, server, address, fullTunnel, publicKey, peers }` \| `{ name, type: 'openvpn', ifname, server, needsAuth, hasCredentials }` \| `{ name, type: 'ipsec', ifname, server, auth: 'eap'\|'psk'\|'cert', user, fullTunnel, insecure: false }` \| `{ name, type: 'pptp'\|'openconnect'\|'fortinet', ifname, server, user, fullTunnel, insecure }]` (`insecure: true` only for PPTP) |
+| `insane.net.vpnTypes()` | `[{ type, available, optional, package, insecure }]` for the six types: `wireguard`, `openvpn`, `ipsec`, `pptp` (included) and `openconnect`, `fortinet` (`optional: true`: if `available` is `false`, the UI shows "Enable" → `net-vpn-enable`). `package`: the Debian packages needed. |
+| `insane.net.wifiKnown()` | `[{ ssid, security: 'psk'\|'open' }]` |
+| `insane.net.prepareOvpn(path)` | Text of the `.ovpn` with `ca`/`cert`/`key`/`tls-auth`/`tls-crypt`/`extra-certs` inlined from the same folder. Only accepts files inside `$HOME`; if a file is missing, it throws an error. |
+| `globalThis.__insaneNet(what)` | Signals that `'link'`, `'addr'` or `'route'` changed. The app asks for the data again. |
 
 Field values:
 - `type`: `ethernet`, `wifi`, `wireguard`, `tun`, `bridge`, `loopback`, `other` or the kernel's `kind` (`veth`, `vlan`, `bond`, `dummy`…).
 - `managed`:
   - `system`: managed by systemd-networkd or ifupdown. Insane OS doesn't touch it.
-  - `lordos`: it has a Insane OS configuration, or it is a Insane OS VPN.
+  - `insaneos`: it has a Insane OS configuration, or it is a Insane OS VPN.
   - `none`: free.
 - Counters: `interfaces()` does a fresh dump on every call, so for live traffic it is enough to call it every one or two seconds.
 
@@ -228,15 +228,15 @@ replies carry only data (a count, a public key).
 
 | Action | Argument | Who | Response |
 |---|---|---|---|
-| `net-restore` | — | anyone | With `lord-netd`, it runs it by itself at boot; the one each session sends answers `OK net.restoreSystem`. Without `lord-netd` (development) the first session applies it, noted in `/run/lordos/net-owner` while alive. It applies the configs in `/etc/lordos/net/if`, and free physical interfaces without a config go through DHCP (with Wi-Fi: wpa_supplicant plus the saved networks). `OK net.restored count=<n>` |
+| `net-restore` | — | anyone | With `insane-netd`, it runs it by itself at boot; the one each session sends answers `OK net.restoreSystem`. Without `insane-netd` (development) the first session applies it, noted in `/run/insaneos/net-owner` while alive. It applies the configs in `/etc/insaneos/net/if`, and free physical interfaces without a config go through DHCP (with Wi-Fi: wpa_supplicant plus the saved networks). `OK net.restored count=<n>` |
 | `net-up` / `net-down` | `if` | admin | `net-down` also stops its DHCP/wpa |
 | `net-config` | `if\nmethod=dhcp\|static\|off\naddress=ip/n\n…gateway=ip\ndns=ip…` | admin | Saves and applies. Rejects system interfaces. |
-| `net-manage` / `net-unmanage` | `if` | admin | Writes and deletes `/etc/systemd/network/00-lordos-<if>.network` (`Unmanaged=yes`) and runs `networkctl reload`. |
+| `net-manage` / `net-unmanage` | `if` | admin | Writes and deletes `/etc/systemd/network/00-insaneos-<if>.network` (`Unmanaged=yes`) and runs `networkctl reload`. |
 | `net-wifi-scan` | `if` | anyone | One `LOG` per network with `{ ssid, bssid, freq, signal, security: open\|wep\|wpa\|wpa2\|wpa2/wpa3\|wpa3\|enterprise, known }`, then `OK <n>` (≈3–10 s) |
 | `net-wifi-connect` | `if\nssid\npassword` (empty if open) | anyone | `OK wifi.connecting ssid=<ssid>`. The result arrives as an EVENT. |
 | `net-wifi-disconnect` | `if` | anyone | |
 | `net-wifi-forget` | `ssid` | admin | |
-| `net-vpn-import` | `type\nname\nconfig`, type `wireguard\|openvpn\|ipsec\|pptp\|openconnect\|fortinet` | admin | WireGuard: `OK <public key>`; with `PrivateKey = generate` it creates it. The others: `OK vpn.imported`. For OpenVPN, first `lord.net.prepareOvpn`. The formats are below. If the program is missing: `ERR vpn.missingProgram type=<type> package=<package>` |
+| `net-vpn-import` | `type\nname\nconfig`, type `wireguard\|openvpn\|ipsec\|pptp\|openconnect\|fortinet` | admin | WireGuard: `OK <public key>`; with `PrivateKey = generate` it creates it. The others: `OK vpn.imported`. For OpenVPN, first `insane.net.prepareOvpn`. The formats are below. If the program is missing: `ERR vpn.missingProgram type=<type> package=<package>` |
 | `net-vpn-enable` | `openconnect\|fortinet` | admin | Installs `openconnect` or `openfortivpn` with Insane OS's package engine (the same as `pkg-install`): `LOG progress …` and the package engine's `OK`. If it was already there: `OK vpn.alreadyInstalled`. |
 | `net-vpn-credentials` | `name\nuser\npassword` | admin | OpenVPN only. Stored with mode 0600. |
 | `net-vpn-trust` | `name\nsha256[\nhost]` | admin | Fortinet: the certificate the person accepted (64 hex digits, `:` allowed) becomes that server's trusted certificate (`trusted-cert=host@hex`), replacing an earlier one for the same server; without `host`, the untagged ones. `OK vpn.trusted`. Settings then calls `net-vpn-up` again. |
@@ -303,7 +303,7 @@ Settings' Fortinet form follows what the vendor's own client offers, as far as o
 | Single sign-on | **Authentication → Single sign-on** (see below). |
 | "Use external browser as user agent" | The only way Insane OS can do it: the SDK has no web view, so the page always opens in the default browser. The form shows it as a fixed line ("Sign-in page opens in: Default browser"), not as a choice. |
 | Auto-login with the identity provider from the OS account | Not applicable: Insane OS accounts aren't directory accounts. The browser keeps the identity provider's session, so after the first sign-in the page usually goes straight through (or only asks for the authenticator approval), which is the same effect. |
-| Client certificate | **Client certificate → Choose…**: the system file dialog; one PEM file with both, or the certificate and the key separately (`.pem`, `.crt`, `.cer`, `.key`). Settings takes the first `CERTIFICATE` block and the first private-key block (RSA, EC, PKCS#8, encrypted or not) and sends them to lord-netd, which keeps root-only copies (`/etc/lordos/net/vpn/<n>.cert.pem` and `.key.pem`, 0600) and passes them to openfortivpn as `user-cert` / `user-key` in its 0600 config. The key's pass phrase (**Key password**) goes into that same 0600 config as `pem-passphrase`, never on the command line. **PKCS#12 (`.p12`, `.pfx`) is not supported**: lord-netd has no PKCS#12 decoder (it needs ASN.1 plus RC2/3DES/AES and PBKDF), and adding one means a crypto library in the root network service; Settings says to export the certificate and key as PEM. A smartcard (`pkcs11:`) isn't offered either. A key that can't be loaded (wrong pass phrase, key of another certificate) is `vpn.fortiClientCert`. |
+| Client certificate | **Client certificate → Choose…**: the system file dialog; one PEM file with both, or the certificate and the key separately (`.pem`, `.crt`, `.cer`, `.key`). Settings takes the first `CERTIFICATE` block and the first private-key block (RSA, EC, PKCS#8, encrypted or not) and sends them to insane-netd, which keeps root-only copies (`/etc/insaneos/net/vpn/<n>.cert.pem` and `.key.pem`, 0600) and passes them to openfortivpn as `user-cert` / `user-key` in its 0600 config. The key's pass phrase (**Key password**) goes into that same 0600 config as `pem-passphrase`, never on the command line. **PKCS#12 (`.p12`, `.pfx`) is not supported**: insane-netd has no PKCS#12 decoder (it needs ASN.1 plus RC2/3DES/AES and PBKDF), and adding one means a crypto library in the root network service; Settings says to export the certificate and key as PEM. A smartcard (`pkcs11:`) isn't offered either. A key that can't be loaded (wrong pass phrase, key of another certificate) is `vpn.fortiClientCert`. |
 | Dual-stack IPv4/IPv6 | **Not offered**: openfortivpn 1.23.1 only brings up IPv4 inside the tunnel (it has no IPv6 address or route handling), so a switch would do nothing. |
 
 ### Fortinet with single sign-on
@@ -317,7 +317,7 @@ sign-in page (an identity provider over SAML, often with an authenticator-app ap
    gateway." — TLS is up and the certificate was accepted. If the certificate can't be verified,
    the person is asked now (see below), not after signing in. An unreachable gateway is reported
    here too.
-2. **The sign-in page.** lord-netd listens on `127.0.0.1:<sso-port>` (loopback only) and sends
+2. **The sign-in page.** insane-netd listens on `127.0.0.1:<sso-port>` (loopback only) and sends
    `net vpn <name> sso https://<host>:<port>/remote/saml/start?redirect=1`. The Settings that asked
    to connect opens that address in the default browser (`openUrl`, the `x-scheme-handler/https`
    app) and shows "Waiting for you to sign in on the organization's page…" with the time left,
@@ -334,7 +334,7 @@ sign-in page (an identity provider over SAML, often with an authenticator-app ap
 Why Insane OS listens itself instead of leaving it to `--saml-login`: openfortivpn 1.23 waits only
 5 × 10 s for the browser, too little for a person typing a password and approving on a phone.
 
-The per-app firewall doesn't get in the way: lord-netd is a system service, not an app, and the
+The per-app firewall doesn't get in the way: insane-netd is a system service, not an app, and the
 browser's connection to `127.0.0.1` is loopback, which the firewall never filters — except for an
 app given the "no LAN" rule, which also covers `127.0.0.1` (docs/FIREWALL.md); a browser with that
 rule can't complete the sign-in.
@@ -345,7 +345,7 @@ openfortivpn accepts a gateway whose certificate chains to a known authority and
 name, or whose sha256 fingerprint is in `trusted-cert`. A gateway that sends its certificate without
 the intermediate one fails that check on Linux even when other systems accept it (they fetch the
 missing intermediate from the address in the certificate). openfortivpn then prints the certificate's
-subject, issuer and fingerprint; `forti.c` reads that block and lord-netd sends
+subject, issuer and fingerprint; `forti.c` reads that block and insane-netd sends
 `net vpn <name> untrusted-cert {"sha256", "subject", "issuer", "changed"}`. Settings shows "This
 server's certificate couldn't be verified", the fingerprint as `AB:CD:…`, who it was issued to and by,
 and that the server may be sending an incomplete certificate chain. **Trust** (administrators) is
@@ -354,7 +354,7 @@ shows another one, `changed` is true and Settings says the certificate changed (
 A renewed certificate means trusting it again.
 
 Completing the chain automatically (downloading the intermediate from the certificate's address and
-passing it as `--ca-file`) was left out: lord-netd is libc-only, with no TLS or X.509 code of its own,
+passing it as `--ca-file`) was left out: insane-netd is libc-only, with no TLS or X.509 code of its own,
 and doing it would mean linking a TLS library into the root network service or running another tool
 to read the server's certificate. The fingerprint is openfortivpn's own mechanism.
 
@@ -369,7 +369,7 @@ line as `vpn.fortiFailed detail=<text>`.
 - `0.0.0.0/1` and `128.0.0.0/1` through the tunnel;
 - a `/32` route to the server through where it went before.
 
-All three use protocol 76 (`RTPROT_LORDOS`): they're deleted on disconnect, and `net-restore` deletes any left over from an interruption.
+All three use protocol 76 (`RTPROT_INSANEOS`): they're deleted on disconnect, and `net-restore` deletes any left over from an interruption.
 
 ### Notifications (`admin.onEvent`, text)
 
@@ -404,7 +404,7 @@ daemon <process> exit <code>   (end of "if:<if>", "wpa:<if>", "vpn:<name>")
   - Insane OS adds `script-security 1` (only openvpn's own programs, such as `ip`), its own management interface and `verb 3`.
   - DNS servers pushed by the server are read from the `PUSH_REPLY` and applied by Insane OS, because OpenVPN doesn't apply them without scripts.
 - **IPsec.**
-  - Each VPN has its own `charon` with a generated `strongswan.conf`. The file goes in `/etc/strongswan.d/lordos/<n>.conf` (0600) and the VICI socket in `/run/charon.lordos-<n>.vici`.
+  - Each VPN has its own `charon` with a generated `strongswan.conf`. The file goes in `/etc/strongswan.d/insaneos/<n>.conf` (0600) and the VICI socket in `/run/charon.insaneos-<n>.vici`.
   - Those paths are the ones Debian's AppArmor profile allows for charon: with others, charon doesn't start ("invalid configuration"). The system's `strongswan.conf` doesn't include that folder.
   - charon loads only the plugins Insane OS names: no `updown` (scripts) or `stroke`.
   - Keys, passwords and certificates travel over VICI with our own client. swanctl isn't used because its AppArmor profile only lets it talk to `/run/charon.vici`.
@@ -415,12 +415,12 @@ daemon <process> exit <code>   (end of "if:<if>", "wpa:<if>", "vpn:<name>")
   - `ip-up`/`ip-down` point to a file that doesn't exist, and there is no way to add `plugin`, `connect` or any other option.
   - Only MS-CHAPv2 is accepted: PAP, CHAP, MS-CHAP and EAP are rejected.
 - **OpenConnect.**
-  - Its `--script` is `/etc/lordos/net/oc-script`, with fixed content. It only records in `/run/lordos/oc/<if>.connect` the variables the server sends (address, routes, DNS), and Insane OS validates and applies them. vpnc-script isn't used.
+  - Its `--script` is `/etc/insaneos/net/oc-script`, with fixed content. It only records in `/run/insaneos/oc/<if>.connect` the variables the server sends (address, routes, DNS), and Insane OS validates and applies them. vpnc-script isn't used.
   - The server certificate is validated against the system CAs or the `servercert` (pin) from the import.
 - **Fortinet.** openfortivpn runs with `set-routes = 0`, `set-dns = 0` and `pppd-use-peerdns = 0`: Insane OS sets routes and DNS. With `set-routes` it would change the system's default route. The pppd that openfortivpn launches does run the system's `/etc/ppp/ip-up.d` scripts; they don't belong to the user.
 - **Secrets.**
-  - They go in `/etc/lordos/net/vpn/<n>.conf|.ovpn|.auth|.ipsec|.pptp|.openconnect|.fortinet|.<ca|cert|key>.pem` and `/etc/lordos/net/wifi/<ssid-hex>.key`, root 0600.
-  - Also in the generated configs: `/etc/lordos/net/ppp/<n>.options` and `/etc/lordos/net/fortinet/<n>.conf`, 0600.
+  - They go in `/etc/insaneos/net/vpn/<n>.conf|.ovpn|.auth|.ipsec|.pptp|.openconnect|.fortinet|.<ca|cert|key>.pem` and `/etc/insaneos/net/wifi/<ssid-hex>.key`, root 0600.
+  - Also in the generated configs: `/etc/insaneos/net/ppp/<n>.options` and `/etc/insaneos/net/fortinet/<n>.conf`, 0600.
   - The UI only sees the public `.json` files (0644). No action returns a private key; the public one, yes.
 - **DNS.** It is only changed on Insane OS interfaces (never on `managed: system` ones) and only from the system's network namespace (`sys.c`).
   - Why the namespace matters: `resolvectl` talks to the system's systemd-resolved with the interface number from its own namespace. Launched from another netns, that number may be eth0's.
@@ -429,15 +429,15 @@ daemon <process> exit <code>   (end of "if:<if>", "wpa:<if>", "vpn:<name>")
 
 ## Resident processes
 
-They are children of `lord-netd` (or, without it, of the session's helper), which starts them with `admin_daemon_*`:
+They are children of `insane-netd` (or, without it, of the session's helper), which starts them with `admin_daemon_*`:
 
 | Process | What it is |
 |---|---|
 | `if:<if>` | DHCP client. On Wi-Fi it also translates wpa_supplicant's notifications. `SIGUSR2`: confirm the lease now (after waking from sleep). |
-| `wpa:<if>` | wpa_supplicant. Leaves a pidfile in `/run/lordos/wpa/<if>.pid` to kill one left over from a previous session. |
+| `wpa:<if>` | wpa_supplicant. Leaves a pidfile in `/run/insaneos/wpa/<if>.pid` to kill one left over from a previous session. |
 | `vpn:<name>` | Drives openvpn, charon, pppd, openconnect or openfortivpn. The program dies with it (`PDEATHSIG`). |
 
-If `lord-netd` restarts, it brings everything back up and resumes the DHCP leases and the VPNs that were up. After a shutdown, VPNs don't reconnect by themselves.
+If `insane-netd` restarts, it brings everything back up and resumes the DHCP leases and the VPNs that were up. After a shutdown, VPNs don't reconnect by themselves.
 
 ## How to reproduce the test
 
@@ -446,10 +446,10 @@ Nothing touches eth0, where SSH comes in. Everything runs on veth, network names
 ```sh
 make -C server build/net-test
 ./build/net-test crypto     # X25519 (RFC 7748), WPA PBKDF2 (IEEE 802.11i), base64
-./build/net-test state      # what lord.net sees
+./build/net-test state      # what insane.net sees
 ```
 
-`sudo net-test act <action> '<arg with \n>'` runs an action like the helper does. `@file` adds a file. Resident processes leave their log in `/run/lordos/test/<process>.log`.
+`sudo net-test act <action> '<arg with \n>'` runs an action like the helper does. `@file` adds a file. Resident processes leave their log in `/run/insaneos/test/<process>.log`.
 
 **DHCP**
 
@@ -489,7 +489,7 @@ There you get rules 32764 (`main suppress_prefixlength 0`) and 32765 (`not fwmar
 
 1. A PKI with `openssl` and an openvpn 2.6 server in `lnw` (UDP 1194, `tls-crypt`, `auth-user-pass-verify`, DNS and route push).
 2. The client's `.ovpn` references the files next to it (`ca ca.crt`…).
-3. `net-test ovpn-inline` (the same as `lord.net.prepareOvpn`), then `net-vpn-import`, `net-vpn-credentials` and `net-vpn-up`.
+3. `net-test ovpn-inline` (the same as `insane.net.prepareOvpn`), then `net-vpn-import`, `net-vpn-credentials` and `net-vpn-up`.
 
 **Wi-Fi**
 
@@ -504,14 +504,14 @@ sudo ./build/net-test act net-wifi-connect 'wlan0\nInsaneTest\nclave-segura-1'
 
 **IPsec**
 
-1. A server `charon` in `lnw`, with a private `/run` (`unshare -m` + tmpfs) and its config in `/etc/strongswan.d/lordtest/` and `/etc/swanctl/lordtest/`, because of AppArmor.
+1. A server `charon` in `lnw`, with a private `/run` (`unshare -m` + tmpfs) and its config in `/etc/strongswan.d/insanetest/` and `/etc/swanctl/insanetest/`, because of AppArmor.
 2. The `eap` connections (EAP-MSCHAPv2, server certificate from a test CA) and `psk`, with pool `10.20.0.0/24`, DNS `10.21.0.1` and `local_ts 10.21.0.0/24`.
 3. On the client:
 
 ```
 server=10.88.0.2
 auth=eap
-user=lord
+user=insane
 password=s3creta
 routes=10.21.0.0/24
 ca=-----BEGIN CERTIFICATE-----
@@ -542,7 +542,7 @@ Then `net-vpn-import` and `net-vpn-up`. Result: `connected 10.20.0.1`, ping to 1
    sign-in page and Settings waited with the time left; **Cancel** stopped it. The sign-in itself and
    the tunnel need the organization's account.
 
-**To clean up:** `ip netns del …`, `rmmod mac80211_hwsim` and delete `/etc/lordos/net/if`.
+**To clean up:** `ip netns del …`, `rmmod mac80211_hwsim` and delete `/etc/insaneos/net/if`.
 
 ## Packages in the VM
 
@@ -569,7 +569,7 @@ Already there: `openssl` (test PKI), systemd-networkd, systemd-resolved and the 
 - **VPN, more:** several IPsec connections at once, which today isn't possible because of charon's single pidfile. IPv6 inside the PPTP, OpenConnect and Fortinet tunnels (today IPv4 only).
 - **Wi-Fi:** test WPA3/SAE with an SAE hostapd; WPA-Enterprise (802.1X); hidden networks from the UI; choosing among several BSSIDs.
 - **IPv6:** DHCPv6 (today the kernel does SLAAC on its own) and DNS via RA (RDNSS).
-- **VPN at boot:** a per-VPN "connect automatically" option. Today interfaces, Wi-Fi and the VPNs that were up before a `lord-netd` restart are restored, but not those from before a shutdown.
+- **VPN at boot:** a per-VPN "connect automatically" option. Today interfaces, Wi-Fi and the VPNs that were up before a `insane-netd` restart are restored, but not those from before a shutdown.
 - **After waking from sleep:** confirm on a radio that loses its association while asleep (issue #14) that the check notices it and that re-associating, or turning the card off and on, brings it back.
-- **Test `lord-netd` with a real physical NIC and Wi-Fi** on a system installed from the ISO (on VM 119 it was tested with a veth and `lord-sessiond` installed like the `.deb`).
+- **Test `insane-netd` with a real physical NIC and Wi-Fi** on a system installed from the ISO (on VM 119 it was tested with a veth and `insane-sessiond` installed like the `.deb`).
 - **ifupdown:** interfaces in `/etc/network/interfaces` show up as system ones, but `net-manage` doesn't yet know how to take them out of there.

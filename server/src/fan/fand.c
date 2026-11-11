@@ -1,10 +1,10 @@
-/* fand.c — lord-fand: the root service that drives the fans by temperature (docs/FANS.md).
- * Closed and minimal, like lord-netperm:
+/* fand.c — insane-fand: the root service that drives the fans by temperature (docs/FANS.md).
+ * Closed and minimal, like insane-netperm:
  *
  *   - executes nothing and opens no network sockets (the unit forbids every family but AF_UNIX);
  *   - reads the CPU temperature every FAND_TICK_MS and writes each fan's duty (fan/fanhw.c);
- *   - its configuration is /etc/lordos/fan.json, written only here, after validating;
- *   - talks to sessions over /run/lordos/fand.sock (0666) with one line per connection:
+ *   - its configuration is /etc/insaneos/fan.json, written only here, after validating;
+ *   - talks to sessions over /run/insaneos/fand.sock (0666) with one line per connection:
  *       STATUS                     anyone: a JSON line with temperature, fans, profile, step and
  *                                  whether this peer may change them ("canChange")
  *       PROFILE <name> / CURVE <t:p,...> / FORCE off|on|<minutes> / GPUFAN <n> auto|<pct>
@@ -12,12 +12,12 @@
  *                                  sudo, admin or wheel): "OK" or "ERR <code>"
  *     GPUFAN (0.8.8.6): an amdgpu card's fan by hand, n from our own scan, pct clamped to 30..100 %. Never saved;
  *     it goes back to automatic when asked, above 85 °C, after read/write errors, when the session of the user who
- *     set it ends (no lord-server of that uid), and on stop, restart or crash (fanhw.h).
+ *     set it ends (no insane-server of that uid), and on stop, restart or crash (fanhw.h).
  *     Clients never name paths or devices: the daemon drives every fan it found.
- *   - on SIGTERM/SIGINT, and in `lord-fand --restore` (the unit's ExecStopPost, which also runs
+ *   - on SIGTERM/SIGINT, and in `insane-fand --restore` (the unit's ExecStopPost, which also runs
  *     after a crash), the fans go back to the kernel or the firmware.
  *
- * Other modes, for diagnosis: `lord-fand --detect` prints what it found and exits.
+ * Other modes, for diagnosis: `insane-fand --detect` prints what it found and exits.
  * For tests only (never in the unit): --root DIR (sysfs root), --config FILE, --run DIR. */
 #include "fan/fancurve.h"
 #include "fan/fanhw.h"
@@ -60,7 +60,7 @@ static struct {
     int out_pct;          /* what the fans were asked for */
     int controlling;      /* 1 while we drive the fans (profile != auto or forced) */
     Client cl[FAND_CLIENTS];
-} S = { .root = "", .config = "/etc/lordos/fan.json", .run = "/run/lordos", .step = -1 };
+} S = { .root = "", .config = "/etc/insaneos/fan.json", .run = "/run/insaneos", .step = -1 };
 
 static volatile sig_atomic_t quit;
 static void on_signal(int s) { (void)s; quit = 1; }
@@ -87,7 +87,7 @@ static void load_config(void) {
     close(fd);
     char err[96] = "";
     if (r < 0 || fan_config_parse(buf, (size_t)r, &S.cfg, err, sizeof err))
-        fprintf(stderr, "lord-fand: %s ignored (%s), using defaults\n", S.config, r < 0 ? "not a root-owned file" : err);
+        fprintf(stderr, "insane-fand: %s ignored (%s), using defaults\n", S.config, r < 0 ? "not a root-owned file" : err);
 }
 
 static int save_config(void) {
@@ -231,7 +231,7 @@ static void handle(Client *c) {
         if (r.gpu >= S.hw.ng) { reply(c->fd, "ERR fan.noGpuFan\n", 17); return; }
         if (r.pct < 0) fanhw_gpu_auto(&S.hw, r.gpu, GR_NONE, S.state);
         else if (fanhw_gpu_manual(&S.hw, r.gpu, r.pct, uid, S.state)) { reply(c->fd, "ERR fan.gpuRefused\n", 19); return; }
-        fprintf(stderr, "lord-fand: %s (uid %u)\n", c->buf, uid);
+        fprintf(stderr, "insane-fand: %s (uid %u)\n", c->buf, uid);
         reply(c->fd, "OK\n", 3);
         return;
     }
@@ -243,7 +243,7 @@ static void handle(Client *c) {
         S.cfg.force_until = r.force == FF_TIMED ? wall_s() + (long long)r.minutes * 60 : 0;
     }
     if (save_config()) { S.cfg = old; reply(c->fd, "ERR fan.saveFailed\n", 19); return; }
-    fprintf(stderr, "lord-fand: %s\n", c->buf);
+    fprintf(stderr, "insane-fand: %s\n", c->buf);
     apply_profile();
     tick();
     reply(c->fd, "OK\n", 3);
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--root") && i + 1 < argc) S.root = argv[++i];
         else if (!strcmp(argv[i], "--config") && i + 1 < argc) S.config = argv[++i];
         else if (!strcmp(argv[i], "--run") && i + 1 < argc) S.run = argv[++i];
-        else { fprintf(stderr, "usage: lord-fand [--detect | --restore]\n"); return 2; }
+        else { fprintf(stderr, "usage: insane-fand [--detect | --restore]\n"); return 2; }
     }
     if (strlen(S.run) > 100 || strlen(S.config) > 200) return 2;
     snprintf(S.sock, sizeof S.sock, "%s/fand.sock", S.run);
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
     if (mode_restore) {
         if (access(S.state, F_OK)) return 0;          /* nothing taken */
         int r = fanhw_restore_file(S.root, S.state);
-        fprintf(stderr, "lord-fand: fans given back to the kernel/firmware%s\n", r ? " (partially)" : "");
+        fprintf(stderr, "insane-fand: fans given back to the kernel/firmware%s\n", r ? " (partially)" : "");
         return 0;
     }
     /* a previous run that died without cleaning up: undo it before reading the "original" values */
@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
 
     load_config();
     apply_profile();
-    fprintf(stderr, "lord-fand: %d fan(s), %d firmware fan(s), temperature from %s, profile %s\n",
+    fprintf(stderr, "insane-fand: %d fan(s), %d firmware fan(s), temperature from %s, profile %s\n",
             S.hw.n, S.hw.nro, S.hw.temp_src[0] ? S.hw.temp_src : "nothing", fan_profile_name(S.cfg.profile));
 
     struct sigaction sa = { .sa_handler = on_signal };
@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
     signal(SIGPIPE, SIG_IGN);
 
     int lfd = listen_sock();
-    if (lfd < 0) fprintf(stderr, "lord-fand: %s: %s (fans still controlled, no settings)\n", S.sock, strerror(errno));
+    if (lfd < 0) fprintf(stderr, "insane-fand: %s: %s (fans still controlled, no settings)\n", S.sock, strerror(errno));
     for (int i = 0; i < FAND_CLIENTS; i++) S.cl[i].fd = -1;
 
     long long next = now_ms();
@@ -367,6 +367,6 @@ int main(int argc, char **argv) {
     for (int i = 0; i < S.hw.ng; i++) if (S.hw.g[i].manual) fanhw_gpu_auto(&S.hw, i, GR_STOP, NULL);
     unlink(S.state);
     if (lfd >= 0) { close(lfd); unlink(S.sock); }
-    fprintf(stderr, "lord-fand: stopped, fans given back to the kernel/firmware\n");
+    fprintf(stderr, "insane-fand: stopped, fans given back to the kernel/firmware\n");
     return 0;
 }

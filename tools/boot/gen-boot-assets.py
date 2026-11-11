@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """gen-boot-assets.py: renders the boot splash (Plymouth) and boot menu (GRUB) images.
 
-Everything comes from our own vectors: the crown is assets/brand/crown.svg and the wordmark is the
+Everything comes from our own vectors: the apple is assets/brand/apple.svg and the wordmark is the
 text of assets/brand/logo-horizontal-dark.svg (already converted to paths, Plus Jakarta Sans). The
 bar, the glow and the menu pieces are drawn here as small SVGs. Needs rsvg-convert.
 
     python3 tools/boot/gen-boot-assets.py
 
-Writes tools/boot/plymouth/lordos/*.png (1x and @2x) and tools/iso/grub/lordos/*.png. The GRUB
+Writes tools/boot/plymouth/insaneos/*.png (1x and @2x) and tools/iso/grub/insaneos/*.png. The GRUB
 fonts (*.pf2) are made with grub-mkfont, see docs/ISO.md, "Boot splash and boot menu".
 See docs/brand/README.md, "Boot splash".
 """
@@ -18,14 +18,14 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PLY = os.path.join(ROOT, "tools/boot/plymouth/lordos")
-GRUB = os.path.join(ROOT, "tools/iso/grub/lordos")
-CROWN = os.path.join(ROOT, "assets/brand/crown.svg")
+PLY = os.path.join(ROOT, "tools/boot/plymouth/insaneos")
+GRUB = os.path.join(ROOT, "tools/iso/grub/insaneos")
+APPLE = os.path.join(ROOT, "assets/brand/apple.svg")
 LOGO = os.path.join(ROOT, "assets/brand/logo-horizontal-dark.svg")
 
-# brand colours (docs/LORDOS-BRAND.md)
+# brand colours (docs/INSANEOS-BRAND.md)
 BG_TOP, BG_BOTTOM = "#12122A", "#0B0B1C"
-VIOLET, LILAC = "#6E4BFF", "#B46CFF"
+VIOLET, LILAC = "#F7701C", "#FF9A3C"   # the brand orange/amber (names keep the diff small)
 
 
 def render(svg, out, w=None, h=None):
@@ -53,9 +53,9 @@ def svg(w, h, body, defs=""):
 
 
 def wordmark_svg():
-    """The wordmark alone: the paths of logo-horizontal-dark.svg that come after the crown group."""
+    """The wordmark alone: the paths of logo-horizontal-dark.svg that come after the apple group."""
     s = open(LOGO).read()
-    # the crown is the first <g transform=...>…</g> block (with its nested clip group); the
+    # the apple is the first <g transform=...>…</g> block (with its nested clip group); the
     # wordmark is the remaining top-level paths
     head, rest = s.split("<g transform=", 1)
     depth, i = 0, 0
@@ -88,8 +88,8 @@ def plymouth(scale):
     sfx = "" if scale == 1 else "@2x"
     p = lambda n: os.path.join(PLY, f"{n}{sfx}.png")
     s = scale
-    render_file(CROWN, p("crown"), 112 * s)
-    # soft violet glow behind the crown
+    render_file(APPLE, p("apple"), 112 * s)
+    # soft violet glow behind the apple
     g = 420 * s
     render(svg(g, g, f'<circle cx="{g/2}" cy="{g/2}" r="{g/2}" fill="url(#r)"/>',
                f'<radialGradient id="r"><stop offset="0" stop-color="{VIOLET}" stop-opacity=".30"/>'
@@ -129,7 +129,7 @@ def grub():
                f'<stop offset=".5" stop-color="{VIOLET}" stop-opacity=".07"/>'
                f'<stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/></radialGradient>'),
            os.path.join(GRUB, "background.png"))
-    render_file(CROWN, os.path.join(GRUB, "crown.png"), 96)
+    render_file(APPLE, os.path.join(GRUB, "apple.png"), 96)
     # 9-slice pieces of the selected entry (rounded, translucent violet), 12 px corners
     # GRUB draws the corners and edges *around* the item box, so they stay small (8 px)
     c = 8
@@ -174,23 +174,23 @@ def uri(path):
 
 
 def preview(out, progress=0.6, password=False, W=1920, H=1080):
-    """A static picture of the splash, laid out exactly like lordos.script does at 1x."""
+    """A static picture of the splash, laid out exactly like insaneos.script does at 1x."""
     img = lambda n: os.path.join(PLY, n + ".png")
     def place(name, x, y, opacity=1.0, w=None):
         iw, ih = png_size(img(name))
         w = iw if w is None else w
         return (f'<image x="{x}" y="{y}" width="{w}" height="{ih}" opacity="{opacity}" '
                 f'preserveAspectRatio="none" xlink:href="{uri(img(name))}"/>')
-    cw, ch = png_size(img("crown"))
+    cw, ch = png_size(img("apple"))
     gw, gh = png_size(img("glow"))
     tw, th = png_size(img("track"))
     ww, wh = png_size(img("wordmark"))
     cx, cy = W / 2, H / 2
-    crown_y = cy - ch / 2 - 40
-    bar_y = crown_y + ch + 56
+    apple_y = cy - ch / 2 - 40
+    bar_y = apple_y + ch + 56
     body = [f'<rect width="{W}" height="{H}" fill="url(#v)"/>',
-            place("glow", cx - gw / 2, crown_y + ch / 2 - gh / 2),
-            place("crown", cx - cw / 2, crown_y)]
+            place("glow", cx - gw / 2, apple_y + ch / 2 - gh / 2),
+            place("apple", cx - cw / 2, apple_y)]
     if password:
         ew, eh = png_size(img("entry"))
         lw, lh = png_size(img("lock"))

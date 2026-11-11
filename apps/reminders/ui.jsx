@@ -1,10 +1,10 @@
 // ui.jsx — small widgets shared by Calendar, Contacts and Reminders (each app keeps its own copy,
-// since apps only import from '@lordos/sdk'): popovers drawn above the window, sheets, drop-down
+// since apps only import from '@insaneos/sdk'): popovers drawn above the window, sheets, drop-down
 // choices, a multi-line field, date and time fields with a month picker, and color swatches.
 import {
   View, Text, useTheme, useStore, createStore, useAppWindow, direction, ScrollView, Button, Hairline, takeTextFocus, releaseTextFocus,
   weekdayName, formatTime, formatDate, t,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 export const RED = '#ff3b30';
@@ -50,7 +50,7 @@ export function Layers() {
   const all = useStore(layers);
   const root = useRef(null);
   const mine = all.filter((x) => x.win === id);
-  if (root.current) { try { origin = lord.getLayout(root.current.id); } catch (e) { /* not laid out yet */ } }
+  if (root.current) { try { origin = insane.getLayout(root.current.id); } catch (e) { /* not laid out yet */ } }
   return (
     <>
       <View ref={root} style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, pointerEvents: 'none' }} />
@@ -66,11 +66,11 @@ function PopBox({ anchor, onClose, width = 240, children, padding = 6 }) {
   const [, force] = useState(0);
   const o = origin || [0, 0, 800, 600];
   let a = null;
-  try { a = anchor?.current ? lord.getLayout(anchor.current.id) : null; } catch (e) { a = null; }
+  try { a = anchor?.current ? insane.getLayout(anchor.current.id) : null; } catch (e) { a = null; }
   useEffect(() => {
     if (!a) { const id = setTimeout(() => force((v) => v + 1), 16); return () => clearTimeout(id); }
     if (!box.current) return undefined;
-    const h = lord.getLayout(box.current.id)[3];
+    const h = insane.getLayout(box.current.id)[3];
     const below = a[1] - o[1] + a[3] + 4;
     const want = below + h > o[3] - 6 && a[1] - o[1] - h - 4 > 6;
     if (want !== flip) setFlip(want);
@@ -208,7 +208,7 @@ export function TextArea({ value, onChange, placeholder, minHeight = 64 }) {
   }, [focus]);
   const onKey = (e) => {
     const { value: v, onChange: set } = latest.current;
-    if ((e.ctrl || e.meta) && e.base === 'v') { try { set(v + lord.clipboard.get()); } catch (err) { /* no clipboard */ } return; }
+    if ((e.ctrl || e.meta) && e.base === 'v') { try { set(v + insane.clipboard.get()); } catch (err) { /* no clipboard */ } return; }
     if (e.key === 'Backspace') set([...v].slice(0, -1).join(''));
     else if (e.key === 'Enter') set(`${v}\n`);
     else if (e.key === 'Escape') { releaseTextFocus(token); setFocus(false); }

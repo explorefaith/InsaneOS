@@ -1,13 +1,13 @@
 #!/bin/sh
-# One-time CloudFront change so lordos.org can serve the APT repository (docs/UPDATES.md,
+# One-time CloudFront change so insaneos.org can serve the APT repository (docs/UPDATES.md,
 # "Serving it"): two cache behaviors, apt/* and apt-staging/*, copied from the default one but
 # serving plain HTTP as is (allow-all: Insane OS's package engine reads https sources over http and
-# trusts the signatures, like apt with deb.debian.org) and without the lordos-router function
+# trusts the signatures, like apt with deb.debian.org) and without the insaneos-router function
 # (it would turn InRelease, Release and Packages into <path>/index.html).
 #
 #   tools/web/cdn-apt-behaviors.sh <aws-profile-that-can-update-the-distribution>
 #
-# The deploy profile ("lordos") cannot change the distribution; run this with the account's
+# The deploy profile ("insaneos") cannot change the distribution; run this with the account's
 # administrator profile. Idempotent: running it again replaces the two behaviors with fresh copies.
 # Then check with: tools/release/apt-repo.sh verify staging
 set -eu

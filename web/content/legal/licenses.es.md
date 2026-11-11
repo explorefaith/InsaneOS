@@ -6,13 +6,13 @@ El código propio de Insane OS (el entorno de escritorio, el servidor gráfico y
 >
 > Se concede permiso, sin cargo, a cualquier persona que obtenga una copia de este software y de los archivos de documentación asociados, para usar el software sin restricciones, incluidos sin limitación los derechos de usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias, con la condición de incluir el aviso de copyright y este aviso de permiso en todas las copias o partes sustanciales del software. El software se ofrece "tal cual", sin garantía de ningún tipo.
 
-Esto es un resumen; el que se aplica es el [texto completo de la licencia](https://github.com/lordbasex/Insane OS/blob/main/LICENSE) (en inglés).
+Esto es un resumen; el que se aplica es el [texto completo de la licencia](https://github.com/insaneos/Insane OS/blob/main/LICENSE) (en inglés).
 
 La licencia MIT cubre el código. No da derechos sobre el nombre Insane OS, el logo de la corona ni Lumo, la mascota: mirá la [Política de marca](/legal/trademark/).
 
 ## Componentes de terceros incluidos en Insane OS
 
-Estos componentes están en el repositorio de Insane OS (`third_party/` y `assets/`) y mantienen sus propias licencias. La lista completa está en [THIRD_PARTY.md](https://github.com/lordbasex/Insane OS/blob/main/THIRD_PARTY.md).
+Estos componentes están en el repositorio de Insane OS (`third_party/` y `assets/`) y mantienen sus propias licencias. La lista completa está en [THIRD_PARTY.md](https://github.com/insaneos/Insane OS/blob/main/THIRD_PARTY.md).
 
 | Componente | Para qué se usa | Licencia |
 |---|---|---|
@@ -40,12 +40,12 @@ Insane OS está construido sobre Debian. El sistema base, el kernel Linux, Mesa,
 
 En un sistema instalado, el copyright y la licencia de cada paquete están en `/usr/share/doc/<package>/copyright`. El código fuente de los paquetes de Debian está disponible en Debian ([sources.debian.org](https://sources.debian.org)).
 
-Insane OS enlaza dinámicamente algunas bibliotecas del sistema: libwayland y libxkbcommon (MIT), Mesa (MIT), OpenSSL 3 (Apache-2.0), libcrypt (LGPL-2.1+), Poppler, cairo, FreeType y fontconfig (GPL-2.0-or-later, LGPL, FTL), libarchive (BSD-2-Clause) y FFmpeg y libva (LGPL-2.1+; la compilación de FFmpeg de Debian es GPL-2.0-or-later). Los procesos auxiliares `lord-doc` y `lord-media` enlazan Poppler y el FFmpeg de Debian, así que esos dos binarios, tal como se distribuyen, quedan cubiertos por la GPL; el código fuente de Insane OS con licencia MIT del que se compilan es compatible con ella.
+Insane OS enlaza dinámicamente algunas bibliotecas del sistema: libwayland y libxkbcommon (MIT), Mesa (MIT), OpenSSL 3 (Apache-2.0), libcrypt (LGPL-2.1+), Poppler, cairo, FreeType y fontconfig (GPL-2.0-or-later, LGPL, FTL), libarchive (BSD-2-Clause) y FFmpeg y libva (LGPL-2.1+; la compilación de FFmpeg de Debian es GPL-2.0-or-later). Los procesos auxiliares `insane-doc` y `insane-media` enlazan Poppler y el FFmpeg de Debian, así que esos dos binarios, tal como se distribuyen, quedan cubiertos por la GPL; el código fuente de Insane OS con licencia MIT del que se compilan es compatible con ella.
 
-Desde la 0.8.7 `lordos` también depende de FreeRDP (Apache-2.0), rclone (MIT), fuse3 (LGPL-2.1, GPL-2.0) y el cliente OpenSSH (BSD). El ítem Disk Formats de la Tienda, que no viene preinstalado, trae ntfs-3g y exfatprogs (GPL-2.0), dosfstools (GPL-3.0) y, en amd64, apfs-dkms (GPL-2.0). Los fondos en movimiento son de dominio público, CC0, CC BY y CC BY-SA, con créditos en Ajustes y en su repositorio.
+Desde la 0.8.7 `insaneos` también depende de FreeRDP (Apache-2.0), rclone (MIT), fuse3 (LGPL-2.1, GPL-2.0) y el cliente OpenSSH (BSD). El ítem Disk Formats de la Tienda, que no viene preinstalado, trae ntfs-3g y exfatprogs (GPL-2.0), dosfstools (GPL-3.0) y, en amd64, apfs-dkms (GPL-2.0). Los fondos en movimiento son de dominio público, CC0, CC BY y CC BY-SA, con créditos en Ajustes y en su repositorio.
 
-Desde la 0.8.8 `lordos` también depende de polkit (`polkitd` y `pkexec`, LGPL-2.0 o posterior), para que las apps de Linux que piden permisos de administrador reciban el aviso de administrador de Insane OS, y recomienda libnss-mdns (LGPL-2.1 o posterior), que resuelve los nombres `.local`. Las imágenes suman wireless-regdb (ISC), la base de datos de las reglas de Wi-Fi de cada país, y libnss-mdns; las ISO además traen firmware-brcm80211, firmware de Wi-Fi Broadcom no libre pero redistribuible, de la sección `non-free-firmware` de Debian (la imagen para Raspberry Pi ya lo tenía para el Wi-Fi de la placa).
+Desde la 0.8.8 `insaneos` también depende de polkit (`polkitd` y `pkexec`, LGPL-2.0 o posterior), para que las apps de Linux que piden permisos de administrador reciban el aviso de administrador de Insane OS, y recomienda libnss-mdns (LGPL-2.1 o posterior), que resuelve los nombres `.local`. Las imágenes suman wireless-regdb (ISC), la base de datos de las reglas de Wi-Fi de cada país, y libnss-mdns; las ISO además traen firmware-brcm80211, firmware de Wi-Fi Broadcom no libre pero redistribuible, de la sección `non-free-firmware` de Debian (la imagen para Raspberry Pi ya lo tenía para el Wi-Fi de la placa).
 
 ## Código fuente
 
-El código fuente de Insane OS está en [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). Si necesitás el código fuente correspondiente de un componente GPL que distribuimos y no lo encontrás, escribinos por [nuestro formulario de contacto](https://www.iperfex.com/contacto/?lang=es).
+El código fuente de Insane OS está en [github.com/insaneos/Insane OS](https://github.com/insaneos/Insane OS). Si necesitás el código fuente correspondiente de un componente GPL que distribuimos y no lo encontrás, escribinos por [nuestro formulario de contacto](https://www.iperfex.com/contacto/?lang=es).

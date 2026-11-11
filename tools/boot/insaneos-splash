@@ -1,0 +1,41 @@
+#!/bin/sh
+# insaneos-splash: hands the boot splash (Plymouth) over to InsaneOS without a black or text flash.
+# See docs/SESSIONS.md, "Boot splash".
+#
+#   insaneos-splash deactivate   (insaneos.service, the last ExecStartPre) Plymouth stops drawing and
+#                              drops DRM master but leaves its last frame on the screen, so
+#                              insane-sessiond can take the card.
+#   insaneos-splash quit         (insaneos-splash-quit.service) waits for the first InsaneOS frame on the
+#                              monitor (/run/insaneos/first-frame, created by insane-sessiond), then ends
+#                              Plymouth keeping that frame (--retain-splash). After 35 s without it,
+#                              Plymouth is ended anyway. With /run/insaneos/no-display nothing will
+#                              replace the splash: it ends without keeping its frame, so the console
+#                              and insane-sessiond's message on it show.
+# Without Plymouth (not installed, or not running) both do nothing.
+set -u
+PLY=/usr/bin/plymouth
+[ -x "$PLY" ] || exit 0
+"$PLY" --ping 2>/dev/null || exit 0
+case "${1:-}" in
+    deactivate)
+        exec "$PLY" deactivate
+        ;;
+    quit)
+        i=0
+        # longer than insane-sessiond's 30 s for a late display driver, so this can tell which case it is
+        while [ $i -lt 350 ] && [ ! -e /run/insaneos/first-frame ]; do
+            sleep 0.1
+            i=$((i + 1))
+        done
+        [ -e /run/insaneos/first-frame ] || echo "insaneos-splash: no InsaneOS frame after 35 s; ending the splash" >&2
+        if [ -e /run/insaneos/no-display ]; then
+            echo "insaneos-splash: no usable display; ending the splash for the text console" >&2
+            exec "$PLY" quit
+        fi
+        exec "$PLY" quit --retain-splash
+        ;;
+    *)
+        echo "usage: insaneos-splash deactivate|quit" >&2
+        exit 2
+        ;;
+esac

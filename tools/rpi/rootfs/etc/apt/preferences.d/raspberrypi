@@ -1,4 +1,4 @@
-# LordOS on Raspberry Pi: from the Raspberry Pi archive only the kernel, the firmware, their utilities and FFmpeg (hardware HEVC)
+# InsaneOS on Raspberry Pi: from the Raspberry Pi archive only the kernel, the firmware, their utilities and FFmpeg (hardware HEVC)
 # (the Debian 13 kernel lacks RP1: no USB, Ethernet or HDMI on the Pi 5). Everything else, Mesa
 # included, comes from Debian. See docs/RASPBERRY.md.
 Package: *

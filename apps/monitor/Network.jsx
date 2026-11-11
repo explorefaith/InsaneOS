@@ -8,14 +8,14 @@
 // equipo, por eso no hay DNS inverso (consultarlo mandaría las IPs al servidor DNS).
 //
 // Modelo para la fase 2 (firewall): cada conexión trae `verdict` ('allow' hoy) y se agrupa por
-// app con una clave estable (`appKey`: 'lordos', 'desktop:<id>' o la ruta del ejecutable). Las
+// app con una clave estable (`appKey`: 'insaneos', 'desktop:<id>' o la ruta del ejecutable). Las
 // reglas futuras son { appKey, host | país, puerto, protocolo, dirección, verdict }: la columna
 // de regla de la lista y los contadores de permitidas/denegadas ya están en su lugar.
 import {
   View, Text, ScrollView, useTheme, useLocale, useStore, monitor, monitorConnections, useMonitor,
   formatBytes, formatNumber, tOptional, useSystemInfo, wm, direction, firewall, firewallState, useLauncherApps, Lumo, Button, useAppWindow, useSettings,
   netModel, ConfirmDialog,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { C, fmt, AppGlyph, useCardStyle } from './index.jsx';
 import { Glyph } from './icons.jsx';
@@ -34,16 +34,16 @@ export const appKeyOf = netModel.connAppKey;
 // The row's name: Insane OS's own components by their label, Insane OS itself, or the app's name.
 // (0.8.8.6) The Machines row also names the running machines whose guests are on the network.
 export const labelOf = (tr, g) => (COMPONENTS[g.key]
-  ? (g.key === 'lordos:machines' && g.machines?.size ? machinesLabel(tr(COMPONENTS[g.key].label), g.machines, g.machineNames)
+  ? (g.key === 'insaneos:machines' && g.machines?.size ? machinesLabel(tr(COMPONENTS[g.key].label), g.machines, g.machineNames)
     : tr(COMPONENTS[g.key].label))
-  : g.key === 'lordos' ? tr('monitor.lordos') : g.name);
+  : g.key === 'insaneos' ? tr('monitor.insaneos') : g.name);
 const countryName = (cc) => (cc ? tOptional(`countries.${cc}`) || cc : '');
 
 // Where an address is: its country, LAN / this computer, or, for a destination known only from the
 // firewall's recent notices, "recent" (or "recently denied").
 const placeOf = (tr, h) => (h.cc ? countryName(h.cc) : h.scope ? tr(`monitor.net.scope.${h.scope}`) : tr(h.denied ? 'fwrules.recentDenied' : 'fwrules.recent'));
 
-// Names the system resolver gave for each address, if lord-netperm's notices carry them ("host" or
+// Names the system resolver gave for each address, if insane-netperm's notices carry them ("host" or
 // "hosts"). The names belong to the system, not to one app (docs/FIREWALL.md, "Where the names come
 // from"), so one map serves every app. Without them a row offers a rule for its address instead.
 // (0.8.5) An address the resolver reached through a CNAME chain has several names (deb.debian.org →
@@ -78,7 +78,7 @@ export function openAppRules(key) {
 }
 
 // Country and scope of every address seen in an open connection, so an address that only appears
-// in lord-netperm's byte counters (its socket already closed) still lands on the map.
+// in insane-netperm's byte counters (its socket already closed) still lands on the map.
 const geoSeen = new Map();
 function rememberGeo(c) {
   if (!c.remote || c.dir === 'listen') return;
@@ -92,7 +92,7 @@ export const ipProtoName = (n) => IP_PROTOS[n] || `IP ${n}`;
 const ETHERTYPES = { 0x0003: 'ALL', 0x0800: 'IPv4', 0x0806: 'ARP', 0x86dd: 'IPv6', 0x888e: 'EAPOL', 0x88cc: 'LLDP', 0x8100: 'VLAN', 0x88f7: 'PTP' };
 export const etherName = (n) => ETHERTYPES[n] || `0x${(n || 0).toString(16).padStart(4, '0')}`;
 
-// Groups the connections by app. Without lord-netperm's byte counters (withFirewall), bytes and
+// Groups the connections by app. Without insane-netperm's byte counters (withFirewall), bytes and
 // rates come from the open TCP sockets (tcp_info) and the difference with the previous reading.
 function useGroups(conns) {
   const prev = useRef({ t: 0, bytes: new Map() });
@@ -105,7 +105,7 @@ function useGroups(conns) {
       const key = appKeyOf(c);
       let g = apps.get(key);
       if (!g) {
-        const comp = !!COMPONENTS[key] || key === 'lordos';
+        const comp = !!COMPONENTS[key] || key === 'insaneos';
         g = { key, item: comp ? { app: key } : c, name: comp || (c.self && !c.cgApp) ? null : c.appName || c.name || '?', exe: c.exe, pids: new Set(), conns: [], hosts: new Map(),
           sent: 0, recv: 0, rateTx: 0, rateRx: 0, listen: [], icmp: [], raw: [], packet: [], incoming: 0, verdict: 'allow', programs: new Set() };
         apps.set(key, g);
@@ -145,9 +145,9 @@ function useGroups(conns) {
   }, [conns]);
 }
 
-// Agrega a cada app su regla y sus contadores del firewall (lord.fw), y las apps que no tienen
+// Agrega a cada app su regla y sus contadores del firewall (insane.fw), y las apps que no tienen
 // conexiones abiertas pero sí intentos (una app denegada no llega a tener sockets).
-// lord-netperm's byte counters for one app ([allowed, denied, rx, tx, rxRate, txRate, flows,
+// insane-netperm's byte counters for one app ([allowed, denied, rx, tx, rxRate, txRate, flows,
 // blocked]): the kernel counts every packet of the app's sockets (TCP and UDP, so QUIC too, and the
 // connections that already closed), which replaces the open-socket estimate. flows: [[addr, rx, tx,
 // rxRate, txRate, blocked], ...], its busiest addresses. blocked: bytes of open connections the
@@ -185,7 +185,7 @@ function withFirewall(groups, fw, launcher) {
   });
   const have = new Set(out.map((g) => g.key));
   for (const [key, v] of Object.entries(counts)) {
-    if (have.has(key) || key === 'lordos' || !Array.isArray(v) || !(v[0] || v[1] || (hasBytes(fw, v) && (v[2] || v[3])))) continue;
+    if (have.has(key) || key === 'insaneos' || !Array.isArray(v) || !(v[0] || v[1] || (hasBytes(fw, v) && (v[2] || v[3])))) continue;
     const la = launcher.find((a) => a.id === key || `lpk:${a.id}` === key);
     const comp = !!COMPONENTS[key];
     const name = comp ? null : la?.name || key.replace(/^(desktop|lpk):/, '');
@@ -215,7 +215,7 @@ function withFirewall(groups, fw, launcher) {
 // ---- columna izquierda ----
 
 // Interruptor de la columna Regla: prendido = la app puede usar la red. Escribe la regla
-// { app, out, any, allow|deny } (lord.fw); ir y volver no acumula reglas. Las apps sin scope propia
+// { app, out, any, allow|deny } (insane.fw); ir y volver no acumula reglas. Las apps sin scope propia
 // (un programa suelto, identificado por su ruta) no se pueden filtrar: el interruptor queda fijo.
 function RuleSwitch({ g, selected, onConfirm }) {
   const t = useTheme();
@@ -298,7 +298,7 @@ function AppRow({ g, node, ctx, open, selected, onToggle, onSelect, maxBytes, tr
         </View>
         <Activity hist={hist} selected={selected} />
         <Text style={{ width: 44, fontSize: 10, color: selected ? '#fff' : t.textDim, textAlign: 'end', whiteSpace: 'nowrap' }}>{total ? formatBytes(total) : '—'}</Text>
-        {/* regla: permitir / denegar la red a la app (lord-netperm la aplica en el kernel) */}
+        {/* regla: permitir / denegar la red a la app (insane-netperm la aplica en el kernel) */}
         <RuleSwitch g={g} selected={selected} onConfirm={onConfirm} />
       </View>
       {open && node ? <TreeChildren node={node} ctx={ctx} /> : null}
@@ -312,7 +312,7 @@ function AppRow({ g, node, ctx, open, selected, onToggle, onSelect, maxBytes, tr
   );
 }
 
-// Each app's rates over the last minute, one entry per second (from lord-netperm's counters, or the
+// Each app's rates over the last minute, one entry per second (from insane-netperm's counters, or the
 // open sockets without them): the row's activity indicator and the detail's chart.
 function useRateHistory(apps) {
   const ref = useRef({ at: 0, map: new Map() });
@@ -535,12 +535,12 @@ function Summary({ groups, conns, last, tr, fw, names, range, sysHist, launcher,
         <Section id="topApps" title={tr('monitor.hist.topApps', { range: tr(`monitor.hist.${range}`) })}>
           {(sysHist?.h?.top || []).slice(0, 6).map(([id, rx, tx]) => {
             const la = launcher.find((a) => a.id === id || `lpk:${a.id}` === id || `desktop:${a.id}` === id);
-            const item = { app: id, appName: la?.name, name: la?.name || id, appIcon: la?.icon || '', self: id === 'lordos' };
+            const item = { app: id, appName: la?.name, name: la?.name || id, appIcon: la?.icon || '', self: id === 'insaneos' };
             return (
               <View key={id} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
                 <View style={{ paddingTop: 1 }}><AppGlyph item={item} size={14} /></View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                  <Text style={{ fontSize: 12, color: t.text, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{id === 'lordos' ? tr('monitor.lordos') : la?.name || id.replace(/^(desktop|lpk):/, '')}</Text>
+                  <Text style={{ fontSize: 12, color: t.text, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{id === 'insaneos' ? tr('monitor.insaneos') : la?.name || id.replace(/^(desktop|lpk):/, '')}</Text>
                   <Text style={{ fontSize: 10, color: t.textDim, whiteSpace: 'nowrap', textAlign: 'start' }}>{upDown(tr, { recv: rx, sent: tx })}</Text>
                 </View>
               </View>
@@ -609,7 +609,7 @@ function Detail({ g, tr, user, names, host, onHost, onRule, hist, range, end }) 
   const can = firewall.available() && firewall.enforceable(g.key);
   const comp = COMPONENTS[g.key];
   let dns = [];
-  if (g.key === 'system:dns') { try { dns = (lord.net?.dns?.()?.servers || []).slice(0, 4); } catch (e) { dns = []; } }
+  if (g.key === 'system:dns') { try { dns = (insane.net?.dns?.()?.servers || []).slice(0, 4); } catch (e) { dns = []; } }
   const ports = new Set(), local = new Set();
   for (const c of g.conns) {
     if (c.dir === 'listen') local.add(`${c.proto.toUpperCase()} ${c.lport}`);
@@ -626,7 +626,7 @@ function Detail({ g, tr, user, names, host, onHost, onRule, hist, range, end }) 
         </View>
       </View>
       {comp ? <Text style={{ fontSize: 11, color: t.textDim, lineHeight: 1.4, textAlign: 'start' }}>{tr(comp.hint)}</Text> : null}
-      {g.key === 'lordos:terminal' && g.programs?.size ? <KV k={tr('monitor.net.programs')} v={[...g.programs].join(', ')} /> : null}
+      {g.key === 'insaneos:terminal' && g.programs?.size ? <KV k={tr('monitor.net.programs')} v={[...g.programs].join(', ')} /> : null}
       {g.key === 'system:dns' && dns.length ? <KV k={tr('monitor.net.dnsServers')} v={dns.join(', ')} mono /> : null}
       {g.tunnels ? g.tunnels.map((v) => <KV key={v.name} k={v.name} v={`↓ ${formatBytes(v.rx)} · ↑ ${formatBytes(v.tx)}`} mono />) : null}
       {g.system ? null : <Section id="process" title={tr('monitor.net.process')}>
@@ -703,7 +703,7 @@ function PlaceDetail({ p, tr }) {
         {[...p.apps.values()].map((g) => (
           <View key={g.key} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
             <View style={{ paddingTop: 1 }}><AppGlyph item={g.item} size={14} /></View>
-            <Text style={{ flex: 1, minWidth: 0, fontSize: 12, color: t.text, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{g.key === 'lordos' ? tr('monitor.lordos') : g.name}</Text>
+            <Text style={{ flex: 1, minWidth: 0, fontSize: 12, color: t.text, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{g.key === 'insaneos' ? tr('monitor.insaneos') : g.name}</Text>
           </View>
         ))}
       </Section>
@@ -714,7 +714,7 @@ function PlaceDetail({ p, tr }) {
               <Text style={{ flex: 1, minWidth: 0, fontSize: 11, color: t.text, fontFamily: 'monospace', direction: 'ltr', textAlign: 'start' }} numberOfLines={2}>{h.remote}</Text>
               <Text style={{ fontSize: 11, color: t.textDim }}>{formatBytes(h.sent + h.recv)}</Text>
             </View>
-            <Text style={{ fontSize: 10, color: t.textDim, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{`${[...h.ports].join(' · ')} · ${h.app.key === 'lordos' ? tr('monitor.lordos') : h.app.name}`}</Text>
+            <Text style={{ fontSize: 10, color: t.textDim, lineHeight: 1.3, textAlign: 'start' }} numberOfLines={2}>{`${[...h.ports].join(' · ')} · ${h.app.key === 'insaneos' ? tr('monitor.insaneos') : h.app.name}`}</Text>
           </View>
         ))}
       </Section>
@@ -732,7 +732,7 @@ function seen(key, active) {
 }
 
 // One flow per (app, address, port) for sdk/netmodel.js: the kernel's per-port counters when
-// lord-netperm sends them (COUNTS), the open sockets' ports otherwise. Apps with no destination yet
+// insane-netperm sends them (COUNTS), the open sockets' ports otherwise. Apps with no destination yet
 // (only listening, or a component that hasn't connected) keep a flow with no address, so their row stays.
 function flowsOf(apps, names, tr) {
   const out = [];
@@ -783,9 +783,9 @@ function useVpnGroup(tr) {
     const prev = new Map();
     const read = () => {
       let ifs = [];
-      try { ifs = typeof lord !== 'undefined' && lord.net ? lord.net.interfaces() || [] : []; } catch (e) { ifs = []; }
+      try { ifs = typeof insane !== 'undefined' && insane.net ? insane.net.interfaces() || [] : []; } catch (e) { ifs = []; }
       const now = Date.now();
-      const list = ifs.filter((i) => i.managed === 'lordos' && (i.type === 'wireguard' || i.type === 'tun' || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name)) && i.up)
+      const list = ifs.filter((i) => i.managed === 'insaneos' && (i.type === 'wireguard' || i.type === 'tun' || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name)) && i.up)
         .map((i) => {
           const p = prev.get(i.name);
           const dt = p ? Math.max(0.5, (now - p.t) / 1000) : 0;
@@ -800,7 +800,7 @@ function useVpnGroup(tr) {
     return () => clearInterval(id);
   }, []);
   if (!st.list.length) return null;
-  const g = { key: 'lordos:vpn', item: { app: 'lordos:vpn' }, name: null, exe: '', pids: new Set(), conns: [], hosts: new Map(), listen: [], incoming: 0,
+  const g = { key: 'insaneos:vpn', item: { app: 'insaneos:vpn' }, name: null, exe: '', pids: new Set(), conns: [], hosts: new Map(), listen: [], incoming: 0,
     sent: 0, recv: 0, rateTx: 0, rateRx: 0, rule: null, allowed: 0, denied: 0, programs: new Set(), system: true, tunnels: st.list };
   for (const v of st.list) {
     g.recv += v.rx; g.sent += v.tx; g.rateRx += v.rateRx; g.rateTx += v.rateTx;
@@ -823,7 +823,7 @@ export function NetworkTab({ last, prefs }) {
   const { apps: connApps } = useGroups(conns);
   const launcher = useLauncherApps();
   const fwApps = useMemo(() => withFirewall(connApps, fw, launcher), [connApps, fw, launcher]);
-  // the remote desktop (lord-sessiond, root) as one more app while it's on (RemoteDesktop.jsx), and
+  // the remote desktop (insane-sessiond, root) as one more app while it's on (RemoteDesktop.jsx), and
   // the VPN tunnels (0.8.5)
   const rd = useRemoteDesktop();
   const rdg = remoteGroup(rd, tr);
@@ -873,8 +873,8 @@ export function NetworkTab({ last, prefs }) {
   const filtered = chips.length > 0 || !!text.trim() || view.dir !== 'all' || view.proto !== 'all' || view.status !== 'all';
   const histRoots = !live ? (sysHist?.h?.top || []).map(([id, rx, tx]) => {
     const la = launcher.find((a) => a.id === id || `lpk:${a.id}` === id || `desktop:${a.id}` === id);
-    const g = byKey.get(id) || { key: id, item: COMPONENTS[id] ? { app: id } : { app: id, appName: la?.name, name: la?.name || id, appIcon: la?.icon || '', self: id === 'lordos' },
-      name: COMPONENTS[id] || id === 'lordos' ? null : la?.name || id.replace(/^(desktop|lpk):/, ''), conns: [], listen: [], hosts: new Map(), rule: firewall.appRule(id), denied: 0, programs: new Set() };
+    const g = byKey.get(id) || { key: id, item: COMPONENTS[id] ? { app: id } : { app: id, appName: la?.name, name: la?.name || id, appIcon: la?.icon || '', self: id === 'insaneos' },
+      name: COMPONENTS[id] || id === 'insaneos' ? null : la?.name || id.replace(/^(desktop|lpk):/, ''), conns: [], listen: [], hosts: new Map(), rule: firewall.appRule(id), denied: 0, programs: new Set() };
     return { ...g, recv: rx, sent: tx, rateRx: 0, rateTx: 0, histOnly: true };
   }).filter((g) => {
     const f = { app: g.key, appName: labelOf(tr, g), name: null, addr: '', port: 0, proto: 'other', dir: 'out', cc: '' };

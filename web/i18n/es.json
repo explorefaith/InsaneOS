@@ -330,19 +330,19 @@
     "toolsLead": "Vienen con Insane OS, funcionan también por SSH y nunca mandan nada por su cuenta.",
     "tools": [
       [
-        "lordos-fetch",
+        "insaneos-fetch",
         "La corona y un resumen en una pantalla: versión, placa, kernel, pantalla, CPU, GPU, memoria, disco y aislamiento. --share oculta tu usuario y el nombre del equipo para una captura."
       ],
       [
-        "lordos-issue",
+        "insaneos-issue",
         "Un reporte completo para un error o una prueba de hardware: dispositivos, drivers, pantallas, código firmado, servicios que fallaron y los errores de este arranque. Reemplaza nombres y direcciones; solo lee, y guarda un archivo que revisás antes de publicarlo."
       ],
       [
-        "lordos-sysreport",
+        "insaneos-sysreport",
         "Información del sistema desde la terminal: report para el hardware, y bench --quick o --full para InsaneBench, las mismas mediciones que la app, también en JSON."
       ],
       [
-        "lordos-testbench",
+        "insaneos-testbench",
         "Una carta de ajuste en una ventana: cuadros por segundo y tiempos de cuadro, cada tecla iluminada al apretarla, el mouse y su rueda, y lo que informa el servidor gráfico. Útil para probar un teclado, un mouse o una pantalla nuevos."
       ]
     ],

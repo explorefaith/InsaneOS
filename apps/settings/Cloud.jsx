@@ -6,8 +6,8 @@
 import {
   View, Text, Button, Toggle, TextInput, SearchField, Segmented, ScrollView, useTheme, useLocale, useStore, useCloud, cloud, cloudModel, createStore,
   formatBytes, formatDate, formatTime, tOptional, spacing, typeScale, wm, useAppWindow, FilePicker, openUrl, clipboard, toast, addListener, direction, errorText, fs,
-  AccountBadge, UsageRing, SpaceBar, CloudGlyph, useSettings, hasTextFocus, cloudState, askKeyringUnlock, systemInfo, lordosVersion,
-} from '@lordos/sdk';
+  AccountBadge, UsageRing, SpaceBar, CloudGlyph, useSettings, hasTextFocus, cloudState, askKeyringUnlock, systemInfo, insaneosVersion,
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Stack, Section, SettingRow, Note, Actions, PopUp, tint } from './ui.jsx';
 import { runCheck, buildReport, issueUrl, aboutFields, checkWorks, CHECK_STEPS } from '../../sdk/cloudcheck.js';
@@ -20,7 +20,7 @@ const setView = (p) => cloudView.set(p);
 
 const RCLONE_SITE = 'https://rclone.org/';
 const RCLONE_LICENSE = 'https://github.com/rclone/rclone/blob/master/COPYING';
-const MIB = 1024;                                       // lord.cloud's bwUp/bwDown are KiB/s (17.1)
+const MIB = 1024;                                       // insane.cloud's bwUp/bwDown are KiB/s (17.1)
 const LIMITS = [0, 1, 2, 5, 10, 20, 50];                // MB/s, 0 = no limit
 const FREE_BELOW = [5, 10, 20, 50, 100];                // GB (section 7.2)
 
@@ -61,7 +61,7 @@ function BoxRow({ t, children, last, onClick, pad = 11 }) {
   );
 }
 
-// A small turning ring (a spinner) while lord-server answers.
+// A small turning ring (a spinner) while insane-server answers.
 function Spinner({ size = 28 }) {
   const t = useTheme();
   const [a, setA] = useState(0);
@@ -138,8 +138,8 @@ function MeasureRow({ a }) {
   );
 }
 
-// Unlock Keyring… (an account's error cloud.keyringLocked): the system's keyring prompt; once it is unlocked lord-server
-// connects the waiting accounts at once (lord-server hears the vault's unlock too; cloud.retry asks it now, 17.2 item 8)
+// Unlock Keyring… (an account's error cloud.keyringLocked): the system's keyring prompt; once it is unlocked insane-server
+// connects the waiting accounts at once (insane-server hears the vault's unlock too; cloud.retry asks it now, 17.2 item 8)
 export function unlockKeyring() {
   return askKeyringUnlock().then((ok) => { if (ok) cloud.retry(null); return ok; });
 }
@@ -440,7 +440,7 @@ function NameField({ a, accounts }) {
     return addListener('pointerdown', (e) => {
       const n = box.current;
       if (!n) return;
-      const [x, y, w, h] = lord.getLayout(n.id);
+      const [x, y, w, h] = insane.getLayout(n.id);
       if (e.x < x || e.x > x + w || e.y < y || e.y > y + h) save();
     });
   }, [edit == null]);
@@ -485,7 +485,7 @@ function Options({ a, accounts }) {
       {row(tr('cloud.opt.folder'), `~/Cloud/${a.name}`, <NameField a={a} accounts={accounts} />)}
       {row(tr('cloud.opt.onDemand'), tr('cloud.opt.onDemandHint'), <Toggle small on={onDemand} onChange={(v) => (v ? cloud.unkeep([a.mount]) : cloud.keep([a.mount]))} />)}
       {row(tr('cloud.opt.pause'), tr('cloud.opt.pauseHint'), <Toggle small on={a.state === 'paused' || !!a.paused} onChange={(v) => (v ? cloud.pause(a.id) : cloud.resume(a.id))} />, !own)}
-      {/* an account's own options only where lord-server has them (not in 0.8.8.5: docs/CLOUD.md 17.1) */}
+      {/* an account's own options only where insane-server has them (not in 0.8.8.5: docs/CLOUD.md 17.1) */}
       {own ? row(tr('cloud.opt.unmetered'), '', <Toggle small on={!!ao.unmeteredOnly} onChange={(v) => cloud.setAccountOptions(a.id, { unmeteredOnly: v })} />) : null}
       {own ? row(tr('cloud.opt.uploadLimit'), tr('cloud.opt.thisAccount'),
         <PopUp width={110} value={Math.round((ao.bwUp || 0) / MIB)} onChange={(v) => cloud.setAccountOptions(a.id, { bwUp: v * MIB })} options={LIMITS.map((v) => [v, limitLabel(v, tr)])} />, true) : null}
@@ -555,11 +555,11 @@ const ownOpts = (c) => (c && c.own && c.id ? { clientId: c.id, clientSecret: c.s
 
 // Check This Account (docs/CLOUD.md 19): its steps, then a report with nothing personal, to copy or send.
 const checks = new Map();          // account id → { running, steps, report } (survives leaving the page)
-// what the check uses of lord.fs (its own names; move is lord.fs.copy's move job)
+// what the check uses of insane.fs (its own names; move is insane.fs.copy's move job)
 const checkFs = {
-  home: () => lord.fs.home(), list: (p) => lord.fs.list(p), mkdir: (p) => lord.fs.mkdir(p), write: (p, d) => lord.fs.write(p, d),
-  read: (p, m) => lord.fs.read(p, m), stat: (p) => lord.fs.stat(p), move: (a, b) => lord.fs.copy(a, b, true), jobs: () => lord.fs.jobs(),
-  forgetJob: (id) => lord.fs.jobForget(id), trash: (p) => lord.fs.trash(p), trashList: () => lord.fs.trashList(), removeFromTrash: (id) => lord.fs.removeFromTrash(id),
+  home: () => insane.fs.home(), list: (p) => insane.fs.list(p), mkdir: (p) => insane.fs.mkdir(p), write: (p, d) => insane.fs.write(p, d),
+  read: (p, m) => insane.fs.read(p, m), stat: (p) => insane.fs.stat(p), move: (a, b) => insane.fs.copy(a, b, true), jobs: () => insane.fs.jobs(),
+  forgetJob: (id) => insane.fs.jobForget(id), trash: (p) => insane.fs.trash(p), trashList: () => insane.fs.trashList(), removeFromTrash: (id) => insane.fs.removeFromTrash(id),
 };
 const checkRev = createStore(0);
 function CheckAccount({ a, st, p, verified }) {
@@ -576,7 +576,7 @@ function CheckAccount({ a, st, p, verified }) {
       const acc = (cloud.state().accounts || []).find((x) => x.id === a.id) || a;
       let info = {};
       try { info = systemInfo() || {}; } catch (e) { /* none */ }
-      const report = buildReport({ version: lordosVersion(info).version, arch: info.arch, rclone: (cloud.state().service || {}).version, kind: a.kind, label,
+      const report = buildReport({ version: insaneosVersion(info).version, arch: info.arch, rclone: (cloud.state().service || {}).version, kind: a.kind, label,
         verified, ownApp: !!acc.ownClient, aboutFields: aboutFields(acc.about), linksSupported: !!acc.linksSupported, steps });
       save({ running: false, steps, report });
     }, () => save({ running: false }));
@@ -608,7 +608,7 @@ function CheckAccount({ a, st, p, verified }) {
           <Dim t={t} style={{ fontSize: typeScale.caption }}>{tr('cloud.check.private')}</Dim>
           <Actions start>
             <Button small label={tr('cloud.check.copy')} onClick={() => { clipboard.set(c.report); toast.set(tr('cloud.check.copied')); }} />
-            <Button small label={tr('cloud.tellUs')} onClick={() => openUrl(issueUrl({ label, report: c.report, version: lordosVersion().version }))} />
+            <Button small label={tr('cloud.tellUs')} onClick={() => openUrl(issueUrl({ label, report: c.report, version: insaneosVersion().version }))} />
           </Actions>
         </View>
       ) : null}
@@ -649,7 +649,7 @@ function Advanced({ a, st, p, verified, wide }) {
   );
 }
 
-// Starts a sign-in in the browser, once: lord-server opens the page itself (nothing here opens it again), a second
+// Starts a sign-in in the browser, once: insane-server opens the page itself (nothing here opens it again), a second
 // start while one runs is ignored, a waiting sign-in for the same account is shown again instead of starting another,
 // and one for another account is cancelled first. The waiting card is inline in the Cloud pane, so the browser stays usable.
 let signinStarting = false;
@@ -902,7 +902,7 @@ function AddSheet({ st }) {
                 <>
                   <View style={{ paddingHorizontal: 22, paddingBottom: 6, gap: 6 }}>
                     <Dim t={t}>{tr('cloud.unverified.line')}</Dim>
-                    <Actions start><Button small label={tr('cloud.tellUs')} onClick={() => openUrl(issueUrl({ label: p && !parts.verified.some((g) => g.items.includes(p)) ? p.label : '', version: lordosVersion().version }))} /></Actions>
+                    <Actions start><Button small label={tr('cloud.tellUs')} onClick={() => openUrl(issueUrl({ label: p && !parts.verified.some((g) => g.items.includes(p)) ? p.label : '', version: insaneosVersion().version }))} /></Actions>
                   </View>
                   <ProviderGroups groups={parts.unverified} sel={sel} onPick={pick} onMore={() => {}} />
                 </>
@@ -983,7 +983,7 @@ function CredSheet({ st, sheet }) {
     setPicking(false);
     if (!path) return;
     try {
-      const text = lord.fs.read(path, 'text');
+      const text = insane.fs.read(path, 'text');
       if (!/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(text)) { setErr({ text: tr('cloud.sftp.notKey'), field: '__key' }); return; }
       setKeyFile(path); set(layout.auth.key, M.pemForRclone(text));
     } catch (e) { setErr({ text: errorText(e), field: '__key' }); }

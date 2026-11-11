@@ -1,6 +1,6 @@
-/* lm_link.h — lord-media's end of a live link (../live.h): nothing here ever waits. */
-#ifndef LORD_MEDIA_LM_LINK_H
-#define LORD_MEDIA_LM_LINK_H
+/* lm_link.h — insane-media's end of a live link (../live.h): nothing here ever waits. */
+#ifndef INSANE_MEDIA_LM_LINK_H
+#define INSANE_MEDIA_LM_LINK_H
 
 #include "../live.h"
 #include <stddef.h>

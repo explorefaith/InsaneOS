@@ -1,6 +1,6 @@
 // texts.js — the words the screens build at render time (docs/LANGUAGES.md: no lists of text as module constants):
-// error messages for every lord-sql code, filter operators, field types' defaults, relative times, a favorite's line.
-import { t as tr, formatDate, formatNumber } from '@lordos/sdk';
+// error messages for every insane-sql code, filter operators, field types' defaults, relative times, a favorite's line.
+import { t as tr, formatDate, formatNumber } from '@insaneos/sdk';
 import { errorCode } from './model.js';
 
 // An Error from sqlRequest (or the app's own checks) → one sentence

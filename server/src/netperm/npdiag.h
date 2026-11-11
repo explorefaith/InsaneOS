@@ -1,12 +1,12 @@
-/* npdiag.h — lord-netperm's sock_diag client (NETLINK_SOCK_DIAG): lists the machine's TCP and
+/* npdiag.h — insane-netperm's sock_diag client (NETLINK_SOCK_DIAG): lists the machine's TCP and
  * UDP sockets with their cgroup and destroys one (SOCK_DESTROY, the kernel's tcp_abort /
  * udp_abort: the app gets ECONNABORTED and TCP sends a reset). It is how the firewall cuts the
  * connections an app opened before a rule changed (docs/FIREWALL.md, "Existing connections are
  * cut"). Netlink only: no AF_INET/AF_INET6 socket is created. Destroying needs CAP_NET_ADMIN and a
  * kernel with CONFIG_INET_DIAG_DESTROY (UDP also CONFIG_INET_UDP_DIAG); without it the packet
  * filter's drop still applies and npdiag_destroy returns -EOPNOTSUPP. */
-#ifndef LORD_NP_DIAG_H
-#define LORD_NP_DIAG_H
+#ifndef INSANE_NP_DIAG_H
+#define INSANE_NP_DIAG_H
 
 #include <stdint.h>
 

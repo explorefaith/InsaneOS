@@ -10,8 +10,8 @@ export function shellQuote(p) {
 
 export const pathsText = (paths) => (paths || []).filter(Boolean).map(shellQuote).join(' ') + ' ';
 
-// The clipboard's image file (lord.clipboard.state(): the compositor keeps it as a PNG under
-// $XDG_RUNTIME_DIR/lordos), or null when the clipboard holds text.
+// The clipboard's image file (insane.clipboard.state(): the compositor keeps it as a PNG under
+// $XDG_RUNTIME_DIR/insaneos), or null when the clipboard holds text.
 export const clipboardImage = (st) => (st && st.kind === 'image' && st.image ? st.image : null);
 
 // Programs the status bar names by what they are rather than by their process name.

@@ -3,10 +3,10 @@
 // The overlay, the pointer and wm.frame() work in logical pixels of the global space, but the
 // capture is the main display at its physical resolution (docs/DISPLAYS.md, "Capture"): at 200 %
 // a 1440 × 900 display is a 2880 × 1800 image. With "all displays" it is the whole logical space
-// at 100 %. The rect is converted the same way lord-server paints the capture:
+// at 100 %. The rect is converted the same way insane-server paints the capture:
 // physical = (logical - display origin) × scale, rounded outwards so no edge pixel is lost.
 
-// The capture's view: { x, y, k } for an image of iw × ih, from lord.screen (displays, width, height).
+// The capture's view: { x, y, k } for an image of iw × ih, from insane.screen (displays, width, height).
 // display (optional): the one the capture was taken of ({ display: id } in media.screenshot); else the main one.
 export function captureView(iw, ih, screen = {}, display = null) {
   const ds = Array.isArray(screen.displays) ? screen.displays : [];

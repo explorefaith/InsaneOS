@@ -8,30 +8,30 @@ covers the Dock goes to the menu.
 
 | | |
 |---|---|
-| ![crown menu, Dock on the left](layers-crown-dock-left-light.png) | ![dark](layers-crown-dock-left-dark.png) |
-| The crown menu over the Dock on the left (it used to open underneath it) | Dark mode |
+| ![apple menu, Dock on the left](layers-apple-dock-left-light.png) | ![dark](layers-apple-dock-left-dark.png) |
+| The apple menu over the Dock on the left (it used to open underneath it) | Dark mode |
 | ![Dock menu over a window](layers-dock-menu-left-dark.png) | ![Dock menu over the menu bar](layers-dock-menu-bottom-light.png) |
 | A Dock menu over the windows | A tall Dock menu over the menu bar |
 | ![Dock on the right](layers-dock-menu-right-dark.png) | ![Control Center](layers-control-center-dock-right.png) |
 | Dock on the right: its menu over the window and the menu bar | The Control Center over the Dock on the right |
 | ![select list](layers-select-passwords-light.png) | ![select list, dark](layers-select-passwords-dark.png) |
 | Passwords → New item → Category: the list covers the form (the fields used to show through it) | Dark mode |
-| ![Insane Classic](layers-classic-left-menu.png) | ![RTL](layers-crown-dock-right-rtl.png) |
-| Insane Classic theme, taskbar on the left: its menu over the windows | Arabic, Dock on the right: the crown menu over the Dock |
+| ![Insane Classic](layers-classic-left-menu.png) | ![RTL](layers-apple-dock-right-rtl.png) |
+| Insane Classic theme, taskbar on the left: its menu over the windows | Arabic, Dock on the right: the apple menu over the Dock |
 
 ## Why it broke
 
 The engine's `zIndex` only orders **siblings** (`node_children_ordered` in `server/src/ui/node.c`),
 and hit testing walks the same order (`hit` in `paint.c`). The theme drew the menu bar, then the
 Dock, and each menu bar menu was a child of the menu bar: with the Dock on the left, the Dock came
-later in the tree and covered the crown menu, and also took its clicks. Inside apps, a select
+later in the tree and covered the apple menu, and also took its clicks. Inside apps, a select
 list drawn inside a form row sat under the rows that came after it, whatever its `zIndex`.
 
 ## The order
 
 Each layer is a root node of the screen's size with a fixed `zIndex`, above the theme's tree;
 content enters it through a React portal (`runtime/index.js`: `layerContainer`, `createPortal`).
-A layer node is `pointerEvents: 'box-none'`: lord-server never hits the layer itself, only what is
+A layer node is `pointerEvents: 'box-none'`: insane-server never hits the layer itself, only what is
 in it, so an empty part of a layer lets the click through to whatever is below.
 
 | Layer | zIndex | What goes there |
@@ -51,13 +51,13 @@ in it, so an empty part of a layer lets the click through to whatever is below.
 | `capture` | 120 | Screenshots' area selection (❖⇧4, `wm.setFullscreen(id, true, { capture: true })`): a still of the whole screen, so it covers every other layer and takes the pointer even with a sheet, menu, prompt or Live Speech open. A press on it is `keepFocus`: what was open under the still stays as it was |
 
 Inside one layer, what opened last is on top. The lock screen and the login screen are another
-session (`lord-sessiond`, see `SESSIONS.md`), above all of this. Menus of Wayland apps
+session (`insane-sessiond`, see `SESSIONS.md`), above all of this. Menus of Wayland apps
 (`xdg_popup`) are painted by the compositor above everything (`wl_paint_popups`).
 
 ## Using it
 
 ```js
-import { Layer, Overlay, LAYERS } from '@lordos/sdk';
+import { Layer, Overlay, LAYERS } from '@insaneos/sdk';
 
 // a shell surface (themes): drawn in its layer wherever it is rendered from
 <Layer name="popover"><ControlCenter … /></Layer>
@@ -94,7 +94,7 @@ import { Layer, Overlay, LAYERS } from '@lordos/sdk';
 
 The menu bar, the Dock, menus and the Control Center blur what is behind them
 (`backdropFilter`). The blur reads the screen around the surface, a margin of twice its radius
-(`canvas_backdrop_blur`). lord-server only repaints the area that changed, and outside it the
+(`canvas_backdrop_blur`). insane-server only repaints the area that changed, and outside it the
 screen still holds the last frame, with the surface's own tint already on it: before 0.8.1, closing
 a menu or the Control Center left a lighter band in the menu bar where the repainted area met it.
 Now `paint_damage` (`paint.c`, `blur_walk`) grows the damaged area to the whole surface whenever a
@@ -103,7 +103,7 @@ The GPU path composites that same canvas, so it gets the same fix (tested on VM 
 path).
 
 Since 0.8.2 the damage can be several rectangles painted one by one (`paint.c`, "Several damaged
-rectangles"; the Monitor's moving map dots; off by default in the 0.8.2 release, `LORD_DAMAGE=multi`
+rectangles"; the Monitor's moving map dots; off by default in the 0.8.2 release, `INSANE_DAMAGE=multi`
 turns it on, see [MONITOR.md](MONITOR.md#082-several-damaged-rectangles-vm-119)). The rule holds for each of them: a rectangle that
 touches a blurred surface or its margin grows to the whole surface, and every other rectangle
 touching that margin joins it, so a blur never reads a neighbour rectangle half painted
@@ -115,7 +115,7 @@ last frame's *final* pixels, so whatever is painted above the blurred surface an
 margin (a sibling's shadow, a menu, the window's own border over a translucent Terminal) was
 blurred into the surface's edges, while a full repaint blurs only what lies below it; the
 difference stayed until the next full repaint. `test_damage_fuzz` in `build/engine-test` found it
-(random trees through lord-server's whole damage pipeline, every painted frame compared with a full
+(random trees through insane-server's whole damage pipeline, every painted frame compared with a full
 repaint). The cost: a repaint that touches the Dock or the menu bar also repaints the band of twice
 the blur radius around it (about 41 px for a 20 px blur; the screen edges cut it). On VM 116 with
 Monitor's moving map, with and without a blurred Terminal over it, layout and paint per frame stayed
@@ -148,6 +148,6 @@ again (`test_hidden_blur_damage`).
   inside the base can't climb above a layer; `pointerEvents: 'none'` still hides a subtree.
   `test_backdrop_band`: after a menu closes, the blurred bar is repainted whole and matches a full
   repaint (37 levels lighter without the fix).
-- On the VM: the screenshots above (VM 122), clicking the crown menu's items over the Dock (they
+- On the VM: the screenshots above (VM 122), clicking the apple menu's items over the Dock (they
   open their item, not the Dock's app) and the Passwords category list (picking «Licenses» changes
   the form).

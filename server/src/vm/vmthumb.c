@@ -1,5 +1,5 @@
-/* vmthumb.c — a machine's picture for its card in the library: the picture lord-vmdisplay hands lord-server, scaled
- * down (box filter) and kept as <machine>/thumb.png (0600, replaced atomically). Runs in lord-server, as the person;
+/* vmthumb.c — a machine's picture for its card in the library: the picture insane-vmdisplay hands insane-server, scaled
+ * down (box filter) and kept as <machine>/thumb.png (0600, replaced atomically). Runs in insane-server, as the person;
  * QEMU can't write there (its Landlock allows disks/ only). The last one stays when the machine stops. */
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC

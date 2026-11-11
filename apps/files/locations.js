@@ -1,7 +1,7 @@
 // locations.js — what each sidebar place shows and how it is sorted and grouped.
 //   { type: 'dir', path } | { type: 'recent' } | { type: 'apps' } | { type: 'trash' }
 //   | { type: 'tag', color } | { type: 'search', root, query }
-import { fs } from '@lordos/sdk';
+import { fs } from '@insaneos/sdk';
 import { kindOf } from './kinds.js';
 import { tagStore, tagsOf, commentOf } from './ops.js';
 import { archiveEntries } from './archive.js';
@@ -15,8 +15,8 @@ const norm = (dir) => (e) => ({ ...e, path: `${dir === '/' ? '' : dir}/${e.name}
 export function loadEntries(loc, { hidden, launcherApps }) {
   switch (loc.type) {
     case 'dir': {
-      // lord.fs.list stops at 5000 entries a folder: the list says so (`capped`) for Files to tell
-      const raw = lord.fs.list(loc.path);
+      // insane.fs.list stops at 5000 entries a folder: the list says so (`capped`) for Files to tell
+      const raw = insane.fs.list(loc.path);
       const out = raw.filter((e) => hidden || !e.name.startsWith('.')).map(norm(loc.path));
       out.capped = raw.length === LIST_CAP;
       return out;

@@ -1,14 +1,14 @@
 // Monitor: CPU, memory, network, disk and process usage of this computer, and the network
 // connections of each app on a map (see docs/MONITOR.md). It follows TangoOS's Monitor: tabs,
 // dark cards with a big number and a live chart, a row of small stats and a footer with the
-// sampling rate. lord-server (lord.monitor) reads the metrics only while this window is open,
+// sampling rate. insane-server (insane.monitor) reads the metrics only while this window is open,
 // four times per second.
 import {
   View, Text, Image, ScrollView, Segmented, Toolbar, typeScale, useTheme, useLocale, useStore, useSettings, useAppWindow,
   useMonitor, monitor, monitorSamples, monitorProcesses, formatBytes, formatNumber, InsaneLogo, iconFromFile, getApp, appName,
-} from '@lordos/sdk';
-import { registerDockActions } from '@lordos/sdk';
-import * as sdk from '@lordos/sdk';
+} from '@insaneos/sdk';
+import { registerDockActions } from '@insaneos/sdk';
+import * as sdk from '@insaneos/sdk';
 import { useEffect, useMemo, useState } from 'react';
 import { Chart } from './Chart.jsx';
 import { memTop } from './memtop.js';
@@ -32,7 +32,7 @@ export const C = { mem: '#8b5cf6', system: '#5b4bc4', cache: '#c4b5fd', rx: '#22
 
 // Settings → Privacy → Monitor (the page belongs to another module: registered if it exists).
 if (typeof sdk.registerPrivacySection === 'function') sdk.registerPrivacySection({ id: 'monitor', order: 10, Component: MonitorPrivacy });
-// … and "App network": trusted and restricted apps (lord.fw, docs/FIREWALL.md)
+// … and "App network": trusted and restricted apps (insane.fw, docs/FIREWALL.md)
 if (typeof sdk.registerPrivacySection === 'function') sdk.registerPrivacySection({ id: 'firewall', order: 11, Component: FirewallPrivacy });
 // … and the rules of each app: domains, addresses and networks, with the app's default
 if (typeof sdk.registerPrivacySection === 'function') sdk.registerPrivacySection({ id: 'fwrules', order: 12, Component: FirewallRulesPrivacy });
@@ -314,7 +314,7 @@ function MemTop() {
   const procs = useStore(monitorProcesses);
   const top = useMemo(() => memTop(procs?.list, 8), [procs]);
   if (!top.length) return null;
-  const label = (p) => (p.app === 'lordos' ? tr('monitor.lordos') : isolatedAppOf(p) ? appName(isolatedAppOf(p)) : p.appName || p.name);
+  const label = (p) => (p.app === 'insaneos' ? tr('monitor.insaneos') : isolatedAppOf(p) ? appName(isolatedAppOf(p)) : p.appName || p.name);
   return (
     <Card icon="memory" title={tr('monitor.memTop')}>
       {top.map((g) => (
@@ -389,7 +389,7 @@ function ComponentGlyph({ comp, size }) {
 }
 
 export function AppGlyph({ item, size = 16 }) {
-  if (item.app === 'lordos') return <InsaneLogo size={size} />;
+  if (item.app === 'insaneos') return <InsaneLogo size={size} />;
   const comp = sdk.netModel?.COMPONENTS?.[item.app];
   if (comp) return <ComponentGlyph comp={comp} size={size} />;
   if (item.app === 'remote-desktop') return <RemoteGlyph size={size} />;
@@ -456,7 +456,7 @@ export default function Monitor() {
   const setTab = (v) => { lastTab = v; setTabState(v); };
   useEffect(() => { if (args?.tab) setTab(args.tab); }, [args?.tab, args?.nonce]);
   const showConns = tab === 'network' && prefs.connections !== false;
-  // which lists lord-server builds (without redrawing this window on every sample)
+  // which lists insane-server builds (without redrawing this window on every sample)
   useMonitor({ procs: tab === 'processes' || tab === 'memory', conns: showConns, geo: showConns && prefs.geo !== false, everyMs: 0 });
   const ready = useStore(monitorSamples, (l) => l.length > 0);
   // Voltage only exists where the machine reports something (not in a virtual machine, for one)

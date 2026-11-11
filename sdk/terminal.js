@@ -1,4 +1,4 @@
-// terminal.js — terminal sessions for apps (lord.term) and the session clipboard.
+// terminal.js — terminal sessions for apps (insane.term) and the session clipboard.
 // Emulation and drawing are in C; here sessions are only created, configured and
 // their events listened to: 'title', 'cwd', 'bell', 'badge', 'notify', 'profile', 'attention',
 // 'copy', 'command' (exit code), 'output' (activity, ~1/s) and 'exit'.
@@ -7,17 +7,17 @@ import { createStore } from './store.js';
 const subs = new Map();
 const anySubs = new Set();
 
-globalThis.__lordTerm = (id, type, data) => {
+globalThis.__insaneTerm = (id, type, data) => {
   for (const fn of [...(subs.get(id) || [])]) { try { fn(type, data); } catch (e) { console.error('term:', e); } }
   for (const fn of [...anySubs]) { try { fn(id, type, data); } catch (e) { console.error('term:', e); } }
 };
 
-const pass = (name) => (...a) => lord.term[name](...a);
+const pass = (name) => (...a) => insane.term[name](...a);
 
 export const term = {
-  create: (opts = {}) => lord.term.create(opts),
-  list: () => lord.term.list(),
-  close(id) { lord.term.close(id); subs.delete(id); },
+  create: (opts = {}) => insane.term.create(opts),
+  list: () => insane.term.list(),
+  close(id) { insane.term.close(id); subs.delete(id); },
   on(id, fn) {
     if (!subs.has(id)) subs.set(id, new Set());
     subs.get(id).add(fn);

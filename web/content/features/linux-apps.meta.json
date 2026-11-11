@@ -96,9 +96,9 @@
         {
           "id": "launch",
           "label": {
-            "en": "Launcher in lord-server",
-            "es": "Lanzador en lord-server",
-            "pt": "Lançador no lord-server"
+            "en": "Launcher in insane-server",
+            "es": "Lanzador en insane-server",
+            "pt": "Lançador no insane-server"
           },
           "sub": {
             "en": "Re-reads Exec, no shell, no extra arguments",

@@ -1,9 +1,9 @@
-// cloudmock.js — a stand-in for lord.cloud (docs/CLOUD.md section 17) for working on the interface before
-// lord-server has Cloud: four accounts like the mocks' (a personal drive, a work drive syncing, an object storage
+// cloudmock.js — a stand-in for insane.cloud (docs/CLOUD.md section 17) for working on the interface before
+// insane-server has Cloud: four accounts like the mocks' (a personal drive, a work drive syncing, an object storage
 // bucket, a WebDAV server that needs a new sign-in), sample folders under ~/Cloud, statuses per file, links, a
 // sign-in that finishes by itself after a few seconds, and transfers that move.
 //
-// Only for development: startCloud() installs it when lord.cloud is missing and settings.json has
+// Only for development: startCloud() installs it when insane.cloud is missing and settings.json has
 // "cloudDevMock": true (or "states", below). It never runs otherwise, and nothing here reaches the network or rclone.
 
 const GB = 1e9, TB = 1e12, MB = 1e6;
@@ -25,7 +25,7 @@ const FIELDS = {
   webdav: [F('url', 'Server', { required: true, examples: ['https://cloud.example.test/remote.php/dav/files/ana'] }),
     F('vendor', 'Preset', { default: 'nextcloud', examples: ['nextcloud', 'owncloud', 'other'] }), F('user', 'User', { required: true }),
     F('pass', 'App password', { secret: true, required: true })],
-  // as lord-server lists them (17.2): rclone's help, Sensitive host and user (secret) but only the passwords isPassword
+  // as insane-server lists them (17.2): rclone's help, Sensitive host and user (secret) but only the passwords isPassword
   sftp: [F('host', 'SSH host to connect to.', { required: true, secret: true, isPassword: false, help: 'SSH host to connect to.\n\nE.g. "example.com".' }),
     F('user', 'SSH username.', { secret: true, isPassword: false, help: 'SSH username.' }), F('port', 'SSH port number.', { default: '22', type: 'int', help: 'SSH port number.' }),
     F('pass', 'SSH password, leave blank to use ssh-agent.', { secret: true, isPassword: true }), F('key_pem', 'Raw PEM-encoded private key.', { secret: true, isPassword: false }),
@@ -100,18 +100,18 @@ export function installCloudMock(home, scenario = '') {
   let pendingAdd = null, measureTimer = 0;
 
   // sample folders and files (small: only their names matter here)
-  const mk = (p) => { try { lord.fs.mkdir(p); } catch (e) { /* there */ } };
+  const mk = (p) => { try { insane.fs.mkdir(p); } catch (e) { /* there */ } };
   mk(`${home}/Cloud`);
   for (const a of st.accounts) {
     mk(a.mount);
     for (const [rel, dir, s] of TREES[a.name] || []) {
       const p = `${a.mount}/${rel}`;
-      if (dir) mk(p); else { try { lord.fs.stat(p); } catch (e) { try { lord.fs.write(p, `${rel}\n`); } catch (er) { /* read only */ } } }
+      if (dir) mk(p); else { try { insane.fs.stat(p); } catch (e) { try { insane.fs.write(p, `${rel}\n`); } catch (er) { /* read only */ } } }
       status[p] = s || (dir ? (a.kept.includes(p) ? 'kept' : 'cloud') : 'cloud');
     }
   }
 
-  const push = () => { if (typeof globalThis.__lordCloud === 'function') globalThis.__lordCloud(JSON.parse(JSON.stringify(st))); };
+  const push = () => { if (typeof globalThis.__insaneCloud === 'function') globalThis.__insaneCloud(JSON.parse(JSON.stringify(st))); };
   const find = (id) => st.accounts.find((a) => a.id === id);
   const ofPath = (p) => st.accounts.find((a) => p === a.mount || p.startsWith(`${a.mount}/`));
   const keptIn = (p) => { const a = ofPath(p); return !!a && a.kept.some((k) => p === k || p.startsWith(`${k}/`)); };
@@ -150,7 +150,7 @@ export function installCloudMock(home, scenario = '') {
     }, 4000);
   }
 
-  lord.cloud = {
+  insane.cloud = {
     available: () => true,
     state: () => JSON.parse(JSON.stringify(st)),
     // 17.2: a Promise, a little later (and a failure with settings "cloudDevMock": "providersFail")
@@ -228,7 +228,7 @@ export function installCloudMock(home, scenario = '') {
     },
     cancelMeasure() { clearTimeout(measureTimer); },
     delete(paths) {
-      for (const p of paths) { try { lord.fs.copy(p, `${home}/.cache/lordos-cloudmock-deleted-${seq++}`, true); } catch (e) { /* gone */ } delete status[p]; }
+      for (const p of paths) { try { insane.fs.copy(p, `${home}/.cache/insaneos-cloudmock-deleted-${seq++}`, true); } catch (e) { /* gone */ } delete status[p]; }
       push();
       return new Promise((r) => setTimeout(() => r({ ok: true }), 300));
     },
@@ -249,7 +249,7 @@ export function installCloudMock(home, scenario = '') {
         if (!ofPath(p) || p === ofPath(p).mount) continue;
         // a file made here since (Check This Account's) is on this computer
         let made = false;
-        if (!status[p]) { try { made = !lord.fs.stat(p).dir; } catch (e) { made = false; } }
+        if (!status[p]) { try { made = !insane.fs.stat(p).dir; } catch (e) { made = false; } }
         let s = status[p] || (keptIn(p) ? 'kept' : made ? 'here' : 'cloud');
         if (keptIn(p) && s !== 'up' && s !== 'error') s = 'kept';
         const a = ofPath(p);
@@ -303,7 +303,7 @@ export function installCloudMock(home, scenario = '') {
       const q = String(needle).toLowerCase();
       const walk = (d, depth) => {
         let list = [];
-        try { list = lord.fs.list(d); } catch (e) { return; }
+        try { list = insane.fs.list(d); } catch (e) { return; }
         for (const e of list) {
           const p = `${d}/${e.name}`;
           if (e.name.toLowerCase().includes(q)) out.push({ path: p, dir: !!e.dir, size: e.size || 0, mtime: e.mtime || 0 });

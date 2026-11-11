@@ -1,7 +1,7 @@
-// Force Quit (the crown menu, sdk/appcontrol.js): every app with a window; the chosen one ends without
-// being asked. Linux and isolated apps get SIGKILL from lord-server (only their own process), built-in
+// Force Quit (the apple menu, sdk/appcontrol.js): every app with a window; the chosen one ends without
+// being asked. Linux and isolated apps get SIGKILL from insane-server (only their own process), built-in
 // apps close without their close guard.
-import { View, Text, Button, ScrollView, useTheme, useWindows, runningApps, forceQuit, windowIcon, errorText, typeScale, t as tr } from '@lordos/sdk';
+import { View, Text, Button, ScrollView, useTheme, useWindows, runningApps, forceQuit, windowIcon, errorText, typeScale, t as tr } from '@insaneos/sdk';
 import { useState } from 'react';
 
 export function Icon({ size }) {

@@ -1,7 +1,7 @@
 /* gpu.h — GPU composition (Mesa's GBM + EGL + GLES2) and direct scanout (see gpu.c and
- * docs/GPU.md). If there is no usable GPU, gpu_init fails and lord-server keeps going by CPU as always. */
-#ifndef LORD_GPU_H
-#define LORD_GPU_H
+ * docs/GPU.md). If there is no usable GPU, gpu_init fails and insane-server keeps going by CPU as always. */
+#ifndef INSANE_GPU_H
+#define INSANE_GPU_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -21,17 +21,17 @@ typedef struct {
 
 typedef struct { uint32_t fourcc; uint64_t modifier; } GpuFormat;
 
-int  gpu_init(Kms *k);                  /* 0 if it is active; LORD_GPU=0 turns it off */
+int  gpu_init(Kms *k);                  /* 0 if it is active; INSANE_GPU=0 turns it off */
 int  gpu_active(void);
 void gpu_shutdown(void);
 const char *gpu_renderer(void);         /* "llvmpipe (LLVM …)", "AMD Radeon …" */
 
 /* What System Information shows of the GPU path (docs/BENCHMARK.md, "The GPU as separate layers").
  * why: the last gpu_init's outcome, a fixed code: "on", "not-built" (built without Mesa), "env-off"
- * (LORD_GPU=0), "no-3d", "no-gbm", "no-egl", "no-config", "no-context", "software" (llvmpipe and
+ * (INSANE_GPU=0), "no-3d", "no-gbm", "no-egl", "no-config", "no-context", "software" (llvmpipe and
  * the like), "shaders", or "" (never tried). The rest is the live context's, "" or 0 without one
  * (the renderer also names the software one that was turned down);
- * scanouts counts the frames shown directly since lord-server started. */
+ * scanouts counts the frames shown directly since insane-server started. */
 typedef struct {
     const char *why, *renderer, *render_node;
     int dmabuf;
@@ -87,10 +87,10 @@ typedef struct GpuDrag {
     int nl, nb, lfull, bfull;
     Rect strip[4];                      /* what the CPU painted around w this frame (uploaded to the UI texture) */
     int nstrip;
-    const uint32_t *ref;                /* LORD_GPU_VERIFY: the CPU's pixels for w (w's width a row), or NULL */
+    const uint32_t *ref;                /* INSANE_GPU_VERIFY: the CPU's pixels for w (w's width a row), or NULL */
     long frame;                         /* its number, for the log */
 } GpuDrag;
-/* 1 if GPU drag may be used on that output: LORD_GPU_DRAG is not 0 (on by default), the shader has 24-bit floats, the self-test
+/* 1 if GPU drag may be used on that output: INSANE_GPU_DRAG is not 0 (on by default), the shader has 24-bit floats, the self-test
  * (every valid premultiplied combination, and a placement pass at least as large as the output, drawn
  * into a framebuffer and read back) gave the CPU's pixels. gpu_init runs that test, once per GL renderer
  * and version. */
@@ -103,7 +103,7 @@ void gpu_gdrag_max(int *lw, int *lh);    /* the largest layer the self-test's pl
  * shown, and the caller paints w on the CPU in its next frame. */
 int  gpu_frame_ex(int out, const Canvas *scene, const Rect *dmg, int n, const GpuDrag *gdrag, int *gdrag_drawn,
                   void (*draw_layer)(int layer));
-/* The buffer-age scissor (LORD_GPU_SCISSOR=1, docs/GPU.md): the next gpu_frame_ex of this output draws only the
+/* The buffer-age scissor (INSANE_GPU_SCISSOR=1, docs/GPU.md): the next gpu_frame_ex of this output draws only the
  * UI, no app window, menu or cursor, so it may redraw only what changed. Asked before every frame; unset, it is
  * composed whole. */
 void gpu_scissor_quiet(int out, int quiet);

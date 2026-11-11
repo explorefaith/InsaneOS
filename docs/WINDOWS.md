@@ -9,7 +9,7 @@ and the cursor shows the arrow for each direction.
 | ![edges](windows-resize-edges.png) | ![resize](windows-resize.png) |
 | The 8 invisible edges of a window (Chromium with the theme's frame): ↖ ↕ ↗ ↔ ↔ ↙ ↕ ↘ | Resizing from the corner: Chromium redraws at the new size while dragging |
 | ![move](windows-move.png) | ![gtk](windows-gtk-move.png) |
-| Moving a window: move cursor, the Dock stays on top | GTK Demo (own frame, CSD) moved from its bar: lord-server follows `xdg_toplevel.move` in C |
+| Moving a window: move cursor, the Dock stays on top | GTK Demo (own frame, CSD) moved from its bar: insane-server follows `xdg_toplevel.move` in C |
 | ![cursors](windows-resize-cursors.png) | ![app](windows-app-cursor.png) |
 | Insane OS cursors (`server/src/cursor.c`) at 2x over light and dark backgrounds; the red dot is the hotspot | The I-beam in Chromium's address bar: it asks for it via `cursor-shape-v1` and Insane OS draws it |
 
@@ -38,9 +38,9 @@ whatever motion has accumulated up to that moment). That way a 1000 Hz mouse doe
 Linux apps a thousand times per second. Raw motion for games (`relative-pointer`) and the cursor
 plane are still per event.
 
-### C does the dragging (`ui/grab.c`, `lord.wm`)
+### C does the dragging (`ui/grab.c`, `insane.wm`)
 
-The theme starts the drag and lord-server follows it on its own:
+The theme starts the drag and insane-server follows it on its own:
 
 ```js
 wm.beginMove(id)              // in the title bar's onMouseDown
@@ -50,8 +50,8 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
 - Per frame, C shifts the window's node (`left`/`top`, and `width`/`height` when resizing) and redoes
   the layout. **JS is not called and React doesn't re-render.**
 - While it lasts, Linux apps don't receive the pointer (`wl_pointer_grab`: `leave`), as in Weston.
-- On release, JS receives `__lordWm('end', { node, dx, dy, dw, dh })` and the SDK stores the geometry
-  in the window manager. React sets the same value the node already had, and `lord.setStyle` no
+- On release, JS receives `__insaneWm('end', { node, dx, dy, dw, dh })` and the SDK stores the geometry
+  in the window manager. React sets the same value the node already had, and `insane.setStyle` no
   longer invalidates anything if the style didn't change (`js.c`).
 - Limits: the minimum size is the manifest's `minSize` (Linux apps, 160×100). The frame doesn't go
   above the work area (the menu bar) and 48 px always remain visible.
@@ -157,8 +157,8 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
     the pixels are the same. Not when an ancestor paints over the window, an app window is under it,
     or the layer has an app window, would be painted whole or is past the self-test's size; then the frame is
     painted as before. A node painted after it (the menu bar, the Dock) only shortens the rectangle. On by default
-    since the Pi 5 run of 2026-10-31; `LORD_GPU_DRAG=0` turns it off,
-    `LORD_GPU_VERIFY=N` compares it with the CPU every N-th frame. `engine-test`'s `gpu-drag` path checks it
+    since the Pi 5 run of 2026-10-31; `INSANE_GPU_DRAG=0` turns it off,
+    `INSANE_GPU_VERIFY=N` compares it with the CPU every N-th frame. `engine-test`'s `gpu-drag` path checks it
     against the GPU path's golden hashes.
 - **There's no layer** if there is a backdrop blur inside (`backdropFilter`), or a video on the GPU
   path.
@@ -202,7 +202,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
   hashes come from the code before this part (e24af69 plus the corner change), and the GPU path's
   list of app windows is hashed with each frame. Every frame that uses the copy where the old rule
   painted everything is painted that old way too, on a copy of the canvas (`paint_below_verify`), and
-  the test fails if one pixel differs. `LORD_BELOW_SWITCH=0 build/engine-test` runs it without that.
+  the test fails if one pixel differs. `INSANE_BELOW_SWITCH=0 build/engine-test` runs it without that.
 - **Against a full repaint** the test prints a second number, which may only go down: today a drag
   frame differs from a full repaint in at most 248 pixels on the CPU path (the largest at the Dock's
   rounded corners, under its backdrop blur, while the window is near it) and 70,864 on the GPU path
@@ -222,7 +222,7 @@ wm.beginResize(id, edges)     // edges as in xdg_toplevel.resize: 1 top, 2 botto
 
   ![A dragged window's lower-left corner over another window, Raspberry Pi 5 monitor](drag-corner-pi5-over-window.png)
   ![A dragged window's lower-right corner over the wallpaper, Raspberry Pi 5 monitor](drag-corner-pi5-over-wallpaper.png)
-- **`LORD_PAINT_VERIFY=N`** in lord-server's environment repaints the whole tree every N-th frame of a
+- **`INSANE_PAINT_VERIFY=N`** in insane-server's environment repaints the whole tree every N-th frame of a
   display into a scratch canvas, without the layer, and writes to stderr how many pixels differ from
   the frame. Use N > 1 to check the partial repaints of the layer: the check repaint also notes where
   the terminals are, so on the next frame a terminal's change repaints the whole layer.
@@ -277,15 +277,15 @@ reached 95–103 frames per second: virtio-gpu completes the flip before the ref
 
 ## Measurements (VM 118, 1280×800 at 75 Hz, 4 vCPU)
 
-Continuous 6 s drag in circles with a virtual tablet (uinput, 125 events/s). lord-server writes one
-line per drag to `~/.cache/lordos/session.log`:
+Continuous 6 s drag in circles with a virtual tablet (uinput, 125 events/s). insane-server writes one
+line per drag to `~/.cache/insaneos/session.log`:
 
 ```
 drag: 464 frames in 6011 ms = 77.2 FPS (464 moves); per frame: work 12.80 ms (max 36.83;
 JS 0.20, layout 0.56, paint 11.43, present 0.61), max gap 36.9 ms; layer: 1023 painted, 467 copied (CPU)
 ```
 
-"work" is what lord-server spends per frame: the pointer and timer JS, layout, painting
+"work" is what insane-server spends per frame: the pointer and timer JS, layout, painting
 ("paint") and presentation ("present"). Since 0.8.6 the line ends with what the copy
 of what is below did during the drag: `below: B built whole, P in part, S frames switched to it (not:
 … ancestor, … blur, … transform, … unreached, … cost)`, the last part counting the frames where the old
@@ -296,8 +296,8 @@ button held) writes the layer's counters and the same text in a `drag (scripted)
 |---|---|---|---|
 | CPU | Terminal | 17.9 FPS, 55.6 ms per frame (JS 38.2) | **77.2 FPS** (the cap is the 75 Hz refresh), 12.8 ms (JS 0.2) |
 | CPU | Chromium (SSD, 900×600) | 17.1 FPS, 58.2 ms (JS 35.9) | **50.7–67 FPS**, 15–20 ms (JS 0.3) |
-| GPU (`LORD_GPU=1`, llvmpipe) | Terminal | 15.3 FPS, 64.5 ms (JS 38.3) | **40 FPS**, 24 ms (JS 0.4; present with llvmpipe 10 ms) |
-| GPU (`LORD_GPU=1`, llvmpipe) | Chromium | 11.5 FPS, 85.9 ms (JS 47.0) | **30 FPS**, 32 ms (JS 0.4; present with llvmpipe 12.7 ms) |
+| GPU (`INSANE_GPU=1`, llvmpipe) | Terminal | 15.3 FPS, 64.5 ms (JS 38.3) | **40 FPS**, 24 ms (JS 0.4; present with llvmpipe 10 ms) |
+| GPU (`INSANE_GPU=1`, llvmpipe) | Chromium | 11.5 FPS, 85.9 ms (JS 47.0) | **30 FPS**, 32 ms (JS 0.4; present with llvmpipe 12.7 ms) |
 | CPU | Chromium, resizing | — | 19.5 FPS: set by Chromium, which redraws at every size |
 
 - **"Before"** is the same tree, but with uncoalesced motion and the original themes (dragging in
@@ -320,7 +320,7 @@ button held) writes the layer's counters and the same text in a `drag (scripted)
 With several displays (`DISPLAYS.md`) the layer and "what is below" belong to the display with
 most of the window (`paint_layer_view`) and are in that display's physical pixels; the other
 displays paint the window normally while it crosses. Dragging uses each display's work-area top
-(`lord.wm.grab(…, { areas })`), so a window never goes under a menu bar. Re-measured on VM 118
+(`insane.wm.grab(…, { areas })`), so a window never goes under a menu bar. Re-measured on VM 118
 (About window, 6 s circles at 125 events/s, one 1280×800 display, CPU): 6.38–6.51 ms of work per
 frame before, 6.73–6.94 ms after (≈ +5 %, the per-display bookkeeping); the layer still renders
 once and is then only copied. Numbers with two displays and at 150 %: `DISPLAYS.md`.
@@ -341,12 +341,12 @@ was checked against this path:
   Layout never reads the transform and `place()` recomputes every matrix, so the result is the same;
   only that node's own layout pass is saved (its ancestors are laid out as before).
   `test_transform_restyle` compares every node's layout and every pixel with the `node_invalidate`
-  path. `'transform'` itself is not a key `lord.setStyle` takes and changes nothing.
+  path. `'transform'` itself is not a key `insane.setStyle` takes and changes nothing.
 - **A main-loop pass with no timer due doesn't walk the timers** (0.8.6;
-  `ui/js_prelude.h`). `__lordTick` keeps the earliest deadline and returns at once when it hasn't
+  `ui/js_prelude.h`). `__insaneTick` keeps the earliest deadline and returns at once when it hasn't
   come; when it has, one pass fires the due timers by deadline, then by id, as before. Clearing the
   earliest timer marks that deadline stale and it is computed again before use, so the wait returned
-  to the main loop is the same number as before. lord-server makes the atoms of the three globals it
+  to the main loop is the same number as before. insane-server makes the atoms of the three globals it
   calls on every pass once per runtime. `build/timer-order-test` runs 400 random timer scripts on this
   prelude and on the one before it and requires the same trace (callbacks, order, arguments, every
   returned wait, logs). A tick with 200 timers pending and none due went from 158.75 µs to 0.30 µs
@@ -377,7 +377,7 @@ dialog dragged over it for 240 frames, and a Dock with a backdrop blur.
 | Drag, two displays (1280×800 + 1920×1200 at 150 %) | 11.3 ms | 2.5 ms |
 
 On VM 120 (live ISO, CPU path, 1280 × 800, the Terminal dragged in circles for 6 s with a uinput
-tablet, lord-server's `drag:` line), switching only `lord-server`: before 7.88–7.99 ms of work per
+tablet, insane-server's `drag:` line), switching only `insane-server`: before 7.88–7.99 ms of work per
 frame (paint 7.30–7.41, layout 0.02, 104.7–105.8 FPS), after 7.98–8.37 ms (paint 7.41–7.76, layout
 0.01–0.02, 101.5–105.4 FPS). The difference is within the run-to-run spread; most of that frame is
 still the Dock's blur.
@@ -393,18 +393,18 @@ window side in `sdk/windows.js`.
   a quarter; at the top edge it is maximized. Halves, thirds and quarters round to whole pixels and
   share their middle line, so two snapped windows never overlap or leave a gap.
 - **The preview** while dragging: the window still moves in C (no JS per frame). Only while a move
-  is going on, the SDK reads `lord.wm.pointer()` (`ui/js_wm.c`: the pointer and the drag's edges,
+  is going on, the SDK reads `insane.wm.pointer()` (`ui/js_wm.c`: the pointer and the drag's edges,
   no arguments, read only) every 90 ms and sets `snapPreview` when the zone changes; the theme draws
   it under the moving window. Crossing into a zone costs one rebuild of what is below the window.
-- **A scripted move (0.8.6, InsaneBench):** `wm.scriptMove(id, { rx, ry, periodMs })` asks lord-server to move
-  the window along a figure of eight through this same path (`lord.wm.script`, `grab_script_begin` in
+- **A scripted move (0.8.6, InsaneBench):** `wm.scriptMove(id, { rx, ry, periodMs })` asks insane-server to move
+  the window along a figure of eight through this same path (`insane.wm.script`, `grab_script_begin` in
   `ui/grab.c`: the window painted once into a layer, one step per frame from the main loop, no button held
   and no JS per frame). The positions come from InsaneBench's synthetic pointer (`bench/lbinput.c`, a 125 Hz
   thread on an eventfd the main loop polls like a device; taken once per frame like a real mouse's motion), so
   the test also measures pointer-to-screen latency; without that thread the path follows the clock. Pointer
   input or `wm.stopScript()` stops it. Only System Information's desktop
   scene uses it (`apps/sysinfo/scene.jsx`), to measure the compositor ([BENCHMARK.md](BENCHMARK.md)).
-- **On release** (`__lordWm('end')`) the SDK reads the pointer once more and snaps; the size from
+- **On release** (`__insaneWm('end')`) the SDK reads the pointer once more and snaps; the size from
   before the first snap is kept in `w.restore`. Dragging a snapped window away gives it that size
   back under the pointer, where it was grabbed. Resizing a snapped window keeps its new size.
 - **API:** `wm.snap(id, zone)` (`left`, `right`, `top-left`, `top-right`, `bottom-left`,
@@ -432,7 +432,7 @@ Each app reopens where it was: size, position, maximized and display, per app, i
 ## The Window menu, the app menu and Force Quit (0.8.5)
 
 The same menus in both themes, built by the SDK (`sdk/windowmenu.js`, `sdk/appcontrol.js`); Insane Flow
-shows them in its menu bar (Window, the app's name, the crown menu), Insane Classic in each window's own
+shows them in its menu bar (Window, the app's name, the apple menu), Insane Classic in each window's own
 Window and Help menus (its in-window menu strip, since it has no menu bar).
 
 - **Window menu** (`windowMenuItems`): Minimize, Zoom, Fill, Center; **Move & Resize** with the halves
@@ -446,10 +446,10 @@ Window and Help menus (its in-window menu strip, since it has no menu bar).
   icon, name, own version and where it comes from; a system window, `apps/appabout`), Settings… (the
   app's own, ❖,), Hide <app>, Hide Others, Show All and Quit <app> (❖Q). In Insane Classic, About <app>
   is in each window's Help menu.
-- **Force Quit…** (the crown menu, a system window `apps/forcequit`) lists the open apps and ends the
+- **Force Quit…** (the apple menu, a system window `apps/forcequit`) lists the open apps and ends the
   chosen one without asking it (`forceQuit`): a Linux or isolated app's own process gets SIGKILL from
-  lord-server through `lord.wayland.kill(surface)` (`js_sys.c`), only that client of the same user and
-  never lord-server itself; an X11 window is only asked to close (every X11 app shares Xwayland); a
+  insane-server through `insane.wayland.kill(surface)` (`js_sys.c`), only that client of the same user and
+  never insane-server itself; an X11 window is only asked to close (every X11 app shares Xwayland); a
   built-in app that runs in the session closes without its close guard.
 
 ## Pending

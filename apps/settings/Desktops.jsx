@@ -1,5 +1,5 @@
 // Settings → Desktop & Dock: the desktops (sdk/desktops.js, docs/DESKTOPS.md), the same in every theme.
-import { View, Text, Button, useSettings, Toggle, useStore, desktopList, desktopNames, renameDesktop, setDesktopCount, themes, typeScale, useTheme, trackpad, TRACKPAD_DEFAULTS, TextInput, tOptional } from '@lordos/sdk';
+import { View, Text, Button, useSettings, Toggle, useStore, desktopList, desktopNames, renameDesktop, setDesktopCount, themes, typeScale, useTheme, trackpad, TRACKPAD_DEFAULTS, TextInput, tOptional } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Section, SettingRow, PopUp } from './ui.jsx';
 

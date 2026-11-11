@@ -18,10 +18,10 @@ static unsigned rnd(void) { st ^= st << 13; st ^= st >> 7; st ^= st << 17; retur
 static const char *const seeds[] = {
     "GET / HTTP/1.1\r\nHost: 10.0.0.5:5673\r\n\r\n",
     "POST /login HTTP/1.1\r\nHost: a:5673\r\nOrigin: https://a:5673\r\nContent-Type: application/x-www-form-urlencoded\r\n"
-    "Content-Length: 20\r\nCookie: __Host-lordos_remote=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r\n\r\nuser=lord&pass=x",
+    "Content-Length: 20\r\nCookie: __Host-insaneos_remote=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r\n\r\nuser=insane&pass=x",
     "GET /ws?w=1280&h=800 HTTP/1.1\r\nHost: [fe80::1]:5673\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
     "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\nSec-Fetch-Site: same-origin\r\n\r\n",
-    "user=lord&pass=a%20b+c%26",
+    "user=insane&pass=a%20b+c%26",
     "{\"t\":\"m\",\"x\":10,\"y\":20}",
     "{\"t\":\"clip\",\"text\":\"h\\u00e9\\ud83d\\udc51\\n\"}",
     "{\"t\":\"pz\",\"p\":2,\"s\":65536,\"r\":-90}",
@@ -88,7 +88,7 @@ static void one(const char *b, size_t n) {
         rs_ws_free(&w);
     }
     c[n] = 0;                                   /* the string functions get a C string */
-    rs_cookie_token(c, "__Host-lordos_remote", tok);
+    rs_cookie_token(c, "__Host-insaneos_remote", tok);
     rs_valid_host(c);
     rs_same_origin(c, "a:5673");
     rs_form_type(c);

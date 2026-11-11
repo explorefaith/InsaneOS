@@ -1,11 +1,11 @@
-/* imapp.h — IMAP4rev1 response parser (RFC 3501) for lord-maild, pure and bounds-checked.
+/* imapp.h — IMAP4rev1 response parser (RFC 3501) for insane-maild, pure and bounds-checked.
  *
  * The connection layer (imap.c) assembles one complete response: the line plus any literals,
  * kept inline exactly as on the wire ("{N}\r\n" followed by N bytes). imap_parse() turns it into
  * a small tree of values (atoms, strings, NIL, lists) that live in one arena. Bracketed sections
  * ("BODY[HEADER.FIELDS (FROM)]<0>", "[UIDVALIDITY 7]") stay a single atom, as clients expect. */
-#ifndef LORD_MAIL_IMAPP_H
-#define LORD_MAIL_IMAPP_H
+#ifndef INSANE_MAIL_IMAPP_H
+#define INSANE_MAIL_IMAPP_H
 
 #include <stddef.h>
 #include <stdint.h>

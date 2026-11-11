@@ -1,7 +1,7 @@
 // The table of rows the Content, Query and Structure panes share (the mocks' grid): a header that sorts on a click, rows
 // of 25 px drawn only where they show (a page holds 1,000 rows), zebra stripes, a selection, a cell edited in place,
 // the wheel (with Shift, sideways) and a scroll bar that can be dragged.
-import { View, Text, addListener, useAppWindow } from '@lordos/sdk';
+import { View, Text, addListener, useAppWindow } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { usePal, useSize, MONO } from './ui.jsx';
 

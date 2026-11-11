@@ -1,4 +1,4 @@
-O Insane OS não tem contas, publicidade nem rastreamento, nem no site nem na distribuição. Ninguém vende, compartilha ou guarda os seus dados, porque nunca os coletamos. Esta política tem duas partes: o **site lordos.org** e a **distribuição Insane OS** que você instala no seu computador.
+O Insane OS não tem contas, publicidade nem rastreamento, nem no site nem na distribuição. Ninguém vende, compartilha ou guarda os seus dados, porque nunca os coletamos. Esta política tem duas partes: o **site insaneos.org** e a **distribuição Insane OS** que você instala no seu computador.
 
 ## Parte 1: o site
 
@@ -8,14 +8,14 @@ O site é um conjunto de páginas estáticas. Ele **não define cookies** e guar
 
 | Chave | O que contém | Para quê |
 |---|---|---|
-| `lordos-theme` | `light` ou `dark` (nada quando você usa o automático) | para mostrar o tema que você escolheu |
-| `lordos-lang-seen` | `1` | para que a sugestão "esta página também está no seu idioma" apareça só uma vez |
+| `insaneos-theme` | `light` ou `dark` (nada quando você usa o automático) | para mostrar o tema que você escolheu |
+| `insaneos-lang-seen` | `1` | para que a sugestão "esta página também está no seu idioma" apareça só uma vez |
 
 Esses valores nunca saem do seu navegador e nós não podemos lê-los. Apague-os quando quiser nas configurações de dados de sites do navegador. Veja o [Cookies e estatísticas](/legal/cookies-and-statistics/).
 
 ### Sem análises, sem anúncios, sem código de terceiros
 
-O site não carrega ferramentas de análise, publicidade, widgets de redes sociais nem fontes ou scripts de outros servidores: tudo o que ele precisa é servido por lordos.org.
+O site não carrega ferramentas de análise, publicidade, widgets de redes sociais nem fontes ou scripts de outros servidores: tudo o que ele precisa é servido por insaneos.org.
 
 ### Registros do servidor
 
@@ -55,7 +55,7 @@ O fuso horário nunca é deduzido pela rede. Nada nesta tabela vai para o projet
 
 Estas conexões acontecem só depois de uma ação sua:
 
-- **Loja e atualizações:** as listas de pacotes e os pacotes vêm dos espelhos do Debian configurados nas suas fontes do apt (`deb.debian.org` e `security.debian.org` por padrão; no Raspberry Pi, o kernel e o firmware vêm de `archive.raspberrypi.com`). A Loja só as atualiza quando você toca em **Procurar atualizações** (na Loja ou em Ajustes → Atualizações) ou instala algo, e confere cada lista com as assinaturas do Debian. As atualizações do Insane OS vêm do repositório assinado do Insane OS em `lordos.org/apt`, consultado ao mesmo tempo. Desde a 0.8.5 esse repositório também traz o banner em destaque da Loja (só aceito de uma fonte cujo índice assinado diz que é do Insane OS, e conferido com seus hashes) e a lista de apps de Loja → Inteligência Artificial; as fontes `https://` são baixadas por HTTPS. Os apps `.lpk` do Insane OS são instalados a partir de arquivos que você escolhe; não existe um catálogo on-line de apps `.lpk`.
+- **Loja e atualizações:** as listas de pacotes e os pacotes vêm dos espelhos do Debian configurados nas suas fontes do apt (`deb.debian.org` e `security.debian.org` por padrão; no Raspberry Pi, o kernel e o firmware vêm de `archive.raspberrypi.com`). A Loja só as atualiza quando você toca em **Procurar atualizações** (na Loja ou em Ajustes → Atualizações) ou instala algo, e confere cada lista com as assinaturas do Debian. As atualizações do Insane OS vêm do repositório assinado do Insane OS em `insaneos.org/apt`, consultado ao mesmo tempo. Desde a 0.8.5 esse repositório também traz o banner em destaque da Loja (só aceito de uma fonte cujo índice assinado diz que é do Insane OS, e conferido com seus hashes) e a lista de apps de Loja → Inteligência Artificial; as fontes `https://` são baixadas por HTTPS. Os apps `.lpk` do Insane OS são instalados a partir de arquivos que você escolhe; não existe um catálogo on-line de apps `.lpk`.
 - **Apps dos repositórios dos fabricantes** (desde a 0.8.5): instalar um app de Loja → Inteligência Artificial ou Loja → Comerciais cujo fabricante tem repositório próprio primeiro diz de quem é o repositório que será adicionado e a impressão digital da chave, e depois o adiciona, então a partir daí a Loja e o apt também baixam as listas de pacotes desse fabricante. Remover o app remove esse repositório, a menos que outro app instalado o use. Ao que o próprio app se conecta depende do fabricante.
 - **Pacotes de idioma:** adicionar um idioma em Ajustes pode instalar os dicionários e as fontes dele a partir dos mesmos espelhos do Debian.
 - **Impressoras e scanners:** Ajustes → Impressoras e scanners pergunta à rede local (mDNS) quais impressoras e scanners existem nela, e só fala com endereços locais.
@@ -67,7 +67,7 @@ Estas conexões acontecem só depois de uma ação sua:
 - **Wi-Fi, Bluetooth e VPNs:** apenas as redes, os dispositivos e os servidores VPN que você escolhe.
 - **A área de trabalho remota** vem **desligada** por padrão (porta 5673 fechada). Ela só escuta depois que você a liga em Ajustes → Compartilhar. No Raspberry Pi, a área de trabalho remota e o servidor SSH também ficam desligados, a menos que você coloque um arquivo de ativação `remote-desktop` ou `ssh` na partição de boot.
 - **Navegadores e outros apps:** o Firefox ESR, o Chromium e qualquer app Linux que você instalar são programas separados, de seus próprios projetos. Eles fazem as conexões que as configurações deles permitem, sob as políticas de privacidade deles. Os apps `.lpk` isolados só acessam a rede se você der a permissão, e o firewall por app mostra e controla a que cada app se conecta.
-- **O script de instalação para Debian** (`curl -fsSL https://lordos.org/install.sh | sh`) contata apenas `api.github.com` (para encontrar a última versão), `github.com` (para baixá-la com a assinatura) e os seus espelhos do apt. Ele não envia telemetria.
+- **O script de instalação para Debian** (`curl -fsSL https://insaneos.org/install.sh | sh`) contata apenas `api.github.com` (para encontrar a última versão), `github.com` (para baixá-la com a assinatura) e os seus espelhos do apt. Ele não envia telemetria.
 
 ### O que fica no seu computador
 

@@ -10,8 +10,8 @@
  *    "under-voltage has occurred" bit of the last answer, so "under-voltage in the last 2 s window";
  *  - the firmware node's get_throttled of older Raspberry Pi kernels (the whole GET_THROTTLED word). With
  *    rpi_volt loaded too, its sticky bits only cover the last 2 s, not the time since boot. */
-#ifndef LORD_HW_RPIFW_H
-#define LORD_HW_RPIFW_H
+#ifndef INSANE_HW_RPIFW_H
+#define INSANE_HW_RPIFW_H
 
 /* GET_THROTTLED: bit 0 under-voltage now, 1 ARM frequency capped now, 2 throttled now, 3 soft temperature
  * limit now; bits 16-19 the same four "has occurred" (sticky until someone asks the firmware to clear them) */

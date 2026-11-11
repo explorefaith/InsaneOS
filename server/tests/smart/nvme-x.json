@@ -10,7 +10,7 @@
     ],
     "pre_release": false,
     "svn_revision": "5530",
-    "platform_info": "aarch64-linux-6.18.57-lordos-rpi-2712",
+    "platform_info": "aarch64-linux-6.18.57-insaneos-rpi-2712",
     "build_info": "(local build)",
     "argv": [
       "smartctl",

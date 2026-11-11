@@ -5,8 +5,8 @@
  * codeset, before the modifier as glibc writes it: "en_IN.UTF-8", "ca_ES.UTF-8@valencia"
  * (sdk/localename.js localeOf). Both spellings of a listed region are accepted; locale-gen makes
  * either from the same source. Used by admin.c (locale-gen, system-locale) and install.c (install-run). */
-#ifndef LORD_LOCALENAME_H
-#define LORD_LOCALENAME_H
+#ifndef INSANE_LOCALENAME_H
+#define INSANE_LOCALENAME_H
 
 #include <stdio.h>
 #include <string.h>

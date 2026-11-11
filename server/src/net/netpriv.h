@@ -1,6 +1,6 @@
 /* netpriv.h — internal pieces of the network module (netlink, cryptography, configurations). */
-#ifndef LORD_NETPRIV_H
-#define LORD_NETPRIV_H
+#ifndef INSANE_NETPRIV_H
+#define INSANE_NETPRIV_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -53,7 +53,7 @@ int  rt_addr_flush(int fd, int ifindex, int family);
 /* gw may be NULL; table 0 = main. */
 int  rt_route(int fd, int add, int family, const void *dst, int prefix, const void *gw, int ifindex, uint32_t metric, uint32_t table);
 /* Routing rule like wg-quick: "not fwmark M table T" (invert) or "table main suppress_prefixlength 0". */
-#define RTPROT_LORDOS 76                /* routes of Insane OS's VPNs (so they can always be cleaned up) */
+#define RTPROT_INSANEOS 76                /* routes of Insane OS's VPNs (so they can always be cleaned up) */
 int  rt_route_proto(int fd, int add, int family, const void *dst, int prefix, const void *gw, int ifindex, uint32_t metric, uint32_t table, int proto);
 int  rt_get(int fd, int family, const void *dst, uint8_t gw[16], int *has_gw, int *oif);   /* ip route get */
 int  rt_flush_proto(int fd, int proto, int family, const void *dst);
@@ -80,11 +80,11 @@ int  random_bytes(void *out, size_t n);
 
 /* ---- configuration files (root) ---- */
 
-#define NET_DIR     "/etc/lordos/net"
+#define NET_DIR     "/etc/insaneos/net"
 #define NET_IF_DIR  NET_DIR "/if"
 #define NET_VPN_DIR NET_DIR "/vpn"
 #define NET_WIFI_DIR NET_DIR "/wifi"
-#define NET_RUN_DIR "/run/lordos"
+#define NET_RUN_DIR "/run/insaneos"
 
 int  valid_ifname(const char *s);
 int  valid_vpn_name(const char *s);

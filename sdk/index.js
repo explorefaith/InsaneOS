@@ -1,12 +1,12 @@
-// @lordos/sdk — everything a Insane OS theme or app needs.
+// @insaneos/sdk — everything a Insane OS theme or app needs.
 import { createElement, cloneElement, Fragment } from 'react';
-import { render, onScreenChange } from '@lordos/runtime';
+import { render, onScreenChange } from '@insaneos/runtime';
 import { settings } from './settings.js';
 import { createStore, useStore } from './store.js';
 import { locale, tOptional } from './i18n.js';
 
-export { View, Text, Image, Terminal, Surface, MediaView, screen, addListener, useClock, system, layouts, getLayout, modifiers } from '@lordos/runtime';
-export { displays as screenDisplays, mainDisplay, displayAt, displayFor, mainBox } from '@lordos/runtime';
+export { View, Text, Image, Terminal, Surface, MediaView, screen, addListener, useClock, system, layouts, getLayout, modifiers } from '@insaneos/runtime';
+export { displays as screenDisplays, mainDisplay, displayAt, displayFor, mainBox } from '@insaneos/runtime';
 export { createStore, useStore } from './store.js';
 export { settings, useSettings } from './settings.js';
 export { t, tOptional, useLocale, locale, languages, preferredLanguages, setPreferredLanguages, CORE_LANGUAGES, appName, formatDate, formatTime, formatNumber, weekdayName, monthName, setLanguage, reloadCatalogs, direction, textDirection } from './i18n.js';
@@ -120,7 +120,7 @@ import { maybeStartTour } from './help.js';
 import { liveStartWindow } from './livestart.js';
 import { getApp as getAppOf, isLiveSystem as isLiveSystemOf, wm as wmOf, windows as windowsStore } from './windows.js';
 export const windowIcon = (w) => windowIconOf(w, getAppOf);
-export { systemInfo, systemReport, lordosVersion, useSystemInfo, useServerStats, useCpuUsage, formatBytes, formatDuration } from './system.js';
+export { systemInfo, systemReport, insaneosVersion, useSystemInfo, useServerStats, useCpuUsage, formatBytes, formatDuration } from './system.js';
 export * as fs from './fs.js';
 export { useDirectory } from './fs.js';
 export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver } from './theme.js';
@@ -149,13 +149,13 @@ export { cleaner } from './cleaner.js';   // Cleaner (docs/CLEANER-ARCHITECTURE.
 export { statusWord } from './cleanerstatus.jsx';
 export { cleanerPalette, CLEANER_THEMES } from './cleanertheme.js';
 export { oldKernels, kernelPlanOk } from './oldkernels.js';
-export { lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs, UPDATE_DEFAULTS } from './updates.js';   // updating Insane OS in place (docs/UPDATES.md)
+export { insaneosUpdate, restartNeeded, updatePrefs, setUpdatePrefs, UPDATE_DEFAULTS } from './updates.js';   // updating Insane OS in place (docs/UPDATES.md)
 // Store → Discover, "Suggested for your computer": packages for the detected hardware (docs/PACKAGES.md)
 export { suggestions, refreshSuggestions, reevaluate as reevaluateSuggestions, dismissSuggestion, markSuggestionsSeen, unseenSuggestions } from './suggestions.js';
 export { vaultAvailable, vaultRequest, onVaultEvent, keyring, autofill, autofillReveal, KeyringPrompt, AutofillButton, askKeyringUnlock } from './vault.js';   // Passwords and keyring (docs/PASSWORDS.md)
 import { KeyringPrompt } from './vault.js';
-// Mail, Calendar, Contacts and Reminders through the sandboxed helper lord-maild (docs/MAIL.md)
-// Databases: MySQL and MariaDB through the sandboxed helper lord-sql (docs/DATABASES.md)
+// Mail, Calendar, Contacts and Reminders through the sandboxed helper insane-maild (docs/MAIL.md)
+// Databases: MySQL and MariaDB through the sandboxed helper insane-sql (docs/DATABASES.md)
 export { sqlAvailable, sqlRequest, onSqlEvent, sqlFavorites, sqlPasswords } from './sql.js';
 export { mailAvailable, mailRequest, onMailEvent, mailConfig, mailAccounts, mailStatus, autoconfig, OAUTH_PROVIDERS, DAV_PRESETS, davPreset, openDavSetup, openMailAccounts, trackMailStatus, isolatedPim, pickFileFd, closeFileFd } from './mail.js';
 export { calendars, events as calendarEvents, reminders, usePim, usePimQuery, pimRev, startOfDay } from './calendar.js';
@@ -179,7 +179,7 @@ import { DisplayConfirm, BluetoothPrompt, PolkitPrompt, startHardware } from './
 export { identifyDisplays, identifying as identifyingDisplays, IDENTIFY_MS } from './displaysui.jsx';
 import { DisplayIdentify } from './displaysui.jsx';
 export { displayNumbers, snapDisplay, resolveDrop, placementOk as displayPlacementOk, SNAP_PREVIEW_PX, scaleChoices, scaleTiles } from './displaylayout.js';
-// Fans and cooling (lord-fand, docs/FANS.md): Settings → Cooling and Monitor → Cooling
+// Fans and cooling (insane-fand, docs/FANS.md): Settings → Cooling and Monitor → Cooling
 export { useFan, fanStatus, fanHistory, fanCase, fanControl, refreshFan, coolingVariant, heatColor, CoolingArt, GpuArt, FanCurveChart, formatTemp, FAN_HISTORY } from './cooling.jsx';
 export { DEFAULT_CATEGORIES, defaultFor, defaultInfo, setDefaultFor, resetDefaultFor, candidatesFor, defaultOpenerId, nativeOf } from './defaults.js';
 export { notifyPrefs, appNotifyPrefs, setAppNotifyPrefs, dndActive, NOTIFY_DEFAULTS } from './notify.js';
@@ -187,14 +187,14 @@ export { notifyPrefs, appNotifyPrefs, setAppNotifyPrefs, dndActive, NOTIFY_DEFAU
 // ---- installed themes ----
 
 export const themes = {
-  list: () => lord.themes.list().map((t) => {
+  list: () => insane.themes.list().map((t) => {
     let meta = {};
     try { meta = t.meta ? JSON.parse(t.meta) : {}; } catch (e) { /* invalid theme.json */ }
     // translated name and description (shell.theme.<id>.*) or those from theme.json
     return { id: t.id, current: t.current, hidden: !!meta.hidden, name: tOptional(`shell.theme.${t.id}.name`) || meta.name || t.id,
       description: tOptional(`shell.theme.${t.id}.description`) || meta.description || '' };
   }).filter((t) => !t.hidden),         // the login screen (themes/greeter) can't be chosen
-  current: () => lord.themes.list().find((t) => t.current)?.id || null,
+  current: () => insane.themes.list().find((t) => t.current)?.id || null,
   // Switches theme live: the server discards this JS context and loads the new one. The Insane OS
   // app windows that are open come back in the new theme (themeReopen, read once by startShell);
   // Linux app windows stay connected and simply get the new theme's frame.
@@ -207,22 +207,22 @@ export const themes = {
     } catch (e) { reopen = []; }
     markThemeSwitch();
     settings.set({ theme: id, themeReopen: reopen.length ? reopen : null, themeDesktops: desktopsForThemeSwitch() });
-    lord.settings.save(JSON.stringify(settings.get(), null, 2));
-    return lord.themes.use(id);
+    insane.settings.save(JSON.stringify(settings.get(), null, 2));
+    return insane.themes.use(id);
   },
 };
 
 // Session: log out, lock the screen or go back to the login screen so another
 // user can sign in without closing this one (docs/SESSIONS.md). Locking and switching user need
-// lord-sessiond (managed()); in a session viewed only from the browser, locking closes the
+// insane-sessiond (managed()); in a session viewed only from the browser, locking closes the
 // browser's access.
 export const session = {
   quit: logOut,
-  managed: () => typeof lord.session !== 'undefined' && lord.session.managed(),
-  lock: () => typeof lord.session !== 'undefined' && lord.session.lock(),
-  switchUser: () => typeof lord.session !== 'undefined' && lord.session.switchUser(),
+  managed: () => typeof insane.session !== 'undefined' && insane.session.managed(),
+  lock: () => typeof insane.session !== 'undefined' && insane.session.lock(),
+  switchUser: () => typeof insane.session !== 'undefined' && insane.session.switchUser(),
   // Restart… and Shut Down… (0.8.1): a confirmation with a 60 s countdown (sdk/power.jsx), then
-  // lord-sessiond decides. canPower(): only in a session lord-sessiond shows on the monitor.
+  // insane-sessiond decides. canPower(): only in a session insane-sessiond shows on the monitor.
   canPower,
   restart: () => askPower('reboot'),
   shutdown: () => askPower('poweroff'),
@@ -237,7 +237,7 @@ export function startShell(element) {
   startDesktops();
   const wanted = settings.get().theme;
   const current = themes.current();
-  if (wanted && current && wanted !== current && lord.themes.use(wanted)) return;
+  if (wanted && current && wanted !== current && insane.themes.use(wanted)) return;
   refreshPackages();                    // after the theme's configureWindows
   enableShellLayers();                  // menus, popovers and prompts go to their layer (sdk/layers.js)
   resetShortcuts();                     // the dispatcher exists only in the session (sdk/shortcuts.js)
@@ -246,7 +246,7 @@ export function startShell(element) {
   // live ISO: the installation assistant opens by itself, in front, or System Information for the
   // boot entry "Check this computer" (livestart.js)
   if (isLiveSystemOf()) {
-    const opening = liveStartWindow(lord.system.info(), getAppOf);
+    const opening = liveStartWindow(insane.system.info(), getAppOf);
     if (opening) setTimeout(() => wmOf.open(...opening), 300);
   }
   startAlarms();                        // Clock alarms and timer, with the app closed
@@ -278,10 +278,10 @@ function sweepUninstalledGrants() {
 
 // A packaged app comes and goes with dpkg, behind the shell's back: one stat every few seconds, and only a change reads the list.
 function watchPackaged() {
-  if (typeof lord === 'undefined' || typeof lord.apps?.packagedStamp !== 'function') return;
-  let last = lord.apps.packagedStamp();
+  if (typeof insane === 'undefined' || typeof insane.apps?.packagedStamp !== 'function') return;
+  let last = insane.apps.packagedStamp();
   setInterval(() => {
-    const now = lord.apps.packagedStamp();
+    const now = insane.apps.packagedStamp();
     if (now === last) return;
     last = now;
     refreshPackages();
@@ -327,7 +327,7 @@ function LocaleRoot({ children }) {
 }
 export { setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, MotionWallpaper, MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionPoster, motionDownloads, wallpaperMedia, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor } from './motion.jsx';
 export { userVideoProblem, motionCodecs, MAX_SECONDS } from './motionmodel.js';
-export { lordosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, findWallpaper, DEFAULT_WALLPAPER, GREETER_WALLPAPER, WALLPAPER_CATEGORIES } from './wallpapers.js';
+export { insaneosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, findWallpaper, DEFAULT_WALLPAPER, GREETER_WALLPAPER, WALLPAPER_CATEGORIES } from './wallpapers.js';
 export { appGroup, appMenuItems, runningApps, forceQuit, recentItems, storeUpdates, hideApp, hideOthers, toggleShowDesktop, appSettingsItem } from './appcontrol.js';
 export { windowMenuItems, moveResizeItems } from './windowmenu.js';
 export { setDesktopCount } from './desktops.js';

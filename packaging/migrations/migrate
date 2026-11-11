@@ -1,27 +1,27 @@
 #!/bin/sh
-# migrate — applies LordOS's system migrations, each one once (docs/UPDATES.md, "Migrations").
+# migrate — applies InsaneOS's system migrations, each one once (docs/UPDATES.md, "Migrations").
 #
-#   /usr/lib/lordos/migrate [<previous version>]     (the lordos package's postinst runs it)
+#   /usr/lib/insaneos/migrate [<previous version>]     (the insaneos package's postinst runs it)
 #
-# Every /usr/lib/lordos/migrations/NNN-<version>-<name>.sh runs in NNN order unless
-# /var/lib/lordos/migrations/NNN-<version>-<name> records that it already ran, so any upgrade path
+# Every /usr/lib/insaneos/migrations/NNN-<version>-<name>.sh runs in NNN order unless
+# /var/lib/insaneos/migrations/NNN-<version>-<name> records that it already ran, so any upgrade path
 # (0.8.1 → 0.8.3, or 0.8.0 → 0.8.3 at once) ends in the same state. A migration is idempotent,
-# never touches the users' home folders and gets the previous version in LORDOS_OLD_VERSION (empty
+# never touches the users' home folders and gets the previous version in INSANEOS_OLD_VERSION (empty
 # on a new install). If one fails, the next ones don't run and the package stays unconfigured, so
 # `dpkg --configure -a` (or the Store's next update) runs it again.
 set -eu
-DIR=${LORDOS_MIGRATIONS_DIR:-/usr/lib/lordos/migrations}
-STATE=${LORDOS_MIGRATIONS_STATE:-/var/lib/lordos/migrations}
+DIR=${INSANEOS_MIGRATIONS_DIR:-/usr/lib/insaneos/migrations}
+STATE=${INSANEOS_MIGRATIONS_STATE:-/var/lib/insaneos/migrations}
 mkdir -p "$STATE"
 for m in "$DIR"/[0-9][0-9][0-9]-*.sh; do
     [ -f "$m" ] || continue
     id=$(basename "$m" .sh)
     [ -e "$STATE/$id" ] && continue
-    if LORDOS_OLD_VERSION=${1:-} sh -eu "$m"; then
+    if INSANEOS_OLD_VERSION=${1:-} sh -eu "$m"; then
         date -u +%Y-%m-%dT%H:%M:%SZ > "$STATE/$id"
-        echo "LordOS: migration $id applied"
+        echo "InsaneOS: migration $id applied"
     else
-        echo "LordOS: migration $id failed; run 'dpkg --configure -a' to try again" >&2
+        echo "InsaneOS: migration $id failed; run 'dpkg --configure -a' to try again" >&2
         exit 1
     fi
 done

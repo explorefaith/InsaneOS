@@ -7,9 +7,9 @@
  * already computed PSK (PBKDF2), so no user text reaches wpa_supplicant raw except the
  * WPA3 password (sae_password), which is validated (no line breaks or control characters).
  *
- * Saved networks: /etc/lordos/net/wifi/<ssid in hex>.json (public: ssid and security) and
+ * Saved networks: /etc/insaneos/net/wifi/<ssid in hex>.json (public: ssid and security) and
  * <ssid in hex>.key (0600: the password, "pass=…"). A network saved by the Insane OS Imager's first-run
- * file (lordos-firstrun, docs/IMAGER.md) has the already derived key instead ("psk=<64 hex>"), so
+ * file (insaneos-firstrun, docs/IMAGER.md) has the already derived key instead ("psk=<64 hex>"), so
  * the password never reaches the card: it joins WPA2/WPA3-transition networks (not WPA3-only ones,
  * which need the password itself for SAE). */
 #include "netpriv.h"

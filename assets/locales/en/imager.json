@@ -18,7 +18,7 @@
   "cooling.noneWarnTitle": "Without cooling the board slows itself down",
   "cooling.overclock": "Mild overclock",
   "cooling.overclockHint": "2.6 GHz instead of 2.4 GHz, with no extra voltage. Only with a fan.",
-  "cooling.overclockWarn": "If the board doesn't start, open the card's boot partition on another computer and delete the lordos-firstrun block in config.txt.",
+  "cooling.overclockWarn": "If the board doesn't start, open the card's boot partition on another computer and delete the insaneos-firstrun block in config.txt.",
   "cooling.overclockWarnTitle": "Not every board is stable when overclocked",
   "cooling.p.balanced": "Balanced",
   "cooling.p.balancedHint": "The fan starts at 55 °C and speeds up with the temperature. The default.",

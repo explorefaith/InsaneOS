@@ -2,8 +2,8 @@
  *
  * Read-only: the whole file goes into memory and every access is checked against its length, so
  * a broken or tampered file gives "not found", never a read outside the buffer. */
-#ifndef LORD_MMDB_H
-#define LORD_MMDB_H
+#ifndef INSANE_MMDB_H
+#define INSANE_MMDB_H
 
 #include <stddef.h>
 #include <stdint.h>

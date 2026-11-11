@@ -5,12 +5,12 @@
 #   apt/build.sh check [id…]    validate the catalog; for every "apt" entry verify the vendor's
 #                               repository (pinned key, signed InRelease, index hash, package per arch)
 #   apt/build.sh fetch [id…]    download and verify (and build, from apt/recipes/) every app that goes
-#                               into lordos.org/apt's pool/catalog; prints the resulting .deb paths
+#                               into insaneos.org/apt's pool/catalog; prints the resulting .deb paths
 #   apt/build.sh list           one line per app: id, package, source type, delivery, version
 #
 # Only stdout of "fetch" is the list of .debs (tools/release/apt-repo.sh build --catalog reads it);
 # everything else goes to stderr. Files are kept in $WORKDIR/catalog-cache (WORKDIR as apt-repo.sh:
-# $LORDOS_APT_DIR or ~/.local/share/lordos-apt): a verified download or a built package is reused,
+# $INSANEOS_APT_DIR or ~/.local/share/insaneos-apt): a verified download or a built package is reused,
 # never rebuilt for the same version, so a version that vanished upstream can still be republished
 # and the append-only pool never sees two different files with the same name.
 #
@@ -28,11 +28,11 @@
 set -eu
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-CAT=${LORDOS_CATALOG:-$ROOT/apt/catalog.json}
-WORKDIR=${LORDOS_APT_DIR:-$HOME/.local/share/lordos-apt}
+CAT=${INSANEOS_CATALOG:-$ROOT/apt/catalog.json}
+WORKDIR=${INSANEOS_APT_DIR:-$HOME/.local/share/insaneos-apt}
 CACHE=$WORKDIR/catalog-cache
-TOOLS_IMAGE=lordos-apt-tools:trixie                 # the same image as tools/release/apt-repo.sh
-BUILD_IMAGE=lordos-catalog-build:trixie-v2          # + "-<arch>"; bump the tag when the packages below change
+TOOLS_IMAGE=insaneos-apt-tools:trixie                 # the same image as tools/release/apt-repo.sh
+BUILD_IMAGE=insaneos-catalog-build:trixie-v2          # + "-<arch>"; bump the tag when the packages below change
 COSIGN_IMAGE=gcr.io/projectsigstore/cosign:v2.4.1@sha256:b03690aa52bfe94054187142fba24dc54137650682810633901767d8a3e15b31
 export LC_ALL=C
 
@@ -118,7 +118,7 @@ validate() {
             [ -n "$v" ] || die "$id: missing $f"
         done
         # Insane OS's own packages (Disk Formats) have no source: they are built in this repository and added to the
-        # pool as .debs with the release (tools/release/apt-repo.sh build … lordos-disk-formats_*.deb).
+        # pool as .debs with the release (tools/release/apt-repo.sh build … insaneos-disk-formats_*.deb).
         own=; [ -n "$(jf "$id" '.source // empty')" ] || own=1
         [ -z "$own" ] || [ "$(jf "$id" .vendor)" = Insane OS ] || die "$id: missing source.type"
         is_name "$(jf "$id" .package)" || die "$id: bad package name"
@@ -320,7 +320,7 @@ build_image() {
 cosign_verify() {
     id=$1; bundle=$2; blob=$3
     ident=$(jf "$id" .source.sigstore.identity); issuer=$(jf "$id" .source.sigstore.issuer)
-    if [ -n "${LORDOS_CATALOG_NO_COSIGN:-}" ]; then say "  WARNING: sigstore check of $(basename "$blob") skipped (LORDOS_CATALOG_NO_COSIGN)"; return 0; fi
+    if [ -n "${INSANEOS_CATALOG_NO_COSIGN:-}" ]; then say "  WARNING: sigstore check of $(basename "$blob") skipped (INSANEOS_CATALOG_NO_COSIGN)"; return 0; fi
     if command -v cosign >/dev/null 2>&1; then
         cosign verify-blob --bundle "$bundle" --certificate-identity "$ident" --certificate-oidc-issuer "$issuer" "$blob" >/dev/null 2>&1 \
             || die "$id: sigstore bundle does not verify $(basename "$blob")"
@@ -383,10 +383,10 @@ do_recipe() {
         build_image "$a"
         # parallel jobs: all CPUs for the native architecture; 3 under emulation, where the compilers
         # use several times the memory (16 jobs ran an 8 GB Docker VM out of memory on llama.cpp's
-        # Vulkan shaders). LORDOS_CATALOG_JOBS overrides.
+        # Vulkan shaders). INSANEOS_CATALOG_JOBS overrides.
         case "$(uname -m)" in x86_64|amd64) native=amd64 ;; arm64|aarch64) native=arm64 ;; *) native="" ;; esac
         if [ "$a" = "$native" ]; then jobs=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4); else jobs=3; fi
-        jobs=${LORDOS_CATALOG_JOBS:-$jobs}
+        jobs=${INSANEOS_CATALOG_JOBS:-$jobs}
         say "  building $pkg $ver for $a (apt/recipes/$recipe; this can take a long time under emulation)"
         docker run --rm --platform "linux/$a" --network none -u "$(id -u):$(id -g)" \
             -e HOME=/tmp -e PKG="$pkg" -e VERSION="$ver" -e UPSTREAM_VERSION="$up" -e ARCH="$a" \

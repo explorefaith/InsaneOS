@@ -1,9 +1,9 @@
 {
-  "format": "lordos-hwreport",
+  "format": "insaneos-hwreport",
   "version": 1,
   "createdAt": "2026-10-27",
   "source": "reference",
-  "lordos": "0.8.5-beta",
+  "insaneos": "0.8.5-beta",
   "live": false,
   "system": {
     "machine": {
@@ -100,8 +100,8 @@
       "os": "Debian GNU/Linux 13 (trixie)",
       "osId": "debian",
       "osVersion": "13",
-      "kernel": "6.18.57-lordos.3",
-      "lordos": "0.8.5-beta",
+      "kernel": "6.18.57-insaneos.3",
+      "insaneos": "0.8.5-beta",
       "lsm": "landlock,lockdown,yama,integrity,bpf",
       "landlockAbi": null,
       "bpfLsm": true,
@@ -169,11 +169,11 @@
     }
   ],
   "bench": {
-    "lordbench": 1,
+    "insanebench": 1,
     "mode": "full",
     "status": "done",
     "stopReason": "",
-    "lordos": "0.8.5-beta",
+    "insaneos": "0.8.5-beta",
     "live": false,
     "results": {
       "cpu.sha256.1": {
@@ -261,7 +261,7 @@
         "value": 54.526
       }
     },
-    "kernel": "6.18.57-lordos.3",
+    "kernel": "6.18.57-insaneos.3",
     "arch": "aarch64",
     "threads": 4,
     "cpus": 4,

@@ -8,7 +8,7 @@
 // A click makes that output the default one (the same call as Settings → Sound): the slider then moves that output,
 // and PipeWire keeps each output's own volume, so a headset and the speakers each come back at the level they had.
 import { createElement as h, useState } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { useTheme } from './theme.js';
 import { t } from './i18n.js';
 import { sound, useSound } from './sound.js';

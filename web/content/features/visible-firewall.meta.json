@@ -198,9 +198,9 @@
         {
           "id": "broker",
           "label": {
-            "en": "Broker in lord-server",
-            "es": "Broker en lord-server",
-            "pt": "Broker no lord-server"
+            "en": "Broker in insane-server",
+            "es": "Broker en insane-server",
+            "pt": "Broker no insane-server"
           },
           "sub": {
             "en": ".lpk apps and Passwords: all eight restrictions, refused without a prompt",
@@ -254,9 +254,9 @@
         {
           "id": "kernel",
           "label": {
-            "en": "lord-netperm's eBPF programs in the kernel",
-            "es": "Programas eBPF de lord-netperm en el kernel",
-            "pt": "Programas eBPF do lord-netperm no kernel"
+            "en": "insane-netperm's eBPF programs in the kernel",
+            "es": "Programas eBPF de insane-netperm en el kernel",
+            "pt": "Programas eBPF do insane-netperm no kernel"
           },
           "sub": {
             "en": "Network hooks; cgroup/dev for camera, USB, ALSA capture and /dev/fb; BPF LSM socket_create for Bluetooth sockets",
@@ -378,9 +378,9 @@
     {
       "path": "server/src/netperm/netperm.c",
       "what": {
-        "en": "The root service lord-netperm",
-        "es": "El servicio root lord-netperm",
-        "pt": "O serviço root lord-netperm"
+        "en": "The root service insane-netperm",
+        "es": "El servicio root insane-netperm",
+        "pt": "O serviço root insane-netperm"
       }
     },
     {
@@ -410,9 +410,9 @@
     {
       "path": "server/src/ui/js_fw.c",
       "what": {
-        "en": "lord.fw, the session API",
-        "es": "lord.fw, la API de la sesión",
-        "pt": "lord.fw, a API da sessão"
+        "en": "insane.fw, the session API",
+        "es": "insane.fw, la API de la sesión",
+        "pt": "insane.fw, a API da sessão"
       }
     },
     {

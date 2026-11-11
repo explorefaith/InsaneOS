@@ -1,4 +1,4 @@
-/* fan_test.c — lord-fand without hardware (docs/FANS.md):
+/* fan_test.c — insane-fand without hardware (docs/FANS.md):
  *   - curve evaluation and hysteresis, presets, output clamping;
  *   - fan.json parser: valid files, round trip, and many broken ones (fuzz-ish);
  *   - socket request parser;
@@ -369,7 +369,7 @@ static void test_sysfs(void) {
         size_t k = nf ? fread(t, 1, sizeof t - 1, nf) : 0;
         if (nf) fclose(nf);
         t[k] = 0;
-        CHECK(strstr(t, "lord-fand 1\ngpufan 2 60 ") && strstr(t, "0000:01:00.0\n"));
+        CHECK(strstr(t, "insane-fand 1\ngpufan 2 60 ") && strstr(t, "0000:01:00.0\n"));
     }
     CHECK(fanhw_gpu_manual(&h, 0, 70, 1000, state) == 0 && get(root, "sys/class/hwmon/hwmon3/pwm1") == 179 && fanhw_gpu_pct(&h, 0) == 70);
     CHECK(fanhw_gpu_manual(&h, 1, 70, 1000, state) == -1);
@@ -424,10 +424,10 @@ static void test_sysfs(void) {
     CHECK(get(root, "sys/class/hwmon/hwmon3/pwm1_enable") == 2 && get(root, "sys/class/hwmon/hwmon3/pwm1") == gpwm);
     fanhw_release(&h3);
     unlink(state);
-    /* whose session: a lord-server of that uid */
-    put(root, "proc/321/comm", "lord-server");
-    put(root, "proc/321/status", "Name:\tlord-server\nUmask:\t0022\nState:\tS\nUid:\t1000\t1000\t1000\t1000\n");
-    put(root, "proc/322/comm", "lord-servers");
+    /* whose session: a insane-server of that uid */
+    put(root, "proc/321/comm", "insane-server");
+    put(root, "proc/321/status", "Name:\tinsane-server\nUmask:\t0022\nState:\tS\nUid:\t1000\t1000\t1000\t1000\n");
+    put(root, "proc/322/comm", "insane-servers");
     put(root, "proc/322/status", "Name:\tx\nUid:\t1001\t1001\t1001\t1001\n");
     CHECK(fanhw_uid_has_session(root, 1000) && !fanhw_uid_has_session(root, 1001) && !fanhw_uid_has_session(root, 1002) && fanhw_uid_has_session(root, 0));
 

@@ -6,16 +6,16 @@ nothing about go-link. It's the only way third-party code gets to run a binary f
 
 ## The third root
 
-`/usr/lib/lordos-apps/<id>/`, with the layout of an unpacked `.lpk`, made by `node tools/lpk.mjs tree <folder> <output> --key key.json --companion <binary>`.
+`/usr/lib/insaneos-apps/<id>/`, with the layout of an unpacked `.lpk`, made by `node tools/lpk.mjs tree <folder> <output> --key key.json --companion <binary>`.
 
 - A folder counts only if root owns it and its root, and no one else can write them. It's never a link. Every entry under it is a regular file or a folder, root's, not writable by
   group or others, and never set-id.
 - It's looked for after `assets/sysapps` and before the home folder, so a home `.lpk` can't shadow it, and installing one with the same id is refused. It's never `system: true` and
-  never in `code-manifest.json`, and it runs as `lord-server --app <id>` in the usual sandbox, under the id `lpk:<id>`.
+  never in `code-manifest.json`, and it runs as `insane-server --app <id>` in the usual sandbox, under the id `lpk:<id>`.
 - **At every load,** before the sandbox goes on: `firma.json` over `contenido.json`, every file hashed, none missing or extra, and the key must be a **Verified author's** in Insane OS's
   signed catalog, not revoked. A key the catalog doesn't list, no catalog, and the official key all fail. It's installed and removed by dpkg, so Remove isn't offered.
 
-A refused app doesn't open, and the reason is in `~/.cache/lordos/session.log`.
+A refused app doesn't open, and the reason is in `~/.cache/insaneos/session.log`.
 
 ## What only this root may declare
 
@@ -24,25 +24,25 @@ A refused app doesn't open, and the reason is in `~/.cache/lordos/session.log`.
 | `"companion": "bin/engine"` | one binary, a path inside the package, listed in `contenido.json` |
 | `"permissions": ["screen-share", "remote-input"]` | use the [screen-sharing API](SCREEN-SHARING.md) through the companion |
 
-`tools/lpk.mjs` refuses these in an `.lpk`. A home package that has them anyway is ignored: lord-server decides by where it found the app, never by what the app or its manifest says.
+`tools/lpk.mjs` refuses these in an `.lpk`. A home package that has them anyway is ignored: insane-server decides by where it found the app, never by what the app or its manifest says.
 
 ## The companion
 
 The app host asks when the app starts (`BOP_COMPANION`), after asking for `network` if the manifest declares it. It sends no path and no argument, and the id comes from the connection.
-lord-server keeps the verified root in its own table, forks, and execs itself as `lord-server --companion <id> <0|1>`, without waiting. That new process, with one thread and nothing of the
+insane-server keeps the verified root in its own table, forks, and execs itself as `insane-server --companion <id> <0|1>`, without waiting. That new process, with one thread and nothing of the
 compositor's:
 
-1. refuses to run as root, and stops at once without lord-server's socket as fd 3;
+1. refuses to run as root, and stops at once without insane-server's socket as fd 3;
 2. repeats the whole check, keeping the descriptor the binary was hashed through;
-3. opens `~/Downloads` with no link followed, joins `app-lordos-lpk-<id>.scope` with the app's limits (one core, 512 MB, shared), and refuses if that fails in a real session;
+3. opens `~/Downloads` with no link followed, joins `app-insaneos-lpk-<id>.scope` with the app's limits (one core, 512 MB, shared), and refuses if that fails in a real session;
 4. applies the sandbox, and runs that descriptor with `execveat(AT_EMPTY_PATH)`.
 
 Any failure stops there: nothing of the package runs, and the app hears why on fd 3. A changed byte gives `sig.fileModified`.
 
 **Descriptors:** 3, a `SOCK_SEQPACKET` socket to the app, one JSON text per message, 64 KB at most. 4, a connection to the sharing API tied to `lpk:<id>`, only if the manifest declares
-`screen-share`. 5, the home folder, open for listing it. 6, where live media links arrive ("Live media"). 0, 1 and 2 are `/dev/null`. Nothing else, and the environment is `HOME`, `LANG` and `LORD_APP_ID`.
+`screen-share`. 5, the home folder, open for listing it. 6, where live media links arrive ("Live media"). 0, 1 and 2 are `/dev/null`. Nothing else, and the environment is `HOME`, `LANG` and `INSANE_APP_ID`.
 
-**It ends with the app:** when the app's broker connection goes, lord-server sends SIGKILL and reaps it; the end of fd 3 is there for a clean exit; and `PR_SET_PDEATHSIG` covers lord-server
+**It ends with the app:** when the app's broker connection goes, insane-server sends SIGKILL and reaps it; the end of fd 3 is there for a clean exit; and `PR_SET_PDEATHSIG` covers insane-server
 dying. A companion that keeps dying is started 5 times at most per run of the app.
 
 **Firewall:** in the app's scope, so the Monitor and the firewall see one app. `FW_R_NO_FILES` refuses the start, since it reads the home folder.
@@ -55,7 +55,7 @@ Everything or it doesn't start: a kernel with Landlock below ABI 3, or any rule 
 |---|---|
 | Identity | no capabilities, `no_new_privs`, not root |
 | Read | the home's visible entries, as they were at start; the app's folder; with network, `/etc/ssl`, `/etc/resolv.conf`, `/run/systemd/resolve` |
-| Write | `~/Downloads` and `~/.local/share/lordos/appdata/<id>`: files and folders, rename, delete, truncate. No links, sockets or fifos |
+| Write | `~/Downloads` and `~/.local/share/insaneos/appdata/<id>`: files and folders, rename, delete, truncate. No links, sockets or fifos |
 | Execute | only the binary |
 | Network | with `network` declared and allowed: `AF_INET`, `AF_INET6` and netlink's route family. It connects and binds; `listen` and `accept` are refused |
 | Everything else | a syscall allowlist of its own, EPERM for the rest |
@@ -76,25 +76,25 @@ out of Landlock's reach to run.
 ## Live media
 
 A companion is a sandbox with no decoder of its own and an app has no way to run one, so a program that receives video would have nowhere to show it. The system does that part. It's general, and knows nothing about go-link. Code: `server/src/media/live.h`,
-`media/helper/lm_live.c`, `lm_link.c`, `sec/brokercam.c`, `ui/js_brokercam.c`, `pkg/lordlive` on the other side.
+`media/helper/lm_live.c`, `lm_link.c`, `sec/brokercam.c`, `ui/js_brokercam.c`, `pkg/insanelive` on the other side.
 
 ```js
 const id = media.live('my-app', 7);        // what the companion hands over under tag 7
 <MediaView media={id} style={{ flex: 1 }} />
-await media.liveMic('my-app', id, true);   // asks for the microphone; lord-server checks it again
+await media.liveMic('my-app', id, true);   // asks for the microphone; insane-server checks it again
 const cam = await media.camera('my-app', dev, { width: 640, height: 480, link: 7, codec: 'h264', kbps: 600 });
 media.close(id);
 ```
 
-- **The app asks, the companion gets its end.** `media.live` starts a `lord-media` of its own and makes a `SOCK_STREAM` pair. One end goes to that helper. The other goes to the companion over **fd 6**, a `SOCK_SEQPACKET` socket only `lord-server` writes to, as
+- **The app asks, the companion gets its end.** `media.live` starts a `insane-media` of its own and makes a `SOCK_STREAM` pair. One end goes to that helper. The other goes to the companion over **fd 6**, a `SOCK_SEQPACKET` socket only `insane-server` writes to, as
   `live <tag>` or `camera <tag>` with the descriptor beside it. Tags are the app's own numbers, 1 to 99999. Neither names a path or a process. An app with no companion running gets an error and no helper starts. At most 4 streams and cameras per app.
 - **What goes over a link** (`live.h`): a 16-byte header with a checked length, 8 MB at most. To the helper: the codec (`h264`, `vp8`), one encoded picture, one Opus packet, a keyframe request for a camera. From it: a request for a keyframe when the decoder loses the picture, Opus of the
   microphone, encoded pictures of the camera. Both ends are nonblocking, neither trusts the other, and a length out of bounds ends the link.
 - **Pictures** go to the same frame slots as a camera: a read-only ring the app maps, drawn by the same `<MediaView>`, scaled in the helper to the box. `info` gives the picture's size and `stats` what was decoded, shown and dropped, every 2 seconds.
-- **Sound** goes to a ring whose PipeWire stream is `lord-server`'s, as a player's. It's a playback stream of the app, in Monitor and volume as any other. More than 200 ms waiting is dropped: late sound is worse than none.
-- **The microphone and the camera** ask the same permissions, with the same restrictions, as anywhere else, and light the same indicators. `lord-server` opens both. Revoking the camera kills that helper at once, and revoking the microphone stops the stream's, with an event for the app.
-- **The decoder** is `lord-media`'s software H.264 and VP8, in the helper's sandbox: no network, no files, no exec. It's what reads a stranger's data, so it's there and not in the compositor, the app or the engine. No hardware decoding on this path.
-- **Its cost isn't the app's.** The helper runs in `app-lordos-media.scope`, outside the app's one core and 512 MB.
+- **Sound** goes to a ring whose PipeWire stream is `insane-server`'s, as a player's. It's a playback stream of the app, in Monitor and volume as any other. More than 200 ms waiting is dropped: late sound is worse than none.
+- **The microphone and the camera** ask the same permissions, with the same restrictions, as anywhere else, and light the same indicators. `insane-server` opens both. Revoking the camera kills that helper at once, and revoking the microphone stops the stream's, with an event for the app.
+- **The decoder** is `insane-media`'s software H.264 and VP8, in the helper's sandbox: no network, no files, no exec. It's what reads a stranger's data, so it's there and not in the compositor, the app or the engine. No hardware decoding on this path.
+- **Its cost isn't the app's.** The helper runs in `app-insaneos-media.scope`, outside the app's one core and 512 MB.
 
 **Tested:** `server/tests/live_helper.py` runs the real helper in its real sandbox with no session, on VM 116 and a Raspberry Pi 5: H.264 and VP8 reach the slots, a damaged stream asks for a keyframe, bad lengths and unknown codecs, 40 damaged streams with no crash. On a real screen (VM 125 and the Pi): a session to another computer, and a two-way call on VM 125 with the system's prompts and indicators. **Not tested:** revoking either device during a call.
 
@@ -107,7 +107,7 @@ statusItem.set({ icon: 'icon.png', title: 'Sharing', alert: true, menu: [{ id: '
 statusItem.onSelect((id) => …);
 ```
 
-The system prompt asks the first time. lord-server reads what came and writes a new JSON text with only the known fields, each escaped. The icon must be a `.png` of the app's own package, by a checked
+The system prompt asks the first time. insane-server reads what came and writes a new JSON text with only the known fields, each escaped. The icon must be a `.png` of the app's own package, by a checked
 relative path. Texts are one line of valid UTF-8, 64 bytes at most, with no control or bidirectional marks. A menu has 12 entries at most. One update per 100 ms. The shell draws it, and a choice comes back as an id.
 It leaves when the app ends or the permission is revoked in Settings → Privacy. An app gets one.
 
@@ -119,7 +119,7 @@ be read forgets nothing.
 ## What was tested
 
 On VM 116 (amd64, kernel 6.12, 2026-11-01), with a static Go binary built with `CGO_ENABLED=0`, in isolated headless sessions. `make -C server test` includes `pkgapp-test`. `tests/companion_e2e.sh` runs
-`build/lord-server-pkgtest`, a test binary that takes its official key and root from the environment, on a root-owned folder, with throwaway keys from `tests/companion/fixture.sh`.
+`build/insane-server-pkgtest`, a test binary that takes its official key and root from the environment, on a root-owned folder, with throwaway keys from `tests/companion/fixture.sh`.
 
 - `pkgapp-test`, 52 checks: every way the folder can differ from what was signed, keys, revocation, and status item descriptions, good and hostile.
 - `companion_e2e.sh`, 132 checks passed at the last run, with fd 6 (2026-11-02): the app opened by Open at Login. **65 checks from inside the sandbox:** every limit above tried, and what must work: files in Downloads, TLS roots, interfaces through netlink,
@@ -129,7 +129,7 @@ On VM 116 (amd64, kernel 6.12, 2026-11-01), with a static Go binary built with `
 
 **On arm64** (Raspberry Pi 5, 2026-11-02): the real engine ran in this sandbox, in its scope, with no capabilities, `no_new_privs` and the filter on, its picture and input working. `tests/companion_e2e.sh`'s own checks have not run on arm64.
 
-**Not tested:** a real `lord-sessiond` placing the companion in its scope (those sessions were refused placement, as a development session is, and it isn't fatal there); limits of one core and 512 MB with a real engine;
+**Not tested:** a real `insane-sessiond` placing the companion in its scope (those sessions were refused placement, as a development session is, and it isn't fatal there); limits of one core and 512 MB with a real engine;
 a real `.deb`; a kernel below ABI 3; seen on screen: the item by the clock and its menu, whose choice reaching the app wasn't run; the first-use prompts for `network` and `status-item`; the admin action behind forgetting grants, from a real shell.
 
-**On a real screen** (VM 125, amd64, 2026-11-02, a development `lordos` and a real `.deb` of Desk go-link, signed with throwaway keys): the app in Applications and the Dock, the `network`, `status-item`, `screen-share` and `remote-input` prompts, the item by the clock and its menu, a visitor from the public website with picture, sound, control, chat and files, Stop, the lock ending a share, and uninstalling forgetting the grants at the next session start. A viewer on 5673 was a root test client, not the real bridge, and a visitor then got `in_use`. An app installed while a session runs shows in Applications at the next session.
+**On a real screen** (VM 125, amd64, 2026-11-02, a development `insaneos` and a real `.deb` of Desk go-link, signed with throwaway keys): the app in Applications and the Dock, the `network`, `status-item`, `screen-share` and `remote-input` prompts, the item by the clock and its menu, a visitor from the public website with picture, sound, control, chat and files, Stop, the lock ending a share, and uninstalling forgetting the grants at the next session start. A viewer on 5673 was a root test client, not the real bridge, and a visitor then got `in_use`. An app installed while a session runs shows in Applications at the next session.

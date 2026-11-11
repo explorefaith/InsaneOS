@@ -1,7 +1,7 @@
-/* fsops.h — file operations for lord.fs (Files): background copy/move,
+/* fsops.h — file operations for insane.fs (Files): background copy/move,
  * Trash (freedesktop), information, bounded searches and mounted volumes (see fsops.c). */
-#ifndef LORD_FSOPS_H
-#define LORD_FSOPS_H
+#ifndef INSANE_FSOPS_H
+#define INSANE_FSOPS_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -22,11 +22,11 @@ int  fsops_protected_below(const char *real);  /* a protected path lies strictly
 enum { FSOPS_PF_TERMINAL, FSOPS_PF_TERMINAL_CUSTOM, FSOPS_PF_SETTINGS, FSOPS_PF_COUNT };
 void fsops_protect_file(int slot, const char *real);
 /* real is, lies under or holds a protected path, each protected path resolved first (links followed): for folders
- * handed to something outside lord.fs (a machine's writable share) */
+ * handed to something outside insane.fs (a machine's writable share) */
 int  fsops_protected_resolved(const char *real);
 const char *fsops_home(void);                  /* the resolved home folder given to fsops_init */
 
-/* rename for lord.fs: refuses a protected path, a parent of one (as source or destination) and an existing target */
+/* rename for insane.fs: refuses a protected path, a parent of one (as source or destination) and an existing target */
 int  fsops_rename(const char *from, const char *to, char *err, size_t errlen);
 
 /* ---- copy / move in a thread ---- */
@@ -60,7 +60,7 @@ void fs_du(const char *real, double max_ms, FsDu *out);
 typedef void (*FsHitFn)(void *ud, const char *path, int dir, double size, double mtime);
 int  fs_search(const char *real, const char *needle, int limit, int depth, FsHitFn fn, void *ud);
 /* real is on a cloud, network or other FUSE mount (fuse.*, cifs, smb3, nfs*, 9p…), from the mount table: the interface's
- * thread mustn't walk it (lord.fs.du and search answer at once there) */
+ * thread mustn't walk it (insane.fs.du and search answer at once there) */
 int  fsops_remote_path(const char *real);
 /* every mount point and whether it is one of those (the same test), from the mount table only */
 typedef void (*FsMountFn)(void *ud, const char *path, int remote);
@@ -69,14 +69,14 @@ int  fs_recent(int limit, int days, FsHitFn fn, void *ud);
 typedef void (*FsVolFn)(void *ud, const char *path, const char *fstype, double total, double avail);
 void fs_volumes(FsVolFn fn, void *ud);
 
-/* ---- what lord.fs.list / stat / trash resolve and read (interface's thread and fsasync.c's workers alike) ----
+/* ---- what insane.fs.list / stat / trash resolve and read (interface's thread and fsasync.c's workers alike) ----
  * path: absolute or relative to the home folder, as JS gives it. down (optional) is set when the path was refused
  * because the share it lies on doesn't answer (fsops_share_down). */
 int fsops_resolve_readable(const char *path, char *out, int *down);    /* 0; -1 refused or missing; -2 exists but not read */
 /* A destination inside the writable roots, even if it doesn't exist yet: the parent resolved, the last name kept.
  * 0; -1 outside the roots; -2 protected (fsops_protected). dir (optional) gets the resolved parent. */
 int fsops_resolve_target(const char *path, char *out, size_t n, char *dir, size_t dn, int *down);
-/* lord.fs.stat's: 0 in the writable roots, 1 read-only elsewhere where reading is allowed, -1 refused, -2 protected */
+/* insane.fs.stat's: 0 in the writable roots, 1 read-only elsewhere where reading is allowed, -1 refused, -2 protected */
 int fsops_resolve_stat(const char *path, char *target, size_t n, int *down);
 typedef struct {
     const char *name;

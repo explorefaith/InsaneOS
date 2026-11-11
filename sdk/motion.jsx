@@ -1,10 +1,10 @@
 // motion.jsx — moving wallpapers (docs/WALLPAPERS.md). The still wallpaper stays drawn under the video, so a failure,
 // a missing file or a machine without the hardware just shows it. Decisions are in motionmodel.js.
 //
-// One video per file, whatever the number of displays showing it. Files live in /var/lib/lordos/wallpapers, fetched by
-// the closed action wallpaper-get from the catalog in the package (lord-server only keeps a file with the catalog's hash).
+// One video per file, whatever the number of displays showing it. Files live in /var/lib/insaneos/wallpapers, fetched by
+// the closed action wallpaper-get from the catalog in the package (insane-server only keeps a file with the catalog's hash).
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { Image, MediaView, addListener } from '@lordos/runtime';
+import { Image, MediaView, addListener } from '@insaneos/runtime';
 import catalog from '../assets/wallpapers/motion.json';
 import { media } from './media.js';
 import { settings, useSettings } from './settings.js';
@@ -15,7 +15,7 @@ import { battery } from './hardware.jsx';
 import { userWallpaperName } from './wallpapers.js';
 import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant } from './motionmodel.js';
 
-const STORE = '/var/lib/lordos/wallpapers';
+const STORE = '/var/lib/insaneos/wallpapers';
 export const MOTION_RATES = [100, 75, 50, 25];
 export const MOTION_SECTIONS = ['dynamic', 'landscape', 'urban', 'underwater', 'earth'];
 export const motionItems = catalog.items;
@@ -26,9 +26,9 @@ export const motionDownloads = createStore({});     // id → percent while down
 // their colours to what is on screen (themes/default/components/DesktopWidgets.jsx).
 export const wallpaperMedia = createStore(null);
 
-// What this machine can play: empty until lord-media answers, and empty for good without the hardware.
+// What this machine can play: empty until insane-media answers, and empty for good without the hardware.
 export function currentCodecs() {
-  try { return motionCodecs(lord.media.hwDecode(), lord.media.composition()); } catch (e) { return []; }
+  try { return motionCodecs(insane.media.hwDecode(), insane.media.composition()); } catch (e) { return []; }
 }
 export function useCodecs() {
   const [c, set] = useState(currentCodecs);
@@ -107,7 +107,7 @@ function evaluate() {
   const live = ws.filter((w) => !w.minimized);
   let b = false;
   try {
-    const [t, i] = lord.system.cpuTimes();
+    const [t, i] = insane.system.cpuTimes();
     if (cpu) { const dt = t - cpu[0]; const load = dt > 0 ? 1 - (i - cpu[1]) / dt : 0; busy = load > 0.85 ? busy + 1 : 0; b = busy >= 2; }
     cpu = [t, i];
   } catch (e) { /* no reading: not busy */ }

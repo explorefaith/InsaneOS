@@ -3,7 +3,7 @@
   "leftM": "A tope · quedan {m} min",
   "leftHM": "A tope · quedan {h} h {m} min",
   "serviceOff": "El servicio de ventiladores no está en marcha",
-  "serviceOffHint": "El servicio de ventiladores (lord-fand) no está en marcha. El kernel o el firmware siguen refrigerando el equipo.",
+  "serviceOffHint": "El servicio de ventiladores (insane-fand) no está en marcha. El kernel o el firmware siguen refrigerando el equipo.",
   "firmwareManaged": "Ventiladores controlados por el firmware",
   "firmwareHint": "Estos ventiladores informan su velocidad, pero los controla el firmware. Insane OS no los toca.",
   "noFans": "No hay ventiladores controlables",

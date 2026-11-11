@@ -1,7 +1,7 @@
 /* logs_admin.h — the helper's logs-system action (system logs for administrators; Logs app,
  * see docs/SYSTEM.md). */
-#ifndef LORD_LOGS_ADMIN_H
-#define LORD_LOGS_ADMIN_H
+#ifndef INSANE_LOGS_ADMIN_H
+#define INSANE_LOGS_ADMIN_H
 
 #include "../admin.h"
 

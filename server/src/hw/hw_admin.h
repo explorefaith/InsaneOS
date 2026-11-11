@@ -7,11 +7,11 @@
  *   power-profile <p>                  performance|balanced|power-saver: powerprofilesctl if
  *                                      installed, else the cpufreq governor (and EPP)         anyone
  *   power-suspend                      systemctl suspend                                      anyone
- *   power-buttons <power> <lid> <lidac> /etc/systemd/logind.conf.d/lordos.conf + reload logind admin
+ *   power-buttons <power> <lid> <lidac> /etc/systemd/logind.conf.d/insaneos.conf + reload logind admin
  *   time-ntp on|off                    timedatectl set-ntp                                    admin
  *   time-set YYYY-MM-DD HH:MM:SS       timedatectl set-time (automatic time must be off)       admin
  *   bt-unblock                         rfkill: unblock Bluetooth (/dev/rfkill)               anyone
- *   rpi-case none|argon-one-v5         Raspberry Pi 5 only: writes /boot/firmware/lordos-case.txt
+ *   rpi-case none|argon-one-v5         Raspberry Pi 5 only: writes /boot/firmware/insaneos-case.txt
  *                                      (fixed text, included from config.txt; takes effect
  *                                      after a restart)                                      admin
  *   rpi-case-detect                    (no arguments) Raspberry Pi 5 only: turns the USB-C controller into a host
@@ -44,20 +44,20 @@
  *   video-optimize <mode> <lower> <vp9> <av1>   auto|always|never, on|off, yes|no, yes|no (the
  *                                      last two: hardware VP9/AV1 decoding found this boot).
  *                                      Writes the browsers' video settings from fixed text:
- *                                      /etc/chromium/policies/managed/lordos-video.json and
- *                                      /etc/firefox-esr/lordos-video.js (docs/VIDEO.md)      anyone
+ *                                      /etc/chromium/policies/managed/insaneos-video.json and
+ *                                      /etc/firefox-esr/insaneos-video.js (docs/VIDEO.md)      anyone
  *   browser-restore on|off             on: each browser continues where it left off, from fixed text:
- *                                      /etc/chromium/policies/recommended/lordos-session.json and
- *                                      /etc/firefox-esr/lordos-session.js; off: removes both
+ *                                      /etc/chromium/policies/recommended/insaneos-session.json and
+ *                                      /etc/firefox-esr/insaneos-session.js; off: removes both
  *                                      (docs/SESSIONS.md, "Session restore")                 anyone
  *   boot-test <n>                      InsaneBench's boot time test (bench/boottest.h): n restarts
  *                                      in a row, 2..10; writes only the fixed-format state file
- *                                      /var/lib/lordos/boot-test, which lord-sessiond follows at
+ *                                      /var/lib/insaneos/boot-test, which insane-sessiond follows at
  *                                      each boot; refused in the live session                  admin
  *   boot-test-cancel                   (no arguments) removes that file: no more restarts      anyone
  */
-#ifndef LORD_HW_ADMIN_H
-#define LORD_HW_ADMIN_H
+#ifndef INSANE_HW_ADMIN_H
+#define INSANE_HW_ADMIN_H
 
 #include "../admin.h"
 #include "rpifw.h"

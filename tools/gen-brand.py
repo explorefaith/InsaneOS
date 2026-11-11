@@ -5,17 +5,17 @@
 #                                       `brew install librsvg` or `apt install librsvg2-bin`)
 #   python3 tools/gen-brand.py --svg    also rewrite the SVGs first (needs fontTools: `pip install fonttools`)
 #
-# The SVGs are real vectors, drawn here by hand: the crown is a mirrored half (exactly symmetric),
+# The SVGs are real vectors, drawn here by hand: the apple is a mirrored half (exactly symmetric),
 # stroke-free shapes with 2-3 gradient layers for the gloss, gem facets as separate polygons. The
-# wordmark ("Lord" Plus Jakarta Sans ExtraBold + "OS" Medium, assets/fonts, SIL OFL 1.1) is
+# wordmark ("Insane" Plus Jakarta Sans ExtraBold + "OS" Medium, assets/fonts, SIL OFL 1.1) is
 # converted to paths from those files, so the SVGs don't depend on installed fonts. Sizes of 32 px and less use the pixel-grid
-# variants (app-icon-small.svg, crown-mono-small.svg). See docs/brand/README.md.
+# variants (app-icon-small.svg, apple-mono-small.svg). See docs/brand/README.md.
 import os, shutil, subprocess, sys
 
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 OUT = os.path.join(REPO, 'assets/brand')
 ICONS = os.path.join(REPO, 'assets/icons')
-# The wordmark face: Plus Jakarta Sans (SIL OFL 1.1, assets/fonts), "Lord" ExtraBold + "OS" Medium.
+# The wordmark face: Plus Jakarta Sans (SIL OFL 1.1, assets/fonts), "Insane" ExtraBold + "OS" Medium.
 # The same files are the 'brand' fontFamily of the UI (InsaneWordmark in sdk/logo.js).
 WORD_BOLD, WORD_REGULAR = 'PlusJakartaSans-ExtraBold.ttf', 'PlusJakartaSans-Medium.ttf'
 TRACK = -0.01                      # letter spacing, in em (the UI uses the same)
@@ -34,7 +34,7 @@ def author():
         return ' '.join(f'{n(x)} {n(y)}' for x, y in pts)
 
 
-    # ---- crown silhouette, 512 design box. Left half from the bottom centre to the apex ----
+    # ---- apple silhouette, 512 design box. Left half from the bottom centre to the apex ----
     # each segment: ('C', c1, c2, end) | ('Q', c, end) | ('L', end)
     START = (256, 446)
     LEFT = [
@@ -53,7 +53,7 @@ def author():
         return (512 - p[0], p[1])
 
 
-    def crown_path():
+    def apple_path():
         d = [f'M{P(START)}']
         pts = [START]
         for s in LEFT:
@@ -71,7 +71,7 @@ def author():
         return ''.join(d) + 'Z'
 
 
-    BODY = crown_path()
+    BODY = apple_path()
     # violet band: a gentle smile, clipped to the body
     BAND = 'M60 350Q256 398 452 350L452 380Q256 428 60 380Z'
     RIM = 'M60 380Q256 428 452 380L452 470L60 470Z'
@@ -92,7 +92,7 @@ def author():
         return f'M{P((cx, cy - h), (cx + w, cy), (cx, cy + h), (cx - w, cy))}Z'
 
 
-    def crown_color(p=''):
+    def apple_color(p=''):
         defs = (f'<clipPath id="{p}k"><path d="{BODY}"/></clipPath>'
                 # layer 1: body base, white to lavender
                 f'<linearGradient id="{p}b" x1="0" y1="0" x2="1" y2="1"><stop offset=".15" stop-color="#fff"/><stop offset=".6" stop-color="#EEEAFF"/><stop offset="1" stop-color="#BDB1F5"/></linearGradient>'
@@ -112,8 +112,8 @@ def author():
         return defs, g
 
 
-    def crown_mono(color, p='m'):
-        """Flat crown for small sizes: one colour, band and gem gaps cut out with a mask."""
+    def apple_mono(color, p='m'):
+        """Flat apple for small sizes: one colour, band and gem gaps cut out with a mask."""
         cut = ''.join(f'<path d="{gem_outline(*x, grow=13)}"/>' for x in GEMS)
         defs = (f'<mask id="{p}" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">'
                 f'<rect width="512" height="512" fill="#fff"/><g fill="black"><path d="{BAND}"/>{cut}</g></mask>')
@@ -132,7 +132,7 @@ def author():
         print(name, len(text.encode()), 'bytes')
 
 
-    # ---- wordmark: "Lord" ExtraBold + "OS" Medium (WORD_BOLD, WORD_REGULAR), outlined ----
+    # ---- wordmark: "Insane" ExtraBold + "OS" Medium (WORD_BOLD, WORD_REGULAR), outlined ----
     FONTS = os.path.join(REPO, 'assets/fonts')
 
 
@@ -151,11 +151,11 @@ def author():
 
 
     def lockup(name, ink, mono=None):
-        # crown 1.6x the cap height, centred on the capitals, as in the original lockup
+        # apple 1.6x the cap height, centred on the capitals, as in the original lockup
         size = 150
-        a, x = outline(WORD_BOLD, 'Lord', 238, 184, size)
+        a, x = outline(WORD_BOLD, 'Insane', 238, 184, size)
         b, x = outline(WORD_REGULAR, 'OS', x, 184, size)
-        d, body = crown_mono(mono) if mono else crown_color()
+        d, body = apple_mono(mono) if mono else apple_color()
         g = f'<g transform="matrix(.437 0 0 .437 -10 19)">{body}</g>\n<path fill="{ink}" d="{a}{b}"/>'
         write(name, svg(round(x + 16), 240, d, g, 'Insane OS'))
         return d, g, round(x + 16)
@@ -164,12 +164,12 @@ def author():
     ICON_BG = ('<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B46CFF"/><stop offset="1" stop-color="#4F46E5"/></linearGradient>'
                '<radialGradient id="gl" cx=".22" cy=".12" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
                '<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#1E1660" stop-opacity=".5"/><stop offset="1" stop-color="#1E1660" stop-opacity="0"/></radialGradient>')
-    d, body = crown_color()
-    write('crown.svg', svg(512, 512, d, body, 'Insane OS crown'))
-    d, body = crown_mono('#000')
-    write('crown-mono.svg', svg(512, 512, d, body, 'Insane OS crown, one colour'))
+    d, body = apple_color()
+    write('apple.svg', svg(512, 512, d, body, 'Insane OS apple'))
+    d, body = apple_mono('#000')
+    write('apple-mono.svg', svg(512, 512, d, body, 'Insane OS apple, one colour'))
 
-    d, body = crown_color('c')
+    d, body = apple_color('c')
     icon = ('<rect width="512" height="512" rx="113" fill="url(#bg)"/><rect width="512" height="512" rx="113" fill="url(#gl)"/>'
             '<ellipse cx="256" cy="416" rx="160" ry="30" fill="url(#sh)"/>'
             f'<g transform="matrix(.72 0 0 .72 71.7 84)">{body}</g>')
@@ -198,17 +198,17 @@ def author():
     write('app-icon-small.svg', svg(32, 32, ICON_BG.split('<radialGradient')[0], small_icon, 'Insane OS (16 to 32 px)'))
     small_mono = ('<path d="M1.5 5.5L5 9L8 5L11 9L14.5 5.5L12.5 11.5H3.5Z"/><rect x="3.5" y="12.5" width="9" height="2" rx=".5"/>'
                   '<path d="M8 1L9.5 2.75L8 4.5L6.5 2.75Z"/><path d="M1.5 2.5L2.75 3.75L1.5 5L.25 3.75ZM14.5 2.5L15.75 3.75L14.5 5L13.25 3.75Z"/>')
-    write('crown-mono-small.svg', svg(16, 16, '', f'<g fill="#000">{small_mono}</g>', 'Insane OS crown, one colour (16 px)'))
+    write('apple-mono-small.svg', svg(16, 16, '', f'<g fill="#000">{small_mono}</g>', 'Insane OS apple, one colour (16 px)'))
 
 
 # PNG renders: (output in assets/icons, source svg, width, recolour)
 RENDERS = [
-    ('lordos-crown.png', 'crown.svg', 256, None),          # existing consumers (tools/demo, ...)
-    ('lordos-crown-512.png', 'crown.svg', 512, None),
-    *[(f'lordos-icon-{s}.png', 'app-icon-small.svg' if s <= 32 else 'app-icon.svg', s, None)
+    ('insaneos-apple.png', 'apple.svg', 256, None),          # existing consumers (tools/demo, ...)
+    ('insaneos-apple-512.png', 'apple.svg', 512, None),
+    *[(f'insaneos-icon-{s}.png', 'app-icon-small.svg' if s <= 32 else 'app-icon.svg', s, None)
       for s in (16, 32, 64, 128, 256, 512, 1024)],
     # menu bar glyph, flat, in the two menu bar text colours (the UI can't tint a PNG)
-    *[(f'lordos-glyph-{tone}-{s}.png', 'crown-mono-small.svg' if s <= 16 else 'crown-mono.svg', s, col)
+    *[(f'insaneos-glyph-{tone}-{s}.png', 'apple-mono-small.svg' if s <= 16 else 'apple-mono.svg', s, col)
       for tone, col in (('light', '#f5f5f7'), ('dark', '#1d1d1f')) for s in (16, 32)],
 ]
 
@@ -217,7 +217,7 @@ KIT = os.path.join(REPO, 'docs/brand')
 # the brand kit for web pages and other uses (docs/brand/README.md): (file in docs/brand, source, width)
 KIT_PNG = [
     *[(f'png/app-icon-{s}.png', 'app-icon-small.svg' if s <= 32 else 'app-icon.svg', s) for s in (16, 32, 64, 128, 256, 512, 1024)],
-    ('png/crown-256.png', 'crown.svg', 256), ('png/crown-512.png', 'crown.svg', 512),
+    ('png/apple-256.png', 'apple.svg', 256), ('png/apple-512.png', 'apple.svg', 512),
     *[(f'png/logo-horizontal-{t}-{w}.png', f'logo-horizontal-{t}.svg', w) for t in ('light', 'dark') for w in (400, 800)],
     *[(f'png/logo-mono-{t}-800.png', f'logo-mono-{t}.svg', 800) for t in ('white', 'black')],
     ('png/social-card-1200x630.png', 'social-card.svg', 1200),
@@ -225,15 +225,15 @@ KIT_PNG = [
     ('favicon/apple-touch-icon-180.png', 'app-icon.svg', 180),
     ('favicon/favicon-512.png', 'app-icon.svg', 512),
 ]
-KIT_SVG = ['crown.svg', 'crown-mono.svg', 'crown-mono-small.svg', 'app-icon.svg', 'app-icon-small.svg',
+KIT_SVG = ['apple.svg', 'apple-mono.svg', 'apple-mono-small.svg', 'app-icon.svg', 'app-icon-small.svg',
            'logo-horizontal-light.svg', 'logo-horizontal-dark.svg', 'logo-mono-white.svg', 'logo-mono-black.svg',
            'social-card.svg']
 
 
-# colour chips for docs/LORDOS-BRAND.md: (file, fill or two-stop gradient)
+# colour chips for docs/INSANEOS-BRAND.md: (file, fill or two-stop gradient)
 SWATCHES = [('violet-light', '#B46CFF'), ('indigo', '#4F46E5'), ('icon-gradient', ('#B46CFF', '#4F46E5')),
             ('band-dark', '#5B3FE0'), ('band-light', '#7C5CFF'), ('gem-yellow', '#FFD60A'), ('gem-amber', '#FFC300'),
-            ('gem-orange', '#FFB000'), ('gem-highlight', '#FFF1A8'), ('crown-lavender', '#BDB1F5'),
+            ('gem-orange', '#FFB000'), ('gem-highlight', '#FFF1A8'), ('apple-lavender', '#BDB1F5'),
             ('navy', '#12122A'), ('white', '#FFFFFF')]
 
 

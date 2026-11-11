@@ -2,8 +2,8 @@
  * bar percentage and the low-battery notice). Read-only and unprivileged; refreshed on
  * power_supply uevents (hw/uevent.c), never polled. The root directory is a parameter so
  * tests/power_test.c can use a fake sysfs tree. */
-#ifndef LORD_HW_POWER_H
-#define LORD_HW_POWER_H
+#ifndef INSANE_HW_POWER_H
+#define INSANE_HW_POWER_H
 
 #include <stddef.h>
 
@@ -36,7 +36,7 @@ typedef struct {
 
 /* Reads every supply under root ("/sys/class/power_supply"). Returns ps->n. */
 int  power_read(const char *root, PowerState *ps);
-/* JSON for lord.power.state(). Returns bytes written (truncated output is still valid JSON
+/* JSON for insane.power.state(). Returns bytes written (truncated output is still valid JSON
  * only if n is large enough; 4 KB always is). */
 size_t power_json(const PowerState *ps, char *out, size_t n);
 

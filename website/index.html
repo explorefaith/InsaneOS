@@ -54,7 +54,7 @@
             <div class="win-title">Terminal</div>
             <div class="win-body">
               <span class="p1">arafat@faith</span><span class="p2">:~$</span> kash --about<br>
-              <span class="p3">compositor: lord-server (C11, Wayland)<br>
+              <span class="p3">compositor: insane-server (C11, Wayland)<br>
               ram: 7.5 GiB + 3.8 GiB zram<br>
               decode: vaapi h264 ✓</span><span class="cursor">▌</span>
             </div>
@@ -145,7 +145,7 @@ outputs_apply(s);  <span class="c">/* saved modes, scales */</span></code></pre>
            picture is yours. OCR runs in a sealed sandbox, offline.</p>
       </article>
       <article class="f-item">
-        <h3>Passwords, a vault, and a crown of code</h3>
+        <h3>Passwords, a vault, and a apple of code</h3>
         <p>2FA, autofill, per-app keyring isolation, signed packages, and verified system
            code — the boot loader checks the hash of everything it runs.</p>
       </article>
@@ -207,7 +207,7 @@ outputs_apply(s);  <span class="c">/* saved modes, scales */</span></code></pre>
        There is no account, no telemetry, and no server to send anything to.</p>
     <dl class="pp-list">
       <dt>No telemetry.</dt><dd>The system keeps no usage statistics and makes no analytics requests. There is no crash-report uploader: crash logs stay in your home folder until you delete them.</dd>
-      <dt>Per-app permissions.</dt><dd>Camera, microphone, files and network are gated per app. An app asks, you answer, and the answer is stored in a plain file you can read: <code>~/.config/lordos/permisos.json</code>.</dd>
+      <dt>Per-app permissions.</dt><dd>Camera, microphone, files and network are gated per app. An app asks, you answer, and the answer is stored in a plain file you can read: <code>~/.config/insaneos/permisos.json</code>.</dd>
       <dt>A firewall you can watch.</dt><dd>Every connection is shown live — app, address, country — and can be allowed or blocked by app, domain or network. Rules are enforced by the kernel's packet filter.</dd>
       <dt>Verified system code.</dt><dd>The boot process checks an Ed25519-signed manifest and the SHA-256 hash of every piece of system code before running it.</dd>
       <dt>Sandboxed helpers.</dt><dd>Media, documents, OCR and passwords run in confined helpers: no network, no sockets, no exec, Landlock and seccomp enforced, each seeing only the one file it was given.</dd>

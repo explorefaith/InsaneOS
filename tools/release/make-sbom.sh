@@ -1,19 +1,19 @@
 #!/bin/sh
 # Writes an SPDX 2.3 JSON software bill of materials (SBOM) for a built Insane OS package: the
-# lordos .deb itself, what is compiled or bundled into it (third_party/, fonts, data, the React
+# insaneos .deb itself, what is compiled or bundled into it (third_party/, fonts, data, the React
 # packages in the theme bundle) and the Debian packages it depends on, at the versions installed
 # on the machine that runs this script (the build VM). See docs/COMPLIANCE.md.
 #
-#   tools/release/make-sbom.sh <lordos_VERSION_ARCH.deb> [out.spdx.json]
+#   tools/release/make-sbom.sh <insaneos_VERSION_ARCH.deb> [out.spdx.json]
 #
 # Run it on the Debian 13 build VM, after building the package and with its dependencies
 # installed, so the versions resolved are the ones the release was built against. Default output:
-# lordos_<version>_<arch>.spdx.json next to the .deb. Put it in the release folder before
+# insaneos_<version>_<arch>.spdx.json next to the .deb. Put it in the release folder before
 # tools/release/sign-release.sh, so SHA256SUMS (and its signature) covers it.
 #
-# Environment: LORDOS_TAG (release tag for the download URL; default v<version>).
+# Environment: INSANEOS_TAG (release tag for the download URL; default v<version>).
 set -eu
-deb=${1:?usage: make-sbom.sh <lordos_VERSION_ARCH.deb> [out.spdx.json]}
+deb=${1:?usage: make-sbom.sh <insaneos_VERSION_ARCH.deb> [out.spdx.json]}
 [ -r "$deb" ] || { echo "make-sbom.sh: cannot read $deb" >&2; exit 1; }
 for t in dpkg-deb dpkg-query python3; do
     command -v "$t" >/dev/null || { echo "make-sbom.sh: $t is needed (run it on the Debian build VM)" >&2; exit 1; }
@@ -25,9 +25,9 @@ root=$(cd "$here/../.." && pwd)
 version=$(dpkg-deb -f "$deb" Version)
 arch=$(dpkg-deb -f "$deb" Architecture)
 name=$(dpkg-deb -f "$deb" Package)
-[ "$name" = lordos ] || { echo "make-sbom.sh: $deb is the package '$name', not lordos" >&2; exit 1; }
-out=${2:-$(dirname "$deb")/lordos_${version}_${arch}.spdx.json}
-tag=${LORDOS_TAG:-v$version}
+[ "$name" = insaneos ] || { echo "make-sbom.sh: $deb is the package '$name', not insaneos" >&2; exit 1; }
+out=${2:-$(dirname "$deb")/insaneos_${version}_${arch}.spdx.json}
+tag=${INSANEOS_TAG:-v$version}
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT INT TERM
@@ -64,7 +64,7 @@ resolve() { # $1 = kind (depends|recommends), $2 = the control field
 # Font versions, when fontconfig's fc-scan is there: "file<TAB>version"
 : > "$tmp/fontver.tsv"
 if command -v fc-scan >/dev/null; then
-    for f in "$tmp"/root/usr/lib/lordos/assets/fonts/*.ttf; do
+    for f in "$tmp"/root/usr/lib/insaneos/assets/fonts/*.ttf; do
         [ -f "$f" ] || continue
         printf '%s\t%s\n' "$(basename "$f")" "$(fc-scan --format '%{fontversion}\n' "$f" 2>/dev/null | head -n 1)" >> "$tmp/fontver.tsv"
     done
@@ -78,7 +78,7 @@ E = os.environ
 root, tmp = E["SBOM_ROOT"], E["SBOM_TMP"]
 version, arch, tag = E["SBOM_VERSION"], E["SBOM_ARCH"], E["SBOM_TAG"]
 debname = E["SBOM_DEB_NAME"]
-REPO = "https://github.com/lordbasex/Insane OS"
+REPO = "https://github.com/insaneos/Insane OS"
 
 def read(p, default=""):
     try:
@@ -129,22 +129,22 @@ def pkg(spdx, name, ver, lic, supplier, home="NOASSERTION", purl=None, comment=N
         p["checksums"] = [{"algorithm": "SHA256", "checksumValue": c} for c in checksums]
     return p
 
-main_id = "SPDXRef-Package-lordos"
-packages = [pkg(main_id, "lordos", version, "MIT", "Organization: IPERFEX",
-                purl=f"pkg:deb/lordos/lordos@{version}?arch={arch}",
+main_id = "SPDXRef-Package-insaneos"
+packages = [pkg(main_id, "insaneos", version, "MIT", "Organization: IPERFEX",
+                purl=f"pkg:deb/insaneos/insaneos@{version}?arch={arch}",
                 checksums=[E["SBOM_DEB_SHA"]],
                 copyright="Copyright (c) 2026 iPERFEX and the Insane OS contributors",
                 comment=f"The Insane OS package ({debname}); source: {REPO}")]
 packages[0]["downloadLocation"] = f"{REPO}/releases/download/{tag}/{debname}"
-packages[0]["homepage"] = "https://lordos.org"
+packages[0]["homepage"] = "https://insaneos.org"
 packages[0]["primaryPackagePurpose"] = "APPLICATION"
 
 tp = os.path.join(root, "third_party")
 bundled = [
     ("QuickJS", read(os.path.join(tp, "quickjs/VERSION"), "NOASSERTION"), "MIT", "https://bellard.org/quickjs/",
-     "JavaScript engine of the interface, compiled into lord-server (third_party/quickjs)"),
+     "JavaScript engine of the interface, compiled into insane-server (third_party/quickjs)"),
     ("Monocypher", read(os.path.join(tp, "monocypher/VERSION"), "NOASSERTION"), "CC0-1.0 OR BSD-2-Clause", "https://monocypher.org",
-     "Cryptography of the password vault and keyring, compiled into lord-vault (third_party/monocypher)"),
+     "Cryptography of the password vault and keyring, compiled into insane-vault (third_party/monocypher)"),
     ("stb_image", header_version(os.path.join(tp, "stb/stb_image.h"), r"v(\d+\.\d+)"), "MIT OR Unlicense", "https://github.com/nothings/stb",
      "Image decoding (third_party/stb)"),
     ("stb_image_write", header_version(os.path.join(tp, "stb/stb_image_write.h"), r"v(\d+\.\d+)"), "MIT OR Unlicense", "https://github.com/nothings/stb",
@@ -152,9 +152,9 @@ bundled = [
     ("stb_truetype", header_version(os.path.join(tp, "stb/stb_truetype.h"), r"v(\d+\.\d+)"), "MIT OR Unlicense", "https://github.com/nothings/stb",
      "Font rasterization (third_party/stb)"),
     ("EFF large wordlist", "2016", "CC-BY-3.0-US", "https://www.eff.org/dice",
-     "Passphrase generator, embedded in lord-vault (third_party/wordlists)"),
+     "Passphrase generator, embedded in insane-vault (third_party/wordlists)"),
     ("SecLists 10k most common passwords", "NOASSERTION", "MIT", "https://github.com/danielmiessler/SecLists",
-     "Weak-password check, embedded in lord-vault (third_party/wordlists)"),
+     "Weak-password check, embedded in insane-vault (third_party/wordlists)"),
     ("react", npm_version("react"), "MIT", "https://react.dev", "Bundled into the theme JavaScript at build time"),
     ("react-reconciler", npm_version("react-reconciler"), "MIT", "https://github.com/facebook/react",
      "Bundled into the theme JavaScript at build time"),
@@ -182,12 +182,12 @@ for name, prefix, home in fonts:
     sid = spdxid("Font-" + name)
     packages.append(pkg(sid, name, ver, "OFL-1.1", "NOASSERTION", home=home,
                         checksums=files_like(r"/fonts/" + re.escape(prefix)) or None,
-                        comment="Font shipped in usr/lib/lordos/assets/fonts (checksums of its .ttf files)"))
+                        comment="Font shipped in usr/lib/insaneos/assets/fonts (checksums of its .ttf files)"))
     contains.append(sid)
 sid = spdxid("Font-Noto-subsets")
 packages.append(pkg(sid, "Noto Sans Arabic, Devanagari, Thai and CJK SC (subsets)", "NOASSERTION", "OFL-1.1", "NOASSERTION",
                     home="https://github.com/notofonts",
-                    comment="Subsets built into usr/lib/lordos/bin/lord-bench, not separate files (tools/gen-lbfonts.py)"))
+                    comment="Subsets built into usr/lib/insaneos/bin/insane-bench, not separate files (tools/gen-lbfonts.py)"))
 contains.append(sid)
 
 data = [("DB-IP Lite Country", r"/monitor/geoip-country", "CC-BY-4.0", "https://db-ip.com",
@@ -213,12 +213,12 @@ for kind, wanted, name, ver, darch in (r + [""] * (5 - len(r)) for r in tsv("dep
             packages.append(pkg(sid, name, ver, "NOASSERTION", "Organization: Debian",
                                 home=f"https://packages.debian.org/trixie/{name}",
                                 purl=f"pkg:deb/debian/{name}@{ver}?arch={darch}&distro=debian-13",
-                                comment=f"Debian package; relation in lordos {kind.capitalize()}: {wanted}. "
+                                comment=f"Debian package; relation in insaneos {kind.capitalize()}: {wanted}. "
                                         f"License: /usr/share/doc/{name}/copyright"))
         else:
             missing.append(name)
             packages.append(pkg(sid, name, "NOASSERTION", "NOASSERTION", "Organization: Debian",
-                                comment=f"Not installed on the build machine; relation in lordos {kind.capitalize()}: {wanted}"))
+                                comment=f"Not installed on the build machine; relation in insaneos {kind.capitalize()}: {wanted}"))
     if kind == "depends":
         rels.append({"spdxElementId": main_id, "relationshipType": "DEPENDS_ON", "relatedSpdxElement": sid})
     else:
@@ -230,8 +230,8 @@ doc = {
     "spdxVersion": "SPDX-2.3",
     "dataLicense": "CC0-1.0",
     "SPDXID": "SPDXRef-DOCUMENT",
-    "name": f"lordos-{version}-{arch}",
-    "documentNamespace": f"https://lordos.org/spdx/lordos-{version}-{arch}-{ns_hash}",
+    "name": f"insaneos-{version}-{arch}",
+    "documentNamespace": f"https://insaneos.org/spdx/insaneos-{version}-{arch}-{ns_hash}",
     "creationInfo": {"created": now, "creators": ["Tool: make-sbom.sh", "Organization: IPERFEX"],
                      "comment": "Debian package versions are the ones installed on the build machine."},
     "documentDescribes": [main_id],

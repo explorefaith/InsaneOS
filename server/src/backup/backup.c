@@ -1,7 +1,7 @@
 /* backup.c — the backup scheduler and worker thread (see backup.h).
  *
- *   ~/.config/lordos/backup.json   the configuration: destination, schedule, exclusions, battery.
- *                                  Only backup_configure writes it (lord.fs cannot: it decides
+ *   ~/.config/insaneos/backup.json   the configuration: destination, schedule, exclusions, battery.
+ *                                  Only backup_configure writes it (insane.fs cannot: it decides
  *                                  where the data goes; it is in fsops_protected).
  *
  * The thread sleeps in pthread_cond_timedwait until the next backup (no polling). While copying:
@@ -43,8 +43,8 @@
 #define RETRY_NODEST 300                /* s before checking again whether the disk is back */
 #define BATTERY_RECHECK 60
 
-static const char *const default_excl[] = { ".cache", ".local/share/Trash", ".local/share/lordos/apps",
-                                            ".local/share/lordos/trash", ".thumbnails", NULL };
+static const char *const default_excl[] = { ".cache", ".local/share/Trash", ".local/share/insaneos/apps",
+                                            ".local/share/insaneos/trash", ".thumbnails", NULL };
 
 typedef enum { S_IDLE, S_RUNNING, S_PAUSED, S_NODEST, S_RESTORING, S_DELETING, S_LOCKED, S_UNLOCKING } State;
 static const char *const state_names[] = { "idle", "running", "paused", "nodest", "restoring", "deleting", "locked", "unlocking" };
@@ -446,7 +446,7 @@ static void *thread_main(void *arg) {
     sigfillset(&all);
     pthread_sigmask(SIG_BLOCK, &all, NULL);
     pid_t tid = (pid_t)syscall(SYS_gettid);
-    const char *np = getenv("LORD_BACKUP_NOPRIO");
+    const char *np = getenv("INSANE_BACKUP_NOPRIO");
     if (!np || strcmp(np, "1")) {
         setpriority(PRIO_PROCESS, (id_t)tid, 19);
         /* IOPRIO_WHO_PROCESS = 1, IOPRIO_CLASS_IDLE = 3 (<< 13) */
@@ -509,14 +509,14 @@ int backup_start(const char *h, const char *u) {
     if (!realpath(h, home)) return -1;
     snprintf(user, sizeof user, "%s", u);
     for (char *p = user; *p; p++) if (!((*p >= 'a' && *p <= 'z') || (*p >= '0' && *p <= '9') || *p == '_' || *p == '-')) *p = '_';
-    char hn[64] = "lordos";
+    char hn[64] = "insaneos";
     gethostname(hn, sizeof hn - 1);
     hn[sizeof hn - 1] = 0;
     size_t k = 0;
     for (char *p = hn; *p && k < sizeof host - 1; p++)
         host[k++] = ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '-') ? *p : '_';
     host[k] = 0;
-    if (pathf(cfg_path, sizeof cfg_path, "%s/.config/lordos/backup.json", home)) return -1;
+    if (pathf(cfg_path, sizeof cfg_path, "%s/.config/insaneos/backup.json", home)) return -1;
     pthread_condattr_t ca;
     pthread_condattr_init(&ca);
     pthread_cond_init(&cv, &ca);        /* CLOCK_REALTIME: backups follow wall-clock time */

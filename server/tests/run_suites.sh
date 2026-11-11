@@ -3,14 +3,14 @@
 # them (the other suites run inside their build rule). Called from server/ by the Makefile:
 #
 #   make -C server test         sh tests/run_suites.sh        self-contained suites, a few seconds
-#   make -C server test-full    sh tests/run_suites.sh full   also the helpers (lord-media, lord-doc),
+#   make -C server test-full    sh tests/run_suites.sh full   also the helpers (insane-media, insane-doc),
 #                                                             the sandbox and the external comparisons
 #
 # Exits with 1 if any suite fails. A suite whose tool or data isn't installed is reported as
 # "skipped: needs X" and doesn't fail the run. Optional data: BIDI_TEST=<BidiCharacterTest.txt>.
 cd "$(dirname "$0")/.." || exit 1
 mode=${1:-quick}
-T=$(mktemp -d "${TMPDIR:-/tmp}/lord-suites.XXXXXX") || exit 1
+T=$(mktemp -d "${TMPDIR:-/tmp}/insane-suites.XXXXXX") || exit 1
 trap 'rm -rf "$T"' EXIT
 trap 'exit 130' INT TERM
 pass=0 fails=0 skips=0 failed=''
@@ -189,7 +189,7 @@ EOF
     if have node; then run "voicerec-model-test (sdk/voicerecmodel.js)" node tests/voicerec_model_test.mjs; fi
     if have node; then run "vm-catalog-test (apps/machines/catalog.js)" node tests/vm_catalog_test.mjs; fi
     # Machines: crafted images the import must refuse (needs qemu-img and this computer's qemu-system)
-    if have qemu-img && { have qemu-system-x86_64 || have qemu-system-aarch64; } && [ -x build/lord-vm ]; then run "vm-import-test" sh tests/vm_import_test.sh build
+    if have qemu-img && { have qemu-system-x86_64 || have qemu-system-aarch64; } && [ -x build/insane-vm ]; then run "vm-import-test" sh tests/vm_import_test.sh build
     else skip "vm-import-test" "qemu-img, qemu-system"; fi
     if have node; then run "screenshots-model-test (apps/screenshots)" node tests/screenshots_model_test.mjs; fi
     if have node; then run "imageedit-model-test (sdk/imageeditmodel.js)" node tests/imageedit_model_test.mjs; fi
@@ -259,7 +259,7 @@ EOF
     # checks (tools/hwreport/lib.mjs), the catalogue and its snapshot, the Compatibility panel's community data
     if have node; then run "hwreport-test (tools/hwreport, apps/sysinfo/share.js)" node tests/hwreport_test.mjs
     else skip "hwreport-test" "node"; fi
-    # (0.8.7) Store → Updates' names for Insane OS's data packages (apps/store/syspkg.js): lordos-hwdata as a dated list
+    # (0.8.7) Store → Updates' names for Insane OS's data packages (apps/store/syspkg.js): insaneos-hwdata as a dated list
     if have node; then run "store-syspkg-test (apps/store/syspkg.js)" node tests/store_syspkg_test.mjs
     else skip "store-syspkg-test" "node"; fi
     # (0.8.8.4, #37) the Store's search (apps/store/search.js): words in any order, joined or apart, accents, keywords
@@ -271,7 +271,7 @@ EOF
     # (0.8.5) Settings → Displays' arrangement (sdk/displaylayout.js): numbers, magnetic snap, valid drops
     if have node; then run "display-layout-test (sdk/displaylayout.js)" node tests/display_layout_test.mjs
     else skip "display-layout-test" "node"; fi
-    # (0.8.6) runtime/index.js's skip of unchanged styles sends the same lord.* calls as without it
+    # (0.8.6) runtime/index.js's skip of unchanged styles sends the same insane.* calls as without it
     if have node && [ -d ../node_modules/esbuild ] && [ -d ../node_modules/react-reconciler ]; then
         run "runtime-props-test (runtime/index.js)" node tests/runtime_props_test.mjs
     else skip "runtime-props-test" "node and the repository's node_modules (npm install)"; fi
@@ -308,7 +308,7 @@ EOF
         run "keyboard-default-test (sdk/keyboard.js, sdk/settings.js)" node tests/keyboard_default_test.mjs
     else skip "keyboard-default-test" "node and the repository's node_modules (npm install)"; fi
     # (0.8.8.6) Claude Code in the Terminal's footer: the status line bridge and the footer's model
-    run "claude-bridge-test (lord-claude-status)" sh tests/claude_bridge_test.sh
+    run "claude-bridge-test (insane-claude-status)" sh tests/claude_bridge_test.sh
     if have node; then run "terminal-claude-test (apps/terminal/claude.js)" node tests/terminal_claude_test.mjs
     else skip "terminal-claude-test" "node"; fi
 }
@@ -316,7 +316,7 @@ EOF
 full() {
     echo "== slow and environment-dependent suites (tests/run_suites.sh full)"
     # media helper: a generated WAV (one second of a 440 Hz tone), probe, waveform and its confinement
-    if [ -x build/lord-media ] && have python3; then
+    if [ -x build/insane-media ] && have python3; then
         python3 -I - "$T/tone.wav" <<'EOF'
 import math, struct, sys, wave
 w = wave.open(sys.argv[1], 'wb'); w.setnchannels(1); w.setsampwidth(2); w.setframerate(8000)
@@ -325,17 +325,17 @@ EOF
         run "media-test probe" build/media-test probe "$T/tone.wav"
         run "media-test wave" build/media-test wave "$T/tone.wav" 50
         run "media-test sandbox" build/media-test sandbox "$T/tone.wav"
-    else skip "media-test" "build/lord-media (FFmpeg -dev packages) and python3"; fi
+    else skip "media-test" "build/insane-media (FFmpeg -dev packages) and python3"; fi
     # document helper: malicious archives and the confinement
-    if [ -x build/lord-doc ] && [ -x build/doc-test ] && have python3; then run "doc_evil.sh (lord-doc)" sh tests/doc_evil.sh
-    else skip "doc_evil.sh" "build/lord-doc (Poppler and libarchive -dev packages) and python3"; fi
-    # text to speech (lord-tts, say): needs a voice model (docs/VOICE.md)
-    if [ -x build/lord-tts ] && [ -x build/lord-say ] && [ -x build/doc-test ] && have python3 && { [ -f "$HOME/.local/share/lordos/voice/models/es/standard.gguf" ] || [ -f /usr/share/lordos/voice/models/es/standard.gguf ]; }; then
-        run "tts_test.sh (lord-tts, say)" sh tests/tts_test.sh
-    else skip "tts_test.sh" "build/lord-tts and a voice model (Settings -> AI -> Voice)"; fi
+    if [ -x build/insane-doc ] && [ -x build/doc-test ] && have python3; then run "doc_evil.sh (insane-doc)" sh tests/doc_evil.sh
+    else skip "doc_evil.sh" "build/insane-doc (Poppler and libarchive -dev packages) and python3"; fi
+    # text to speech (insane-tts, say): needs a voice model (docs/VOICE.md)
+    if [ -x build/insane-tts ] && [ -x build/insane-say ] && [ -x build/doc-test ] && have python3 && { [ -f "$HOME/.local/share/insaneos/voice/models/es/standard.gguf" ] || [ -f /usr/share/insaneos/voice/models/es/standard.gguf ]; }; then
+        run "tts_test.sh (insane-tts, say)" sh tests/tts_test.sh
+    else skip "tts_test.sh" "build/insane-tts and a voice model (Settings -> AI -> Voice)"; fi
     # text recognition helper: reading, bad requests and the confinement
-    if [ -x build/lord-ocr ] && [ -x build/doc-test ] && [ -r /usr/share/tesseract-ocr/5/tessdata/spa.traineddata ]; then run "ocr_test.sh (lord-ocr)" sh tests/ocr_test.sh
-    else skip "ocr_test.sh" "build/lord-ocr (libtesseract-dev) and tesseract-ocr-spa"; fi
+    if [ -x build/insane-ocr ] && [ -x build/doc-test ] && [ -r /usr/share/tesseract-ocr/5/tessdata/spa.traineddata ]; then run "ocr_test.sh (insane-ocr)" sh tests/ocr_test.sh
+    else skip "ocr_test.sh" "build/insane-ocr (libtesseract-dev) and tesseract-ocr-spa"; fi
     # sandbox: Landlock and seccomp of the running kernel
     if [ -r /sys/kernel/security/lsm ] && grep -q landlock /sys/kernel/security/lsm; then
         run "sandbox-test (app)" build/sandbox-test

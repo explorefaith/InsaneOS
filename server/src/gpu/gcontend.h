@@ -1,8 +1,8 @@
 /* gcontend.h — the plan, the numbers and the verdict of the contention experiment (build/gpu-contention,
  * tests/gpu_contention.c; docs/GPU.md, "What slows the GPU under CPU load"). No GL and no threads here, so
  * build/engine-test checks the verdict's rules. */
-#ifndef LORD_GCONTEND_H
-#define LORD_GCONTEND_H
+#ifndef INSANE_GCONTEND_H
+#define INSANE_GCONTEND_H
 
 #include <stddef.h>
 

@@ -1,15 +1,15 @@
-/* say.c — lord-say, Insane OS's `say` command (docs/VOICE.md): text to speech.
+/* say.c — insane-say, Insane OS's `say` command (docs/VOICE.md): text to speech.
  *
  *   say "Hola, ¿cómo estás?"            say -l en -v alba "Hello"          echo texto | say
  *   say -f notas.txt -o notas.wav       say -b gpu "…"                      say --voices
  *   say -q hd -v juergen "…"             say --preview es lola
  *
- * It holds no speech code: it starts lord-tts (the sandboxed helper next to it, src/doc/h_tts.c) on a channel at
+ * It holds no speech code: it starts insane-tts (the sandboxed helper next to it, src/doc/h_tts.c) on a channel at
  * fd 3, gives it the models folder (read only) and, for the GPU, Mesa's shader cache folder, and sends it the text
  * a sentence at a time (saytext.c). Each sentence comes back as a WAV in a sealed memfd and is played with
  * PipeWire's pw-cat (or written with -o) while the next one is synthesized, so speech starts after the first.
  *
- * Models, root being /usr/share/lordos/voice (the lordos-voice-* packages) or ~/.local/share/lordos/voice:
+ * Models, root being /usr/share/insaneos/voice (the insaneos-voice-* packages) or ~/.local/share/insaneos/voice:
  *   standard  <root>/models/<language>/standard.gguf, its voices in <root>/models/<language>/embeddings/<voice>.safetensors
  *   hd        <root>/models/<language>/hd/ (Kyutai's model.safetensors, tokenizer.model and embeddings/<voice>.safetensors)
  * The quality is -q, else voice.json's "quality", else "auto": HD when it is installed. The voice is -v, else
@@ -19,20 +19,20 @@
  * voice.json's "language", then $LANG's, when the text is too short to tell.
  *
  * --preview <language> <voice> plays the voice's recorded sample, <root>/previews/<language>/<voice>.wav (the
- * lordos-voice-previews package), so a voice can be heard before it is downloaded.
+ * insaneos-voice-previews package), so a voice can be heard before it is downloaded.
  *
- * -o - writes the WAV to stdout (its sizes are set at the end, so it must be a file); lord-server saves this way.
+ * -o - writes the WAV to stdout (its sizes are set at the end, so it must be a file); insane-server saves this way.
  *
- * --levels (lord-server's, speak.c): fd 3 is a pipe to it; for each SAY_LEVEL_MS of audio played, SAY_BANDS bytes, how
+ * --levels (insane-server's, speak.c): fd 3 is a pipe to it; for each SAY_LEVEL_MS of audio played, SAY_BANDS bytes, how
  * loud each band is (levels.c), for the wave its player draws. Written without waiting: one it isn't reading is lost.
  *
- * While it speaks or saves, ~/.cache/lordos/say/<pid> says how: "lord-say 1 <vulkan|cpu> <hd|standard> <language>
- * <speak|save>" (Monitor → GPU shows it: lord-tts is sandboxed and its /proc isn't readable, src/monitor/gpustat.c). It
- * goes when lord-say ends; a note whose process is gone is removed by the next lord-say. Not lord-tts's folder: the
+ * While it speaks or saves, ~/.cache/insaneos/say/<pid> says how: "insane-say 1 <vulkan|cpu> <hd|standard> <language>
+ * <speak|save>" (Monitor → GPU shows it: insane-tts is sandboxed and its /proc isn't readable, src/monitor/gpustat.c). It
+ * goes when insane-say ends; a note whose process is gone is removed by the next insane-say. Not insane-tts's folder: the
  * helper can't write it.
  *
- * Exit status: 0 spoken, 1 an error, 2 usage, 3 no model for the language, 4 no voice chosen, 5 lord-tts isn't
- * installed, 130 stopped by a signal. lord-server (speak.c) tells the person which one it was. */
+ * Exit status: 0 spoken, 1 an error, 2 usage, 3 no model for the language, 4 no voice chosen, 5 insane-tts isn't
+ * installed, 130 stopped by a signal. insane-server (speak.c) tells the person which one it was. */
 #include "../doc/proto.h"
 #include "../doc/wire.h"
 #include "../sec/json.h"
@@ -61,7 +61,7 @@ extern char **environ;
 #define PIECE_MAX 300
 #define WAV_PREVIEW_MAX (8u << 20)          /* a recorded sample: about ten seconds */
 
-static const char *const ROOTS_SYS = "/usr/share/lordos/voice";
+static const char *const ROOTS_SYS = "/usr/share/insaneos/voice";
 static int sock = -1;
 static pid_t helper = -1, player = -1;
 static int player_fd = -1;
@@ -99,12 +99,12 @@ static char *read_all(int fd, size_t *len) {
     return b;
 }
 
-/* ~/.config/lordos/voice.json: the defaults Settings → AI → Voice keeps */
+/* ~/.config/insaneos/voice.json: the defaults Settings → AI → Voice keeps */
 static char conf_lang[8], conf_voice[64], conf_backend[8], conf_quality[12], conf_voices[3][64];
 static const char *const LANGS[3] = { "es", "en", "pt" };
 static void read_settings(const char *home) {
     char path[PATH_MAX];
-    snprintf(path, sizeof path, "%s/.config/lordos/voice.json", home);
+    snprintf(path, sizeof path, "%s/.config/insaneos/voice.json", home);
     int fd = open(path, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return;
     size_t len;
@@ -193,29 +193,29 @@ static void start_helper(int models_fd, int cache_fd, int gpu, const char *home)
     char *slash = strrchr(self, '/');
     if (!slash) die("can't find myself", NULL);
     *slash = 0;
-    snprintf(path, sizeof path, "%s/lord-tts", self);
+    snprintf(path, sizeof path, "%s/insane-tts", self);
     if (!is_file(path)) die_as(EXIT_NOT_INSTALLED, "speech isn't installed", path);
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) die("socketpair", strerror(errno));
     posix_spawn_file_actions_t fa;
     posix_spawn_file_actions_init(&fa);
     posix_spawn_file_actions_adddup2(&fa, sv[1], 3);
-    /* its only writable folder, ~/.cache/lordos/voice: audio.cpp unpacks a model's files in tmp/, Mesa keeps compiled
+    /* its only writable folder, ~/.cache/insaneos/voice: audio.cpp unpacks a model's files in tmp/, Mesa keeps compiled
      * shaders in gpu/ */
     char henv[PATH_MAX + 8], tenv[PATH_MAX + 32], cenv[PATH_MAX + 48], *envp[6];
     int ne = 0;
     snprintf(henv, sizeof henv, "HOME=%s", home);
     envp[ne++] = henv;
     envp[ne++] = "LANG=C.UTF-8";
-    snprintf(tenv, sizeof tenv, "TMPDIR=%s/.cache/lordos/voice/tmp", home);
+    snprintf(tenv, sizeof tenv, "TMPDIR=%s/.cache/insaneos/voice/tmp", home);
     envp[ne++] = tenv;
-    if (gpu) { snprintf(cenv, sizeof cenv, "MESA_SHADER_CACHE_DIR=%s/.cache/lordos/voice/gpu", home); envp[ne++] = cenv; }
+    if (gpu) { snprintf(cenv, sizeof cenv, "MESA_SHADER_CACHE_DIR=%s/.cache/insaneos/voice/gpu", home); envp[ne++] = cenv; }
     envp[ne] = NULL;
-    char *argv[] = { "lord-tts", NULL };
+    char *argv[] = { "insane-tts", NULL };
     int r = posix_spawn(&helper, path, &fa, NULL, argv, envp);
     posix_spawn_file_actions_destroy(&fa);
     close(sv[1]);
-    if (r) die("can't start lord-tts", strerror(r));
+    if (r) die("can't start insane-tts", strerror(r));
     sock = sv[0];
     int fds[1] = { models_fd };
     doc_send(sock, DQ_INIT_FD, 0, "{\"role\":\"ro\"}", 13, fds, 1);
@@ -223,7 +223,7 @@ static void start_helper(int models_fd, int cache_fd, int gpu, const char *home)
     const char *go = gpu ? "{\"mode\":\"tts\",\"gpu\":true}" : "{\"mode\":\"tts\"}";
     doc_send(sock, DQ_INIT_GO, 0, go, strlen(go), NULL, 0);
     DocMsg m;
-    if (doc_recv(sock, &m) || m.h.op != DR_DONE) die("lord-tts didn't start", NULL);
+    if (doc_recv(sock, &m) || m.h.op != DR_DONE) die("insane-tts didn't start", NULL);
     doc_msg_free(&m);
 }
 
@@ -246,7 +246,7 @@ static void request(uint32_t id, const char *text, size_t len, const char *file,
     if (language) { jb_raw(&b, ",\"language\":"); jb_str(&b, language); }
     jb_raw(&b, "}");
     int fds[1] = { voice_fd };
-    if (b.oom || doc_send(sock, DQ_TTS, id, b.p, b.n, voice_fd >= 0 ? fds : NULL, voice_fd >= 0 ? 1 : 0)) die("lord-tts stopped", NULL);
+    if (b.oom || doc_send(sock, DQ_TTS, id, b.p, b.n, voice_fd >= 0 ? fds : NULL, voice_fd >= 0 ? 1 : 0)) die("insane-tts stopped", NULL);
     jb_free(&b);
 }
 
@@ -392,13 +392,13 @@ static void note_remove(void) { if (note_path[0]) unlink(note_path); }
 
 static void note_write(const char *home, int gpu, int hd, const char *lang, int save) {
     char dir[PATH_MAX], tmp[sizeof note_path + 8];
-    snprintf(dir, sizeof dir, "%s/.cache/lordos/say", home);
+    snprintf(dir, sizeof dir, "%s/.cache/insaneos/say", home);
     mkdir(dir, 0700);
     int dfd = open(dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
     struct stat st;
     if (dfd < 0 || fstat(dfd, &st) || st.st_uid != getuid()) { if (dfd >= 0) close(dfd); return; }
     DIR *d = fdopendir(dup(dfd));
-    for (struct dirent *e; d && (e = readdir(d));) {          /* notes left by a lord-say that was killed */
+    for (struct dirent *e; d && (e = readdir(d));) {          /* notes left by a insane-say that was killed */
         char *end;
         long pid = strtol(e->d_name, &end, 10);
         if (e->d_name[0] >= '1' && e->d_name[0] <= '9' && !*end && pid > 0 && pid != getpid() && kill((pid_t)pid, 0) && errno == ESRCH)
@@ -411,7 +411,7 @@ static void note_write(const char *home, int gpu, int hd, const char *lang, int 
     snprintf(tmp, sizeof tmp, "%s.tmp", note_path);
     FILE *f = fopen(tmp, "we");
     if (!f) return;
-    fprintf(f, "lord-say 1 %s %s %s %s\n", gpu ? "vulkan" : "cpu", hd ? "hd" : "standard", lang, save ? "save" : "speak");
+    fprintf(f, "insane-say 1 %s %s %s %s\n", gpu ? "vulkan" : "cpu", hd ? "hd" : "standard", lang, save ? "save" : "speak");
     if (fclose(f) || rename(tmp, note_path)) unlink(tmp);
 }
 
@@ -461,7 +461,7 @@ int main(int argc, char **argv) {
     const char *home = getenv("HOME");
     if (!home || home[0] != '/' || strlen(home) > 1024) die("HOME isn't set", NULL);
     char user_root[1100];
-    snprintf(user_root, sizeof user_root, "%s/.local/share/lordos/voice", home);
+    snprintf(user_root, sizeof user_root, "%s/.local/share/insaneos/voice", home);
     if (voices) { list_voices(user_root); return 0; }
     if (preview_lang) {
         const char *const proots[2] = { user_root, ROOTS_SYS };
@@ -564,9 +564,9 @@ int main(int argc, char **argv) {
     signal(SIGTERM, on_signal);
     signal(SIGPIPE, SIG_IGN);
     char c[1200];
-    static const char *const sub[] = { "/.cache", "/.cache/lordos", "/.cache/lordos/voice", "/.cache/lordos/voice/tmp", "/.cache/lordos/voice/gpu" };
+    static const char *const sub[] = { "/.cache", "/.cache/insaneos", "/.cache/insaneos/voice", "/.cache/insaneos/voice/tmp", "/.cache/insaneos/voice/gpu" };
     for (size_t i = 0; i < sizeof sub / sizeof *sub; i++) { snprintf(c, sizeof c, "%s%s", home, sub[i]); mkdir(c, 0700); }
-    snprintf(c, sizeof c, "%s/.cache/lordos/voice", home);
+    snprintf(c, sizeof c, "%s/.cache/insaneos/voice", home);
     int cache_fd = open(c, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
     struct stat cst;
     if (cache_fd < 0 || fstat(cache_fd, &cst) || cst.st_uid != getuid()) die("can't use", c);

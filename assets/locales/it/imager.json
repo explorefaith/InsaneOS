@@ -18,7 +18,7 @@
   "cooling.noneWarnTitle": "Senza raffreddamento la scheda rallenta da sola",
   "cooling.overclock": "Overclock leggero",
   "cooling.overclockHint": "2,6 GHz invece di 2,4 GHz, senza tensione aggiuntiva. Solo con una ventola.",
-  "cooling.overclockWarn": "Se la scheda non si avvia, apri la partizione di avvio della scheda SD su un altro computer ed elimina il blocco lordos-firstrun in config.txt.",
+  "cooling.overclockWarn": "Se la scheda non si avvia, apri la partizione di avvio della scheda SD su un altro computer ed elimina il blocco insaneos-firstrun in config.txt.",
   "cooling.overclockWarnTitle": "Non tutte le schede sono stabili in overclock",
   "cooling.p.balanced": "Bilanciato",
   "cooling.p.balancedHint": "La ventola parte a 55 °C e accelera con la temperatura. Il profilo predefinito.",

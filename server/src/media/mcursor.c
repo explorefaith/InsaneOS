@@ -1,5 +1,5 @@
 /* mcursor.c — the pointer image a media node's source brings with it (a Machines guest's CursorDefine): made
- * ready for lord-server's cursor (premultiplied ARGB, see cursor.h) and drawn at the size the picture is shown.
+ * ready for insane-server's cursor (premultiplied ARGB, see cursor.h) and drawn at the size the picture is shown.
  * Pure functions, no state: tests/mcursor_test.c. */
 #include "mcursor.h"
 

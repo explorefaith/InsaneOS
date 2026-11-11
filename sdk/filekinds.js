@@ -32,7 +32,7 @@ export function kindOf(e) {
 }
 
 // For "Open With" of Linux apps (their MimeType in the .desktop file). The names are
-// shared-mime-info's; the system's own database (lord.mime.guess, see mimesOf) comes first, and this
+// shared-mime-info's; the system's own database (insane.mime.guess, see mimesOf) comes first, and this
 // table is what is known without it. Every extension of a kind with no text fallback is here, so a
 // kind never loses "Open With" for lack of a type (issue #49: the office documents had none).
 const MIME = {
@@ -66,7 +66,7 @@ export function mimeOf(e) {
 }
 
 // Every type an entry may be, best first: the system's MIME database's guess from the name
-// (guess(name) → type or null: lord.mime.guess, /usr/share/mime/globs2), then mimeOf's. An app that
+// (guess(name) → type or null: insane.mime.guess, /usr/share/mime/globs2), then mimeOf's. An app that
 // declares either one opens it, so a type this table lacks still finds its apps through the system.
 export function mimesOf(e, guess) {
   const out = [];
@@ -89,7 +89,7 @@ export function appOpens(mimeTypes, mime) {
 }
 
 export const isTextual = (e) => ['text', 'code'].includes(kindOf(e));
-export const isImage = (e) => kindOf(e) === 'image' && !/\.(svg|heic|avif|tiff?|webp)$/i.test(e.name);   // the ones stb_image draws (the rest: lord-media thumbnail)
+export const isImage = (e) => kindOf(e) === 'image' && !/\.(svg|heic|avif|tiff?|webp)$/i.test(e.name);   // the ones stb_image draws (the rest: insane-media thumbnail)
 
 // Band color of each kind in the document icon.
 export const KIND_COLOR = {

@@ -8,7 +8,7 @@ import {
   View, Text, ScrollView, SearchField, addListener, t as tr, tOptional, useSettings, settings, useStore,
   useLauncherApps, launchApp, dockIdOf, dock, beginDockDrag, dockDragJustEnded, session, wm, useSystemInfo, searchEverything,
   mainDisplay, direction,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 import { PowerGlyph, Chevron, FolderGlyph, PageGlyph, GearGlyph, SearchGlyph } from '../glyphs.jsx';

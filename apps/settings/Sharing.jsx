@@ -1,20 +1,20 @@
-// Settings → Sharing: remote desktop (lord-sessiond, docs/REMOTE.md) and remote login (SSH).
+// Settings → Sharing: remote desktop (insane-sessiond, docs/REMOTE.md) and remote login (SSH).
 // Both are off by default; turning them on, choosing who can log in and viewing or cutting
 // connections goes through the administration helper (remote-* and ssh-* actions). The SSH
 // server is installed, the first time, with the package engine's own pkg-install action.
 import {
   View, Text, Button, Toggle, Segmented, TextInput, useTheme, useLocale, useStore, admin, remote, remoteViewers, shareHolder, sshLogin, remoteCidr,
   remoteMinutesLeft, remoteVideo, remoteIceServer, remoteFingerprint, statusText, useSystemInfo, spacing, typeScale, FilePicker, fs, Layer, useAppWindow, wm,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, Note, Message, StatusDot, tint } from './ui.jsx';
 
 
 // This machine's LAN IPv4 addresses (to build the URL).
 function lanAddresses() {
-  if (typeof lord.net === 'undefined') return [];
+  if (typeof insane.net === 'undefined') return [];
   const out = [];
-  for (const i of lord.net.interfaces()) {
+  for (const i of insane.net.interfaces()) {
     if (i.type === 'loopback' || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name)) continue;
     for (const a of i.addresses) if (a.family === 4 && a.scope === 'global') out.push(a.address);
   }

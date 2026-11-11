@@ -1,8 +1,8 @@
-/* netrec.h — records the traffic history (nethist.h) from what lord-server already reads: the
- * per-app counters lord-netperm sends (js_fw.c) and /proc/net/dev, every 5 s. See docs/MONITOR.md,
+/* netrec.h — records the traffic history (nethist.h) from what insane-server already reads: the
+ * per-app counters insane-netperm sends (js_fw.c) and /proc/net/dev, every 5 s. See docs/MONITOR.md,
  * "Traffic history". */
-#ifndef LORD_NETREC_H
-#define LORD_NETREC_H
+#ifndef INSANE_NETREC_H
+#define INSANE_NETREC_H
 
 #include "nethist.h"
 

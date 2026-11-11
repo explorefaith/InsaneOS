@@ -1,11 +1,11 @@
 /* cloud_rc.h — the rc client (cloud_rc.c). */
-#ifndef LORD_CLOUD_RC_H
-#define LORD_CLOUD_RC_H
+#ifndef INSANE_CLOUD_RC_H
+#define INSANE_CLOUD_RC_H
 
 #include "cloud_pure.h"
 
 typedef struct {
-    char sock[108];         /* $XDG_RUNTIME_DIR/lordos/cloud/rc.sock */
+    char sock[108];         /* $XDG_RUNTIME_DIR/insaneos/cloud/rc.sock */
     char auth[160];         /* base64 of user:password, random per start */
 } RcConn;
 

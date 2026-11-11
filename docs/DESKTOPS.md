@@ -1,7 +1,7 @@
 # Desktops
 
 Several desktops, each with its own windows, in Insane Flow and Insane Classic. All displays switch together.
-There is always at least one, and at most nine. Most of this is SDK work: `lord-server` knows only that a
+There is always at least one, and at most nine. Most of this is SDK work: `insane-server` knows only that a
 window is *parked*.
 
 | Code | Role |
@@ -41,7 +41,7 @@ is typed on another desktop, and an app the user can't see must not be able to b
 - `move`, `resize` and `menu` requests from a Linux app are refused unless its window is on the desktop in view
   (`acceptsAppRequest`). Otherwise an app could switch the desktop with `xdg_toplevel.move`.
 - Fullscreen is presented above everything and keeps the keyboard in `wl.c`, whatever the shell says, so the
-  rule needs the compositor: `lord.wayland.state(id, max, 0, iconic, parked)` → `wl_set_parked`. A parked window
+  rule needs the compositor: `insane.wayland.state(id, max, 0, iconic, parked)` → `wl_set_parked`. A parked window
   loses the keyboard, `wl_set_focus` refuses it, its menus close, and it leaves fullscreen and gets it back when
   its desktop returns. A fullscreen request while parked waits for that. This is the only thing C knows.
 - A text field of a mounted Insane OS app loses the focus when its window leaves the desktop in view
@@ -57,7 +57,7 @@ A parked X11 window goes iconic and to the bottom of X's stack through the path 
 
 Ctrl+Up in Insane Flow, Super+Tab or the taskbar button in Insane Classic, the Window menu or the desktop's menu in
 both, and a four-finger swipe up. The windows of the desktop in a grid, drawn smaller by a transform on their
-real frame (lord-server paints a raster of it, so no app redraws; on the GPU path a Linux window's quad is drawn
+real frame (insane-server paints a raster of it, so no app redraws; on the GPU path a Linux window's quad is drawn
 at the scaled box, with its hole opened there, so it stays live and can't overflow or reach the Dock), with
 minimized ones too: a minimized Linux window that has nothing to draw, such as an iconic X11 window, shows its app
 icon and title (`OverviewPlaceholder`, behind the body, so a last buffer covers it; a Insane OS app gets none, its body is translucent). Along the top, a strip with every desktop: a miniature of its windows' frames and icons
@@ -119,10 +119,10 @@ Settings → Mouse & Trackpad).
 
 ## The switch
 
-The windows arriving slide 56 px and fade in over 170 ms, on their cached raster: `lord.setStyle` on each one's
+The windows arriving slide 56 px and fade in over 170 ms, on their cached raster: `insane.setStyle` on each one's
 node, no React render per frame. The windows leaving are gone at once. A small indicator shows the desktop's name for
 800 ms. With Reduce motion there is no animation, and when nothing is switching, no timer runs. In a session left
-alone, `lord-server` used 0 CPU ticks in 10 s with three desktops and windows open (VM 116).
+alone, `insane-server` used 0 CPU ticks in 10 s with three desktops and windows open (VM 116).
 
 ## What is kept
 

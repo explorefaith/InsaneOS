@@ -1,10 +1,10 @@
-// print.js — printing and printers (CUPS over IPP from our own C client, lord.print) and
+// print.js — printing and printers (CUPS over IPP from our own C client, insane.print) and
 // network eSCL scanners. See docs/PRINTING.md.
 //
 // For apps:
 //   print.open({ title, path })            print a PDF (opens the system dialog)
 //   print.open({ title, doc })             a PDF already opened with pdf.open (with its annotations)
-//   print.open({ title, text, mono })      text (Editor, Notes): a PDF is built in lord-doc
+//   print.open({ title, text, mono })      text (Editor, Notes): a PDF is built in insane-doc
 //   print.open({ title, image })           an image (Photos, the scanner)
 //     → promise: { job, printer } | { saved: path } | null (cancelled)
 //
@@ -18,16 +18,16 @@ import { createStore } from './store.js';
 import { tOptional } from './i18n.js';
 import { errorText } from './errors.js';
 
-// lord.print reports short codes ('no-cups', 'unreachable'…): the message is their translation (print.err.*).
+// insane.print reports short codes ('no-cups', 'unreachable'…): the message is their translation (print.err.*).
 const printError = (code, detail) => Object.assign(new Error(code ? tOptional(`print.err.${code}`, { detail: detail || '' }) ?? errorText(code) : errorText('sys.unknown')), { code, detail });
 
-const has = () => typeof lord !== 'undefined' && typeof lord.print !== 'undefined';
+const has = () => typeof insane !== 'undefined' && typeof insane.print !== 'undefined';
 const waiting = new Map();
 let timer = null;
 
 function pump() {
   let evs = null;
-  try { evs = lord.print.poll(); } catch (e) { evs = null; }
+  try { evs = insane.print.poll(); } catch (e) { evs = null; }
   for (const e of evs || []) {
     const w = waiting.get(e.id);
     if (!w) continue;
@@ -53,17 +53,17 @@ export const printRequest = createStore(null);    // { source, resolve }
 
 export const print = {
   available: () => has(),
-  hasCups: () => has() && lord.print.hasCups(),
-  printers: () => call(() => lord.print.printers()),
-  jobs: () => call(() => lord.print.jobs()),
-  cancel: (id) => call(() => lord.print.cancel(id)),
-  add: (name, uri, info = '', location = '') => call(() => lord.print.add(name, uri, info, location)),
-  remove: (name) => call(() => lord.print.remove(name)),
-  setDefault: (name) => call(() => lord.print.setDefault(name)),
-  discover: () => call(() => lord.print.discover()),
-  scanCaps: (s) => call(() => lord.print.scanCaps(s.addr, s.port, s.rs || 'eSCL')),
-  scan: (s, settings) => call(() => lord.print.scan(s.addr, s.port, s.rs || 'eSCL', JSON.stringify(settings))),
-  submit: (printer, source, options = {}) => call(() => lord.print.submit(printer, source, JSON.stringify(options))),
+  hasCups: () => has() && insane.print.hasCups(),
+  printers: () => call(() => insane.print.printers()),
+  jobs: () => call(() => insane.print.jobs()),
+  cancel: (id) => call(() => insane.print.cancel(id)),
+  add: (name, uri, info = '', location = '') => call(() => insane.print.add(name, uri, info, location)),
+  remove: (name) => call(() => insane.print.remove(name)),
+  setDefault: (name) => call(() => insane.print.setDefault(name)),
+  discover: () => call(() => insane.print.discover()),
+  scanCaps: (s) => call(() => insane.print.scanCaps(s.addr, s.port, s.rs || 'eSCL')),
+  scan: (s, settings) => call(() => insane.print.scan(s.addr, s.port, s.rs || 'eSCL', JSON.stringify(settings))),
+  submit: (printer, source, options = {}) => call(() => insane.print.submit(printer, source, JSON.stringify(options))),
   // Opens the dialog. If one is already open, the new one waits its turn (returns null).
   open(source) {
     if (printRequest.get()) return Promise.resolve(null);

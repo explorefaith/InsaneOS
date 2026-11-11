@@ -14,7 +14,7 @@ eq('spaces are quoted', shellQuote('/home/ana/Mis fotos/a b.png'), "'/home/ana/M
 eq("a quote inside", shellQuote("/tmp/it's.png"), "'/tmp/it'\\''s.png'");
 eq('shell characters are quoted', shellQuote('/tmp/$(rm -rf ~).png'), "'/tmp/$(rm -rf ~).png'");
 eq('several files, then a space', pathsText(['/a.png', '/b c.png']), "/a.png '/b c.png' ");
-eq('the clipboard image', clipboardImage({ kind: 'image', image: '/run/user/1000/lordos/clip-3.png' }), '/run/user/1000/lordos/clip-3.png');
+eq('the clipboard image', clipboardImage({ kind: 'image', image: '/run/user/1000/insaneos/clip-3.png' }), '/run/user/1000/insaneos/clip-3.png');
 eq('text on the clipboard', clipboardImage({ kind: 'text', image: '' }), null);
 eq('Claude Code by name', programLabel('claude'), 'Claude Code');
 eq('another program keeps its name', programLabel('vim'), 'vim');

@@ -41,9 +41,9 @@ typedef struct { char host[256]; int port; int suffix; } Allow;
 typedef struct { char host[256]; int port; time_t until; } Grant;
 typedef struct { int handle, w, h, owner; uint32_t *px; uint64_t seq; } Img;
 
-/* Isolated system apps (Mail, Calendar, Contacts, Reminders as `lord-server --app <id>`): each
+/* Isolated system apps (Mail, Calendar, Contacts, Reminders as `insane-server --app <id>`): each
  * app process is an "owner" with its own event queue. Replies to its requests go only there; the
- * events lord-maild broadcasts go to the session (owner 0) and to every owner whose mask allows
+ * events insane-maild broadcasts go to the session (owner 0) and to every owner whose mask allows
  * them. brokermail.c reads these queues and forwards them over the broker. */
 typedef struct { int used, mask; JBuf ev; } Owner;
 typedef struct { int id, owner; } Route;
@@ -76,8 +76,8 @@ static void paths(void) {
     if (cfg_path[0]) return;
     const char *h = getenv("HOME");
     if (!h) h = "/nonexistent";
-    snprintf(cfg_path, sizeof cfg_path, "%s/.config/lordos/mail/accounts.json", h);
-    snprintf(cache_path, sizeof cache_path, "%s/.local/share/lordos/mail", h);
+    snprintf(cfg_path, sizeof cfg_path, "%s/.config/insaneos/mail/accounts.json", h);
+    snprintf(cache_path, sizeof cache_path, "%s/.local/share/insaneos/mail", h);
 }
 
 const char *mail_config_path(void) { paths(); return cfg_path; }
@@ -93,11 +93,11 @@ int mail_available(void) {
         if (!slash) return -1;
         *slash = 0;
         if (strlen(self) + 12 > sizeof helper) return -1;
-        snprintf(helper, sizeof helper, "%s/lord-maild", self);
+        snprintf(helper, sizeof helper, "%s/insane-maild", self);
     }
     struct stat st, me;
     if (stat(helper, &st) || !S_ISREG(st.st_mode) || !(st.st_mode & S_IXUSR)) return -1;
-    /* owned by root or by lord-server's owner, and not writable by anyone else */
+    /* owned by root or by insane-server's owner, and not writable by anyone else */
     if (stat("/proc/self/exe", &me) || (st.st_uid != 0 && st.st_uid != me.st_uid) || (st.st_mode & 022)) return -1;
     return 0;
 }
@@ -471,7 +471,7 @@ int mail_image_fd(int owner, int handle, int *w, int *h) {
     pthread_mutex_lock(&img_mu);
     for (int i = 0; i < MAX_IMG; i++) if (imgs[i].px && imgs[i].handle == handle && imgs[i].owner == owner && owner > 0) {
         size_t bytes = (size_t)imgs[i].w * (size_t)imgs[i].h * 4;
-        fd = memfd_create("lordos-mail-img", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+        fd = memfd_create("insaneos-mail-img", MFD_CLOEXEC | MFD_ALLOW_SEALING);
         if (fd >= 0) {
             size_t off = 0;
             while (off < bytes) { ssize_t r = write(fd, (const char *)imgs[i].px + off, bytes - off); if (r <= 0) break; off += (size_t)r; }
@@ -533,7 +533,7 @@ static int send_msg(uint32_t op, uint32_t id, const char *json, int fd) {
     return r;
 }
 
-/* The socket is made and connected by Mail's own connector, in lordos-net-mail.scope (0.8.5,
+/* The socket is made and connected by Mail's own connector, in insaneos-net-mail.scope (0.8.5,
  * sec/netconn.h): Mail and the calendar sync are their own app for the firewall and the Monitor. */
 static int connect_timeout(const struct addrinfo *ai, int ms) {
     int fd = netconn_socket(NC_MAIL, ai->ai_family, SOCK_STREAM, ai->ai_addr, ai->ai_addrlen);
@@ -586,7 +586,7 @@ static void on_connect(uint32_t cid, const char *json, size_t len) {
     }
     int how = host_ok(host) && port > 0 && port <= 65535 ? allowed_now(host, port) : 0;
     if (!how) {
-        fprintf(stderr, "lord-server: lord-maild asked for %s:%d, which is not a configured server: denied\n", host, port);
+        fprintf(stderr, "insane-server: insane-maild asked for %s:%d, which is not a configured server: denied\n", host, port);
         send_msg(MQ_SOCK, cid, "{\"error\":\"denied\"}", -1);
         return;
     }
@@ -713,9 +713,9 @@ int mail_start(void) {
     const char *home = getenv("HOME");
     if (home) { snprintf(henv, sizeof henv, "HOME=%s", home); envp[ne++] = henv; }
     envp[ne++] = "LANG=C.UTF-8";
-    if (getenv("LORD_MAIL_DEBUG")) envp[ne++] = "LORD_MAIL_DEBUG=1";
+    if (getenv("INSANE_MAIL_DEBUG")) envp[ne++] = "INSANE_MAIL_DEBUG=1";
     envp[ne] = NULL;
-    char *argv[] = { "lord-maild", NULL };
+    char *argv[] = { "insane-maild", NULL };
     pid_t pid;
     int e = posix_spawn(&pid, helper, &fa, &at, argv, envp);
     posix_spawn_file_actions_destroy(&fa);

@@ -23,7 +23,7 @@ mkdir -p ~/.config/fwprobe ~/.cache/fwprobe ~/.cache/fontconfig
 echo shm > /dev/shm/fwlinux-shm-$U                  # the session's shared memory: not visible to the app
 PROBE=~/.config/fwprobe/probe.py           # its own config dir: visible to the restricted app
 cp "$D/files_probe.py" "$PROBE"
-SPID=$(pgrep -u "$U" -o -x lord-server || echo 1)   # a session process: its /proc/<pid>/root must not be reachable
+SPID=$(pgrep -u "$U" -o -x insane-server || echo 1)   # a session process: its /proc/<pid>/root must not be reachable
 TSOCK=/tmp/fwlinux-tmp-$U.sock                       # a socket in the real /tmp (like a terminal multiplexer's)
 rm -f "$TSOCK"
 python3 -c "import socket,sys,time; s=socket.socket(socket.AF_UNIX); s.bind(sys.argv[1]); s.listen(); time.sleep(60)" "$TSOCK" &
@@ -118,12 +118,12 @@ for r in no-mic no-camera no-usb no-bluetooth; do
 done
 echo "3d. a restricted app on a kernel whose Landlock can't scope abstract sockets: not launched"
 rm -f "$OUT"
-LORD_SANDBOX_MAX_ABI=5 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$U "$CLI" fwprobe >/dev/null 2>&1 && bad "launched with Landlock ABI 5" || ok "refused with Landlock ABI 5"
+INSANE_SANDBOX_MAX_ABI=5 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$U "$CLI" fwprobe >/dev/null 2>&1 && bad "launched with Landlock ABI 5" || ok "refused with Landlock ABI 5"
 sleep 1; [ -s "$OUT" ] && bad "the app ran with Landlock ABI 5" || ok "the app did not run"
 restrict desktop:fwprobe no-files
 
 echo "4. malicious .desktop files: names chosen to reach other programs' folders"
-EVIL=/usr/local/lib/lordos-tests/files_probe.py          # a system path: these ids get no folders of their own
+EVIL=/usr/local/lib/insaneos-tests/files_probe.py          # a system path: these ids get no folders of their own
 sudo install -D -m 644 "$D/files_probe.py" "$EVIL"
 for id in fwevil autostart applications; do
     cat > "$APPS/$id.desktop" <<DESK
@@ -147,7 +147,7 @@ DESK
 done
 [ -e ~/.config/autostart/fwlinux.desktop ] && bad "an autostart entry was written" || ok "no autostart entry was written"
 [ -e ~/.local/share/applications/fwlinux-evil.desktop ] && bad "a .desktop was written" || ok "no .desktop file was written"
-sudo rm -rf /usr/local/lib/lordos-tests
+sudo rm -rf /usr/local/lib/insaneos-tests
 rm -rf ~/.config/fwevil ~/.cache/fwevil ~/.local/share/fwevil ~/.local/state/fwevil
 
 if command -v gtk4-print-editor >/dev/null && command -v strace >/dev/null && [ -S "/run/user/$U/wayland-0" ]; then

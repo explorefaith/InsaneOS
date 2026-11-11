@@ -1,8 +1,8 @@
-// conn.js — the open connections (one lord-sql per tab, docs/DATABASES.md "How it connects"), the queries the app and
-// the person send through them (one at a time per connection: lord-sql answers `busy` otherwise), and the console's
+// conn.js — the open connections (one insane-sql per tab, docs/DATABASES.md "How it connects"), the queries the app and
+// the person send through them (one at a time per connection: insane-sql answers `busy` otherwise), and the console's
 // log of every one of them (in memory, gone at disconnect, passwords redacted). The Console window, another window
 // of the same app, reads the same store.
-import { createStore, sqlRequest, onSqlEvent, sqlFavorites, settings } from '@lordos/sdk';
+import { createStore, sqlRequest, onSqlEvent, sqlFavorites, settings } from '@insaneos/sdk';
 import { redactSql, normalizeFavorite, cleanFavorite, pushRecent, isReadOnlySql } from './model.js';
 
 // sessions: [{ key, fav, conn, server, tls, threadId, db, openedAt, locked, closed, log, busy }]; active: key or null
@@ -37,7 +37,7 @@ export function readFavorites() {
   const f = sqlFavorites.get();
   return { version: 1, groups: Array.isArray(f.groups) ? f.groups : [], favorites: (Array.isArray(f.favorites) ? f.favorites : []).map(normalizeFavorite) };
 }
-// throws when lord-server refuses the file
+// throws when insane-server refuses the file
 export function writeFavorites(file) {
   sqlFavorites.save({ version: 1, groups: file.groups.map((g) => ({ id: g.id, name: String(g.name || ''), parent: g.parent || null, expanded: g.expanded !== false })),
     favorites: file.favorites.map(cleanFavorite) });

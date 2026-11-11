@@ -7,10 +7,10 @@
  * fw.restricted.<what>, even when the permission was granted before. It also checks live
  * revocation (restricting a running app stops its camera and its microphone), the "restricted
  * meanwhile" paths (prompt answered or file picked after the restriction) and the built-in apps'
- * hook (firewall id "lordos", used by js_media.c).
+ * hook (firewall id "insaneos", used by js_media.c).
  *
- * Only the edges are stand-ins: the terminal's clipboard, PipeWire (maudio_*), lord-vault's FIDO
- * attach, the keyring, the keyboard and lord-media's spawn. open() is wrapped so /dev/video9 is
+ * Only the edges are stand-ins: the terminal's clipboard, PipeWire (maudio_*), insane-vault's FIDO
+ * attach, the keyring, the keyboard and insane-media's spawn. open() is wrapped so /dev/video9 is
  * /dev/null. Temporary HOME. `make build/broker-restrict-test && build/broker-restrict-test`. */
 #include "sec/broker_int.h"
 #include "sec/perms.h"
@@ -33,7 +33,7 @@
 static int fails, total;
 static void check(int ok, const char *what) { total++; printf("%s: %s\n", ok ? "ok  " : "FAIL", what); if (!ok) fails++; }
 
-/* ---- stand-ins for the rest of lord-server ---- */
+/* ---- stand-ins for the rest of insane-server ---- */
 /* packaged apps: nothing here is one, so a call that reaches these is a test failure */
 static int spawned;
 int pkgapp_dir(const char *id, char *out, size_t n) { (void)id; (void)out; (void)n; return -1; }
@@ -349,17 +349,17 @@ int main(void) {
     check(restrict_perm_pkg("game", PERM_CAMERA) == PERM_DENY, "restrict_perm_pkg: DENY when restricted, over an allow");
     restrict_app("lpk:game", 0);
 
-    /* ---- built-in apps: firewall id "lordos" (js_media.c) ---- */
-    check(!restrict_blocks("lordos", FW_R_NO_CAMERA), "lordos: not restricted by default");
-    restrict_app("lordos", FW_R_NO_CAMERA | FW_R_NO_MIC);
-    check(restrict_blocks("lordos", FW_R_NO_CAMERA) && restrict_blocks("lordos", FW_R_NO_MIC) && !restrict_blocks("lordos", FW_R_NO_SCREEN),
-          "lordos: js_media.c sees exactly the restrictions set");
-    check(local_added == (FW_R_NO_CAMERA | FW_R_NO_MIC), "lordos: the live hook gets what was just added (stops camera and recordings)");
+    /* ---- built-in apps: firewall id "insaneos" (js_media.c) ---- */
+    check(!restrict_blocks("insaneos", FW_R_NO_CAMERA), "insaneos: not restricted by default");
+    restrict_app("insaneos", FW_R_NO_CAMERA | FW_R_NO_MIC);
+    check(restrict_blocks("insaneos", FW_R_NO_CAMERA) && restrict_blocks("insaneos", FW_R_NO_MIC) && !restrict_blocks("insaneos", FW_R_NO_SCREEN),
+          "insaneos: js_media.c sees exactly the restrictions set");
+    check(local_added == (FW_R_NO_CAMERA | FW_R_NO_MIC), "insaneos: the live hook gets what was just added (stops camera and recordings)");
     local_added = 0;
-    restrict_app("lordos", FW_R_NO_CAMERA | FW_R_NO_MIC | FW_R_NO_SCREEN);
-    check(local_added == FW_R_NO_SCREEN, "lordos: only the new restriction is passed on");
-    restrict_app("lordos", 0);
-    check(!restrict_blocks_pkg("lordos", FW_R_NO_CAMERA), "a package named \"lordos\" is lpk:lordos, not the built-in apps");
+    restrict_app("insaneos", FW_R_NO_CAMERA | FW_R_NO_MIC | FW_R_NO_SCREEN);
+    check(local_added == FW_R_NO_SCREEN, "insaneos: only the new restriction is passed on");
+    restrict_app("insaneos", 0);
+    check(!restrict_blocks_pkg("insaneos", FW_R_NO_CAMERA), "a package named \"insaneos\" is lpk:insaneos, not the built-in apps");
     restrict_set_store(NULL);
     check(!restrict_blocks("lpk:game", FW_R_NO_CAMERA), "no store: no restrictions (and no crash)");
 

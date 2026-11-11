@@ -1,20 +1,20 @@
 // SaveBar.jsx — Save to Passwords from the Terminal (docs/PASSWORDS.md): after a program accepted a password the
-// user typed (lord-server decides that, tcapture.c), "Save the password for ssh ana@host in Passwords?". This code
-// has the program, host and user only; Save asks lord-server to send the value it keeps to lord-vault
-// (lord.term.saveSecret, termfill.c), Not Now has it wiped. Not shown when Passwords already has that host and
-// user; the value is wiped by lord-server after a minute either way.
-import { View, Text, useTheme, launchApp, vaultRequest, t as T } from '@lordos/sdk';
+// user typed (insane-server decides that, tcapture.c), "Save the password for ssh ana@host in Passwords?". This code
+// has the program, host and user only; Save asks insane-server to send the value it keeps to insane-vault
+// (insane.term.saveSecret, termfill.c), Not Now has it wiped. Not shown when Passwords already has that host and
+// user; the value is wiped by insane-server after a minute either way.
+import { View, Text, useTheme, launchApp, vaultRequest, t as T } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { patchMeta, toast } from './state.js';
 import { alreadySaved, offerTitle } from './secret.js';
 
-const OFFER_MS = 60000;                    // as long as lord-server keeps the value (SAVE_OFFER_MS)
+const OFFER_MS = 60000;                    // as long as insane-server keeps the value (SAVE_OFFER_MS)
 
 export function SaveBar({ sid, wid, offer }) {
   const th = useTheme();
   const [locked, setLocked] = useState(false);
   const close = () => patchMeta(sid, { saveOffer: null });
-  const notNow = () => { try { lord.term.dropSecret(sid, offer.token); } catch (e) { /* gone */ } close(); };
+  const notNow = () => { try { insane.term.dropSecret(sid, offer.token); } catch (e) { /* gone */ } close(); };
   useEffect(() => {
     let live = true;
     (async () => {
@@ -29,7 +29,7 @@ export function SaveBar({ sid, wid, offer }) {
     return () => { live = false; clearTimeout(tmr); };
   }, [offer.token]);
   const save = () => {
-    if (!lord.term.saveSecret(sid, offer.token)) { toast(wid, T('terminal.save.failed')); close(); return; }
+    if (!insane.term.saveSecret(sid, offer.token)) { toast(wid, T('terminal.save.failed')); close(); return; }
     close();
   };
   const btn = (label, onClick, primary) => (

@@ -8,7 +8,7 @@
  *   sudo build/pkg-test run <action> [argument]     pkg-update, pkg-install "a b", pkg-autoremove…, as
  *                                        admin.c runs them (progress goes to stdout); pkg-source-add <id>
  *                                        reads <dir>/apt/catalog.json, <dir> being two folders above the
- *                                        binary (root-owned, as the lordos package installs it) */
+ *                                        binary (root-owned, as the insaneos package installs it) */
 #include "pkg/crypto.h"
 #include "pkg/deb.h"
 #include "pkg/idx.h"
@@ -320,7 +320,7 @@ static void test_resolver(const char *dir) {
 }
 
 /* apt's preferences: the Raspberry Pi image's pins (tools/rpi/rootfs/etc/apt/preferences.d/raspberrypi
- * and build-img.sh's lordos-kernel), checked against what apt chooses. */
+ * and build-img.sh's insaneos-kernel), checked against what apt chooses. */
 static const char *PI_DEBIAN =
     "Package: chromium\nVersion: 140.0-1~deb13u1\nArchitecture: arm64\nFilename: pool/c/chromium.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: c\n\n"
     "Package: bluez\nVersion: 5.82-1\nArchitecture: arm64\nFilename: pool/b/bluez.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: b\n\n"
@@ -331,7 +331,7 @@ static const char *PI_RPI =
     "Package: rpi-eeprom\nVersion: 28.4-1\nArchitecture: all\nFilename: pool/r/rpi-eeprom.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: r\n\n"
     "Package: raspi-config\nVersion: 2025\nArchitecture: all\nFilename: pool/r/raspi-config.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: r\n\n"
     "Package: linux-image-rpi-2712\nVersion: 1:6.12.47-1+rpt1\nArchitecture: arm64\nFilename: pool/l/k.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: k\n\n";
-static const char *PI_LORDOS =
+static const char *PI_INSANEOS =
     "Package: rpi-eeprom\nVersion: 28.3-1\nArchitecture: all\nFilename: pool/rpi/r/rpi-eeprom.deb\nSize: 9\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: r\n\n";
 static const char *PI_PREFS =
     "# Insane OS on Raspberry Pi\n"
@@ -351,21 +351,21 @@ static const char *cand_ver(const Idx *x, const char *name, const StPkg *inst) {
     return c < 0 ? "-" : idx_s(x, x->pkg[c].version);
 }
 
-/* (0.8.7) lordos-hwdata, the signed tested-hardware snapshot (tools/iso/mkdeb-hwdata.sh): an Architecture: all
- * package that lordos depends on, whose versions are dates. Updating lordos from a release without it brings it
+/* (0.8.7) insaneos-hwdata, the signed tested-hardware snapshot (tools/iso/mkdeb-hwdata.sh): an Architecture: all
+ * package that insaneos depends on, whose versions are dates. Updating insaneos from a release without it brings it
  * in, and a newer snapshot alone is an ordinary upgrade (docs/BENCHMARK.md, "Newer snapshots between releases"). */
 static const char *HW_REPO =
-    "Package: lordos\nVersion: 0.8.7\nArchitecture: amd64\nDepends: libc6 (>= 2.38), lordos-hwdata (>= 2026.10.27)\nFilename: pool/main/l/lordos/lordos_0.8.7_amd64.deb\nSize: 9000\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: l\n\n"
-    "Package: lordos-hwdata\nVersion: 2026.10.29\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/lordos-hwdata/lordos-hwdata_2026.10.29_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n"
-    "Package: lordos-hwdata\nVersion: 2026.11.05.1\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/lordos-hwdata/lordos-hwdata_2026.11.05.1_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n"
-    "Package: lordos-hwdata\nVersion: 2026.11.05\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/lordos-hwdata/lordos-hwdata_2026.11.05_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n";
-static const char *HW_OLD =        /* a 0.8.5 system: no lordos-hwdata */
+    "Package: insaneos\nVersion: 0.8.7\nArchitecture: amd64\nDepends: libc6 (>= 2.38), insaneos-hwdata (>= 2026.10.27)\nFilename: pool/main/l/insaneos/insaneos_0.8.7_amd64.deb\nSize: 9000\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: l\n\n"
+    "Package: insaneos-hwdata\nVersion: 2026.10.29\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/insaneos-hwdata/insaneos-hwdata_2026.10.29_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n"
+    "Package: insaneos-hwdata\nVersion: 2026.11.05.1\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/insaneos-hwdata/insaneos-hwdata_2026.11.05.1_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n"
+    "Package: insaneos-hwdata\nVersion: 2026.11.05\nArchitecture: all\nMulti-Arch: foreign\nFilename: pool/main/l/insaneos-hwdata/insaneos-hwdata_2026.11.05_all.deb\nSize: 3\nSHA256: 0000000000000000000000000000000000000000000000000000000000000000\nDescription: h\n\n";
+static const char *HW_OLD =        /* a 0.8.5 system: no insaneos-hwdata */
     "Package: libc6\nStatus: install ok installed\nVersion: 2.41\nArchitecture: amd64\nDescription: c\n\n"
-    "Package: lordos\nStatus: install ok installed\nVersion: 0.8.5\nArchitecture: amd64\nDepends: libc6 (>= 2.38)\nDescription: l\n\n";
+    "Package: insaneos\nStatus: install ok installed\nVersion: 0.8.5\nArchitecture: amd64\nDepends: libc6 (>= 2.38)\nDescription: l\n\n";
 static const char *HW_NEW =        /* 0.8.7 with an older snapshot */
     "Package: libc6\nStatus: install ok installed\nVersion: 2.41\nArchitecture: amd64\nDescription: c\n\n"
-    "Package: lordos\nStatus: install ok installed\nVersion: 0.8.7\nArchitecture: amd64\nDepends: libc6 (>= 2.38), lordos-hwdata (>= 2026.10.27)\nDescription: l\n\n"
-    "Package: lordos-hwdata\nStatus: install ok installed\nVersion: 2026.10.29\nArchitecture: all\nDescription: h\n\n";
+    "Package: insaneos\nStatus: install ok installed\nVersion: 0.8.7\nArchitecture: amd64\nDepends: libc6 (>= 2.38), insaneos-hwdata (>= 2026.10.27)\nDescription: l\n\n"
+    "Package: insaneos-hwdata\nStatus: install ok installed\nVersion: 2026.10.29\nArchitecture: all\nDescription: h\n\n";
 
 static const char *item_ver(const Plan *p, const char *name) {
     for (int i = 0; i < p->n; i++) if (!strcmp(p->items[i].name, name)) return p->items[i].version;
@@ -379,7 +379,7 @@ static void test_hwdata(const char *dir) {
     CHECK(ver_cmp("2026.11.05.1", "2026.11.05") > 0 && ver_cmp("2026.11.05", "2026.10.29.9") > 0 && ver_cmp("2026.10.29", "2026.10.27") > 0,
           "snapshot versions: the date, then .N for a second one that day");
     IdxBuilder *b = idxb_new();
-    int s = idxb_source(b, "https://lordos.org/apt", "stable", "main", "stable", "Insane OS", "Insane OS", 0, 0, 500);
+    int s = idxb_source(b, "https://insaneos.org/apt", "stable", "main", "stable", "Insane OS", "Insane OS", 0, 0, 500);
     idxb_packages(b, s, HW_REPO, strlen(HW_REPO), "amd64");
     CHECK(!idxb_write(b, idir, "amd64", err, sizeof err), "write hwdata index: %s", err);
     idxb_free(b);
@@ -388,19 +388,19 @@ static void test_hwdata(const char *dir) {
     Status st = { 0 };
     Plan p;
     PlanOpts o = { 0 };
-    /* Store → Updates' Insane OS card: pkg-install lordos brings the new dependency, its newest version */
+    /* Store → Updates' Insane OS card: pkg-install insaneos brings the new dependency, its newest version */
     snprintf(sp, sizeof sp, "%s/hwstatus-old", dir);
     write_text(sp, HW_OLD);
     CHECK(!status_load(&st, sp, "amd64") && st.n == 2, "old status");
-    const char *lo[] = { "lordos" };
+    const char *lo[] = { "insaneos" };
     plan_make(&x, &st, lo, 1, NULL, 0, &o, &p);
-    CHECK(p.ok && p.n == 2 && has(&p, PA_UPGRADE, "lordos") && has(&p, PA_INSTALL, "lordos-hwdata") && !strcmp(item_ver(&p, "lordos-hwdata"), "2026.11.05.1"),
-          "updating lordos installs lordos-hwdata 2026.11.05.1: %d %s %s", p.n, item_ver(&p, "lordos-hwdata"), p.err);
+    CHECK(p.ok && p.n == 2 && has(&p, PA_UPGRADE, "insaneos") && has(&p, PA_INSTALL, "insaneos-hwdata") && !strcmp(item_ver(&p, "insaneos-hwdata"), "2026.11.05.1"),
+          "updating insaneos installs insaneos-hwdata 2026.11.05.1: %d %s %s", p.n, item_ver(&p, "insaneos-hwdata"), p.err);
     plan_free(&p);
     /* Update all (pkg-upgrade) does the same */
     o = (PlanOpts){ .upgrade_all = 1 };
     plan_make(&x, &st, NULL, 0, NULL, 0, &o, &p);
-    CHECK(p.ok && has(&p, PA_UPGRADE, "lordos") && has(&p, PA_INSTALL, "lordos-hwdata"), "update all brings lordos-hwdata too: %s", p.err);
+    CHECK(p.ok && has(&p, PA_UPGRADE, "insaneos") && has(&p, PA_INSTALL, "insaneos-hwdata"), "update all brings insaneos-hwdata too: %s", p.err);
     plan_free(&p);
     status_free(&st);
     /* between releases: only the snapshot is newer, an upgrade of one package */
@@ -409,7 +409,7 @@ static void test_hwdata(const char *dir) {
     memset(&st, 0, sizeof st);
     CHECK(!status_load(&st, sp, "amd64") && st.n == 3, "new status");
     plan_make(&x, &st, NULL, 0, NULL, 0, &o, &p);
-    CHECK(p.ok && p.n == 1 && has(&p, PA_UPGRADE, "lordos-hwdata") && !strcmp(item_ver(&p, "lordos-hwdata"), "2026.11.05.1"),
+    CHECK(p.ok && p.n == 1 && has(&p, PA_UPGRADE, "insaneos-hwdata") && !strcmp(item_ver(&p, "insaneos-hwdata"), "2026.11.05.1"),
           "a newer snapshot alone: one upgrade, %d %s", p.n, p.err);
     plan_free(&p);
     status_free(&st);
@@ -426,10 +426,10 @@ static void test_pins(const char *dir) {
     IdxBuilder *b = idxb_new();
     int deb = idxb_source(b, "http://deb.debian.org/debian", "stable", "main", "trixie", "Debian", "Debian", 0, 0, 500);
     int rpi = idxb_source(b, "http://archive.raspberrypi.com/debian", "trixie", "main", "trixie", "Raspberry Pi Foundation", "Raspberry Pi Foundation", 0, 0, 500);
-    int lord = idxb_source(b, "https://lordos.org/apt", "stable", "rpi", "lordos", "Insane OS", "Insane OS", 0, 0, 500);
+    int insane = idxb_source(b, "https://insaneos.org/apt", "stable", "rpi", "insaneos", "Insane OS", "Insane OS", 0, 0, 500);
     idxb_packages(b, deb, PI_DEBIAN, strlen(PI_DEBIAN), "arm64");
     idxb_packages(b, rpi, PI_RPI, strlen(PI_RPI), "arm64");
-    idxb_packages(b, lord, PI_LORDOS, strlen(PI_LORDOS), "arm64");
+    idxb_packages(b, insane, PI_INSANEOS, strlen(PI_INSANEOS), "arm64");
     char idir[700], err[200];
     snprintf(idir, sizeof idir, "%s/pinidx", dir);
     mkdir(idir, 0755);
@@ -441,7 +441,7 @@ static void test_pins(const char *dir) {
     idx_close(&x);
 
     snprintf(path, sizeof path, "%s/etc/apt/preferences.d/raspberrypi", root); write_text(path, PI_PREFS);
-    snprintf(path, sizeof path, "%s/etc/apt/preferences.d/lordos-kernel", root); write_text(path, PI_KERNEL);
+    snprintf(path, sizeof path, "%s/etc/apt/preferences.d/insaneos-kernel", root); write_text(path, PI_KERNEL);
     snprintf(path, sizeof path, "%s/etc/apt/preferences.d/ignored.list", root); write_text(path, "Package: *\nPin: version *\nPin-Priority: -1\n");
     CHECK(!idx_open(&x, idir) && x.prio, "preferences read");
     CHECK(!strcmp(cand_ver(&x, "chromium", NULL), "140.0-1~deb13u1"), "chromium from Debian: %s", cand_ver(&x, "chromium", NULL));
@@ -575,17 +575,17 @@ static void test_search(void) {
 
 /* ReleaseNotes (docs/UPDATES.md): the stanza of that package and version, " ." as an empty line */
 static void test_notes(void) {
-    const char *t = "Package: lordos\nVersion: 0.8.1\nNotes:\n ### Added\n .\n - Updates from the Store\n\n"
-                    "Package: lordos\nVersion: 0.8.2~beta1\nNotes: one line\n\nPackage: other\nVersion: 0.8.1\nNotes:\n x\n";
+    const char *t = "Package: insaneos\nVersion: 0.8.1\nNotes:\n ### Added\n .\n - Updates from the Store\n\n"
+                    "Package: insaneos\nVersion: 0.8.2~beta1\nNotes: one line\n\nPackage: other\nVersion: 0.8.1\nNotes:\n x\n";
     size_t n = 0;
-    char *s = deb_notes_find(t, strlen(t), "lordos", "0.8.1", &n);
+    char *s = deb_notes_find(t, strlen(t), "insaneos", "0.8.1", &n);
     CHECK(s && !strcmp(s, "### Added\n\n- Updates from the Store") && n == strlen(s), "notes 0.8.1: [%s]", s ? s : "(null)");
     free(s);
-    s = deb_notes_find(t, strlen(t), "lordos", "0.8.2~beta1", &n);
+    s = deb_notes_find(t, strlen(t), "insaneos", "0.8.2~beta1", &n);
     CHECK(s && !strcmp(s, "one line"), "notes on the field line: [%s]", s ? s : "(null)");
     free(s);
-    CHECK(!deb_notes_find(t, strlen(t), "lordos", "0.8.3", &n), "no notes for another version");
-    CHECK(!deb_notes_find(t, strlen(t), "lordo", "0.8.1", &n), "the package name must match whole");
+    CHECK(!deb_notes_find(t, strlen(t), "insaneos", "0.8.3", &n), "no notes for another version");
+    CHECK(!deb_notes_find(t, strlen(t), "insaneo", "0.8.1", &n), "the package name must match whole");
     CHECK(ver_cmp("0.8.1~staging1", "0.8.0") > 0 && ver_cmp("0.8.1~staging1", "0.8.1") < 0 && ver_cmp("0.8.1~beta2", "0.8.1~beta10") < 0,
           "pre-release versions sort between releases");
 }

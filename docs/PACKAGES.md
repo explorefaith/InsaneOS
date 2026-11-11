@@ -18,10 +18,10 @@ The code is in `server/src/pkg/`:
 | `status.c` | Reading `/var/lib/dpkg/status` (what is installed) |
 | `resolve.c` | Dependency resolver and installation order |
 | `pin.c` | apt's preferences and priorities (0.8.5, see "How it resolves") |
-| `http.c` | HTTP/1.1 client, with a child process that runs as `nobody`; HTTPS through `lord-tls` (0.8.5, see "HTTPS") |
+| `http.c` | HTTP/1.1 client, with a child process that runs as `nobody`; HTTPS through `insane-tls` (0.8.5, see "HTTPS") |
 | `sources_admin.c` | `pkg-source-add`/`pkg-source-remove`: vendor repositories from Insane OS's catalog (0.8.5) |
 | `pkg.c` | Privileged helper actions (update, install, remove, local `.deb`) |
-| `../ui/js_pkg.c` | `lord.pkg`, the queries for the UI (without root) |
+| `../ui/js_pkg.c` | `insane.pkg`, the queries for the UI (without root) |
 
 ## Security
 
@@ -40,7 +40,7 @@ The code is in `server/src/pkg/`:
   `debian-archive-keyring`.
 - **HTTPS since 0.8.5.** Until 0.8.4 Insane OS had no TLS of its own and downloaded `https://` sources
   over `http://`, with the same path; since 0.8.5 they are downloaded over HTTPS through the sandboxed
-  `lord-tls` helper (see "HTTPS" below), and `http://` sources as before. Either way security comes
+  `insane-tls` helper (see "HTTPS" below), and `http://` sources as before. Either way security comes
   from the signatures and the SHA-256 hashes, as with apt; HTTPS adds privacy (someone watching the
   network no longer sees which packages are downloaded from an HTTPS source) and refuses an impostor
   server. A secure download is never redirected to plain HTTP. (A repository on a CDN should still
@@ -49,8 +49,8 @@ The code is in `server/src/pkg/`:
   `file:` method) is read by the same unprivileged child, as `nobody`: only world-readable files,
   checked exactly like a download. An HTTP redirect can never lead to a `file:` URL.
 - **Its own firewall app** (0.8.5): before dropping root the download child moves itself into
-  `lordos-net-store.scope` (`cgroup_enter_root`), so the Store and the updates are "Store and
-  updates" (`lordos:store`) in Monitor → Network, with their own rules; blocking them asks first,
+  `insaneos-net-store.scope` (`cgroup_enter_root`), so the Store and the updates are "Store and
+  updates" (`insaneos:store`) in Monitor → Network, with their own rules; blocking them asks first,
   because no security update arrives while they are blocked (`FIREWALL.md`, "Insane OS components in
   their own scopes").
 - **Downloads without root.** The process that talks to the network drops privileges before
@@ -61,7 +61,7 @@ The code is in `server/src/pkg/`:
 - **Locks.** While dpkg works, Insane OS takes dpkg's frontend lock
   (`/var/lib/dpkg/lock-frontend`, same as apt) and passes it `DPKG_FRONTEND_LOCKED=1`. If apt is
   running, Insane OS waits its turn: they don't step on each other. Insane OS operations among
-  themselves are queued (`/var/lib/lordos/pkg/lock`).
+  themselves are queued (`/var/lib/insaneos/pkg/lock`).
 - **Local `.deb`** (`pkg-install-file`):
   - the file must be in the user's folder;
   - it is opened with that user's permissions (`setfsuid`), walking the path component by
@@ -70,19 +70,19 @@ The code is in `server/src/pkg/`:
     installing) is done on that copy, so the user can't change it midway.
 - **Essential packages.** Packages with `Essential: yes` or `Protected: yes` are never removed.
 - **Names.** They follow Debian's syntax (`[a-z0-9][a-z0-9+.-]+`). Arguments are validated in the
-  helper, even though lord-server has already validated them.
+  helper, even though insane-server has already validated them.
 
 ## Files
 
 | Path | Contents |
 |---|---|
-| `/var/lib/lordos/pkg/index.bin` | Index (packages, "provides", AppStream apps, sources, texts and long descriptions); world-readable |
-| `/var/lib/lordos/pkg/lists/` | Verified `InRelease` files and the compressed indexes, named by their SHA-256 (what didn't change isn't downloaded again) |
-| `/var/lib/lordos/pkg/icons/64/` | 64×64 icons of the desktop apps (DEP-11) |
-| `/var/lib/lordos/pkg/auto` | Packages Insane OS installed as dependencies |
-| `/var/lib/lordos/pkg/sources` | SHA-256 of the list files the index was built from: when a component or source is added or removed, the next `pkg-update` rebuilds the index even if no signed release file changed |
-| `/var/lib/lordos/pkg/notes` | The verified `main/notes/ReleaseNotes` of every source that has one (Insane OS's; [UPDATES.md](UPDATES.md)); world-readable |
-| `/var/cache/lordos/pkg/` | `.deb` files while they're being installed (deleted when done) |
+| `/var/lib/insaneos/pkg/index.bin` | Index (packages, "provides", AppStream apps, sources, texts and long descriptions); world-readable |
+| `/var/lib/insaneos/pkg/lists/` | Verified `InRelease` files and the compressed indexes, named by their SHA-256 (what didn't change isn't downloaded again) |
+| `/var/lib/insaneos/pkg/icons/64/` | 64×64 icons of the desktop apps (DEP-11) |
+| `/var/lib/insaneos/pkg/auto` | Packages Insane OS installed as dependencies |
+| `/var/lib/insaneos/pkg/sources` | SHA-256 of the list files the index was built from: when a component or source is added or removed, the next `pkg-update` rebuilds the index even if no signed release file changed |
+| `/var/lib/insaneos/pkg/notes` | The verified `main/notes/ReleaseNotes` of every source that has one (Insane OS's; [UPDATES.md](UPDATES.md)); world-readable |
+| `/var/cache/insaneos/pkg/` | `.deb` files while they're being installed (deleted when done) |
 
 ## Helper actions (`admin.run`)
 
@@ -102,10 +102,10 @@ All of them run in a separate process (`A_FORK`) and require an administrator us
 **Vendor repositories (0.8.5, `sources_admin.c`).** Store → Artificial Intelligence and Store →
 Commercial add a maker's signed APT repository only when one of its apps is installed. Only the id comes
 from the caller: the entry is read from Insane OS's catalog (`<Insane OS dir>/apt/catalog.json` and
-`apt/keys/`, shipped root-owned by the lordos package), must be `"type": "apt", "delivery": "direct"`,
+`apt/keys/`, shipped root-owned by the insaneos package), must be `"type": "apt", "delivery": "direct"`,
 every field passes a strict character set, and the key file must hold a primary key with exactly the
-catalog's fingerprint. The action writes `/etc/apt/sources.list.d/lordos-<id>.sources` (Signed-By that
-key) and `/usr/share/keyrings/lordos-<id>.asc` as fixed-format files. A package that always writes its
+catalog's fingerprint. The action writes `/etc/apt/sources.list.d/insaneos-<id>.sources` (Signed-By that
+key) and `/usr/share/keyrings/insaneos-<id>.asc` as fixed-format files. A package that always writes its
 own source (Cursor, Chrome, Edge) gets the vendor's own file names from the catalog's `files`, with the
 same text, so the package's write changes nothing (two entries for one repository with different
 Signed-By would make apt refuse every source); for Spotify, whose package adds `spotify.list` unless that
@@ -123,10 +123,10 @@ repository removes that repository. The catalog itself is described in `UPDATES.
   - installing `postfix` removes `exim4`, because they are two mail programs and can't coexist;
   - removing a library removes what depends on it.
 
-  The UI shows the plan (`lord.pkg.plan`) and, if the user accepts, repeats the request with
+  The UI shows the plan (`insane.pkg.plan`) and, if the user accepts, repeats the request with
   `--allow-remove` (when installing) or `--cascade` (when removing).
 - **Orphans.** When removing, the dependencies Insane OS installed (recorded in
-  `/var/lib/lordos/pkg/auto`) that nobody uses anymore after that change are removed too, as
+  `/var/lib/insaneos/pkg/auto`) that nobody uses anymore after that change are removed too, as
   `apt autoremove` would do afterwards. They appear in the plan with `reason: 'auto'` and do
   **not** need `--cascade`. `--keep-orphans` keeps them. `pkg-autoremove` cleans up the ones that
   were already left over.
@@ -202,14 +202,14 @@ computer** (below). Store → Installed shows each native Insane OS app's own ve
   starts with the computer and isn't held to the per-app firewall; the page says so. What each does
   on Insane OS, and what it can't do: `UPDATES.md`, "Remote access: Tailscale and RustDesk". Not
   installed on a Insane OS system yet.
-- **Disk Formats** (0.8.7, `lordos-disk-formats`, `tools/iso/mkdeb-diskformats.sh`) is one item in the Commercial group,
+- **Disk Formats** (0.8.7, `insaneos-disk-formats`, `tools/iso/mkdeb-diskformats.sh`) is one item in the Commercial group,
   from the Insane OS repository: it depends on `ntfs-3g`, `exfatprogs` and `dosfstools`, and on amd64 suggests `apfs-dkms`,
   offered as a switch on its page. Those drivers are free software ([FILES.md](FILES.md), "Disks' file systems").
 - **The featured banner** comes from the Insane OS repository (`apt/featured/featured.json` and
   `banner.png`, published under `main/featured/` and listed in the signed InRelease). The engine takes
   them only from a source whose signed Release says `Origin: Insane OS`, checks their hashes, that the
   JSON is an object of at most 64 KB and that the PNG has a PNG signature and at most 2 MB, and keeps
-  them in `/var/lib/lordos/pkg/` (`lord.pkg.featured()`, read-only). Until the picture is there the
+  them in `/var/lib/insaneos/pkg/` (`insane.pkg.featured()`, read-only). Until the picture is there the
   Store draws a skeleton of the banner (it pulses, unless Reduce motion is on); a repository without a banner shows
   a catalog app instead.
 
@@ -220,7 +220,7 @@ ranked by where the words are: the whole name, the start of the name, the start 
 word, then the summaries (and a bonus when the words appear together in that order). With two words or
 more, packages with only some of them follow, after all of those, when one of the words starts a word
 of their name (`vs code` also lists `code-aster`); a word only in a summary isn't enough.
-`lord.pkg.search` does this in C (`server/src/pkg/match.c`, tested in `build/pkg-test`), and the
+`insane.pkg.search` does this in C (`server/src/pkg/match.c`, tested in `build/pkg-test`), and the
 Store's own lists in JS with the same rules (`apps/store/search.js`, tested in
 `server/tests/store_search_test.mjs`). While searching, Discover first shows **From the Insane OS
 catalog**: the catalog apps that match (`apt/catalog.json`, every section), which aren't in the package
@@ -236,10 +236,10 @@ the old substring search, measured with the same queries).
 *"vs code": Visual Studio Code first, then VSCodium and Cursor (VS Code in their keywords or summary), then
 the catalog apps with only "code", then the packages.*
 
-**What `lordos` depends on since 0.8.7.** `lordos-hwdata`, the signed tested-hardware snapshot
+**What `insaneos` depends on since 0.8.7.** `insaneos-hwdata`, the signed tested-hardware snapshot
 ([UPDATES.md](UPDATES.md), "The tested-hardware snapshot"); `libfreerdp3-3`, `libfreerdp-client3-3` and `libwinpr3-3` for
 Remote Desk; `rclone`, `fuse3` and `openssh-client` for Connect to Server; `openssl`. An update brings them in.
-Since 0.8.8.5 `lordos-rclone` (rclone's official release binary v1.75.2, unmodified, at `/usr/lib/lordos/rclone/rclone`; `tools/iso/mkdeb-rclone.sh`
+Since 0.8.8.5 `insaneos-rclone` (rclone's official release binary v1.75.2, unmodified, at `/usr/lib/insaneos/rclone/rclone`; `tools/iso/mkdeb-rclone.sh`
 checks the release's signed `SHA256SUMS` against rclone's pinned release key and the zip's hash, one package per architecture,
 published in Insane OS's own apt repository with each release since rclone has none) replaces Debian's `rclone` as the dependency: Cloud needs a newer rclone than Debian 13's 1.60, and
 Connect to Server runs the same binary (Debian's only if ours is missing). Debian's `rclone` stays installed on an upgrade; nothing runs it.
@@ -266,7 +266,7 @@ every 6 hours; never again for the same suggestion, `suggestions.notified`).
 
 The rules are data, `assets/store/suggestions.json`, evaluated by `sdk/suggestengine.js` (pure
 functions; `server/tests/suggest_engine_test.mjs`). Every package is looked up in the package
-index first, and an installable card also needs a plan that can be made (`lord.pkg.plan`): a
+index first, and an installable card also needs a plan that can be made (`insane.pkg.plan`): a
 package that isn't in the configured sources, or that depends on one that isn't (the NVIDIA driver
 needs `contrib` as well as `non-free`), is never offered as installable.
 
@@ -286,7 +286,7 @@ Cards are ordered: installable, then explained (not available), then installed.
 
 ### Detection
 
-`lord.hwinfo.scan()` (`server/src/hw/hwscan.c`, exposed in `ui/js_hw.c`) runs in `lord-server`,
+`insane.hwinfo.scan()` (`server/src/hw/hwscan.c`, exposed in `ui/js_hw.c`) runs in `insane-server`,
 **without root**, and only reads world-readable kernel files: `/sys/class/dmi/id` (vendor, product,
 board, chassis; never the serial numbers, which are root-only), `/proc/device-tree/model` and
 `compatible`, `/sys/bus/pci/devices/*` (vendor, device, class, bound driver),
@@ -301,8 +301,8 @@ Raspberry Pi kernel). With Debian's default (`1`) the Store asks the admin helpe
 only `LOG fw <file> <driver>` lines whose file name passes `hwscan_fw_name_valid()` (`[A-Za-z0-9._+,/-]`,
 no `..`, no leading `/`) and is still missing, never other log text.
 
-`LORD_HWSCAN_ROOT=/path` (development and screenshots only; an absolute path without `..`) makes
-`lord-server` read a fake tree instead, with the kernel log in `<root>/kmsg`; the Store then labels the
+`INSANE_HWSCAN_ROOT=/path` (development and screenshots only; an absolute path without `..`) makes
+`insane-server` read a fake tree instead, with the kernel log in `<root>/kmsg`; the Store then labels the
 section "Test data". `build/hwscan-test fixture <dir> demo` writes such a tree (also `vmware`,
 `virtualbox`, `nvidia`, `printer`, `scanner`, `rpi5`, `qemu`, `firmware`); `build/hwscan-test dump`
 prints the facts of the machine it runs on.
@@ -337,33 +337,33 @@ Insane OS desktop on it), a USB printer and scanner of each vendor in the table,
 adapters without firmware (that the miss is logged as expected and the device works after the
 install), and VMware and VirtualBox guests.
 
-## `lord.pkg` (lord-server, without root)
+## `insane.pkg` (insane-server, without root)
 
 The queries read the index with mmap and `/var/lib/dpkg/status`, and reload by themselves when
 these change. `lang` (`'es'`, `'pt'` or omitted) picks the AppStream name and description.
 
 ```js
-lord.pkg.available()            // true if there is already an index
-lord.pkg.lastUpdate()           // seconds since 1970 (0: never)
-lord.pkg.sources()              // [{ uri, suite, component, codename, label, date, validUntil, priority, packages }]
-lord.pkg.search(q, { limit = 50, apps = false, every = false, section, lang })   // [Summary], sorted by relevance
-lord.pkg.info(name, { lang })   // Summary + { description, homepage, arch, source, depends, preDepends,
+insane.pkg.available()            // true if there is already an index
+insane.pkg.lastUpdate()           // seconds since 1970 (0: never)
+insane.pkg.sources()              // [{ uri, suite, component, codename, label, date, validUntil, priority, packages }]
+insane.pkg.search(q, { limit = 50, apps = false, every = false, section, lang })   // [Summary], sorted by relevance
+insane.pkg.info(name, { lang })   // Summary + { description, homepage, arch, source, depends, preDepends,
                                 //   recommends, suggests, provides, conflicts, breaks, priority, suite,
                                 //   origin, appDescription, versions: [{ version, suite, size }] } | null
-lord.pkg.installed({ lang })    // [Summary] of everything installed
-lord.pkg.upgrades()             // [{ name, from, to, summary, suite, size }]
-lord.pkg.plan({ install: [], remove: [], recommends, allowRemove, cascade, upgrade, keepOrphans })
+insane.pkg.installed({ lang })    // [Summary] of everything installed
+insane.pkg.upgrades()             // [{ name, from, to, summary, suite, size }]
+insane.pkg.plan({ install: [], remove: [], recommends, allowRemove, cascade, upgrade, keepOrphans })
     // { ok, error, items: [{ action: 'install'|'upgrade'|'remove', name, version, oldVersion, size,
     //   requested, reason }], held: [], download, installedDelta }   (bytes)
     // with remove, it includes the orphans: { action: 'remove', reason: 'auto', requested: false }
-lord.pkg.orphans()              // [{ name, version, summary, installedSize }]: what pkg-autoremove would remove
-lord.pkg.apps({ category, type = 'desktop-application', limit = 100, offset = 0, lang })
+insane.pkg.orphans()              // [{ name, version, summary, installedSize }]: what pkg-autoremove would remove
+insane.pkg.apps({ category, type = 'desktop-application', limit = 100, offset = 0, lang })
     // [App + { package, installed, version, size }], sorted by name
-lord.pkg.categories()           // { AudioVideo: 210, Development: 180, … } (desktop apps)
-lord.pkg.icon(name)             // path of the 64×64 PNG or null
-lord.pkg.releaseNotes(name, version)   // Markdown release notes a source published for that version, or null
-lord.pkg.featured()             // (0.8.5) the Store's banner from the signed Insane OS repository, or null
-lord.pkg.rebootRequired()       // null, or the packages that asked for a restart (/run/reboot-required.pkgs)
+insane.pkg.categories()           // { AudioVideo: 210, Development: 180, … } (desktop apps)
+insane.pkg.icon(name)             // path of the 64×64 PNG or null
+insane.pkg.releaseNotes(name, version)   // Markdown release notes a source published for that version, or null
+insane.pkg.featured()             // (0.8.5) the Store's banner from the signed Insane OS repository, or null
+insane.pkg.rebootRequired()       // null, or the packages that asked for a restart (/run/reboot-required.pkgs)
 
 // Summary = { name, version (candidate), summary, section, size, installedSize (bytes),
 //             installed (version or null), upgradable, essential, auto, app: App | null }
@@ -374,7 +374,7 @@ To make changes:
 
 ```js
 await admin.run('pkg-update')
-const plan = lord.pkg.plan({ install: ['featherpad'] })      // show it and ask for confirmation
+const plan = insane.pkg.plan({ install: ['featherpad'] })      // show it and ask for confirmation
 await admin.run('pkg-install', 'featherpad', (line) => …)    // line: "progress download 123 456"…
 ```
 
@@ -427,8 +427,8 @@ make -C server build/pkg-test
 build/pkg-test                         # unit tests: versions, deb822, SHA, RSA, Ed25519, xz/gz,
                                        # index and resolver over a toy repository
 build/pkg-test pgp /usr/share/keyrings/debian-archive-keyring.gpg InRelease
-build/pkg-test plan /var/lib/lordos/pkg /var/lib/dpkg/status gimp     # the plan, without installing
-sudo build/pkg-test run pkg-update     # the real actions, without lord-server
+build/pkg-test plan /var/lib/insaneos/pkg /var/lib/dpkg/status gimp     # the plan, without installing
+sudo build/pkg-test run pkg-update     # the real actions, without insane-server
 sudo build/pkg-test run pkg-install "cowsay sl"
 ```
 
@@ -446,7 +446,7 @@ sudo build/pkg-test run pkg-install "cowsay sl"
   | First time | 11 indexes, 29 MB | 4.9 s | 122 MB, in the child process that lives as long as the action |
   | No changes in the lists (304 responses) | nothing | 0.12 s | 3 MB |
 
-  Result: 74,362 packages and 2,100 icons. On disk, `/var/lib/lordos/pkg` takes 98 MB:
+  Result: 74,362 packages and 2,100 icons. On disk, `/var/lib/insaneos/pkg` takes 98 MB:
   60 MB of index and 29 MB of compressed lists.
 - **Plans against `apt-get -s install --no-install-recommends`:**
 
@@ -489,7 +489,7 @@ sudo build/pkg-test run pkg-install "cowsay sl"
     `--cascade`, removes all 9. With `keepOrphans` the plan has 1.
 
   After each test, `apt-get check` and `dpkg --audit` came back clean. The VM was left as it was.
-- **`lord.pkg`**, with `build/pkg-js-test`:
+- **`insane.pkg`**, with `build/pkg-js-test`:
 
   | Query | Time |
   |---|---|
@@ -518,9 +518,9 @@ sudo build/pkg-test run pkg-install "cowsay sl"
 ## HTTPS (0.8.5)
 
 The engine downloads `https://` sources over TLS and `http://` ones as before. The download child (nobody,
-in `lordos-net-store.scope`) resolves and connects the TCP socket itself; for `https://` it starts
-`lord-tls` (`server/src/tls/tlsproxy.c`, next to `lord-server`, root's) with the socket on fd 3 and a
-socketpair on fd 4. lord-tls loads the system's CA bundle, takes the helpers' sandbox (no sockets, no exec,
+in `insaneos-net-store.scope`) resolves and connects the TCP socket itself; for `https://` it starts
+`insane-tls` (`server/src/tls/tlsproxy.c`, next to `insane-server`, root's) with the socket on fd 3 and a
+socketpair on fd 4. insane-tls loads the system's CA bundle, takes the helpers' sandbox (no sockets, no exec,
 no files), does a TLS 1.2+ handshake with SNI, checks the chain and the host name, answers `1` (or `0`,
 which the engine reports as `pkg.http.tlsFailed`) and then relays plain HTTP, so the HTTP code is the
 same for both schemes. Redirects may go from `http://` to `https://`, never back (`pkg.http.downgrade`).
@@ -528,10 +528,10 @@ TLS adds privacy and refuses an impostor server; what is installed is still deci
 index and each file's SHA-256, exactly as over HTTP. Sources written as `https://` are no longer
 rewritten to `http://`.
 
-A `+` in a file's path is sent as `%2B`, as apt does (0.8.5): lordos.org's CDN reads a bare `+` as a
+A `+` in a file's path is sent as `%2B`, as apt does (0.8.5): insaneos.org's CDN reads a bare `+` as a
 space, so packages such as `kms++-utils` and `libkms++0` failed with 404 before.
 
 Tested against real servers (`server/tests/pkg_https_test.c`, run as root with network, not part of
-`make test`): an HTTPS-only vendor repository, lordos.org over both schemes, an HTTP→HTTPS redirect, and
+`make test`): an HTTPS-only vendor repository, insaneos.org over both schemes, an HTTP→HTTPS redirect, and
 self-signed, wrong-host and expired certificates refused (7/7).
 

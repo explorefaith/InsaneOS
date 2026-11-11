@@ -1,6 +1,6 @@
 {
   "title": "Nuvem",
-  "unavailable": "A Nuvem não está disponível nesta sessão: o seu motor (lordos-rclone) não está instalado ou não está funcionando.",
+  "unavailable": "A Nuvem não está disponível nesta sessão: o seu motor (insaneos-rclone) não está instalado ou não está funcionando.",
   "addAccount": "Adicionar conta…",
   "accounts": "Contas",
   "allAccounts": "Todas as contas",

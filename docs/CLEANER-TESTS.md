@@ -4,12 +4,12 @@ Automated tests use throwaway folders only, never a real home folder.
 
 ## `build/clean-test` (`server/tests/clean_test.c`, in `make test`)
 
-Runs against the real `build/lord-clean`, with a home folder made by `mkdtemp` under `/tmp`. It skips itself without Landlock.
+Runs against the real `build/insane-clean`, with a home folder made by `mkdtemp` under `/tmp`. It skips itself without Landlock.
 
 - **Rules:** the real table; every kind of bad entry; a delete only for regenerable rules; no root touching cookies, history or passwords.
 - **Walk:** read-only; symbolic links to files and folders; a root that is a link; `..` and absolute paths in records; bad names; file and depth limits.
-- **Records:** every field lord-server must refuse.
-- **Protected paths:** skipped by the walk, dropped by lord-server, refused at plan and execution.
+- **Records:** every field insane-server must refuse.
+- **Protected paths:** skipped by the walk, dropped by insane-server, refused at plan and execution.
 - **Execution:** a file changed, touched, replaced or removed after the plan; a folder swapped for a link; a name repointed at the last moment; cancel; restore from the Trash.
 - **Real delete:** the same swaps; no private name left behind; a fingerprint of everything outside the root; a mount inside the root and one placed after the scan, in a user and mount namespace.
 - **Browsers:** a live and a stale lock, for both families; a browser starting between plan and cleanup; cookies and history untouched.
@@ -23,7 +23,7 @@ Runs against the real `build/lord-clean`, with a home folder made by `mkdtemp` u
 - **Leftovers:** a removed app's folder is offered; an installed app's, a system app's, a name no app can have and a loose file aren't. Refused by category, skipped if the app comes back after the plan, moved whole, restored, and not offered when the system's apps can't be located or their folder is missing.
 - **`/tmp`:** age, a link, no plan by rule or by id can act, and the table refuses any other system root and any action on one. It runs on a throwaway stand-in; another user's files were only seen in the session below.
 
-Checked by breaking the code on purpose on 2026-10-30, 823 checks each time: without the installed-app check 6 fail; without lord-server's check of a group of images 2 fail; taking any `XDG_DOWNLOAD_DIR` value 3 fail.
+Checked by breaking the code on purpose on 2026-10-30, 823 checks each time: without the installed-app check 6 fail; without insane-server's check of a group of images 2 fail; taking any `XDG_DOWNLOAD_DIR` value 3 fail.
 
 ## The additions of 2026-10-31
 
@@ -31,7 +31,7 @@ At the time of writing `server/tests/clean_test.c` has no case for project outpu
 
 ## `oldkernels_test.mjs` (in `run_suites.sh`)
 
-Which kernels are offered: the running one, the newest and one below stay; numbers compare as numbers; other flavours, meta packages and an unknown running kernel offer nothing. Plans that take the meta package, the running kernel, `lordos` or anything but a removal are refused.
+Which kernels are offered: the running one, the newest and one below stay; numbers compare as numbers; other flavours, meta packages and an unknown running kernel offer nothing. Plans that take the meta package, the running kernel, `insaneos` or anything but a removal are refused.
 
 ## `build/fsops-test`
 
@@ -43,7 +43,7 @@ Times scans on a throwaway folder and reports the helper's peak memory, polled e
 
 Measured on VM 116 on 2026-10-30 (Xeon Silver 4108, 8 cores, virtual disk, warm cache, throwaway tree of 122,000 files; the helper's peak is a poll, so a lower bound):
 
-| Step | Time | Helper peak | lord-server RSS |
+| Step | Time | Helper peak | insane-server RSS |
 |---|---|---|---|
 | Rule scan, 20,000 candidates | 125 ms | 1 MB | 4 MB |
 | Plan of 20,000 files | 164 ms | | |
@@ -57,11 +57,11 @@ Calls on the compositor's thread: `poll` 1.08 ms at worst, a page of 500 results
 ### Animation and frame time
 
 Measured on VM 116 on 2026-10-30 in an isolated headless session, 1280×800, Noche dark, the Scan hero, with `--profile` per frame and a video viewer attached. **A headless session paints only with a viewer**:
-the figure this section used to give, 100 ms of CPU in 10 s, had none, so nothing was being painted and it did not describe the app. `lord-server` CPU is over 8 s. Both columns were run back to back on the final code on a quiet VM (load under 0.5); an earlier pass under load 8 to 14 gave 27.7 ms and 0.80 ms at the median, so the load changes the numbers and only same-load figures compare.
+the figure this section used to give, 100 ms of CPU in 10 s, had none, so nothing was being painted and it did not describe the app. `insane-server` CPU is over 8 s. Both columns were run back to back on the final code on a quiet VM (load under 0.5); an earlier pass under load 8 to 14 gave 27.7 ms and 0.80 ms at the median, so the load changes the numbers and only same-load figures compare.
 
 | | Before (commit 3a97f5c) | After |
 |---|---|---|
-| `lord-server` CPU in 8 s | 6,690 ms | 970 ms |
+| `insane-server` CPU in 8 s | 6,690 ms | 970 ms |
 | Layout and paint per frame, p50 | 17.5 ms | 0.61 ms |
 | p90 | 19.2 ms | 1.9 ms |
 | p99 | 22.6 ms | 9.6 ms |
@@ -81,7 +81,7 @@ After: 845 frames in 12 s. Before: 423. These are the CPU path's numbers.
 | Aurora, idle hero (dark, light) | 4.5–5.0 % | 24.7–27.5 fps | 33.2 / 102.4–312.7 ms | 267.5–736.9 ms |
 | Aurora, scanning (dark, light) | 15.8–18.0 % | 21.7–25.0 fps | 31.8–32.9 / 298.0–415.5 ms | 343.5–984.7 ms |
 
-`lord-clean`'s scope took 0.6–1.2 % of that while scanning. Light and dark don't differ beyond the noise; the look does. Scanning costs about 8 to 13 points of a core over idle, under a fifth of one core of four. Aurora flips about half as often as Noche and shows gaps of up to a second while scanning, which is worth a look: this run doesn't say whether those are a calm moment of the animation or late frames. Cristal was not measured, nor the window next to the Dock, nor a home folder larger than this one's 570 MB, nor the review board or Storage's bubbles.
+`insane-clean`'s scope took 0.6–1.2 % of that while scanning. Light and dark don't differ beyond the noise; the look does. Scanning costs about 8 to 13 points of a core over idle, under a fifth of one core of four. Aurora flips about half as often as Noche and shows gaps of up to a second while scanning, which is worth a look: this run doesn't say whether those are a calm moment of the animation or late frames. Cristal was not measured, nor the window next to the Dock, nor a home folder larger than this one's 570 MB, nor the review board or Storage's bubbles.
 
 - Reduce motion: 9 repaints in the whole session after opening the app, 80 ms of CPU in 8 s.
 - Minimized: 60 ms of CPU in 8 s.
@@ -98,13 +98,13 @@ A 311 KB 16-bit RGBA PNG of 6,200 × 6,200 pixels made the decoder peak at 588 M
 
 ## An isolated session on VM 116
 
-The branch's `lord-server` with its own home and runtime folder, a throwaway theme with the real Cleaner, driven through `remote.sock` with screenshots, on 2026-10-30:
+The branch's `insane-server` with its own home and runtime folder, a throwaway theme with the real Cleaner, driven through `remote.sock` with screenshots, on 2026-10-30:
 
 - Similar images from the Duplicates section with real thumbnails, selection and the confirmation; Apps with real packages and icons, leftovers found and named in the confirmation; `~/Descargas` found through `user-dirs.dirs`.
 - The real `/tmp`, with other users' folders in it: the scan stayed complete and showed only the session user's file.
 - A list scrolled to its end shows its last row at the bottom of the box.
-- `lord.pkg`: three kernel names read; `oldKernels` offered nothing on a machine with two; a real plan for the older kernel passed `kernelPlanOk`, and one for the running kernel was refused by the engine and by the check.
-- The update word's rule with `lord.pkg.info` stubbed: `lordos` isn't a package on the VM, so its real state there is "not installed".
+- `insane.pkg`: three kernel names read; `oldKernels` offered nothing on a machine with two; a real plan for the older kernel passed `kernelPlanOk`, and one for the running kernel was refused by the engine and by the check.
+- The update word's rule with `insane.pkg.info` stubbed: `insaneos` isn't a package on the VM, so its real state there is "not installed".
 
 The session has no admin helper, so nothing was removed: not an app, not a kernel. The Remove buttons, the system card and `OldKernels`' own card were not on screen. The panel by the clock wasn't opened: that theme has no such item.
 
@@ -119,7 +119,7 @@ The admin actions ran as root once, on 2026-10-30, in a real session of an insta
 | `clean-apt-cache` | removed `t1.deb` and `partial/t2.part`; kept `keep.txt`, the symbolic link `link.deb` and `lock` |
 | `clean-var-tmp` | removed only the old root file; kept a file open in a process, a hard-linked pair, a user's file, a new file and a folder |
 
-`/sys/fs/cgroup/system.slice/lordos.service/lordos-session-1000/lordos-cleaner.scope` appeared in both a live and an installed session.
+`/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/insaneos-cleaner.scope` appeared in both a live and an installed session.
 
 Found in that run: **a scan finds nothing in a live session.** On the live system's overlay a regular file's device differs from its folder's (`1f`, `1e` here), and the walker (`lcmain.c`, `other_dev`) counts it as another mount, so "This scan found nothing". An installed system on ext4 isn't affected. **The system card is unreachable when a scan finds nothing**: `CleanupList` renders it only with rule rows. Both open.
 

@@ -1,5 +1,5 @@
 // hwkeys.js — what a keyboard's volume, brightness and keyboard-light keys do, in every theme
-// (BASE in shortcuts.js; lord-server keeps these keys from apps, wl/keygrab.c). Each press shows the new
+// (BASE in shortcuts.js; insane-server keeps these keys from apps, wl/keygrab.c). Each press shows the new
 // level in the brief indicator (levelhud.js), also when it is already at an end.
 import { soundState, defaultSink, sound } from './sound.js';
 import { admin } from './admin.js';
@@ -26,9 +26,9 @@ export function volumeMute() {
 // A held key is faster than the helper's round trip: the value on its way counts, not the file's.
 const sent = new Map();
 function step(action, field, next, dir, kind) {
-  if (typeof lord.display === 'undefined') return;
+  if (typeof insane.display === 'undefined') return;
   let shown = false;
-  for (const d of lord.display.list()?.[field] || []) {
+  for (const d of insane.display.list()?.[field] || []) {
     const was = sent.get(d.name);
     const from = was && Date.now() - was.at < 500 ? was.value : d.value;
     const value = next(from, d.max, dir);

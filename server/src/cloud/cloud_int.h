@@ -1,6 +1,6 @@
 /* cloud_int.h — shared between cloud.c (accounts, rclone, the thread) and cloud_files.c (status, eviction, keeping). */
-#ifndef LORD_CLOUD_INT_H
-#define LORD_CLOUD_INT_H
+#ifndef INSANE_CLOUD_INT_H
+#define INSANE_CLOUD_INT_H
 
 #include "cloud.h"
 #include "cloud_pure.h"
@@ -30,7 +30,7 @@ typedef struct {
     const CloudKind *k;
     long long created;
     int paused, own_client;
-    Params p;                       /* non-secret options (what ~/.config/lordos/cloud/rclone.conf has) */
+    Params p;                       /* non-secret options (what ~/.config/insaneos/cloud/rclone.conf has) */
     /* this run of rclone */
     int configured, mounted, held;  /* held: Pause is holding its uploads back */
     int locked;                     /* 1 keyring locked, 2 no keyring */

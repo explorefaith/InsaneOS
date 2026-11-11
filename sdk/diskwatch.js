@@ -1,7 +1,7 @@
 // diskwatch.js — session notices when a disk gets too hot or its SMART health gets worse
 // (docs/MONITOR.md, "Disk temperature and health"). startShell calls startDiskWatch().
 //
-// Temperatures: lord.monitor.watchDisks(true) lets the Monitor's thread read only the disk sensors
+// Temperatures: insane.monitor.watchDisks(true) lets the Monitor's thread read only the disk sensors
 // every 30 s while the Monitor is closed (a spinning disk only while awake); this polls the result
 // every 30 s. A notice when a disk reaches its limit (diskTempLimit), at most one per disk every 30
 // minutes, and again only after it has cooled 3 °C below the limit.
@@ -27,10 +27,10 @@ const label = (d) => d.model || `/dev/${d.name}`;
 let watching = false;
 function checkTemps() {
   const on = diskAlertPrefs();
-  if (on !== watching) { watching = on; try { lord.monitor.watchDisks(on); } catch (e) { /* older server */ } }
+  if (on !== watching) { watching = on; try { insane.monitor.watchDisks(on); } catch (e) { /* older server */ } }
   if (!on) return;
   let r = null;
-  try { r = lord.monitor.diskTemps(); } catch (e) { return; }
+  try { r = insane.monitor.diskTemps(); } catch (e) { return; }
   if (!r || !Array.isArray(r.disks)) return;
   const now = Date.now();
   for (const d of r.disks) {
@@ -57,9 +57,9 @@ function checkTemps() {
 async function checkHealth() {
   if (!diskAlertPrefs()) return;
   let list = [];
-  try { list = lord.disks.list() || []; } catch (e) { return; }
+  try { list = insane.disks.list() || []; } catch (e) { return; }
   let temps = null;
-  try { temps = lord.monitor.diskTemps(); } catch (e) { /* none yet */ }
+  try { temps = insane.monitor.diskTemps(); } catch (e) { /* none yet */ }
   const awake = new Set((temps?.disks || []).filter((d) => d.awake).map((d) => d.name));
   for (const d of list) {
     if (!smart.smartable(d.name) || d.transport === 'loop') continue;
@@ -88,7 +88,7 @@ async function checkHealth() {
 const offered = new Set();
 function volumesOf() {
   const out = [];
-  try { for (const d of lord.disks.list() || []) if (!d.system) out.push(d, ...(d.partitions || d.children || [])); } catch (e) { /* none */ }
+  try { for (const d of insane.disks.list() || []) if (!d.system) out.push(d, ...(d.partitions || d.children || [])); } catch (e) { /* none */ }
   return out.filter((v) => v.fstype && !v.mountpoint);
 }
 function offerFormats(first) {
@@ -103,7 +103,7 @@ function offerFormats(first) {
 }
 
 export function startDiskWatch() {
-  if (started || typeof lord === 'undefined' || !lord.monitor?.watchDisks || !lord.disks || typeof lord.greeter !== 'undefined') return;
+  if (started || typeof insane === 'undefined' || !insane.monitor?.watchDisks || !insane.disks || typeof insane.greeter !== 'undefined') return;
   started = true;
   checkTemps();                       // turns the background reading on (or leaves it off)
   setInterval(checkTemps, TEMP_EVERY);

@@ -1,8 +1,8 @@
-/* npload.h — what lord-netperm loads into the kernel: its maps and which kind of program each
+/* npload.h — what insane-netperm loads into the kernel: its maps and which kind of program each
  * section of np.bpf.c is. Shared by netperm.c and tests/npverify_test.c (which loads every
  * program into the running kernel, so the verifier checks exactly what the service loads). */
-#ifndef LORD_NP_LOAD_H
-#define LORD_NP_LOAD_H
+#ifndef INSANE_NP_LOAD_H
+#define INSANE_NP_LOAD_H
 
 #include <linux/bpf.h>
 #include <stdint.h>
@@ -33,7 +33,7 @@
  * hooks (its id comes from /sys/kernel/btf/vmlinux). opt: 1 = the device, Bluetooth and traffic
  * accounting programs; if the kernel refuses one (no bpf LSM, an old kernel) the network ones
  * still work. The accounting programs (BPF_CGROUP_INET_INGRESS / EGRESS) are attached only to
- * lordos.service, not to user@<uid>.service (np_attach_user). */
+ * insaneos.service, not to user@<uid>.service (np_attach_user). */
 typedef struct {
     const char *sec;
     uint32_t type, attach;

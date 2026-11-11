@@ -1,4 +1,4 @@
-# rpi-mirror.list — the Raspberry Pi packages LordOS mirrors into its own APT repository (arm64 only):
+# rpi-mirror.list — the Raspberry Pi packages InsaneOS mirrors into its own APT repository (arm64 only):
 # the bootloader EEPROM updater and exactly what its Depends need that Debian 13 does not have.
 # docs/UPDATES.md, "Raspberry Pi firmware packages". Imported by `tools/release/apt-repo.sh build
 # <target> --rpi …`, which accepts a file only if its SHA-256 is the one below AND the one in

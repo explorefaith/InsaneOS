@@ -4,7 +4,7 @@ What each Insane OS image needs. If a figure here and another page disagree, thi
 
 | | PC (ISO) | Virtual machine | Raspberry Pi 5 / Raspberry Pi 500 | Debian 13 package |
 |---|---|---|---|---|
-| File | `lordos-live-<version>-amd64.iso` | `lordos-<version>-amd64.ova`, or an ISO | `lordos-<version>-rpi5-arm64.img.xz` | `install.sh` |
+| File | `insaneos-live-<version>-amd64.iso` | `insaneos-<version>-amd64.ova`, or an ISO | `insaneos-<version>-rpi5-arm64.img.xz` | `install.sh` |
 | Processor | 64-bit Intel or AMD (amd64) | at least 4 CPUs | Raspberry Pi 5 or Raspberry Pi 500 | amd64 or arm64 |
 | Memory | 4 GB minimum, 8 GB recommended | 4 GB minimum, 16 GB ideal | 4 GB works, 8 or 16 GB recommended | as for a PC |
 | Storage | 8 GB disk minimum, 32 GB recommended | 32 GB disk (the OVA's grows as used) | SD card of 16 GB (8 GB minimum) or NVMe | 2 GB free in `/var` |
@@ -21,7 +21,7 @@ What each Insane OS image needs. If a figure here and another page disagree, thi
 
 ## arm64 ISO
 
-`lordos-live-<version>-arm64.iso` is for arm64 machines and virtual machines that start with UEFI. So far it has been run only on emulated QEMU, not on real hardware. The memory and storage figures are the PC's.
+`insaneos-live-<version>-arm64.iso` is for arm64 machines and virtual machines that start with UEFI. So far it has been run only on emulated QEMU, not on real hardware. The memory and storage figures are the PC's.
 
 ## Virtual machine
 
@@ -42,7 +42,7 @@ The [Insane OS Imager](/imager/) writes the image and prepares the first boot.
 
 ## On an existing Debian 13
 
-`curl -fsSL https://lordos.org/install.sh | sh` adds Insane OS to Debian 13 (trixie), amd64 or arm64, started with systemd. It needs root or `sudo` and 2 GB free in `/var`. Other distributions based on Debian may work, with a warning.
+`curl -fsSL https://insaneos.org/install.sh | sh` adds Insane OS to Debian 13 (trixie), amd64 or arm64, started with systemd. It needs root or `sudo` and 2 GB free in `/var`. Other distributions based on Debian may work, with a warning.
 
 ## Not supported
 

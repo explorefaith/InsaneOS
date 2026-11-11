@@ -24,7 +24,7 @@ const ok = (name, cond, info = '') => { n++; if (!cond) { bad++; console.log(`�
 for (const h of ['pi', 'living-room-pi5', 'a', 'pi5']) ok(`hostname ${h}`, v.hostname(h) === null);
 for (const h of ['', '-pi', 'pi-', 'Pi', 'pi.local', 'pi_5', '12345', 'localhost', 'x'.repeat(64), 'piñ']) ok(`bad hostname ${h}`, v.hostname(h) !== null);
 for (const u of ['ana', '_svc', 'ana-maria_2', 'a'.repeat(32)]) ok(`user ${u}`, v.username(u) === null);
-for (const u of ['Ana', '1ana', '-ana', 'root', 'lordos', 'systemd-x', 'sudo', 'ana maria', '', 'a'.repeat(33)]) ok(`bad user ${u}`, v.username(u) !== null);
+for (const u of ['Ana', '1ana', '-ana', 'root', 'insaneos', 'systemd-x', 'sudo', 'ana maria', '', 'a'.repeat(33)]) ok(`bad user ${u}`, v.username(u) !== null);
 ok('suggest user', v.suggestUser('Ana Pérez') === 'ana');
 ok('suggest user root → none', v.suggestUser('Root Admin') === '');
 ok('suggest host', v.suggestHostname('Ana Pérez') === 'ana-perez-pi');
@@ -105,22 +105,22 @@ ok('foreign profile refused', fr.fromProfile({ format: 'x' }, cat.defaultConfig(
 // ---- the release list ----
 const list = rel.parseReleases(fs.readFileSync(path.join(here, 'imager/releases.json'), 'utf8'), 'rpi5');
 ok('releases found', list.length >= 3, String(list.length));
-ok('newest first', list[0].tag === 'v0.8.3-beta' && list[0].image.name === 'lordos-0.8.3-rpi5-arm64.img.xz' && list[0].image.size === 558119764);
+ok('newest first', list[0].tag === 'v0.8.3-beta' && list[0].image.name === 'insaneos-0.8.3-rpi5-arm64.img.xz' && list[0].image.size === 558119764);
 ok('signature files', list.every((r) => r.sums.name === 'SHA256SUMS' && r.sig.name === 'SHA256SUMS.sig'));
 const pc = rel.parseReleases(fs.readFileSync(path.join(here, 'imager/releases.json'), 'utf8'), 'pc');
-ok('pc iso', pc[0].image.name === 'lordos-live-0.8.3-amd64.iso');
-const armAssets = (v) => [{ name: `lordos-live-${v}-amd64.iso`, size: 7 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }];
+ok('pc iso', pc[0].image.name === 'insaneos-live-0.8.3-amd64.iso');
+const armAssets = (v) => [{ name: `insaneos-live-${v}-amd64.iso`, size: 7 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }];
 ok('arm64 iso: no image, no release', rel.parseReleases([{ tag_name: 'v0.8.6-beta', assets: armAssets('0.8.6') }], 'pc-arm64').length === 0);
-const armIso = rel.parseReleases([{ tag_name: 'v0.8.7-beta', assets: [...armAssets('0.8.7'), { name: 'lordos-live-0.8.7-arm64.iso', size: 9 }] }], 'pc-arm64');
-ok('arm64 iso: its own image', armIso.length === 1 && armIso[0].image.name === 'lordos-live-0.8.7-arm64.iso');
+const armIso = rel.parseReleases([{ tag_name: 'v0.8.7-beta', assets: [...armAssets('0.8.7'), { name: 'insaneos-live-0.8.7-arm64.iso', size: 9 }] }], 'pc-arm64');
+ok('arm64 iso: its own image', armIso.length === 1 && armIso[0].image.name === 'insaneos-live-0.8.7-arm64.iso');
 ok('garbage list', rel.parseReleases('nope', 'rpi5').length === 0 && rel.parseReleases('{}', 'rpi5').length === 0);
-ok('hostile names dropped', rel.parseReleases([{ tag_name: 'v1.0.0', assets: [{ name: '../lordos-1.0.0-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5').length === 0);
-const point = rel.parseReleases([{ tag_name: 'v0.8.4.1-beta', published_at: '2026-10-25T20:00:00Z', assets: [{ name: 'lordos-0.8.4.1-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5');
-ok('point release (four numbers)', point.length === 1 && point[0].version === '0.8.4.1' && point[0].image.name === 'lordos-0.8.4.1-rpi5-arm64.img.xz');
-ok('five numbers dropped', rel.parseReleases([{ tag_name: 'v0.8.4.1.2', assets: [{ name: 'lordos-0.8.4.1.2-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5').length === 0);
+ok('hostile names dropped', rel.parseReleases([{ tag_name: 'v1.0.0', assets: [{ name: '../insaneos-1.0.0-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5').length === 0);
+const point = rel.parseReleases([{ tag_name: 'v0.8.4.1-beta', published_at: '2026-10-25T20:00:00Z', assets: [{ name: 'insaneos-0.8.4.1-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5');
+ok('point release (four numbers)', point.length === 1 && point[0].version === '0.8.4.1' && point[0].image.name === 'insaneos-0.8.4.1-rpi5-arm64.img.xz');
+ok('five numbers dropped', rel.parseReleases([{ tag_name: 'v0.8.4.1.2', assets: [{ name: 'insaneos-0.8.4.1.2-rpi5-arm64.img.xz', size: 5 }, { name: 'SHA256SUMS', size: 5 }, { name: 'SHA256SUMS.sig', size: 5 }] }], 'rpi5').length === 0);
 ok('bad tag dropped', rel.parseReleases([{ tag_name: 'v1.0.0/../x', assets: [] }], 'rpi5').length === 0);
 ok('fits', rel.fits(2.8e9, 4e9) === 'yes' && rel.fits(2.8e9, 2.9e9) === 'tight' && rel.fits(3e9, 2e9) === 'no');
-ok('download url', rel.downloadUrl('v0.8.3-beta', 'SHA256SUMS') === 'https://github.com/lordbasex/Insane OS/releases/download/v0.8.3-beta/SHA256SUMS');
+ok('download url', rel.downloadUrl('v0.8.3-beta', 'SHA256SUMS') === 'https://github.com/insaneos/Insane OS/releases/download/v0.8.3-beta/SHA256SUMS');
 
 console.log(`imager-core-test: ${n} checks, ${bad} failed`);
 process.exit(bad ? 1 : 0);

@@ -1,5 +1,5 @@
 // build-web.mjs — builds the desktop app's window (dist/) from the SAME UI as Insane OS's native imager
-// (apps/imager): @lordos/sdk becomes web/sdk.jsx (DOM versions of the few primitives it uses) and
+// (apps/imager): @insaneos/sdk becomes web/sdk.jsx (DOM versions of the few primitives it uses) and
 // apps/imager/platform.js becomes web/platform.js (the Tauri commands). docs/IMAGER.md.
 //
 //   node build-web.mjs        → dist/index.html, dist/app.js, dist/assets/…
@@ -14,9 +14,9 @@ const dist = path.join(here, 'dist');
 const nm = path.join(here, 'node_modules');
 
 const swap = {
-  name: 'lordos-desktop',
+  name: 'insaneos-desktop',
   setup(b) {
-    b.onResolve({ filter: /^@lordos\/sdk$/ }, () => ({ path: path.join(here, 'web/sdk.jsx') }));
+    b.onResolve({ filter: /^@insaneos\/sdk$/ }, () => ({ path: path.join(here, 'web/sdk.jsx') }));
     // the native platform module → the desktop one (only apps/imager's own)
     b.onResolve({ filter: /platform\.js$/ }, (a) => {
       const p = path.resolve(a.resolveDir, a.path);
@@ -42,7 +42,7 @@ await esbuild.build({
   define: { 'process.env.NODE_ENV': '"production"' },
 });
 for (const f of fs.readdirSync(path.join(repo, 'assets/mascot'))) if (f.endsWith('-256.png')) fs.copyFileSync(path.join(repo, 'assets/mascot', f), path.join(dist, 'assets/mascot', f));
-fs.copyFileSync(path.join(repo, 'assets/icons/lordos-icon-128.png'), path.join(dist, 'assets/icons/lordos-icon-128.png'));
+fs.copyFileSync(path.join(repo, 'assets/icons/insaneos-icon-128.png'), path.join(dist, 'assets/icons/insaneos-icon-128.png'));
 for (const f of ['Inter-Regular.ttf', 'Inter-Medium.ttf', 'Inter-SemiBold.ttf', 'Inter-Bold.ttf', 'Inter-LICENSE.txt', 'JetBrainsMono-Regular.ttf', 'JetBrainsMono-LICENSE.txt'])
   fs.copyFileSync(path.join(repo, 'assets/fonts', f), path.join(dist, 'assets/fonts', f));
 fs.copyFileSync(path.join(here, 'web/index.html'), path.join(dist, 'index.html'));

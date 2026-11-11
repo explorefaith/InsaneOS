@@ -5,8 +5,8 @@
  * admin-rescue-status and admin-rescue (users_admin.c) are that way out, approved by the maintainer
  * for exactly this case: with the root password, the session user joins `sudo`. The decision lives
  * here, without the system, so it can be tested (build/admin-rescue-test). */
-#ifndef LORD_ADMIN_RESCUE_H
-#define LORD_ADMIN_RESCUE_H
+#ifndef INSANE_ADMIN_RESCUE_H
+#define INSANE_ADMIN_RESCUE_H
 
 #include <sys/types.h>
 

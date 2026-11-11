@@ -1,12 +1,12 @@
 // syspkg.js — how Store → Updates (and its plans) name Insane OS's own data packages: in words instead of
-// the package name. Only presentation; what gets installed is the same. The lordos package itself has
+// the package name. Only presentation; what gets installed is the same. The insaneos package itself has
 // its own card (InsaneCard in debian.js). No imports, so tests/store_syspkg_test.mjs can load it.
 //
 //   sysPkgKey(name)       the t() key prefix for a known system package, or null
-//   snapshotDate(version) the date of a lordos-hwdata version (YYYY.MM.DD or YYYY.MM.DD.N,
+//   snapshotDate(version) the date of a insaneos-hwdata version (YYYY.MM.DD or YYYY.MM.DD.N,
 //                         tools/iso/mkdeb-hwdata.sh) as a local Date, or null when it isn't one
 
-const KEYS = { 'lordos-hwdata': 'store.updates.hwdata' };
+const KEYS = { 'insaneos-hwdata': 'store.updates.hwdata' };
 
 export const sysPkgKey = (name) => (typeof name === 'string' && Object.prototype.hasOwnProperty.call(KEYS, name) ? KEYS[name] : null);
 

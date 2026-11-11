@@ -2,34 +2,34 @@
 
 Created by iPERFEX with an AI image generator; part of the Insane OS brand assets.
 
-The collection that Insane OS ships in `/usr/share/backgrounds/lordos/` and shows in
+The collection that Insane OS ships in `/usr/share/backgrounds/insaneos/` and shows in
 **Settings → Wallpaper**, grouped by category. The default theme also keeps its four gradients
 (Aurora, Ocean, Sunset, Graphite; `themes/default/assets/`, made by `tools/gen-wallpaper.py`) as the
 "Gradients" category.
 
 | Category | File | Name (en / es / pt) |
 |---|---|---|
-| Signature | `signature/lordos-crystal-crown.jpg` | Crystal Crown / Corona de cristal / Coroa de cristal (**login screen**) |
-| Signature | `signature/lordos-eternal-dawn.jpg` | Eternal Dawn / Amanecer eterno / Amanhecer eterno |
-| Signature | `signature/lordos-royal-flow.jpg` | Royal Flow / Flujo real / Fluxo real |
-| Signature | `signature/lordos-royal-waves.jpg` | Royal Waves / Ondas reales / Ondas reais |
-| Signature | `signature/lordos-violet-horizon.jpg` | Violet Horizon / Horizonte violeta / Horizonte violeta |
-| Lumo | `lumo/lordos-lumo-aurora.jpg` | Aurora |
-| Lumo | `lumo/lordos-lumo-celestial.jpg` | Celestial (**default desktop** for new users) |
-| Cosmos | `cosmos/lordos-event-horizon.jpg` | Event Horizon / Horizonte de sucesos / Horizonte de eventos |
-| Cosmos | `cosmos/lordos-infinite-galaxy.jpg` | Infinite Galaxy / Galaxia infinita / Galáxia infinita |
-| Cosmos | `cosmos/lordos-solar-odyssey.jpg` | Solar Odyssey / Odisea solar / Odisseia solar |
-| Cosmos | `cosmos/lordos-stellar-voyage.jpg` | Stellar Voyage / Viaje estelar / Viagem estelar |
+| Signature | `signature/insaneos-crystal-apple.jpg` | Crystal Apple / Corona de cristal / Coroa de cristal (**login screen**) |
+| Signature | `signature/insaneos-eternal-dawn.jpg` | Eternal Dawn / Amanecer eterno / Amanhecer eterno |
+| Signature | `signature/insaneos-royal-flow.jpg` | Royal Flow / Flujo real / Fluxo real |
+| Signature | `signature/insaneos-royal-waves.jpg` | Royal Waves / Ondas reales / Ondas reais |
+| Signature | `signature/insaneos-violet-horizon.jpg` | Violet Horizon / Horizonte violeta / Horizonte violeta |
+| Lumo | `lumo/insaneos-lumo-aurora.jpg` | Aurora |
+| Lumo | `lumo/insaneos-lumo-celestial.jpg` | Celestial (**default desktop** for new users) |
+| Cosmos | `cosmos/insaneos-event-horizon.jpg` | Event Horizon / Horizonte de sucesos / Horizonte de eventos |
+| Cosmos | `cosmos/insaneos-infinite-galaxy.jpg` | Infinite Galaxy / Galaxia infinita / Galáxia infinita |
+| Cosmos | `cosmos/insaneos-solar-odyssey.jpg` | Solar Odyssey / Odisea solar / Odisseia solar |
+| Cosmos | `cosmos/insaneos-stellar-voyage.jpg` | Stellar Voyage / Viaje estelar / Viagem estelar |
 
 The names shown in the interface come from `assets/locales/<lang>/shell.json`
 (`shell.wallpaper.<id>`) and the categories from `settings.json` (`settings.wallpaperCategory.*`).
 
 ## Files
 
-- `<category>/lordos-<name>.jpg`: the wallpaper at the original's native size (1672×941 today),
+- `<category>/insaneos-<name>.jpg`: the wallpaper at the original's native size (1672×941 today),
   JPEG quality 90, 4:4:4 chroma, baseline. About 4 MB for all eleven; the 2 MB PNG originals are
   not kept in the repository (the JPEGs measure 39–46 dB PSNR against them and look the same).
-- `thumbs/<category>/lordos-<name>.jpg`: 320×180 thumbnails for Settings and the Control Center,
+- `thumbs/<category>/insaneos-<name>.jpg`: 320×180 thumbnails for Settings and the Control Center,
   so the pickers never decode the full images.
 - `index.json`: the list (ids, categories, sizes) that the SDK bundles (`sdk/wallpapers.js`).
 
@@ -43,7 +43,7 @@ The originals are 1672×941, so they are upscaled (bilinear, "cover" crop) on bi
 put the PNG next to the original with its size in the name and run the generator again:
 
 ```
-<originals>/lumo/lordos-lumo-celestial@3840x2160.png  →  lumo/lordos-lumo-celestial@3840x2160.jpg
+<originals>/lumo/insaneos-lumo-celestial@3840x2160.png  →  lumo/insaneos-lumo-celestial@3840x2160.jpg
 ```
 
 The desktop and the login screen then pick, for each screen, the smallest variant that covers it
@@ -54,7 +54,7 @@ screen gets the 4K one. No code changes are needed.
 
 The images were created by iPERFEX with an AI image generator and are part of the Insane OS brand
 assets, like the logo and Lumo. The files are distributed with Insane OS under the same terms as the
-rest of the repository (MIT); the Insane OS name, the crown and Lumo that appear in them are also
+rest of the repository (MIT); the Insane OS name, the apple and Lumo that appear in them are also
 covered by the Insane OS trademark and brand policy (`web/content/legal/trademark.en.md`). Because
 they are AI-generated, copyright protection for the images themselves may be limited in some
 countries; the trademark policy still applies to the brand elements in them. The "Lumo" pieces are

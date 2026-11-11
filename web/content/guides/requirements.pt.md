@@ -4,7 +4,7 @@ O que cada imagem do Insane OS precisa. Se um número desta página não bater c
 
 | | PC (ISO) | Máquina virtual | Raspberry Pi 5 / Raspberry Pi 500 | Pacote para Debian 13 |
 |---|---|---|---|---|
-| Arquivo | `lordos-live-<versão>-amd64.iso` | `lordos-<versão>-amd64.ova`, ou uma ISO | `lordos-<versão>-rpi5-arm64.img.xz` | `install.sh` |
+| Arquivo | `insaneos-live-<versão>-amd64.iso` | `insaneos-<versão>-amd64.ova`, ou uma ISO | `insaneos-<versão>-rpi5-arm64.img.xz` | `install.sh` |
 | Processador | Intel ou AMD de 64 bits (amd64) | pelo menos 4 CPUs | Raspberry Pi 5 ou Raspberry Pi 500 | amd64 ou arm64 |
 | Memória | 4 GB mínimo, 8 GB recomendado | 4 GB mínimo, ideal 16 GB | 4 GB funciona, 8 ou 16 GB recomendado | o mesmo que num PC |
 | Armazenamento | disco de 8 GB mínimo, 32 GB recomendado | disco de 32 GB (o da OVA cresce com o uso) | cartão SD de 16 GB (8 GB mínimo) ou NVMe | 2 GB livres em `/var` |
@@ -21,7 +21,7 @@ O que cada imagem do Insane OS precisa. Se um número desta página não bater c
 
 ## ISO arm64
 
-`lordos-live-<versão>-arm64.iso` é para máquinas e máquinas virtuais arm64 que iniciam com UEFI. Até agora só rodou no QEMU emulado, não em hardware real. Os números de memória e armazenamento são os do PC.
+`insaneos-live-<versão>-arm64.iso` é para máquinas e máquinas virtuais arm64 que iniciam com UEFI. Até agora só rodou no QEMU emulado, não em hardware real. Os números de memória e armazenamento são os do PC.
 
 ## Máquina virtual
 
@@ -42,7 +42,7 @@ O [Insane OS Imager](/pt/imager/) grava a imagem e prepara a primeira inicializa
 
 ## Num Debian 13 que você já tem
 
-`curl -fsSL https://lordos.org/install.sh | sh` adiciona o Insane OS ao Debian 13 (trixie), amd64 ou arm64, iniciado com systemd. Precisa de root ou `sudo` e 2 GB livres em `/var`. Outras distribuições baseadas no Debian podem funcionar, com um aviso.
+`curl -fsSL https://insaneos.org/install.sh | sh` adiciona o Insane OS ao Debian 13 (trixie), amd64 ou arm64, iniciado com systemd. Precisa de root ou `sudo` e 2 GB livres em `/var`. Outras distribuições baseadas no Debian podem funcionar, com um aviso.
 
 ## Não suportado
 

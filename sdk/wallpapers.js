@@ -10,15 +10,15 @@ import index from '../assets/wallpapers/index.json';
 export const DEFAULT_WALLPAPER = 'lumo-celestial';
 // The login screen's background (themes/greeter; the remote login page serves the same image
 // through themes/greeter/assets/background.jpg, a link to it).
-export const GREETER_WALLPAPER = 'crystal-crown';
+export const GREETER_WALLPAPER = 'crystal-apple';
 
 // Categories in the order Settings shows them; a theme's own wallpapers come after.
 export const WALLPAPER_CATEGORIES = ['signature', 'lumo', 'cosmos', 'gradients'];
 
-// English fallback for an id: "crystal-crown" → "Crystal Crown", "lumo-celestial" → "Celestial"
+// English fallback for an id: "crystal-apple" → "Crystal Apple", "lumo-celestial" → "Celestial"
 const englishName = (id) => id.replace(/^lumo-/, '').split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
 
-export const lordosWallpapers = index.map((e) => ({
+export const insaneosWallpapers = index.map((e) => ({
   id: e.id,
   category: e.category,
   nameKey: `shell.wallpaper.${e.id}`,
@@ -49,8 +49,8 @@ export const userWallpaperName = (id) => (USER_WALLPAPER.exec(id || '') || [])[1
 function userWallpaper(id) {
   const name = userWallpaperName(id);
   if (!name) return null;
-  const base = `${lord.fs.home()}/.local/share/lordos/wallpapers/${name}`;
-  try { if (!lord.fs.stat(`${base}.jpg`)) return null; } catch (e) { return null; }    // deleted: the default one
+  const base = `${insane.fs.home()}/.local/share/insaneos/wallpapers/${name}`;
+  try { if (!insane.fs.stat(`${base}.jpg`)) return null; } catch (e) { return null; }    // deleted: the default one
   return { id, category: 'mine', nameKey: 'settings.wallpaperImage.name', name: 'Your picture', src: `${base}.jpg`, thumb: `${base}.thumb.jpg` };
 }
 

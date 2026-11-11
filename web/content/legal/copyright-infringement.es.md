@@ -1,4 +1,4 @@
-Respetamos los derechos de los autores y esperamos lo mismo de todas las personas que contribuyen a Insane OS. Si creés que algo en lordos.org, en una versión de Insane OS o en el repositorio de Insane OS infringe tus derechos de autor, avisanos y lo vamos a revisar.
+Respetamos los derechos de los autores y esperamos lo mismo de todas las personas que contribuyen a Insane OS. Si creés que algo en insaneos.org, en una versión de Insane OS o en el repositorio de Insane OS infringe tus derechos de autor, avisanos y lo vamos a revisar.
 
 ## La ley que se aplica
 
@@ -9,7 +9,7 @@ Insane OS lo lleva adelante desde Argentina iPERFEX (Pablo Miranda y Federico Pe
 Escribinos a través de [nuestro formulario de contacto](https://www.iperfex.com/contacto/?lang=es) con **"Copyright"** en el asunto, e incluí:
 
 1. **La obra:** qué creés que se está infringiendo (por ejemplo una imagen, un texto, una tipografía o un fragmento de código), y una prueba o una declaración clara de que sos el titular o actuás en su nombre.
-2. **El material:** exactamente qué la infringe y dónde está: la URL en lordos.org, la versión y el nombre del archivo, o la ruta en el repositorio.
+2. **El material:** exactamente qué la infringe y dónde está: la URL en insaneos.org, la versión y el nombre del archivo, o la ruta en el repositorio.
 3. **Tus datos de contacto:** tu nombre, y un correo electrónico y un país donde podamos ubicarte.
 4. **Buena fe:** una declaración de que creés de buena fe que el uso no está autorizado por el titular, su representante ni la ley.
 5. **Exactitud:** una declaración de que la información de tu aviso es exacta y de que sos el titular o estás autorizado a actuar en su nombre.

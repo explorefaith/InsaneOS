@@ -1,22 +1,22 @@
-/* proto.h — protocol between lord-server and its document helper lord-doc (see docs/DOCUMENTS.md).
+/* proto.h — protocol between insane-server and its document helper insane-doc (see docs/DOCUMENTS.md).
  *
- * lord-doc is a separate process, without network and locked down (Landlock + seccomp), that opens PDFs
- * (Poppler), archives (libarchive) and fonts (FreeType). lord-server never links those
+ * insane-doc is a separate process, without network and locked down (Landlock + seccomp), that opens PDFs
+ * (Poppler), archives (libarchive) and fonts (FreeType). insane-server never links those
  * libraries: a malicious PDF or .zip can only bring down the helper.
  *
  * The channel is a SOCK_SEQPACKET socketpair (fd 3 of the helper). Each message is a DocHdr + JSON
  * (UTF-8) and, with SCM_RIGHTS, up to DOC_MAX_FDS descriptors. If the JSON doesn't fit in a message
  * (more than DOC_INLINE_MAX) it travels in a sealed memfd and the header carries DOCF_JSON_FD.
  *
- * Startup: lord-server first sends DQ_INIT_FD messages (the files the helper may
+ * Startup: insane-server first sends DQ_INIT_FD messages (the files the helper may
  * use: the document, the destination folder of an extraction, the items to compress) and
  * then DQ_INIT_GO. Only then does the helper lock itself down, with Landlock built from those
  * fds, and start serving. What arrives afterwards never adds file permissions.
  *
  * Replies carry the request id. An image (page, font sample) comes back in a
  * sealed memfd with premultiplied ARGB32 pixels (those of cairo and of the Insane OS engine). */
-#ifndef LORD_DOC_PROTO_H
-#define LORD_DOC_PROTO_H
+#ifndef INSANE_DOC_PROTO_H
+#define INSANE_DOC_PROTO_H
 
 #include <stdint.h>
 
@@ -68,8 +68,8 @@ enum {
     DQ_IMG_DECODE,      /* fd + {"maxw","maxh"} → DR_IMG */
     DQ_IMG_CONVERT,     /* input fd + output fd + {"format":"png"|"jpeg"|"pdf","quality"} → DR_DONE */
 
-    DQ_TTS = 82,        /* (lord-tts) {"slot","file","text","backend","threads","voice_id","seed"} + voice WAV fd? → DR_BLOB WAV (h_tts.c) */
-    DQ_OCR = 80,        /* (lord-ocr) fd (w*h premultiplied ARGB32) + {"w","h","langs"} → {text} (h_ocr.c) */
+    DQ_TTS = 82,        /* (insane-tts) {"slot","file","text","backend","threads","voice_id","seed"} + voice WAV fd? → DR_BLOB WAV (h_tts.c) */
+    DQ_OCR = 80,        /* (insane-ocr) fd (w*h premultiplied ARGB32) + {"w","h","langs"} → {text} (h_ocr.c) */
 
     DQ_SELFTEST = 90,   /* lockdown test: tries the forbidden and says what happened (tests/doc_test.c) */
 };

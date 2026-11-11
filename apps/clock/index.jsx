@@ -1,13 +1,13 @@
 // Clock — world clock, alarms, timer and stopwatch (docs/SYSTEM.md).
 // Alarms, the timer and the stopwatch live in the SDK (sdk/alarms.js): they keep running and ring
 // with the window closed. Other cities' times come from tzdata through our own reader
-// (lord.time.zoneOffset, server/src/ui/tzif.c), without changing the session time zone.
+// (insane.time.zoneOffset, server/src/ui/tzif.c), without changing the session time zone.
 import {
   View, Text, useTheme, useSettings, useStore, useAppWindow, t as tr, formatTime, weekdayName, formatNumber,
   Segmented, Toggle, Button, Stepper, TextInput, ScrollView, clockAlarms, clockTimer, timerStart, timerPause, timerResume,
   timerReset, timerLeft, stopwatch, swStart, swStop, swLap, swReset, swElapsed, nextFire,
   Toolbar, ToolbarButton, EmptyState, Hairline, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 // ---- analog face without rotations: the hands are dots along the radius ----
@@ -60,7 +60,7 @@ const localOffset = (d) => -d.getTimezoneOffset() * 60;
 // Date "shifted" to the zone: its getHours() give that city's local time.
 function zoneDate(zone, now) {
   let z = null;
-  try { z = lord.time.zoneOffset(zone, Math.floor(now / 1000)); } catch (e) { z = null; }
+  try { z = insane.time.zoneOffset(zone, Math.floor(now / 1000)); } catch (e) { z = null; }
   if (!z) return null;
   return { date: new Date(now + (z.offset - localOffset(new Date(now))) * 1000), offset: z.offset, abbr: z.abbr };
 }
@@ -92,7 +92,7 @@ function inWords(ms) {
 function ZonePicker({ onPick, onClose }) {
   const t = useTheme();
   const [q, setQ] = useState('');
-  const zones = useMemo(() => { try { return lord.time.zones(); } catch (e) { return ['UTC']; } }, []);
+  const zones = useMemo(() => { try { return insane.time.zones(); } catch (e) { return ['UTC']; } }, []);
   const needle = q.trim().toLowerCase();
   const shown = (needle ? zones.filter((z) => z.toLowerCase().replace(/_/g, ' ').includes(needle)) : zones).slice(0, 200);
   return (
@@ -148,7 +148,7 @@ function World({ picking, setPicking }) {
   const now = useTick(1000);
   const cities = s.clock?.cities || [];
   let localZone = 'UTC';
-  try { localZone = lord.time.zone(); } catch (e) { /* no zone */ }
+  try { localZone = insane.time.zone(); } catch (e) { /* no zone */ }
   const save = (list) => set({ clock: { ...(s.clock || {}), cities: list } });
   return (
     <View style={{ flex: 1 }}>
@@ -362,7 +362,7 @@ function useWidth(ref, initial) {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!ref.current) return;
-      const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+      const lw = Math.round(insane.getLayout(ref.current.id)[2]);
       if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
     }, 20);
     return () => clearTimeout(id);

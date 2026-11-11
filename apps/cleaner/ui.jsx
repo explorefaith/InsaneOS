@@ -1,6 +1,6 @@
 // Cleaner's look, "Noche": a night sky in the dark theme and its day version in the light one, with slowly
 // twinkling stars, orbits around the hero, glass cards and cyan-to-violet accents. Colours follow the system's
-// mode. Motion goes through one frame callback and lord.setStyle on nodes (no React render per frame); it runs only
+// mode. Motion goes through one frame callback and insane.setStyle on nodes (no React render per frame); it runs only
 // while the window is in front, and with Reduce motion nothing moves. Timing: entrances 320-500 ms with a decelerating
 // curve, ambient loops on slow sines, staggers under 400 ms in all.
 //
@@ -12,7 +12,7 @@
 // wakes it (it does so on a real display; a viewer's video keeps a headless session awake). Slots make such frames
 // common, so a timer is kept pending while anything runs. It does nothing: firing is enough for the frame to follow,
 // and with the screen off, when no frame runs, it fires once and stops.
-import { View, Text, Image, MenuButton, addListener, useAppWindow, useStore, useTheme, useWindowHidden, settings, windows, wm, cleanerPalette, t as tr, formatBytes, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Image, MenuButton, addListener, useAppWindow, useStore, useTheme, useWindowHidden, settings, windows, wm, cleanerPalette, t as tr, formatBytes, typeScale, spacing } from '@insaneos/sdk';
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 const Pal = createContext(null);
@@ -50,7 +50,7 @@ function run(fn, mask = SLOT.all) {
 }
 
 const reduced = () => !!settings.get().reduceMotion;
-const set = (id, k, v) => { try { lord.setStyle(id, k, v); } catch (e) { /* the node went away */ } };
+const set = (id, k, v) => { try { insane.setStyle(id, k, v); } catch (e) { /* the node went away */ } };
 const decel = (x) => 1 - (1 - x) ** 3;
 
 export function tween(node, props, { ms = 320, delay = 0, done } = {}) {
@@ -114,7 +114,7 @@ export function CountUp({ value, format, size = 30, weight = 600, color }) {
   useEffect(() => {
     const id = r.current && r.current.id;
     if (id == null) return undefined;
-    const put = (v) => { try { lord.setText(id, format(v)); } catch (e) { /* gone */ } };
+    const put = (v) => { try { insane.setText(id, format(v)); } catch (e) { /* gone */ } };
     if (reduced() || !value) { put(value); return undefined; }
     const t0 = Date.now();
     return run((now) => {
@@ -425,7 +425,7 @@ export function PagedList({ fetch, rowH = 34, render, reset, style }) {
   const box = useRef(null);
   const [h, setH] = useState(400);          // the box's real height, once laid out
   useEffect(() => {
-    const id = setTimeout(() => { if (box.current) { const v = lord.getLayout(box.current.id)[3]; if (v > 0 && Math.abs(v - h) > 1) setH(v); } }, 30);
+    const id = setTimeout(() => { if (box.current) { const v = insane.getLayout(box.current.id)[3]; if (v > 0 && Math.abs(v - h) > 1) setH(v); } }, 30);
     return () => clearTimeout(id);
   });
   const load = (n) => {
@@ -452,7 +452,7 @@ export function PagedList({ fetch, rowH = 34, render, reset, style }) {
     const a = addListener('pointermove', (e) => {
       const d = drag.current;
       if (!d || !box.current) return;
-      const oy = lord.getLayout(box.current.id)[1];
+      const oy = insane.getLayout(box.current.id)[1];
       setY(Math.max(0, Math.min(d.max, ((e.y - oy - d.grab) / d.room) * d.max)));
     });
     const b = addListener('pointerup', () => { drag.current = null; });
@@ -463,7 +463,7 @@ export function PagedList({ fetch, rowH = 34, render, reset, style }) {
     <View ref={box} onWheel={(e) => setY(Math.max(0, Math.min(max, top + e.deltaY)))} style={{ flex: 1, minHeight: 0, overflow: 'hidden', ...style }}>
       <View style={{ position: 'absolute', left: 0, right: bar ? 10 : 0, top: first * rowH - top }}>{rows}</View>
       {bar ? (
-        <View onMouseDown={(e) => { e.stopPropagation(); drag.current = { grab: e.y - lord.getLayout(box.current.id)[1] - barTop, room: Math.max(1, h - bar), max }; }}
+        <View onMouseDown={(e) => { e.stopPropagation(); drag.current = { grab: e.y - insane.getLayout(box.current.id)[1] - barTop, room: Math.max(1, h - bar), max }; }}
           style={{ position: 'absolute', end: 0, width: 14, height: bar, top: barTop }}>
           <View style={{ position: 'absolute', end: 2, top: 0, width: 5, borderRadius: 3, height: bar, backgroundColor: p.sub, opacity: 0.6 }} />
         </View>

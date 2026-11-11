@@ -1,7 +1,7 @@
 // Similar images: pictures that look alike in the folders the user chose, such as a resized or recompressed copy.
-// Decoding happens only in the sandboxed lord-clean helper. Nothing is selected by itself, every image is shown, and
-// lord-server keeps at least one image of each group. They aren't the same bytes, so what goes is the user's choice.
-import { View, Image, cleaner, useThumb, t as tr, formatBytes, formatNumber, revealPath, typeScale, spacing } from '@lordos/sdk';
+// Decoding happens only in the sandboxed insane-clean helper. Nothing is selected by itself, every image is shown, and
+// insane-server keeps at least one image of each group. They aren't the same bytes, so what goes is the user's choice.
+import { View, Image, cleaner, useThumb, t as tr, formatBytes, formatNumber, revealPath, typeScale, spacing } from '@insaneos/sdk';
 import { useMemo } from 'react';
 import { Label, Glass, GlassButton, Pill, Check, Hero, PagedList, CountUp, SelectBar, ORB_SPACE, usePal } from './ui.jsx';
 import { picks } from './duplicates.jsx';

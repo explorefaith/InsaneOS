@@ -1,7 +1,7 @@
 // suggestions.js — "Suggested for your computer" (Store → Discover; docs/PACKAGES.md).
 //
 //   suggestions          store { list, fixture, ready, scanning } (useStore(suggestions))
-//   refreshSuggestions({ firmware })   scans again (lord.hwinfo.scan; the kernel log through the
+//   refreshSuggestions({ firmware })   scans again (insane.hwinfo.scan; the kernel log through the
 //                        read-only hw-firmware-missing action when the session can't read it)
 //   reevaluate()         same facts, new package state (after an install)
 //   dismissSuggestion(id)   "Don't suggest again"
@@ -20,8 +20,8 @@ import { wm } from './windows.js';
 import { evaluate, firmwareFromLog, fresh } from './suggestengine.js';
 import DATA from '../assets/store/suggestions.json';
 
-const has = () => typeof lord !== 'undefined' && !!lord.hwinfo && !!lord.pkg;
-const pkgReady = () => has() && lord.pkg.available();
+const has = () => typeof insane !== 'undefined' && !!insane.hwinfo && !!insane.pkg;
+const pkgReady = () => has() && insane.pkg.available();
 
 export const SUGGEST_DEFAULTS = { dismissed: [], notified: [], seen: [] };
 const prefs = (s = settings.get()) => ({ ...SUGGEST_DEFAULTS, ...(s.suggestions || {}) });
@@ -32,10 +32,10 @@ function setPrefs(patch) {
 export const suggestions = createStore({ list: [], fixture: false, ready: false, scanning: false });
 let facts = null;
 
-const info = (name) => { try { return lord.pkg.info(name); } catch (e) { return null; } };
+const info = (name) => { try { return insane.pkg.info(name); } catch (e) { return null; } };
 // an installable card only when its plan can be made (a dependency may live in a component that
 // isn't enabled: nvidia-driver needs contrib as well as non-free)
-const plannable = (names) => { try { return !!lord.pkg.plan({ install: names }).ok; } catch (e) { return true; } };
+const plannable = (names) => { try { return !!insane.pkg.plan({ install: names }).ok; } catch (e) { return true; } };
 
 export function reevaluate() {
   if (!facts || !pkgReady()) { suggestions.set({ list: [], ready: !!facts }); return []; }
@@ -57,7 +57,7 @@ let caseAsked = false;
 async function caseFound(f) {
   if (!(f.compatible || []).includes('raspberrypi,5-model-b') || !admin.available()) return null;
   let chosen = null;
-  try { chosen = lord.fan.caseConfig(); } catch (e) { return null; }
+  try { chosen = insane.fan.caseConfig(); } catch (e) { return null; }
   if (chosen !== 'none' || (prefs().caseChecked && !caseAsked)) return null;
   if (caseAsked === 'found') return 'argon-one-v5';
   if (caseAsked) return null;
@@ -75,7 +75,7 @@ export function refreshSuggestions({ firmware = true } = {}) {
   suggestions.set({ scanning: true });
   running = (async () => {
     let f = null;
-    try { f = lord.hwinfo.scan(); } catch (e) { f = null; }
+    try { f = insane.hwinfo.scan(); } catch (e) { f = null; }
     if (f && !f.fixture && f.firmware && !f.firmware.readable && firmware && admin.available()) {
       const missing = await firmwareViaHelper();
       if (missing) f.firmware = { readable: true, missing };
@@ -124,7 +124,7 @@ function check() {
   refreshSuggestions().then(maybeNotify, () => {});
 }
 
-if (has() && typeof lord.admin !== 'undefined' && typeof lord.greeter === 'undefined') {
+if (has() && typeof insane.admin !== 'undefined' && typeof insane.greeter === 'undefined') {
   // a while after login (the desktop first), then every 6 hours (a new device, firmware installed…)
   setTimeout(() => { check(); setInterval(check, 6 * 3600 * 1000); }, 3 * 60 * 1000);
   admin.onEvent((text) => { if (text === 'pkg changed' && facts) reevaluate(); });

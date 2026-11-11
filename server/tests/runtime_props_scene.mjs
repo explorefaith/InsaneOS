@@ -1,11 +1,11 @@
 // runtime_props_scene.mjs — the scene of tests/runtime_props_test.mjs (not run by itself): fuzzed React
-// trees rendered through runtime/index.js with a recording `lord` (the mock comes in as the bundle's
+// trees rendered through runtime/index.js with a recording `insane` (the mock comes in as the bundle's
 // banner, so it exists before the runtime loads). Prints every native call, then each node's final
 // style. Usage, after the test bundles it: node <bundle> SEED STEPS
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 
-const { log, fmt, state } = globalThis.__lordTest;
+const { log, fmt, state } = globalThis.__insaneTest;
 const seed0 = +(process.argv[2] || 1), STEPS = +(process.argv[3] || 300);
 const h = React.createElement;
 

@@ -2,14 +2,14 @@
 // fileglyphs.jsx): for apps that run in the theme's context (Mail attachments, a contact's photo,
 // importing .ics/.vcf) and for Linux apps through the portal below. Isolated .lpk apps use the
 // powerbox (fs.openFile) instead. It shows the home folder and the local disks mounted for the user
-// (lord.fs enforces that anyway); what it decides, it decides in filepickermodel.js.
+// (insane.fs enforces that anyway); what it decides, it decides in filepickermodel.js.
 // A List / Thumbnails switch in the toolbar (remembered in settings.pickerView; thumbnails when the
-// dialog takes only pictures): the thumbnails are lord-media's (useThumb, the cache Files and Photos
+// dialog takes only pictures): the thumbnails are insane-media's (useThumb, the cache Files and Photos
 // use), asked for only for the tiles in sight, and a file shows its type icon until its own arrives.
 //
 //   <FilePicker onPick={(path) => …} onClose={() => …} filter={/\.(png|jpe?g)$/i} title={t('…')} multiple />
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, addListener } from '@lordos/runtime';
+import { View, Text, Image, addListener } from '@insaneos/runtime';
 import { useTheme, ThemeContext, DEFAULT_TOKENS, shellTokens } from './theme.js';
 import { t, direction } from './i18n.js';
 import { Button, ScrollView, TextInput, takeTextFocus, releaseTextFocus, hasTextFocus } from './components.jsx';
@@ -46,7 +46,7 @@ function SortTitle({ k, width, sort, onSort, t: th }) {
   );
 }
 
-// A tile's picture: its thumbnail once lord-media has made it, its type icon until then (and for good
+// A tile's picture: its thumbnail once insane-media has made it, its type icon until then (and for good
 // when it has none). Mounted only for the tiles in sight, so a big folder asks for a screenful.
 function Thumb({ e, dark }) {
   const src = useThumb(e.path, 256);
@@ -115,14 +115,14 @@ export function FilePicker({ onPick, onClose, filter = null, title = '', multipl
     return sortRows(list.map((e) => ({ ...e, path: `${dir === '/' ? '' : dir}/${e.name}` })), sort);
   }, [dir, sort.by, sort.desc]);
   const row = rows.find((e) => e.path === cursor) || null;
-  // lord.fs answers for a name inside a folder it may write to: the home folder and a disk are their own roots
+  // insane.fs answers for a name inside a folder it may write to: the home folder and a disk are their own roots
   const writable = useMemo(() => mode !== 'save' || dir === home || disks.some((d) => d.path === dir) || !!statOf(dir)?.writable, [dir]);
 
   const show = (path) => {
     const i = rows.findIndex((r) => r.path === path);
     const s = scroll.current;
     if (i < 0 || !s) return;
-    const rowH = thumbs ? TILE_H : ROW_H, top = (thumbs ? Math.floor(i / cols) : i) * rowH, box = lord.getLayout(listBox.current.id)[3];
+    const rowH = thumbs ? TILE_H : ROW_H, top = (thumbs ? Math.floor(i / cols) : i) * rowH, box = insane.getLayout(listBox.current.id)[3];
     if (top < s.offset()) s.scrollTo(top);
     else if (top + 2 * rowH > s.offset() + box) s.scrollTo(top + 2 * rowH - box);
   };
@@ -339,7 +339,7 @@ export function PortalFilePrompt() {
   // the system layer is outside the theme's ThemeProvider: the dialog takes the same tokens as Files
   const tokens = useStore(shellTokens);
   if (!p) return null;
-  const answer = (paths) => lord.portal.chosen(p.id, paths);
+  const answer = (paths) => insane.portal.chosen(p.id, paths);
   return (
     <ThemeContext.Provider value={tokens || DEFAULT_TOKENS}>
       <View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}>

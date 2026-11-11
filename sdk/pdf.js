@@ -1,4 +1,4 @@
-// pdf.js — PDF through the confined helper (Poppler inside lord-doc; see docs/DOCUMENTS.md).
+// pdf.js — PDF through the confined helper (Poppler inside insane-doc; see docs/DOCUMENTS.md).
 //
 //   const doc = await pdf.open(path | { blob }, { quick })
 //   doc.info           { pages, sizes: [[w, h]…] (points), title, author, outline, forms }
@@ -31,21 +31,21 @@ class PdfDoc {
   blob() { return request(this.sid, 'blob', null, { prio: 6 }); }
   save(path) {
     let req;
-    try { req = lord.doc.savePdf(this.sid, path); } catch (e) { return Promise.reject(e); }
+    try { req = insane.doc.savePdf(this.sid, path); } catch (e) { return Promise.reject(e); }
     return waitFor(this.sid, req);
   }
   cancel(p) { if (p?.req) cancelRequest(this.sid, p.req); }
   onCrash(fn) { return onSessionCrash(this.sid, fn); }
-  close() { if (!this.closed) { this.closed = true; lord.doc.close(this.sid); } }
+  close() { if (!this.closed) { this.closed = true; insane.doc.close(this.sid); } }
 }
 
 async function open(src, { quick = false, password = '' } = {}) {
-  const sid = typeof src === 'object' && src && src.blob ? lord.doc.openBlob(src.blob) : lord.doc.openPdf(src);
+  const sid = typeof src === 'object' && src && src.blob ? insane.doc.openBlob(src.blob) : insane.doc.openPdf(src);
   try {
     const info = await request(sid, 'open', { slot: 0, quick, password }, { prio: 9 });
     return new PdfDoc(sid, info);
   } catch (e) {
-    lord.doc.close(sid);
+    insane.doc.close(sid);
     throw e;
   }
 }

@@ -1,11 +1,11 @@
 /* pty.c — creates the pseudo-terminal and launches the user's shell.
  *
- * It is the only way lord-server has to run processes, and it only launches the user's own
+ * It is the only way insane-server has to run processes, and it only launches the user's own
  * login shell (the one in /etc/passwd), just like any terminal emulator.
  * The child inherits no capabilities, blocked signals or descriptors from the server. */
 #include "term.h"
 #include "../sec/cgroup.h"
-#include "lord_version.h"           /* build/gen: Insane OS version (Makefile, from package.json) */
+#include "insane_version.h"           /* build/gen: Insane OS version (Makefile, from package.json) */
 
 #include <errno.h>
 #include <fcntl.h>
@@ -21,7 +21,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-static char integration[1024];      /* folder with lord-bash.sh, zsh/ and lord-fish.fish (absolute path) */
+static char integration[1024];      /* folder with insane-bash.sh, zsh/ and insane-fish.fish (absolute path) */
 
 void pty_set_integration(const char *dir) {
     if (!dir || !realpath(dir, integration)) integration[0] = 0;
@@ -33,7 +33,7 @@ void pty_resize(int fd, int cols, int rows, int pw, int ph) {
 }
 
 /* The size the pty has now, set again when it isn't the grid's: something other than this Terminal changed it
- * (a program's `stty cols`, or before 0.8.8.6 a second lord-server that had taken the session from its holder)
+ * (a program's `stty cols`, or before 0.8.8.6 a second insane-server that had taken the session from its holder)
  * and the program would go on drawing for a window it isn't in. 1 if it was set, 0 if it already was the
  * grid's, -1 if fd isn't a pty (a serial console's stream). */
 int pty_sync_size(int fd, int cols, int rows, int pw, int ph) {
@@ -64,12 +64,12 @@ static void child(int fd, const char *cwd, int id) {
     memset(caps, 0, sizeof caps);
     syscall(SYS_capset, &hdr, caps);
 
-    /* (0.8.5) the shell and every program it runs in lordos-net-terminal.scope: one "Terminal" app
-     * for the firewall and Monitor → Network (lordos:terminal), each connection with its program's
+    /* (0.8.5) the shell and every program it runs in insaneos-net-terminal.scope: one "Terminal" app
+     * for the firewall and Monitor → Network (insaneos:terminal), each connection with its program's
      * name. Best effort: a terminal that can't be placed still opens. */
-    if (getenv("LORDOS_SESSIOND")) {
+    if (getenv("INSANEOS_SESSIOND")) {
         CgroupLimits lim = { 0, 0, 0 };
-        cgroup_enter("lordos-net-terminal.scope", &lim);
+        cgroup_enter("insaneos-net-terminal.scope", &lim);
     }
 
     struct passwd *pw = getpwuid(getuid());
@@ -84,13 +84,13 @@ static void child(int fd, const char *cwd, int id) {
     char idbuf[16];
     snprintf(idbuf, sizeof idbuf, "%d", id);
     static const char *const drop[] = { "SUDO_USER", "SUDO_UID", "SUDO_GID", "SUDO_COMMAND", "SUDO_HOME",
-                                        "LORD_TERM_INTEGRATION_LOADED", "COLUMNS", "LINES", NULL };
+                                        "INSANE_TERM_INTEGRATION_LOADED", "COLUMNS", "LINES", NULL };
     for (int i = 0; drop[i]; i++) unsetenv(drop[i]);
     setenv("TERM", "xterm-256color", 1);
     setenv("COLORTERM", "truecolor", 1);
     setenv("TERM_PROGRAM", "InsaneTerminal", 1);
-    setenv("TERM_PROGRAM_VERSION", LORD_VERSION, 1);
-    setenv("LORD_TERMINAL_SESSION", idbuf, 1);
+    setenv("TERM_PROGRAM_VERSION", INSANE_VERSION, 1);
+    setenv("INSANE_TERMINAL_SESSION", idbuf, 1);
     setenv("SHELL", shell, 1);
     if (pw) { setenv("USER", pw->pw_name, 1); setenv("LOGNAME", pw->pw_name, 1); }
     if (!getenv("LANG")) setenv("LANG", "C.UTF-8", 1);
@@ -100,20 +100,20 @@ static void child(int fd, const char *cwd, int id) {
     snprintf(argv0, sizeof argv0, "-%s", base);   /* "-zsh": login shell */
     if (integration[0] && !strcmp(base, "bash")) {
         /* interactive bash with integration: the rc emulates a login shell and adds the marks. */
-        snprintf(rc, sizeof rc, "%s/lord-bash.sh", integration);
+        snprintf(rc, sizeof rc, "%s/insane-bash.sh", integration);
         if (access(rc, R_OK) == 0) execl(shell, "bash", "--rcfile", rc, "-i", (char *)NULL);
     } else if (integration[0] && !strcmp(base, "zsh")) {
         /* zsh: ZDOTDIR points to our .zshenv, which restores the user's own and loads the integration. */
         snprintf(rc, sizeof rc, "%s/zsh/.zshenv", integration);
         if (access(rc, R_OK) == 0) {
             const char *orig = getenv("ZDOTDIR");
-            if (orig) setenv("LORD_ZDOTDIR", orig, 1); else unsetenv("LORD_ZDOTDIR");
+            if (orig) setenv("INSANE_ZDOTDIR", orig, 1); else unsetenv("INSANE_ZDOTDIR");
             snprintf(rc, sizeof rc, "%s/zsh", integration);
             setenv("ZDOTDIR", rc, 1);
         }
     } else if (integration[0] && !strcmp(base, "fish") && !strchr(integration, '\'') && !strchr(integration, '\\')) {
         /* fish: --init-command runs after the user's configuration. */
-        snprintf(rc, sizeof rc, "%s/lord-fish.fish", integration);
+        snprintf(rc, sizeof rc, "%s/insane-fish.fish", integration);
         if (access(rc, R_OK) == 0) {
             char cmd[1300];
             snprintf(cmd, sizeof cmd, "source '%s'", rc);

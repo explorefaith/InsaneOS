@@ -9,37 +9,37 @@
 // Without a text focus keys pass through as-is (app shortcuts keep working).
 // <ImeOverlay /> is mounted by startShell: every theme has it without doing anything.
 import { createElement as h } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { noteTextField } from './textfocus.js';
 
 const EMPTY = { engine: '', preedit: '', candidates: [], selected: 0, converting: false, segments: null };
 export const imeState = createStore(EMPTY);
-globalThis.__lordIme = (s) => imeState.set({ ...EMPTY, ...s });
+globalThis.__insaneIme = (s) => imeState.set({ ...EMPTY, ...s });
 
 // Focus stack: the last one attached receives the text (a search field on top of the
 // terminal); when it is released the previous one comes back.
 let stack = [];
 const top = () => stack[stack.length - 1] || null;
-const native = (fn) => { try { fn(); } catch (e) { /* server without lord.ime */ } };
+const native = (fn) => { try { fn(); } catch (e) { /* server without insane.ime */ } };
 const clear = () => imeState.set({ ...imeState.get(), preedit: '', candidates: [], converting: false });
 
 export const ime = {
   attach(token, caret, { inline = false } = {}) {
     const prev = top();
     stack = [...stack.filter((e) => e.token !== token), { token, caret, inline }];
-    if (prev && prev.token !== token) { native(() => lord.ime.reset()); clear(); }
-    native(() => lord.ime.setContext(true));
+    if (prev && prev.token !== token) { native(() => insane.ime.reset()); clear(); }
+    native(() => insane.ime.setContext(true));
     noteTextField('ime', ime.caret);
   },
   detach(token) {
     const was = top();
     stack = stack.filter((e) => e.token !== token);
     if (was?.token !== token) return;
-    native(() => lord.ime.setContext(false));       // discards the composition
+    native(() => insane.ime.setContext(false));       // discards the composition
     clear();
-    if (stack.length) native(() => lord.ime.setContext(true));
+    if (stack.length) native(() => insane.ime.setContext(true));
     noteTextField('ime', stack.length ? ime.caret : null);
   },
   caret: () => top()?.caret?.() || null,

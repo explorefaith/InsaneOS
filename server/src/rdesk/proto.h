@@ -1,8 +1,8 @@
-/* proto.h — lord-server ↔ lord-rdesk, the helper behind the RDP and VNC apps (docs/FILES.md, "Remote desktop"). A
- * SOCK_SEQPACKET pair on fd 3. The first packet is the job as JSON; then fixed messages. The picture is a memfd lord-server
+/* proto.h — insane-server ↔ insane-rdesk, the helper behind the RDP and VNC apps (docs/FILES.md, "Remote desktop"). A
+ * SOCK_SEQPACKET pair on fd 3. The first packet is the job as JSON; then fixed messages. The picture is a memfd insane-server
  * makes and shares: the helper draws BGRA into it and the engine shows it as a media node. */
-#ifndef LORD_RDESK_PROTO_H
-#define LORD_RDESK_PROTO_H
+#ifndef INSANE_RDESK_PROTO_H
+#define INSANE_RDESK_PROTO_H
 
 #include <fcntl.h>
 #include <stddef.h>
@@ -36,15 +36,15 @@ typedef struct { int w, h, drives; const char *drive[8][2]; int admin, scale, so
 
 #define RD_POLL_MAX 256                 /* messages taken per poll: a flood from the helper doesn't hold the UI thread */
 
-/* The shared picture, its size sealed: the helper can't shrink it under lord-server's mapping. */
+/* The shared picture, its size sealed: the helper can't shrink it under insane-server's mapping. */
 static inline int rd_picture_memfd(size_t len) {
-    int fd = (int)syscall(SYS_memfd_create, "lordos-rdesk", 3u /* MFD_CLOEXEC | MFD_ALLOW_SEALING */);
+    int fd = (int)syscall(SYS_memfd_create, "insaneos-rdesk", 3u /* MFD_CLOEXEC | MFD_ALLOW_SEALING */);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)len) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { close(fd); return -1; }
     return fd;
 }
 
-/* Passes the picture (or the audio ring) to the helper; a full socket never blocks lord-server. 0 sent. */
+/* Passes the picture (or the audio ring) to the helper; a full socket never blocks insane-server. 0 sent. */
 static inline int rd_send_fd(int sock, uint32_t type, int fd) {
     RdMsg r = { type, 0, 0, 0, "" };
     struct iovec io = { &r, sizeof r };

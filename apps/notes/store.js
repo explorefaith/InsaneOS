@@ -15,7 +15,7 @@
 //   ---
 //   # Groceries
 //   - [ ] yerba mate
-import { createStore, fs, screen, registerWidgetType, setWidgets } from '@lordos/sdk';
+import { createStore, fs, screen, registerWidgetType, setWidgets } from '@insaneos/sdk';
 
 export const DIR = 'Notes';
 const OLD_DIR = 'Notas'; // before 0.7.0: moved to ~/Notes on first run (see ensureDir)
@@ -199,7 +199,7 @@ export function attachFile(slug, path) {
 
 // The clipboard image (copied in any app) as the note's image-N.png.
 export function pasteClipboardImage(slug) {
-  const data = lord.clipboard.imageData ? lord.clipboard.imageData() : null;
+  const data = insane.clipboard.imageData ? insane.clipboard.imageData() : null;
   if (!data) return null;
   let names;
   try { names = new Set(fs.list(folder(slug)).map((e) => e.name)); } catch (e) { names = new Set(); }

@@ -1,4 +1,4 @@
-/* lm_link.c — lord-media's end of a live link (../live.h). The other end is a sandboxed program of a third party
+/* lm_link.c — insane-media's end of a live link (../live.h). The other end is a sandboxed program of a third party
  * that also reads from the network: every length is checked here, and a message out of bounds ends the link. */
 #include "lm_link.h"
 

@@ -6,20 +6,20 @@ This document gathers what's needed to build the image, write it, develop on the
 
 > **Status (2026-10-18):** first bring-up on a real **Raspberry Pi 5 (16 GB, SD card)** running
 > Raspberry Pi OS-style Debian 13 (kernel `6.18.50+rpt-rpi-2712`, 16K pages, no monitor attached).
-> Verified on the board: native build, the headless test suites, NEON, the arm64 `.deb`, lord-sessiond
+> Verified on the board: native build, the headless test suites, NEON, the arm64 `.deb`, insane-sessiond
 > and the login screen starting on vc4 without a monitor, and `build-img.sh` (see "Results on the
 > board"). **Not verified yet:** anything with a monitor on HDMI (KMS modeset, GPU composition on
 > screen, hardware cursor, FPS), the desktop session, remote-desktop screenshots, and booting the
 > image that `build-img.sh` produced.
 >
 > **Update (2026-10-18, later):** the image now ships **the Insane OS build of the Raspberry Pi kernel**
-> (`6.18.57-lordos-rpi-2712`, Raspberry Pi's source and `bcm2712_defconfig` plus Landlock; see "The
+> (`6.18.57-insaneos-rpi-2712`, Raspberry Pi's source and `bcm2712_defconfig` plus Landlock; see "The
 > Insane OS kernel"), **switch files** on the boot partition (`ssh`, `remote-desktop`, Wi-Fi in
-> `lordos-user.txt`; see "Switch files") and a post-flash check (`verify-board`, see "After
+> `insaneos-user.txt`; see "Switch files") and a post-flash check (`verify-board`, see "After
 > flashing"). Built on the board; it is verified by booting the reflashed card.
 >
 > **Update (2026-10-19, 0.8.4):** `build-kernel.sh` now builds revision 3,
-> **`6.18.57-lordos.3-rpi-2712`** (`6.18.57-3+lordos`): the same source and options plus sock_diag
+> **`6.18.57-insaneos.3-rpi-2712`** (`6.18.57-3+insaneos`): the same source and options plus sock_diag
 > `SOCK_DESTROY` (`INET_DIAG_DESTROY`, `INET_UDP_DIAG`), so the firewall closes the connections a new
 > rule denies instead of leaving them stalled. Each kernel revision now has its own release, so the
 > previous one stays installed and bootable (see "Switching kernels on a board"). Cross-compiled on
@@ -35,33 +35,33 @@ This document gathers what's needed to build the image, write it, develop on the
 > were measured with InsaneBench's desktop test (`BENCHMARK.md`, "The desktop under load"). **Still not measured:**
 > two monitors and 4K.
 >
-> **Update (2026-10-27, 0.8.5):** released with the image `lordos-0.8.5-rpi5-arm64.img.xz`. A Pi 5 on
+> **Update (2026-10-27, 0.8.5):** released with the image `insaneos-0.8.5-rpi5-arm64.img.xz`. A Pi 5 on
 > 0.8.4 updated to the same package built as `0.8.5~rc2` with `apt` and restarted (no migration;
 > `CHANGELOG.md`, 0.8.5, Upgrading). What changes on the Pi: the login screen follows a monitor plugged
 > in after boot (`SESSIONS.md`), the Store follows apt's priorities so "Update all" no longer takes
 > Raspberry Pi's builds of Debian packages, and packages with a `+` in their name (`kms++-utils`,
-> `libkms++0`) download from lordos.org, so Settings → Board firmware can install the bootloader tools
+> `libkms++0`) download from insaneos.org, so Settings → Board firmware can install the bootloader tools
 > from the Insane OS repository alone (`PACKAGES.md`). Still not measured: the same as above.
 >
-> **Update (2026-10-30, 0.8.6):** released with the image `lordos-0.8.6-rpi5-arm64.img.xz` (783,667,748
+> **Update (2026-10-30, 0.8.6):** released with the image `insaneos-0.8.6-rpi5-arm64.img.xz` (783,667,748
 > bytes, sha256 `a81a2e068870099ac70aef8eaa08d0f1e33c0b3825f18f231f2e43ee251ea613`). A Pi 5 on 0.8.5 updated to 0.8.6 with `apt` against
-> `lordos.org/apt-staging` and restarted: no migration ran, the settings files are unchanged, and it
+> `insaneos.org/apt-staging` and restarted: no migration ran, the settings files are unchanged, and it
 > came back with 0.8.6-beta build 20261030, the first frame 7.63 s after the kernel, in a release build
 > with signed code (`UPDATES.md`, "Release tests"). The Store's own package engine and the Store → Updates
 > screen were not exercised, and a second reinstall was not run. The test suites were not rerun on the
 > Pi for 0.8.6. Results are in `results/0.8.6-beta/pi5-16gb-hdmi/` (`RESULTS.md`). Still not
 > measured: the same as above.
 >
-> **Not tested:** the `lordos-0.8.6-rpi5-arm64.img.xz` file itself was not written to a card or booted. Its package is
+> **Not tested:** the `insaneos-0.8.6-rpi5-arm64.img.xz` file itself was not written to a card or booted. Its package is
 > the one tested on the Pi above, built in the same run.
 >
-> **Update (2026-11-01, 0.8.7):** the image is `lordos-0.8.7-rpi5-arm64.img.xz`. FFmpeg now comes from Raspberry Pi's
-> archive, pinned in the image and by a migration on upgrades, and `lord-media` drives the Pi 5's HEVC decoder with it
+> **Update (2026-11-01, 0.8.7):** the image is `insaneos-0.8.7-rpi5-arm64.img.xz`. FFmpeg now comes from Raspberry Pi's
+> archive, pinned in the image and by a migration on upgrades, and `insane-media` drives the Pi 5's HEVC decoder with it
 > (`WALLPAPERS.md`, `MEDIA.md`).
 >
-> **Update (2026-11-03, 0.8.8):** the image is `lordos-0.8.8-rpi5-arm64.img.xz` (811,565,352 bytes, sha256
+> **Update (2026-11-03, 0.8.8):** the image is `insaneos-0.8.8-rpi5-arm64.img.xz` (811,565,352 bytes, sha256
 > `648e3d159616617ccbb31d80381c5fb990a1d722ea4c231769843783c16ffdc4`), built for the release with `RELEASE=1` from
-> signed code. A Pi 5 read the arm64 index of `lordos.org/apt-staging` and found 0.8.8 as the candidate. The image
+> signed code. A Pi 5 read the arm64 index of `insaneos.org/apt-staging` and found 0.8.8 as the candidate. The image
 > itself was not written to a card or booted for this release.
 
 ## Models
@@ -88,7 +88,7 @@ This document gathers what's needed to build the image, write it, develop on the
 
 ## The image
 
-`tools/rpi/build-img.sh` builds `lordos-<version>-rpi5-arm64.img.xz`. It is written the same way to an
+`tools/rpi/build-img.sh` builds `insaneos-<version>-rpi5-arm64.img.xz`. It is written the same way to an
 SD card or an NVMe. The Pi 5 is the only supported board: the image also carries a kernel for the Pi 4,
 but booting it there is untested (see "Models").
 
@@ -101,16 +101,16 @@ but booting it there is untested (see "Models").
   exFAT and NTFS drives, power profiles, the MIME database and the GSettings schemas (since 0.8.4.1).
 - **Chromium and Firefox ESR** (Debian's arm64 builds, since 0.8.4.1), with the ISO's defaults from
   the same script, `tools/iso/browser-defaults.sh`: Chromium's `master_preferences` with
-  `custom_chrome_frame` and the GTK theme, Firefox's `/etc/firefox-esr/lordos.js` (`inTitlebar` 1),
+  `custom_chrome_frame` and the GTK theme, Firefox's `/etc/firefox-esr/insaneos.js` (`inTitlebar` 1),
   so both draw a single bar with Insane OS's window buttons; the GTK themes, the video extension and
-  the video settings (`video-optimize`, Settings → Displays → Video) come with the lordos package.
+  the video settings (`video-optimize`, Settings → Displays → Video) come with the insaneos package.
   Measured cost in `ISO.md`, "Release test (0.8.4.1 Beta, October 25)".
 - **The Insane OS build of the Raspberry Pi kernel** (see "The Insane OS kernel"), when
   `tools/rpi/build-kernel.sh` has built it; otherwise Raspberry Pi's archive kernel, with a loud
   warning (it has no Landlock, BPF LSM or BTF):
-  - `linux-image-<version>-lordos-rpi-2712`: the Pi 5 one, with 16K pages (archive:
+  - `linux-image-<version>-insaneos-rpi-2712`: the Pi 5 one, with 16K pages (archive:
     `linux-image-rpi-2712`);
-  - `linux-image-<version>-lordos-rpi-v8`: the Pi 4/400/CM4 one, with 4K pages (archive:
+  - `linux-image-<version>-insaneos-rpi-v8`: the Pi 4/400/CM4 one, with 4K pages (archive:
     `linux-image-rpi-v8`). The Pi 5 can also use it, with `kernel=kernel8.img` in `config.txt`.
 - **Firmware from the Raspberry Pi archive** (`archive.raspberrypi.com/debian`, suite trixie), only
   these packages (`/etc/apt/preferences.d/raspberrypi`):
@@ -130,11 +130,11 @@ but booting it there is untested (see "Models").
   `raspi-config` doesn't apply on Insane OS.
 - **Bluetooth** (the CYW43455's Bluetooth half, on a UART; see "Bluetooth"), from Debian: `bluez`,
   `bluez-firmware` (the chip's patch, `brcm/BCM4345C0.hcd`), `libspa-0.2-bluetooth` (headsets in
-  PipeWire) and `rfkill`, plus our SCO-routing helper (`lordos-rpi-bt@hciN`).
+  PipeWire) and `rfkill`, plus our SCO-routing helper (`insaneos-rpi-bt@hciN`).
 - **Debian 13's Mesa:** v3d (GLES 3.1), v3dv (Vulkan) and kmsro (vc4 for the display, v3d for
-  rendering). lord-server is compiled with `GPU=1`.
+  rendering). insane-server is compiled with `GPU=1`.
 - **The same Insane OS package as the ISO.** Built by `tools/iso/mkdeb.sh` with `DEB_ARCH=arm64`, installed with
-  the same `lordos-hwdata` package (0.8.7, `tools/iso/mkdeb-hwdata.sh`, `Architecture: all`: the signed
+  the same `insaneos-hwdata` package (0.8.7, `tools/iso/mkdeb-hwdata.sh`, `Architecture: all`: the signed
   tested-hardware snapshot it depends on).
 - **Partitions:** MBR, in the layout Raspberry Pi Imager and the firmware expect:
 
@@ -171,9 +171,9 @@ Pi, and everything else from Debian. The kernel is Insane OS's own build of it (
 
 Raspberry Pi's kernel leaves Landlock out (`# CONFIG_SECURITY_LANDLOCK is not set`, `CONFIG_LSM=""`,
 so `/sys/kernel/security/lsm` is just `capability`). Insane OS confines apps (`.lpk`) and its helpers
-(`lord-doc`, `lord-media`, `lord-maild`) with Landlock (`server/src/sec/sandbox.c`, see
+(`insane-doc`, `insane-media`, `insane-maild`) with Landlock (`server/src/sec/sandbox.c`, see
 `PRIVACY.md`); without it `doc_evil.sh` fails 5 of 25 and `sandbox-test` is skipped. It also has no
-BPF LSM and no BTF (`/sys/kernel/btf/vmlinux`), which `lord-netperm` needs for "No Bluetooth" of
+BPF LSM and no BTF (`/sys/kernel/btf/vmlinux`), which `insane-netperm` needs for "No Bluetooth" of
 Linux apps (its per-cgroup LSM program on `socket_create`, `FIREWALL.md`); without them
 `npverify-test` fails 35/36. The tests stay as they are: the fix is the kernel.
 
@@ -184,8 +184,8 @@ what Insane OS needs:
 # on the Pi (arm64 Debian 13): about 75 min per flavour on a Pi 5 (4 cores, SD card), ~10 GB free
 sudo apt-get install -y --no-install-recommends build-essential bc bison flex libssl-dev libelf-dev \
   libdw-dev dwarves cpio kmod rsync dpkg-dev debhelper git
-tools/rpi/build-kernel.sh /var/tmp/lordos-kernel all     # 2712 (Pi 5), v8 (Pi 4), or all
-# → /var/tmp/lordos-kernel/out/linux-image-6.18.57-lordos.3-rpi-2712_6.18.57-3+lordos_arm64.deb, …
+tools/rpi/build-kernel.sh /var/tmp/insaneos-kernel all     # 2712 (Pi 5), v8 (Pi 4), or all
+# → /var/tmp/insaneos-kernel/out/linux-image-6.18.57-insaneos.3-rpi-2712_6.18.57-3+insaneos_arm64.deb, …
 
 # or cross-compiled on an x86-64 Debian 13 (VM 116: 4 vCPU, 4 GB RAM; 67 min for 2712), the same
 # packages plus the cross compiler and the arm64 libc headers (for the headers package's tools)
@@ -203,15 +203,15 @@ than 10 GB free on its SD card.
 
 - **Source:** `github.com/raspberrypi/linux`, branch `rpi-6.18.y` (`RPI_KERNEL_BRANCH`;
   `RPI_KERNEL_REF=<commit>` pins one). The first build (2026-10-18) used commit `234188315037`,
-  kernel **6.18.57**; the archive shipped 6.18.50 at the time. The 0.8.1 rebuild (`-2+lordos`, BPF
-  LSM and BTF) and the 0.8.4 one (`-3+lordos`, sock_diag `SOCK_DESTROY`) use the same commit.
+  kernel **6.18.57**; the archive shipped 6.18.50 at the time. The 0.8.1 rebuild (`-2+insaneos`, BPF
+  LSM and BTF) and the 0.8.4 one (`-3+insaneos`, sock_diag `SOCK_DESTROY`) use the same commit.
   `out/SOURCE` records it.
 - **Config:** `bcm2712_defconfig` (Pi 5, 16K pages) or `bcm2711_defconfig` (Pi 4, 4K pages), then
   `scripts/config` and `olddefconfig`. The whole diff against the defconfig (`out/config-*.diff`):
 
   ```diff
   -CONFIG_LOCALVERSION="-v8-16k"
-  +CONFIG_LOCALVERSION="-lordos.3-rpi-2712"
+  +CONFIG_LOCALVERSION="-insaneos.3-rpi-2712"
   -# CONFIG_SECURITY_LANDLOCK is not set
   +CONFIG_SECURITY_LANDLOCK=y
   -CONFIG_LSM=""
@@ -237,44 +237,44 @@ than 10 GB free on its SD card.
   `CONFIG_LSM` uses the usual Debian order; the kernel skips the ones it doesn't build (lockdown
   and IMA/EVM stay off, as Raspberry Pi has them), so the active list is
   **`capability,landlock,yama,bpf`**. The image's `cmdline.txt` has the same `lsm=` list.
-- **Yama (0.8.1)**, so the lordos package's `kernel.yama.ptrace_scope = 1` (a process may only
+- **Yama (0.8.1)**, so the insaneos package's `kernel.yama.ptrace_scope = 1` (a process may only
   trace its own descendants) applies on the Pi as on a PC; with 0.8.0's kernel the sysctl had
   nothing to set.
-- **BPF LSM and BTF (0.8.1).** `CONFIG_BPF_LSM` lets `lord-netperm` attach its per-cgroup LSM
+- **BPF LSM and BTF (0.8.1).** `CONFIG_BPF_LSM` lets `insane-netperm` attach its per-cgroup LSM
   program (`BPF_LSM_CGROUP`) to `socket_create`, so "No Bluetooth" is enforced for Linux apps on the
   Pi as on a PC; its attach point is the BTF id of `bpf_lsm_socket_create`, read from
   `/sys/kernel/btf/vmlinux` (`CONFIG_DEBUG_INFO_BTF`, generated by `pahole` from the DWARF debug
   info: Debian's `dwarves`). The debug info is only there to make BTF: the modules are stripped by
   the packaging (their `.BTF` sections stay) and the `-dbg` package isn't built
-  (`DEB_BUILD_PROFILES=pkg.linux-lordos-rpi-<flavour>.nokerneldbg`), so the package hardly grows.
+  (`DEB_BUILD_PROFILES=pkg.linux-insaneos-rpi-<flavour>.nokerneldbg`), so the package hardly grows.
   The script checks `vmlinux` has a `.BTF` section. The build needs about 10 GB free while it runs
   (the object files carry DWARF) and takes about 50 % longer.
-- **sock_diag `SOCK_DESTROY` (0.8.4, `-3+lordos`).** When a rule changes to deny, `lord-netperm`
+- **sock_diag `SOCK_DESTROY` (0.8.4, `-3+insaneos`).** When a rule changes to deny, `insane-netperm`
   drops the packets of the app's open connections and destroys its TCP and connected UDP (QUIC)
   sockets over sock_diag netlink, so the app sees the connection end (`FIREWALL.md`, "Existing
   connections are cut"). Destroying needs `CONFIG_INET_DIAG_DESTROY` (TCP) and `CONFIG_INET_UDP_DIAG`
   (UDP); `INET_DIAG` and `INET_TCP_DIAG` are already modules in the defconfig (enforced too), and the
-  kernel loads them when `lord-netperm` opens its sock_diag socket. Raspberry Pi's defconfig leaves
+  kernel loads them when `insane-netperm` opens its sock_diag socket. Raspberry Pi's defconfig leaves
   the other two off. The options were in `build-kernel.sh` since 0.8.3, but the 0.8.3 image kept
-  0.8.2's `-2+lordos` kernel, so on the Pi the connections stalled until the app's own timeout (the
+  0.8.2's `-2+insaneos` kernel, so on the Pi the connections stalled until the app's own timeout (the
   journal says `the kernel can't destroy TCP sockets`). The script checks `INET_DIAG_DESTROY` stuck,
   `build-img.sh` and `verify-board` check the kernel config.
 - **Already in the defconfig, checked by the script** so a future defconfig can't drop them:
   `SECCOMP_FILTER` (sandbox.c), cgroup v2 with `MEMCG`, `CGROUP_PIDS` and `CGROUP_SCHED` (per-app
   limits; `cgroup_enable=memory` is in `cmdline.txt` because Raspberry Pi turns memcg off at boot),
-  and `BPF_SYSCALL`, `BPF_JIT`, `CGROUP_BPF` (lord-netperm's cgroup hooks). `USER_NS` stays as
+  and `BPF_SYSCALL`, `BPF_JIT`, `CGROUP_BPF` (insane-netperm's cgroup hooks). `USER_NS` stays as
   Raspberry Pi has it, on (the launcher's own view for restricted Linux apps uses it).
-- **Packages:** `make bindeb-pkg`, version `6.18.57-3+lordos` (`LORDOS_KREV`; `-1` was 0.8.0's,
-  without the BPF LSM, `-2` 0.8.1's, without `SOCK_DESTROY`), release `6.18.57-lordos.3-rpi-2712`
-  (`-lordos.3-rpi-v8` for the Pi 4).
+- **Packages:** `make bindeb-pkg`, version `6.18.57-3+insaneos` (`INSANEOS_KREV`; `-1` was 0.8.0's,
+  without the BPF LSM, `-2` 0.8.1's, without `SOCK_DESTROY`), release `6.18.57-insaneos.3-rpi-2712`
+  (`-insaneos.3-rpi-v8` for the Pi 4).
   - **One release per revision (since `-3`).** Revisions 1 and 2 were both
-    `6.18.57-lordos-rpi-2712`, so a new revision replaced the old one's `vmlinuz` and
+    `6.18.57-insaneos-rpi-2712`, so a new revision replaced the old one's `vmlinuz` and
     `/lib/modules` in place: the old kernel couldn't stay bootable, since with `MODVERSIONS` and
     `DEBUG_INFO_BTF_MODULES` (without `MODULE_ALLOW_BTF_MISMATCH`) a kernel refuses another build's
-    modules, Wi-Fi among them. Now `-lordos.<rev>-rpi-<flavour>` is its own package
-    (`linux-image-6.18.57-lordos.3-rpi-2712`) next to the previous one, as Debian does with its ABI
+    modules, Wi-Fi among them. Now `-insaneos.<rev>-rpi-<flavour>` is its own package
+    (`linux-image-6.18.57-insaneos.3-rpi-2712`) next to the previous one, as Debian does with its ABI
     numbers. The `.<rev>` form is chosen for the order: `sort -V` (the hook's "newest") puts
-    `-lordos.3-` after `-lordos-`, while `-lordos3-` or `-3-lordos-` would sort before it and the
+    `-insaneos.3-` after `-insaneos-`, while `-insaneos3-` or `-3-insaneos-` would sort before it and the
     hook would keep copying the old kernel.
   - The `-rpi-<flavour>` suffix is what `raspi-firmware`'s hook keys
   on, so it installs exactly like Raspberry Pi's: `kernel_2712.img`, initramfs, device trees and
@@ -285,12 +285,12 @@ than 10 GB free on its SD card.
   - `make dtbs_install` doesn't install `overlays/README`, which the hook copies (and fails
     without): the script adds it to the package.
   - Measured on 2026-10-18 on the Pi 5 (load 4, 40–55 °C with the Active Cooler): 2712 in 50 min,
-    v8 in 49 min. `linux-image-6.18.57-lordos-rpi-2712_6.18.57-1+lordos_arm64.deb` 32 MB (vmlinuz
-    10 MB, 385 overlays) and `linux-image-6.18.57-lordos-rpi-v8_…` 33 MB; `out/SHA256SUMS` lists
-    them. The v8 diff is the same three options (`-v8` → `-lordos-rpi-v8`).
+    v8 in 49 min. `linux-image-6.18.57-insaneos-rpi-2712_6.18.57-1+insaneos_arm64.deb` 32 MB (vmlinuz
+    10 MB, 385 overlays) and `linux-image-6.18.57-insaneos-rpi-v8_…` 33 MB; `out/SHA256SUMS` lists
+    them. The v8 diff is the same three options (`-v8` → `-insaneos-rpi-v8`).
 - **Not replaced by the archive.** `build-img.sh` installs the Insane OS `.debs` from `KERNEL_DEBS`
-  (default `/var/tmp/lordos-kernel/out`) instead of `linux-image-rpi-<flavour>`, and writes
-  `/etc/apt/preferences.d/lordos-kernel` with priority -1 for Raspberry Pi's kernel packages of
+  (default `/var/tmp/insaneos-kernel/out`) instead of `linux-image-rpi-<flavour>`, and writes
+  `/etc/apt/preferences.d/insaneos-kernel` with priority -1 for Raspberry Pi's kernel packages of
   that flavour (`linux-image-rpi-2712`, `linux-image-*+rpt-rpi-2712` and the headers; checked with
   `apt-cache policy`: no candidate). Otherwise a newer `+rpt` kernel would win the hook's "newest
   `vmlinuz-*-rpi-2712`" and boot without Landlock. Kernel updates come as new Insane OS packages.
@@ -303,15 +303,15 @@ The firmware reads `config.txt` on `bootfs`; `os_prefix=<folder>/` makes it take
 initramfs, `cmdline.txt`, device trees and overlays from that folder instead of the top level. On
 an installed system the top level is always what the packages put there: the newest Insane OS kernel
 (`raspi-firmware`'s hook copies it on every install). The previous kernel stays installed (its own
-`/lib/modules`) and its boot files go in a folder, `lordos-prev/`:
+`/lib/modules`) and its boot files go in a folder, `insaneos-prev/`:
 
 ```sh
 # keep the running kernel's boot files before installing a new one (once per revision)
-K=$(uname -r); D=/boot/firmware/lordos-prev
+K=$(uname -r); D=/boot/firmware/insaneos-prev
 sudo mkdir -p $D/overlays && sudo cp /boot/vmlinuz-$K $D/kernel_2712.img && sudo cp /boot/initrd.img-$K $D/initramfs_2712
 sudo cp /boot/firmware/cmdline.txt $D/ && sudo cp /usr/lib/linux-image-$K/broadcom/bcm27*.dtb $D/
 sudo cp /usr/lib/linux-image-$K/overlays/* $D/overlays/
-sudo dpkg -i linux-image-6.18.57-lordos.3-rpi-2712_6.18.57-3+lordos_arm64.deb   # the hook: top level = new
+sudo dpkg -i linux-image-6.18.57-insaneos.3-rpi-2712_6.18.57-3+insaneos_arm64.deb   # the hook: top level = new
 # first boot of the new kernel only once: tryboot.txt = config.txt without os_prefix
 sudo reboot "0 tryboot"         # if it doesn't come up, any reset boots config.txt again
 ```
@@ -322,16 +322,16 @@ sudo reboot "0 tryboot"         # if it doesn't come up, any reset boots config.
 
   ```
   [all]
-  os_prefix=lordos-prev/
+  os_prefix=insaneos-prev/
   ```
 
   Removing those two lines boots the new kernel again. To try the previous one **once** without
   editing `config.txt`, put that line in `tryboot.txt` (a copy of `config.txt`) and
   `sudo reboot "0 tryboot"`; the next reset is back on the top level.
-- `uname -r` tells them apart: `6.18.57-lordos.3-rpi-2712` (0.8.4) or `6.18.57-lordos-rpi-2712`
-  (0.8.1–0.8.3's `-2+lordos`).
+- `uname -r` tells them apart: `6.18.57-insaneos.3-rpi-2712` (0.8.4) or `6.18.57-insaneos-rpi-2712`
+  (0.8.1–0.8.3's `-2+insaneos`).
 - The Pi 5 used for development (2026-10-19) has exactly this: the top level is `-3`,
-  `lordos-prev/` is `-2`, and `tryboot.txt` boots `lordos-prev/` once. Both were booted and checked.
+  `insaneos-prev/` is `-2`, and `tryboot.txt` boots `insaneos-prev/` once. Both were booted and checked.
 
 ### Packages to build it
 
@@ -350,12 +350,12 @@ sudo apt-get install -y --no-install-recommends qemu-user-static binfmt-support
 # on the development machine: the themes (they are JS, the same on every architecture)
 npm run build
 # on the Debian where it's built (VM 116 or the Pi itself), from the repository root
-sudo tools/rpi/build-img.sh /var/tmp/lordos-rpi     # → /var/tmp/lordos-rpi/out/
+sudo tools/rpi/build-img.sh /var/tmp/insaneos-rpi     # → /var/tmp/insaneos-rpi/out/
 ```
 
 Steps:
 
-1. **lord-server and lord-sessiond for aarch64.**
+1. **insane-server and insane-sessiond for aarch64.**
    - If `server/build/` is already aarch64 (`make -C server` on the Pi), it is used.
    - If not, a separate arm64 chroot is built (`buildroot/`, reused) and it's compiled inside with
      `GPU=1`.
@@ -364,10 +364,10 @@ Steps:
 3. **debootstrap arm64:** native on an arm64 host. On x86-64 it's two stages, with qemu.
 4. **The Raspberry Pi archive.** Its key's fingerprint is verified (`RPI_KEY_FPR`). Then the packages
    and the `.deb` are installed.
-5. **Configuration:** the same as the ISO (locales, `ping` without root, lordos.service on tty1,
-   PipeWire with linger, the `lordos-greeter` user), plus:
-   - the first boot (`lordos-rpi-firstboot.service`);
-   - waiting for vc4 (`lordos.service.d/rpi.conf`).
+5. **Configuration:** the same as the ISO (locales, `ping` without root, insaneos.service on tty1,
+   PipeWire with linger, the `insaneos-greeter` user), plus:
+   - the first boot (`insaneos-rpi-firstboot.service`);
+   - waiting for vc4 (`insaneos.service.d/rpi.conf`).
 
    root is locked.
 6. **The image:** `sfdisk` (MBR), FAT32 and ext4. Then the system is copied and `fstab` and
@@ -379,7 +379,7 @@ Variables:
 | Variable | What for |
 |---|---|
 | `RPI_SSH=1` | SSH server on from the start (for development); without it `openssh-server` ships off and the `ssh` switch file turns it on |
-| `KERNEL_DEBS` | folder with the Insane OS kernel packages (`build-kernel.sh`), `/var/tmp/lordos-kernel/out` by default |
+| `KERNEL_DEBS` | folder with the Insane OS kernel packages (`build-kernel.sh`), `/var/tmp/insaneos-kernel/out` by default |
 | `IMG_EXTRA_MB` | free space in the image, 512 by default |
 | `MIRROR`, `RPI_MIRROR` | Debian and Raspberry Pi mirrors |
 | `RPI_KEY_FPR`, `RPI_KEY_NOCHECK=1` | the Raspberry Pi key |
@@ -403,18 +403,18 @@ Estimate: on x86-64 with qemu, 30–60 minutes the first time. Natively on the P
 - **Insane OS Imager** (recommended; `IMAGER.md`): in Insane OS (App Launcher → System) or as a small app
   for other computers. It downloads the latest release, checks its signature, writes
   and verifies the card, and prepares the first boot (computer name, language, user, Wi-Fi, SSH and
-  remote desktop, appearance, cooling) in `lordos-firstrun.txt` (next section).
+  remote desktop, appearance, cooling) in `insaneos-firstrun.txt` (next section).
 - **Raspberry Pi Imager:** "Choose OS" → "Use custom" → the `.img.xz`, and then the card or the
   NVMe.
   - Skip Imager's OS customization (it's designed for Raspberry Pi OS; newer versions write
     cloud-init files that Insane OS doesn't read). If it leaves a `userconf.txt` on the boot
     partition, Insane OS uses it (see below).
-  - Instead, add the switch files and `lordos-user.txt` to the `bootfs` partition (see "Switch
+  - Instead, add the switch files and `insaneos-user.txt` to the `bootfs` partition (see "Switch
     files"); `out/FLASHING.txt` next to the image has the exact steps for macOS.
 - **dd** (Linux and other Unix-like systems):
   ```sh
-  shasum -a 256 -c lordos-<version>-rpi5-arm64.img.xz.sha256
-  xz -dc lordos-<version>-rpi5-arm64.img.xz | sudo dd of=/dev/rdiskN bs=4m   # Linux: of=/dev/sdX bs=4M conv=fsync
+  shasum -a 256 -c insaneos-<version>-rpi5-arm64.img.xz.sha256
+  xz -dc insaneos-<version>-rpi5-arm64.img.xz | sudo dd of=/dev/rdiskN bs=4m   # Linux: of=/dev/sdX bs=4M conv=fsync
   ```
 - **balenaEtcher:** opens the `.img.xz` directly.
 - **NVMe:**
@@ -430,11 +430,11 @@ Estimate: on x86-64 with qemu, 30–60 minutes the first time. Natively on the P
 
 ### First boot
 
-`lordos-rpi-firstboot.service` runs before lord-sessiond (`/usr/lib/lordos/rpi/firstboot`) and does
+`insaneos-rpi-firstboot.service` runs before insane-sessiond (`/usr/lib/insaneos/rpi/firstboot`) and does
 two things.
 
-0. **The Insane OS Imager's settings (0.8.4).** If the `bootfs` partition has a `lordos-firstrun.txt`,
-   `/usr/lib/lordos/bin/lordos-firstrun` checks it with a strict parser and, only if all of it is
+0. **The Insane OS Imager's settings (0.8.4).** If the `bootfs` partition has a `insaneos-firstrun.txt`,
+   `/usr/lib/insaneos/bin/insaneos-firstrun` checks it with a strict parser and, only if all of it is
    valid, applies it once: computer name, language, time zone, keyboard, Wi-Fi country and network
    (the derived WPA2 key, never the password), the user (from a yescrypt or SHA-512 crypt hash),
    automatic login, SSH (keys only or with passwords), remote desktop (local network only),
@@ -447,8 +447,8 @@ two things.
 1. **Grows partition 2** to the end of the card or disk (`sfdisk -N 2`, `partx -u` and an online
    `resize2fs`).
 2. **The user**, like the installer's "User" step (`docs/ISO.md`).
-   - **With `lordos-user.txt`** on the `bootfs` partition: it's copied from
-     `lordos-user.txt.example`, which ships in the image. It has user, name, `password_hash` (or
+   - **With `insaneos-user.txt`** on the `bootfs` partition: it's copied from
+     `insaneos-user.txt.example`, which ships in the image. It has user, name, `password_hash` (or
      `password`), computer name, language, time zone and keyboard.
      - It's validated with `install.c`'s rules: the name, reserved names, the computer name, the
        zone and the keyboard.
@@ -458,10 +458,10 @@ two things.
      - It boots to the **login screen**, like an installed system (empty `AUTOLOGIN=`).
      - The `userconf.txt` from Raspberry Pi OS / Imager (`user:hash`) also works.
    - **Without the file: setup mode.**
-     - It logs in on its own with the `lordos` user, without a password and with passwordless sudo,
+     - It logs in on its own with the `insaneos` user, without a password and with passwordless sudo,
        like the live ISO.
      - In **Settings → Users** you create your own account, as an administrator. On the next boot
-       `firstboot` sees there's an administrator, deletes `lordos` and its sudo and switches to the
+       `firstboot` sees there's an administrator, deletes `insaneos` and its sudo and switches to the
        login screen.
      - In the meantime, **don't turn on remote desktop** and don't leave the board exposed on the
        network.
@@ -475,37 +475,37 @@ ROADMAP, M8).
 
 Like Raspberry Pi OS's `ssh` file: files dropped on the `bootfs` partition (FAT, editable from any
 computer) before booting. `firstboot` applies each one, logs it (`journalctl -u
-lordos-rpi-firstboot`) and deletes it (overwritten with zeros first, since they can hold a password).
+insaneos-rpi-firstboot`) and deletes it (overwritten with zeros first, since they can hold a password).
 A name with `.txt` (as some editors save it) works the same.
 
 | File | Contents | What it does |
 |---|---|---|
 | `ssh` | empty | Turns the SSH server on (`systemctl enable ssh`, started right away) and keeps it on. The image ships `openssh-server` off; each board creates its own host keys. Logging in needs an account with a password: root is locked and the setup user has none |
-| `remote-desktop` | empty, or `port=5673` and/or `allow=all\|group` | Turns Insane OS remote desktop on (`https://<board IP>:5673`, `REMOTE.md`), writing the same `/etc/lordos/remote/config` (`enabled=1`, `port=`, `allow=`) that Settings → Sharing's `remote-enable`/`remote-config` write; lord-sessiond reads it when `lordos.service` starts. It still asks for a user and password: while there's no account with a password (setup mode) the file is **kept** and applied on a later boot. `port` must be 1024–65535 (5673 by default); `allow=group` limits it to the `lordos-remote` group |
-| `lordos-user.txt` | from `lordos-user.txt.example` | The first-boot user (above), read only on the first boot. Optional Wi-Fi: `wifi_ssid=`, `wifi_password=` (8–128 characters; empty for an open network) and `wifi_country=` (two letters) |
+| `remote-desktop` | empty, or `port=5673` and/or `allow=all\|group` | Turns Insane OS remote desktop on (`https://<board IP>:5673`, `REMOTE.md`), writing the same `/etc/insaneos/remote/config` (`enabled=1`, `port=`, `allow=`) that Settings → Sharing's `remote-enable`/`remote-config` write; insane-sessiond reads it when `insaneos.service` starts. It still asks for a user and password: while there's no account with a password (setup mode) the file is **kept** and applied on a later boot. `port` must be 1024–65535 (5673 by default); `allow=group` limits it to the `insaneos-remote` group |
+| `insaneos-user.txt` | from `insaneos-user.txt.example` | The first-boot user (above), read only on the first boot. Optional Wi-Fi: `wifi_ssid=`, `wifi_password=` (8–128 characters; empty for an open network) and `wifi_country=` (two letters) |
 | `userconf.txt` | `user:hash` | Raspberry Pi OS / Imager's user file, first boot only |
 
-**Wi-Fi at first boot.** The image's network stack is **lord-netd** (no NetworkManager, no
+**Wi-Fi at first boot.** The image's network stack is **insane-netd** (no NetworkManager, no
 systemd-networkd): at boot it brings up every free physical interface with its own DHCP client, and
 on Wi-Fi interfaces it starts `wpa_supplicant` and loads the saved networks. `firstboot` saves the
-network from `lordos-user.txt` the same way Settings → Network does
-(`/etc/lordos/net/wifi/<SSID in hex>.json`, and `.key` with mode 0600), before lord-netd starts, so
+network from `insaneos-user.txt` the same way Settings → Network does
+(`/etc/insaneos/net/wifi/<SSID in hex>.json`, and `.key` with mode 0600), before insane-netd starts, so
 the board joins it on the first boot. `wifi_country` adds `cfg80211.ieee80211_regdom=<XX>` to
 `cmdline.txt` (the 5 GHz channels of that country, from the second boot; until then the world
-domain). lord-netd skips interfaces NetworkManager manages, which only matters on Raspberry Pi OS.
+domain). insane-netd skips interfaces NetworkManager manages, which only matters on Raspberry Pi OS.
 
 Options in `cmdline.txt` (a single line), as on the ISO:
 
 | Option | What it does |
 |---|---|
-| `lordos.gpu=0` | safe mode: everything on the CPU |
-| `lordos.lang=es` / `pt` / `fr` | first-boot language (English by default, like the ISO) |
+| `insaneos.gpu=0` | safe mode: everything on the CPU |
+| `insaneos.lang=es` / `pt` / `fr` | first-boot language (English by default, like the ISO) |
 | `video=HDMI-A-1:1920x1080@60` | pins the mode, for example on a 4K monitor (on the CPU, 4K is heavy: see below) |
 | remove `splash` (or add `nosplash`) | boots in text, without the boot splash |
 
 ### Boot splash
 
-From power-on to the login screen the board shows the Insane OS crown with a progress bar (the same
+From power-on to the login screen the board shows the Insane OS apple with a progress bar (the same
 Plymouth theme as the ISO, `ISO.md`, "Boot splash and boot menu"), with no rainbow square, no kernel
 logo and no console text.
 
@@ -514,23 +514,23 @@ logo and no console text.
 - **`config.txt`:** `disable_splash=1`: the firmware's rainbow square is not drawn.
 - **`cmdline.txt`:** `console=serial0,115200 console=tty1 … quiet splash
   plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3`, keeping
-  `root=`, `lsm=`, `cgroup_enable=memory` and `lordos.lang=`. The local console moved from `tty3`
+  `root=`, `lsm=`, `cgroup_enable=memory` and `insaneos.lang=`. The local console moved from `tty3`
   to **`tty1`**: Plymouth takes its terminal (keyboard, password prompt, Esc) from the local
   `console=` and Insane OS runs on tty1, so both stay on the same VT (Raspberry Pi OS does the same). The kernel's messages
   stay hidden (`quiet`, Plymouth); **Esc** shows them during the boot, as usual.
-- **initramfs:** `plymouth` and `plymouth-label` are installed and `lordos` is the selected theme
-  (`plymouth-set-default-theme lordos`), so Plymouth's initramfs hook copies the theme, its plugins
+- **initramfs:** `plymouth` and `plymouth-label` are installed and `insaneos` is the selected theme
+  (`plymouth-set-default-theme insaneos`), so Plymouth's initramfs hook copies the theme, its plugins
   and a font (for the encrypted-disk password prompt). `/etc/initramfs-tools/modules` lists `vc4`
-  and `conf.d/lordos-splash.conf` keeps `MODULES=most` (the hook then adds the DRM drivers), so the
+  and `conf.d/insaneos-splash.conf` keeps `MODULES=most` (the hook then adds the DRM drivers), so the
   HDMI output is up in the initramfs and the splash shows within the first seconds instead of after
   the root file system is mounted. The Insane OS kernels have `DRM`, `DRM_VC4` and `DRM_V3D` as modules,
   and their packages build an initramfs through `/etc/kernel/postinst.d` (initramfs-tools); the
   raspi-firmware hook and `build-img.sh` copy it as `initramfs_2712` / `initramfs8`
-  (`auto_initramfs=1`). `build-img.sh` fails if an initramfs has no `lordos.script`.
+  (`auto_initramfs=1`). `build-img.sh` fails if an initramfs has no `insaneos.script`.
 - **Hand-off:** the same as the ISO (`SESSIONS.md`, "Boot splash"); on the Pi
-  `lordos-splash deactivate` runs after `wait-kms`, so Plymouth keeps drawing until vc4 is ready.
+  `insaneos-splash deactivate` runs after `wait-kms`, so Plymouth keeps drawing until vc4 is ready.
   Plymouth draws on vc4 (`card1`), the card with the HDMI connectors; `v3d` (`card0`) has none.
-- **First boot:** `lordos-rpi-firstboot` (growing the partition, the user, the switch files) runs
+- **First boot:** `insaneos-rpi-firstboot` (growing the partition, the user, the switch files) runs
   under the splash; its messages go to the journal and to the console, which Plymouth keeps hidden
   (Esc shows them).
 
@@ -556,20 +556,20 @@ Raspberry Pi OS's `pi-bluetooth` scripts:
   chip reports the placeholder address `43:45:c0:00:1f:ac`; the kernel replaces it with the device
   tree's.
 - **BlueZ** (Debian's `bluez`, `bluetooth.service` enabled) and the rest of the desktop side are the
-  same as on a PC (`SETTINGS.md`, "Bluetooth"): our own D-Bus client in `lord-server`, the
+  same as on a PC (`SETTINGS.md`, "Bluetooth"): our own D-Bus client in `insane-server`, the
   system-drawn pairing prompts, and headsets in PipeWire through `libspa-0.2-bluetooth` with the
-  lordos package's WirePlumber drop-in (`lordos-bluez.conf`).
+  insaneos package's WirePlumber drop-in (`insaneos-bluez.conf`).
 - **SCO routing, our helper.** Call audio (HFP/HSP: a headset's microphone) can leave the chip over
   HCI or over its PCM pins, which the Pi doesn't wire. Raspberry Pi OS's `bthelper` sets HCI with a
-  vendor command of the chip; Insane OS does the same with its own `/usr/lib/lordos/rpi/bt-uart`, run by
-  `lordos-rpi-bt@hciN.service` (udev starts it for an `hciN` whose parent is on the serial bus,
-  `/etc/udev/rules.d/90-lordos-rpi-bt.rules`; before `bluetooth.service`). It reads the setting
+  vendor command of the chip; Insane OS does the same with its own `/usr/lib/insaneos/rpi/bt-uart`, run by
+  `insaneos-rpi-bt@hciN.service` (udev starts it for an `hciN` whose parent is on the serial bus,
+  `/etc/udev/rules.d/90-insaneos-rpi-bt.rules`; before `bluetooth.service`). It reads the setting
   back first (`Read_SCO_PCM_Int_Param`, 0xfc1d) and only writes (`Write_SCO_PCM_Int_Param`,
   0xfc1c, `01 02 00 01 01`: routing over HCI, with the same other parameters as `bthelper`) when it
   differs,
   leaves the controller powered as it found it, skips a controller blocked by rfkill or not on a
   UART, warns if the address is still the chip's placeholder, and never fails the boot. It uses
-  `hciconfig`/`hcitool` from Debian's `bluez`; `lord-server` still never runs either (it speaks
+  `hciconfig`/`hcitool` from Debian's `bluez`; `insane-server` still never runs either (it speaks
   D-Bus to `bluetoothd` only). The setting survives a power cycle of the controller from Settings
   (an HCI reset): checked on the board.
 - **Not used from Raspberry Pi OS:** `pi-bluetooth` (`hciuart.service`/`btuart` are for the older
@@ -580,45 +580,45 @@ Raspberry Pi OS's `pi-bluetooth` scripts:
 To turn Bluetooth off for good, `dtoverlay=disable-bt` in `config.txt` (the UART is then free); the
 switch in Settings → Bluetooth only powers the controller off.
 
-**Checked on a Pi 5 (2026-10-18, Insane OS kernel `6.18.57-2+lordos`):** `hci0` on the UART with the
+**Checked on a Pi 5 (2026-10-18, Insane OS kernel `6.18.57-2+insaneos`):** `hci0` on the UART with the
 board's own address (`88:A2:…`, not the chip's placeholder), `bluetoothctl show` powered, and a
 12-second scan lists the devices around it (4 to 5 in that room). "No Bluetooth" for a Linux app:
 in the app's scope `socket(AF_BLUETOOTH)` gets `EPERM`, outside it works (`FIREWALL.md`, "Bluetooth
 sockets"). **Not checked yet:** pairing and a headset's audio on the board (they need a device in
 pairing mode next to it), and Settings → Bluetooth on the board's own screen (no Insane OS session was
 open; it is the same page and the same D-Bus client as on a PC, `SETTINGS.md`).
-The image built with this kernel (`lordos-0.8.1-rpi5-arm64.img.xz`, 2,717 MB uncompressed) was
+The image built with this kernel (`insaneos-0.8.1-rpi5-arm64.img.xz`, 2,717 MB uncompressed) was
 checked read-only, loop-mounted: our `kernel_2712.img` on `bootfs` with `BPF_LSM`, BTF, Yama and
 Landlock in its config, `lsm=` with `bpf` in `cmdline.txt`, `bluez`, `bluez-firmware` (with
 `brcm/BCM4345C0.hcd`), `libspa-0.2-bluetooth`, `rfkill`, `hciconfig`/`hcitool`, the helper, its unit
-and udev rule, `lordos`, `lord-netperm`, `lord-fand` and `bluetooth` enabled, SSH off. The Pi 4
-kernel in it (`-rpi-v8`) is still 0.8.0's `6.18.57-1+lordos`, without the BPF LSM: "No Bluetooth" is
+and udev rule, `insaneos`, `insane-netperm`, `insane-fand` and `bluetooth` enabled, SSH off. The Pi 4
+kernel in it (`-rpi-v8`) is still 0.8.0's `6.18.57-1+insaneos`, without the BPF LSM: "No Bluetooth" is
 only enforced on a Pi 4 once that flavour is rebuilt (`build-kernel.sh … v8`).
 
 ### After flashing
 
-`tools/rpi/verify-board.sh` (in the image as `/usr/lib/lordos/rpi/verify-board`) checks a freshly
+`tools/rpi/verify-board.sh` (in the image as `/usr/lib/insaneos/rpi/verify-board`) checks a freshly
 booted board and prints a PASS/FAIL table. It only reads `/sys`, `/proc`, the kernel log and the
 configs; it changes nothing.
 
 ```sh
-sudo /usr/lib/lordos/rpi/verify-board                  # system checks
-sudo /usr/lib/lordos/rpi/verify-board --repo ~/Insane OS  # plus make -C server test-full and doc_evil.sh
+sudo /usr/lib/insaneos/rpi/verify-board                  # system checks
+sudo /usr/lib/insaneos/rpi/verify-board --repo ~/Insane OS  # plus make -C server test-full and doc_evil.sh
 ```
 
 | Check | PASS when |
 |---|---|
-| kernel | `uname -r` is a `-lordos-rpi-*` or `-lordos.<rev>-rpi-*` kernel; page size 16K on the Pi 5 (4K with `-rpi-v8`) |
+| kernel | `uname -r` is a `-insaneos-rpi-*` or `-insaneos.<rev>-rpi-*` kernel; page size 16K on the Pi 5 (4K with `-rpi-v8`) |
 | socket destroy | the kernel config has `INET_DIAG_DESTROY`, `INET_TCP_DIAG` and `INET_UDP_DIAG` (the firewall closes the connections a new rule denies) |
 | Landlock | `/sys/kernel/security/lsm` lists `landlock`; the kernel log says `landlock: Up and running`; the kernel config has `SECURITY_LANDLOCK`, `SECCOMP_FILTER`, `CGROUP_BPF`, `BPF_SYSCALL`, `MEMCG` |
-| BPF LSM, BTF | `bpf` in `/sys/kernel/security/lsm`; `/sys/kernel/btf/vmlinux` present; the kernel config has `BPF_LSM` and `DEBUG_INFO_BTF`; `lord-netperm` active |
+| BPF LSM, BTF | `bpf` in `/sys/kernel/security/lsm`; `/sys/kernel/btf/vmlinux` present; the kernel config has `BPF_LSM` and `DEBUG_INFO_BTF`; `insane-netperm` active |
 | seccomp, cgroups | seccomp available; the cgroup v2 `memory` controller is on (`cgroup_enable=memory`) |
 | first boot | the root partition has grown; no switch file left on `bootfs` (WARN for a `remote-desktop` still waiting for an account); not in setup mode |
 | display, GPU | a `connected` KMS output with its mode (WARN with no monitor); `eglinfo -p gbm` shows V3D; the session log shows `GPU composition` |
-| fan, temperature | a fan hwmon (`pwmfan`, rpm and PWM; `lord-fand` active if it's installed); SoC < 75 °C; `throttled=0x0` |
-| Bluetooth | an `hciN` on the UART (with the patch file from the kernel log); `bluetoothd` active; `lordos-rpi-bt@hciN` active (WARN otherwise); the board's own address, not the chip's placeholder `43:45:c0:…` |
-| remote desktop | port 5673 (or the configured one) listens **only** when `/etc/lordos/remote/config` has `enabled=1` |
-| services | `lordos.service` active; SSH shown as on or off |
+| fan, temperature | a fan hwmon (`pwmfan`, rpm and PWM; `insane-fand` active if it's installed); SoC < 75 °C; `throttled=0x0` |
+| Bluetooth | an `hciN` on the UART (with the patch file from the kernel log); `bluetoothd` active; `insaneos-rpi-bt@hciN` active (WARN otherwise); the board's own address, not the chip's placeholder `43:45:c0:…` |
+| remote desktop | port 5673 (or the configured one) listens **only** when `/etc/insaneos/remote/config` has `enabled=1` |
+| services | `insaneos.service` active; SSH shown as on or off |
 | `--repo` | `make -C server test-full` passes; `doc_evil.sh` N/N (25/25 with the archive tools installed); the three `sandbox-test` runs ok |
 
 `--repo` needs the tree and the build packages ("Developing on the board"); it builds as the tree's
@@ -636,16 +636,16 @@ owner.
 
 The order of `card0` and `card1` depends on which driver loads first.
 
-- **`server/src/drmcard.h`**, new, is used by lord-server (`main.c`) and lord-sessiond
+- **`server/src/drmcard.h`**, new, is used by insane-server (`main.c`) and insane-sessiond
   (`remote/monitor.c`). It picks the first card that has connectors and CRTCs, and prefers the one
   with a monitor plugged in (`GETRESOURCES` + `GETCONNECTOR`).
   - `card0` is no longer assumed. This also fixes PCs where simpledrm leaves the real card at
     `card1`.
-  - `LORD_CARD=/dev/dri/cardN` pins it, and lord-server's `--card` still works.
-- **`lordos.service.d/rpi.conf`** waits up to 10 s for a connector to appear in `/sys/class/drm`
-  (`wait-kms`, up to 30 s, and it asks for `vc4` with `modprobe`; lord-sessiond then waits up to 30 s more for a card with KMS before showing the "no display" text). If lord-sessiond starts before vc4 is loaded, without this it would only see v3d.
+  - `INSANE_CARD=/dev/dri/cardN` pins it, and insane-server's `--card` still works.
+- **`insaneos.service.d/rpi.conf`** waits up to 10 s for a connector to appear in `/sys/class/drm`
+  (`wait-kms`, up to 30 s, and it asks for `vc4` with `modprobe`; insane-sessiond then waits up to 30 s more for a card with KMS before showing the "no display" text). If insane-sessiond starts before vc4 is loaded, without this it would only see v3d.
 - **GBM and EGL** are created on the display card (vc4), as always. Mesa recognizes it (kmsro) and
-  renders with v3d. Scanout buffers are created on vc4 and v3d imports them. lord-server doesn't need
+  renders with v3d. Scanout buffers are created on vc4 and v3d imports them. insane-server doesn't need
   to know anything about this.
 - **The linux-dmabuf feedback** announces the render node where Mesa renders: `gpu_device()` in
   `gpu/gpu.c`. That way apps (GTK, Qt, games) ask v3d for their buffers and not vc4, which has no
@@ -679,14 +679,14 @@ The order of `card0` and `card1` depends on which driver loads first.
 
 ### What to verify on the board
 
-1. `grep -E 'kms:|gpu:' ~/.cache/lordos/session.log` (or the session log). It has to show:
+1. `grep -E 'kms:|gpu:' ~/.cache/insaneos/session.log` (or the session log). It has to show:
    - the chosen card, with the `vc4` driver;
    - the plane's modifiers (with `0x0`, linear, present);
    - `GPU composition (V3D 7.1…)`;
    - `render /dev/dri/renderD128`;
    - `cursor by hardware (cursor plane, …)`, with the plane's size (0.8.8.6).
-2. `journalctl -u lordos` shows `lord-sessiond: display: /dev/dri/card1` (or whichever).
-3. `LORD_GPU_DEBUG=1`:
+2. `journalctl -u insaneos` shows `insane-sessiond: display: /dev/dri/card1` (or whichever).
+3. `INSANE_GPU_DEBUG=1`:
    - the list of dmabuf formats EGL announces (it has to include UIF `0x0700000000000006` and
      linear);
    - whether a fullscreen game goes through direct scanout or is composited.
@@ -699,7 +699,7 @@ The order of `card0` and `card1` depends on which driver loads first.
 8. 4K monitor. On the CPU, the 3840×2160 canvas is 33 MB per buffer and copying it is costly. With
    the GPU it should work well. If not, `video=HDMI-A-1:1920x1080@60`.
 
-## Video (for the `lord-media` helper)
+## Video (for the `insane-media` helper)
 
 This part is for the media agent: it's what the Pi 5 needs besides VA-API, which is the PC path. Its
 files weren't touched.
@@ -715,7 +715,7 @@ files weren't touched.
 
   Options:
   1. pin `ffmpeg` and the Raspberry Pi `libav*` at 990, like the kernel, only in the Pi image;
-  2. have `lord-media` load an alternative `libavcodec`;
+  2. have `insane-media` load an alternative `libavcodec`;
   3. speak V4L2-request directly from C (a lot of work).
 
   Recommended: option 1. Add
@@ -728,7 +728,7 @@ files weren't touched.
   To display them:
   - **On the GPU (best):** import them via EGL with the SAND128 modifier and
     `GL_OES_EGL_image_external`. Mesa v3d has to accept SAND128 (it is believed to convert it with
-    the TFU): **verify** with `LORD_GPU_DEBUG=1`. lord-server already imports multiplanar dmabufs
+    the TFU): **verify** with `INSANE_GPU_DEBUG=1`. insane-server already imports multiplanar dmabufs
     with modifiers (`gpu_tex_dmabuf`) if the format is in the feedback. Today `gpu_formats()` only
     announces 32-bit RGB (`known[]` in `gpu.c`): for video NV12/P030 have to be added.
   - **Through a vc4 overlay plane:** the HVS displays SAND128 directly (that's what Kodi does).
@@ -784,12 +784,12 @@ There are two possible systems on the board:
    make -C server test          # all headless tests, including build/canvas-test
    server/build/canvas-test     # NEON = C, and how long each one takes
    ```
-5. **Test lord-server alone,** from a console (Ctrl+Alt+F2, with lordos.service stopped):
+5. **Test insane-server alone,** from a console (Ctrl+Alt+F2, with insaneos.service stopped):
    ```sh
-   cd ~/Insane OS/server && sudo build/lord-server --user "$USER" 2> /tmp/lord.log
+   cd ~/Insane OS/server && sudo build/insane-server --user "$USER" 2> /tmp/insane.log
    ```
-6. **Install it on the Insane OS image:** `sh tools/iso/mkdeb.sh /tmp/lordos.deb` (on the board it takes
-   `arm64` from `dpkg --print-architecture`) and `sudo apt install /tmp/lordos.deb`.
+6. **Install it on the Insane OS image:** `sh tools/iso/mkdeb.sh /tmp/insaneos.deb` (on the board it takes
+   `arm64` from `dpkg --print-architecture`) and `sudo apt install /tmp/insaneos.deb`.
 7. **Screenshots:**
    - Insane OS's remote desktop (Settings → Sharing, port 5673; `REMOTE.md`) from the development machine's browser,
      only on the LAN and turning it off afterward;
@@ -804,14 +804,14 @@ Each item, with a screenshot or the pasted output, in this document.
 | # | Test | How | Expected |
 |---|---|---|---|
 | 1 | Boot | `systemd-analyze`, `systemd-analyze blame \| head` | SD: <25 s; NVMe: <12 s to the login screen |
-| 2 | First boot | freshly written image, with and without `lordos-user.txt` | partition grown (`df -h /`); login screen or setup mode; the file deleted |
-| 3 | RAM | `free -m`, lord-server RSS (`ps -o rss`) | idle desktop <400 MB total; lord-server ~35–60 MB (with 16K pages RSS goes up a bit) |
+| 2 | First boot | freshly written image, with and without `insaneos-user.txt` | partition grown (`df -h /`); login screen or setup mode; the file deleted |
+| 3 | RAM | `free -m`, insane-server RSS (`ps -o rss`) | idle desktop <400 MB total; insane-server ~35–60 MB (with 16K pages RSS goes up a bit) |
 | 4 | Card and GPU | the log (see "What to verify") | `vc4`, `V3D 7.1`, `renderD128`, hardware cursor |
 | 5 | GPU compositing FPS | `glmark2-es2-wayland` windowed and fullscreen; dragging windows; the app launcher | 60 FPS synced to vblank |
-| 6 | CPU path | `lordos.gpu=0` | usable at 1080p; note ms per frame with `--profile` |
-| 7 | Modifiers | `LORD_GPU_DEBUG=1`, `kms:` in the log | linear on the plane; UIF only for textures; no garbage on screen |
+| 6 | CPU path | `insaneos.gpu=0` | usable at 1080p; note ms per frame with `--profile` |
+| 7 | Modifiers | `INSANE_GPU_DEBUG=1`, `kms:` in the log | linear on the plane; UIF only for textures; no garbage on screen |
 | 8 | Apps' dmabuf | gtk4-demo, foot, FeatherPad (Qt6), `vkcube` | they look right; `WAYLAND_DEBUG` shows renderD128 |
-| 9 | 1080p video | H.264 and HEVC (once `lord-media` is there) | no dropped frames; CPU noted |
+| 9 | 1080p video | H.264 and HEVC (once `insane-media` is there) | no dropped frames; CPU noted |
 | 10 | 4K video | hardware HEVC 4Kp60 | smooth; temperature noted |
 | 11 | Temperature | `vcgencmd measure_temp`, `vcgencmd get_throttled`, Insane OS Monitor (`cpu_thermal` and the fan) | <75 °C with the Active Cooler under load; `throttled=0x0` |
 | 12 | NEON | `server/build/canvas-test` | "NEON matches C"; NEON faster than C |
@@ -823,25 +823,25 @@ Each item, with a screenshot or the pasted output, in this document.
 
 ## 0.8.0 Beta image (2026-10-18)
 
-`lordos-0.8.0-rpi5-arm64.img.xz` from the `v0.8.0-beta` tag (46c972a), built natively on the Pi 5 in
+`insaneos-0.8.0-rpi5-arm64.img.xz` from the `v0.8.0-beta` tag (46c972a), built natively on the Pi 5 in
 about 10 minutes with the Insane OS kernels: 532,884,784 bytes, SHA-256
 `827f3c550eb01f639f3f93f9551b8051a8c6791398b00135f5624d4e5b16724f` (2693 MB uncompressed, system
 1448 MB). `make -C server test` on the board: everything passes except `npverify-test` 35/36, because
 the board runs Raspberry Pi's archive kernel, which has no `/sys/kernel/btf/vmlinux`.
 
 Checked read-only (loop device, `ro,noload`): `config.txt` (vc4-kms-v3d, PCIe gen 3, `include
-lordos-case.txt`), `cmdline.txt` (`quiet splash`, `lsm=landlock,lockdown,yama,integrity,bpf`),
-`kernel_2712.img` is the Insane OS vmlinuz, Plymouth and the `lordos` theme are in the initramfs,
-`Theme=lordos`, `lordos`, `lord-netperm`, `lord-fand` and `lordos-rpi-firstboot` enabled, SSH off,
-`kernel.yama.ptrace_scope = 1`, pipewire-pulse module loading off, `lordos-user.txt.example`, the
+insaneos-case.txt`), `cmdline.txt` (`quiet splash`, `lsm=landlock,lockdown,yama,integrity,bpf`),
+`kernel_2712.img` is the Insane OS vmlinuz, Plymouth and the `insaneos` theme are in the initramfs,
+`Theme=insaneos`, `insaneos`, `insane-netperm`, `insane-fand` and `insaneos-rpi-firstboot` enabled, SSH off,
+`kernel.yama.ptrace_scope = 1`, pipewire-pulse module loading off, `insaneos-user.txt.example`, the
 `remote-desktop` switch file handled by `firstboot`, and the build id `20261018.46c972ac`.
 
-Found while checking: **the image didn't enable `lord-netperm`** (the ISO and `install.sh` do), so
+Found while checking: **the image didn't enable `insane-netperm`** (the ISO and `install.sh` do), so
 the per-app firewall was off on the Pi; `build-img.sh` enables it now. **The Insane OS kernel has no
 BPF LSM** (`CONFIG_BPF_LSM` is not set, and no BTF), so "No Bluetooth" for Linux apps isn't enforced
-on the Pi (`lord-netperm` reports `"bluetooth":false`); the network and device programs work. Turning
+on the Pi (`insane-netperm` reports `"bluetooth":false`); the network and device programs work. Turning
 on `CONFIG_BPF_LSM` and `CONFIG_DEBUG_INFO_BTF` in `build-kernel.sh` is pending. **The image has not
-been booted on a board yet.** (Later: both options are on since 0.8.1's `-2+lordos` kernel, see "The
+been booted on a board yet.** (Later: both options are on since 0.8.1's `-2+insaneos` kernel, see "The
 Insane OS kernel".)
 
 ## Results on the board (2026-10-18)
@@ -853,28 +853,28 @@ on the development machine.
 
 | What | Result |
 |---|---|
-| `make -C server -j4` (GPU=1, NEON=1) | ✅ every binary: lord-server, lord-sessiond, lord-netd, lord-netperm (BPF with clang), lord-doc, lord-media, lord-vault, lord-maild. 1 min 02 s. One GCC 14 `-Wformat-truncation` warning (`apps.c`), fixed: now 0 warnings |
+| `make -C server -j4` (GPU=1, NEON=1) | ✅ every binary: insane-server, insane-sessiond, insane-netd, insane-netperm (BPF with clang), insane-doc, insane-media, insane-vault, insane-maild. 1 min 02 s. One GCC 14 `-Wformat-truncation` warning (`apps.c`), fixed: now 0 warnings |
 | `make -C server test` | ✅ `23 passed, 0 failed, 0 skipped` (with skkdic, rime-data-pinyin-simp, unicode-data and libthai-dev installed), plus engine-test 2642 checks, backup-test 220, vault-test 74, import-test 150 |
 | NEON (`build/canvas-test`) | ✅ "NEON matches C". blit 9.90 → 4.33 ms/screen, mask 11.09 → 5.49 ms/screen (2.0–2.3×) |
 | `make -C server test-full` | ⚠️ media-test probe/wave/sandbox ✅. `doc_evil.sh` 20/25: the 5 failures are the filesystem confinement checks (`~/.ssh`, home, `/tmp`), because **the Raspberry Pi kernel has no Landlock** (`# CONFIG_SECURITY_LANDLOCK is not set`, `/sys/kernel/security/lsm` = `capability`). seccomp works on aarch64 (`seccomp=1(tsync)`, no sockets, no fork). `sandbox-test` skipped for the same reason |
 | arm64 `.deb` (`DEB_ARCH=arm64 tools/iso/mkdeb.sh`) | ✅ 5.0 MB; dependencies resolve on Raspberry Pi OS (its `+rpt` FFmpeg keeps the Debian package names) |
-| lordos.service | ✅ `lord-sessiond: display: /dev/dri/card1` (vc4; v3d is card0, `drmcard.h` picks the right one). With nothing connected the login screen stays headless (`kms: no monitor connected`) instead of crash-looping. lord-server keeps the lent card and retries on the next DRM uevent (`main.c`, parked fds). Until 0.8.5 the login screen never opened the uevent socket (`hw_start` ran only in sessions), so a monitor plugged in after boot stayed black until a restart; the login screen now starts `hw` without the bus. Retry checked on the board with `echo change > /sys/class/drm/card1/uevent` (the greeter tries the card again) |
-| Idle (login screen, headless) | lord-server 36 MB RSS, 0.6 % CPU; lord-sessiond 4.4 + 2.5 MB; system total 450 MB used of 16 GB; 38–43 °C, `throttled=0x0`, 2.4 GHz |
+| insaneos.service | ✅ `insane-sessiond: display: /dev/dri/card1` (vc4; v3d is card0, `drmcard.h` picks the right one). With nothing connected the login screen stays headless (`kms: no monitor connected`) instead of crash-looping. insane-server keeps the lent card and retries on the next DRM uevent (`main.c`, parked fds). Until 0.8.5 the login screen never opened the uevent socket (`hw_start` ran only in sessions), so a monitor plugged in after boot stayed black until a restart; the login screen now starts `hw` without the bus. Retry checked on the board with `echo change > /sys/class/drm/card1/uevent` (the greeter tries the card again) |
+| Idle (login screen, headless) | insane-server 36 MB RSS, 0.6 % CPU; insane-sessiond 4.4 + 2.5 MB; system total 450 MB used of 16 GB; 38–43 °C, `throttled=0x0`, 2.4 GHz |
 | EGL/GBM | `V3D 7.1.10.2`, OpenGL ES 3.1 (`eglinfo -p gbm`). Insane OS's GPU path on screen not exercised (no monitor) |
-| Video (FFmpeg CLI) | HEVC 1080p30 through `rpi-hevc-dec` (`/dev/video19`, `-hwaccel drm -hwaccel_output_format drm_prime`): 300 frames in 0.54 s with 0.12 s of CPU. Software, 4 threads: HEVC 1080p 251 fps, H.264 1080p ~420 fps (synthetic `testsrc2` clip: real content is heavier). lord-media only knows VA-API, so inside Insane OS HEVC is software for now |
-| `build-img.sh` natively on the Pi | ✅ after the key fix (above): 7 min 58 s from the SD card. `/var/tmp/lordos-rpi/out/lordos-0.7.0-rpi5-arm64.img.xz`, 500 MB (2651 MB uncompressed, system 1412 MB). Kernel 6.18.50+rpt, `kernel_2712.img`/`kernel8.img`, initramfs, 386 overlays. **The image hasn't been booted yet** (the board's only SD is the running system) |
-| Insane OS kernel (`build-kernel.sh all`, natively) | ✅ `6.18.57-lordos-rpi-2712` (50 min) and `6.18.57-lordos-rpi-v8` (49 min), Landlock built in; installed in a chroot: `raspi-firmware`'s hook copied `kernel_2712.img`, initramfs, device trees and 388 overlays. **Not booted yet** (the board's SD is the running system) |
-| `build-img.sh` with the Insane OS kernels, lord-fand and the switch files | ✅ 8 min 18 s. `lordos-0.7.0-rpi5-arm64.img.xz`, 503,485,468 bytes (2673 MB uncompressed, system 1431 MB), SHA-256 `d47778e6cb8a614b3bb104d14f808dcdf27a4a4f6f61dc50c055cccc9f5cb045`. Checked read-only: `kernel_2712.img` = our vmlinuz, `lsm=landlock,…` in `cmdline.txt`, the apt pin, SSH installed but off, `lord-fand` enabled, `verify-board` present |
-| `firstboot` switch files (in a chroot of the image) | ✅ user + Wi-Fi from `lordos-user.txt` (SSID with quotes, `wifi_country` → `cmdline.txt`), `remote-desktop` with `port=5800` → `/etc/lordos/remote/config`, kept while the only account had no password, `allow=group` creates `lordos-remote`, a bad `port=99` falls back to 5673; the files are deleted |
+| Video (FFmpeg CLI) | HEVC 1080p30 through `rpi-hevc-dec` (`/dev/video19`, `-hwaccel drm -hwaccel_output_format drm_prime`): 300 frames in 0.54 s with 0.12 s of CPU. Software, 4 threads: HEVC 1080p 251 fps, H.264 1080p ~420 fps (synthetic `testsrc2` clip: real content is heavier). insane-media only knows VA-API, so inside Insane OS HEVC is software for now |
+| `build-img.sh` natively on the Pi | ✅ after the key fix (above): 7 min 58 s from the SD card. `/var/tmp/insaneos-rpi/out/insaneos-0.7.0-rpi5-arm64.img.xz`, 500 MB (2651 MB uncompressed, system 1412 MB). Kernel 6.18.50+rpt, `kernel_2712.img`/`kernel8.img`, initramfs, 386 overlays. **The image hasn't been booted yet** (the board's only SD is the running system) |
+| Insane OS kernel (`build-kernel.sh all`, natively) | ✅ `6.18.57-insaneos-rpi-2712` (50 min) and `6.18.57-insaneos-rpi-v8` (49 min), Landlock built in; installed in a chroot: `raspi-firmware`'s hook copied `kernel_2712.img`, initramfs, device trees and 388 overlays. **Not booted yet** (the board's SD is the running system) |
+| `build-img.sh` with the Insane OS kernels, insane-fand and the switch files | ✅ 8 min 18 s. `insaneos-0.7.0-rpi5-arm64.img.xz`, 503,485,468 bytes (2673 MB uncompressed, system 1431 MB), SHA-256 `d47778e6cb8a614b3bb104d14f808dcdf27a4a4f6f61dc50c055cccc9f5cb045`. Checked read-only: `kernel_2712.img` = our vmlinuz, `lsm=landlock,…` in `cmdline.txt`, the apt pin, SSH installed but off, `insane-fand` enabled, `verify-board` present |
+| `firstboot` switch files (in a chroot of the image) | ✅ user + Wi-Fi from `insaneos-user.txt` (SSID with quotes, `wifi_country` → `cmdline.txt`), `remote-desktop` with `port=5800` → `/etc/insaneos/remote/config`, kept while the only account had no password, `allow=group` creates `insaneos-remote`, a bad `port=99` falls back to 5673; the files are deleted |
 
 Found and fixed on the board:
 
-- **lord-netd vs NetworkManager.** Raspberry Pi OS uses NetworkManager (with netplan). lord-netd only
+- **insane-netd vs NetworkManager.** Raspberry Pi OS uses NetworkManager (with netplan). insane-netd only
   knew systemd-networkd and ifupdown, so it saw `eth0` and `wlan0` as free and started its own DHCP
   client and a second `wpa_supplicant` on them, plus duplicate default routes. `managed_by_system()`
   (`net/state.c`) now also reads `/run/NetworkManager/devices/<ifindex>` (`managed=true`); `net-test
   state` shows both as `"managed":"system"`. The Insane OS image has no NetworkManager, so there
-  lord-netd still owns the network.
+  insane-netd still owns the network.
 - **The Raspberry Pi archive key** (SHA-1 signatures rejected by apt; see "Building it").
 - **Default language** of the image and first boot: now English, like the ISO (it was Spanish).
 
@@ -910,14 +910,14 @@ EGL/GLES/GBM ones. What follows is the result.
 
 | Where | What |
 |---|---|
-| `server/Makefile` | `ARCH` (from `$(CC) -dumpmachine`). On aarch64, `NEON=1` by default (`-DLORD_NEON`; `NEON=0` turns it off). QuickJS with `-ffp-contract=off`: GCC in GNU mode fuses `a*b+c` into FMA on ARM and would change JS numeric results; our code uses `-std=c11`, which already turns it off. `$(LD)` instead of `ld` for `pages.o` (cross-compiling). New test `build/canvas-test` |
-| `server/src/canvas.c` | The rows of `canvas_blit` (without corners) and of `canvas_alpha_mask` (text, shadows) are separate functions, with a NEON version (4 pixels per iteration) under `LORD_NEON && __ARM_NEON`. Bit-for-bit identical to C with valid premultiplied sources: checked with `tests/canvas_test.c` under emulation (SIMDe) on the development machine, 4000 random rows. Still to do on the board |
+| `server/Makefile` | `ARCH` (from `$(CC) -dumpmachine`). On aarch64, `NEON=1` by default (`-DINSANE_NEON`; `NEON=0` turns it off). QuickJS with `-ffp-contract=off`: GCC in GNU mode fuses `a*b+c` into FMA on ARM and would change JS numeric results; our code uses `-std=c11`, which already turns it off. `$(LD)` instead of `ld` for `pages.o` (cross-compiling). New test `build/canvas-test` |
+| `server/src/canvas.c` | The rows of `canvas_blit` (without corners) and of `canvas_alpha_mask` (text, shadows) are separate functions, with a NEON version (4 pixels per iteration) under `INSANE_NEON && __ARM_NEON`. Bit-for-bit identical to C with valid premultiplied sources: checked with `tests/canvas_test.c` under emulation (SIMDe) on the development machine, 4000 random rows. Still to do on the board |
 | `server/src/ui/stb.c` | `STBI_NEON` on aarch64: stb's JPEG uses NEON (on x86 it already used SSE2) |
 | `server/src/term/vt.c:890` | `src[i] >= 0 && …` with `char`: on ARM `char` is unsigned and `-Wextra` warns (`-Wtype-limits`). Now `(unsigned char)src[i] < 0x20`, the same on both architectures |
 | `server/src/kms.c` `kms_dispatch` | the DRM event buffer aligned to 8 (it's read with a cast to `drm_event_vblank`, which has 64-bit fields) |
 | `server/src/drmcard.h` (new), `main.c`, `remote/monitor.c` | pick the card with connectors instead of `card0` (see above) |
 | `server/src/kms.c`/`kms.h`, `gpu/gpu.c` | the primary plane's `IN_FORMATS`, `kms_scanout_ok`, EGL's render node for the dmabuf feedback (see above) |
-| `server/src/ui/js_sys.c` | `lord.system.info().cpu`: on ARM64 `/proc/cpuinfo` has no "model name". Now it comes from "CPU part" and `/proc/device-tree/model`: «Cortex-A76 · Raspberry Pi 5 Model B Rev 1.0» |
+| `server/src/ui/js_sys.c` | `insane.system.info().cpu`: on ARM64 `/proc/cpuinfo` has no "model name". Now it comes from "CPU part" and `/proc/device-tree/model`: «Cortex-A76 · Raspberry Pi 5 Model B Rev 1.0» |
 | `server/src/sec/sandbox.c` (fixed by the sandbox agent, on request) | `SYS_epoll_wait` without `#ifdef`: on aarch64 it doesn't exist and didn't compile. The repeated `SYS_read` was removed |
 
 **Reviewed, no changes:**
@@ -954,8 +954,8 @@ EGL/GLES/GBM ones. What follows is the result.
 | `server/src/gpu/gpu.c` `gpu_formats` (`known[]`) | Only announces 32-bit RGB: the Pi's SAND128/NV12 video isn't announced (see Video) |
 | `server/src/gpu/gpu.c` `gpu_device` | That EGL returns the render node with kmsro is unverified. If it returns nothing, it falls back to the first render node, which on the Pi is v3d |
 | `server/src/kms.c` `read_scanout_formats` | `IN_FORMATS` with `UNIVERSAL_PLANES` untested on vc4. If it fails, it stays as before |
-| `server/src/drmcard.h` | `GETCONNECTOR` forces an EDID read per card at startup (~50 ms). Hotplug: if HDMI is plugged in after boot, lord-sessiond has already chosen the card (vc4 anyway, because it has connectors) |
+| `server/src/drmcard.h` | `GETCONNECTOR` forces an EDID read per card at startup (~50 ms). Hotplug: if HDMI is plugged in after boot, insane-sessiond has already chosen the card (vc4 anyway, because it has connectors) |
 | `server/src/sec/sandbox.c` | seccomp: check on the board that no `.lpk` app dies from a syscall that arm64 glibc uses and x86 doesn't. Landlock: the Raspberry Pi kernel might not have it; `cmdline.txt` asks for `lsm=landlock,…`. The shared helper profile (`sandbox_apply_helper`) uses the same list and is fine on arm64, but has no `ioctl`: hardware video (V4L2 on the Pi, VA-API on the PC) inside the sandbox needs it (the sandbox agent was told) |
-| `server/src/monitor/mon.c` | The Monitor's "model name" stayed empty on ARM. Fixed: `lord.monitor.info().cpuModel` now comes from `js_sys_cpu_name()`, the same one About uses (`js_monitor.c`) |
+| `server/src/monitor/mon.c` | The Monitor's "model name" stayed empty on ARM. Fixed: `insane.monitor.info().cpuModel` now comes from `js_sys_cpu_name()`, the same one About uses (`js_monitor.c`) |
 | `server/src/install/install.c` | Done in 0.8.7, for the generic arm64 ISO (`ISO.md`, "The arm64 ISO"): `--target=arm64-efi`, no BIOS partition. On the Pi it doesn't apply (it's not live, the installer doesn't appear) |
 | page size | Some third-party program (not Insane OS) assumes 4K: Widevine, box64, old jemalloc. If needed, `kernel=kernel8.img` in `config.txt` (4K, a bit slower) |

@@ -2,10 +2,10 @@
 # gpu_cycle.sh — a session leaves the monitor and comes back N times while Wayland apps keep
 # drawing; checks that their windows are not black afterwards and that fds and memory stay flat
 # (docs/GPU.md, "When the GPU context is re-created"). Integration test, not part of `make test`:
-# it needs a free DRM card (stop lordos.service first), sudo (the seat side is root, as
-# lord-sessiond is) and, for the dmabuf client, /dev/udmabuf.
+# it needs a free DRM card (stop insaneos.service first), sudo (the seat side is root, as
+# insane-sessiond is) and, for the dmabuf client, /dev/udmabuf.
 #
-#   sh tests/gpu_cycle.sh <lord-server> <cycles> [card] [gpu]     (gpu: 1 = LORD_GPU=1, 0 = CPU)
+#   sh tests/gpu_cycle.sh <insane-server> <cycles> [card] [gpu]     (gpu: 1 = INSANE_GPU=1, 0 = CPU)
 #
 # Prints per-cycle fd count and RSS of the session and leaves the DRM snapshots in $OUT
 # (default /tmp/gpu-cycle). Run from server/ after `make build/dmabuf-client build/seat-cycle`.
@@ -15,18 +15,18 @@ CYCLES=${2:-10}
 CARD=${3:-/dev/dri/card0}
 GPU=${4:-1}
 OUT=${OUT:-/tmp/gpu-cycle}
-LIB=${LIB:-/usr/lib/lordos}
+LIB=${LIB:-/usr/lib/insaneos}
 RT=$OUT/rt
 rm -rf "$OUT"
 mkdir -p "$RT" "$OUT/home"
 chmod 700 "$RT"
 
-env -i PATH=/usr/bin:/bin HOME="$OUT/home" XDG_RUNTIME_DIR="$RT" LORD_GPU="$GPU" LORD_GPU_DEBUG=1 \
+env -i PATH=/usr/bin:/bin HOME="$OUT/home" XDG_RUNTIME_DIR="$RT" INSANE_GPU="$GPU" INSANE_GPU_DEBUG=1 \
     "$BIN" --headless 1280x800 --theme "$LIB/themes/default/theme.bundle.js" \
     --fonts "$LIB/assets/fonts" --shell "$LIB/assets/shell" 2>"$OUT/stderr.log" &
 SESS=$!
 trap 'kill $SESS 2>/dev/null; sudo pkill -f "$OUT/rt" 2>/dev/null || true' EXIT
-for _ in $(seq 50); do [ -S "$RT/lordos/remote.sock" ] && break; sleep 0.2; done
+for _ in $(seq 50); do [ -S "$RT/insaneos/remote.sock" ] && break; sleep 0.2; done
 sleep 3
 WL=$(cd "$RT" && ls wayland-* | grep -v lock | head -1)
 
@@ -47,8 +47,8 @@ sleep 8
 
 echo "before: fds=$(ls /proc/$SESS/fd | wc -l) rss_kb=$(awk '/VmRSS/{print $2}' /proc/$SESS/status)"
 # after each cycle (the session off the monitor): open fds and RSS of the session
-sudo build/seat-cycle "$RT/lordos/remote.sock" "$CARD" "$CYCLES" 3000 1500 "$OUT/c" \
+sudo build/seat-cycle "$RT/insaneos/remote.sock" "$CARD" "$CYCLES" 3000 1500 "$OUT/c" \
     "echo cycle \$CYCLE: fds=\$(ls /proc/$SESS/fd | wc -l) rss_kb=\$(awk '/VmRSS/{print \$2}' /proc/$SESS/status)"
 echo "end (on the monitor): fds=$(ls /proc/$SESS/fd | wc -l) rss_kb=$(awk '/VmRSS/{print $2}' /proc/$SESS/status)"
-grep -E "^(gpu|monitor|wayland):" "$OUT/home/.cache/lordos/session.log" | sort | uniq -c | sort -rn | head -20
+grep -E "^(gpu|monitor|wayland):" "$OUT/home/.cache/insaneos/session.log" | sort | uniq -c | sort -rn | head -20
 echo "snapshots: $OUT/c-NN.bmp (each time it was shown) and $OUT/c-final.bmp"

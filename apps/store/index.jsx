@@ -4,7 +4,7 @@ import {
   View, Text, Image, useTheme, useLocale, useAppWindow, useStore, Button, ScrollView, SidebarItem, SectionTitle, SearchField, Hairline, EmptyState, GroupBox, Toolbar, ToolbarButton,
   packages, packageList, refreshPackages, useLauncherApps, launchApp, fs, formatBytes, wm, direction, typeScale, spacing, isSystemApp,
   suggestions, unseenSuggestions, refreshSuggestions,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AiDetail, AiDiscover, AiPage, CatalogResults, catalogApp, catalogApps, searchCatalog } from './ai.js';
 import { matches } from './search.js';
@@ -26,7 +26,7 @@ function downloadsDir() {
 
 // Trust level of a package from its signature (see docs/SIGNING.md).
 const TRUST = {
-  lordos: { color: '#30d158', glyph: '◆' },
+  insaneos: { color: '#30d158', glyph: '◆' },
   verified: { color: '#0a84ff', glyph: '✓' },
   signed: { color: '#8e8e93', glyph: '✎' },
   unsigned: { color: '#ff9f0a', glyph: '⚠' },
@@ -35,7 +35,7 @@ function TrustBadge({ sig }) {
   const { t: tr } = useLocale();
   const level = sig?.trust || 'unsigned';
   const c = TRUST[level] || TRUST.unsigned;
-  const label = level === 'lordos' ? tr('store.trust.lordos')
+  const label = level === 'insaneos' ? tr('store.trust.insaneos')
     : level === 'verified' ? tr('store.trust.verified', { name: sig.signer })
     : level === 'signed' ? tr('store.trust.signed', { name: sig.signer })
     : tr('store.trust.unsigned');
@@ -148,7 +148,7 @@ function InstallFile({ path, onDone }) {
   useEffect(() => {
     setMsg(null);
     if (isDeb) { setInfo(null); return; }
-    try { setInfo(packages.inspect(path)); } catch (e) { setInfo(null); setMsg({ ok: false, text: tr('store.lordos.invalid', { error: e.message }) }); }
+    try { setInfo(packages.inspect(path)); } catch (e) { setInfo(null); setMsg({ ok: false, text: tr('store.insaneos.invalid', { error: e.message }) }); }
   }, [path]);
   const m = info?.manifest;
   const lang = useLocale().lang;
@@ -163,7 +163,7 @@ function InstallFile({ path, onDone }) {
     }
     try {
       packages.install(path);
-      setMsg({ ok: true, text: tr('store.lordos.installed', { name: loc(m.name) }) });
+      setMsg({ ok: true, text: tr('store.insaneos.installed', { name: loc(m.name) }) });
       onDone?.();
     } catch (e) { setMsg({ ok: false, text: e.message }); }
   };
@@ -209,19 +209,19 @@ function InsaneOSPage({ query }) {
   const shown = list.filter((p) => matches(query, [p.name, p.id], [p.description]));
   return (
     <View>
-      <Text style={{ fontSize: typeScale.body, color: t.textDim, lineHeight: 1.45, maxWidth: 680, marginBottom: spacing.xl, textAlign: 'start' }}>{tr('store.lordos.subtitle')}</Text>
+      <Text style={{ fontSize: typeScale.body, color: t.textDim, lineHeight: 1.45, maxWidth: 680, marginBottom: spacing.xl, textAlign: 'start' }}>{tr('store.insaneos.subtitle')}</Text>
       {pick && <InstallFile path={pick} onDone={(cancel) => { if (cancel) setPick(null); setFiles(findPackageFiles().filter((f) => /\.lpk$/i.test(f.name))); }} />}
       <Message msg={msg} />
-      <List title={tr('store.lordos.installedTitle')} count={shown.length || null} empty={tr('store.lordos.none')}>
+      <List title={tr('store.insaneos.installedTitle')} count={shown.length || null} empty={tr('store.insaneos.none')}>
         {shown.map((p) => (
           <AppRow key={p.id} icon={<p.Icon size={40} />} name={p.name} detail={p.description} extra={tr('store.version', { version: p.version })}
             below={<PkgManage pkg={p} onMsg={setMsg} />}>
-            {!p.packaged && <Button small label={tr('store.remove')} onClick={() => { packages.remove(p.id); setMsg({ ok: true, text: tr('store.lordos.removed', { name: p.name }) }); }} />}
+            {!p.packaged && <Button small label={tr('store.remove')} onClick={() => { packages.remove(p.id); setMsg({ ok: true, text: tr('store.insaneos.removed', { name: p.name }) }); }} />}
             <Button small label={tr('store.open')} onClick={() => launchApp(p.id)} />
           </AppRow>
         ))}
       </List>
-      <List title={tr('store.lordos.filesTitle')} count={files.length || null} empty={tr('store.lordos.noFiles')}>
+      <List title={tr('store.insaneos.filesTitle')} count={files.length || null} empty={tr('store.insaneos.noFiles')}>
         {files.map((f) => (
           <AppRow key={f.path} icon={<Icon size={32} />} name={f.name} detail={`${f.path.replace(fs.home(), '~')} · ${formatBytes(f.size)}`}>
             <Button small label={tr('store.install')} onClick={() => setPick(f.path)} />
@@ -238,18 +238,18 @@ function PkgManage({ pkg, onMsg }) {
   const { t: tr } = useLocale();
   const [st, setSt] = useState(null);
   const [rev, setRev] = useState(0);
-  useEffect(() => { try { setSt(lord.sign.status(pkg.id)); } catch (e) { setSt(null); } }, [pkg.id, pkg.version, rev]);
+  useEffect(() => { try { setSt(insane.sign.status(pkg.id)); } catch (e) { setSt(null); } }, [pkg.id, pkg.version, rev]);
   if (!st || !st.installed) return null;
   const restore = () => {
-    try { lord.sign.restore(pkg.id); refreshPackages(); setRev((v) => v + 1); onMsg({ ok: true, text: tr('store.restore.done', { name: pkg.name }) }); }
+    try { insane.sign.restore(pkg.id); refreshPackages(); setRev((v) => v + 1); onMsg({ ok: true, text: tr('store.restore.done', { name: pkg.name }) }); }
     catch (e) { onMsg({ ok: false, text: e.message }); }
   };
   const share = () => {
     try {
-      const key = lord.sign.userKey();
+      const key = insane.sign.userKey();
       const base = `${pkg.id}@${st.version} by ${st.signer || tr('store.trust.unknownAuthor')}`;
       const manifest = { ...pkgManifest(pkg), id: pkg.id, version: `${st.version}+mine`, basedOn: base };
-      const out = lord.sign.share(pkg.id, JSON.stringify(manifest, null, 2), `${downloadsDir()}${pkg.id}-mine.lpk`);
+      const out = insane.sign.share(pkg.id, JSON.stringify(manifest, null, 2), `${downloadsDir()}${pkg.id}-mine.lpk`);
       onMsg({ ok: true, text: tr('store.share.done', { path: out.replace(fs.home(), '~'), key: key.public.slice(0, 16) }) });
     } catch (e) { onMsg({ ok: false, text: e.message }); }
   };
@@ -290,7 +290,7 @@ function InstalledPage({ query }) {
         {shown.map((a) => (
           <AppRow key={a.id} icon={<a.Icon size={32} />} name={a.name} detail={a.comment || a.genericName || ''} extra={kind(a)}>
             {/* a system app is part of Insane OS: never removable here (docs/SIGNING.md, "Verified system code") */}
-            {a.kind === 'lordos' && isSystemApp(a.id) && <Text style={{ fontSize: typeScale.caption, color: t.textDim, whiteSpace: 'nowrap' }}>{tr('store.systemApp')}</Text>}
+            {a.kind === 'insaneos' && isSystemApp(a.id) && <Text style={{ fontSize: typeScale.caption, color: t.textDim, whiteSpace: 'nowrap' }}>{tr('store.systemApp')}</Text>}
             {a.kind === 'linux' && debian.canRemove(a) && <Button small label={tr('store.remove')} onClick={() => debian.removeApp(a)} />}
             <Button small label={tr('store.open')} onClick={() => launchApp(a.id)} />
           </AppRow>
@@ -302,10 +302,10 @@ function InstalledPage({ query }) {
 
 // ---- window ----
 
-// Where the window is: a page ('discover', 'installed', 'updates', 'ai', 'lordos' or 'cat:<Category>')
+// Where the window is: a page ('discover', 'installed', 'updates', 'ai', 'insaneos' or 'cat:<Category>')
 // and, over it, an app page (`app`: a Debian package; `ai`: true for a catalog app). Back returns to
 // the page.
-const PAGE_GLYPH = { suites: GLYPH.suites, remote: GLYPH.remote, commercial: GLYPH.commercial, suggested: GLYPH.suggested, discover: GLYPH.discover, installed: GLYPH.installed, updates: GLYPH.updates, ai: GLYPH.ai, lordos: GLYPH.lordos };
+const PAGE_GLYPH = { suites: GLYPH.suites, remote: GLYPH.remote, commercial: GLYPH.commercial, suggested: GLYPH.suggested, discover: GLYPH.discover, installed: GLYPH.installed, updates: GLYPH.updates, ai: GLYPH.ai, insaneos: GLYPH.insaneos };
 
 export default function Store() {
   const t = useTheme();
@@ -343,7 +343,7 @@ export default function Store() {
   const openDeb = (name) => { remember(); setApp({ name, ai: false }); };
   const openAi = (name) => { remember(); setApp({ name, ai: true }); };
   const pageTitle = cat ? tr(`store.cat.${cat}`) : tr(`store.page.${page}`);
-  const appTitle = app && (app.ai ? catalogApp(app.name)?.name : (lord.pkg?.info?.(app.name, {})?.app?.name)) || app?.name;
+  const appTitle = app && (app.ai ? catalogApp(app.name)?.name : (insane.pkg?.info?.(app.name, {})?.app?.name)) || app?.name;
   const searchable = !app && page !== 'updates' && page !== 'suggested';
   const onSearch = (v) => { setQuery(v); if (v && !searchable) go('discover'); };
   let body;
@@ -362,7 +362,7 @@ export default function Store() {
   else if (page === 'commercial') body = <AiPage section="commercial" query={query} onOpen={openAi} onPage={go} />;
   else if (page === 'remote') body = <AiPage section="remote" query={query} onOpen={openAi} />;
   else if (page === 'suites') body = <AiPage section="suites" query={query} onOpen={openAi} />;
-  else if (page === 'lordos') body = <InsaneOSPage query={query} />;
+  else if (page === 'insaneos') body = <InsaneOSPage query={query} />;
   else if (page === 'installed') body = <InstalledPage query={query} />;
   else body = <debian.Updates />;
   const item = (id, label, detail, glyph) => (
@@ -385,7 +385,7 @@ export default function Store() {
           {catalogApps('suites').length ? item('suites', tr('store.page.suites'), catalogApps('suites').length, PAGE_GLYPH.suites) : null}
           {CATS.filter((c) => counts[c]).map((c) => item(`cat:${c}`, tr(`store.cat.${c}`), counts[c], GLYPH[c]))}
           <SectionTitle>Insane OS</SectionTitle>
-          {item('lordos', tr('store.page.lordos'), null, PAGE_GLYPH.lordos)}
+          {item('insaneos', tr('store.page.insaneos'), null, PAGE_GLYPH.insaneos)}
           <View style={{ height: 12 }} />
         </ScrollView>
         <View style={{ paddingHorizontal: 20, paddingBottom: 12, paddingTop: 6 }}><debian.Status /></View>

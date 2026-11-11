@@ -1,5 +1,5 @@
 // store_syspkg_test.mjs — Store → Updates' names for Insane OS's data packages (apps/store/syspkg.js):
-// which packages get a label, and lordos-hwdata versions read as dates.
+// which packages get a label, and insaneos-hwdata versions read as dates.
 //
 //   node tests/store_syspkg_test.mjs        (from server/; run_suites.sh runs it when node exists)
 import fs from 'node:fs';
@@ -17,8 +17,8 @@ const eq = (name, got, want) => {
 };
 const ymd = (d) => (d ? [d.getFullYear(), d.getMonth() + 1, d.getDate()] : null);
 
-eq('hwdata key', sysPkgKey('lordos-hwdata'), 'store.updates.hwdata');
-for (const other of ['lordos', 'lordos-hwdata2', 'LORDOS-HWDATA', 'firefox-esr', '', 'toString', '__proto__', 'constructor', null, 42, undefined])
+eq('hwdata key', sysPkgKey('insaneos-hwdata'), 'store.updates.hwdata');
+for (const other of ['insaneos', 'insaneos-hwdata2', 'INSANEOS-HWDATA', 'firefox-esr', '', 'toString', '__proto__', 'constructor', null, 42, undefined])
   eq(`no key for ${JSON.stringify(other)}`, sysPkgKey(other), null);
 
 eq('plain date', ymd(snapshotDate('2026.10.27')), [2026, 10, 27]);

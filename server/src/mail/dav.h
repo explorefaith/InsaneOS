@@ -1,7 +1,7 @@
 /* dav.h — WebDAV requests (CalDAV RFC 4791, CardDAV RFC 6352) over our HTTP client, for the
  * account's DAV worker (dav.c) and the calendar/contacts sync (pim.c). */
-#ifndef LORD_MAIL_DAV_H
-#define LORD_MAIL_DAV_H
+#ifndef INSANE_MAIL_DAV_H
+#define INSANE_MAIL_DAV_H
 
 #include "maild.h"
 #include "http.h"

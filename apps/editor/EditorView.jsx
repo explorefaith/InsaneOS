@@ -1,8 +1,8 @@
 // EditorView — the text area: draws only the visible lines (plus a margin), with highlighting,
 // selections, multiple cursors and search matches; and handles keyboard, mouse, wheel and
 // the input method. The font is monospaced (JetBrains Mono): the width of a cell is
-// measured with lord.measureText and positions with wide characters (CJK, emoji) are measured for real.
-import { View, Text, useAppWindow, addListener, ime, clipboard, hasTextFocus } from '@lordos/sdk';
+// measured with insane.measureText and positions with wide characters (CJK, emoji) are measured for real.
+import { View, Text, useAppWindow, addListener, ime, clipboard, hasTextFocus } from '@insaneos/sdk';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cmp, head, anchor, hasSel, selStart, selEnd, cursorAt } from './buffer.js';
 import { tokenizeLine } from './syntax.js';
@@ -17,7 +17,7 @@ const PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'", '`': '`' };
 const CLOSERS = new Set([')', ']', '}', '"', "'", '`']);
 
 let cellW = 0;
-export const cell = () => cellW || (cellW = lord.measureText('0000000000', FONT, MONO) / 10 || 7.8);
+export const cell = () => cellW || (cellW = insane.measureText('0000000000', FONT, MONO) / 10 || 7.8);
 const ascii = (s) => /^[\x00-\x7f]*$/.test(s);
 
 // Expands tabs to spaces (visual column).
@@ -30,7 +30,7 @@ export function expand(s, tab) {
   return out;
 }
 
-const measure = (s) => (ascii(s) ? s.length * cell() : lord.measureText(s, FONT, MONO));
+const measure = (s) => (ascii(s) ? s.length * cell() : insane.measureText(s, FONT, MONO));
 
 // Column (index in the string) closest to the given x.
 function colAt(line, x, tab) {
@@ -40,7 +40,7 @@ function colAt(line, x, tab) {
     const cp = line.codePointAt(i);
     const n = cp > 0xffff ? 2 : 1;
     let adv;
-    if (line[i] === '\t') { const k = tab - (col % tab); adv = k * cell(); col += k; } else { adv = cp < 0x80 ? cell() : lord.measureText(String.fromCodePoint(cp), FONT, MONO); col++; }
+    if (line[i] === '\t') { const k = tab - (col % tab); adv = k * cell(); col += k; } else { adv = cp < 0x80 ? cell() : insane.measureText(String.fromCodePoint(cp), FONT, MONO); col++; }
     if (x < w + adv / 2) return i;
     w += adv;
     i += n;
@@ -117,7 +117,7 @@ export function EditorView({ doc, lang, t, palette, settings, matches, onChange,
   // ---- area size (there are no resize events: checked after every render and every 500 ms) ----
   const readSize = () => {
     if (!area.current) return;
-    const [, , w, h] = lord.getLayout(area.current.id);
+    const [, , w, h] = insane.getLayout(area.current.id);
     if (Math.abs(w - st.current.w) > 0.5 || Math.abs(h - st.current.h) > 0.5) { st.current.w = w; st.current.h = h; setSize({ w, h }); }
   };
   useEffect(() => { readSize(); const id = setInterval(readSize, 500); return () => clearInterval(id); }, []);
@@ -156,7 +156,7 @@ export function EditorView({ doc, lang, t, palette, settings, matches, onChange,
   // ---- geometry ----
   const xOf = (p) => measure(expand(doc.line(p.l).slice(0, p.c), tab));
   const posAt = (x, y) => {
-    const [ax, ay] = lord.getLayout(area.current.id);
+    const [ax, ay] = insane.getLayout(area.current.id);
     const l = Math.max(0, Math.min(doc.lineCount - 1, Math.floor((y - ay + scroll.top) / LH)));
     const c2 = colAt(doc.line(l), x - ax - gutter - PAD + scroll.left, tab);
     return { l, c: c2 };
@@ -500,7 +500,7 @@ export function EditorView({ doc, lang, t, palette, settings, matches, onChange,
   st.current.onKey = onKey;
   st.current.caret = () => {
     if (!area.current) return null;
-    const [ax, ay] = lord.getLayout(area.current.id);
+    const [ax, ay] = insane.getLayout(area.current.id);
     const k = doc.cursors[doc.cursors.length - 1];
     return { x: ax + gutter + PAD + xOf(head(k)) - scroll.left, y: ay + k.l * LH - scroll.top, h: LH };
   };
@@ -564,7 +564,7 @@ export function EditorView({ doc, lang, t, palette, settings, matches, onChange,
         const a = Math.min(p.l, d.line), b = Math.max(p.l, d.line);
         doc.cursors = [{ l: Math.min(b + 1, doc.lineCount - 1), c: b + 1 < doc.lineCount ? 0 : doc.line(b).length, al: a, ac: 0, goal: -1 }];
       } else if (d.mode === 'column') {
-        const [ax] = lord.getLayout(area.current.id);
+        const [ax] = insane.getLayout(area.current.id);
         const x0 = d.startX - ax - gutter - PAD + scroll.left, x1 = e.x - ax - gutter - PAD + scroll.left;
         const a = Math.min(d.start.l, p.l), b = Math.max(d.start.l, p.l);
         const ks = [];

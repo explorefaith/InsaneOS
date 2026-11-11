@@ -1,7 +1,7 @@
 // state.js — the Insane OS Imager's wizard state and the write pipeline. Shared by the native and the
 // desktop app; only platform.js differs. The secrets (password, Wi-Fi password) live in memory only,
 // in `secrets`, and are dropped once they are derived (docs/IMAGER.md, "Secrets").
-import { createStore } from '@lordos/sdk';
+import { createStore } from '@insaneos/sdk';
 import { platform } from './platform.js';
 import { defaultConfig, deviceById } from './core/catalog.js';
 import { parseReleases } from './core/releases.js';

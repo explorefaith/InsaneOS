@@ -5,11 +5,11 @@
 // cards sit on the wallpaper like paper.
 //
 // The accent still follows the wallpaper: every six seconds the playing live wallpaper's
-// pixels are sampled (wallpaperMedia → lord.media.pixels) and the most saturated block is
+// pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, createStore } from '@lordos/sdk';
-import { View, Text } from '@lordos/sdk';
+import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, useSettings, createStore } from '@insaneos/sdk';
+import { View, Text } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -39,13 +39,13 @@ function samplePalette() {
   const id = wallpaperMedia.get();
   if (!id) return;
   let info = null;
-  try { info = lord.media.info(id); } catch { return; }
+  try { info = insane.media.info(id); } catch { return; }
   if (!info?.width) return;
   const w = info.width, h = info.height;
   let best = null, bestSat = -1;
   for (const fx of [0.16, 0.5, 0.84]) {
     let buf = null;
-    try { buf = lord.media.pixels(id, Math.round(w * fx) - 8, Math.round(h * 0.5) - 8, 16, 16); } catch { buf = null; }
+    try { buf = insane.media.pixels(id, Math.round(w * fx) - 8, Math.round(h * 0.5) - 8, 16, 16); } catch { buf = null; }
     if (!buf) continue;
     const px = new Uint8Array(buf);
     let sr = 0, sg = 0, sb = 0;
@@ -65,12 +65,22 @@ function samplePalette() {
 }
 
 function Card({ widget, children }) {
+  // Glass (0.8.8.8): the wallpaper shows through a semi-transparent card with a real backdrop
+  // blur of it (the video frame below is in the same canvas this blurs, insane-server paint.c).
+  // The two sliders live in Settings → Wallpaper → Glass (settings.glassBlur/glassTransparency);
+  // with transparency 0 this is the paper card the v2 design shipped.
+  const [s] = useSettings();
+  const on = s.effects !== false;
+  const t = on ? Math.max(0, Math.min(1, Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3)) : 0;
+  const alpha = Math.max(0.04, 0.92 + (0.24 - 0.92) * t);    // paper white, pulled towards glass
+  const blur = on ? Math.max(0, Math.min(64, Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24)) : 0;
   return (
     <View style={[{
       position: 'absolute', left: widget.x, top: widget.y, width: widget.w,
       padding: 20, borderRadius: 18, gap: 4,
-      backgroundColor: 'rgba(252,251,247,0.92)',
-      border: '1px solid rgba(20,20,30,0.08)',
+      backgroundColor: `rgba(252,251,247,${alpha.toFixed(3)})`,
+      backdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
+      border: `1px solid rgba(20,20,30,${(0.08 + 0.06 * t).toFixed(3)})`,
       boxShadow: '0 10px 30px rgba(20,20,40,0.14)',
     }, widget.style]}>
       {children}
@@ -79,6 +89,7 @@ function Card({ widget, children }) {
 }
 
 function Row({ label, value, pct, ink }) {
+  if (!Number.isFinite(pct)) pct = 0;                      // never put NaN on the card
   return (
     <View style={{ gap: 5 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -115,15 +126,21 @@ function StatsCard({ widget }) {
   const p = useStore(palette);
   const ink = hex(p.ink);
   const stats = useRef({ cpu: null, temp: null, ram: null });
-  useEffect(() => { try { lord.monitor?.start?.(); } catch { /* not available */ } }, []);
+  useEffect(() => { try { insane.monitor?.start?.(); } catch { /* not available */ } }, []);
   useEffect(() => { samplePalette(); }, [tick]);
   try {
-    const smp = lord.monitor?.sample?.();
+    const smp = insane.monitor?.sample?.();
     if (smp) {
       const cpu = Array.isArray(smp.cpu) ? smp.cpu[smp.cpu.length - 1] : smp.cpu;
       if (cpu != null && isFinite(cpu)) stats.current.cpu = Math.max(0, Math.min(1, cpu));
       if (smp.temp != null && isFinite(smp.temp)) stats.current.temp = Math.round(smp.temp);
-      if (smp.mem?.total > 0) stats.current.ram = 1 - smp.mem.available / smp.mem.total;
+      // the monitor's field is "avail" (server/src/monitor/mon.c); read it defensively so a
+      // missing field can never put NaN on the card again (was: mem.available → NaN %)
+      const m = smp.mem || {};
+      const avail = Number.isFinite(m.avail) ? m.avail : Number.isFinite(m.available) ? m.available : NaN;
+      if (Number.isFinite(m.total) && m.total > 0 && Number.isFinite(avail)) {
+        stats.current.ram = Math.max(0, Math.min(1, 1 - avail / m.total));
+      }
     }
   } catch { /* monitor asleep */ }
   const s = stats.current;
@@ -142,7 +159,7 @@ function StatsCard({ widget }) {
 }
 
 // place them on the main display, right side under the menu bar (behind every window)
-const X = () => Math.max(40, lord.screen.width - 342);
+const X = () => Math.max(40, insane.screen.width - 342);
 
 registerWidgetType('insane-clock', ClockCard);
 registerWidgetType('insane-stats', StatsCard);

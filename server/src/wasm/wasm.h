@@ -14,8 +14,8 @@
  * Reference-counted objects: module, instance, function (an instance's functions count
  * on their instance), memory, table and global. Everything returned by *_new or wasm_instantiate
  * starts with one reference; wasm_extern_ref/unref for those from exports. Single-threaded. */
-#ifndef LORD_WASM_H
-#define LORD_WASM_H
+#ifndef INSANE_WASM_H
+#define INSANE_WASM_H
 
 #include <stddef.h>
 #include <stdint.h>

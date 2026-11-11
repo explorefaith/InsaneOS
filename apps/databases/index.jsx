@@ -1,7 +1,7 @@
 // Databases — the MySQL and MariaDB client (docs/DATABASES.md). One window holds a tab per open connection and the
 // Connect tab (favorites, Quick Connect, the Sequel Ace / Sequel Pro import); each connection is its own sandboxed
-// lord-sql process. The same app opened with args.console is that connection's Console window.
-import { View, Text, useAppWindow, useStore, wm, sqlPasswords, t as tr } from '@lordos/sdk';
+// insane-sql process. The same app opened with args.console is that connection's Console window.
+import { View, Text, useAppWindow, useStore, wm, sqlPasswords, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { usePal, Dot } from './ui.jsx';
 import { store, listen, setActive, closeSession, openSession, sessionOf } from './conn.js';

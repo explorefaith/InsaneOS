@@ -34,8 +34,8 @@ MODEL=$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || echo unknown)
 KREL=$(uname -r)
 row INFO "board" "$MODEL"
 case "$KREL" in
-    *-lordos-rpi-*|*-lordos.*-rpi-*) row PASS "kernel (Insane OS build)" "$KREL" ;;
-    *) row FAIL "kernel (Insane OS build)" "$KREL is not a -lordos[.<rev>]-rpi-* kernel (Raspberry Pi's has no Landlock)" ;;
+    *-insaneos-rpi-*|*-insaneos.*-rpi-*) row PASS "kernel (Insane OS build)" "$KREL" ;;
+    *) row FAIL "kernel (Insane OS build)" "$KREL is not a -insaneos[.<rev>]-rpi-* kernel (Raspberry Pi's has no Landlock)" ;;
 esac
 PS=$(getconf PAGESIZE 2>/dev/null || echo ?)
 case "$KREL:$PS" in
@@ -49,15 +49,15 @@ case ",$LSM," in
     *,landlock,*) row PASS "Landlock in the LSM list" "$LSM" ;;
     *) row FAIL "Landlock in the LSM list" "/sys/kernel/security/lsm = '${LSM:-unreadable}'" ;;
 esac
-# the bpf LSM and BTF: lord-netperm's "No Bluetooth" program for Linux apps (docs/FIREWALL.md)
+# the bpf LSM and BTF: insane-netperm's "No Bluetooth" program for Linux apps (docs/FIREWALL.md)
 case ",$LSM," in
     *,bpf,*) row PASS "BPF LSM in the LSM list" "$LSM" ;;
     *) row FAIL "BPF LSM in the LSM list" "no bpf in '${LSM:-unreadable}' (\"No Bluetooth\" not enforced)" ;;
 esac
 if [ -s /sys/kernel/btf/vmlinux ]; then row PASS "kernel BTF" "/sys/kernel/btf/vmlinux, $(($(stat -c %s /sys/kernel/btf/vmlinux) / 1024)) KiB"
-else row FAIL "kernel BTF" "no /sys/kernel/btf/vmlinux (lord-netperm can't attach its LSM program)"; fi
-if systemctl is-active -q lord-netperm.service 2>/dev/null; then row PASS "lord-netperm" "active"
-elif systemctl cat lord-netperm.service >/dev/null 2>&1; then row FAIL "lord-netperm" "$(systemctl is-active lord-netperm.service)"; fi
+else row FAIL "kernel BTF" "no /sys/kernel/btf/vmlinux (insane-netperm can't attach its LSM program)"; fi
+if systemctl is-active -q insane-netperm.service 2>/dev/null; then row PASS "insane-netperm" "active"
+elif systemctl cat insane-netperm.service >/dev/null 2>&1; then row FAIL "insane-netperm" "$(systemctl is-active insane-netperm.service)"; fi
 KLOG=$( (dmesg 2>/dev/null || journalctl -k -b --no-pager 2>/dev/null) | grep -i 'landlock:' | head -1)
 if echo "$KLOG" | grep -qi 'up and running'; then row PASS "Landlock initialized" "$(echo "$KLOG" | sed 's/^.*\] //')"
 elif [ -z "$KLOG" ]; then row WARN "Landlock initialized" "no landlock line in the kernel log$([ "$(id -u)" = 0 ] || echo " (run as root)")"
@@ -70,7 +70,7 @@ if [ -f "$CFG" ]; then
     done
     if [ -z "$MISS" ]; then row PASS "kernel config" "LANDLOCK SECCOMP_FILTER CGROUP_BPF BPF_SYSCALL BPF_LSM DEBUG_INFO_BTF MEMCG"
     else row FAIL "kernel config" "missing:$MISS"; fi
-    # sock_diag SOCK_DESTROY (0.8.4's kernel, 6.18.57-3+lordos): lord-netperm closes the open
+    # sock_diag SOCK_DESTROY (0.8.4's kernel, 6.18.57-3+insaneos): insane-netperm closes the open
     # connections a new rule denies (docs/FIREWALL.md, "Existing connections are cut"); without it
     # they are only dropped and the app stalls until its own timeout
     if grep -q '^CONFIG_INET_DIAG_DESTROY=y' "$CFG" && [ "$(grep -Ec '^CONFIG_INET_(TCP|UDP)_DIAG=[ym]' "$CFG")" = 2 ]; then
@@ -86,15 +86,15 @@ esac
 
 # ---- first boot ----
 DF=$(df -h / | awk 'NR == 2 { print $2 " (" $5 " used)" }')
-if [ -e /var/lib/lordos/rpi/resize-pending ]; then row FAIL "root partition grown" "resize still pending: $DF"
+if [ -e /var/lib/insaneos/rpi/resize-pending ]; then row FAIL "root partition grown" "resize still pending: $DF"
 else row PASS "root partition grown" "$DF"; fi
 LEFT=""
-for f in ssh ssh.txt remote-desktop remote-desktop.txt lordos-user.txt userconf.txt; do
+for f in ssh ssh.txt remote-desktop remote-desktop.txt insaneos-user.txt userconf.txt; do
     [ -e "/boot/firmware/$f" ] && LEFT="$LEFT $f"
 done
 if [ -z "$LEFT" ]; then row PASS "switch files consumed" "none left on /boot/firmware"
 else row WARN "switch files consumed" "still there:$LEFT (remote-desktop waits for an account with a password)"; fi
-if [ -e /var/lib/lordos/rpi/setup-mode ]; then row WARN "user account" "setup mode (create your account in Settings → Users)"
+if [ -e /var/lib/insaneos/rpi/setup-mode ]; then row WARN "user account" "setup mode (create your account in Settings → Users)"
 else row PASS "user account" "first-boot user created (login screen)"; fi
 
 # ---- display and GPU ----
@@ -119,7 +119,7 @@ if command -v eglinfo >/dev/null; then
     if echo "$R" | grep -q 'V3D'; then row PASS "GPU (EGL on GBM)" "$R"
     else row FAIL "GPU (EGL on GBM)" "renderer: '${R:-none}'"; fi
 else row WARN "GPU (EGL on GBM)" "eglinfo missing (mesa-utils)"; fi
-SLOG=$(ls -t /home/*/.cache/lordos/session.log 2>/dev/null | head -1)
+SLOG=$(ls -t /home/*/.cache/insaneos/session.log 2>/dev/null | head -1)
 if [ -n "$SLOG" ]; then
     G=$(grep -m1 'gpu:' "$SLOG" | sed 's/^.*gpu: //')
     if echo "$G" | grep -q 'GPU composition'; then row PASS "Insane OS GPU composition" "$G"
@@ -135,9 +135,9 @@ for h in /sys/class/hwmon/hwmon*; do
 done
 if [ -n "$FAN" ]; then row PASS "fan detected" "$FAN"
 else row WARN "fan detected" "no fan hwmon (no Active Cooler or case fan connected?)"; fi
-if systemctl list-unit-files lord-fand.service >/dev/null 2>&1 && systemctl cat lord-fand.service >/dev/null 2>&1; then
-    if systemctl is-active -q lord-fand.service; then row PASS "lord-fand" "active"
-    else row FAIL "lord-fand" "$(systemctl is-active lord-fand.service)"; fi
+if systemctl list-unit-files insane-fand.service >/dev/null 2>&1 && systemctl cat insane-fand.service >/dev/null 2>&1; then
+    if systemctl is-active -q insane-fand.service; then row PASS "insane-fand" "active"
+    else row FAIL "insane-fand" "$(systemctl is-active insane-fand.service)"; fi
 fi
 T=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0)
 TC=$((T / 1000))
@@ -161,8 +161,8 @@ if [ -n "$HCI" ]; then
     row PASS "Bluetooth controller" "$HCI on the UART${FW:+ ($FW)}"
     if systemctl is-active -q bluetooth.service; then row PASS "bluetoothd" "active"
     else row FAIL "bluetoothd" "$(systemctl is-active bluetooth.service)"; fi
-    if systemctl is-active -q "lordos-rpi-bt@$HCI.service"; then row PASS "Bluetooth UART helper" "lordos-rpi-bt@$HCI: $(journalctl -b -u "lordos-rpi-bt@$HCI" -o cat --no-pager 2>/dev/null | grep -m1 'bt-uart:' | sed 's/^bt-uart: //')"
-    else row WARN "Bluetooth UART helper" "lordos-rpi-bt@$HCI is $(systemctl is-active "lordos-rpi-bt@$HCI.service")"; fi
+    if systemctl is-active -q "insaneos-rpi-bt@$HCI.service"; then row PASS "Bluetooth UART helper" "insaneos-rpi-bt@$HCI: $(journalctl -b -u "insaneos-rpi-bt@$HCI" -o cat --no-pager 2>/dev/null | grep -m1 'bt-uart:' | sed 's/^bt-uart: //')"
+    else row WARN "Bluetooth UART helper" "insaneos-rpi-bt@$HCI is $(systemctl is-active "insaneos-rpi-bt@$HCI.service")"; fi
     if command -v btmgmt > /dev/null; then
         A=$(btmgmt --index "${HCI#hci}" info 2>/dev/null | sed -n 's/^[[:space:]]*addr \([0-9A-F:]*\).*/\1/p' | head -1)
         case "$A" in ""|43:45:C0:*|AA:AA:AA:AA:AA:AA|00:00:00:00:00:00) row FAIL "Bluetooth address" "'${A}' (the chip's default: no local-bd-address)" ;;
@@ -172,7 +172,7 @@ elif [ -e /proc/device-tree/aliases/bluetooth ]; then row FAIL "Bluetooth contro
 else row INFO "Bluetooth controller" "none on this board"; fi
 
 # ---- remote desktop: listening on its port only when enabled ----
-RC=/etc/lordos/remote/config
+RC=/etc/insaneos/remote/config
 EN=0; PORT=5673
 if [ -f "$RC" ]; then
     EN=$(sed -n 's/^enabled=//p' "$RC" | head -1); PORT=$(sed -n 's/^port=//p' "$RC" | head -1)
@@ -190,15 +190,15 @@ if systemctl is-enabled -q ssh.service 2>/dev/null; then
     if systemctl is-active -q ssh.service; then row INFO "SSH server" "on (ssh switch file or RPI_SSH=1)"
     else row FAIL "SSH server" "enabled but $(systemctl is-active ssh.service)"; fi
 else row INFO "SSH server" "off"; fi
-if systemctl is-active -q lordos.service; then row PASS "lordos.service" "active"
-else row FAIL "lordos.service" "$(systemctl is-active lordos.service)"; fi
+if systemctl is-active -q insaneos.service; then row PASS "insaneos.service" "active"
+else row FAIL "insaneos.service" "$(systemctl is-active insaneos.service)"; fi
 
 # ---- the test suites (optional: needs the tree and the build packages) ----
 if [ -n "$REPO" ]; then
     if [ ! -f "$REPO/server/Makefile" ]; then row FAIL "test-full" "$REPO is not a Insane OS tree"
     else
         OWNER=$(stat -c %U "$REPO")
-        LOG=/tmp/lordos-verify-tests.log
+        LOG=/tmp/insaneos-verify-tests.log
         run() { if [ "$(id -u)" = 0 ] && [ "$OWNER" != root ]; then su "$OWNER" -s /bin/sh -c "$1"; else sh -c "$1"; fi; }
         echo "verify-board.sh: building and running make -C server test-full as $OWNER (log $LOG)…" >&2
         if run "cd '$REPO' && make -C server -j$(nproc) && make -C server test-full" > "$LOG" 2>&1; then

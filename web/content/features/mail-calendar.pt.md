@@ -1,6 +1,6 @@
 ## Em poucas palavras
 
-O Insane OS traz quatro apps nativos para suas informações pessoais: **E-mail**, **Calendário**, **Contatos** e **Lembretes**. São apps comuns do Insane OS, desenhados pelo mesmo motor que o resto do desktop. O incomum é onde acontece o trabalho arriscado: todo protocolo de rede e todo leitor de dados vindos de fora roda num único processo ajudante trancado, o **`lord-maild`**, que nem tem permissão para abrir uma conexão de rede sozinho.
+O Insane OS traz quatro apps nativos para suas informações pessoais: **E-mail**, **Calendário**, **Contatos** e **Lembretes**. São apps comuns do Insane OS, desenhados pelo mesmo motor que o resto do desktop. O incomum é onde acontece o trabalho arriscado: todo protocolo de rede e todo leitor de dados vindos de fora roda num único processo ajudante trancado, o **`insane-maild`**, que nem tem permissão para abrir uma conexão de rede sozinho.
 
 [[shot:0]]
 
@@ -25,17 +25,17 @@ O e-mail é o caminho mais comum para atacar um computador. Uma mensagem é um d
 
 ## Como funciona
 
-1. **O ajudante já começa trancado.** O `lord-server` inicia o `lord-maild` a partir de um caminho fixo, sem argumentos e com um ambiente mínimo. Antes de ler qualquer coisa da rede, ele carrega as autoridades certificadoras do sistema e se tranca com o mesmo sandbox de ajudante dos outros decodificadores do Insane OS: escrita só na sua pasta de cache, sem `socket`, `connect`, `bind`, `execve` nem `fork`, só threads, sem capacidades, com cgroup próprio.
-2. **Ele pede cada conexão.** Para alcançar um servidor, ele manda ao `lord-server` um pedido: host e porta. O `lord-server` confere esse destino no seu arquivo de contas e só então conecta e devolve o socket já conectado. Os destinos permitidos são exatamente os servidores IMAP, SMTP e de calendário/contatos das suas contas, mais outros hosts do mesmo domínio na porta 443 quando um servidor de calendário redireciona durante a descoberta.
+1. **O ajudante já começa trancado.** O `insane-server` inicia o `insane-maild` a partir de um caminho fixo, sem argumentos e com um ambiente mínimo. Antes de ler qualquer coisa da rede, ele carrega as autoridades certificadoras do sistema e se tranca com o mesmo sandbox de ajudante dos outros decodificadores do Insane OS: escrita só na sua pasta de cache, sem `socket`, `connect`, `bind`, `execve` nem `fork`, só threads, sem capacidades, com cgroup próprio.
+2. **Ele pede cada conexão.** Para alcançar um servidor, ele manda ao `insane-server` um pedido: host e porta. O `insane-server` confere esse destino no seu arquivo de contas e só então conecta e devolve o socket já conectado. Os destinos permitidos são exatamente os servidores IMAP, SMTP e de calendário/contatos das suas contas, mais outros hosts do mesmo domínio na porta 443 quando um servidor de calendário redireciona durante a descoberta.
 3. **O TLS é conferido direito.** Toda conexão é verificada contra o repositório de certificados do sistema e o nome do servidor. Um certificado que não passa na verificação nunca é aceito em silêncio: o E-mail mostra o problema e a impressão digital, e só se você apertar *Confiar neste certificado* aquele certificado exato fica lembrado para aquela conta.
 4. **O HTML é traduzido, não executado.** O Insane OS não tem motor web, e o E-mail não precisa de um. O sanitizador próprio do Insane OS transforma o HTML de uma mensagem numa pequena árvore de blocos, tabelas, trechos de texto, imagens e links, e o E-mail a desenha com views nativas. Scripts, estilos, frames, formulários, SVG, mídia, tratadores de eventos e truques de "preheader" escondido são descartados.
 
 ## O que você vê e decide
 
-- **As imagens remotas ficam bloqueadas** até você apertar *Carregar imagens* para aquela mensagem ou *Sempre deste remetente*. Mesmo assim, o `lord-server` libera só aqueles hosts de imagem, nas portas 80 e 443, por dez minutos, e recusa qualquer endereço que não seja público (rede local, loopback, metadados de nuvem e similares), conferido no endereço com que ele de fato se conecta. Pixels de rastreamento são contados e nunca exibidos.
+- **As imagens remotas ficam bloqueadas** até você apertar *Carregar imagens* para aquela mensagem ou *Sempre deste remetente*. Mesmo assim, o `insane-server` libera só aqueles hosts de imagem, nas portas 80 e 443, por dez minutos, e recusa qualquer endereço que não seja público (rede local, loopback, metadados de nuvem e similares), conferido no endereço com que ele de fato se conecta. Pixels de rastreamento são contados e nunca exibidos.
 - **Links enganosos são marcados** em vermelho com um aviso quando o texto visível parece um endereço mas aponta para outro lugar, ou usa truques como um endereço IP, `user@` ou caracteres parecidos. Clicar mostra o destino real. O E-mail nunca abre um navegador sozinho; você pode copiar o endereço.
 - **Os próprios apps são isolados.** Desde a 0.8.2, E-mail, Calendário, Contatos e Lembretes rodam cada um como seu próprio processo isolado, como um app `.lpk` instalado, e chegam ao e-mail e ao chaveiro só por pedidos ao broker permitidos para esses quatro apps e nenhum outro. Desde a 0.8.5, as conexões com os seus servidores de e-mail também saem de um processo próprio, então têm sua própria linha e suas próprias regras em Monitor → Rede.
-- **As senhas nunca tocam um arquivo.** O E-mail guarda as senhas das contas no chaveiro do sistema (veja Senhas) e as entrega ao `lord-maild` só em memória. Desde a 0.8.8.6, quando o chaveiro ainda está trancado no boot (com login automático, ou depois que a senha de login foi trocada fora do Insane OS), as contas esperam, o aviso do chaveiro aparece uma vez, e cada conta em espera recebe sua senha assim que o chaveiro abre, em vez de o E-mail pedir de novo a cada boot; quando uma senha não pode ser guardada, o E-mail diz por quê. O arquivo de contas guarda servidores, nomes de usuário, assinaturas e impressões digitais de certificados confiáveis, e o código se recusa a gravar uma senha nele.
+- **As senhas nunca tocam um arquivo.** O E-mail guarda as senhas das contas no chaveiro do sistema (veja Senhas) e as entrega ao `insane-maild` só em memória. Desde a 0.8.8.6, quando o chaveiro ainda está trancado no boot (com login automático, ou depois que a senha de login foi trocada fora do Insane OS), as contas esperam, o aviso do chaveiro aparece uma vez, e cada conta em espera recebe sua senha assim que o chaveiro abre, em vez de o E-mail pedir de novo a cada boot; quando uma senha não pode ser guardada, o E-mail diz por quê. O arquivo de contas guarda servidores, nomes de usuário, assinaturas e impressões digitais de certificados confiáveis, e o código se recusa a gravar uma senha nele.
 
 [[shot:1]]
 
@@ -43,7 +43,7 @@ O e-mail é o caminho mais comum para atacar um computador. Uma mensagem é um d
 
 ## As perguntas do leitor cético
 
-**E se uma mensagem explorar um bug no leitor?** É exatamente o que o projeto supõe que um dia vai acontecer. O leitor roda no `lord-maild`, que não consegue criar sockets, não consegue executar programas e só pode escrever no próprio cache. Os leitores são testados a fundo: 47.395 verificações no `mail-test`, incluindo fuzzing por mutação de MIME, conjuntos de caracteres, o sanitizador de HTML, iCalendar, vCard, XML e as rotinas de sincronização de calendários, além de suítes separadas para a camada de rede e para o conector.
+**E se uma mensagem explorar um bug no leitor?** É exatamente o que o projeto supõe que um dia vai acontecer. O leitor roda no `insane-maild`, que não consegue criar sockets, não consegue executar programas e só pode escrever no próprio cache. Os leitores são testados a fundo: 47.395 verificações no `mail-test`, incluindo fuzzing por mutação de MIME, conjuntos de caracteres, o sanitizador de HTML, iCalendar, vCard, XML e as rotinas de sincronização de calendários, além de suítes separadas para a camada de rede e para o conector.
 
 **Um ajudante sequestrado poderia falar com a minha rede local?** Só com os servidores do seu arquivo de contas. As liberações de imagens se limitam a endereços públicos, e a verificação é feita no endereço realmente conectado, então um truque de DNS não consegue redirecioná-lo para o seu roteador.
 
@@ -63,10 +63,10 @@ O e-mail é o caminho mais comum para atacar um computador. Uma mensagem é um d
 
 ## Leia o código
 
-- [server/src/mail/maild.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/maild.c): o ajudante `lord-maild` e seu sandbox
-- [server/src/mail/mailc.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/mailc.c): o conector no `lord-server` que decide quais destinos são permitidos
-- [server/src/mail/html.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/mail/html.c): o sanitizador de HTML
-- [server/src/ui/js_mail.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_mail.c): `lord.mail`, a API da sessão
-- [apps/mail](https://github.com/lordbasex/Insane OS/tree/main/apps/mail), [apps/calendar](https://github.com/lordbasex/Insane OS/tree/main/apps/calendar), [apps/contacts](https://github.com/lordbasex/Insane OS/tree/main/apps/contacts), [apps/reminders](https://github.com/lordbasex/Insane OS/tree/main/apps/reminders)
-- [server/tests/mail_test.c](https://github.com/lordbasex/Insane OS/blob/main/server/tests/mail_test.c): os testes dos leitores e do sanitizador
-- [docs/MAIL.md](https://github.com/lordbasex/Insane OS/blob/main/docs/MAIL.md)
+- [server/src/mail/maild.c](https://github.com/insaneos/Insane OS/blob/main/server/src/mail/maild.c): o ajudante `insane-maild` e seu sandbox
+- [server/src/mail/mailc.c](https://github.com/insaneos/Insane OS/blob/main/server/src/mail/mailc.c): o conector no `insane-server` que decide quais destinos são permitidos
+- [server/src/mail/html.c](https://github.com/insaneos/Insane OS/blob/main/server/src/mail/html.c): o sanitizador de HTML
+- [server/src/ui/js_mail.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/js_mail.c): `insane.mail`, a API da sessão
+- [apps/mail](https://github.com/insaneos/Insane OS/tree/main/apps/mail), [apps/calendar](https://github.com/insaneos/Insane OS/tree/main/apps/calendar), [apps/contacts](https://github.com/insaneos/Insane OS/tree/main/apps/contacts), [apps/reminders](https://github.com/insaneos/Insane OS/tree/main/apps/reminders)
+- [server/tests/mail_test.c](https://github.com/insaneos/Insane OS/blob/main/server/tests/mail_test.c): os testes dos leitores e do sanitizador
+- [docs/MAIL.md](https://github.com/insaneos/Insane OS/blob/main/docs/MAIL.md)

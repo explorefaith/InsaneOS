@@ -1,21 +1,21 @@
-/* js_input.c — lord.input: which touchpads and touchscreens exist and the driver settings
+/* js_input.c — insane.input: which touchpads and touchscreens exist and the driver settings
  * (tp/tp.c). It only reads and changes the driver's in-memory configuration: it opens no devices and
  * touches no files (settings are saved to settings.json from the SDK, sdk/trackpad.js).
  *
- *   lord.input.devices()      → [{ name, kind: 'touchpad'|'touchscreen', clickpad, width, height, fingers }]
- *   lord.input.config()       → { speed, mouseSpeed, mouseNatural, mouseLeftHanded, scrollSpeed,
+ *   insane.input.devices()      → [{ name, kind: 'touchpad'|'touchscreen', clickpad, width, height, fingers }]
+ *   insane.input.config()       → { speed, mouseSpeed, mouseNatural, mouseLeftHanded, scrollSpeed,
  *                                 sensitivity: 'low'|'medium'|'high', pointerSize, tap, tapDrag,
  *                                 natural, secondary, threeDrag, dwt, scroll, kinetic, pinch,
  *                                 swipe3, swipe4 }
- *   lord.input.configure(obj) → applies the valid fields (the rest stay as they are); true
+ *   insane.input.configure(obj) → applies the valid fields (the rest stay as they are); true
  *
  * The on-screen keyboard (docs/ON-SCREEN-KEYBOARD.md). The theme's and the login screen's context
- * only: an isolated app's process has the broker's `lord`, without any of these.
+ * only: an isolated app's process has the broker's `insane`, without any of these.
  *
- *   lord.input.hasKeyboard()  → is a keyboard someone can type on attached?
- *   lord.input.keyLabels()    → { altgr, keys: { code: [plain, shift, altgr, altgr + shift] } } of the
+ *   insane.input.hasKeyboard()  → is a keyboard someone can type on attached?
+ *   insane.input.keyLabels()    → { altgr, keys: { code: [plain, shift, altgr, altgr + shift] } } of the
  *                               active layout, or null without XKB
- *   lord.input.tap(code, level) → queues one press and release of a key from a closed list; the main
+ *   insane.input.tap(code, level) → queues one press and release of a key from a closed list; the main
  *                               loop sends it down js_key, the path of a physical key, so it goes
  *                               to the focused client or field, through the layout and the input
  *                               method. level: 1 Shift, 2 AltGr. No Ctrl, Alt or Super: a tap
@@ -181,8 +181,8 @@ static const JSCFunctionListEntry input_funcs[] = {
     JS_CFUNC_DEF("tap", 2, f_tap),
 };
 
-void js_input_register(JSContext *c, JSValue lord) {
+void js_input_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, input_funcs, sizeof input_funcs / sizeof input_funcs[0]);
-    JS_SetPropertyStr(c, lord, "input", o);
+    JS_SetPropertyStr(c, insane, "input", o);
 }

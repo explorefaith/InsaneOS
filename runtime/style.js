@@ -1,4 +1,4 @@
-// style.js — converts CSS/React-style styles into lord-server's native properties.
+// style.js — converts CSS/React-style styles into insane-server's native properties.
 // Colors → ARGB number, shorthands (margin, padding, border, boxShadow, background…) → simple properties.
 
 const NAMED = {
@@ -265,6 +265,6 @@ const same = (a, b) => a === b || (Array.isArray(a) && Array.isArray(b) && a.len
 
 // Sends the server only the properties that changed.
 export function applyStyle(id, prev, next) {
-  for (const k in prev) if (!(k in next)) lord.setStyle(id, k, undefined);
-  for (const k in next) if (!same(prev[k], next[k])) lord.setStyle(id, k, next[k]);
+  for (const k in prev) if (!(k in next)) insane.setStyle(id, k, undefined);
+  for (const k in next) if (!same(prev[k], next[k])) insane.setStyle(id, k, next[k]);
 }

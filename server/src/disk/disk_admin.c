@@ -133,10 +133,10 @@ int disk_admin_target(const AdminReq *r, const char *name, int need_admin, char 
 static volatile sig_atomic_t cancelled;
 static void on_cancel(int s) { (void)s; cancelled = 1; }
 
-static void job_path(const char *disk, char *out, size_t n) { snprintf(out, n, "/run/lordos/disk-%s.job", disk); }
+static void job_path(const char *disk, char *out, size_t n) { snprintf(out, n, "/run/insaneos/disk-%s.job", disk); }
 
 static void job_begin(const AdminReq *r, const char *disk) {
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     char p[96];
     job_path(disk, p, sizeof p);
     FILE *f = fopen(p, "we");
@@ -166,12 +166,12 @@ void disk_act_cancel(const AdminReq *r, const char *arg, size_t len) {
     if (f) fclose(f);
     if (!ok || pid <= 1) { admin_err("disk.nothingRunning", "name", arg, NULL); return; }
     if (uid != r->uid && !r->admin) { admin_err("disk.otherUser", NULL); return; }
-    /* it must really be a helper child (lord-admin), not a recycled pid */
+    /* it must really be a helper child (insane-admin), not a recycled pid */
     char cp[64], comm[32] = "";
     snprintf(cp, sizeof cp, "/proc/%d/comm", pid);
     FILE *c = fopen(cp, "re");
     if (c) { if (!fgets(comm, sizeof comm, c)) comm[0] = 0; fclose(c); }
-    if (strncmp(comm, "lord-admin", 10)) { unlink(p); admin_err("disk.nothingRunning", "name", arg, NULL); return; }
+    if (strncmp(comm, "insane-admin", 10)) { unlink(p); admin_err("disk.nothingRunning", "name", arg, NULL); return; }
     kill(pid, SIGTERM);
     admin_ok("disk.cancelling", NULL);
 }
@@ -235,7 +235,7 @@ void disk_act_mount(const AdminReq *r, const char *arg, size_t len) {
     /* the Store's Disk Formats item gates the desktop's mount of these; the kernel's drivers, the boot partition, the
      * installer and the live system don't come through here */
     if (k >= 0 && (!strcmp(fs, "vfat") || !strcmp(fs, "exfat") || !strcmp(fs, "ntfs") || !strcmp(fs, "hfsplus") || !strcmp(fs, "apfs")) &&
-        access("/usr/lib/lordos/disk-formats.enabled", F_OK)) { admin_err("disk.formatsNeeded", "fs", fs, NULL); return; }
+        access("/usr/lib/insaneos/disk-formats.enabled", F_OK)) { admin_err("disk.formatsNeeded", "fs", fs, NULL); return; }
     if (k < 0) { { if (fs[0]) admin_err("disk.cannotMountFs", "fs", fs, NULL); else admin_err("disk.unknownFs", "name", t.name, NULL); } return; }
     char base[96], dir[PATH_MAX], leaf[200];
     mkdir("/media", 0755);
@@ -262,7 +262,7 @@ void disk_act_mount(const AdminReq *r, const char *arg, size_t len) {
         int e = errno;
         rmdir(dir);
         /* Files offers the driver's package; APFS has none on an architecture without the item's marker */
-        if (e == ENODEV) { admin_err(!strcmp(fs, "apfs") && access("/usr/lib/lordos/disk-formats.apfs", F_OK) ? "disk.noDriverHere" : "disk.noDriver", "fs", fs, NULL); return; }
+        if (e == ENODEV) { admin_err(!strcmp(fs, "apfs") && access("/usr/lib/insaneos/disk-formats.apfs", F_OK) ? "disk.noDriverHere" : "disk.noDriver", "fs", fs, NULL); return; }
         admin_err("disk.mountFailed", "name", t.name, "errno", lerr_errno(e), NULL);
         return;
     }

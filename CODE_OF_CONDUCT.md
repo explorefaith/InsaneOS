@@ -5,7 +5,7 @@ repository, issues, pull requests and any community channel) to be welcoming, re
 of harassment for everyone.
 
 The full text, adapted for Insane OS, is at
-**[lordos.org/legal/code-of-conduct](https://lordos.org/legal/code-of-conduct/)**.
+**[insaneos.org/legal/code-of-conduct](https://insaneos.org/legal/code-of-conduct/)**.
 
 ## Reporting
 

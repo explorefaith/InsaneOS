@@ -8,7 +8,7 @@
 //                 where a rule can be written, its switch; "N more…" folds long lists
 import {
   View, Text, SearchField, Overlay, useTheme, useLocale, useSettings, formatBytes, formatNumber, tOptional, direction, firewall, fwRule, netModel, addListener,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { C, AppGlyph } from './index.jsx';
 
@@ -82,7 +82,7 @@ export function ViewButton({ view, setView, extra, tr }) {
   useEffect(() => {
     if (!open) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, h] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, h] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
       if (!inside(menu.current) && !inside(btn.current)) setOpen(false);
     });
   }, [open]);

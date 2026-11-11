@@ -1,27 +1,27 @@
-/* js_voice.c — lord.voice: reading text aloud (docs/VOICE.md, phase 2; speak.c starts lord-say).
+/* js_voice.c — insane.voice: reading text aloud (docs/VOICE.md, phase 2; speak.c starts insane-say).
  *
- *   lord.voice.available()              → lord-say and lord-tts are installed
- *   lord.voice.speak(text, lang?, voice?) → true when it started; ends the reading before. lord-say tells the text's
+ *   insane.voice.available()              → insane-say and insane-tts are installed
+ *   insane.voice.speak(text, lang?, voice?) → true when it started; ends the reading before. insane-say tells the text's
  *                                         language; lang ('es', 'en' or 'pt', the interface's) is for a text too short;
  *                                         voice, a plain name, is say's -v (Settings' "Try this voice")
- *   lord.voice.speakSelection(lang?)    → true when it started, false when the app with the keyboard (a Linux app)
+ *   insane.voice.speakSelection(lang?)    → true when it started, false when the app with the keyboard (a Linux app)
  *                                         has selected nothing: its primary selection, read here, never given to JS
- *   lord.voice.save(text, path, lang?)  → true when it started: a WAV at path, nothing heard. path is in the home
- *                                         folder or a mount (as lord.fs.write), not a protected one, and ends in .wav
- *   lord.voice.holdSelection()          → true when the app with the keyboard (a Linux app) has a selection: it is kept
+ *   insane.voice.save(text, path, lang?)  → true when it started: a WAV at path, nothing heard. path is in the home
+ *                                         folder or a mount (as insane.fs.write), not a protected one, and ends in .wav
+ *   insane.voice.holdSelection()          → true when the app with the keyboard (a Linux app) has a selection: it is kept
  *                                         here for saveSelection, as the dialog that asks where takes the keyboard
- *   lord.voice.saveSelection(path, lang?)   the same as save, with the selection kept; forgets it
- *   lord.voice.preview(lang, voice)     → true when it started: a voice's recorded sample (say --preview), heard as a
+ *   insane.voice.saveSelection(path, lang?)   the same as save, with the selection kept; forgets it
+ *   insane.voice.preview(lang, voice)     → true when it started: a voice's recorded sample (say --preview), heard as a
  *                                         reading is, with the wave; lang is es, en or pt, voice a plain name
- *   lord.voice.pause(on)                → freezes the reading where it is, or goes on
- *   lord.voice.replay()                 → reads the last text again from the start
- *   lord.voice.stop()
- *   lord.voice.state()                  → { speaking, paused, saving, exit }: exit is how the last one ended (say.c's
+ *   insane.voice.pause(on)                → freezes the reading where it is, or goes on
+ *   insane.voice.replay()                 → reads the last text again from the start
+ *   insane.voice.stop()
+ *   insane.voice.state()                  → { speaking, paused, saving, exit }: exit is how the last one ended (say.c's
  *                                         statuses); speaking is also true while saving
- *   lord.voice.levels()                 → an array of SAY_BANDS numbers 0–255, how loud each band of what is heard now
+ *   insane.voice.levels()                 → an array of SAY_BANDS numbers 0–255, how loud each band of what is heard now
  *                                         is (the player's wave), or null when nothing is
  *
- * Only in the session's context: an isolated app has no lord.voice (js_broker.c doesn't offer it). */
+ * Only in the session's context: an isolated app has no insane.voice (js_broker.c doesn't offer it). */
 #include "js_voice.h"
 #include "js_sys.h"
 #include "../tts/speak.h"
@@ -49,7 +49,7 @@ static const char *lang_arg(JSContext *c, int argc, JSValueConst *argv, int i, c
     return out[0] ? out : NULL;
 }
 
-/* where a WAV may go: as lord.fs.write's targets, and named *.wav */
+/* where a WAV may go: as insane.fs.write's targets, and named *.wav */
 static int wav_target(JSContext *c, JSValueConst v, char *out, size_t n) {
     const char *p = JS_IsString(v) ? JS_ToCString(c, v) : NULL;
     if (!p) return -1;
@@ -179,8 +179,8 @@ static const JSCFunctionListEntry voice_funcs[] = {
     JS_CFUNC_DEF("levels", 0, f_levels),
 };
 
-void js_voice_register(JSContext *c, JSValue lord) {
+void js_voice_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, voice_funcs, sizeof voice_funcs / sizeof voice_funcs[0]);
-    JS_SetPropertyStr(c, lord, "voice", o);
+    JS_SetPropertyStr(c, insane, "voice", o);
 }

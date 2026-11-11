@@ -1,14 +1,14 @@
-/* sleepbus.c — lord-netd hears the computer go to sleep and wake (issue #14).
+/* sleepbus.c — insane-netd hears the computer go to sleep and wake (issue #14).
  *
  * logind announces both with the PrepareForSleep(b) signal on the system bus: true just before the
- * sleep, false right after waking. lord-netd listens with Insane OS's own D-Bus client (vault/dbus.c:
+ * sleep, false right after waking. insane-netd listens with Insane OS's own D-Bus client (vault/dbus.c:
  * libc only, strict parser), subscribed to that one signal, and only believes it from the
  * connection that owns org.freedesktop.login1 (the bus sets the sender; nobody can forge it).
  * It owns no name, exports nothing and calls nothing else. Without a system bus (a container, a
  * development system) it tries again later, and the jump of CLOCK_BOOTTIME over CLOCK_MONOTONIC
  * (actions.c) still catches a wake.
  *
- * Built only into lord-netd (Makefile: NETD_OBJ). */
+ * Built only into insane-netd (Makefile: NETD_OBJ). */
 #include "net.h"
 #include "../vault/dbus.h"
 
@@ -49,7 +49,7 @@ static void connect_bus(void) {
         if (fd >= 0) { conn.fd = fd; dbus_close(&conn); }
         conn.fd = -1;
         long wait = 5000L << (tries < 4 ? tries : 4);      /* 5, 10, 20, 40, 80 s */
-        if (!tries++) fprintf(stderr, "lord-netd: no system bus yet: waking from sleep is noticed by the clock only\n");
+        if (!tries++) fprintf(stderr, "insane-netd: no system bus yet: waking from sleep is noticed by the clock only\n");
         retry_at = now_ms() + wait;
         return;
     }
@@ -70,7 +70,7 @@ static void connect_bus(void) {
     bus_call("AddMatch", "s", "type='signal',sender='" LOGIN1 "',path='" LOGIN1_PATH "',interface='" LOGIN1_MGR "',member='PrepareForSleep'", 0);
     bus_call("AddMatch", "s", "type='signal',sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',member='NameOwnerChanged',arg0='" LOGIN1 "'", 0);
     dbus_flush(&conn);
-    fprintf(stderr, "lord-netd: listening for sleep and wake on the system bus%s\n", owner[0] ? "" : " (logind not running yet)");
+    fprintf(stderr, "insane-netd: listening for sleep and wake on the system bus%s\n", owner[0] ? "" : " (logind not running yet)");
 }
 
 static void lost(void) {
@@ -79,7 +79,7 @@ static void lost(void) {
     up = 0;
     owner[0] = 0;
     retry_at = now_ms() + 5000;
-    fprintf(stderr, "lord-netd: the system bus connection was lost; trying again in 5 s\n");
+    fprintf(stderr, "insane-netd: the system bus connection was lost; trying again in 5 s\n");
 }
 
 int net_sleep_poll(short *events) {

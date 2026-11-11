@@ -1,10 +1,10 @@
-// Calendar — day, week and month views of the calendars kept by lord-maild (local, or synced with
+// Calendar — day, week and month views of the calendars kept by insane-maild (local, or synced with
 // CalDAV): see docs/MAIL.md. Data comes from the SDK (calendars, calendarEvents); every call is a
 // promise and usePim() changes whenever something changes, so views re-query on it.
 import {
   View, Text, useTheme, useLocale, useAppWindow, useKeyboard, useWindowState, usePim, calendars, calendarEvents,
   Button, Segmented, ScrollView, Hairline, Toolbar, ToolbarButton, ToolbarGroup, ToolbarSpacer, EmptyState, formatDate, formatTime, weekdayName, direction, textDirection, t, openDavSetup, openMailAccounts,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   RED, sod, addDays, addMonths, sameDay, startOfWeek, ymd, parseYmd, minutesOf, monthYear, MiniMonth, ColorCheck, Layers, Popover, MenuList,
@@ -306,7 +306,7 @@ function CalRow({ cal, onEdit }) {
 function useWidth(ref, initial = 100) {
   const [w, setW] = useState(initial);
   useEffect(() => {
-    const id = setTimeout(() => { if (ref.current) { const nw = lord.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } }, 20);
+    const id = setTimeout(() => { if (ref.current) { const nw = insane.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } }, 20);
     return () => clearTimeout(id);
   });
   return w;
@@ -437,7 +437,7 @@ function MonthGrid({ cursor, days, cals, now, onOpen, onSlot, onDay }) {
   const box = useRef(null);
   const [cellH, setCellH] = useState(90);
   useEffect(() => {
-    const id = setTimeout(() => { if (box.current) { const h = lord.getLayout(box.current.id)[3] / 6; if (h && Math.abs(h - cellH) > 0.5) setCellH(h); } }, 20);
+    const id = setTimeout(() => { if (box.current) { const h = insane.getLayout(box.current.id)[3] / 6; if (h && Math.abs(h - cellH) > 0.5) setCellH(h); } }, 20);
     return () => clearTimeout(id);
   });
   const nowD = new Date(now);

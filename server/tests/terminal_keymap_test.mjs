@@ -2,7 +2,7 @@
 // imported onto the main keys (on a Latin American keyboard the "-" key typed "/"), "\n" in a text mapping is
 // a line feed as in iTerm2 (Claude Code takes it as a new line; the shell as Enter), and settings migration 2
 // drops the mappings that only repeat what a US keyboard types. Bundles the real modules with esbuild over a
-// stub '@lordos/sdk'. Needs node and the repository's node_modules (esbuild).
+// stub '@insaneos/sdk'. Needs node and the repository's node_modules (esbuild).
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +22,7 @@ globalThis.__out = { actionOf, itermCombo, itermKeyMap, mappingBytes, migrateSet
 const sdkStub = {
   name: 'sdk-stub',
   setup(b) {
-    b.onResolve({ filter: /^@lordos\/sdk$/ }, () => ({ path: 'sdk', namespace: 'stub' }));
+    b.onResolve({ filter: /^@insaneos\/sdk$/ }, () => ({ path: 'sdk', namespace: 'stub' }));
     b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({
       contents: `export const t = (k) => k;
         export function createStore(v) { let s = v; return { get: () => s, set: (f) => { s = typeof f === 'function' ? f(s) : f; }, subscribe: () => () => {} }; }
@@ -32,7 +32,7 @@ const sdkStub = {
     }));
   },
 };
-globalThis.lord = new Proxy({ settings: { load: () => '{}', save: () => true } }, { get: (o, k) => (k in o ? o[k] : () => undefined) });
+globalThis.insane = new Proxy({ settings: { load: () => '{}', save: () => true } }, { get: (o, k) => (k in o ? o[k] : () => undefined) });
 const r = await esbuild.build({ stdin: { contents: entry, resolveDir: root, loader: 'js' }, bundle: true, write: false, format: 'iife', plugins: [sdkStub], logLevel: 'silent' });
 new Function(r.outputFiles[0].text)();
 const { actionOf, itermCombo, itermKeyMap, mappingBytes, migrateSettings, usNoopMapping } = globalThis.__out;

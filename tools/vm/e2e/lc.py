@@ -1,6 +1,6 @@
-# lc.py USER JS [TIMEOUT_S]  (run as root): runs JS (the body of an async function with lord, wm, admin, launchApp,
+# lc.py USER JS [TIMEOUT_S]  (run as root): runs JS (the body of an async function with insane, wm, admin, launchApp,
 # sleep, log in scope) in USER's headless session through driver.js (Machines bench; from the Cloud bench, cloud-e2e).
-# JS "-" reads it from stdin. Example: lc.py m89a "return lord.vm.list().map((m) => [m.name, m.state])"
+# JS "-" reads it from stdin. Example: lc.py m89a "return insane.vm.list().map((m) => [m.name, m.state])"
 import json, os, pwd, sys, time
 user, src = sys.argv[1], sys.argv[2]
 timeout = float(sys.argv[3]) if len(sys.argv) > 3 else 60

@@ -1,4 +1,4 @@
-Queremos que lordos.org lo pueda usar todo el mundo, incluidas las personas que usan solo el teclado, un lector de pantalla, ampliación o alto contraste. Nuestro objetivo son las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, nivel AA. Esta declaración cubre el sitio; la accesibilidad de la distribución Insane OS se describe al final.
+Queremos que insaneos.org lo pueda usar todo el mundo, incluidas las personas que usan solo el teclado, un lector de pantalla, ampliación o alto contraste. Nuestro objetivo son las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, nivel AA. Esta declaración cubre el sitio; la accesibilidad de la distribución Insane OS se describe al final.
 
 ## Qué hace el sitio hoy
 

@@ -4,8 +4,8 @@
  * groups, multi-valued attributes, integers, enums, booleans, ranges, resolutions, texts
  * and (nested) collections. The decoder validates every length: what arrives over the socket
  * is treated as untrusted (tests/ipp_test.c tests it with broken messages). */
-#ifndef LORD_PRINT_IPP_H
-#define LORD_PRINT_IPP_H
+#ifndef INSANE_PRINT_IPP_H
+#define INSANE_PRINT_IPP_H
 
 #include <stddef.h>
 #include <stdint.h>

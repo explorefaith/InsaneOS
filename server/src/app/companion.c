@@ -1,8 +1,8 @@
-/* companion.c — `lord-server --companion <id> <0|1>`: a packaged app's helper program (docs/GO-LINK.md 3.2).
+/* companion.c — `insane-server --companion <id> <0|1>`: a packaged app's helper program (docs/GO-LINK.md 3.2).
  *
- * lord-server forked this and exec'd itself, so it starts as a new process with one thread and two inherited
+ * insane-server forked this and exec'd itself, so it starts as a new process with one thread and two inherited
  * descriptors: 3, a SOCK_SEQPACKET socket to the app, and 4, if the manifest declares screen-share, a connection to the
- * sharing API already tied to this app; and 6, where lord-server hands it the live media links (media/live.h). It opens another, 5, on the home folder, to list it. Nothing else comes in: no path, no argument but the id and whether the
+ * sharing API already tied to this app; and 6, where insane-server hands it the live media links (media/live.h). It opens another, 5, on the home folder, to list it. Nothing else comes in: no path, no argument but the id and whether the
  * network is allowed. Everything here runs before a byte of the package does:
  *   the id is a packaged app's, and this process isn't root;
  *   the whole signed package checks, its key is a Verified author's and nothing revoked it, the binary is read through one
@@ -46,9 +46,9 @@ static int refuse(const char *id, const char *code) {
     return 1;
 }
 
-/* ~/.local/share/lordos/appdata/<id>, made if missing, with no link followed on the way. */
+/* ~/.local/share/insaneos/appdata/<id>, made if missing, with no link followed on the way. */
 static int data_folder(int homefd, const char *id) {
-    const char *const parts[] = { ".local", "share", "lordos", "appdata", id };
+    const char *const parts[] = { ".local", "share", "insaneos", "appdata", id };
     int at = dup(homefd);
     for (size_t i = 0; at >= 0 && i < sizeof parts / sizeof parts[0]; i++) {
         mkdirat(at, parts[i], 0700);
@@ -64,7 +64,7 @@ int companion_main(int argc, char **argv) {
     const char *id = argv[2];
     int network = argv[3][0] == '1', type = 0;
     socklen_t tl = sizeof type;
-    if (getsockopt(3, SOL_SOCKET, SO_TYPE, &type, &tl) || type != SOCK_SEQPACKET) return 2;   /* not from lord-server */
+    if (getsockopt(3, SOL_SOCKET, SO_TYPE, &type, &tl) || type != SOCK_SEQPACKET) return 2;   /* not from insane-server */
     if (getsockopt(6, SOL_SOCKET, SO_TYPE, &type, &tl) || type != SOCK_SEQPACKET) return 2;
     if (getuid() == 0 || geteuid() == 0) return refuse(id, "companion.root");
 
@@ -97,7 +97,7 @@ int companion_main(int argc, char **argv) {
     char scope[80];
     sandbox_scope_name(id, scope, sizeof scope);
     CgroupLimits lim = { .mem_high_mb = 192, .mem_max_mb = 512, .cpu_percent = 100 };   /* the app's, shared with it */
-    if (cgroup_enter(scope, &lim) && getenv("LORDOS_SESSIOND")) return refuse(id, "companion.noScope");
+    if (cgroup_enter(scope, &lim) && getenv("INSANEOS_SESSIOND")) return refuse(id, "companion.noScope");
     cgroup_settle();
 
     /* the binary's descriptor closes at exec; 0, 1, 2 lead nowhere */
@@ -111,7 +111,7 @@ int companion_main(int argc, char **argv) {
 
     char e_home[PATH_MAX + 8], e_id[64];
     snprintf(e_home, sizeof e_home, "HOME=%s", home);
-    snprintf(e_id, sizeof e_id, "LORD_APP_ID=%s", id);
+    snprintf(e_id, sizeof e_id, "INSANE_APP_ID=%s", id);
     const char *lang = getenv("LANG");
     char e_lang[64];
     snprintf(e_lang, sizeof e_lang, "LANG=%s", lang && strlen(lang) < 40 ? lang : "C");

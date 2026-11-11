@@ -1,11 +1,11 @@
-/* conn.c — one remote desktop connection, in a child process of lord-sessiond.
+/* conn.c — one remote desktop connection, in a child process of insane-sessiond.
  *
  *   1. TLS (OpenSSL) and one HTTP request, parsed strictly (rsec.c) under a deadline: the login
  *      page (GET /), the login itself (POST /login), the desktop (GET /desk), logout (POST /logout)
  *      or the WebSocket (GET /ws). Anything else is refused and the connection closed.
  *   2. Login: system user and password, checked against /etc/shadow with crypt(3) (sess.c). Only
  *      regular accounts (uid 1000..59999, a shell from /etc/shells, not locked, not expired, never
- *      root; if the configuration asks for it, in the lordos-remote group). Unknown and refused
+ *      root; if the configuration asks for it, in the insaneos-remote group). Unknown and refused
  *      accounts cost the same time as a wrong password. 3 failures block the source (lockout.c):
  *      15 min, then 1 h, then 24 h. A random cookie (__Host-, Secure, HttpOnly, SameSite=Strict,
  *      only its SHA-256 is kept) lasts 12 hours.
@@ -74,7 +74,7 @@ static double deadline;
 static int busy_end;             /* the session is shared through the API: this bridge ends, the sign-in stays */
 static int lock_fd = -1;        /* bridge → root parent: "L" = the session was locked */
 static char *turn_pass;         /* read as root before the bridge drops root; the bridge's rtc.c owns it */
-static int ice_lfd = -1;        /* ICE-TCP handoff: root's /run/lordos/rtc/<route>, kept by the bridge */
+static int ice_lfd = -1;        /* ICE-TCP handoff: root's /run/insaneos/rtc/<route>, kept by the bridge */
 static int turn_has_key;        /* the TURN key a peer derived, for the next peer (the password is gone) */
 static uint8_t turn_key_saved[16];
 static char turn_realm_saved[256];
@@ -386,7 +386,7 @@ static int session_user(const RsReq *r, char user[33], uid_t *uid, unsigned char
 }
 
 #define CLEAR_COOKIES "Set-Cookie: " RD_COOKIE "=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\r\n" \
-                      "Set-Cookie: lordos_remote=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\r\n"
+                      "Set-Cookie: insaneos_remote=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\r\n"
 
 /* ---- login ---- */
 
@@ -499,7 +499,7 @@ static void handle_login(const RsReq *r) {
     char tok[65], cookie[400];
     if (new_token(pw->pw_uid, user, tok)) { respond(503, NULL); return; }
     snprintf(cookie, sizeof cookie, "Set-Cookie: " RD_COOKIE "=%s; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=%d\r\n"
-             "Set-Cookie: lordos_remote=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\r\n", tok, TOKEN_SECONDS);
+             "Set-Cookie: insaneos_remote=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\r\n", tok, TOKEN_SECONDS);
     explicit_bzero(tok, sizeof tok);
     sd_log("%s logged in", user);
     redirect("/desk", cookie);
@@ -1155,7 +1155,7 @@ static int drop_root(const struct passwd *pw, pid_t parent) {
 
 /* ---- ICE over TCP (docs/REMOTE.md, "ICE over TCP") ---- */
 
-/* As root, before the bridge forks: a listening socket in root's /run/lordos/rtc (0700) named after
+/* As root, before the bridge forks: a listening socket in root's /run/insaneos/rtc (0700) named after
  * this connection's random route. Only root can connect to it: the connection children below. */
 static void ice_listen(void) {
     struct stat st;
@@ -1337,7 +1337,7 @@ void rd_serve(SSL_CTX *ctx, int fd, const char *ip, const char *key) {
     snprintf(peer, sizeof peer, "%s", ip);
     snprintf(peer_key, sizeof peer_key, "%s", key);
     char prefix[96];
-    snprintf(prefix, sizeof prefix, "lord-sessiond[%d] %s", (int)getpid(), peer);
+    snprintf(prefix, sizeof prefix, "insane-sessiond[%d] %s", (int)getpid(), peer);
     sd_log_prefix(prefix);
     alarm(ALARM_SECONDS);                       /* backstop: SIGALRM ends a stuck connection */
     deadline = mono() + HEAD_SECONDS;
@@ -1400,7 +1400,7 @@ void rd_serve(SSL_CTX *ctx, int fd, const char *ip, const char *key) {
         if (logged) redirect("/desk", NULL); else send_login(200, 0, r.host);
         return;
     }
-    if (!strcmp(r.path, "/bg.jpg")) {             /* the login screen background (links to Crystal Crown) */
+    if (!strcmp(r.path, "/bg.jpg")) {             /* the login screen background (links to Crystal Apple) */
         if (!get) { respond(405, "Allow: GET\r\n"); return; }
         char p[600];
         snprintf(p, sizeof p, "%s", rd_conf.greeter_theme);

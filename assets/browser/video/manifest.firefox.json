@@ -6,7 +6,7 @@
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "video@lordos.org",
+      "id": "video@insaneos.org",
       "strict_min_version": "128.0"
     }
   },

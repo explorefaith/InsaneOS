@@ -7,8 +7,8 @@ Una app instalable de Insane OS (un paquete `.lpk`) no recibe las llaves de tu c
 Tres ideas hacen casi todo el trabajo:
 
 - **Aislamiento.** Cada app `.lpk` es su propio proceso, encerrado con funciones del kernel Linux antes de que corra una sola línea de su código.
-- **Mediación.** Todo lo que toca tus cosas (archivos, cámara, micrófono, portapapeles, contraseñas) pasa por el broker en `lord-server`, que revisa el permiso en cada pedido.
-- **Tu decisión, guardada donde la app no llega.** Las decisiones viven en `~/.config/lordos/permisos.json`, que las apps aisladas no pueden ver ni escribir.
+- **Mediación.** Todo lo que toca tus cosas (archivos, cámara, micrófono, portapapeles, contraseñas) pasa por el broker en `insane-server`, que revisa el permiso en cada pedido.
+- **Tu decisión, guardada donde la app no llega.** Las decisiones viven en `~/.config/insaneos/permisos.json`, que las apps aisladas no pueden ver ni escribir.
 
 [[diagram:permission]]
 
@@ -20,8 +20,8 @@ Es la primera pregunta que tiene que hacerse un lector cuidadoso, así que acá 
 |---|---|---|---|---|---|
 | Apps `.lpk` instaladas | sí | sí | sí, con límites de memoria y CPU | sí | sí |
 | Contraseñas, Mail, Calendario, Contactos y Recordatorios (apps incluidas con proceso propio; las últimas cuatro desde 0.8.2) | sí | sí | sí | sí | sí |
-| Otras apps incluidas (Archivos, Ajustes, Terminal…) | no, corren dentro de `lord-server` | no | no (cuentan como "Insane OS") | su uso de cámara, micrófono y pantalla se revisa en C | sí, como "Insane OS" |
-| Apps de Linux abiertas desde el lanzador de apps (apt, la Tienda) | sí, un proceso común | **no** de forma predeterminada; con "sin acceso a tus archivos", espacios de nombres propios y Landlock | sí, `app-lordos-<id>.scope`, sin límites | **no** | **sí**, más las restricciones que fijes (cámara, micrófono, USB, Bluetooth, archivos, notificaciones) |
+| Otras apps incluidas (Archivos, Ajustes, Terminal…) | no, corren dentro de `insane-server` | no | no (cuentan como "Insane OS") | su uso de cámara, micrófono y pantalla se revisa en C | sí, como "Insane OS" |
+| Apps de Linux abiertas desde el lanzador de apps (apt, la Tienda) | sí, un proceso común | **no** de forma predeterminada; con "sin acceso a tus archivos", espacios de nombres propios y Landlock | sí, `app-insaneos-<id>.scope`, sin límites | **no** | **sí**, más las restricciones que fijes (cámara, micrófono, USB, Bluetooth, archivos, notificaciones) |
 | Programas iniciados desde la Terminal | sí | no | comparten el lugar de la Terminal en el árbol | no | como "Terminal", con sus propias reglas (desde 0.8.5; antes, como "Insane OS") |
 
 O sea: **Insane OS no encierra a las apps de Linux en una caja de arena de forma predeterminada.** Corren como tu usuario, exactamente como en cualquier sistema Debian, y pueden leer tu carpeta personal. Lo que Insane OS les suma es atribución (el Monitor sabe qué app hizo cada conexión), el firewall por app que aplica el kernel y las restricciones que elijas para una app: sin cámara, sin micrófono, sin USB, sin sockets Bluetooth, sin notificaciones y "sin acceso a tus archivos", que desde su próximo inicio abre la app en sus propios espacios de nombres, con una carpeta personal vacía que solo tiene sus propias carpetas. Insane OS no usa ni integra Flatpak, y no se probó.
@@ -34,13 +34,13 @@ La caja de arena es código propio de Insane OS (`server/src/sec/sandbox.c`), no
 
 [[diagram:sandbox]]
 
-- **Landlock** limita los archivos que el proceso puede tocar: lectura sola de su propio paquete, del entorno compartido de las apps, de las fuentes y las bibliotecas; lectura y escritura solo en `~/.local/share/lordos/appdata/<id>`. Nada más de tu carpeta personal, y nada de `/dev`.
+- **Landlock** limita los archivos que el proceso puede tocar: lectura sola de su propio paquete, del entorno compartido de las apps, de las fuentes y las bibliotecas; lectura y escritura solo en `~/.local/share/insaneos/appdata/<id>`. Nada más de tu carpeta personal, y nada de `/dev`.
 - **seccomp-bpf** es una lista de llamadas al sistema permitidas, aplicada a cada hilo. Llamadas como `ptrace`, `mount`, `bpf`, `execve`, `keyctl` y la carga de módulos directamente no están. La app tampoco puede abrir sockets Unix nuevos, así que no puede llegar por su cuenta al bus de la sesión, al servicio de impresión ni al socket Wayland.
 - **Sin privilegios.** Se activa `no_new_privs` y se quitan todas las capacidades.
-- **Un cgroup propio**, `app-lordos-lpk-<id>.scope`, con un límite blando de memoria de 192 MB, uno duro de 512 MB y como máximo un núcleo de CPU. El scope lo crea y lo tiene root (`lord-sessiond`), así que la app no se puede mudar a otro lado.
+- **Un cgroup propio**, `app-insaneos-lpk-<id>.scope`, con un límite blando de memoria de 192 MB, uno duro de 512 MB y como máximo un núcleo de CPU. El scope lo crea y lo tiene root (`insane-sessiond`), así que la app no se puede mudar a otro lado.
 - **Red solo con permiso.** Sin el permiso `network`, seccomp se niega a crear sockets de internet y Landlock niega el connect y el bind de TCP. Con el permiso (declarado en el manifiesto **y** permitido por vos), se habilitan, y el firewall por app sigue aplicando.
 
-**¿Se usan namespaces?** No para las apps `.lpk`. `lord-server` corre sin root, y crear un namespace de red necesita privilegios que no tiene. El diseño usa Landlock, seccomp y cgroups en su lugar, y deja la app en el namespace de red de la máquina bajo las reglas de arriba. El único lugar donde Insane OS usa namespaces es una app de Linux restringida con "sin acceso a tus archivos": arranca en sus propios namespaces de usuario, montaje y PID, sin privilegios, armados por código propio de Insane OS en el lanzador, así que no llega a los sockets de la sesión.
+**¿Se usan namespaces?** No para las apps `.lpk`. `insane-server` corre sin root, y crear un namespace de red necesita privilegios que no tiene. El diseño usa Landlock, seccomp y cgroups en su lugar, y deja la app en el namespace de red de la máquina bajo las reglas de arriba. El único lugar donde Insane OS usa namespaces es una app de Linux restringida con "sin acceso a tus archivos": arranca en sus propios namespaces de usuario, montaje y PID, sin privilegios, armados por código propio de Insane OS en el lanzador, así que no llega a los sockets de la sesión.
 
 El proyecto mantiene una app de prueba maliciosa a propósito (`tests/lpk-evil`). No declara permisos e intenta de todo al arrancar: leer `~/.ssh/id_rsa` y `settings.json`, escribir fuera de su carpeta, leer el portapapeles sin avisar, abrir `/etc/shadow`, abrir un socket, ejecutar `/bin/sh`, `ptrace`, abrir la placa de video. Todos los intentos quedan bloqueados. La batería de pruebas de la caja de arena pasa 14 de 14 controles para apps, 14 de 14 con red y 17 de 17 para ayudantes.
 
@@ -58,21 +58,21 @@ Permisos que una app puede declarar: archivos, portapapeles, notificaciones, red
 
 ## Las preguntas del lector escéptico
 
-**¿Se puede saltear el aviso?** La app aislada no. El aviso lo dibuja la sesión, fuera de la ventana de la app. La respuesta llega directo a `lord-server`, y el broker lee en C la decisión guardada en cada pedido. El archivo de decisiones está fuera de lo que Landlock le deja ver a la app, y `lord.fs` se niega a escribirlo. Una app podría dibujar un diálogo falso dentro de su propia ventana, pero tocarlo no cambia nada. El hueco honesto: una app de Linux, que de forma predeterminada no está en caja de arena y corre como vos, podría editar `permisos.json` como cualquier otro archivo de tu carpeta personal, salvo que esté restringida con "sin acceso a tus archivos".
+**¿Se puede saltear el aviso?** La app aislada no. El aviso lo dibuja la sesión, fuera de la ventana de la app. La respuesta llega directo a `insane-server`, y el broker lee en C la decisión guardada en cada pedido. El archivo de decisiones está fuera de lo que Landlock le deja ver a la app, y `insane.fs` se niega a escribirlo. Una app podría dibujar un diálogo falso dentro de su propia ventana, pero tocarlo no cambia nada. El hueco honesto: una app de Linux, que de forma predeterminada no está en caja de arena y corre como vos, podría editar `permisos.json` como cualquier otro archivo de tu carpeta personal, salvo que esté restringida con "sin acceso a tus archivos".
 
 **¿Tengo "Permitir una vez" o "Permitir siempre"?** Hoy el aviso ofrece Permitir y No permitir, y la decisión se recuerda hasta que la cambies en Ajustes. Todavía no hay "permitir una vez" para los permisos de las apps.
 
-**¿La app recibe solo el archivo que elijo?** Sí. Para abrir o guardar, una app aislada llama al diálogo de archivos del sistema. `lord-server` lo dibuja (el "powerbox"), abre con tus permisos el archivo que elegiste y le pasa a la app **solo ese descriptor de archivo**. La app nunca ve la carpeta ni el resto del disco. No hace falta un permiso extra, porque elegir el archivo ya es el consentimiento.
+**¿La app recibe solo el archivo que elijo?** Sí. Para abrir o guardar, una app aislada llama al diálogo de archivos del sistema. `insane-server` lo dibuja (el "powerbox"), abre con tus permisos el archivo que elegiste y le pasa a la app **solo ese descriptor de archivo**. La app nunca ve la carpeta ni el resto del disco. No hace falta un permiso extra, porque elegir el archivo ya es el consentimiento.
 
 [[shot:2]]
 
 **¿Cómo se median la cámara y el micrófono?** La app nunca abre el dispositivo.
-- *Micrófono:* `lord-server` abre el flujo de captura de PipeWire y escribe el audio en un anillo compartido; la app recibe una copia **de solo lectura**.
-- *Cámara:* `lord-server` abre `/dev/videoN` y se lo pasa solo al ayudante multimedia aislado, `lord-media`, que decodifica los cuadros a un anillo compartido sellado. La app recibe un mapeo de solo lectura y tiene que confirmar cada cuadro; `lord-server` valida cada confirmación (generación, posición, ritmo). Las fotos y los videos van a un archivo que elegís en el diálogo de guardar del sistema.
+- *Micrófono:* `insane-server` abre el flujo de captura de PipeWire y escribe el audio en un anillo compartido; la app recibe una copia **de solo lectura**.
+- *Cámara:* `insane-server` abre `/dev/videoN` y se lo pasa solo al ayudante multimedia aislado, `insane-media`, que decodifica los cuadros a un anillo compartido sellado. La app recibe un mapeo de solo lectura y tiene que confirmar cada cuadro; `insane-server` valida cada confirmación (generación, posición, ritmo). Las fotos y los videos van a un archivo que elegís en el diálogo de guardar del sistema.
 
 [[diagram:camera]]
 
-**¿Se pueden revocar permisos mientras la app corre?** Sí, para la cámara y el micrófono: pasar cualquiera de los dos a Preguntar o Denegar en Ajustes lo corta al instante. Para la cámara, `lord-server` mata el proceso `lord-media` de la app (probado: desaparece en menos de 0,5 s); para el micrófono, cierra el flujo de PipeWire. Controles como el del portapapeles se aplican en el próximo pedido. El permiso `network` se decide cuando arranca la app, así que un cambio vale desde el próximo inicio; para cortarle la red al instante a una app que está corriendo, usá el interruptor del firewall en el Monitor.
+**¿Se pueden revocar permisos mientras la app corre?** Sí, para la cámara y el micrófono: pasar cualquiera de los dos a Preguntar o Denegar en Ajustes lo corta al instante. Para la cámara, `insane-server` mata el proceso `insane-media` de la app (probado: desaparece en menos de 0,5 s); para el micrófono, cierra el flujo de PipeWire. Controles como el del portapapeles se aplican en el próximo pedido. El permiso `network` se decide cuando arranca la app, así que un cambio vale desde el próximo inicio; para cortarle la red al instante a una app que está corriendo, usá el interruptor del firewall en el Monitor.
 
 [[shot:3]]
 
@@ -82,7 +82,7 @@ Permisos que una app puede declarar: archivos, portapapeles, notificaciones, red
 
 ## Insane OS verifica su propio código antes de ejecutarlo
 
-Desde 0.8.2, cada paquete de código que Insane OS ejecuta como propio (los temas con el shell y cada app nativa, la pantalla de inicio de sesión, el anfitrión de las apps aisladas y las apps del sistema que corren como proceso propio) figura con su SHA-256 en un manifiesto firmado con la clave de versiones de Insane OS (Ed25519). `lord-server` verifica la firma con la clave pública compilada adentro, y el hash de cada paquete con la misma lectura con la que lo carga, así que no hay un momento en el que se pueda cambiar el archivo. Un paquete que no coincide no se ejecuta: el escritorio pasa a otro tema y lo avisa, o muestra una pantalla de recuperación que explica cómo repararlo, nunca una pantalla en blanco. Acerca de Insane OS muestra "Verificado", o "Compilación de desarrollo" para un árbol de desarrollo sin firmar. Esto protege de los cambios hechos por procesos que no son root y de la modificación sin conexión; root todavía puede reemplazar el propio `lord-server`, algo que una fase posterior (fs-verity, imágenes A/B) debe cubrir.
+Desde 0.8.2, cada paquete de código que Insane OS ejecuta como propio (los temas con el shell y cada app nativa, la pantalla de inicio de sesión, el anfitrión de las apps aisladas y las apps del sistema que corren como proceso propio) figura con su SHA-256 en un manifiesto firmado con la clave de versiones de Insane OS (Ed25519). `insane-server` verifica la firma con la clave pública compilada adentro, y el hash de cada paquete con la misma lectura con la que lo carga, así que no hay un momento en el que se pueda cambiar el archivo. Un paquete que no coincide no se ejecuta: el escritorio pasa a otro tema y lo avisa, o muestra una pantalla de recuperación que explica cómo repararlo, nunca una pantalla en blanco. Acerca de Insane OS muestra "Verificado", o "Compilación de desarrollo" para un árbol de desarrollo sin firmar. Esto protege de los cambios hechos por procesos que no son root y de la modificación sin conexión; root todavía puede reemplazar el propio `insane-server`, algo que una fase posterior (fs-verity, imágenes A/B) debe cubrir.
 
 ## Comprobalo en tu propia computadora (desde 0.8.5)
 
@@ -92,7 +92,7 @@ Desde 0.8.5, **Información del sistema** (Acerca de Insane OS → Informe del s
 
 ## Los ayudantes que leen datos no confiables
 
-Los archivos que vienen de afuera son la puerta de entrada clásica. Insane OS los abre en procesos chicos y separados que están todavía más encerrados que las apps: `lord-doc` (PDF, archivos comprimidos, fuentes), `lord-media` (video, música, fotos, cámara), `lord-maild` (correo, calendarios, contactos) y `lord-vault` (contraseñas). No tienen red, no pueden crear sockets, no pueden ejecutar programas y solo pueden crear hilos, no procesos. No abren rutas: `lord-server` abre los archivos y se los pasa como descriptores. Si seccomp no se puede aplicar, el ayudante termina en lugar de correr sin encierro. Un PDF malicioso puede tumbar a `lord-doc`, pero no al escritorio. Desde la 0.8.5 `lord-fetch` (las listas de bloqueo del firewall) y `lord-tls` (el HTTPS de la Tienda) están encerrados de la misma forma y tampoco pueden crear sockets: solo reciben una conexión que `lord-server` o la Tienda abrió por ellos. Desde la 0.8.7 `lord-lan` lee de la misma forma lo que vuelve de la red local para Archivos → Red, sin sockets ni archivos, y `lord-rdesk`, la conexión de Remote Desk, queda aislado apenas se conecta: sin sockets nuevos y sin programas. El `lord-bench` de InsaneBench (desde la 0.8.6) corre sus pruebas bajo el mismo encierro.
+Los archivos que vienen de afuera son la puerta de entrada clásica. Insane OS los abre en procesos chicos y separados que están todavía más encerrados que las apps: `insane-doc` (PDF, archivos comprimidos, fuentes), `insane-media` (video, música, fotos, cámara), `insane-maild` (correo, calendarios, contactos) y `insane-vault` (contraseñas). No tienen red, no pueden crear sockets, no pueden ejecutar programas y solo pueden crear hilos, no procesos. No abren rutas: `insane-server` abre los archivos y se los pasa como descriptores. Si seccomp no se puede aplicar, el ayudante termina en lugar de correr sin encierro. Un PDF malicioso puede tumbar a `insane-doc`, pero no al escritorio. Desde la 0.8.5 `insane-fetch` (las listas de bloqueo del firewall) y `insane-tls` (el HTTPS de la Tienda) están encerrados de la misma forma y tampoco pueden crear sockets: solo reciben una conexión que `insane-server` o la Tienda abrió por ellos. Desde la 0.8.7 `insane-lan` lee de la misma forma lo que vuelve de la red local para Archivos → Red, sin sockets ni archivos, y `insane-rdesk`, la conexión de Remote Desk, queda aislado apenas se conecta: sin sockets nuevos y sin programas. El `insane-bench` de InsaneBench (desde la 0.8.6) corre sus pruebas bajo el mismo encierro.
 
 ## Ventanas protegidas
 
@@ -109,13 +109,13 @@ Una ventana se puede marcar como protegida. La de Contraseñas lo está. Sus pí
 
 ## Leé el código
 
-- [server/src/sec/sandbox.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/sandbox.c): Landlock, seccomp, capacidades, reglas de red
-- [server/src/sec/brokersrv.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokersrv.c): el broker, del lado del servidor
-- [server/src/sec/perms.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/perms.c): permisos por app
-- [server/src/sec/brokercam.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/brokercam.c): la cámara para apps aisladas
-- [server/src/sec/restrict.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/restrict.c): las restricciones del firewall en el broker
-- [server/src/sec/cgroup.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/cgroup.c) y [server/src/remote/cgsup.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/remote/cgsup.c): scopes de las apps en manos de root
-- [server/src/app/appclient.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/app/appclient.c): el proceso de la app aislada
-- [sdk/privacy.js](https://github.com/lordbasex/Insane OS/blob/main/sdk/privacy.js) y [sdk/powerbox.jsx](https://github.com/lordbasex/Insane OS/blob/main/sdk/powerbox.jsx): los avisos y el diálogo de archivos
-- [server/tests/sandbox_test.c](https://github.com/lordbasex/Insane OS/blob/main/server/tests/sandbox_test.c) y [tests/lpk-evil](https://github.com/lordbasex/Insane OS/tree/main/tests/lpk-evil): las pruebas
-- [docs/PRIVACY.md](https://github.com/lordbasex/Insane OS/blob/main/docs/PRIVACY.md)
+- [server/src/sec/sandbox.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/sandbox.c): Landlock, seccomp, capacidades, reglas de red
+- [server/src/sec/brokersrv.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/brokersrv.c): el broker, del lado del servidor
+- [server/src/sec/perms.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/perms.c): permisos por app
+- [server/src/sec/brokercam.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/brokercam.c): la cámara para apps aisladas
+- [server/src/sec/restrict.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/restrict.c): las restricciones del firewall en el broker
+- [server/src/sec/cgroup.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/cgroup.c) y [server/src/remote/cgsup.c](https://github.com/insaneos/Insane OS/blob/main/server/src/remote/cgsup.c): scopes de las apps en manos de root
+- [server/src/app/appclient.c](https://github.com/insaneos/Insane OS/blob/main/server/src/app/appclient.c): el proceso de la app aislada
+- [sdk/privacy.js](https://github.com/insaneos/Insane OS/blob/main/sdk/privacy.js) y [sdk/powerbox.jsx](https://github.com/insaneos/Insane OS/blob/main/sdk/powerbox.jsx): los avisos y el diálogo de archivos
+- [server/tests/sandbox_test.c](https://github.com/insaneos/Insane OS/blob/main/server/tests/sandbox_test.c) y [tests/lpk-evil](https://github.com/insaneos/Insane OS/tree/main/tests/lpk-evil): las pruebas
+- [docs/PRIVACY.md](https://github.com/insaneos/Insane OS/blob/main/docs/PRIVACY.md)

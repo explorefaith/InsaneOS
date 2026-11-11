@@ -1,9 +1,9 @@
-/* js_vm.h — lord.vm (js_vm.c). */
-#ifndef LORD_UI_JS_VM_H
-#define LORD_UI_JS_VM_H
+/* js_vm.h — insane.vm (js_vm.c). */
+#ifndef INSANE_UI_JS_VM_H
+#define INSANE_UI_JS_VM_H
 
 #include "quickjs.h"
 
-void js_vm_register(JSContext *c, JSValue lord);
+void js_vm_register(JSContext *c, JSValue insane);
 
 #endif

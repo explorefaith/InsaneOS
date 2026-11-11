@@ -1,12 +1,12 @@
 /* wallpaper_admin.c — moving wallpapers on disk (docs/WALLPAPERS.md). Closed actions of the admin helper:
  *
- *   wallpaper-get "<id> <variant>"     downloads one file of the catalog to /var/lib/lordos/wallpapers/<sha256>.mp4
+ *   wallpaper-get "<id> <variant>"     downloads one file of the catalog to /var/lib/insaneos/wallpapers/<sha256>.mp4
  *   wallpaper-remove "<id> <variant>"  deletes it
  *   wallpaper-login "still <id>"       the login screen shows that still wallpaper, with no video
  *   wallpaper-login "<id> <variant>"   the login screen plays it; "default" goes back to the built-in one
  *   wallpaper-image "<path>"           the session user's own copy of a picture they chose, made by a child running as
  *                                      them; answers its name, 16 hex digits. "remove <name>" deletes that copy
- *   wallpaper-login-image "<name>"     the login screen shows that copy: stored in /var/lib/lordos/wallpapers
+ *   wallpaper-login-image "<name>"     the login screen shows that copy: stored in /var/lib/insaneos/wallpapers
  *
  * What is fetched comes only from the catalog in the package, read here as root: JS names an entry, never a URL or
  * a path. The bytes go through fetch_batch (a child as nobody, in the Store's scope), and a file whose size or
@@ -36,9 +36,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#define CATALOG "/usr/share/backgrounds/lordos/motion.json"
-#define STORE   "/var/lib/lordos/wallpapers"
-#define MINE    "/.local/share/lordos/wallpapers"     /* under the user's home: their copies */
+#define CATALOG "/usr/share/backgrounds/insaneos/motion.json"
+#define STORE   "/var/lib/insaneos/wallpapers"
+#define MINE    "/.local/share/insaneos/wallpapers"     /* under the user's home: their copies */
 #define IMAGE_SECONDS 30                              /* a picture takes far less; a stuck disk doesn't wait forever */
 
 static int entry(const char *arg, size_t len, char *url, size_t un, char *sha, size_t sn, unsigned long long *size) {
@@ -179,7 +179,7 @@ static int become_user(const AdminReq *r, int out) {
 
 static int save_mine(const char *home, const char *name, const unsigned char *d, size_t n) {
     char dir[PATH_MAX], path[PATH_MAX], tmp[PATH_MAX];
-    if (snprintf(dir, sizeof dir, "%s/.local/share/lordos/wallpapers", home) >= (int)sizeof dir) return WP_WRITE;
+    if (snprintf(dir, sizeof dir, "%s/.local/share/insaneos/wallpapers", home) >= (int)sizeof dir) return WP_WRITE;
     for (char *p = dir + strlen(home) + 1; (p = strchr(p, '/')); *p++ = '/') { *p = 0; mkdir(dir, 0755); }
     mkdir(dir, 0755);
     snprintf(path, sizeof path, "%.4000s/%s", dir, name);
@@ -315,7 +315,7 @@ void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len
     snprintf(name, sizeof name, "login-%s.jpg", hex);
     snprintf(dst, sizeof dst, STORE "/%s", name);
     snprintf(tmp, sizeof tmp, STORE "/.login-image.%d", (int)getpid());
-    mkdir("/var/lib/lordos", 0755);
+    mkdir("/var/lib/insaneos", 0755);
     mkdir(STORE, 0755);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0644);
     int bad = fd < 0 || fchmod(fd, 0644) || write_all(fd, jpg, n) || fsync(fd);

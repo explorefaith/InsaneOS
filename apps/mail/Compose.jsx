@@ -1,14 +1,14 @@
 // Compose.jsx — the compose window: From, To/Cc/Bcc with autocomplete (Contacts and people you
 // wrote to), subject, a body in rich text (formatting buttons and a live preview), markdown or
 // plain text, attachments, signature, drafts saved to the server, send now or later.
-import { View, Text, useTheme, useAppWindow, Button, TextInput, Segmented, ScrollView, Markdown, FilePicker, t, wm, fs, mailRequest, mailAccounts, contacts, useKeyboard, isolatedPim, pickFileFd, closeFileFd } from '@lordos/sdk';
+import { View, Text, useTheme, useAppWindow, Button, TextInput, Segmented, ScrollView, Markdown, FilePicker, t, wm, fs, mailRequest, mailAccounts, contacts, useKeyboard, isolatedPim, pickFileFd, closeFileFd } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { BodyEditor } from './BodyEditor.jsx';
 import { mdToHtml, mdToText } from './md.js';
 import { formatSize } from './util.js';
 
 // An attachment is a path (Mail in the session) or { fd, name, size } (Mail in its own process: a
-// file from the system dialog, or a cached attachment lord-server opened for it).
+// file from the system dialog, or a cached attachment insane-server opened for it).
 const attName = (p) => (typeof p === 'object' ? p.name : fs.basename(p));
 const attKey = (p) => (typeof p === 'object' ? `fd:${p.fd}` : p);
 function attSize(p) {

@@ -4,7 +4,7 @@
 // and, since 0.8.2, keep a traffic history (bytes per minute and per hour, never addresses) with
 // "Clear History" (monitor.clearHistory, docs/MONITOR.md "Traffic history").
 // Drawn like the Settings sections: a 13/600 header, an inset GroupBox and a footer.
-import { View, Text, Toggle, Button, GroupBox, useTheme, useLocale, useSettings, wm, spacing, typeScale, monitor } from '@lordos/sdk';
+import { View, Text, Toggle, Button, GroupBox, useTheme, useLocale, useSettings, wm, spacing, typeScale, monitor } from '@insaneos/sdk';
 import { useState } from 'react';
 
 function Row({ label, hint, children }) {

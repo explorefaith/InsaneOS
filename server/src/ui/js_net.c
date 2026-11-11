@@ -1,8 +1,8 @@
-/* js_net.c — lord.net: network state for the Network and VPN app (see docs/NETWORK.md).
+/* js_net.c — insane.net: network state for the Network and VPN app (see docs/NETWORK.md).
  *
- * Everything is read-only and without root (rtnetlink and public files in /etc/lordos/net). Anything
+ * Everything is read-only and without root (rtnetlink and public files in /etc/insaneos/net). Anything
  * that changes something goes through the privileged helper: the SDK's admin.run('net-…'). Kernel
- * changes (links, addresses, routes) arrive at __lordNet(what), with what = link | addr | route. */
+ * changes (links, addresses, routes) arrive at __insaneNet(what), with what = link | addr | route. */
 #include "js_net.h"
 #include "../net/net.h"
 #include "js_err.h"
@@ -44,7 +44,7 @@ static JSValue f_wifi_known(JSContext *c, JSValueConst t, int argc, JSValueConst
     return json_or_null(c, net_wifi_known_json(), "<net.wifiKnown>");
 }
 
-/* lord.net.config(interface): the configuration saved by Insane OS, or null. */
+/* insane.net.config(interface): the configuration saved by Insane OS, or null. */
 static JSValue f_config(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     if (argc < 1) return JS_NULL;
@@ -55,7 +55,7 @@ static JSValue f_config(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return json_or_null(c, j, "<net.config>");
 }
 
-/* lord.net.prepareOvpn(path): the .ovpn (inside $HOME) with its files embedded, ready
+/* insane.net.prepareOvpn(path): the .ovpn (inside $HOME) with its files embedded, ready
  * for admin.run('net-vpn-import', 'openvpn\n<name>\n' + text). Throws an error if something is missing. */
 static JSValue f_prepare_ovpn(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -77,7 +77,7 @@ static JSValue f_prepare_ovpn(JSContext *c, JSValueConst t, int argc, JSValueCon
     return v;
 }
 
-/* lord.net.vpnTypes(): [{type, available, optional, package, insecure}] — the optional ones are
+/* insane.net.vpnTypes(): [{type, available, optional, package, insecure}] — the optional ones are
  * enabled with admin.run('net-vpn-enable', 'openconnect'|'fortinet'). */
 static JSValue f_vpn_types(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -95,8 +95,8 @@ static const JSCFunctionListEntry net_funcs[] = {
     JS_CFUNC_DEF("prepareOvpn", 1, f_prepare_ovpn),
 };
 
-void js_net_register(JSContext *c, JSValue lord) {
+void js_net_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, net_funcs, sizeof net_funcs / sizeof net_funcs[0]);
-    JS_SetPropertyStr(c, lord, "net", o);
+    JS_SetPropertyStr(c, insane, "net", o);
 }

@@ -1,7 +1,7 @@
 // remote.js — remote desktop: who is watching this session from the network, and the on-screen notice.
 //
-// lord-server notifies (__lordRemote) every time someone connects or disconnects through the
-// remote desktop (lord-sessiond, docs/REMOTE.md). <RemoteBadge /> is mounted by startShell: a
+// insane-server notifies (__insaneRemote) every time someone connects or disconnects through the
+// remote desktop (insane-sessiond, docs/REMOTE.md). <RemoteBadge /> is mounted by startShell: a
 // fixed notice at the top right while there are connections, in every theme.
 //
 //   useStore(remoteViewers) → [{ ip, user }]
@@ -9,12 +9,12 @@
 //                               sessions: [...], monitor, blocked: [{ ip, until, strikes, manual }], allowed: ['cidr'] }
 //   remoteVideo.setStun([...]) / setTurn(server, user, pass, 'udp'|'tcp'|'tls', fingerprint) / clearTurn()  (remote-ice)
 //   remoteCidr(text)        → canonical-looking text if it's an address or network the admin actions accept, else ''
-//                             (lord-sessiond's helper checks again, strictly: server/src/remote/ipnet.c)
-// lord-sessiond's notice "this source was blocked after failed logins" arrives as __lordRemoteNotice and is
+//                             (insane-sessiond's helper checks again, strictly: server/src/remote/ipnet.c)
+// insane-sessiond's notice "this source was blocked after failed logins" arrives as __insaneRemoteNotice and is
 // shown as a notification that opens Settings → Sharing.
 //   sshLogin.status()       → { installed, enabled, running, allow: 'all'|'admins', fingerprint } (remote login, SSH)
 import { createElement as h } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { t } from './i18n.js';
 import { notify } from './notify.js';
@@ -23,7 +23,7 @@ import { admin } from './admin.js';
 import { parseCode } from './errors.js';
 
 export const remoteViewers = createStore([]);
-globalThis.__lordRemote = (json) => {
+globalThis.__insaneRemote = (json) => {
   try { remoteViewers.set(JSON.parse(json)); } catch (e) { remoteViewers.set([]); }
 };
 
@@ -46,7 +46,7 @@ export function remoteCidr(text) {
 }
 
 const minutesLeft = (until) => Math.max(1, Math.round((until - Date.now() / 1000) / 60));
-globalThis.__lordRemoteNotice = (n) => {
+globalThis.__insaneRemoteNotice = (n) => {
   if (!n || n.t !== 'blocked' || typeof n.ip !== 'string' || !/^[0-9a-fA-F:./]{3,48}$/.test(n.ip)) return;
   const min = Math.max(1, Math.min(1440, Number(n.min) || 15));
   notify({
@@ -99,10 +99,10 @@ function parseConfig(text) {
 }
 
 export const remote = {
-  available: () => typeof lord.remote !== 'undefined',
+  available: () => typeof insane.remote !== 'undefined',
   status() {
-    if (typeof lord.remote === 'undefined') return { enabled: false, installed: false, net: 'lan', clients: [], sessions: [], monitor: '', blocked: [], allowed: [] };
-    const s = lord.remote.status();
+    if (typeof insane.remote === 'undefined') return { enabled: false, installed: false, net: 'lan', clients: [], sessions: [], monitor: '', blocked: [], allowed: [] };
+    const s = insane.remote.status();
     const cfg = parseConfig(s.config);
     let st = null;
     try { st = s.status ? JSON.parse(s.status) : null; } catch (e) { st = null; }
@@ -141,10 +141,10 @@ export const remoteVideo = {
 
 // Remote login (SSH): read-only state; changes go through the ssh-set / ssh-allow admin actions.
 export const sshLogin = {
-  available: () => typeof lord.ssh !== 'undefined',
+  available: () => typeof insane.ssh !== 'undefined',
   status() {
-    if (typeof lord.ssh === 'undefined') return { installed: false, enabled: false, running: false, allow: 'all', fingerprint: '' };
-    const s = lord.ssh.status();
+    if (typeof insane.ssh === 'undefined') return { installed: false, enabled: false, running: false, allow: 'all', fingerprint: '' };
+    const s = insane.ssh.status();
     return { installed: !!s.installed, enabled: !!s.enabled, running: !!s.running, allow: s.allow === 'admins' ? 'admins' : 'all', fingerprint: s.fingerprint || '' };
   },
 };

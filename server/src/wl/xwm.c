@@ -1,7 +1,7 @@
 /* xwm.c — Insane OS's X window manager for Xwayland (see xwm.h).
  *
  * It speaks the X11 protocol itself (x11wire.c), on the connection Xwayland opened for it with
- * `-wm`, fully asynchronously: it never waits for a reply, so lord-server can't stall on
+ * `-wm`, fully asynchronously: it never waits for a reply, so insane-server can't stall on
  * Xwayland while Xwayland waits on the compositor. Replies are matched by sequence number to a
  * FIFO of callbacks.
  *
@@ -67,7 +67,7 @@ enum { XA_PRIMARY = 1, XA_ATOM = 4, XA_CARDINAL = 6, XA_STRING = 31, XA_WINDOW =
     X(NET_CLIENT_LIST, "_NET_CLIENT_LIST") X(NET_FRAME_EXTENTS, "_NET_FRAME_EXTENTS") X(MOTIF_WM_HINTS, "_MOTIF_WM_HINTS") \
     X(WL_SURFACE_ID, "WL_SURFACE_ID") X(CLIPBOARD, "CLIPBOARD") X(TARGETS, "TARGETS") X(TIMESTAMP, "TIMESTAMP") X(INCR, "INCR") \
     X(TEXT, "TEXT") X(MIME_UTF8, "text/plain;charset=utf-8") X(MIME_TEXT, "text/plain") X(MIME_PNG, "image/png") X(MIME_HTML, "text/html") \
-    X(LORD_SEL_CLIPBOARD, "_LORD_SEL_CLIPBOARD") X(LORD_SEL_PRIMARY, "_LORD_SEL_PRIMARY")
+    X(INSANE_SEL_CLIPBOARD, "_INSANE_SEL_CLIPBOARD") X(INSANE_SEL_PRIMARY, "_INSANE_SEL_PRIMARY")
 
 #define AE(id, name) A_##id,
 enum { ATOM_LIST(AE) A_COUNT };
@@ -391,15 +391,15 @@ static void read_props(XWin *w) {
 /* ---- the clipboard bridge ---- */
 
 static uint32_t sel_atom(int k) { return k == SEL_CLIP ? AT(CLIPBOARD) : XA_PRIMARY; }
-static uint32_t sel_prop(int k) { return k == SEL_CLIP ? AT(LORD_SEL_CLIPBOARD) : AT(LORD_SEL_PRIMARY); }
+static uint32_t sel_prop(int k) { return k == SEL_CLIP ? AT(INSANE_SEL_CLIPBOARD) : AT(INSANE_SEL_PRIMARY); }
 static int sel_index(uint32_t a) { return a == AT(CLIPBOARD) ? SEL_CLIP : a == XA_PRIMARY ? SEL_PRIM : -1; }
 
 /* Insane OS's current selection, as a generation (any change → another value). */
-static unsigned lord_gen(int k) {
+static unsigned insane_gen(int k) {
     if (k == SEL_PRIM) { size_t n; unsigned g; wlx_primary(&n, &g); return g; }
     return term_clipboard_gen() * 2654435761u + wl_clip_image_gen() * 40503u + 1;
 }
-static int lord_has(int k) {
+static int insane_has(int k) {
     if (k == SEL_PRIM) { size_t n; unsigned g; return wlx_primary(&n, &g) && n > 0; }
     if (wl_clip_is_image()) return 1;
     /* a secret (Passwords, password fields) never goes to X: any X client can read the property the
@@ -412,14 +412,14 @@ static int lord_has(int k) {
 static void clip_sync(void) {
     for (int k = 0; k < NSEL; k++) {
         Sel *s = &X.sel[k];
-        unsigned g = lord_gen(k);
-        if (X.focus && lord_has(k) && g != s->x_gen) {
+        unsigned g = insane_gen(k);
+        if (X.focus && insane_has(k) && g != s->x_gen) {
             if (!s->owned || s->owned_gen != g) {
                 set_owner(X.wmwin, sel_atom(k));
                 s->owned = 1;
                 s->owned_gen = g;
             }
-        } else if (s->owned && (!X.focus || !lord_has(k))) {
+        } else if (s->owned && (!X.focus || !insane_has(k))) {
             set_owner(0, sel_atom(k));
             s->owned = 0;
         }
@@ -459,7 +459,7 @@ static void sel_finish(int k) {
         if (k == SEL_PRIM) wlx_primary_text((const char *)s->buf, s->len);
         else if (s->image) wlx_clip_png(s->buf, s->len, origin);
         else wlx_clip_text((const char *)s->buf, s->len, origin);
-        s->x_gen = lord_gen(k);             /* this one is the X app's: not offered back */
+        s->x_gen = insane_gen(k);             /* this one is the X app's: not offered back */
         if (X.debug) fprintf(stderr, "xwm: %s copied %zu bytes (%s) from %s\n", k ? "PRIMARY" : "CLIPBOARD", s->len,
                              s->image ? "image/png" : "text", origin);
     }
@@ -513,7 +513,7 @@ static void sel_owner_changed(const uint8_t *p) {
     Sel *s = &X.sel[k];
     s->owned = 0;
     if (!owner) { s->x_gen = 0; return; }                  /* the X app that had it is gone */
-    s->x_gen = lord_gen(k);
+    s->x_gen = insane_gen(k);
     sel_start(k, owner);
 }
 
@@ -590,7 +590,7 @@ static void sel_request(const uint8_t *p) {
      * a window of the focused client is a hint, not a boundary: the requestor id isn't
      * authenticated in X11 and X apps on one display can read each other's selections anyway
      * (docs/PRIVACY.md, "X11 apps") */
-    if (k < 0 || owner != X.wmwin || !X.sel[k].owned || !X.focus || !same_client(requestor, X.focus->id) || !lord_has(k)) {
+    if (k < 0 || owner != X.wmwin || !X.sel[k].owned || !X.focus || !same_client(requestor, X.focus->id) || !insane_has(k)) {
         notify_requestor(time_, requestor, selection, target, 0);
         return;
     }
@@ -1066,7 +1066,7 @@ static int on_fd(int fd, uint32_t mask, void *data) {
 
 int xwm_start(int fd, struct wl_event_loop *loop) {
     xwm_stop();
-    X.debug = getenv("LORD_XWM_DEBUG") != NULL;     /* every window, copy and X error in the session log */
+    X.debug = getenv("INSANE_XWM_DEBUG") != NULL;     /* every window, copy and X error in the session log */
     X.fd = fd;
     X.loop = loop;
     X.ev = wl_event_loop_add_fd(loop, fd, WL_EVENT_READABLE, on_fd, NULL);

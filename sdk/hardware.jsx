@@ -1,21 +1,21 @@
 // hardware.jsx — the session side of Settings' hardware pages (docs/SETTINGS.md):
 //
-//   displays      store with lord.display.list() (outputs, modes, Night Light, backlight)
+//   displays      store with insane.display.list() (outputs, modes, Night Light, backlight)
 //   applyDisplay  change resolution/refresh/rotation/main display live, with the 15-second
 //                 "Keep these display settings?" countdown (<DisplayConfirm />, drawn by the system)
 //   night         Night Light scheduler: sunset to sunrise (from the time zone's coordinates, never
 //                 from the network) or custom hours, with a 30-minute fade, plus "on until tomorrow"
-//   battery       store with lord.power.state(); low-battery notice; battery in the menu bar
-//   idle          screen off / lock / sleep after N minutes (deadlines live in lord-server)
-//   bluetooth     store with lord.bt.state(); pairing requests (<BluetoothPrompt />); setBluetoothPower,
+//   battery       store with insane.power.state(); low-battery notice; battery in the menu bar
+//   idle          screen off / lock / sleep after N minutes (deadlines live in insane-server)
+//   bluetooth     store with insane.bt.state(); pairing requests (<BluetoothPrompt />); setBluetoothPower,
 //                 remembered and applied again at login (btpowermodel.js)
 //   polkit        a Linux app's request for administrator rights (<PolkitPrompt />)
 //   timedate      NTP state from timedated (read-only)
 //   menuClock(d)  the menu bar clock with the format chosen in Settings → Date & Time
 //
-// Everything arrives as __lordHw(kind, data) from lord-server (ui/js_hw.c): no polling.
+// Everything arrives as __insaneHw(kind, data) from insane-server (ui/js_hw.c): no polling.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text, mainBox } from '@lordos/runtime';
+import { View, Text, mainBox } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme } from './theme.js';
@@ -29,13 +29,13 @@ import { portalFile } from './filepicker.jsx';
 import { lockBeforeSleep, lockAfterWake } from './idlemodel.js';
 import { btPowerAction } from './btpowermodel.js';
 
-const has = (name) => typeof lord !== 'undefined' && lord[name] && typeof lord[name] === 'object';
+const has = (name) => typeof insane !== 'undefined' && insane[name] && typeof insane[name] === 'object';
 const call = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
 
-export const displays = createStore(has('display') ? call(() => lord.display.list(), null) : null);
-export const battery = createStore(has('power') ? call(() => lord.power.state(), null) : null);
-export const powerProfiles = createStore(has('power') ? call(() => lord.power.profiles(), null) : null);
-export const bluetooth = createStore(has('bt') ? call(() => lord.bt.state(), null) : null);
+export const displays = createStore(has('display') ? call(() => insane.display.list(), null) : null);
+export const battery = createStore(has('power') ? call(() => insane.power.state(), null) : null);
+export const powerProfiles = createStore(has('power') ? call(() => insane.power.profiles(), null) : null);
+export const bluetooth = createStore(has('bt') ? call(() => insane.bt.state(), null) : null);
 export const timedate = createStore(null);
 export const displayConfirm = createStore(null);   // { conn, old, deadline, left }
 const btResults = new Set();
@@ -51,7 +51,7 @@ export const onBluetoothResult = (fn) => { btResults.add(fn); return () => btRes
 // since BlueZ powers every adapter again when it starts (btpowermodel.js).
 export function setBluetoothPower(on) {
   settings.set({ bluetoothOff: !on });
-  return has('bt') && call(() => lord.bt.power(on), false);
+  return has('bt') && call(() => insane.bt.power(on), false);
 }
 export const onPowerProfileResult = (fn) => { ppdResults.add(fn); return () => ppdResults.delete(fn); };
 
@@ -91,9 +91,9 @@ export function nightAmount(now, from, to, fade = 30) {
 
 // Sunset and sunrise today, in local minutes, from the chosen time zone's coordinates.
 export function sunTimes(day = new Date()) {
-  if (!has('display') || !lord.time) return null;
-  const zone = call(() => lord.time.zone(), '');
-  const s = call(() => lord.display.sun(zone, day.getFullYear(), day.getMonth() + 1, day.getDate()), null);
+  if (!has('display') || !insane.time) return null;
+  const zone = call(() => insane.time.zone(), '');
+  const s = call(() => insane.display.sun(zone, day.getFullYear(), day.getMonth() + 1, day.getDate()), null);
   if (!s) return null;
   const local = (utcMin) => {
     const d = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) + utcMin * 60000);
@@ -137,7 +137,7 @@ export function nightTick() {
   clearTimeout(nightTimer);
   if (!has('display')) return;
   const { kelvin, fading } = nightTarget();
-  if (call(() => lord.display.temperature(), NEUTRAL) !== kelvin) call(() => lord.display.setTemperature(kelvin));
+  if (call(() => insane.display.temperature(), NEUTRAL) !== kelvin) call(() => insane.display.setTemperature(kelvin));
   const p = nightPrefs();
   if (p.schedule === 'off' && !(p.manual && Date.now() < p.manual.until)) return;
   // next check: every 30 s while fading, else at most 5 minutes (survives clock and zone changes)
@@ -145,7 +145,7 @@ export function nightTick() {
 }
 
 // Preview while dragging the warmth slider in Settings.
-export function previewNight(kelvin) { if (has('display')) call(() => lord.display.setTemperature(kelvin)); }
+export function previewNight(kelvin) { if (has('display')) call(() => insane.display.setTemperature(kelvin)); }
 
 // ---- displays ----
 
@@ -157,7 +157,7 @@ export function applyDisplay(out, { w, h: hh, refresh = 0, rotation = 0, scale =
   const d = displays.get();
   const cur = (d?.outputs || []).find((o) => o.id === conn) || out;
   const old = { conn: cur.id, w: cur.mode?.w || 0, h: cur.mode?.h || 0, refresh: cur.mode?.refresh || 0, rotation: cur.rotation || 0, scale: cur.scale || 100 };
-  if (!lord.display.apply(conn, w, hh, refresh, rotation, scale)) return false;
+  if (!insane.display.apply(conn, w, hh, refresh, rotation, scale)) return false;
   const prev = displayConfirm.get();
   displayConfirm.set({ conn, old: prev ? prev.old : old, deadline: Date.now() + 15000, left: 15 });
   scheduleConfirm();
@@ -179,39 +179,39 @@ export function keepDisplay() {
   const c = displayConfirm.get();
   clearTimeout(confirmTimer);
   displayConfirm.set(null);
-  if (c && has('display')) lord.display.save(c.conn);
+  if (c && has('display')) insane.display.save(c.conn);
 }
 
 export function revertDisplay() {
   const c = displayConfirm.get();
   clearTimeout(confirmTimer);
   displayConfirm.set(null);
-  if (c && has('display')) lord.display.apply(c.old.conn, c.old.w, c.old.h, c.old.refresh, c.old.rotation, c.old.scale || 100);
+  if (c && has('display')) insane.display.apply(c.old.conn, c.old.w, c.old.h, c.old.refresh, c.old.rotation, c.old.scale || 100);
 }
 
 // Arrangement, mirror, main display, capture: applied and kept right away (nothing goes dark).
 export function arrangeDisplay(conn, x, y, apply = true) {
-  if (!has('display') || !lord.display.arrange) return null;
-  const r = lord.display.arrange(conn, Math.round(x), Math.round(y), apply);
-  if (r && apply) lord.display.save(conn);
+  if (!has('display') || !insane.display.arrange) return null;
+  const r = insane.display.arrange(conn, Math.round(x), Math.round(y), apply);
+  if (r && apply) insane.display.save(conn);
   return r;
 }
 export function setDisplayMirror(on) {
-  if (!has('display') || !lord.display.setMirror) return false;
-  const ok = lord.display.setMirror(on);
-  if (ok) setTimeout(() => lord.display.save(0), 0);
+  if (!has('display') || !insane.display.setMirror) return false;
+  const ok = insane.display.setMirror(on);
+  if (ok) setTimeout(() => insane.display.save(0), 0);
   return ok;
 }
 export function setMainDisplay(conn) {
-  if (!has('display') || !lord.display.setMain) return false;
-  const ok = lord.display.setMain(conn);
-  if (ok) setTimeout(() => lord.display.save(conn), 0);
+  if (!has('display') || !insane.display.setMain) return false;
+  const ok = insane.display.setMain(conn);
+  if (ok) setTimeout(() => insane.display.save(conn), 0);
   return ok;
 }
-export function setCaptureAllDisplays(on) { return has('display') && lord.display.setCaptureAll ? lord.display.setCaptureAll(on) : false; }
-// Settings → Displays, "Rotate automatically": the built-in panel follows the accelerometer (lord-server
+export function setCaptureAllDisplays(on) { return has('display') && insane.display.setCaptureAll ? insane.display.setCaptureAll(on) : false; }
+// Settings → Displays, "Rotate automatically": the built-in panel follows the accelerometer (insane-server
 // saves it in displays.json and sends the new list).
-export function setAutoRotateDisplays(on) { return has('display') && lord.display.setAutoRotate ? lord.display.setAutoRotate(on) : false; }
+export function setAutoRotateDisplays(on) { return has('display') && insane.display.setAutoRotate ? insane.display.setAutoRotate(on) : false; }
 
 // System dialogs are drawn outside the theme's provider: light or dark from the user's setting.
 function useSystemTokens() {
@@ -269,30 +269,30 @@ export function applyIdle() {
   const off = ac ? p.offAC : p.offBattery;
   const lock = p.lockDelay < 0 || !off ? 0 : off + p.lockDelay;
   idleLocks = lock > 0;
-  call(() => lord.display.setIdle(off || 0, lock, (ac ? p.sleepAC : p.sleepBattery) || 0));
+  call(() => insane.display.setIdle(off || 0, lock, (ac ? p.sleepAC : p.sleepBattery) || 0));
 }
 
-const managed = () => typeof lord.session !== 'undefined' && lord.session.managed();
-const machinesAwake = () => { try { return typeof lord.vm !== 'undefined' ? lord.vm.awake() : 0; } catch (e) { return 0; } };
+const managed = () => typeof insane.session !== 'undefined' && insane.session.managed();
+const machinesAwake = () => { try { return typeof insane.vm !== 'undefined' ? insane.vm.awake() : 0; } catch (e) { return 0; } };
 // the sleep deadline came while a machine ran: looked at again every 30 s, and the computer sleeps once none runs
 // (unless someone came back first: the "wake" stage)
 let sleepHeld = null;
 function onIdle(data) {
   const stage = data?.stage;
   if (stage === 'wake' && sleepHeld) { clearInterval(sleepHeld); sleepHeld = null; }
-  if (stage === 'lock' && managed()) lord.session.lock();
+  if (stage === 'lock' && managed()) insane.session.lock();
   // the computer is going to sleep (the lid, the power button, a sleep timer) or woke up: the display was
   // off, so "Require password after the display turns off" applies (issue #36, sdk/idlemodel.js).
-  // lord-server holds the sleep until the screen is taken (hw/sleeplock.c).
+  // insane-server holds the sleep until the screen is taken (hw/sleeplock.c).
   if (stage === 'suspend' || stage === 'resume') {
-    if (typeof lord.greeter !== 'undefined' || !managed()) return;
+    if (typeof insane.greeter !== 'undefined' || !managed()) return;
     const { lockDelay } = powerPrefs();
-    if (stage === 'suspend' ? lockBeforeSleep(lockDelay) : lockAfterWake(lockDelay, data?.slept)) lord.session.lock();
+    if (stage === 'suspend' ? lockBeforeSleep(lockDelay) : lockAfterWake(lockDelay, data?.slept)) insane.session.lock();
     return;
   }
   if (stage !== 'sleep') return;
   // a machine that runs keeps this computer awake (Machines, "Keep this computer awake", on unless turned off there)
-  // (lord-vm also holds logind's idle inhibitor, which the login screen's sleep deadline obeys: lord-sessiond)
+  // (insane-vm also holds logind's idle inhibitor, which the login screen's sleep deadline obeys: insane-sessiond)
   const n = machinesAwake();
   if (n > 0) {
     console.log(`idle: sleep held off: ${n} running machine(s) keep this computer awake`);
@@ -305,10 +305,10 @@ function onIdle(data) {
     }, 30000);
     return;
   }
-  // the login screen of a locked session has no admin helper: lord-sessiond suspends (docs/SESSIONS.md)
-  if (typeof lord.greeter !== 'undefined') { lord.greeter.send(JSON.stringify({ t: 'power', a: 'suspend' })); return; }
+  // the login screen of a locked session has no admin helper: insane-sessiond suspends (docs/SESSIONS.md)
+  if (typeof insane.greeter !== 'undefined') { insane.greeter.send(JSON.stringify({ t: 'power', a: 'suspend' })); return; }
   // sleep came before the lock deadline (a short sleep time): lock first, so waking up asks for the password
-  if (idleLocks && managed()) lord.session.lock();
+  if (idleLocks && managed()) insane.session.lock();
   admin.run('power-suspend', '', undefined, { quiet: true }).catch((e) => console.log(`suspender: ${e.message}`));
 }
 
@@ -358,7 +358,7 @@ export function BluetoothPrompt() {
   if (!p) return null;
   const typed = p.kind === 'pin' || p.kind === 'passkey';
   const shows = p.kind === 'confirm' || p.kind === 'display-pin' || p.kind === 'display-passkey';
-  const answer = (ok) => lord.bt.answer(p.id, ok, typed ? value : null);
+  const answer = (ok) => insane.bt.answer(p.id, ok, typed ? value : null);
   const valid = !typed || (p.kind === 'pin' ? /^[A-Za-z0-9]{1,16}$/.test(value) : /^\d{1,6}$/.test(value));
   return h(View, { style: { position: 'absolute', ...mainBox(), alignItems: 'center', justifyContent: 'flex-start',
     backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 100000 } },
@@ -381,8 +381,8 @@ export function BluetoothPrompt() {
 
 // ---- A Linux app asks for administrator rights (polkit, server/src/hw/pkagent.c) ----
 //
-// lord-server owns the password field: keys of this computer go straight to it, never through here.
-// This only draws what lord-server reports, a character count included, and can only cancel: the
+// insane-server owns the password field: keys of this computer go straight to it, never through here.
+// This only draws what insane-server reports, a character count included, and can only cancel: the
 // keyboard's Enter is the only way to submit, so nothing injected can.
 
 export const polkitPrompt = createStore(null);
@@ -427,7 +427,7 @@ export function PolkitPrompt() {
   asking ? h(View, { style: { width: 1.5, height: 16, marginLeft: 1, backgroundColor: blink ? th.accent : 'transparent' } }) : null),
   h(Text, { style: { fontSize: 12, color: p.wrong ? '#ff453a' : th.textDim } }, note),
   h(View, { style: { flexDirection: 'row', justifyContent: 'flex-end' } },
-    h(View, { style: { width: 110 } }, h(DialogButton, { label: t('passwords.cancel'), onClick: () => lord.polkit.cancel(p.id), th })))));
+    h(View, { style: { width: 110 } }, h(DialogButton, { label: t('passwords.cancel'), onClick: () => insane.polkit.cancel(p.id), th })))));
 }
 
 // ---- Linux apps' notifications (org.freedesktop.Notifications, server/src/hw/notifyd.c) ----
@@ -443,15 +443,15 @@ function linuxNotify(n) {
   const id = notify({
     app: key, label: shortAppName(app) || n.app, icon: app?.Icon || null, title: n.title, body: n.body, sticky: n.urgency === 2,
     timeout: n.timeout > 0 ? n.timeout : 6000,
-    actions: (n.actions || []).filter(([k]) => k !== 'default').map(([k, label]) => ({ id: k, label, run: () => lord.notifyd.action(n.id, k) })),
-    onClose: (why) => { if (fromLinux.get(n.id) === id) fromLinux.delete(n.id); if (reason[why]) lord.notifyd.closed(n.id, reason[why]); },
+    actions: (n.actions || []).filter(([k]) => k !== 'default').map(([k, label]) => ({ id: k, label, run: () => insane.notifyd.action(n.id, k) })),
+    onClose: (why) => { if (fromLinux.get(n.id) === id) fromLinux.delete(n.id); if (reason[why]) insane.notifyd.closed(n.id, reason[why]); },
   });
   if (id) fromLinux.set(n.id, id);
 }
 
-// ---- events from lord-server ----
+// ---- events from insane-server ----
 
-globalThis.__lordHw = (kind, data) => {
+globalThis.__insaneHw = (kind, data) => {
   switch (kind) {
     case 'display': displays.set(data); break;
     case 'idle': onIdle(data); break;
@@ -482,7 +482,7 @@ export function startHardware() {
     const btApply = () => {
       const r = btPowerAction(bluetooth.get(), settings.get().bluetoothOff, btDone);
       btDone = r.done;
-      if (r.off) call(() => lord.bt.power(false));
+      if (r.off) call(() => insane.bt.power(false));
     };
     bluetooth.subscribe(btApply);
     btApply();

@@ -6,8 +6,8 @@
  * Reader: builds an array of items in order (no copying), each with where its subtree ends;
  * rejects non-minimal encodings ("overlong"), reserved simple values, invalid UTF-8 and
  * nesting deeper than 16 levels. */
-#ifndef LORD_VAULT_CBOR_H
-#define LORD_VAULT_CBOR_H
+#ifndef INSANE_VAULT_CBOR_H
+#define INSANE_VAULT_CBOR_H
 
 #include <stddef.h>
 #include <stdint.h>

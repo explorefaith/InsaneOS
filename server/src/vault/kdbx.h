@@ -7,8 +7,8 @@
  * "unsupported-cipher"); inner stream for protected values: ChaCha20 (4.x) and Salsa20 (3.1).
  * Composite key: password and/or key file (XML 1.0/2.0, 32 bytes, 64 hex or SHA-256 of the
  * file). Errors go in ImpList.err, as in imp_parse. */
-#ifndef LORD_VAULT_KDBX_H
-#define LORD_VAULT_KDBX_H
+#ifndef INSANE_VAULT_KDBX_H
+#define INSANE_VAULT_KDBX_H
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,6 +1,6 @@
-/* gl3d.h — lordos-testbench's 3D view (see gl3d.c). */
-#ifndef LORD_TESTBENCH_GL3D_H
-#define LORD_TESTBENCH_GL3D_H
+/* gl3d.h — insaneos-testbench's 3D view (see gl3d.c). */
+#ifndef INSANE_TESTBENCH_GL3D_H
+#define INSANE_TESTBENCH_GL3D_H
 
 #include <stdio.h>
 #include <wayland-client.h>

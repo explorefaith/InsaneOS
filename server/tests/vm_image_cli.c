@@ -1,6 +1,6 @@
 /* vm_image_cli.c — runs Machines' vm-image-* actions (src/vm/vmimage_admin.c) like the admin helper does, against the
  * real makers' servers, for a manual check on a build VM (not part of `make test`: it needs root and the network).
- * Built with its own catalog and store paths: copy it and lord-tls into a root-owned folder first (http.c wants lord-tls
+ * Built with its own catalog and store paths: copy it and insane-tls into a root-owned folder first (http.c wants insane-tls
  * next to the binary, root's), then
  *
  *   sudo DIR/vm-image-cli vm-image-list 'debian amd64'
@@ -28,7 +28,7 @@ void admin_say(const char *kind, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-    prctl(PR_SET_NAME, "lord-admin");
+    prctl(PR_SET_NAME, "insane-admin");
     if (argc != 3) { fprintf(stderr, "usage: vm-image-cli vm-image-list|vm-image-get|vm-image-remove ARG\n"); return 2; }
     struct passwd *pw = getpwnam(getenv("SUDO_USER") ? getenv("SUDO_USER") : "root");
     if (!pw) return 2;

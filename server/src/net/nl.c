@@ -339,7 +339,7 @@ static void proto_cb(const struct nlmsghdr *h, void *ud) {
     l->n++;
 }
 
-/* Deletes the routes with that protocol (Insane OS's: RTPROT_LORDOS) towards dst, or all if dst is NULL. */
+/* Deletes the routes with that protocol (Insane OS's: RTPROT_INSANEOS) towards dst, or all if dst is NULL. */
 int rt_flush_proto(int fd, int proto, int family, const void *dst) {
     ProtoList l = { .proto = proto };
     NlMsg m;

@@ -4,7 +4,7 @@
 // rpi-eeprom-update (administrators), both running only /usr/bin/rpi-eeprom-update with a fixed
 // argument list; the reply is "<uptodate|available|pending> <current> <latest> <release>". The
 // update is finished by the board itself at the next restart. See docs/SETTINGS.md, "Board firmware".
-import { View, Text, useTheme, useLocale, Button, admin, session, useSystemInfo, spacing, typeScale } from '@lordos/sdk';
+import { View, Text, useTheme, useLocale, Button, admin, session, useSystemInfo, spacing, typeScale } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { GroupBox, ValueRow, Note, Stack, StatusDot, Actions, tint } from './ui.jsx';
 

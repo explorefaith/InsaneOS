@@ -4,7 +4,7 @@
 
 // a disk that goes away over the network would hold the interface: the dialog lists local disks only
 const NETWORK_FS = ['cifs', 'smb3', 'nfs', 'nfs4', 'fuse.rclone', 'fuse.sshfs'];
-export const localDisks = (volumes, home) => (volumes || []).filter((v) => !NETWORK_FS.includes(v.fs) && !v.path.startsWith(`${home}/.local/share/lordos/remote/`));
+export const localDisks = (volumes, home) => (volumes || []).filter((v) => !NETWORK_FS.includes(v.fs) && !v.path.startsWith(`${home}/.local/share/insaneos/remote/`));
 
 const inside = (path, root) => path === root || path.startsWith(`${root}/`);
 
@@ -34,7 +34,7 @@ export const cloudPlaces = (accounts, home, hidden = []) => (accounts || [])
 // Crumbs of a folder, from the place it belongs to: the home folder, a Cloud account, a disk or a connected server.
 // Outside them (Files' This computer) they begin at /. The home folder's has home: true, for its name.
 export function pathCrumbs(path, home) {
-  const remote = `${home}/.local/share/lordos/remote/`;
+  const remote = `${home}/.local/share/insaneos/remote/`;
   const base = path.startsWith(remote) ? path.split('/').slice(0, remote.split('/').length).join('/')
     : cloudRoot(path, home) ? cloudRoot(path, home)
     : inside(path, home) ? home

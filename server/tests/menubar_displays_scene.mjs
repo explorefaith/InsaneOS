@@ -1,18 +1,18 @@
 // menubar_displays_scene.mjs — the second scene of tests/menubar_test.mjs (not run by itself), 0.8.8.6: Insane Flow's
-// menu bar on every display. Three monitors side by side over the stub `lord` (the bundle's banner); <MenuBars> from
+// menu bar on every display. Three monitors side by side over the stub `insane` (the bundle's banner); <MenuBars> from
 // themes/default/components/MenuBar.jsx through runtime/index.js and the real SDK. It checks one bar per display,
 // the app's menus lit only on the focused window's display, a click on a dimmed bar lighting it, one clock timer
 // for all the bars, the setting turned off, a monitor unplugged, and a clock panel opening under the clock on the
 // display it was clicked on. Prints one line per check: "ok <name>" or "FAIL <name> <detail>".
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 import { enableShellLayers } from '../../sdk/layers.js';
 import { MenuBars } from '../../themes/default/components/MenuBar.jsx';
 import { NotificationCenter } from '../../themes/default/components/NotificationCenter.jsx';
 import { makeTheme } from '../../themes/default/tokens.js';
 import { ThemeProvider } from '../../sdk/index.js';
 
-const { texts, styles, parents, removed } = globalThis.__lordTest;
+const { texts, styles, parents, removed } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 const check = (name, got, want) => {
@@ -23,8 +23,8 @@ const attached = (id) => { for (let n = id; n; n = parents.get(n)) if (removed.h
 // the <Text> nodes that show s now, in creation order (the bars are drawn in display order)
 const textNodes = (s) => [...texts].filter(([id, v]) => v === s && attached(id)).map(([id]) => parents.get(id)).sort((a, b) => a - b);
 const click = async (id) => {
-  globalThis.__lordEvent('down', id, 10, 10, 0); await flush();
-  globalThis.__lordEvent('up', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('down', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('up', id, 10, 10, 0); await flush();
 };
 
 // the timers alive (the clock's must be one, however many bars there are)
@@ -38,10 +38,10 @@ const L = { id: 41, name: 'DP-1', x: 0, y: 0, w: 1920, h: 1080, scale: 100, main
 const M = { id: 42, name: 'DP-2', x: 1920, y: 0, w: 2560, h: 1440, scale: 100, main: true };
 const R = { id: 43, name: 'HDMI-A-1', x: 4480, y: 0, w: 1920, h: 1080, scale: 100, main: false };
 const plug = (list) => {
-  lord.screen.displays = list;
-  lord.screen.width = Math.max(...list.map((d) => d.x + d.w));
-  lord.screen.height = Math.max(...list.map((d) => d.y + d.h));
-  globalThis.__lordScreen();
+  insane.screen.displays = list;
+  insane.screen.width = Math.max(...list.map((d) => d.x + d.w));
+  insane.screen.height = Math.max(...list.map((d) => d.y + d.h));
+  globalThis.__insaneScreen();
 };
 plug([L, M, R]);
 

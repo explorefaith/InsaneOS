@@ -3,7 +3,7 @@
 // cursor, or the selection) and Run All (Ctrl+Shift+Enter), Explain, the history of this favorite, results in tabs with
 // a Messages tab, rows and milliseconds, Copy as CSV, JSON or INSERT. Safe mode asks before an UPDATE or DELETE without
 // WHERE; a locked connection runs only what reads.
-import { View, Text, MenuButton, ConfirmDialog, addListener, useAppWindow, hasTextFocus, ime, clipboard, t as tr } from '@lordos/sdk';
+import { View, Text, MenuButton, ConfirmDialog, addListener, useAppWindow, hasTextFocus, ime, clipboard, t as tr } from '@insaneos/sdk';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { EditorView } from '../editor/EditorView.jsx';
 import { Doc, head, hasSel, selStart, selEnd } from '../editor/buffer.js';
@@ -75,7 +75,7 @@ export function Query({ s, db, tables }) {
     if (!items.length) return null;
     const c = ime.caret();
     let x = 60, y = 40;
-    if (c && box.current) { const [bx, by] = lord.getLayout(box.current.id); x = c.x - bx; y = c.y - by + c.h + 2; }
+    if (c && box.current) { const [bx, by] = insane.getLayout(box.current.id); x = c.x - bx; y = c.y - by + c.h + 2; }
     return { items, i: 0, x, y, from: w.from, l: k.l };
   };
   const accept = (it) => {

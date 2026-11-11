@@ -1,7 +1,7 @@
-/* js_termconf.c — lord.termconf: the Terminal's configuration file (../termconf.h, docs/TERMINAL.md,
+/* js_termconf.c — insane.termconf: the Terminal's configuration file (../termconf.h, docs/TERMINAL.md,
  * "Configuration file"). Only the shell's JS has it (not the broker: isolated apps never see it).
  *
- *   setPath(path)   the file to use ("" = ~/.config/lordos/terminal.json) → its resolved path; throws a code
+ *   setPath(path)   the file to use ("" = ~/.config/insaneos/terminal.json) → its resolved path; throws a code
  *   where()         { path, cache, custom }
  *   read(which)     'active' | 'cache' → { text, mtime }; throws termconf.missing, termconf.unavailable, …
  *   write(text)     the active file (and the cache with it when it is a chosen one) → its mtime; throws
@@ -119,8 +119,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("write", 1, f_write), JS_CFUNC_DEF("writeCache", 1, f_write_cache), JS_CFUNC_DEF("mtime", 0, f_mtime), JS_CFUNC_DEF("exportTo", 2, f_export), JS_CFUNC_DEF("migrate", 1, f_migrate),
 };
 
-void js_termconf_register(JSContext *c, JSValue lord) {
+void js_termconf_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "termconf", o);
+    JS_SetPropertyStr(c, insane, "termconf", o);
 }

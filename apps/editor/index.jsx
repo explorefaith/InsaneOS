@@ -4,7 +4,7 @@
 // See docs/EDITOR.md.
 import {
   View, Text, TextInput, Button, ScrollView, ToolbarButton, direction, useTheme, useLocale, useAppWindow, useKeyboard, wm, fs, formatBytes, addListener, hasTextFocus, print, speechItems, registerSelection, ContextMenu,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Doc, cursorAt, hasSel, selStart, selEnd } from './buffer.js';
 import { LANGUAGES, languageFor, languageById, paletteFor } from './syntax.js';
@@ -364,7 +364,7 @@ export default function Editor() {
       case 'gotoLine': setLineQuery(''); setOverlay('gotoLine'); break;
       case 'gotoFile': setOverlay('gotoFile'); break;
       case 'language': setOverlay('lang'); break;
-      // print with the system dialog (M9): the text is laid out as a PDF in lord-doc
+      // print with the system dialog (M9): the text is laid out as a PDF in insane-doc
       case 'print': print.open({ title: tab.path ? baseName(tab.path) : tr('editor.untitled'), text: doc.text(), mono: true }); break;
       case 'toggleProject': setRoot((r) => (r === null ? '' : null)); break;
       case 'nextTab': { const i = tabs.findIndex((x) => x.id === tab.id); setActiveId(tabs[(i + 1) % tabs.length].id); break; }
@@ -420,7 +420,7 @@ export default function Editor() {
     wm.setMenus(wid, [
       { label: tr('editor.menu.file'), items: [it('editor.cmd.new', 'new', '❖N'), it('editor.cmd.open', 'open', '❖O'), it('editor.cmd.openFolder', 'openFolder', '❖⇧O'), '-',
         it('editor.cmd.save', 'save', '❖S'), it('editor.cmd.saveAs', 'saveAs', '❖⇧S'), '-',
-        // print with the system dialog (M9): the text is laid out as a PDF in lord-doc
+        // print with the system dialog (M9): the text is laid out as a PDF in insane-doc
         it('editor.cmd.print', 'print', '❖P'), '-',
         it('editor.cmd.close', 'close', '❖W')] },
       { label: tr('editor.menu.edit'), items: [it('editor.cmd.undo', 'undo', '❖Z'), it('editor.cmd.redo', 'redo', '❖⇧Z'), '-', it('editor.cmd.cut', 'cut', '❖X'),
@@ -481,7 +481,7 @@ export default function Editor() {
         {find.open && <FindBar t={t} tr={tr} find={find} setFind={setFind} count={found.list.length} current={current} error={found.error}
           onNext={nextMatch} onPrev={prevMatch} onReplace={replaceOne} onReplaceAll={replaceAll} onClose={() => setFind((f) => ({ ...f, open: false }))} />}
         {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)}
-          bounds={column.current ? { w: lord.getLayout(column.current.id)[2], h: lord.getLayout(column.current.id)[3] } : undefined} />}
+          bounds={column.current ? { w: insane.getLayout(column.current.id)[2], h: insane.getLayout(column.current.id)[3] } : undefined} />}
         {/* status bar */}
         <View style={{ height: 26, flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 14, backgroundColor: t.sidebarBg,
           direction: 'ltr' }}>

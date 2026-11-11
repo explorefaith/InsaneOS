@@ -2,8 +2,8 @@
 // tests/livestart_test.mjs can load it.
 //
 //   liveStartWindow(info, hasApp)   the window to open: [id, options], or null for none
-//     info    lord.system.info(): `firstAccount`, `live` and `liveCheck` (the boot entry "Check this computer",
-//             lordos.check=1 on the kernel command line, docs/ISO.md)
+//     info    insane.system.info(): `firstAccount`, `live` and `liveCheck` (the boot entry "Check this computer",
+//             insaneos.check=1 on the kernel command line, docs/ISO.md)
 //     hasApp  (id) => whether that app exists
 //
 // The OVA image's first boot (`firstAccount`, docs/ISO.md) opens the installer on its account screens.

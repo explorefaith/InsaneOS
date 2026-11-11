@@ -6,7 +6,7 @@ sets the system up the way the ISO does (`ISO.md`): Insane OS's own login screen
 services, and the user's groups.
 
 ```sh
-curl -fsSL https://lordos.org/install.sh | sh
+curl -fsSL https://insaneos.org/install.sh | sh
 ```
 
 The script asks before changing anything. It reads the answers from the terminal (`/dev/tty`), so
@@ -30,8 +30,8 @@ this works even though the script itself comes through a pipe.
 ## What it does
 
 1. **Checks** the points above and shows what it is going to do. Nothing changes until you answer `y`.
-2. **Downloads** `SHA256SUMS` and `lordos_<version>_<arch>.deb` from the GitHub release
-   (`https://github.com/lordbasex/Insane OS/releases`), by default the latest one. The latest
+2. **Downloads** `SHA256SUMS` and `insaneos_<version>_<arch>.deb` from the GitHub release
+   (`https://github.com/insaneos/Insane OS/releases`), by default the latest one. The latest
    release is looked up through the GitHub API; since betas are marked as pre-releases, which
    `releases/latest` skips, it falls back to the newest release of any kind.
 3. **Verifies** the `.deb`'s SHA-256 against `SHA256SUMS`. A mismatch stops everything.
@@ -39,14 +39,14 @@ this works even though the script itself comes through a pipe.
      signature of `SHA256SUMS` made with the Insane OS release key (fingerprint
      `c7155b8e…53ea108e`, see `SIGNING.md`, "Release files"). A missing or invalid signature
      stops the install.
-4. **Installs** with `apt-get install ./lordos_<version>_<arch>.deb`, so the dependencies come from
+4. **Installs** with `apt-get install ./insaneos_<version>_<arch>.deb`, so the dependencies come from
    your Debian mirrors. It also installs, if they are missing, what the ISO adds for sound, fonts
    and the user session (`dbus-user-session`, PipeWire with `pipewire-pulse`, `pipewire-alsa` and
    WirePlumber, `rtkit`, `alsa-ucm-conf`, the Noto and DejaVu fonts, `libthai-data`,
    `shared-mime-info`). `--no-extras` skips those. (Insane OS's own package engine is for apps
    inside Insane OS; a local `.deb` on Debian goes through apt, as usual.)
 5. **Sets up Insane OS** like the ISO:
-   - creates the `lordos-greeter` system user (the login screen's user) if it doesn't exist;
+   - creates the `insaneos-greeter` system user (the login screen's user) if it doesn't exist;
    - adds your user (the one who ran `sudo`, or `--user NAME`) to whichever of these groups exist:
      `audio video input render lpadmin pipewire plugdev`. If the system has no administrator at all (a Debian
      installed with a root password), it also offers to make that user one, by adding them to `sudo`: the Store
@@ -56,12 +56,12 @@ this works even though the script itself comes through a pipe.
      the session user to `sudo`, effective after a reboot;
    - generates the `en_US`, `es_ES`, `pt_BR` and `fr_FR` UTF-8 locales (the languages the interface ships).
      Your system language is not changed;
-   - writes `/etc/lordos/session.conf` with an empty `AUTOLOGIN=`: the login screen, no automatic
+   - writes `/etc/insaneos/session.conf` with an empty `AUTOLOGIN=`: the login screen, no automatic
      login (Settings → Users changes it). An existing file is kept;
-   - enables `lord-netperm` (per-app network permissions) and `lord-fand` (fans);
+   - enables `insane-netperm` (per-app network permissions) and `insane-fand` (fans);
    - **display manager:** if GDM, SDDM, LightDM or another display manager is set as
      `display-manager.service`, it asks whether to disable it. If you say yes, it is disabled (not
-     removed), `lordos.service` is enabled and `getty@tty1` is masked: at the next boot Insane OS shows
+     removed), `insaneos.service` is enabled and `getty@tty1` is masked: at the next boot Insane OS shows
      its login screen on tty1. The other text consoles stay (Ctrl+Alt+F2). If you say no (or pass
      `--keep-display-manager`), Insane OS is installed but not enabled at boot, and the final message
      shows the commands to switch later;
@@ -69,7 +69,7 @@ this works even though the script itself comes through a pipe.
    - enables the PipeWire user units globally (Debian's packages already do this).
 6. **Doesn't touch:**
    - **the network.** NetworkManager, ifupdown and systemd-networkd keep their interfaces:
-     `lord-netd` shows them as system interfaces and doesn't run DHCP or Wi-Fi on them
+     `insane-netd` shows them as system interfaces and doesn't run DHCP or Wi-Fi on them
      (`NETWORK.md`). Only interfaces nobody manages get Insane OS's DHCP;
    - **remote desktop**, which stays off (port 5673 closed; Settings → Sharing turns it on);
    - your home folder and your current desktop session. The display manager is only disabled for
@@ -83,27 +83,27 @@ this works even though the script itself comes through a pipe.
      own single bar.
 7. **Prints** what changed, how to start Insane OS and how to uninstall.
 
-What it changed is recorded in `/var/lib/lordos-installer/state`, so `--uninstall` undoes exactly
+What it changed is recorded in `/var/lib/insaneos-installer/state`, so `--uninstall` undoes exactly
 that. No telemetry: the only requests go to `api.github.com`, `github.com` and your apt mirrors.
 
 ### Starting Insane OS
 
 - **Reboot** (`sudo reboot`): the Insane OS login screen appears.
-- Or, if no display manager is running, from a text console: `sudo systemctl start lordos`. If GDM
+- Or, if no display manager is running, from a text console: `sudo systemctl start insaneos`. If GDM
   or another display manager is still running your session, reboot instead: both want tty1 and the
   graphics card.
 
 ## Options
 
 ```sh
-curl -fsSL https://lordos.org/install.sh | sh -s -- [options]
+curl -fsSL https://insaneos.org/install.sh | sh -s -- [options]
 ```
 
 | Option | |
 |---|---|
-| `-y`, `--yes` | don't ask (also `LORDOS_YES=1`). With it, the display manager **is** disabled; add `--keep-display-manager` to avoid that |
+| `-y`, `--yes` | don't ask (also `INSANEOS_YES=1`). With it, the display manager **is** disabled; add `--keep-display-manager` to avoid that |
 | `--version X` | install release `X` (`0.8.0-beta` or `v0.8.0-beta`) instead of the latest |
-| `--deb FILE` | install a local `.deb`. If a `SHA256SUMS` is next to it, it is checked; otherwise the output says the checksum was not verified. (0.8.7) The `lordos-hwdata_<date>_all.deb` the package depends on (the signed tested-hardware snapshot) is taken from the same folder, checked the same way |
+| `--deb FILE` | install a local `.deb`. If a `SHA256SUMS` is next to it, it is checked; otherwise the output says the checksum was not verified. (0.8.7) The `insaneos-hwdata_<date>_all.deb` the package depends on (the signed tested-hardware snapshot) is taken from the same folder, checked the same way |
 | `--user NAME` | the user to set up (default: the user who ran `sudo`; as plain root, who logged in, or the only regular user) |
 | `--keep-display-manager` | leave the current display manager enabled; Insane OS is not enabled at boot |
 | `--no-extras` | don't install the extra sound and font packages |
@@ -118,17 +118,17 @@ curl -fsSL https://lordos.org/install.sh | sh -s -- [options]
 
 ## Boot splash (optional)
 
-At the end the installer asks whether to show the Insane OS boot splash (the crown and a progress bar,
+At the end the installer asks whether to show the Insane OS boot splash (the apple and a progress bar,
 `ISO.md`, "Boot splash and boot menu"). The default answer is no, and `--yes` skips it unless
 `--boot-splash` is given. If you accept:
 
-- `plymouth` and `plymouth-label` are installed and the theme is set to `lordos` with
+- `plymouth` and `plymouth-label` are installed and the theme is set to `insaneos` with
   `plymouth-set-default-theme -R` (it rebuilds the initramfs). If you had picked a boot splash theme
   that isn't one of Debian's own, it asks before replacing it.
 - **GRUB, only if nobody customised it for this:** when the system boots with GRUB, and its settings
   (`/etc/default/grub` and `/etc/default/grub.d/*.cfg`) don't already have `splash`/`nosplash` or a
   `GRUB_THEME`, and the terminal isn't `console`/`serial`, it writes its own drop-in
-  `/etc/default/grub.d/lordos.cfg` (`splash` added to `GRUB_CMDLINE_LINUX_DEFAULT`,
+  `/etc/default/grub.d/insaneos.cfg` (`splash` added to `GRUB_CMDLINE_LINUX_DEFAULT`,
   `GRUB_GFXPAYLOAD_LINUX=keep` and the Insane OS boot menu as `GRUB_THEME`, on arm64 too since 0.8.7) and runs
   `update-grub`. `/etc/default/grub` itself is never edited. Without GRUB (systemd-boot, a
   Raspberry Pi), only the theme is set and the final message says to add `quiet splash` to the kernel
@@ -140,17 +140,17 @@ back; Plymouth itself stays installed.
 ## Servers and VPS
 
 The same command works on a server or a VPS with no monitor, on **amd64 and arm64** (the release
-has a `.deb` for each, `lordos_<version>_amd64.deb` and `lordos_<version>_arm64.deb`; the installer
+has a `.deb` for each, `insaneos_<version>_amd64.deb` and `insaneos_<version>_arm64.deb`; the installer
 picks the one for the machine). Add `--remote-desktop` to reach the desktop from a browser:
 
 ```sh
-curl -fsSL https://lordos.org/install.sh | sh -s -- --remote-desktop
-curl -fsSL https://lordos.org/install.sh | sh -s -- --remote-desktop --remote-port 8443
+curl -fsSL https://insaneos.org/install.sh | sh -s -- --remote-desktop
+curl -fsSL https://insaneos.org/install.sh | sh -s -- --remote-desktop --remote-port 8443
 ```
 
 **What works headless.** Insane OS's sessions don't need a screen (`SESSIONS.md`): each session is a
-`lord-server --headless`, and the login screen runs headless too. Without a display manager the
-installer enables `lordos.service` (as on any machine without one), so `lord-sessiond` starts at
+`insane-server --headless`, and the login screen runs headless too. Without a display manager the
+installer enables `insaneos.service` (as on any machine without one), so `insane-sessiond` starts at
 boot and serves the login screen and the sessions over the remote desktop. Apps, Linux apps, the
 firewall and the rest of the desktop work as on a PC; without a GPU everything is drawn on the CPU.
 The remote desktop carries the session's sound (Opus over WebRTC) since 0.8.4.
@@ -160,11 +160,11 @@ The remote desktop carries the session's sound (Opus over WebRTC) since 0.8.4.
 - In interactive mode it first warns that the machine will accept remote-desktop logins from the
   network on that port, and asks. "No" keeps the rest of the install and leaves remote desktop off.
   With `--yes`, the flag is the answer (the warning is still printed).
-- It writes `/etc/lordos/remote/config` (`enabled=1`, the port, `allow=all`, `insecure_dev=0`) in
+- It writes `/etc/insaneos/remote/config` (`enabled=1`, the port, `allow=all`, `insecure_dev=0`) in
   the same format Settings → Sharing and the Raspberry Pi `remote-desktop` switch file use
   (`REMOTE.md`). Values saved there before (`allow=group`, a port) are kept unless
   `--remote-port` is given.
-- If `lordos.service` is already running it is reloaded (it rereads the file). If it is enabled but
+- If `insaneos.service` is already running it is reloaded (it rereads the file). If it is enabled but
   not running, it is started right away when that takes the screen from nobody: no display manager
   running and nobody logged in on tty1. Otherwise it starts at the next boot.
 - The final message gives the address, and warns when there is no account that can log in yet.
@@ -172,7 +172,7 @@ The remote desktop carries the session's sound (Opus over WebRTC) since 0.8.4.
 **Connecting.** Open `https://<the server's IP>:5673` (or your port) in a browser and log in with a
 user of the machine that has a password (uid 1000 or above; `sudo adduser NAME` creates one; root
 can't log in). The certificate is self-signed: the browser warns the first time; compare its
-fingerprint with `/etc/lordos/remote/fingerprint` on the server before accepting it. Nothing has
+fingerprint with `/etc/insaneos/remote/fingerprint` on the server before accepting it. Nothing has
 to be installed on the other computer. See `REMOTE.md`.
 
 **Security.** The port is protected by TLS and the account's password, and nothing else. On a
@@ -182,16 +182,16 @@ machine reachable from the internet:
   the host's firewall, or reach it through a VPN (WireGuard, OpenVPN) or an SSH tunnel
   (`ssh -L 5673:localhost:5673 server`, then `https://localhost:5673`);
 - use strong passwords for every account that can log in, or limit remote login to the
-  `lordos-remote` group (Settings → Sharing, `allow=group`);
+  `insaneos-remote` group (Settings → Sharing, `allow=group`);
 - turn it off when you don't need it: Settings → Sharing, or `enabled=0` in
-  `/etc/lordos/remote/config` and `sudo systemctl reload lordos`.
+  `/etc/insaneos/remote/config` and `sudo systemctl reload insaneos`.
 
-`--uninstall` removes `/etc/lordos/remote/config`, so the port is closed.
+`--uninstall` removes `/etc/insaneos/remote/config`, so the port is closed.
 
 ## Updating
 
-The package adds the signed Insane OS repository (`/etc/apt/sources.list.d/lordos.sources`, key
-`/usr/share/keyrings/lordos-archive-keyring.gpg`), so new versions arrive in place: Store → Updates
+The package adds the signed Insane OS repository (`/etc/apt/sources.list.d/insaneos.sources`, key
+`/usr/share/keyrings/insaneos-archive-keyring.gpg`), so new versions arrive in place: Store → Updates
 shows "Insane OS <version> is available", or `sudo apt update && sudo apt upgrade` does the same. Files,
 settings, users and the login setup are kept, and the package applies whatever each version changes
 in the system ([UPDATES.md](UPDATES.md)). Running `install.sh` again also upgrades in place; it is
@@ -201,29 +201,29 @@ removes the repository with the package.
 ## Uninstalling
 
 ```sh
-curl -fsSL https://lordos.org/install.sh | sh -s -- --uninstall
+curl -fsSL https://insaneos.org/install.sh | sh -s -- --uninstall
 ```
 
 It asks first, then:
 
-- disables `lordos.service` and `lord-netperm` (the package's `prerm` gives the fans back to the
-  kernel and disables `lord-fand`);
+- disables `insaneos.service` and `insane-netperm` (the package's `prerm` gives the fans back to the
+  kernel and disables `insane-fand`);
 - unmasks `getty@tty1`;
 - enables the previous display manager again. Without a record (Insane OS installed by hand), it
   offers the first display manager it finds installed (`gdm3`, `sddm`, `lightdm`, …);
 - removes the package (`apt-get remove`; `--purge` for `apt-get purge`);
 - removes your user from the groups **the installer added** (not the ones you already had), turns
-  off the linger it turned on, deletes `/etc/lordos/session.conf` and the `lordos-greeter` user if
+  off the linger it turned on, deletes `/etc/insaneos/session.conf` and the `insaneos-greeter` user if
   it created them;
-- removes the remote desktop configuration (`/etc/lordos/remote/config`), if there is one.
+- removes the remote desktop configuration (`/etc/insaneos/remote/config`), if there is one.
 
-Your home folder and `~/.config/lordos` are kept. The dependencies apt pulled in stay installed;
+Your home folder and `~/.config/insaneos` are kept. The dependencies apt pulled in stay installed;
 `sudo apt autoremove` removes them. Reboot to get your previous login screen back.
 
 ### Switching back without uninstalling
 
 ```sh
-sudo systemctl disable lordos.service
+sudo systemctl disable insaneos.service
 sudo systemctl unmask getty@tty1.service
 sudo systemctl enable gdm3          # or sddm, lightdm…
 sudo reboot
@@ -239,7 +239,7 @@ sudo reboot
 | `the SHA256SUMS signature is NOT valid` | Don't install; report it (the release files may have been tampered with). |
 | `apt-get could not install Insane OS` | Usually a broken apt state or mirrors that aren't trixie. `sudo apt-get update && sudo apt-get -f install`, then run the installer again. |
 | `Insane OS needs Debian 13 (trixie)` | Debian 12 and testing/unstable are not supported: the package depends on trixie's library versions. |
-| Black screen or back to text after the reboot | Switch to tty2 (Ctrl+Alt+F2), log in, and look at `journalctl -b -u lordos`. To go back to your desktop meanwhile, see "Switching back" above. |
+| Black screen or back to text after the reboot | Switch to tty2 (Ctrl+Alt+F2), log in, and look at `journalctl -b -u insaneos`. To go back to your desktop meanwhile, see "Switching back" above. |
 | The previous desktop still appears | The display manager was kept (`--keep-display-manager` or "no" to the question). Disable it as shown in the final message. |
 | No sound | Reboot (the new groups and linger apply on the next boot; a logout was not enough on a reported machine), and check `systemctl --user status pipewire wireplumber`. |
 | Network changed | It shouldn't: interfaces managed by NetworkManager, ifupdown or systemd-networkd are left alone. If an interface nobody managed now has a DHCP address, that is Insane OS's DHCP (`NETWORK.md`); Settings → Network turns it off. |
@@ -247,49 +247,49 @@ sudo reboot
 ## For maintainers
 
 - **The canonical copy is `tools/install/install.sh`.** The website serves it at
-  `https://lordos.org/install.sh`, and **that file must stay byte-identical to the one in the
+  `https://insaneos.org/install.sh`, and **that file must stay byte-identical to the one in the
   release tag** (`git show v0.8.0-beta:tools/install/install.sh | sha256sum` against
-  `curl -fsSL https://lordos.org/install.sh | sha256sum`). Change the script here, tag, then copy it
+  `curl -fsSL https://insaneos.org/install.sh | sha256sum`). Change the script here, tag, then copy it
   to the website, never the other way round.
 - POSIX `sh` with `set -eu`; everything is inside `main()`, called on the last line, so a truncated
   download runs nothing. Commands that could read standard input (apt, dpkg) get `</dev/null`,
   because under `curl | sh` standard input is the script.
 - `shellcheck -s sh tools/install/install.sh` must be clean (also `-s dash`, Debian's `/bin/sh`).
 - Release layout the script expects: tag `vX`, assets `SHA256SUMS` (`sha256sum` format), the
-  `lordos_<version>_<arch>.deb` files listed in it (the version inside the name doesn't have to match
+  `insaneos_<version>_<arch>.deb` files listed in it (the version inside the name doesn't have to match
   the tag), and `SHA256SUMS.sig` (required: without it the script stops).
 
 ### Testing
 
 Test-only environment variables:
 
-- `LORDOS_BASE_URL`: where the release files are, instead of
-  `https://github.com/lordbasex/Insane OS/releases/download/<tag>` (for example `file:///srv/rel`; use it
+- `INSANEOS_BASE_URL`: where the release files are, instead of
+  `https://github.com/insaneos/Insane OS/releases/download/<tag>` (for example `file:///srv/rel`; use it
   with `--version` so the GitHub API is not asked). It lifts the https-only restriction.
-- `LORDOS_PUBKEY_FILE`: a PEM public key used instead of `RELEASE_PUBKEY_PEM`, to exercise the
+- `INSANEOS_PUBKEY_FILE`: a PEM public key used instead of `RELEASE_PUBKEY_PEM`, to exercise the
   signature check with a throwaway key.
 
 Done on 2026-10-18 on the development Mac with Docker (`debian:trixie`, amd64) and the
-`lordos_0.7.0_amd64.deb` built on VM 116 (sha256 `4684f1e9…147ffee`):
+`insaneos_0.7.0_amd64.deb` built on VM 116 (sha256 `4684f1e9…147ffee`):
 
 | Test | Result |
 |---|---|
 | `cat install.sh \| sh -s -- --yes --deb …` as root, no systemd | OK: apt pulled the dependencies; greeter user, groups, locales, `session.conf`; systemd steps skipped with a warning |
 | The same as a sudo user (`bob`), with the user detected from `sudo` | OK |
-| Download from a local release (`LORDOS_BASE_URL=file://…`, `--version 0.7.0-beta`) | OK; the output says the signature was not checked |
+| Download from a local release (`INSANEOS_BASE_URL=file://…`, `--version 0.7.0-beta`) | OK; the output says the signature was not checked |
 | Signature with a throwaway key: valid / signed by another key / no `.sig` | installs / stops before downloading the `.deb` / stops |
 | `SHA256SUMS` with a wrong hash | stops: "SHA-256 mismatch", nothing installed |
 | `--deb` with a `SHA256SUMS` next to it | checked |
 | Latest release through the GitHub API (repository private) | clear error suggesting `--version`/`--deb` |
 | Debian 12 `os-release` / a trixie-based derivative | refused / warning and continues |
 | A `.deb` for the other architecture, an unknown option, no terminal without `--yes` | refused with a clear message |
-| systemd as PID 1 in a privileged container, with a fake `lightdm.service` as `display-manager.service` | lightdm disabled, `lordos`/`lord-netperm`/`lord-fand` enabled, `getty@tty1` masked, linger on; `--uninstall` re-enabled lightdm (alias restored), unmasked getty, turned linger off, removed groups and the greeter user |
-| The same with answers typed on a pseudo-terminal while the script comes from a pipe | "no" to the display manager leaves it enabled and `lordos.service` disabled; "no" to "Continue?" changes nothing |
-| No display manager | `lordos` enabled, `getty@tty1` masked, the final message offers `systemctl start lordos` |
+| systemd as PID 1 in a privileged container, with a fake `lightdm.service` as `display-manager.service` | lightdm disabled, `insaneos`/`insane-netperm`/`insane-fand` enabled, `getty@tty1` masked, linger on; `--uninstall` re-enabled lightdm (alias restored), unmasked getty, turned linger off, removed groups and the greeter user |
+| The same with answers typed on a pseudo-terminal while the script comes from a pipe | "no" to the display manager leaves it enabled and `insaneos.service` disabled; "no" to "Continue?" changes nothing |
+| No display manager | `insaneos` enabled, `getty@tty1` masked, the final message offers `systemctl start insaneos` |
 | `--uninstall --purge` with the state file deleted | still finds and re-enables lightdm, unmasks getty, keeps the greeter user (not created by the installer) |
 | `shellcheck -s sh` and `-s dash` | clean |
-| `--remote-desktop` (0.8.0, systemd in a privileged `debian:trixie` container, no display) | config written in the Settings → Sharing format, `lordos.service` started headless, port 5673 listening, login page served and a login accepted; `--remote-port 8443` while running moves it (reload); a bad port or `--remote-port` alone is refused; "no" to the question keeps the install and leaves it off; `--uninstall` removes the config and closes the port |
-| Release files signed with the real key (`LORDOS_BASE_URL=file://…`, `--version 0.8.0-beta --remote-desktop`) | "valid Ed25519 signature", SHA-256 OK, installed, remote desktop listening |
+| `--remote-desktop` (0.8.0, systemd in a privileged `debian:trixie` container, no display) | config written in the Settings → Sharing format, `insaneos.service` started headless, port 5673 listening, login page served and a login accepted; `--remote-port 8443` while running moves it (reload); a bad port or `--remote-port` alone is refused; "no" to the question keeps the install and leaves it off; `--uninstall` removes the config and closes the port |
+| Release files signed with the real key (`INSANEOS_BASE_URL=file://…`, `--version 0.8.0-beta --remote-desktop`) | "valid Ed25519 signature", SHA-256 OK, installed, remote desktop listening |
 | `--remote-desktop` on VM 120 (Insane OS installed from the ISO) | reload path: port 5673 listening, login from another machine accepted |
 
 ### Still to test on a real Debian 13 machine
@@ -298,16 +298,16 @@ No free Debian 13 VM was available (the ISO work uses VMs 116, 117 and 120). Man
 Debian 13 VM with a desktop (GNOME, which brings GDM and NetworkManager) and one without (server
 install, ifupdown):
 
-1. `curl -fsSL https://lordos.org/install.sh | sh` (or `sh install.sh --deb lordos_…_amd64.deb`
+1. `curl -fsSL https://insaneos.org/install.sh | sh` (or `sh install.sh --deb insaneos_…_amd64.deb`
    from a copy) as a sudo user, from inside the GNOME session. Answer "y" to both questions. The
    running GNOME session must keep working until the reboot.
 2. `sudo reboot`: the Insane OS login screen appears on tty1; log in with your Debian password. Check:
    sound (Settings → Sound, `pw-cli info 0`), network unchanged (`nmcli device` still shows
    NetworkManager managing the interface; no second DHCP client: `ps aux | grep -i dhcp`), Settings →
    Sharing shows remote desktop off, `ss -ltn | grep 5673` is empty, Ctrl+Alt+F2 gives a text login.
-3. `systemctl status lordos lord-netperm lord-fand` are active; `journalctl -b -u lordos` has no errors.
+3. `systemctl status insaneos insane-netperm insane-fand` are active; `journalctl -b -u insaneos` has no errors.
 4. On the server install: run the installer from tty1 over the console, then `sudo systemctl start
-   lordos` without rebooting; then reboot and check ifupdown still owns `eth0`.
+   insaneos` without rebooting; then reboot and check ifupdown still owns `eth0`.
 5. `curl … | sh -s -- --uninstall`, reboot: GDM comes back with GNOME; on the server, the text login
    on tty1.
 6. Repeat 1–5 on arm64 (a Raspberry Pi 5 with Raspberry Pi OS trixie, or an arm64 VM), where the

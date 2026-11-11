@@ -3,7 +3,7 @@
 // the production / read-only switches; Test Connection and Connect. The password is asked in a sheet when Passwords
 // doesn't keep it or the server refuses it; a certificate that doesn't check asks to be trusted by its sha256. The first
 // run (and File > Import Connections) offers Sequel Ace's and Sequel Pro's favorites.
-import { View, Text, ScrollView, TextInput, FilePicker, ConfirmDialog, AutofillButton, useStore, sqlAvailable, sqlPasswords, t as tr } from '@lordos/sdk';
+import { View, Text, ScrollView, TextInput, FilePicker, ConfirmDialog, AutofillButton, useStore, sqlAvailable, sqlPasswords, t as tr } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePal, Icons, Dot, Btn, IconBtn, Check, Popup, Field, Box, Note, Sheet, MONO, MenuGlyph } from './ui.jsx';
 import { store, favRev, readFavorites, writeFavorites, openSession, testFavorite, prefs, setPrefs } from './conn.js';

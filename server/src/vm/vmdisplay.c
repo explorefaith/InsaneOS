@@ -1,10 +1,10 @@
-/* vmdisplay.c — lord-vmdisplay: one machine's picture and input (docs/VIRTUALIZATION.md 3.2 and "Phase 1
- * implementation"). It speaks QEMU's D-Bus display protocol peer to peer on fd 4 (a connection lord-vm had QEMU
- * accept), and passes lord-server only the fixed messages of vmproto.h on fd 3. The compositor never parses
+/* vmdisplay.c — insane-vmdisplay: one machine's picture and input (docs/VIRTUALIZATION.md 3.2 and "Phase 1
+ * implementation"). It speaks QEMU's D-Bus display protocol peer to peer on fd 4 (a connection insane-vm had QEMU
+ * accept), and passes insane-server only the fixed messages of vmproto.h on fd 3. The compositor never parses
  * anything QEMU sends.
  *
- *   lord-vmdisplay <machine id>     fd 3: SOCK_SEQPACKET to lord-server; fd 4: the D-Bus connection to QEMU
- *   lord-vmdisplay --selftest       applies the sandbox, then tries what it must not be able to do (JSON line)
+ *   insane-vmdisplay <machine id>     fd 3: SOCK_SEQPACKET to insane-server; fd 4: the D-Bus connection to QEMU
+ *   insane-vmdisplay --selftest       applies the sandbox, then tries what it must not be able to do (JSON line)
  *
  * Decisions (Phase 0, section 13.6):
  *   - It requires org.qemu.Display1.Listener.Unix.Map: QEMU shares its picture once as a memfd and sends
@@ -13,14 +13,14 @@
  *   - QEMU's memfd is sealed only against new seals, so QEMU can shrink it under our mapping: every read of it
  *     runs under a SIGBUS guard, and a fault drops that mapping (the picture waits for the next ScanoutMap).
  *     Refusing unsealed buffers would mean no picture at all with QEMU 10.0.
- *   - Copy before forward: the damaged area goes from QEMU's buffer into the picture lord-server shared (sealed
- *     by lord-server against shrinking), at most VD_RATE times a second, and not again until lord-server said
- *     it read the last one (VD_FRAME_DONE) or 250 ms passed. lord-server never sees QEMU's live memory.
+ *   - Copy before forward: the damaged area goes from QEMU's buffer into the picture insane-server shared (sealed
+ *     by insane-server against shrinking), at most VD_RATE times a second, and not again until insane-server said
+ *     it read the last one (VD_FRAME_DONE) or 250 ms passed. insane-server never sees QEMU's live memory.
  *   - It never makes a blocking call to QEMU after setup (QEMU calls the listener from its main loop): input goes
  *     out as method calls that expect no reply.
  *   - Sound (6.9, 6.20): an org.qemu.Display1.AudioOutListener on a third peer connection, registered before the
- *     sandbox. Only 16-bit little-endian PCM is taken (QEMU is told 48 kHz stereo s16, -audiodev in lordvm.c); while
- *     a recording runs (VD_AUDIO_REC) it goes, mixed to one channel, into the ring lord-media reads, with silence for
+ *     sandbox. Only 16-bit little-endian PCM is taken (QEMU is told 48 kHz stereo s16, -audiodev in insanevm.c); while
+ *     a recording runs (VD_AUDIO_REC) it goes, mixed to one channel, into the ring insane-media reads, with silence for
  *     the time the guest plays nothing and nothing beyond 200 ms ahead of the clock, so it keeps time with the
  *     picture. */
 #include "vmproto.h"
@@ -72,7 +72,7 @@ static struct {
     uint32_t off, stride;
     /* SRC_FB: our copy of an array Scanout */
     uint8_t *fb;
-    /* lord-server's picture */
+    /* insane-server's picture */
     uint8_t *shm;
     size_t shm_len;
     uint32_t shm_w, shm_h;
@@ -104,7 +104,7 @@ static long long now_ms(void) {
 }
 
 static void say(VdMsg m, int fd) {
-    if (vd_send(CH, &m, fd) && errno != EAGAIN) { /* lord-server gone: the loop sees the hangup */ }
+    if (vd_send(CH, &m, fd) && errno != EAGAIN) { /* insane-server gone: the loop sees the hangup */ }
 }
 
 static void refuse(const char *what, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
@@ -117,7 +117,7 @@ static void refuse(const char *what, const char *fmt, ...) {
     va_start(ap, fmt);
     vsnprintf(line, sizeof line, fmt, ap);
     va_end(ap);
-    fprintf(stderr, "lord-vmdisplay: refused %s: %s\n", what, line);
+    fprintf(stderr, "insane-vmdisplay: refused %s: %s\n", what, line);
 }
 
 /* ---- the SIGBUS guard around reads of QEMU's buffer ---- */
@@ -199,7 +199,7 @@ static int on_au_init(sd_bus_message *m, void *u, sd_bus_error *e) {
     A.st[i].used = 1; A.st[i].id = id; A.st[i].on = 0; A.st[i].mute = 0;
     A.st[i].ok = bits == 16 && sgn && !flt && !be && freq == 48000 && (nch == 1 || nch == 2) && bpf == (uint32_t)nch * 2;
     A.st[i].ch = nch;
-    if (!A.st[i].ok) fprintf(stderr, "lord-vmdisplay: sound stream %llu isn't 48 kHz 16-bit (%u bits, %u Hz, %u channels): not used\n", (unsigned long long)id, bits, freq, nch);
+    if (!A.st[i].ok) fprintf(stderr, "insane-vmdisplay: sound stream %llu isn't 48 kHz 16-bit (%u bits, %u Hz, %u channels): not used\n", (unsigned long long)id, bits, freq, nch);
     return sd_bus_reply_method_return(m, "");
 }
 static int on_au_fini(sd_bus_message *m, void *u, sd_bus_error *e) {
@@ -269,14 +269,14 @@ static const sd_bus_vtable audio_vt[] = {
 static int au_registered(sd_bus_message *m, void *u, sd_bus_error *e) {
     (void)e;
     *(int *)u = sd_bus_message_is_method_error(m, NULL) ? 2 : 1;
-    if (*(int *)u == 2) fprintf(stderr, "lord-vmdisplay: RegisterOutListener: %s\n", sd_bus_message_get_error(m) ? sd_bus_message_get_error(m)->message : "?");
+    if (*(int *)u == 2) fprintf(stderr, "insane-vmdisplay: RegisterOutListener: %s\n", sd_bus_message_get_error(m) ? sd_bus_message_get_error(m)->message : "?");
     return 0;
 }
 
 /* VD_AUDIO_REC: the recording's ring (checked: sealed against shrinking, the size it says, 48 kHz, one channel) */
 static void au_rec(int fd) {
     if (A.ring) { munmap(A.ring, A.ring_len); A.ring = NULL; }
-    if (A.writes || A.pads) fprintf(stderr, "lord-vmdisplay: recording's sound: %lld writes, %lld silences, %lld dropped\n", A.writes, A.pads, A.dropped);
+    if (A.writes || A.pads) fprintf(stderr, "insane-vmdisplay: recording's sound: %lld writes, %lld silences, %lld dropped\n", A.writes, A.pads, A.dropped);
     A.writes = A.pads = A.dropped = 0;
     if (fd < 0) return;
     struct stat st;
@@ -297,7 +297,7 @@ static void au_rec(int fd) {
     A.samples = 0;
 }
 
-/* a new picture size: ask lord-server for a picture of it; the old one isn't written again */
+/* a new picture size: ask insane-server for a picture of it; the old one isn't written again */
 static void new_size(uint32_t w, uint32_t h) {
     D.w = w;
     D.h = h;
@@ -311,7 +311,7 @@ static void new_size(uint32_t w, uint32_t h) {
     }
 }
 
-/* copies the damage into lord-server's picture. 0 copied, -1 QEMU's buffer faulted (dropped) */
+/* copies the damage into insane-server's picture. 0 copied, -1 QEMU's buffer faulted (dropped) */
 static int copy_damage(int x, int y, int w, int h) {
     /* volatile: they're read again after a SIGBUS longjmp */
     const uint8_t *volatile src;
@@ -466,7 +466,7 @@ static int on_cursor_define(sd_bus_message *m, void *u, sd_bus_error *e) {
     if (w <= 0 || h <= 0 || w > VD_MAX_CURSOR || h > VD_MAX_CURSOR) { refuse("CursorDefine", "size %dx%d", w, h); return ok(m); }
     if (len != (size_t)w * (size_t)h * 4) { refuse("CursorDefine", "%zu bytes for %dx%d", len, w, h); return ok(m); }
     if (hx < 0 || hy < 0 || hx >= w || hy >= h) { refuse("CursorDefine", "hotspot %d,%d outside %dx%d", hx, hy, w, h); return ok(m); }
-    int fd = memfd_create("lordos-vmcursor", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-vmcursor", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0) return ok(m);
     size_t off = 0;
     while (off < len) { ssize_t k = pwrite(fd, (const char *)data + off, len - off, (off_t)off); if (k <= 0) { if (k < 0 && errno == EINTR) continue; break; } off += (size_t)k; }
@@ -509,7 +509,7 @@ static int on_scanout_map(sd_bus_message *m, void *u, sd_bus_error *e) {
     static int seals_told;
     if (!seals_told) {
         int seals = fcntl(fd, F_GET_SEALS);
-        fprintf(stderr, "lord-vmdisplay: QEMU's picture: %ux%u, memfd of %lld bytes, sealed against shrinking: %s (reads are SIGBUS-guarded)\n",
+        fprintf(stderr, "insane-vmdisplay: QEMU's picture: %ux%u, memfd of %lld bytes, sealed against shrinking: %s (reads are SIGBUS-guarded)\n",
                 w, h, (long long)real, seals >= 0 && (seals & F_SEAL_SHRINK) ? "yes" : "no");
         seals_told = 1;
     }
@@ -620,7 +620,7 @@ static void send_input(long long now) {
     if (D.ptr_pending) { D.ptr_pending = 0; say(vd_msg(VD_POINTER, D.ptr_x, D.ptr_y, D.ptr_on, 0, 0, 0), -1); }
 }
 
-/* ---- lord-server's messages ---- */
+/* ---- insane-server's messages ---- */
 
 static void take_picture(int fd) {
     struct stat st;
@@ -649,7 +649,7 @@ static int from_server(void) {
         int r = vd_recv(CH, &m, &fd);
         if (r < 0) return 1;
         if (!r) return 0;
-        if (!vd_msg_valid(&m, 1)) { if (fd >= 0) close(fd); refuse("message", "type %u from lord-server", m.type); continue; }
+        if (!vd_msg_valid(&m, 1)) { if (fd >= 0) close(fd); refuse("message", "type %u from insane-server", m.type); continue; }
         if (m.type != VD_SHM && m.type != VD_AUDIO_REC && fd >= 0) { close(fd); fd = -1; }
         switch (m.type) {
         case VD_SHM: if (fd >= 0) take_picture(fd); break;
@@ -676,7 +676,7 @@ static sd_bus *p2p(int fd) {
     if (r >= 0) r = sd_bus_set_fd(b, fd, fd);
     if (r >= 0) r = sd_bus_negotiate_fds(b, 1);
     if (r >= 0) r = sd_bus_start(b);
-    if (r < 0) { fprintf(stderr, "lord-vmdisplay: D-Bus setup: %s\n", strerror(-r)); sd_bus_unref(b); return NULL; }
+    if (r < 0) { fprintf(stderr, "insane-vmdisplay: D-Bus setup: %s\n", strerror(-r)); sd_bus_unref(b); return NULL; }
     sd_bus_set_method_call_timeout(b, 5 * 1000 * 1000);
     return b;
 }
@@ -706,7 +706,7 @@ static int selftest(void) {
     int f_home = open(hp, O_RDONLY | O_CLOEXEC);
     int f_null = open("/dev/null", O_RDWR | O_CLOEXEC);
     int f_kvm = open("/dev/kvm", O_RDWR | O_CLOEXEC);
-    int f_tmp = open("/tmp/lord-vmdisplay-selftest", O_WRONLY | O_CREAT | O_CLOEXEC, 0600);
+    int f_tmp = open("/tmp/insane-vmdisplay-selftest", O_WRONLY | O_CREAT | O_CLOEXEC, 0600);
     int s_inet = socket(AF_INET, SOCK_STREAM, 0), s_unix = socket(AF_UNIX, SOCK_STREAM, 0);
     int sp[2], s_pair = socketpair(AF_UNIX, SOCK_STREAM, 0, sp);
     pid_t child = fork();
@@ -734,8 +734,8 @@ int main(int argc, char **argv) {
     prctl(PR_SET_DUMPABLE, 0);
     signal(SIGPIPE, SIG_IGN);
     if (argc == 2 && !strcmp(argv[1], "--selftest")) return selftest();
-    if (argc != 2 || !uuid_ok(argv[1])) { fprintf(stderr, "usage: lord-vmdisplay <machine id>   (fd 3: lord-server, fd 4: QEMU's D-Bus display)\n"); return 2; }
-    if (!is_socket(CH, SOCK_SEQPACKET) || !is_socket(DBUS_FD, SOCK_STREAM)) { fprintf(stderr, "lord-vmdisplay: fd 3 must be a SOCK_SEQPACKET and fd 4 a stream socket\n"); return 2; }
+    if (argc != 2 || !uuid_ok(argv[1])) { fprintf(stderr, "usage: insane-vmdisplay <machine id>   (fd 3: insane-server, fd 4: QEMU's D-Bus display)\n"); return 2; }
+    if (!is_socket(CH, SOCK_SEQPACKET) || !is_socket(DBUS_FD, SOCK_STREAM)) { fprintf(stderr, "insane-vmdisplay: fd 3 must be a SOCK_SEQPACKET and fd 4 a stream socket\n"); return 2; }
     fcntl(CH, F_SETFD, FD_CLOEXEC);
     fcntl(DBUS_FD, F_SETFD, FD_CLOEXEC);
     struct sigaction sa;
@@ -753,7 +753,7 @@ int main(int argc, char **argv) {
     int absm = 0;
     char *label = NULL;
     if (sd_bus_get_property_string(bus, NULL, CONSOLE_PATH, "org.qemu.Display1.Console", "Label", &e, &label) < 0) {
-        fprintf(stderr, "lord-vmdisplay: QEMU's console isn't there: %s\n", e.message ? e.message : "?");
+        fprintf(stderr, "insane-vmdisplay: QEMU's console isn't there: %s\n", e.message ? e.message : "?");
         say(vd_msg(VD_STATE, VDS_LOST, VDR_SETUP, 0, 0, 0, 0), -1);
         return 1;
     }
@@ -772,7 +772,7 @@ int main(int argc, char **argv) {
         sd_bus_add_object_vtable(lbus, NULL, LISTENER_PATH, "org.qemu.Display1.Listener.Unix.Map", map_vt, NULL) < 0) return 1;
     sd_bus_message *rep = NULL;
     if (sd_bus_call_method(bus, NULL, CONSOLE_PATH, "org.qemu.Display1.Console", "RegisterListener", &e, &rep, "h", lv[1]) < 0) {
-        fprintf(stderr, "lord-vmdisplay: RegisterListener: %s\n", e.message ? e.message : "?");
+        fprintf(stderr, "insane-vmdisplay: RegisterListener: %s\n", e.message ? e.message : "?");
         say(vd_msg(VD_STATE, VDS_LOST, VDR_SETUP, 0, 0, 0, 0), -1);
         return 1;
     }
@@ -807,19 +807,19 @@ int main(int argc, char **argv) {
             au_ok = au_done == 1;
         }
         sd_bus_slot_unref(slot);
-        if (au_ok) fprintf(stderr, "lord-vmdisplay %s: sound listener registered\n", argv[1]);
+        if (au_ok) fprintf(stderr, "insane-vmdisplay %s: sound listener registered\n", argv[1]);
         else {
-            fprintf(stderr, "lord-vmdisplay %s: no sound (%s)\n", argv[1], au_done == 2 ? "QEMU refused the listener" : abus ? "no answer" : "no connection");
+            fprintf(stderr, "insane-vmdisplay %s: no sound (%s)\n", argv[1], au_done == 2 ? "QEMU refused the listener" : abus ? "no answer" : "no connection");
             if (abus) { sd_bus_flush_close_unref(abus); abus = NULL; }
         }
         if (av[1] >= 0) close(av[1]);
     }
-    fprintf(stderr, "lord-vmdisplay %s: console \"%s\" %ux%u, mouse %s\n", argv[1], label ? label : "", cw, ch, absm ? "absolute" : "relative");
+    fprintf(stderr, "insane-vmdisplay %s: console \"%s\" %ux%u, mouse %s\n", argv[1], label ? label : "", cw, ch, absm ? "absolute" : "relative");
     free(label);
 
     /* setup done: from here no files, no new sockets, no exec, threads only, in its own scope */
     char scope[80];
-    snprintf(scope, sizeof scope, "lordos-vmdisplay-%s", argv[1]);
+    snprintf(scope, sizeof scope, "insaneos-vmdisplay-%s", argv[1]);
     SandboxHelperCfg cfg = { .name = scope, .ro_paths = NULL, .extra_syscalls = (int[]){ -1 }, .allow_ioctl_classes = 0, .mem_max_mb = 512 };
     sandbox_apply_helper(&cfg);
     say(vd_msg(VD_READY, (int)cw, (int)ch, absm, 0, 0, 0), -1);
@@ -835,7 +835,7 @@ int main(int argc, char **argv) {
         if (r < 0) { say(vd_msg(VD_STATE, VDS_LOST, VDR_QEMU_GONE, 0, 0, 0, 0), -1); break; }
         if (abus) {
             while ((r = sd_bus_process(abus, NULL)) > 0) ;
-            if (r < 0) { fprintf(stderr, "lord-vmdisplay: the sound connection went away\n"); sd_bus_flush_close_unref(abus); abus = NULL; }
+            if (r < 0) { fprintf(stderr, "insane-vmdisplay: the sound connection went away\n"); sd_bus_flush_close_unref(abus); abus = NULL; }
         }
         long long now = now_ms();
         if (A.ring) au_tick(now);

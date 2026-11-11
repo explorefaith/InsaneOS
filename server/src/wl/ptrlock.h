@@ -6,8 +6,8 @@
  * the app that could let it go. ❖Esc always lets go (wl_key).
  *
  * `spent`: the constraint must not hold again (a oneshot that was released, or ❖Esc). */
-#ifndef LORD_WL_PTRLOCK_H
-#define LORD_WL_PTRLOCK_H
+#ifndef INSANE_WL_PTRLOCK_H
+#define INSANE_WL_PTRLOCK_H
 
 enum { PTRLOCK_SAME, PTRLOCK_ON, PTRLOCK_OFF };
 

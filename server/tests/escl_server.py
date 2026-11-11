@@ -21,7 +21,7 @@ CAPS = f"""<?xml version="1.0" encoding="UTF-8"?>
 <scan:ScannerCapabilities xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03" xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm">
 <pwg:Version>2.63</pwg:Version>
 <pwg:MakeAndModel>Escáner de prueba Insane OS</pwg:MakeAndModel>
-<pwg:SerialNumber>LORD-0001</pwg:SerialNumber>
+<pwg:SerialNumber>INSANE-0001</pwg:SerialNumber>
 <scan:Platen><scan:PlatenInputCaps>
 <scan:MinWidth>16</scan:MinWidth><scan:MaxWidth>{MAXW}</scan:MaxWidth><scan:MinHeight>16</scan:MinHeight><scan:MaxHeight>{MAXH}</scan:MaxHeight>
 <scan:SettingProfiles><scan:SettingProfile>

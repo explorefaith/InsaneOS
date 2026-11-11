@@ -1,6 +1,6 @@
 // voicerecmodel.js — the recordings of a personal voice (Settings → AI → Voice, "Create a Personal Voice";
 // docs/VOICE.md): the room's noise, where speech starts and ends in a phrase, and the phrases joined into the one WAV
-// the model clones from (16-bit mono, at most 30 s; lord-tts's read_voice). Pure; tested by
+// the model clones from (16-bit mono, at most 30 s; insane-tts's read_voice). Pure; tested by
 // server/tests/voicerec_model_test.mjs.
 //
 //   parseWav(arrayBuffer)            → { rate, channels, samples: Int16Array (mono) } or null
@@ -9,9 +9,9 @@
 //   trimSilence(samples, rate)       → the samples between the first and the last speech, with SPEECH_PAD_MS around
 //   joinPhrases(clips, rate)         → an ArrayBuffer: a WAV of the clips, GAP_MS of silence between, MAX_MS at most
 //   phraseDone(state, level, nowMs)  → the recording of a phrase can stop: speech was heard, then quiet for END_QUIET_MS
-//                                      (level: lord-media's live level, 0..1); state is kept by the caller
+//                                      (level: insane-media's live level, 0..1); state is kept by the caller
 //   roomCheck(samples)               → { quiet, db }: the room check's verdict and the noise it heard (dBFS, rounded)
-//   takeName(kind, nowMs, n)         → a new file name for one recording: lord-media never writes over a file, so a
+//   takeName(kind, nowMs, n)         → a new file name for one recording: insane-media never writes over a file, so a
 //                                      take that reused a name (the room checked again, a phrase read again) would fail
 
 export const QUIET_DB = -45;          // a quiet room; above it the voice copies the noise too

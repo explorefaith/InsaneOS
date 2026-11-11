@@ -1,7 +1,7 @@
 /* vfile.h — the vault file format (.lvault), version 1. See docs/PASSWORDS.md,
  * "The format".
  *
- *   header     "LORDVLT\x1a", version, header length, vault id, dates, counter,
+ *   header     "INSANEVLT\x1a", version, header length, vault id, dates, counter,
  *              and the "slots" (one per way of opening: password, key file, password +
  *              key file, FIDO2 key, recovery key, session password)
  *   body       nonce(24) length(8) XChaCha20-Poly1305(JSON content) mac(16)
@@ -16,13 +16,13 @@
  * everything, and changing the password is rewriting one slot.
  *
  * Everything is little endian. */
-#ifndef LORD_VAULT_VFILE_H
-#define LORD_VAULT_VFILE_H
+#ifndef INSANE_VAULT_VFILE_H
+#define INSANE_VAULT_VFILE_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-#define VF_MAGIC "LORDVLT\x1a"
+#define VF_MAGIC "INSANEVLT\x1a"
 #define VF_VERSION 1
 #define VF_MAX_SLOTS 16
 #define VF_HDR_FIXED 56

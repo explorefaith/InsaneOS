@@ -1,4 +1,4 @@
-// archive.js — archives through the confined helper (libarchive inside lord-doc). Extracting
+// archive.js — archives through the confined helper (libarchive inside insane-doc). Extracting
 // never leaves the destination folder: no "..", no absolute paths, no links pointing outside
 // (see docs/DOCUMENTS.md, "Extracting without leaving the folder").
 //
@@ -21,8 +21,8 @@ export const stem = (name) => String(name).replace(/\.(tar\.(gz|xz|zst|bz2|lz|lz
 
 function list(path) {
   let r;
-  try { r = lord.doc.arcList(path); } catch (e) { return Promise.reject(e); }
-  return waitFor(r.sid, r.req).finally(() => lord.doc.close(r.sid));
+  try { r = insane.doc.arcList(path); } catch (e) { return Promise.reject(e); }
+  return waitFor(r.sid, r.req).finally(() => insane.doc.close(r.sid));
 }
 
 function extract(path, dest, { only, existing = false, onProgress } = {}) {
@@ -30,16 +30,16 @@ function extract(path, dest, { only, existing = false, onProgress } = {}) {
   const args = {};
   if (only) args.only = only;
   if (isRawCompressed(path)) args.rawname = rawName(String(path).split('/').pop());
-  try { r = lord.doc.arcExtract(path, dest, JSON.stringify(args), existing); } catch (e) { return Promise.reject(e); }
-  const p = waitFor(r.sid, r.req, { onProgress }).finally(() => lord.doc.close(r.sid));
+  try { r = insane.doc.arcExtract(path, dest, JSON.stringify(args), existing); } catch (e) { return Promise.reject(e); }
+  const p = waitFor(r.sid, r.req, { onProgress }).finally(() => insane.doc.close(r.sid));
   p.sid = r.sid;
   return p;
 }
 
 function create(paths, out, { onProgress } = {}) {
   let r;
-  try { r = lord.doc.arcCreate(paths, out); } catch (e) { return Promise.reject(e); }
-  const p = waitFor(r.sid, r.req, { onProgress }).finally(() => lord.doc.close(r.sid));
+  try { r = insane.doc.arcCreate(paths, out); } catch (e) { return Promise.reject(e); }
+  const p = waitFor(r.sid, r.req, { onProgress }).finally(() => insane.doc.close(r.sid));
   p.sid = r.sid;
   return p;
 }

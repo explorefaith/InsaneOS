@@ -1,8 +1,8 @@
 /* tzif.h — our own time zone reader (tzdata TZif files, RFC 8536, and POSIX TZ rules).
- * Used by lord.time.zoneOffset (Clock app, docs/SYSTEM.md) to get another city's time without
+ * Used by insane.time.zoneOffset (Clock app, docs/SYSTEM.md) to get another city's time without
  * touching the process time zone (setenv TZ would change the Date of the whole theme). */
-#ifndef LORD_TZIF_H
-#define LORD_TZIF_H
+#ifndef INSANE_TZIF_H
+#define INSANE_TZIF_H
 
 #include <stddef.h>
 #include <stdint.h>

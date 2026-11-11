@@ -1,8 +1,8 @@
 // Settings → Appearance → "Browsers: tabs in the title bar" (docs/WAYLAND.md, "The switch in
 // Settings"). On: Chromium, Brave and Firefox draw one bar with their tabs and Insane OS's window buttons;
 // off: they use Insane OS's frame. The SDK (sdk/browserframe.js) writes that one preference in the
-// user's own browser profiles through lord.browserFrame.
-import { View, Button, Toggle, useLocale, useSettings, useStore, browserFrameResult, browserFrameState, browserTabsInTitlebar, setBrowserTabsInTitlebar } from '@lordos/sdk';
+// user's own browser profiles through insane.browserFrame.
+import { View, Button, Toggle, useLocale, useSettings, useStore, browserFrameResult, browserFrameState, browserTabsInTitlebar, setBrowserTabsInTitlebar } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Section, SettingRow, Note, Actions } from './ui.jsx';
 

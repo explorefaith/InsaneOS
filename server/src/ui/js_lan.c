@@ -1,4 +1,4 @@
-/* js_lan.c — lord.lan: Files → Network (lan/lan.h, docs/FILES.md, "Network"). JS names no address,
+/* js_lan.c — insane.lan: Files → Network (lan/lan.h, docs/FILES.md, "Network"). JS names no address,
  * port or socket: it only starts a bounded pass, stops it and reads what is known.
  *
  *   start(asked)   true if a pass started. Opening the page keeps a pass under 5 minutes old; asked
@@ -103,8 +103,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("connectTrust", 2, f_trust),
 };
 
-void js_lan_register(JSContext *c, JSValue lord) {
+void js_lan_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "lan", o);
+    JS_SetPropertyStr(c, insane, "lan", o);
 }

@@ -4,15 +4,15 @@
 // validator and the catalogue (tools/hwreport) use the same summary, kind and vendor rules.
 //
 // Insane OS sends nothing by itself and holds no token: the app writes the report and the page to the user's
-// Documents, opens the page with the default browser (lord.apps.launchWith('', path)), and the user attaches
+// Documents, opens the page with the default browser (insane.apps.launchWith('', path)), and the user attaches
 // the file to the issue and submits it with their own account.
 //
 // The report is built from the schema (hwreport.schema.json) as an allow-list: pick() copies only the fields
 // the schema lists, in the forms it allows, so a field added to the collector is never shared until it is
 // added to the schema.
 
-export const FORMAT = 'lordos-hwreport';
-export const REPO_URL = 'https://github.com/lordbasex/Insane OS';
+export const FORMAT = 'insaneos-hwreport';
+export const REPO_URL = 'https://github.com/insaneos/Insane OS';
 export const ISSUE_TEMPLATE = 'hardware-report.yml';
 export const TITLE_MAX = 100;
 export const SUMMARY_MAX = 600;
@@ -88,19 +88,19 @@ export function pick(v, s, root = s) {
 const baseVersion = (v) => { const m = /^(\d+\.\d+\.\d+(?:\.\d+)?)/.exec(String(v || '')); return m ? m[1] : ''; };
 export const sameVersion = (a, b) => !!baseVersion(a) && baseVersion(a) === baseVersion(b);
 
-// report: lord.sysinfo.report(); bench / desktop: the last InsaneBench peak and desktop results (or null);
+// report: insane.sysinfo.report(); bench / desktop: the last InsaneBench peak and desktop results (or null);
 // compat: model.js compatibility(report). A bench result is kept only when it was measured with this Insane OS
 // version, so the catalogue never files an old version's numbers under the new one.
 export function buildShareReport({ report, bench = null, desktop = null, compat = [], schema, date, source = 'community' }) {
   const rep = report || {};
   const sw = rep.software || {};
-  const lordos = String(sw.lordos || '');
-  const keepBench = (b) => (b && sameVersion(b.lordos, lordos) ? pick(b, { $ref: '#/$defs/bench' }, schema) || null : null);
+  const insaneos = String(sw.insaneos || '');
+  const keepBench = (b) => (b && sameVersion(b.insaneos, insaneos) ? pick(b, { $ref: '#/$defs/bench' }, schema) || null : null);
   const b = keepBench(bench), d = keepBench(desktop);
   const out = {
     format: FORMAT, version: 1,
     createdAt: /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : String(rep.date || ''),
-    source, lordos,
+    source, insaneos,
     live: sw.live === true || !!(b && b.live === true) || !!(d && d.live === true),
     system: pick(rep, { $ref: '#/$defs/system' }, schema) || {},
     compatibility: (compat || []).map((c) => ({ id: c.id, state: c.state, note: c.note || null })),
@@ -190,7 +190,7 @@ export function summaryRows(rep) {
     ['gpu', g ? [[g.vendor, g.device].filter(Boolean).join(' '), g.driver ? `(${g.driver})` : ''].filter(Boolean).join(' ') : ''],
     ['memory', memGB != null ? `${memGB} GB` : ''],
     ['arch', (s.cpu && s.cpu.arch) || ''],
-    ['lordos', rep && rep.lordos],
+    ['insaneos', rep && rep.insaneos],
     ['kernel', (s.software && s.software.kernel) || ''],
     ['live', rep && rep.live ? 'yes' : 'no'],
     ['boot', bootText(rep)],
@@ -202,7 +202,7 @@ export function summaryRows(rep) {
 
 export function issueTitle(rep) {
   const name = machineLabel(rep) || 'unknown machine';
-  return oneLine(`Hardware report: ${name} (Insane OS ${rep && rep.lordos ? rep.lordos : '?'}${rep && rep.live ? ', live' : ''})`, TITLE_MAX);
+  return oneLine(`Hardware report: ${name} (Insane OS ${rep && rep.insaneos ? rep.insaneos : '?'}${rep && rep.live ? ', live' : ''})`, TITLE_MAX);
 }
 
 export function summaryText(rep) {
@@ -211,12 +211,12 @@ export function summaryText(rep) {
 }
 
 // GitHub's issue forms take a field's value from the query string by its id (the template's "summary" and
-// "lordos" fields); the title too.
+// "insaneos" fields); the title too.
 export function issueUrl(rep) {
   const q = [
     ['template', ISSUE_TEMPLATE],
     ['title', issueTitle(rep)],
-    ['lordos', String((rep && rep.lordos) || '')],
+    ['insaneos', String((rep && rep.insaneos) || '')],
     ['summary', summaryText(rep)],
   ].map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
   return `${REPO_URL}/issues/new?${q}`;
@@ -224,9 +224,9 @@ export function issueUrl(rep) {
 
 // ---- the files ----
 
-// lordos-hwreport-<date>.json and .html in the given folder, or -2, -3… when either name is taken.
+// insaneos-hwreport-<date>.json and .html in the given folder, or -2, -3… when either name is taken.
 export function shareFileNames(date, exists) {
-  const base = `lordos-hwreport-${/^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : 'today'}`;
+  const base = `insaneos-hwreport-${/^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : 'today'}`;
   for (let i = 1; i < 100; i++) {
     const b = `${base}${i > 1 ? `-${i}` : ''}`;
     if (!exists(`${b}.json`) && !exists(`${b}.html`)) return { json: `${b}.json`, html: `${b}.html` };

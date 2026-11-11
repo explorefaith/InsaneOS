@@ -43,15 +43,15 @@ int main(void) {
     CHECK(STREQ(proc_protect_reason(1, 0, "systemd", "/usr/lib/systemd/systemd", NULL, 999), "init"));
     CHECK(STREQ(proc_protect_reason(2, 0x00200000, "kthreadd", "", NULL, 999), "kernel"));
     CHECK(STREQ(proc_protect_reason(77, 0x00200000, "kworker/0:1", "", NULL, 999), "kernel"));
-    CHECK(STREQ(proc_protect_reason(999, 0, "lord-server", "/usr/lib/lordos/bin/lord-server", NULL, 999), "session"));
-    CHECK(STREQ(proc_protect_reason(500, 0, "lord-server", "/usr/lib/lordos/bin/lord-server", "--term-holder", 999), "system"));
-    CHECK(proc_protect_reason(501, 0, "lord-server", "/usr/lib/lordos/bin/lord-server", "--app", 999) == NULL);
-    const char *sys[] = { "lord-sessiond", "lord-netperm", "lord-netd", "lord-fand", "lord-vault", "lord-maild", "lord-doc", "lord-media",
-                          "lord-admin", "pipewire", "pipewire-pulse", "wireplumber" };
+    CHECK(STREQ(proc_protect_reason(999, 0, "insane-server", "/usr/lib/insaneos/bin/insane-server", NULL, 999), "session"));
+    CHECK(STREQ(proc_protect_reason(500, 0, "insane-server", "/usr/lib/insaneos/bin/insane-server", "--term-holder", 999), "system"));
+    CHECK(proc_protect_reason(501, 0, "insane-server", "/usr/lib/insaneos/bin/insane-server", "--app", 999) == NULL);
+    const char *sys[] = { "insane-sessiond", "insane-netperm", "insane-netd", "insane-fand", "insane-vault", "insane-maild", "insane-doc", "insane-media",
+                          "insane-admin", "pipewire", "pipewire-pulse", "wireplumber" };
     for (size_t i = 0; i < sizeof sys / sizeof sys[0]; i++) CHECK(STREQ(proc_protect_reason(600, 0, sys[i], "", NULL, 999), "system"));
     CHECK(STREQ(proc_protect_reason(601, 0, "x", "/usr/bin/pipewire (deleted)", NULL, 999), "system"));
     CHECK(proc_protect_reason(602, 0, "firefox-esr", "/usr/lib/firefox-esr/firefox-esr", NULL, 999) == NULL);
-    CHECK(proc_protect_reason(603, 0, "lord-serverx", "", NULL, 999) == NULL);
+    CHECK(proc_protect_reason(603, 0, "insane-serverx", "", NULL, 999) == NULL);
 
     /* signals: a stale start time is refused and the process survives */
     pid_t a = child();

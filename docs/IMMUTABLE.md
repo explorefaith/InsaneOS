@@ -70,8 +70,8 @@ a Flatpak" system, or converting existing installations in place.
 
 - `/usr` is an ordinary ext4 directory tree owned by dpkg. Root (or `sudo`) can change any file.
 - 0.8.2 phase 1 (`server/src/sec/codesig.c`) checks only Insane OS's JavaScript bundles, from inside
-  `lord-server`; its threat model says plainly that it does not protect against root, who can
-  replace `lord-server` itself (and its compiled-in key).
+  `insane-server`; its threat model says plainly that it does not protect against root, who can
+  replace `insane-server` itself (and its compiled-in key).
 - Updates are in-place `dpkg` upgrades from the signed APT repository (0.8.1). A broken update is
   fixed by another update; there is no "previous version". A power cut during `dpkg` can leave a
   half-configured system (dpkg recovers most of it, not all).
@@ -123,9 +123,9 @@ What each layer stops (✓ stops, ~ partly, ✗ no). "Classic" is today's Insane
   would turn that into a reboot into the other slot. Root can also write a new UKI to the ESP; only
   Secure Boot stops that from booting.
 
-**How it composes with phase 1 (signed code).** With a verified `/usr`, `lord-server`, its
+**How it composes with phase 1 (signed code).** With a verified `/usr`, `insane-server`, its
 compiled-in release key, the bundles and `code-manifest.json` are all inside the verified image, so
-phase 1's stated gap ("root can replace lord-server") closes for anything that must survive a
+phase 1's stated gap ("root can replace insane-server") closes for anything that must survive a
 reboot, as long as the UKI is trusted (Secure Boot on PCs). Phase 1 stays: it costs ~7–34 ms, it
 protects the classic edition and development trees, and it gives the clear "this component was
 modified" screen instead of an I/O error.
@@ -269,7 +269,7 @@ full-image downloads — is addressed below (system extensions; chunked deltas).
 ### Building images from Debian packages
 
 The image is built on the build machine exactly like the ISO's chroot today (`debootstrap` + the
-same package list + `lordos_<version>.deb`), then split:
+same package list + `insaneos_<version>.deb`), then split:
 
 - `/usr` → **EROFS**, compressed with **lz4hc** (decompression is cheap on low-end CPUs; zstd is an
   option for smaller downloads), built reproducibly (`mkfs.erofs -T0 -U <fixed>`; the prototype gives
@@ -288,11 +288,11 @@ This is where Debian and immutable images rub. Known issues and the planned answ
 
 | Issue | Answer |
 |---|---|
-| Packages ship defaults in `/etc` (conffiles), and an update may change them | Each image carries `/usr/share/factory/etc`. On the first boot of a new version, the migration runner (`/usr/lib/lordos/migrate`, already in 0.8.1) does a **three-way merge**: a file the admin never changed (same as the old factory copy) is replaced with the new factory copy; a changed one is kept and the new default goes next to it as `<file>.lordos-new`, reported in the Store; new files are copied. This is how OSTree handles `/etc`. |
-| System users and groups made by `adduser` in postinst (`lordos-greeter`, `systemd-*`, `messagebus`…) live in `/etc/passwd` | Ship `sysusers.d` entries for every system user of the image (generated at build time from the chroot's `/etc/passwd`); `systemd-sysusers` creates missing ones on boot. |
+| Packages ship defaults in `/etc` (conffiles), and an update may change them | Each image carries `/usr/share/factory/etc`. On the first boot of a new version, the migration runner (`/usr/lib/insaneos/migrate`, already in 0.8.1) does a **three-way merge**: a file the admin never changed (same as the old factory copy) is replaced with the new factory copy; a changed one is kept and the new default goes next to it as `<file>.insaneos-new`, reported in the Store; new files are copied. This is how OSTree handles `/etc`. |
+| System users and groups made by `adduser` in postinst (`insaneos-greeter`, `systemd-*`, `messagebus`…) live in `/etc/passwd` | Ship `sysusers.d` entries for every system user of the image (generated at build time from the chroot's `/etc/passwd`); `systemd-sysusers` creates missing ones on boot. |
 | Caches that dpkg triggers rebuild: `ld.so.cache` (in `/etc`!), icon and MIME caches, `gdk-pixbuf` loaders, fontconfig, GSettings schemas | Built at image build time into `/usr`; `ldconfig` at boot only when `/etc/ld.so.conf.d` changed (Debian's `ldconfig.service` already does this with `ConditionNeedsUpdate=/etc`). System extensions trigger a rebuild into `/var/cache` (phase 4). |
 | Units enabled with `systemctl enable` create links in `/etc` | Enable Insane OS's units from `/usr` (vendor `.wants`/`.requires` links, as the prototype does) or presets applied by the merge; keep the admin's own `systemctl` choices in `/etc`. |
-| `/var/lib/dpkg` describes the image, not the machine | Ship it read-only inside `/usr` (`/usr/lib/lordos/dpkg-status`) for the Store's "installed" view and for SBOM-style queries; there is no dpkg database on the client to corrupt. |
+| `/var/lib/dpkg` describes the image, not the machine | Ship it read-only inside `/usr` (`/usr/lib/insaneos/dpkg-status`) for the Store's "installed" view and for SBOM-style queries; there is no dpkg database on the client to corrupt. |
 | Kernel modules built on the machine (DKMS: some Wi-Fi, out-of-tree GPU drivers) | Not possible on a verified `/usr`. Ship the common ones prebuilt in the image; others need the classic edition. Said clearly in the installer. |
 | `install.sh` and Debian derivatives | Classic only: they are someone else's Debian installation. |
 
@@ -300,12 +300,12 @@ This is where Debian and immutable images rub. Known issues and the planned answ
 
 | # | Partition | Type (Discoverable Partitions) | Size | Contents |
 |---|---|---|---|---|
-| 1 | `lordos-esp` | ESP | 1 GiB | systemd-boot, one UKI per version (`EFI/Linux/lordos_<v>[+tries].efi`), `loader.conf` |
-| 2 | `lordos_usr_<v>` | `usr` (x86-64) | 5 GiB | EROFS `/usr`, slot A |
-| 3 | `lordos_usr_v_<v>` | `usr-verity` | 64 MiB | dm-verity hash tree of slot A |
-| 4 | `lordos_usr_<v>` / `_empty` | `usr` | 5 GiB | slot B |
-| 5 | `lordos_usr_v_<v>` / `_empty` | `usr-verity` | 64 MiB | slot B hashes |
-| 6 | `lordos-root` | `root` (x86-64) | the rest (min. 8 GiB) | ext4 (or optionally encrypted): `/etc`, `/var`, `/home`, `/swapfile`, `/opt` |
+| 1 | `insaneos-esp` | ESP | 1 GiB | systemd-boot, one UKI per version (`EFI/Linux/insaneos_<v>[+tries].efi`), `loader.conf` |
+| 2 | `insaneos_usr_<v>` | `usr` (x86-64) | 5 GiB | EROFS `/usr`, slot A |
+| 3 | `insaneos_usr_v_<v>` | `usr-verity` | 64 MiB | dm-verity hash tree of slot A |
+| 4 | `insaneos_usr_<v>` / `_empty` | `usr` | 5 GiB | slot B |
+| 5 | `insaneos_usr_v_<v>` / `_empty` | `usr-verity` | 64 MiB | slot B hashes |
+| 6 | `insaneos-root` | `root` (x86-64) | the rest (min. 8 GiB) | ext4 (or optionally encrypted): `/etc`, `/var`, `/home`, `/swapfile`, `/opt` |
 
 Sizes: the ISO's live system is 1.5 GB uncompressed in 0.7.0 ([ISO.md](ISO.md)); with browsers,
 Mesa, firmware and CJK fonts in 0.8.x the `/usr` tree is about 2.5–3 GB, ~1.2–1.6 GB as EROFS/lz4hc
@@ -328,7 +328,7 @@ one-shot trial, done by the firmware itself.
 
 | # | Partition | Size | Contents |
 |---|---|---|---|
-| 1 | `autoboot` (FAT) | 64 MiB | `autoboot.txt` only (`[all] boot_partition=2` / `[tryboot] boot_partition=3`), plus the `ssh`, `remote-desktop`, `lordos-user.txt` switch files |
+| 1 | `autoboot` (FAT) | 64 MiB | `autoboot.txt` only (`[all] boot_partition=2` / `[tryboot] boot_partition=3`), plus the `ssh`, `remote-desktop`, `insaneos-user.txt` switch files |
 | 2 | `bootfs-A` (FAT) | 256 MiB | firmware, `kernel_2712.img`, initramfs, DTBs, `config.txt`, `cmdline.txt` with `usrhash=` of slot A |
 | 3 | `bootfs-B` (FAT) | 256 MiB | the same for slot B |
 | 4–7 | `usr` A, `usr-verity` A, `usr` B, `usr-verity` B | 5 GiB / 64 MiB each | as on the PC (arm64 partition types) |
@@ -354,10 +354,10 @@ wear is neutral-to-better for the system and unchanged for user data.
 
 ### Updates
 
-- **Format.** Each version publishes `lordos_usr_<v>.erofs`, `lordos_usr_<v>.verity`,
-  `lordos_usr_<v>.roothash` and the signed UKI `lordos_<v>.efi` (Pi: a `bootfs` image), listed in a
+- **Format.** Each version publishes `insaneos_usr_<v>.erofs`, `insaneos_usr_<v>.verity`,
+  `insaneos_usr_<v>.roothash` and the signed UKI `insaneos_<v>.efi` (Pi: a `bootfs` image), listed in a
   `SHA256SUMS` signed with the Insane OS **APT archive key** (OpenPGP Ed25519, which the package engine
-  already verifies) — next to the APT repository, e.g. `https://lordos.org/images/stable/<arch>/`.
+  already verifies) — next to the APT repository, e.g. `https://insaneos.org/images/stable/<arch>/`.
   The root hash binds the data; the UKI's signature binds the root hash; the `SHA256SUMS` signature
   binds the download.
 - **The updater** (design: C, in `server/src/pkg`, a new closed admin action `image-update`; the
@@ -365,14 +365,14 @@ wear is neutral-to-better for the system and unchanged for user data.
   (never older than the running one); invalidate the inactive slot (label `_empty`) *before* writing,
   so a crash never leaves a half slot that looks bootable; write data and hash partitions; **verify
   the written blocks against the root hash** (`veritysetup verify`); set the partition UUIDs derived
-  from the root hash and the labels; install the UKI last, as `lordos_<v>+3.efi`. These are
+  from the root hash and the labels; install the UKI last, as `insaneos_<v>+3.efi`. These are
   systemd-sysupdate's conventions (labels `@v`, `+tries` names, `_empty`), so Insane OS can switch to
   `systemd-sysupdate` if Debian ships it later, with the same disk.
 - **Store → Updates** shows "Insane OS 0.9.1 is available" as today; Update downloads and writes the
   inactive slot while the user keeps working; then "Restart required". Nothing is replaced under the
   running session (an improvement over 0.8.1, where files change under it).
 - **Update size and bandwidth.** A full image is ~1.2–1.6 GB to download (zstd-19 transfer: the
-  prototype's 202 MB EROFS compresses to 167 MB; xz −6 165 MB) against ~6 MB for a `lordos` `.deb`
+  prototype's 202 MB EROFS compresses to 167 MB; xz −6 165 MB) against ~6 MB for a `insaneos` `.deb`
   today, so full images alone are not acceptable for Insane OS users on slow links. Measured on the
   prototype between versions 1 and 2 (a small change in `/usr/lib`): the deterministic EROFS images
   differ in **3 of 51,678 4-KiB blocks**, and `zstd --patch-from` (v1 as dictionary) makes a
@@ -385,10 +385,10 @@ wear is neutral-to-better for the system and unchanged for user data.
 
 ### Boot assessment and rollback UX
 
-- **Automatic.** A new version boots with 3 tries (`lordos_<v>+3.efi`); systemd-boot renames it on
+- **Automatic.** A new version boots with 3 tries (`insaneos_<v>+3.efi`); systemd-boot renames it on
   every attempt (`+2-1`, `+1-2`, …). When `boot-complete.target` is reached,
-  `systemd-bless-boot` renames it to `lordos_<v>.efi` (good). `boot-complete.target` requires the
-  **Insane OS health check**: in the product, "`lord-sessiond` showed the login screen and the GPU or
+  `systemd-bless-boot` renames it to `insaneos_<v>.efi` (good). `boot-complete.target` requires the
+  **Insane OS health check**: in the product, "`insane-sessiond` showed the login screen and the GPU or
   CPU path composited a frame" plus `systemd-boot-check-no-failures`. On failure the health check
   restarts the machine; after the last try systemd-boot treats the entry as bad and boots the
   previous version. In the initrd, `panic=10 rd.emergency=reboot` turns an early failure (no `/usr`,
@@ -464,19 +464,19 @@ What it builds:
 - **base:** `debootstrap` trixie (minbase) + systemd, systemd-boot (for `systemd-bless-boot`),
   systemd-cryptsetup, dracut, `linux-image-amd64`, curl, gpgv; a dracut initrd with
   `systemd-veritysetup`; root autologin on the serial console (**prototype only**); a throwaway
-  OpenPGP test key whose public half goes into `/usr/share/lordos/immutable/update-keyring.gpg`.
-- **release `<v>`:** copies `/usr`, sets `IMAGE_ID=lordos-immutable` / `IMAGE_VERSION=<v>` in
+  OpenPGP test key whose public half goes into `/usr/share/insaneos/immutable/update-keyring.gpg`.
+- **release `<v>`:** copies `/usr`, sets `IMAGE_ID=insaneos-immutable` / `IMAGE_VERSION=<v>` in
   `os-release`, builds the EROFS image (lz4hc, fixed timestamps and UUID), the dm-verity hash tree,
   and the UKI with `usrhash=`, the verity partition UUIDs derived from the hash and
-  `root=PARTLABEL=lordos-root`. Release 3 is built **broken on purpose** (its health check fails).
-- **disk:** `systemd-repart` writes the GPT image: ESP 512 MiB (systemd-boot + `lordos_1.efi`),
+  `root=PARTLABEL=insaneos-root`. Release 3 is built **broken on purpose** (its health check fails).
+- **disk:** `systemd-repart` writes the GPT image: ESP 512 MiB (systemd-boot + `insaneos_1.efi`),
   slot A (1 GiB) + hashes (64 MiB) with release 1, slot B empty, root ext4 (1 GiB) with `/etc` and
   `/var`. (Slots are small here; see "Disk layouts" for real sizes.)
 - **publish:** `SHA256SUMS` over the chosen releases, signed with the test key, served by the demo
   over HTTP.
-- **in the image:** `/usr/lib/lordos/immutable/update` (the updater, see "Updates"),
-  `/usr/lib/lordos/immutable/health-check` with `lordos-health.service` (required by
-  `boot-complete.target`, restarts the machine on failure through `lordos-health-failed.service`),
+- **in the image:** `/usr/lib/insaneos/immutable/update` (the updater, see "Updates"),
+  `/usr/lib/insaneos/immutable/health-check` with `insaneos-health.service` (required by
+  `boot-complete.target`, restarts the machine on failure through `insaneos-health-failed.service`),
   both enabled from `/usr` (vendor `.requires` links), not from `/etc`.
 
 ### Results (VM 122, 2026-10-19)
@@ -496,63 +496,63 @@ is [immutable-demo-transcript.txt](immutable-demo-transcript.txt)):
 
 ```text
 ##### 1. first boot of the factory image
-$ /usr/lib/lordos/immutable/update --status
+$ /usr/lib/insaneos/immutable/update --status
   running: image version 1, /usr = /dev/mapper/usr erofs ro
-  slot A: /dev/vda2  label=lordos_usr_1  <- running
+  slot A: /dev/vda2  label=insaneos_usr_1  <- running
   slot B: /dev/vda4  label=_empty
   boot entries (ESP /efi/EFI/Linux):
-    lordos_1.efi
+    insaneos_1.efi
 $ veritysetup status usr
   /dev/mapper/usr is active and is in use.
     type:        VERITY
     status:      verified
 $ touch /usr/bin/evil
   touch: cannot touch '/usr/bin/evil': Read-only file system
-$ echo 'kept across updates' > /etc/lordos-demo.conf; echo 'my file' > /home/demo/notes.txt
+$ echo 'kept across updates' > /etc/insaneos-demo.conf; echo 'my file' > /home/demo/notes.txt
 
 ##### 2. signed update to version 2 (into slot B)
-$ /usr/lib/lordos/immutable/update http://10.0.2.2:8642
+$ /usr/lib/insaneos/immutable/update http://10.0.2.2:8642
   signature: good (update key)
   installing version 2 (running 1)
   writing slot B (/dev/vda4, was _empty)
   slot verified against usrhash 5305fd2b…
   version 2 installed; it boots next (3 tries), version 1 stays as the fallback.
-  boot entries: lordos_1.efi  lordos_2+3.efi
+  boot entries: insaneos_1.efi  insaneos_2+3.efi
 $ systemctl reboot
 ##### booted after the update
-$ cat /usr/lib/lordos/immutable/VERSION
+$ cat /usr/lib/insaneos/immutable/VERSION
   Insane OS immutable prototype, image version 2
-$ cat /etc/lordos-demo.conf /home/demo/notes.txt
+$ cat /etc/insaneos-demo.conf /home/demo/notes.txt
   kept across updates
   my file
 $ journalctl -b -u systemd-bless-boot -o cat
   Marked boot as 'good'. (Boot attempt counter is at 1.)
-  boot entries: lordos_1.efi  lordos_2.efi
+  boot entries: insaneos_1.efi  insaneos_2.efi
 
 ##### 3. a broken release: version 3 (fails its health check) into slot A
-$ /usr/lib/lordos/immutable/update http://10.0.2.2:8642
+$ /usr/lib/insaneos/immutable/update http://10.0.2.2:8642
   installing version 3 (running 2)
-  writing slot A (/dev/vda2, was lordos_usr_1)
-  boot entries: lordos_2.efi  lordos_3+3.efi
+  writing slot A (/dev/vda2, was insaneos_usr_1)
+  boot entries: insaneos_2.efi  insaneos_3+3.efi
 $ systemctl reboot
-  [console] lordos: this version failed its health check; restarting in 5 s   (attempt 1)
-  [console] lordos: this version failed its health check; restarting in 5 s   (attempt 2)
-  [console] lordos: this version failed its health check; restarting in 5 s   (attempt 3)
+  [console] insaneos: this version failed its health check; restarting in 5 s   (attempt 1)
+  [console] insaneos: this version failed its health check; restarting in 5 s   (attempt 2)
+  [console] insaneos: this version failed its health check; restarting in 5 s   (attempt 3)
 ##### booted on its own after the failed attempts
-$ cat /usr/lib/lordos/immutable/VERSION
+$ cat /usr/lib/insaneos/immutable/VERSION
   Insane OS immutable prototype, image version 2
-$ /usr/lib/lordos/immutable/update --status
-  slot A: /dev/vda2  label=lordos_usr_3
-  slot B: /dev/vda4  label=lordos_usr_2  <- running
-  boot entries: lordos_2.efi  lordos_3+0-3.efi
-$ cat /etc/lordos-demo.conf /home/demo/notes.txt
+$ /usr/lib/insaneos/immutable/update --status
+  slot A: /dev/vda2  label=insaneos_usr_3
+  slot B: /dev/vda4  label=insaneos_usr_2  <- running
+  boot entries: insaneos_2.efi  insaneos_3+0-3.efi
+$ cat /etc/insaneos-demo.conf /home/demo/notes.txt
   kept across updates
   my file
-$ /usr/lib/lordos/immutable/update http://10.0.2.2:8642
+$ /usr/lib/insaneos/immutable/update http://10.0.2.2:8642
   version 3 could not start on this computer (all tries failed); staying on 2 until a newer version is published
 
 ##### 3b. a hostile mirror: SHA256SUMS changed on the server (a version 9 added) without the key
-$ /usr/lib/lordos/immutable/update http://10.0.2.2:8642
+$ /usr/lib/insaneos/immutable/update http://10.0.2.2:8642
   update: SHA256SUMS: BAD or missing signature, nothing installed
 
 ##### 4. tampering: corrupt 8 MiB of the running /usr slot underneath dm-verity
@@ -571,17 +571,17 @@ What this verifies:
 | The updater accepts only a validly signed `SHA256SUMS` and checks every file's SHA-256 | ✓ (a `SHA256SUMS` changed on the server is refused, slots and boot entries unchanged) |
 | The written slot is checked block by block against the signed root hash before it can boot | ✓ (`veritysetup verify`, "slot verified") |
 | A UKI picks its own slot through the root-hash-derived partition UUIDs | ✓ (versions 1, 2 and 3 booted from the right slot) |
-| systemd-boot boots the newest entry, counts tries, and `systemd-bless-boot` marks a healthy boot good | ✓ (`lordos_2+3.efi` → `lordos_2.efi`, "Marked boot as 'good'") |
-| A version that fails its health check is retried, then abandoned, and the previous version boots **with no user action** | ✓ (three boots of version 3, `lordos_3+0-3.efi`, version 2 back) |
+| systemd-boot boots the newest entry, counts tries, and `systemd-bless-boot` marks a healthy boot good | ✓ (`insaneos_2+3.efi` → `insaneos_2.efi`, "Marked boot as 'good'") |
+| A version that fails its health check is retried, then abandoned, and the previous version boots **with no user action** | ✓ (three boots of version 3, `insaneos_3+0-3.efi`, version 2 back) |
 | `/etc` and `/home` survive an update and a rollback | ✓ |
 | A version that used up its tries is not reinstalled | ✓ |
-| The factory entry (no counter) needs no assessment | ✓ (`lordos-health` and `systemd-bless-boot` stay inactive on it, as systemd intends for entries without `+tries`) |
+| The factory entry (no counter) needs no assessment | ✓ (`insaneos-health` and `systemd-bless-boot` stay inactive on it, as systemd intends for entries without `+tries`) |
 | A modified block of the running `/usr` is refused | ✓ (228 files unreadable, `data block … is corrupted`); with `restart-on-corruption` this would reboot into the other slot (not tested) |
 | Update delta between two releases (`zstd --patch-from`) | 156 KB instead of 167 MB for a small change; 3 of 51,678 blocks differed (see "Update size and bandwidth") |
 
 ### What the prototype does not do (yet)
 
-- The payload is a minimal Debian, not Insane OS: no desktop, no `lord-sessiond` health check.
+- The payload is a minimal Debian, not Insane OS: no desktop, no `insane-sessiond` health check.
 - No Secure Boot (unsigned UKI, OVMF without enrolled keys), no TPM, no verity signature partition.
 - The updater is a shell script with `curl` and `gpgv`; the product one is C in the package engine.
 - No three-way `/etc` merge (the factory copy is recorded but not used), no sysusers generation,
@@ -595,7 +595,7 @@ Estimates are for one experienced developer working with agents, including VM te
 | Phase | Version | What | Effort |
 |---|---|---|---|
 | 0 | 0.8.2 (this item) | Study, prototype (VM-verified A/B with dm-verity, boot counting, automatic rollback) | done |
-| 1 | 0.9.x | **Experimental PC edition with the full desktop:** image build from the ISO's chroot (`tools/immutable` grows into it), hermetic `/usr` fixes (factory `/etc` + three-way merge in `migrate`, sysusers for every system user, vendor-enabled units), dracut initrd trimmed, installer option "Immutable (experimental)" with repart definitions, the updater in C (`image-update` admin action, APT-key-signed `SHA256SUMS`), Store → Updates for images, the health check in `lord-sessiond`, fallback notice, "previous version" in Settings, factory reset. VM tests (UEFI), real-PC test | 70–100 h |
+| 1 | 0.9.x | **Experimental PC edition with the full desktop:** image build from the ISO's chroot (`tools/immutable` grows into it), hermetic `/usr` fixes (factory `/etc` + three-way merge in `migrate`, sysusers for every system user, vendor-enabled units), dracut initrd trimmed, installer option "Immutable (experimental)" with repart definitions, the updater in C (`image-update` admin action, APT-key-signed `SHA256SUMS`), Store → Updates for images, the health check in `insane-sessiond`, fallback notice, "previous version" in Settings, factory reset. VM tests (UEFI), real-PC test | 70–100 h |
 | 2 | 0.9.x | **Secure Boot and measured boot:** Insane OS Secure Boot key (on the maintainer's Mac, like the other keys), signed UKIs, shim + MOK enrollment step in the installer and its help, verity signature partition, `restart-on-corruption`, optional encrypted root with a signed TPM PCR policy | 40–60 h |
 | 3 | 0.9.x–1.0 | **Raspberry Pi 5 immutable image:** GPT + `autoboot.txt`/`tryboot` A/B, watchdog, kernel in the image (closes the Pi kernel gap), Insane OS Pi kernel with dm-verity/EROFS checked, board tests (SD and NVMe) | 40–60 h |
 | 4 | 1.x | **Apps and bandwidth:** Debian packages as system extensions from the Store, prebuilt signed sysexts, the Debian box container, chunked delta updates (signed chunk index, seeding from the running slot), weekly security images in the release pipeline | 100–140 h |

@@ -1,15 +1,15 @@
-/* firstrun.h — the Insane OS first-run file (lordos-firstrun.txt on the boot partition).
+/* firstrun.h — the Insane OS first-run file (insaneos-firstrun.txt on the boot partition).
  *
  * The Insane OS Imager (apps/imager, desktop/imager) writes it next to the image; the Raspberry Pi's
- * lordos-rpi-firstboot.service runs `lordos-firstrun apply` on the first boot, which parses it with
+ * insaneos-rpi-firstboot.service runs `insaneos-firstrun apply` on the first boot, which parses it with
  * fr_parse() (pure, no I/O: tests/firstrun_test.c and an ASan/UBSan fuzz run), applies it once and
  * shreds it. The format is specified in docs/IMAGER.md, "The first-run file".
  *
  * Strict on purpose: one bad line, an unknown key, a repeated key or a value out of range makes the
  * whole file invalid, and nothing is applied (the board then starts in setup mode). Secrets never
  * travel in clear: the password is a crypt(3) hash, the Wi-Fi key is the derived PSK. */
-#ifndef LORD_FIRSTRUN_H
-#define LORD_FIRSTRUN_H
+#ifndef INSANE_FIRSTRUN_H
+#define INSANE_FIRSTRUN_H
 
 #include <stddef.h>
 

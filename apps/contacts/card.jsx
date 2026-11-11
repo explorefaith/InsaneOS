@@ -3,7 +3,7 @@
 import {
   View, Text, useTheme, Button, TextInput, ScrollView, Hairline, ContactPhoto, contacts, contactName, wm, getApp, formatDate, FilePicker, t,
   isolatedPim, pickFileFd,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { RED, Popover, MenuList, Choice, TextArea, DateField, ymd, parseYmd, monthName } from './ui.jsx';
 
@@ -109,7 +109,7 @@ export function Card({ contact: c, groups, onEdit }) {
 function useWidth(ref, initial = 600) {
   const [w, setW] = useState(initial);
   useEffect(() => {
-    const id = setTimeout(() => { if (ref.current) { const nw = lord.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } }, 20);
+    const id = setTimeout(() => { if (ref.current) { const nw = insane.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } }, 20);
     return () => clearTimeout(id);
   });
   return w;

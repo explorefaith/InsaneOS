@@ -8,8 +8,8 @@
  * removed or truncated without failing verification. An empty file is a single empty final chunk.
  * The key comes from the passphrase with Argon2id (64 MiB, 3 passes) and a per-destination salt.
  * File names and symlink targets are NOT encrypted. */
-#ifndef LORD_BACKUP_CRYPT_H
-#define LORD_BACKUP_CRYPT_H
+#ifndef INSANE_BACKUP_CRYPT_H
+#define INSANE_BACKUP_CRYPT_H
 
 #include <stddef.h>
 #include <stdint.h>

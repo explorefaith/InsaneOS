@@ -1,7 +1,7 @@
 // i18n-check.mjs — checks the Insane OS language catalogs.
 //
 //   node tools/i18n-check.mjs            every language in assets/locales
-//   node tools/i18n-check.mjs pt         just one (or a pack: path to lordos-lang-xx.json)
+//   node tools/i18n-check.mjs pt         just one (or a pack: path to insaneos-lang-xx.json)
 //
 // Reports: keys used in the code (t('namespace.key')) that are not in the reference
 // catalog (en), keys each language is missing or has in excess compared to en, and

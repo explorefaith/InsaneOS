@@ -985,10 +985,10 @@ static void collect_software(SysReport *r, const char *root) {
     }
     free(txt);
 
-    s->sessiond = exists(root, "/run/lordos/cgroup.sock");
-    s->netperm = exists(root, "/run/lordos/netperm.sock");
-    s->fand = exists(root, "/run/lordos/fand.sock");
-    s->netd = exists(root, "/run/lordos/netd.sock");
+    s->sessiond = exists(root, "/run/insaneos/cgroup.sock");
+    s->netperm = exists(root, "/run/insaneos/netperm.sock");
+    s->fand = exists(root, "/run/insaneos/fand.sock");
+    s->netd = exists(root, "/run/insaneos/netd.sock");
     /* the live session from the ISO (live-boot's marker, as InsaneBench reads it): a shared report says so
      * (docs/BENCHMARK.md, "From the live USB") */
     s->live = exists(root, "/run/live");

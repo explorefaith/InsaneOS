@@ -1,6 +1,6 @@
 /* imager_admin.h — the Insane OS Imager's admin actions (imager_admin.c, docs/IMAGER.md). */
-#ifndef LORD_IMAGER_ADMIN_H
-#define LORD_IMAGER_ADMIN_H
+#ifndef INSANE_IMAGER_ADMIN_H
+#define INSANE_IMAGER_ADMIN_H
 
 #include "../admin.h"
 

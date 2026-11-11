@@ -3,10 +3,10 @@
 // optional port or range and an optional protocol. Used by Settings → Privacy → "Network rules by
 // app" (inline, under the app's rules) and by the Monitor's Network tab ("Allow / Block this
 // domain", over the window). What the user types is checked as they type with sdk/fwrule.js, the
-// same rules as the C store; lord.fw.addRule / updateRule check it again in C.
+// same rules as the C store; insane.fw.addRule / updateRule check it again in C.
 // Layout per docs/DESIGN.md "Dialogs and sheets": 20 px padding, a 15/600 title, 13 px body,
 // the buttons at the end with 12 px above them and one primary action.
-import { View, Text, Button, Segmented, TextInput, useTheme, useLocale, firewall, fwRule, spacing, typeScale, formatNumber } from '@lordos/sdk';
+import { View, Text, Button, Segmented, TextInput, useTheme, useLocale, firewall, fwRule, spacing, typeScale, formatNumber } from '@insaneos/sdk';
 import { useState } from 'react';
 
 const { checkRule, parseDest } = fwRule;

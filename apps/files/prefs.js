@@ -1,6 +1,6 @@
 // prefs.js — Files → Settings, kept in settings.json under `files`. Every value here changes something (docs/FILES.md,
 // "Settings").
-import { settings, useSettings } from '@lordos/sdk';
+import { settings, useSettings } from '@insaneos/sdk';
 import { normalColumns } from './columns.js';
 import { SIDE_DEFAULT } from './viewprefs.js';
 

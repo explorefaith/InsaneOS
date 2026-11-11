@@ -62,7 +62,7 @@ static void mask_row_c(uint32_t *row, const uint8_t *m, int n, uint32_t argb, ui
         if (m[i]) put(&row[i], argb, (m[i] * ca + 127) / 255);
 }
 
-#if defined(LORD_NEON) && defined(__ARM_NEON)
+#if defined(INSANE_NEON) && defined(__ARM_NEON)
 #include <arm_neon.h>
 
 static void blit_row_neon(uint32_t *row, const uint32_t *s, int n, uint32_t k) {
@@ -144,7 +144,7 @@ uint32_t canvas_gdrag_model(uint32_t s, uint32_t d) {
     return r;
 }
 
-#ifdef LORD_CANVAS_TEST
+#ifdef INSANE_CANVAS_TEST
 const char *canvas_test_simd(void) { return CANVAS_SIMD; }
 void canvas_test_blit_row(int simd, uint32_t *row, const uint32_t *s, int n, uint32_t k) {
     if (simd) blit_row(row, s, n, k); else blit_row_c(row, s, n, k);
@@ -225,7 +225,7 @@ void canvas_clear(Canvas *c, uint32_t rgb) {
     }
 }
 
-/* ---- parallel rows (lord-server sets canvas_parallel; tests and helpers stay serial) ----
+/* ---- parallel rows (insane-server sets canvas_parallel; tests and helpers stay serial) ----
  * The row-local primitives (every pixel depends only on its own row: fills, strokes, gradients,
  * blits, shadow masks) run as the same call on each thread with the clip cut to a band of rows,
  * so the pixels are the same as on one thread. */

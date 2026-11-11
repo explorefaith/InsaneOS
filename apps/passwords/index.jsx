@@ -1,14 +1,14 @@
 // Passwords — the Insane OS password manager: items by category (a tree, with field templates) and
 // tags, favorites, archived, trash, history, 2FA codes, Wi-Fi with QR, secure notes, cards, the
 // security report, the generator, import/export and the session keyring. Everything decrypted is
-// handled by lord-vault, sandboxed and without network; this window is protected (black in
+// handled by insane-vault, sandboxed and without network; this window is protected (black in
 // screenshots, recordings and the remote desktop). See docs/PASSWORDS.md.
 // Layout (docs/DESIGN.md): a source list (search, sections, categories, tags), the item list and
 // the detail pane; under 960 px the columns get narrower so nothing is clipped.
 import {
   View, Text, useTheme, useStore, useAppWindow, useKeyboard, Button, ScrollView, SearchField, SectionTitle, ToolbarButton, EmptyState,
   hasTextFocus, direction, wm, t, vaultAvailable, ContextMenu,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { app, req, refreshStatus, wireEvents, reloadLogin, keepCopy, toast, errorText } from './api.js';
 import { allCategories, builtinById, catName } from './templates.js';
@@ -148,7 +148,7 @@ function useWidth(ref, initial) {
   const [w, setW] = useState(initial);
   useEffect(() => {
     const id = setTimeout(() => {
-      try { if (ref.current) { const nw = lord.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } } catch (e) { /* not laid out */ }
+      try { if (ref.current) { const nw = insane.getLayout(ref.current.id)[2]; if (nw && Math.abs(nw - w) > 0.5) setW(nw); } } catch (e) { /* not laid out */ }
     }, 20);
     return () => clearTimeout(id);
   });
@@ -352,7 +352,7 @@ export default function Passwords() {
       {sheet === 'cat' && <CategorySheet cat={sheetArg} onClose={() => setSheet(null)} />}
       {sheet === 'tag' && <TagSheet tag={sheetArg} onClose={() => setSheet(null)} />}
       <Overlays />
-      {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w: winW, h: rootRef.current ? lord.getLayout(rootRef.current.id)[3] : 660 }} />}
+      {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w: winW, h: rootRef.current ? insane.getLayout(rootRef.current.id)[3] : 660 }} />}
       {st.clip ? (
         // the secret just copied: how long before it's cleared, and Keep
         <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, alignItems: 'center', zIndex: 80 }}>

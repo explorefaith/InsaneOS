@@ -4,7 +4,7 @@
 //
 // The same files build the desktop app (desktop/imager, Tauri): only platform.js is swapped and the
 // few SDK primitives used are DOM versions there. Nothing here talks to the system directly.
-import { View, Text, ScrollView, Button, Lumo, useTheme, useLocale, useStore, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, ScrollView, Button, Lumo, useTheme, useLocale, useStore, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { platform } from './platform.js';
 import { app, set, setOptions, STEPS, loadReleases, isBusy } from './state.js';

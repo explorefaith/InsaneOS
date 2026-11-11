@@ -1,4 +1,4 @@
-These terms cover the lordos.org website and the Insane OS files you download from it or from our GitHub releases (the ISO image, the Raspberry Pi image, the `.deb` package and the Debian installer script). Insane OS is a free Debian-based GNU/Linux distribution with its own desktop environment, made by the iPERFEX group (Pablo Miranda and Federico Pereira, Argentina).
+These terms cover the insaneos.org website and the Insane OS files you download from it or from our GitHub releases (the ISO image, the Raspberry Pi image, the `.deb` package and the Debian installer script). Insane OS is a free Debian-based GNU/Linux distribution with its own desktop environment, made by the iPERFEX group (Pablo Miranda and Federico Pereira, Argentina).
 
 ## Acceptance
 
@@ -6,7 +6,7 @@ By using this website or downloading, installing or running Insane OS, you accep
 
 ## Free software under the MIT license
 
-Insane OS's own code is free software released under the [MIT license](https://github.com/lordbasex/Insane OS/blob/main/LICENSE). You may use, copy, modify and redistribute it under that license. The license, not these terms, governs what you may do with the code; these terms only add the rules for the website, the downloads and the Insane OS name (see the [Trademark and brand policy](/legal/trademark/)).
+Insane OS's own code is free software released under the [MIT license](https://github.com/insaneos/Insane OS/blob/main/LICENSE). You may use, copy, modify and redistribute it under that license. The license, not these terms, governs what you may do with the code; these terms only add the rules for the website, the downloads and the Insane OS name (see the [Trademark and brand policy](/legal/trademark/)).
 
 Insane OS also includes software from Debian and other projects under their own licenses. See [Licenses and open-source notices](/legal/licenses/).
 

@@ -2,12 +2,12 @@
 // with Favorites, Locations and Tags, the freedesktop Trash, Quick Preview, Get Info,
 // copy/cut/paste, drag and drop, and search. Locations also has This computer (the whole tree,
 // read-only outside the home folder and the user's disks) and every disk, mounted or not.
-// Disk operations go through lord.fs (server/src/fsops.c); see docs/FILES.md.
+// Disk operations go through insane.fs (server/src/fsops.c); see docs/FILES.md.
 import {
   needsDiskFormats, openDiskFormats, View, Text, useTheme, useAppWindow, useKeyboard, useStore, useLauncherApps, addListener, wm, fs, clipboard, archive, warmDocs,
   formatBytes, t as tr, ScrollView, Toolbar, ToolbarButton, ToolbarGroup, SearchField, Hairline, direction, spacing, typeScale, registerDockActions,
   useDisks, admin, systemInfo, lan, shortcutTaken, Slider, useSettings, cloudModel, cloud, errorText, useCloud, formatNumber,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FolderGlyph, DocGlyph, TAG_COLORS, TrashGlyph, DriveGlyph } from './glyphs.jsx';
 import { IconView, ListView, ColumnView, GalleryView } from './views.jsx';
@@ -228,7 +228,7 @@ export default function Files() {
   const [sharing, setSharing] = useState(null);           // Cloud: the Share Link sheet's entry
   const [offlineAsk, setOfflineAsk] = useState(null);     // Cloud: a file that isn't here, with the cloud out of reach
   const [userSettings] = useSettings();
-  // folders on a Cloud account or a network share: listed, created, renamed and sent to the Trash off lord-server's
+  // folders on a Cloud account or a network share: listed, created, renamed and sent to the Trash off insane-server's
   // thread (fs.*Async, server/src/fsasync.c), so a provider that takes seconds never freezes the desktop (0.8.8.7)
   const [remoteVer, setRemoteVer] = useState(0);
   const rdirs = useMemo(() => createRemoteDirs({ list: (dir) => fs.listAsync(dir), onChange: () => setRemoteVer((n) => n + 1) }), []);
@@ -271,7 +271,7 @@ export default function Files() {
     return () => clearInterval(id);
   }, [listAcc ? loc.path : null]);
   // a folder whose file system may be slow (fs.isRemote: rclone's Cloud mounts, Connect to Server, SMB/NFS): its listing
-  // comes from rdirs, which asks lord-server's workers and shows the last listing meanwhile
+  // comes from rdirs, which asks insane-server's workers and shows the last listing meanwhile
   const remoteDir = loc.type === 'dir' && fs.isRemote(loc.path);
   const remoteSeen = useRef(null);
   useEffect(() => {
@@ -324,7 +324,7 @@ export default function Files() {
       let st = null;
       // a slow folder's listing already brings what the columns need (fs.listAsync): its files aren't asked one by one
       if (e.mode != null && e.user != null) st = e;
-      else if (!e.trash && !e.app && !e.arc && !e.netHost && !e.netWay && !fs.isRemote(e.path)) { try { st = lord.fs.stat(e.path); } catch (err) { /* gone */ } }
+      else if (!e.trash && !e.app && !e.arc && !e.netHost && !e.netWay && !fs.isRemote(e.path)) { try { st = insane.fs.stat(e.path); } catch (err) { /* gone */ } }
       m.set(e.path, st);
     }
     return m.get(e.path);
@@ -338,7 +338,7 @@ export default function Files() {
   const cf = useCloudFiles(useMemo(() => flat.map((e) => e.path), [flat]));
   const curDir = baseLoc.type === 'dir' ? baseLoc.path : null;
   const curAcc = curDir ? cf.accountOf(curDir) : null;
-  // outside the home folder and the user's disks a folder is only browsed (lord.fs reads there but
+  // outside the home folder and the user's disks a folder is only browsed (insane.fs reads there but
   // doesn't write): the actions that change it are left out
   // on a slow folder that is asked off the thread too, with the space left (rdirs' folders: fs.isRemote)
   const curRemote = !!curDir && fs.isRemote(curDir);
@@ -350,7 +350,7 @@ export default function Files() {
     const put = (p) => { if (live) setRemoteInfo((x) => ({ ...(x && x.path === dir ? x : { path: dir }), ...p })); };
     fs.statAsync(dir).then((s) => put({ writable: !!(s && s.writable) }), () => put({ writable: false }));
     // not in a cloud account: its status bar tells its own space, and statfs there waits for the provider
-    if (!curAcc && !dir.includes('/.local/share/lordos/remote/')) fs.freeAsync(dir).then((f) => put({ free: f }), () => {});
+    if (!curAcc && !dir.includes('/.local/share/insaneos/remote/')) fs.freeAsync(dir).then((f) => put({ free: f }), () => {});
     return () => { live = false; };
   }, [curRemote ? curDir : null, version, !!curAcc]);
   const readOnly = useMemo(() => {
@@ -390,7 +390,7 @@ export default function Files() {
   const selPaths = sel.map((e) => e.path);
   const first = sel[0];
   const local = (ev) => (root.current ? ev.local(root.current) : { x: ev.x, y: ev.y });
-  const bounds = () => { const l = root.current ? lord.getLayout(root.current.id) : [0, 0, 800, 600]; return { w: l[2], h: l[3] }; };
+  const bounds = () => { const l = root.current ? insane.getLayout(root.current.id) : [0, 0, 800, 600]; return { w: l[2], h: l[3] }; };
 
   // ---- actions ----
   const report = (e) => { console.log(`files: ${e?.message || e}`); setMsg(String(e?.message || e)); };
@@ -495,7 +495,7 @@ export default function Files() {
     const app = clientFor(a.scheme);
     if (!app) return { error: tr('files.connect.err.noClient', { scheme: a.scheme }) };
     noteServer(a.text);
-    if (!lord.apps.launchUri(app.desktopId, a.text)) return { error: tr('files.connect.err.launch', { name: app.name }) };
+    if (!insane.apps.launchUri(app.desktopId, a.text)) return { error: tr('files.connect.err.launch', { name: app.name }) };
     setSheet(null);
     return null;
   };
@@ -714,7 +714,7 @@ export default function Files() {
       '-',
       { label: tr('files.menu.trash'), hint: '❖⌫', onClick: () => toTrash(paths), disabled: readOnly },
       '-',
-      // compress and extract (M9, lord-doc)
+      // compress and extract (M9, insane-doc)
       ...(wDir && list.length === 1 && isArchiveFile(e) ? [{ label: tr('docs.extractHere'), onClick: () => extractHere(e, arcReport, tr) }] : []),
       ...(wDir ? [{ label: list.length === 1 ? tr('docs.compressOne', { name: e.name }) : tr('docs.compressMany', { count: list.length }), onClick: () => compress(paths, wDir, arcReport, tr) }] : []),
       '-',
@@ -781,7 +781,7 @@ export default function Files() {
   const onBgContext = (ev) => { setSelected(new Set()); const p = local(ev); setMenu({ x: p.x, y: p.y, items: bgMenu() }); };
 
   // ---- keyboard ----
-  const cols = () => iconColumns(root.current ? lord.getLayout(root.current.id)[2] - sideW : 600, zoom);
+  const cols = () => iconColumns(root.current ? insane.getLayout(root.current.id)[2] - sideW : 600, zoom);
   const moveSel = (d, ev) => {
     if (!flat.length) return;
     const i = first ? flat.findIndex((x) => x.path === (anchor.current && selected.has(anchor.current) ? anchor.current : first.path)) : -1;
@@ -925,8 +925,8 @@ export default function Files() {
       toggleExpanded(p);
     },
     listOf: (dir) => listOf(dir),
-    isDir: (p) => { const e = byPath.get(p); if (e) return e.dir; try { return lord.fs.stat(p).dir; } catch (err) { return false; } },
-    entryAt: (p) => byPath.get(p) || (() => { try { const s = lord.fs.stat(p); return { name: s.name, path: s.path, dir: s.dir, size: s.size, mtime: s.mtime }; } catch (err) { return null; } })(),
+    isDir: (p) => { const e = byPath.get(p); if (e) return e.dir; try { return insane.fs.stat(p).dir; } catch (err) { return false; } },
+    entryAt: (p) => byPath.get(p) || (() => { try { const s = insane.fs.stat(p); return { name: s.name, path: s.path, dir: s.dir, size: s.size, mtime: s.mtime }; } catch (err) { return null; } })(),
   };
   // columns only in folders; elsewhere, the list
   const view = shownView;
@@ -934,10 +934,10 @@ export default function Files() {
   // not in a cloud account: its status bar tells its own space, and statfs there waits for the provider (rclone asks it)
   const freeSpace = useMemo(() => {
     if (curRemote) return remoteInfo && remoteInfo.path === curDir ? remoteInfo.free || null : null;
-    try { return curDir && !curAcc && !curDir.includes('/.local/share/lordos/remote/') ? fs.free(curDir) : null; } catch (e) { return null; }
+    try { return curDir && !curAcc && !curDir.includes('/.local/share/insaneos/remote/') ? fs.free(curDir) : null; } catch (e) { return null; }
   }, [curDir, version, !!curAcc, curRemote, remoteInfo]);
   // what a folder in the column view or an unfolded one in the list shows: a slow one from rdirs, never on this thread
-  const listOf = (dir) => (fs.isRemote(dir) ? rdirs.get(dir).entries || [] : lord.fs.list(dir));
+  const listOf = (dir) => (fs.isRemote(dir) ? rdirs.get(dir).entries || [] : insane.fs.list(dir));
   const quickEntry = quick ? (first || flat[0]) : null;
   const infoEntry = info ? (first || (curDir ? { name: fs.basename(curDir), path: curDir, dir: true, size: 0 } : null)) : null;
   const job = jobs[0];
@@ -947,14 +947,14 @@ export default function Files() {
   })();
   const sideSel = (l) => sameLoc(l, baseLoc) && !debounced;
   const dirLoc = (p) => ({ type: 'dir', path: p });
-  const dragLocal = drag && root.current ? (() => { const [lx, ly] = lord.getLayout(root.current.id); return { x: drag.x - lx, y: drag.y - ly }; })() : null;
+  const dragLocal = drag && root.current ? (() => { const [lx, ly] = insane.getLayout(root.current.id); return { x: drag.x - lx, y: drag.y - ly }; })() : null;
   const dragEntry = drag ? byPath.get(drag.paths[0]) : null;
 
   // toolbar menus open under their button, aligned to its trailing edge
   const menuUnder = (ref, items) => {
     if (!ref.current || !root.current) return;
-    const [bx, by, bw, bh] = lord.getLayout(ref.current.id);
-    const [rx, ry] = lord.getLayout(root.current.id);
+    const [bx, by, bw, bh] = insane.getLayout(ref.current.id);
+    const [rx, ry] = insane.getLayout(root.current.id);
     const rtl = direction() === 'rtl';
     setMenu({ x: rtl ? bx - rx : bx - rx + bw - 220, y: by - ry + bh + 4, items });
   };

@@ -1,5 +1,5 @@
 #!/bin/sh
-# cloud_integration.sh — lord-server's cloud code (build/cloud-harness, the same src/cloud) against a local WebDAV server
+# cloud_integration.sh — insane-server's cloud code (build/cloud-harness, the same src/cloud) against a local WebDAV server
 # that rclone itself serves on loopback (docs/CLOUD.md 16). Needs fuse3 and python3; runs as a normal user in a
 # throwaway home, never touches ~/Cloud.
 #
@@ -33,7 +33,7 @@ cleanup() {
     [ -n "${DAV:-}" ] && kill -CONT "$DAV" 2>/dev/null; [ -n "${DAV:-}" ] && kill "$DAV" 2>/dev/null
     for p in ${EXTRA:-}; do kill "$p" 2>/dev/null; done
     for m in "$H"/Cloud/*; do [ -d "$m" ] && fusermount3 -u -z "$m" 2>/dev/null; done
-    pkill -f "$R/lordos/cloud/rc.sock" 2>/dev/null
+    pkill -f "$R/insaneos/cloud/rc.sock" 2>/dev/null
     sleep 0.5
     rm -rf "$T"
 }
@@ -53,9 +53,9 @@ sleep 1
 
 mkfifo "$T/in" "$T/out"
 ASSETS=$(cd "$(dirname "$0")/../../assets" 2>/dev/null && pwd)
-# the harness is lord-server's cloud side; started again later on the same home, as a new session would
+# the harness is insane-server's cloud side; started again later on the same home, as a new session would
 start_harness() {
-    env -i HOME="$H" XDG_RUNTIME_DIR="$R" PATH=/usr/bin:/bin LORDOS_CLOUD_RCLONE="$RC" LORDOS_ASSETS="$ASSETS" "$B/cloud-harness" <"$T/in" >"$T/out" 2>>"$T/harness.log" &
+    env -i HOME="$H" XDG_RUNTIME_DIR="$R" PATH=/usr/bin:/bin INSANEOS_CLOUD_RCLONE="$RC" INSANEOS_ASSETS="$ASSETS" "$B/cloud-harness" <"$T/in" >"$T/out" 2>>"$T/harness.log" &
     HP=$!
     exec 3>"$T/in" 4<"$T/out"
 }
@@ -63,7 +63,7 @@ start_harness
 # one command, its one line (lines about opened pages are skipped)
 cmd() { echo "$*" >&3; while IFS= read -r L <&4; do case $L in '{"opened"'*) continue ;; esac; break; done; printf '%s' "$L"; }
 has() { case $1 in *"$2"*) return 0 ;; esac; return 1; }
-rcd_pid() { pgrep -u "$(id -u)" -f "rcd --rc-addr unix://$R/lordos/cloud/rc.sock" | head -1; }
+rcd_pid() { pgrep -u "$(id -u)" -f "rcd --rc-addr unix://$R/insaneos/cloud/rc.sock" | head -1; }
 
 echo "== Cloud integration ($(uname -m), $("$RC" version 2>/dev/null | head -1))"
 r=$(cmd providers)
@@ -88,13 +88,13 @@ P=$(rcd_pid)
 check "rcd is running" test -n "$P"
 check "no TCP listener of rcd" sh -c "! ss -ltnpH 2>/dev/null | grep -q 'pid=$P,'"
 check "no listener of rcd at all but its socket" sh -c "! ss -lnpH 2>/dev/null | grep 'pid=$P,' | grep -qv 'rc.sock'"
-check "rc folder 0700" test "$(stat -c %a "$R/lordos/cloud")" = 700
-check "rc socket for the user only" sh -c "m=\$(stat -c %a '$R/lordos/cloud/rc.sock'); [ \$((0\$m & 077)) -eq 0 ]"
+check "rc folder 0700" test "$(stat -c %a "$R/insaneos/cloud")" = 700
+check "rc socket for the user only" sh -c "m=\$(stat -c %a '$R/insaneos/cloud/rc.sock'); [ \$((0\$m & 077)) -eq 0 ]"
 check "no rc password or user on rcd's command line" sh -c "! tr '\\0' ' ' </proc/$P/cmdline | grep -Eq -- '--rc-pass|--rc-user|--rc-no-auth'"
 check "rc credentials only through a memfd htpasswd" sh -c "tr '\\0' ' ' </proc/$P/cmdline | grep -q -- '--rc-htpasswd /proc/self/fd/3'"
 check "no RCLONE_RC_ variable in rcd's environment" sh -c "! tr '\\0' '\\n' </proc/$P/environ | grep -q '^RCLONE_RC'"
 check "in-memory configuration (--config \"\")" sh -c "tr '\\0' '|' </proc/$P/cmdline | grep -q -- '|--config||'"
-NOAUTH=$(python3 - "$R/lordos/cloud/rc.sock" <<'EOF'
+NOAUTH=$(python3 - "$R/insaneos/cloud/rc.sock" <<'EOF'
 import socket, sys
 out = []
 for m in ("config/dump", "core/command", "operations/list"):
@@ -111,7 +111,7 @@ EOF
 )
 check "calls without the credentials refused (config/dump, core/command, operations/list: $NOAUTH)" test "$NOAUTH" = "401 401 401"
 if sudo -n true 2>/dev/null; then
-    if sudo -n -u nobody python3 -c "import socket,sys; s=socket.socket(socket.AF_UNIX); s.connect(sys.argv[1])" "$R/lordos/cloud/rc.sock" 2>/dev/null
+    if sudo -n -u nobody python3 -c "import socket,sys; s=socket.socket(socket.AF_UNIX); s.connect(sys.argv[1])" "$R/insaneos/cloud/rc.sock" 2>/dev/null
     then bad "another local user can't connect"; else ok "another local user can't connect"; fi
 else echo "  skip  another local user (sudo needs a password)"; fi
 
@@ -151,7 +151,7 @@ r=$(cmd add webdav BadUrl "{\"url\":\"http://127.0.0.1:99999\",\"user\":\"dav\",
 check "add with a port that can't be: cloud.badAddress" has "$r" 'cloud.badAddress'
 r=$(cmd state)
 check "none of them left an account" sh -c 'case "$1" in *Wrong*|*Nowhere*|*BadUrl*) exit 1;; esac; exit 0' x "$r"
-check "nor a folder, a keyring item or a line in accounts.json" sh -c "[ ! -e '$H/Cloud/Wrong' ] && [ ! -e '$H/Cloud/Nowhere' ] && ! grep -q Wrong '$H/.config/lordos/cloud/accounts.json' 2>/dev/null && [ -z \"\$(ls '$H/.harness-keyring' 2>/dev/null | grep -v LOCKED)\" ]"
+check "nor a folder, a keyring item or a line in accounts.json" sh -c "[ ! -e '$H/Cloud/Wrong' ] && [ ! -e '$H/Cloud/Nowhere' ] && ! grep -q Wrong '$H/.config/insaneos/cloud/accounts.json' 2>/dev/null && [ -z \"\$(ls '$H/.harness-keyring' 2>/dev/null | grep -v LOCKED)\" ]"
 
 r=$(cmd add webdav Work "{\"url\":\"http://127.0.0.1:$PORT\",\"user\":\"dav\",\"pass\":\"davpass\"}")
 ID=$(printf '%s' "$r" | sed -n 's/.*"id":"\([a-z0-9]*\)".*/\1/p')
@@ -160,12 +160,12 @@ r=$(cmd wait '"mounted":true' 30)
 check "mounted at ~/Cloud/Work" has "$r" '"ok"'
 M=$H/Cloud/Work
 check "the mount is a FUSE rclone mount" sh -c "grep -q ' $M fuse.rclone ' /proc/self/mounts"
-check "rclone.conf 0600" test "$(stat -c %a "$H/.config/lordos/cloud/rclone.conf")" = 600
-check "rclone.conf holds no secret" sh -c "! grep -Eq '^pass|davpass|^token' '$H/.config/lordos/cloud/rclone.conf' && grep -q 'url = http://127.0.0.1:$PORT' '$H/.config/lordos/cloud/rclone.conf'"
+check "rclone.conf 0600" test "$(stat -c %a "$H/.config/insaneos/cloud/rclone.conf")" = 600
+check "rclone.conf holds no secret" sh -c "! grep -Eq '^pass|davpass|^token' '$H/.config/insaneos/cloud/rclone.conf' && grep -q 'url = http://127.0.0.1:$PORT' '$H/.config/insaneos/cloud/rclone.conf'"
 r=$(cmd secret "$ID")
 check "the password is in the keyring (stand-in), obscured by rclone" sh -c 'case "$1" in *"\"pass\":"*) case "$1" in *davpass*) exit 1;; esac; exit 0;; esac; exit 1' x "$r"
-check "no password in accounts.json" sh -c "! grep -q davpass '$H/.config/lordos/cloud/accounts.json'"
-check "nothing secret in any file of ~/.config/lordos/cloud" sh -c "! grep -rq davpass '$H/.config/lordos/cloud'"
+check "no password in accounts.json" sh -c "! grep -q davpass '$H/.config/insaneos/cloud/accounts.json'"
+check "nothing secret in any file of ~/.config/insaneos/cloud" sh -c "! grep -rq davpass '$H/.config/insaneos/cloud'"
 
 # rclone's own questions (17.2 item 3): Jottacloud's setup asks which kind of sign-in, then for a login token
 r=$(cmd add jottacloud Jotta '{}')
@@ -204,7 +204,7 @@ r=$(cmd status "$M/notes.txt")
 check "status: notes on this computer" has "$r" '"st":"here"'
 r=$(cmd free "$M/Projects/big.bin")
 check "Free Up Space while not open" sh -c 'case "$1" in *"\"freed\":0,"*) exit 1;; *"\"freed\":"*) exit 0;; esac; exit 1' x "$r"
-check "its cached copy is gone" test ! -e "$H/.cache/lordos/cloud/vfs/$ID/Projects/big.bin"
+check "its cached copy is gone" test ! -e "$H/.cache/insaneos/cloud/vfs/$ID/Projects/big.bin"
 r=$(cmd status "$M/Projects/big.bin")
 check "status: in the cloud" has "$r" '"st":"cloud"'
 check "read again after freeing: same bytes" test "$(sha256sum <"$M/Projects/big.bin" | cut -c1-64)" = "$want"
@@ -213,7 +213,7 @@ exec 5<"$M/Projects/big.bin"
 head -c 1000 <&5 >/dev/null
 r=$(cmd free "$M/Projects/big.bin")
 check "Free Up Space refused while open" has "$r" '"reason":"open"'
-check "its cached copy stays while open" test -e "$H/.cache/lordos/cloud/vfs/$ID/Projects/big.bin"
+check "its cached copy stays while open" test -e "$H/.cache/insaneos/cloud/vfs/$ID/Projects/big.bin"
 exec 5<&-
 sleep 12
 r=$(cmd free "$M/Projects/big.bin")
@@ -224,7 +224,7 @@ r=$(cmd status "$M/notes.txt")
 check "status after a write: going up" has "$r" '"st":"up"'
 r=$(cmd free "$M/notes.txt")
 check "Free Up Space refuses a file waiting to go up" has "$r" '"reason":"pending"'
-check "its cached copy stays" test -e "$H/.cache/lordos/cloud/vfs/$ID/notes.txt"
+check "its cached copy stays" test -e "$H/.cache/insaneos/cloud/vfs/$ID/notes.txt"
 r=$(cmd wait '"up":{"files":0' 20)
 for i in $(seq 120); do [ "$(cat "$S/notes.txt")" = "changed here" ] && break; sleep 0.5; done   # a slow or busy machine: up to 60 s
 check "the write reached the server" test "$(cat "$S/notes.txt")" = "changed here"
@@ -478,11 +478,11 @@ QS=$(printf '%s' "$r" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
 r=$(cmd answer "$QS" trust)
 SID=$(printf '%s' "$r" | sed -n 's/.*"id":"\([a-z0-9]*\)".*/\1/p')
 check "trusted: the account is made" test -n "$SID"
-check "its known_hosts is ours, 0600" test "$(stat -c %a "$H/.config/lordos/cloud/known_hosts/$SID" 2>/dev/null)" = 600
+check "its known_hosts is ours, 0600" test "$(stat -c %a "$H/.config/insaneos/cloud/known_hosts/$SID" 2>/dev/null)" = 600
 r=$(cmd wait '"name":"Box"' 10)
 r=$(cmd wait '"mounted":true' 30)
 check "SFTP files read" test "$(cat "$H/Cloud/Box/s.txt" 2>/dev/null)" = s
-check "rclone checks the host key (no 'No host key validation' in its log)" sh -c "! grep -q 'No host key validation' '$H/.cache/lordos/cloud.log'"
+check "rclone checks the host key (no 'No host key validation' in its log)" sh -c "! grep -q 'No host key validation' '$H/.cache/insaneos/cloud.log'"
 # N1: a second account on the same server takes the key the first one trusts, without asking
 r=$(cmd add sftp Box3 "{\"host\":\"127.0.0.1\",\"port\":\"$SP\",\"user\":\"su\",\"pass\":\"spass\"}")
 B3ID=$(printf '%s' "$r" | sed -n 's/.*"id":"\([a-z0-9]*\)".*/\1/p')
@@ -506,9 +506,9 @@ check "the owner's update after the key changed: a hostKeyChanged question with 
 QS=$(printf '%s' "$r" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
 r=$(cmd answer "$QS" trust)
 check "trusting the new key: the account works again" has "$r" "\"id\":\"$SID\""
-check "the kept key is the new one now" sh -c "ssh-keygen -lf '$H/.config/lordos/cloud/known_hosts/$SID' | grep -q '$new' && ! ssh-keygen -lf '$H/.config/lordos/cloud/known_hosts/$SID' | grep -q '$want'"
+check "the kept key is the new one now" sh -c "ssh-keygen -lf '$H/.config/insaneos/cloud/known_hosts/$SID' | grep -q '$new' && ! ssh-keygen -lf '$H/.config/insaneos/cloud/known_hosts/$SID' | grep -q '$want'"
 check "State: an SFTP account carries its server (host, port)" sh -c 'case "$1" in *"\"name\":\"Box\""*"\"host\":\"127.0.0.1\",\"port\":$2,"*) exit 0;; esac; exit 1' x "$(cmd state)" "$SP"
-check "N4: the other account on that server got the new key too" sh -c "ssh-keygen -lf '$H/.config/lordos/cloud/known_hosts/$B3ID' | grep -q '$new'"
+check "N4: the other account on that server got the new key too" sh -c "ssh-keygen -lf '$H/.config/insaneos/cloud/known_hosts/$B3ID' | grep -q '$new'"
 r=$(cmd wait '"name":"Box3","kind":"sftp"' 10)
 for i in $(seq 40); do st=$(cmd state); case "$st" in *'"name":"Box3"'*'"mounted":true'*) break;; esac; sleep 0.5; done
 check "N4: and works again without being asked" test -e "$H/Cloud/Box3/s.txt"
@@ -566,11 +566,11 @@ QS=$(printf '%s' "$r" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
 r=$(cmd answer "$QS" trust)
 TID=$(printf '%s' "$r" | sed -n 's/.*"id":"\([a-z0-9]*\)".*/\1/p')
 check "trusted: the account is made" test -n "$TID"
-check "its certificate is kept for it, 0600" test "$(stat -c %a "$H/.config/lordos/cloud/certs/$TID.pem" 2>/dev/null)" = 600
+check "its certificate is kept for it, 0600" test "$(stat -c %a "$H/.config/insaneos/cloud/certs/$TID.pem" 2>/dev/null)" = 600
 r=$(cmd wait '"name":"Secure"' 10)
 r=$(cmd wait '"mounted":true' 30)
 check "files read over https with that certificate" test "$(cat "$H/Cloud/Secure/t.txt" 2>/dev/null)" = t
-check "no_check_certificate is never used" sh -c "! grep -rq no_check_certificate '$H/.config/lordos/cloud'"
+check "no_check_certificate is never used" sh -c "! grep -rq no_check_certificate '$H/.config/insaneos/cloud'"
 r=$(cmd add webdav Secure2 "{\"url\":\"https://127.0.0.1:$TP\",\"user\":\"tu\",\"pass\":\"tpass\"}")
 check "the same certificate isn't trusted for another account" has "$r" '"kind":"certificate"'
 QS=$(printf '%s' "$r" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
@@ -617,12 +617,12 @@ r=$(cmd wait '"accounts":[]' 20)
 check "the account is gone" has "$r" '"ok"'
 sleep 1
 check "unmounted, the folder removed" sh -c "! grep -q ' $H/Cloud/' /proc/self/mounts && [ ! -e '$H/Cloud/Office' ]"
-check "its cache removed" sh -c "[ ! -e '$H/.cache/lordos/cloud/vfs/$ID' ] && [ ! -e '$H/.cache/lordos/cloud/vfsMeta/$ID' ]"
+check "its cache removed" sh -c "[ ! -e '$H/.cache/insaneos/cloud/vfs/$ID' ] && [ ! -e '$H/.cache/insaneos/cloud/vfsMeta/$ID' ]"
 r=$(cmd secret "$ID")
 check "its keyring item removed" test "$r" = "null"
-check "nothing left in rclone.conf" sh -c "! grep -q '\\[$ID\\]' '$H/.config/lordos/cloud/rclone.conf'"
+check "nothing left in rclone.conf" sh -c "! grep -q '\\[$ID\\]' '$H/.config/insaneos/cloud/rclone.conf'"
 check "the server still has every file (nothing deleted in the cloud)" sh -c "[ -e '$S/Projects/big.bin' ] && [ -e '$S/notes.txt' ] && [ -e '$S/paused.txt' ]"
-check "rclone's log in ~/.cache/lordos/cloud.log" test -e "$H/.cache/lordos/cloud.log"
+check "rclone's log in ~/.cache/insaneos/cloud.log" test -e "$H/.cache/insaneos/cloud.log"
 r=$(cmd quit)
 sleep 1
 check "rclone ends with the session" test -z "$(rcd_pid)"

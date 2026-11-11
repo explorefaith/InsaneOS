@@ -5,8 +5,8 @@
  * The helper never takes a URL from JS: an entry is named by its id and an architecture, and every URL is the entry's
  * folder plus a plain file name that must match the entry's pattern. A downloaded image is kept only when its SHA-256
  * is the one the maker's list (fetched by the helper itself) gives for that very name. */
-#ifndef LORD_VM_CATALOG_H
-#define LORD_VM_CATALOG_H
+#ifndef INSANE_VM_CATALOG_H
+#define INSANE_VM_CATALOG_H
 
 #include <stddef.h>
 #include <stdint.h>

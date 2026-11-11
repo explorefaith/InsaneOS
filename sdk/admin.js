@@ -22,7 +22,7 @@ function refreshBusy() {
   adminBusy.set(last ? { action: last.action, arg: last.arg, log: last.log } : null);
 }
 
-globalThis.__lordAdmin = (id, kind, text) => {
+globalThis.__insaneAdmin = (id, kind, text) => {
   if (id === 0) {
     for (const fn of eventListeners) { try { fn(text); } catch (e) { console.log(`admin.onEvent: ${e}`); } }
     return;
@@ -41,11 +41,11 @@ globalThis.__lordAdmin = (id, kind, text) => {
 };
 
 export const admin = {
-  available: () => lord.admin.available(),
+  available: () => insane.admin.available(),
   // quiet: not shown as "in progress" (quick queries, such as the network state).
   run(action, arg = '', onLog, { quiet = false } = {}) {
     return new Promise((resolve, reject) => {
-      const id = lord.admin.request(action, String(arg));
+      const id = insane.admin.request(action, String(arg));
       if (!id) { reject(codeError('admin.unavailable')); return; }
       pending.set(id, { action, arg: quiet ? '' : arg, onLog, resolve, reject, quiet, log: [] });   // quiet: may carry a password
       if (!quiet) refreshBusy();

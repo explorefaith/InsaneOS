@@ -3,8 +3,8 @@
 //
 // A pinned item is a typed id, so the three kinds of app can never collide:
 //   "app:<id>"      a Insane OS app bundled with the theme (apps/<id>), opened with wm.open
-//   "lpk:<id>"      an installed .lpk package, launched with lord.apps.launchPackage(id)
-//   "desktop:<id>"  a Linux app's .desktop entry, launched with lord.apps.launch(id)
+//   "lpk:<id>"      an installed .lpk package, launched with insane.apps.launchPackage(id)
+//   "desktop:<id>"  a Linux app's .desktop entry, launched with insane.apps.launch(id)
 // Lists written before 0.8.1 hold untyped ids ("files", "store"); normalizePinned() migrates them.
 //
 // Positions passed to moveItem/pinItem count only the items the Dock shows (isShown): an

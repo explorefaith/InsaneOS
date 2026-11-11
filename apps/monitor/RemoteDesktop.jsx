@@ -1,11 +1,11 @@
 // RemoteDesktop.jsx — the remote desktop as one more app in Monitor → Network (0.8.3, docs/MONITOR.md,
-// "Remote desktop"). lord-sessiond serves it as root, outside the session's apps, so its connections
-// never show up among them: this file builds its row from lord-sessiond's own state, read-only
-// (/run/lordos/status.json through remote.status(): clients with their traffic, blocks and lists),
+// "Remote desktop"). insane-sessiond serves it as root, outside the session's apps, so its connections
+// never show up among them: this file builds its row from insane-sessiond's own state, read-only
+// (/run/insaneos/status.json through remote.status(): clients with their traffic, blocks and lists),
 // and, for administrators, the recent failed sign-ins through the fixed admin action
 // remote-failures (an address, the cleaned name that was typed, a count; never a password). Block and
 // Unblock use the same validated admin actions as Settings → Sharing (remoteAccess).
-import { View, Text, Button, TextInput, useTheme, useLocale, useStore, shareHolder, remote, remoteAccess, remoteCidr, remoteMinutesLeft, admin, formatBytes, formatNumber, useSystemInfo } from '@lordos/sdk';
+import { View, Text, Button, TextInput, useTheme, useLocale, useStore, shareHolder, remote, remoteAccess, remoteCidr, remoteMinutesLeft, admin, formatBytes, formatNumber, useSystemInfo } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 export const REMOTE_KEY = 'remote-desktop';
@@ -21,7 +21,7 @@ export function RemoteGlyph({ size = 16 }) {
 
 const agoMin = (sec) => Math.max(0, Math.round((Date.now() / 1000 - sec) / 60));
 
-// lord-sessiond's state every 2 s (and the failed sign-ins every 5 s, administrators only) while the
+// insane-sessiond's state every 2 s (and the failed sign-ins every 5 s, administrators only) while the
 // Network tab is open; the traffic rates are the difference between two readings.
 export function useRemoteDesktop() {
   const [st, setSt] = useState(() => remote.status());

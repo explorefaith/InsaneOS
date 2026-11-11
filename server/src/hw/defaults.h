@@ -1,9 +1,9 @@
 /* defaults.h — default applications on disk (Settings → Default Apps): the user's
  * ~/.config/mimeapps.list and the system ones, shared-mime-info's globs2, and the preferred
  * terminal in ~/.config/xdg-terminals.list (the xdg-terminal-exec convention). Insane OS's own apps
- * are written as "lordos-<app>.desktop" (no such file exists; other desktops skip them). */
-#ifndef LORD_HW_DEFAULTS_H
-#define LORD_HW_DEFAULTS_H
+ * are written as "insaneos-<app>.desktop" (no such file exists; other desktops skip them). */
+#ifndef INSANE_HW_DEFAULTS_H
+#define INSANE_HW_DEFAULTS_H
 
 #include <stddef.h>
 
@@ -19,7 +19,7 @@ int  defaults_removed(const DefaultsFiles *f, int upto, const char *mime, const 
 char *defaults_read(const char *path);
 
 /* First [Default Applications] entry for a MIME type over those files, without checking that it is
- * installed (lord.mime.get). 0 if found ("x.desktop"). The full lookup, with installed apps and the
+ * installed (insane.mime.get). 0 if found ("x.desktop"). The full lookup, with installed apps and the
  * automatic choice, is apps_default_for() in apps.c. */
 int  defaults_lookup(const char *mime, char *id, size_t n);
 /* Sets it in ~/.config/mimeapps.list (atomic write, other lines kept). 0 if written. */
@@ -32,7 +32,7 @@ int  defaults_guess(const char *path, char *mime, size_t n);
 /* Tests only: a folder read in place of "/" for the system files (fake XDG trees). */
 void defaults_set_root(const char *root);
 const char *defaults_root(void);
-/* Preferred terminal ("foot.desktop", "lordos-terminal.desktop"). */
+/* Preferred terminal ("foot.desktop", "insaneos-terminal.desktop"). */
 int  defaults_terminal(char *id, size_t n);
 int  defaults_set_terminal(const char *id);
 

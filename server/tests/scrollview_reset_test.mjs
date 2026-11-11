@@ -1,7 +1,7 @@
 // scrollview_reset_test.mjs — (0.8.8.3, #20) the SDK ScrollView's resetKey: a view that shows another
 // page (a Store category, a Settings section, a folder) goes back to the top, and one whose key stays
 // the same keeps its position. Bundles tests/scrollview_reset_scene.mjs with esbuild (as the theme is
-// built) over a stub `lord` whose layout gives the scroll view 100 px and its content 1000 px, runs it,
+// built) over a stub `insane` whose layout gives the scroll view 100 px and its content 1000 px, runs it,
 // and reads its checks. Needs node and the repository's node_modules (esbuild, react, react-reconciler).
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
@@ -17,9 +17,9 @@ let esbuild = null;
 for (const p of nodePaths) { try { esbuild = createRequire(path.join(p, 'x.js'))('esbuild'); break; } catch (e) { /* next */ } }
 if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 
-// A stub lord: nodes and their styles; any other native call is a no-op. getLayout: the node that is
+// A stub insane: nodes and their styles; any other native call is a no-op. getLayout: the node that is
 // translated (the scrolled content) is 1000 px high, every other one 100 px.
-const MOCK = `globalThis.__lordTest = (() => {
+const MOCK = `globalThis.__insaneTest = (() => {
   const styles = new Map();
   let nextId = 1;
   const base = {
@@ -32,17 +32,17 @@ const MOCK = `globalThis.__lordTest = (() => {
     settings: { load: () => '{}' },
   };
   const noop = () => undefined;
-  globalThis.lord = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
+  globalThis.insane = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
   return { styles };
 })();`;
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-scrollview-reset-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-scrollview-reset-'));
 let bad = 0, n = 0;
 try {
   const out = await esbuild.build({
     entryPoints: [path.join(here, 'scrollview_reset_scene.mjs')], bundle: true, write: false, format: 'esm',
     platform: 'node', target: 'es2022', nodePaths, logLevel: 'error', jsx: 'automatic',
-    alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js') }, define: { 'process.env.NODE_ENV': '"production"' },
+    alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js') }, define: { 'process.env.NODE_ENV': '"production"' },
     banner: { js: MOCK },
   });
   const file = path.join(dir, 'scene.mjs');

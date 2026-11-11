@@ -4,17 +4,17 @@
  *   <dir>/machine.json        this description, schema-versioned; never holds a password
  *   <dir>/disks/system.qcow2  the system disk
  *   <dir>/disks/nvram.qcow2   UEFI variables, qcow2 so that internal snapshots work (6.2); absent with "bios"
- *   <dir>/log/                lord-vm.log (this run) and lord-vm.1.log, lord-vm.2.log (the two before), serial.log
- *   <dir>/lock                held (flock) by the running lord-vm
- *   <dir>/run.json            the last state lord-vm wrote: state, why, pids; read by status and recovery
+ *   <dir>/log/                insane-vm.log (this run) and insane-vm.1.log, insane-vm.2.log (the two before), serial.log
+ *   <dir>/lock                held (flock) by the running insane-vm
+ *   <dir>/run.json            the last state insane-vm wrote: state, why, pids; read by status and recovery
  *
  * QEMU may write only inside disks/: it can't change machine.json, the logs or run.json.
  *
  * Parsing is strict: unknown keys, wrong types and out-of-range values are refused, and a file with a newer
  * schema is never rewritten (VM_E_NEWER) and never started. Limits that depend on the computer (vCPUs, memory,
  * KVM) are checked separately, against a VmHost, so the same file can be read on another computer. */
-#ifndef LORD_VM_MACHINE_H
-#define LORD_VM_MACHINE_H
+#ifndef INSANE_VM_MACHINE_H
+#define INSANE_VM_MACHINE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -78,9 +78,9 @@ typedef struct {
     char iso[VM_PATH_MAX];              /* attached installer image, read-only; "" none */
     char base[VM_PATH_MAX];             /* a linked clone's frozen shared disk (6.3): <library>/.shared/<x>.qcow2, read
                                          * only, the system disk's backing; "" none (schema 2) */
-    int agent;                          /* the guest agent channels (6.17): qemu-guest-agent and org.lordos.agent; off
+    int agent;                          /* the guest agent channels (6.17): qemu-guest-agent and org.insaneos.agent; off
                                          * unless turned on (schema 2) */
-    int clipboard;                      /* VM_CLIP_*, through org.lordos.agent (schema 2) */
+    int clipboard;                      /* VM_CLIP_*, through org.insaneos.agent (schema 2) */
     /* schema 3: what an imported machine keeps of its source's hardware (6.22) */
     int devices;                        /* VM_DEV_* */
     int nic_model;                      /* VM_NIC_* */
@@ -170,9 +170,9 @@ void vm_host_probe(VmHost *h);
 enum { VM_IMG_QCOW2 = 0, VM_IMG_RAW = 1 };
 #define VM_IMG_HEAD 512
 int vm_image_kind(const uint8_t *head, size_t n, const char *name, char *err, size_t errlen);
-/* a qcow2 header lord-vm may hand QEMU: 0 yes (no backing file, no external data file, not corrupt) */
+/* a qcow2 header insane-vm may hand QEMU: 0 yes (no backing file, no external data file, not corrupt) */
 int vm_qcow2_plain(const uint8_t *head, size_t n, char *err, size_t errlen);
-/* the same for a linked clone's system disk, which has a backing file: its name in the header is never followed (lord-vm
+/* the same for a linked clone's system disk, which has a backing file: its name in the header is never followed (insane-vm
  * names machine.json's base itself), the other checks stay */
 int vm_qcow2_overlay(const uint8_t *head, size_t n, char *err, size_t errlen);
 /* a base path machine.json may name: absolute, plain, in a ".shared" folder, a .qcow2 */

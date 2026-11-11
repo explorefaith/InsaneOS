@@ -520,7 +520,7 @@ int rw_sdp_answer(const RwOffer *of, const RwAnswer *a, char *buf, size_t cap) {
     buf[0] = 0;
     outf(&o, "v=0\r\no=- %u %u IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=ice-lite\r\na=group:BUNDLE", a->sess_id, a->version ? a->version : 2);
     for (int i = 0; i < of->nmedia; i++) if (!of->m[i].rejected) outf(&o, " %s", of->m[i].mid);
-    outf(&o, "\r\na=msid-semantic: WMS lordos\r\n");
+    outf(&o, "\r\na=msid-semantic: WMS insaneos\r\n");
     int first = 1;
     for (int i = 0; i < of->nmedia; i++) {
         const RwMedia *m = &of->m[i];
@@ -558,7 +558,7 @@ int rw_sdp_answer(const RwOffer *of, const RwAnswer *a, char *buf, size_t cap) {
         if (i == of->vm) {
             const RwCodec *c = NULL;
             for (int q = 0; q < m->npt; q++) if (m->pt[q].pt == of->vpt) c = &m->pt[q];
-            outf(&o, "a=sendonly\r\na=msid:lordos video\r\n");
+            outf(&o, "a=sendonly\r\na=msid:insaneos video\r\n");
             if (of->vcodec == RW_CODEC_H264) {
                 outf(&o, "a=rtpmap:%d H264/90000\r\n", of->vpt);
                 outf(&o, "a=fmtp:%d level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=%06x\r\n", of->vpt, c ? c->plid : 0x42e01fu);
@@ -566,11 +566,11 @@ int rw_sdp_answer(const RwOffer *of, const RwAnswer *a, char *buf, size_t cap) {
             if (c && c->fb_nack) outf(&o, "a=rtcp-fb:%d nack\r\n", of->vpt);
             if (c && c->fb_pli) outf(&o, "a=rtcp-fb:%d nack pli\r\n", of->vpt);
             if (c && c->fb_fir) outf(&o, "a=rtcp-fb:%d ccm fir\r\n", of->vpt);
-            outf(&o, "a=ssrc:%u cname:lordos\r\na=ssrc:%u msid:lordos video\r\n", a->vssrc, a->vssrc);
+            outf(&o, "a=ssrc:%u cname:insaneos\r\na=ssrc:%u msid:insaneos video\r\n", a->vssrc, a->vssrc);
         } else {
-            outf(&o, "%s\r\na=msid:lordos audio\r\n", a->audio ? "a=sendonly" : "a=inactive");
+            outf(&o, "%s\r\na=msid:insaneos audio\r\n", a->audio ? "a=sendonly" : "a=inactive");
             outf(&o, "a=rtpmap:%d opus/48000/2\r\na=fmtp:%d minptime=10;useinbandfec=1\r\n", of->apt, of->apt);
-            outf(&o, "a=ssrc:%u cname:lordos\r\na=ssrc:%u msid:lordos audio\r\n", a->assrc, a->assrc);
+            outf(&o, "a=ssrc:%u cname:insaneos\r\na=ssrc:%u msid:insaneos audio\r\n", a->assrc, a->assrc);
         }
     }
     return o.bad ? -1 : (int)o.n;

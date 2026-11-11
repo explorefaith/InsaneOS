@@ -222,7 +222,7 @@ export function nameProblem(name, accounts, self = null) {
 export const formValues = (provider, prev = {}) => Object.fromEntries((provider?.fields || []).map((f0) => { const f = presetField(f0); return [f.name, prev[f.name] ?? (f.default != null ? String(f.default) : '')]; }));
 // the first required field still empty, or null
 export const missingField = (provider, values) => (provider?.fields || []).find((f) => f.required && !String(values[f.name] ?? '').trim())?.name || null;
-// only the fields the provider has, without control characters (lord-server checks again)
+// only the fields the provider has, without control characters (insane-server checks again)
 export const cleanFields = (provider, values) => Object.fromEntries((provider?.fields || []).filter((f) => String(values[f.name] ?? '') !== '')
   .map((f) => [f.name, String(values[f.name]).replace(/[\x00-\x1f\x7f]/g, '')]));
 
@@ -290,7 +290,7 @@ export function menuGlyph(state) {
   const waiting = accs.filter((a) => a.state === 'offline' || a.state === 'paused').reduce((s, a) => s + ((a.up && a.up.files) || 0), 0);
   return { arrow, badge: waiting > 0 ? waiting : null };
 }
-// Pause All took (#71): lord-server's own pauseAll, or every account paused. An account's state shows an error or a
+// Pause All took (#71): insane-server's own pauseAll, or every account paused. An account's state shows an error or a
 // sign-in before "paused", so the states alone kept the button on Pause All while it had worked.
 export const allPaused = (state) => {
   const a = (state && state.accounts) || [];
@@ -366,7 +366,7 @@ export function rateOf(samples, total) {
 // data: the file's object; → its entry for a kind ({ since, date, evidence }) or null
 export const verifiedInfo = (kind, data) => ((data && data.verified) || {})[kind] || null;
 export const isVerified = (kind, data) => !!verifiedInfo(kind, data);
-// a provider item: its own `verified` (17.2, from lord-server's overlay) or else the file's
+// a provider item: its own `verified` (17.2, from insane-server's overlay) or else the file's
 const verifiedItem = (p, data) => (p && typeof p.verified === 'boolean' ? p.verified : isVerified(p && p.kind, data));
 // The sheet's two parts: { verified: groups (groupProviders), unverified: groups, unverifiedCount, open }. While searching
 // both are searched and the Not verified part opens by itself when it has matches.
@@ -555,7 +555,7 @@ export function errorVars(r, fmtDate) {
   if (src.host) vars.host = src.host;
   return { code, vars };
 }
-// the field an add error belongs to: lord-server's own `field`, else by the code
+// the field an add error belongs to: insane-server's own `field`, else by the code
 const ERROR_FIELD = { 'cloud.unreachable': ['host', 'url', 'endpoint'], 'cloud.badAddress': ['host', 'url', 'endpoint'],
   'cloud.authFailed': ['pass', 'password', 'secret_access_key', 'key_pem'], 'cloud.badPassword': ['pass', 'password', 'secret_access_key', 'key_pem'] };
 export function errorField(r, p) {

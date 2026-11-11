@@ -1,6 +1,6 @@
 // editor.jsx — the event sheet (new event, details and editing) and the calendar sheet
 // (new calendar or edit name and color).
-import { View, Text, useTheme, Button, Toggle, TextInput, ScrollView, calendars, calendarEvents, t } from '@lordos/sdk';
+import { View, Text, useTheme, Button, Toggle, TextInput, ScrollView, calendars, calendarEvents, t } from '@insaneos/sdk';
 import { useRef, useState } from 'react';
 import {
   RED, COLORS, sod, addDays, ymd, parseYmd, minutesOf, atMinutes, Sheet, Field, Choice, TextArea, DateField, TimeField, ColorSwatches,

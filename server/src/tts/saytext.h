@@ -1,6 +1,6 @@
-/* saytext.h — how `say` prepares text for lord-tts (docs/VOICE.md): pure functions, tested by tests/saytext_test.c. */
-#ifndef LORD_TTS_SAYTEXT_H
-#define LORD_TTS_SAYTEXT_H
+/* saytext.h — how `say` prepares text for insane-tts (docs/VOICE.md): pure functions, tested by tests/saytext_test.c. */
+#ifndef INSANE_TTS_SAYTEXT_H
+#define INSANE_TTS_SAYTEXT_H
 
 #include <stddef.h>
 

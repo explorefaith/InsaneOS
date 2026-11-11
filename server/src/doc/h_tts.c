@@ -1,7 +1,7 @@
-/* h_tts.c — lord-tts: text to speech with Pocket TTS (Kyutai, CC-BY-4.0) through audio.cpp (docs/VOICE.md).
+/* h_tts.c — insane-tts: text to speech with Pocket TTS (Kyutai, CC-BY-4.0) through audio.cpp (docs/VOICE.md).
  *
- * lord-tts is lord-doc's helper loop (helper.c, built with LORD_HELPER_TTS) with only this part: the only binary
- * that links libaudiocpp and ggml (server/mk/tts.mk), so neither lord-server nor any other helper does. Its
+ * insane-tts is insane-doc's helper loop (helper.c, built with INSANE_HELPER_TTS) with only this part: the only binary
+ * that links libaudiocpp and ggml (server/mk/tts.mk), so neither insane-server nor any other helper does. Its
  * sandbox reads /usr (the libraries, the Vulkan drivers) and the model folder it was given as an fd; with the GPU
  * it also opens the render node, with DRM ioctls only, and writes Mesa's shader cache in a folder it was given.
  * It has no network and never opens a path it wasn't given.
@@ -185,7 +185,7 @@ static const char *load(int slot_fd, const char *file, const char *backend, int 
 static int wav_memfd(const float *s, size_t frames, int rate, int ch, size_t *size) {
     size_t n = frames, bytes = n * 2;
     if (bytes > 0x7fffffffu - 44) return -1;
-    int fd = memfd_create("lordos-tts", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-tts", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0 || ftruncate(fd, (off_t)(44 + bytes))) { if (fd >= 0) close(fd); return -1; }
     uint8_t *p = mmap(NULL, 44 + bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (p == MAP_FAILED) { close(fd); return -1; }

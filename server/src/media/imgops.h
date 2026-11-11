@@ -1,9 +1,9 @@
 /* imgops.h — pixel operations of the image editor (the markup editor of Screenshots, also opened on
  * any picture from Photos and Files): resize, quarter turns, solid fill and pixelate, over
- * premultiplied ARGB in lord-server's memory. Pure functions with no other dependency, tested by
+ * premultiplied ARGB in insane-server's memory. Pure functions with no other dependency, tested by
  * build/imgops-test (tests/imgops_test.c). */
-#ifndef LORD_IMGOPS_H
-#define LORD_IMGOPS_H
+#ifndef INSANE_IMGOPS_H
+#define INSANE_IMGOPS_H
 
 #include <stdint.h>
 

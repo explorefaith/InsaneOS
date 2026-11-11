@@ -1,13 +1,13 @@
 /* mstream.c — the remote desktop's video on the session side (docs/REMOTE.md, "Video (WebRTC)").
  *
  * The session renders once; the frame the remote desktop sees (protected windows in black, from
- * media_composed or the GPU's read-back) feeds one live encoder per codec in use: lord-media in
+ * media_composed or the GPU's read-back) feeds one live encoder per codec in use: insane-media in
  * MK_STREAM mode, through a sealed memfd of 3 slots, as for the screen recording. Every viewer of this
  * session gets the same encoded frames (remote/mirror.c sends them to each bridge); only the
- * encryption is per connection. Two users means two sessions, two lord-servers and two encoders.
+ * encryption is per connection. Two users means two sessions, two insane-servers and two encoders.
  * If the encoder is behind (no free slot) the frame waits: the newest one goes when a slot frees up,
  * so a slow machine sends fewer frames, never old ones. Sound: the session's default output,
- * recorded by lord-server itself (maudio.c, PipeWire) into a ring the encoder reads. */
+ * recorded by insane-server itself (maudio.c, PipeWire) into a ring the encoder reads. */
 #include "../par.h"
 #include "../canvas.h"
 #include "mstream.h"
@@ -120,10 +120,10 @@ static int start(Enc *e, int codec) {
     if (render >= 0) close(render);
     if (s->sock < 0) { media_src_close(s); e->retry_at = now_ms() + 10000; return -1; }
     s->bk_msg = on_msg;
-    /* input slots: lord-server writes, lord-media only reads */
+    /* input slots: insane-server writes, insane-media only reads */
     int slots = 3;
     size_t n = (size_t)fw * fh * 4 * slots;
-    int fd = memfd_create("lordos-remote", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-remote", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     void *m = MAP_FAILED;
     if (fd >= 0 && !ftruncate(fd, (off_t)n) && !fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL))
         m = mmap(NULL, n, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);

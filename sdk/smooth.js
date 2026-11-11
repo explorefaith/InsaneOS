@@ -8,7 +8,7 @@
 //   • Dynamic wallpaper: settings.dynamicWallpaper { on, day, night, from, to } —
 //     wallpaper tokens swapped by time of day.
 //   • Login chime: sound.play('chime') once per session start.
-import { addListener, screen } from '@lordos/runtime';
+import { addListener, screen } from '@insaneos/runtime';
 import { settings } from './settings.js';
 import { sound } from './sound.js';
 import { toggleShowDesktop } from './appcontrol.js';
@@ -72,7 +72,7 @@ function tick() {
 
 export function startSmooth() {
   // login chime — once, in the user's session (the login screen stays quiet)
-  const greeter = typeof lord !== 'undefined' && typeof lord.greeter !== 'undefined';
+  const greeter = typeof insane !== 'undefined' && typeof insane.greeter !== 'undefined';
   if (!greeter) { try { sound.play('chime'); } catch { /* sound may not be up yet */ } }
 
   // hot corners
@@ -113,6 +113,6 @@ export function startSmooth() {
     if (lastAC === null) { lastAC = ac; return; }     // never switch at startup
     if (ac === lastAC) return;
     lastAC = ac;
-    try { lord.power.setProfile(ac ? 'balanced' : 'power-saver'); } catch { /* ppd missing */ }
+    try { insane.power.setProfile(ac ? 'balanced' : 'power-saver'); } catch { /* ppd missing */ }
   });
 }

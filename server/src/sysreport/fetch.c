@@ -1,5 +1,5 @@
-/* fetch.c — `lordos-fetch` (see fetch.h). The crown is pixel art drawn two pixels per character
- * cell with half blocks (▀ ▄), in the brand colors (docs/LORDOS-BRAND.md); without color it is plain
+/* fetch.c — `insaneos-fetch` (see fetch.h). The apple is pixel art drawn two pixels per character
+ * cell with half blocks (▀ ▄), in the brand colors (docs/INSANEOS-BRAND.md); without color it is plain
  * ASCII. */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -16,11 +16,11 @@
 #include <sys/statvfs.h>
 #include <unistd.h>
 
-/* ---- the crown ---- */
+/* ---- the apple ---- */
 
 /* 31 × 23 pixels: H gem highlight, Y gem, A gem shade, W white, L lavender shading, V band, B band
  * edge, '.' nothing. */
-static const char *CROWN[] = {
+static const char *APPLE[] = {
     "...............H...............",
     "..............HHH..............",
     ".............HHYYY.............",
@@ -45,8 +45,8 @@ static const char *CROWN[] = {
     "...WWWWWWWWWWWWWWWWWWWWWLLLL...",
     "...............................",
 };
-#define CROWN_H ((int)(sizeof CROWN / sizeof CROWN[0]))
-#define CROWN_W 31
+#define APPLE_H ((int)(sizeof APPLE / sizeof APPLE[0]))
+#define APPLE_W 31
 
 static const char *PLAIN[] = {
     "               <>              ",
@@ -81,12 +81,12 @@ static void bg(HBuf *b, const Pal *p, FetchColor c) {
     else hb_printf(b, "\033[48;5;%dm", p->idx);
 }
 
-/* One text row of the crown: pixel rows 2y and 2y+1. */
-static void crown_row(HBuf *b, int y, FetchColor c) {
-    if (c == FETCH_PLAIN) { hb_printf(b, "%-*s", CROWN_W, y < (int)(sizeof PLAIN / sizeof PLAIN[0]) ? PLAIN[y] : ""); return; }
-    for (int x = 0; x < CROWN_W; x++) {
-        const Pal *t = 2 * y < CROWN_H ? pal(CROWN[2 * y][x]) : NULL;
-        const Pal *u = 2 * y + 1 < CROWN_H ? pal(CROWN[2 * y + 1][x]) : NULL;
+/* One text row of the apple: pixel rows 2y and 2y+1. */
+static void apple_row(HBuf *b, int y, FetchColor c) {
+    if (c == FETCH_PLAIN) { hb_printf(b, "%-*s", APPLE_W, y < (int)(sizeof PLAIN / sizeof PLAIN[0]) ? PLAIN[y] : ""); return; }
+    for (int x = 0; x < APPLE_W; x++) {
+        const Pal *t = 2 * y < APPLE_H ? pal(APPLE[2 * y][x]) : NULL;
+        const Pal *u = 2 * y + 1 < APPLE_H ? pal(APPLE[2 * y + 1][x]) : NULL;
         if (!t && !u) { hb_printf(b, " "); continue; }
         if (t && u && t == u) { fg(b, t, c); hb_printf(b, "█"); }
         else if (t && u) { fg(b, t, c); bg(b, u, c); hb_printf(b, "▀"); }
@@ -205,7 +205,7 @@ char *fetch_render(const SysReport *r, const FetchLive *l, FetchColor c) {
     int n = 0;
     char v[256], a[96], b2[96];
 
-    snprintf(v, sizeof v, "Insane OS %s%s%s%s", r->sw.lordos, r->sw.os[0] ? " (" : "", r->sw.os, r->sw.os[0] ? ")" : "");
+    snprintf(v, sizeof v, "Insane OS %s%s%s%s", r->sw.insaneos, r->sw.os[0] ? " (" : "", r->sw.os, r->sw.os[0] ? ")" : "");
     n = add(ls, n, "OS", v);
     const SrMachine *m = &r->machine;
     snprintf(v, sizeof v, "%s%s%s", m->vendor, m->vendor[0] && m->product[0] ? " " : "", m->product);
@@ -266,13 +266,13 @@ char *fetch_render(const SysReport *r, const FetchLive *l, FetchColor c) {
     char title[160];
     if (l->user[0] && l->host[0]) snprintf(title, sizeof title, "%s@%s", l->user, l->host);
     else snprintf(title, sizeof title, "Insane OS");
-    /* title, rule, the lines, and with color a blank line and the palette; at least the crown's height */
+    /* title, rule, the lines, and with color a blank line and the palette; at least the apple's height */
     int rows = n + (c == FETCH_PLAIN ? 2 : 4);
-    if (rows < (CROWN_H + 1) / 2) rows = (CROWN_H + 1) / 2;
+    if (rows < (APPLE_H + 1) / 2) rows = (APPLE_H + 1) / 2;
     if (rows < (int)(sizeof PLAIN / sizeof PLAIN[0])) rows = (int)(sizeof PLAIN / sizeof PLAIN[0]);
     for (int y = 0; y < rows; y++) {
         hb_printf(&b, " ");
-        crown_row(&b, y, c);
+        apple_row(&b, y, c);
         hb_printf(&b, "   ");
         if (y == 0) {
             if (c != FETCH_PLAIN) { hb_printf(&b, "\033[1m"); fg(&b, violet, c); }

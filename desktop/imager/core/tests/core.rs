@@ -2,7 +2,7 @@
 //! (server/tests/imager_test.c, firstrun_test.c): release signature good / tampered / missing /
 //! another release's, the key fingerprint, the .xz index, the secrets, and write + verify + cancel
 //! on a file standing in for a device.
-use lordos_imager_core::{sums, write, xzinfo, secrets, RELEASE_KEY, image_kind, valid_name, valid_tag};
+use insaneos_imager_core::{sums, write, xzinfo, secrets, RELEASE_KEY, image_kind, valid_name, valid_tag};
 use sha2::{Digest, Sha256};
 use std::fs;
 use std::io::{Read, Write};
@@ -13,7 +13,7 @@ fn fixture(name: &str) -> PathBuf { PathBuf::from(env!("CARGO_MANIFEST_DIR")).jo
 
 #[test]
 fn release_key_matches_the_published_fingerprint() {
-    let pem = fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../tools/release/lordos-release.pub.pem")).unwrap();
+    let pem = fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../tools/release/insaneos-release.pub.pem")).unwrap();
     let b64: String = pem.lines().filter(|l| !l.starts_with("-----")).collect();
     use base64::Engine;
     let der = base64::engine::general_purpose::STANDARD.decode(b64).unwrap();
@@ -39,7 +39,7 @@ fn signature_good_bad_missing() {
     other[0] ^= 0x40;
     assert!(sums::verify(&s, &sig, &other).is_err());
     let list = sums::parse(&s).unwrap();
-    assert_eq!(sums::hex(&list["lordos-0.8.1-rpi5-arm64.img.xz"]), "a7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45");
+    assert_eq!(sums::hex(&list["insaneos-0.8.1-rpi5-arm64.img.xz"]), "a7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45");
     assert!(sums::parse(b"zz").is_err());
     let dup = b"a7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45  x.img\na7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45  x.img\n";
     assert!(sums::parse(dup).is_err());
@@ -47,7 +47,7 @@ fn signature_good_bad_missing() {
 
 #[test]
 fn names_and_tags() {
-    assert!(valid_name("lordos-0.8.4-rpi5-arm64.img.xz") && !valid_name("../x.img") && !valid_name(".x") && !valid_name("a b.img"));
+    assert!(valid_name("insaneos-0.8.4-rpi5-arm64.img.xz") && !valid_name("../x.img") && !valid_name(".x") && !valid_name("a b.img"));
     assert_eq!(image_kind("a.img.xz"), 2);
     assert_eq!(image_kind("a.iso"), 1);
     assert_eq!(image_kind("a.zip"), 0);

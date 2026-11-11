@@ -15,7 +15,7 @@ algo falla.
 - **Mis registros:** tu journal de systemd (tus apps y servicios), leído con tus permisos.
 - **Sistema** y **Kernel:** el journal del sistema. Lo ven los administradores (grupo sudo) por
   el ayudante de administración, o quien esté en el grupo de lectura del journal.
-- **Insane OS:** los registros de tu sesión (`~/.cache/lordos`, como `session.log`).
+- **Insane OS:** los registros de tu sesión (`~/.cache/insaneos`, como `session.log`).
 
 ## Filtrar
 

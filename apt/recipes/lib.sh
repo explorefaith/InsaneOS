@@ -7,7 +7,7 @@
 #   PKG VERSION UPSTREAM_VERSION ARCH SOURCE_DATE_EPOCH JOBS   from apt/build.sh
 # The container has no network (--network none) and runs as the invoking user.
 
-MAINTAINER="Insane OS <lord.basex@gmail.com>"
+MAINTAINER="Insane OS <insane.basex@gmail.com>"
 
 die() { echo "recipe: $*" >&2; exit 1; }
 
@@ -20,7 +20,7 @@ shlibs_depends() {
     [ "${1:-}" = -- ] && shift
     sd_w=$(mktemp -d)
     mkdir -p "$sd_w/debian"
-    printf 'Source: lordos-catalog\n\nPackage: lordos-catalog\nArchitecture: any\n' > "$sd_w/debian/control"
+    printf 'Source: insaneos-catalog\n\nPackage: insaneos-catalog\nArchitecture: any\n' > "$sd_w/debian/control"
     # shellcheck disable=SC2086
     (cd "$sd_w" && dpkg-shlibdeps -O --ignore-missing-info $sd_l "$@" 2>/dev/null) | sed -n 's/^shlibs:Depends=//p'
     rm -rf "$sd_w"

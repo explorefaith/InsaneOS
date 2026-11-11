@@ -1,20 +1,20 @@
-// monitor.js — system metrics for the Monitor app (lord.monitor, see docs/MONITOR.md).
+// monitor.js — system metrics for the Monitor app (insane.monitor, see docs/MONITOR.md).
 //
 //   const samples = useMonitor({ procs: true, conns: false, geo: true });   // last 240 samples (60 s)
 //   const procs = useStore(monitorProcesses);    // { t, total, list: [{ pid, name, cpu, rss, app… }] }
 //   const conns = useStore(monitorConnections);  // { t, others, list: [{ id, proto, remote, cc, app… }] }
 //   monitor.info()                               // { cpuModel, cores, geo, home: { lat, lon, cc } }
 //
-// lord-server samples in its own thread only while some useMonitor is mounted (and
+// insane-server samples in its own thread only while some useMonitor is mounted (and
 // polls it): with the app closed it costs nothing. The process and connection lists are built
 // only if some useMonitor asks for them, once per second.
 //
 // One process (Processes tab, docs/MONITOR.md "Process actions"):
 //   monitor.watchProcess(p, { asAdmin })   Get Info: monitorDetail follows p once per second; returns stop()
-//   await monitor.stopProcess(p, 'TERM' | 'KILL')   the user's own: lord-server signals it; another
+//   await monitor.stopProcess(p, 'TERM' | 'KILL')   the user's own: insane-server signals it; another
 //                                                  user's or root's: the root helper (administrators)
 //
-// Traffic history (0.8.2, docs/MONITOR.md "Traffic history"): lord-server records the machine's and
+// Traffic history (0.8.2, docs/MONITOR.md "Traffic history"): insane-server records the machine's and
 // each of the user's apps' bytes per minute (7 days) and per hour (30 days) in a file of the user's,
 // while Settings → Privacy → Monitor → "Keep a traffic history" is on (settings.monitor.history).
 //   monitor.history({ from, step, n, app })  → { res, oldest, now, rx: [n], tx: [n], top: [[app, rx, tx]] } | null
@@ -60,7 +60,7 @@ function noteDiskTemps(s) {
   });
 }
 
-const available = () => typeof lord.monitor !== 'undefined';
+const available = () => typeof insane.monitor !== 'undefined';
 const wants = new Map();                        // mounted useMonitor → { procs, conns }
 let timer = null;
 let lastWant = '';
@@ -74,17 +74,17 @@ function wanted() {
 function poll() {
   const w = wanted();
   const key = `${w.procs}|${w.conns}|${w.geo}`;
-  if (key !== lastWant) { lastWant = key; lord.monitor.want(w.procs, w.conns, w.geo); }
-  const s = lord.monitor.sample();
+  if (key !== lastWant) { lastWant = key; insane.monitor.want(w.procs, w.conns, w.geo); }
+  const s = insane.monitor.sample();
   if (s) {
     monitorSamples.set((list) => (list.length >= MONITOR_HISTORY ? [...list.slice(1 - MONITOR_HISTORY), s] : [...list, s]));
     noteDiskTemps(s);
   }
   const lang = locale.get().lang;
-  if (w.procs) { const p = lord.monitor.processes(lang); if (p) monitorProcesses.set(() => p); }
-  if (watched && !watched.viaAdmin) { const d = lord.monitor.detailInfo(); if (d) monitorDetail.set(() => d); }
+  if (w.procs) { const p = insane.monitor.processes(lang); if (p) monitorProcesses.set(() => p); }
+  if (watched && !watched.viaAdmin) { const d = insane.monitor.detailInfo(); if (d) monitorDetail.set(() => d); }
   if (w.conns) {
-    const c = lord.monitor.connections(lang);
+    const c = insane.monitor.connections(lang);
     if (c) {
       for (const x of c.list) x.verdict = 'allow';           // a socket that exists already passed the firewall
       monitorConnections.set(() => c);
@@ -96,7 +96,7 @@ function poll() {
 function subscribe(token, w) {
   wants.set(token, w);
   if (timer || !available()) return;
-  lord.monitor.start();
+  insane.monitor.start();
   lastWant = '';
   poll();
   timer = setInterval(poll, 250);
@@ -108,8 +108,8 @@ function unsubscribe(token) {
   clearInterval(timer);
   timer = null;
   if (watched) stopWatching(watched);
-  lord.monitor.want(false, false, false);
-  lord.monitor.stop();
+  insane.monitor.want(false, false, false);
+  insane.monitor.stop();
   monitorSamples.set([]);                       // the history starts over when reopened
   monitorProcesses.set(() => null);
   monitorConnections.set(() => null);
@@ -140,13 +140,13 @@ export function useMonitor({ procs = false, conns = false, geo = true, everyMs =
   return everyMs ? list : null;
 }
 
-// ---- per-app firewall (lord.fw, docs/FIREWALL.md) ----
-// lord-netperm (root) applies the rules in the kernel and counts each app's new connections;
-// lord-server passes them to JS. firewallState: { status, counts: { app: [allowed, denied, rx, tx,
+// ---- per-app firewall (insane.fw, docs/FIREWALL.md) ----
+// insane-netperm (root) applies the rules in the kernel and counts each app's new connections;
+// insane-server passes them to JS. firewallState: { status, counts: { app: [allowed, denied, rx, tx,
 // rxRate, txRate, [[addr, rx, tx, rxRate, txRate, blocked], ...], blocked] } (the bytes when
 // status.bytes; blocked: bytes of open connections dropped because a rule now denies them),
 // events: [the last 200 new connections], rev }. rev goes up when a rule changes.
-const fwApi = () => (typeof lord !== 'undefined' && lord.fw) || null;
+const fwApi = () => (typeof insane !== 'undefined' && insane.fw) || null;
 export const firewallState = createStore({ status: null, counts: {}, events: [], rev: 0 });
 let fwLast = 0;
 function fwPoll(force) {
@@ -160,15 +160,15 @@ function fwPoll(force) {
     const status = api.status();
     const at = Date.now();
     firewallState.set((s) => ({ ...s, status, counts: p.counts || {}, events: p.events.length ? [...s.events, ...p.events.map((e) => ({ ...e, at }))].slice(-200) : s.events }));
-  } catch (e) { /* no lord.fw */ }
+  } catch (e) { /* no insane.fw */ }
 }
 const fwBump = (r) => { firewallState.set((s) => ({ ...s, rev: s.rev + 1 })); fwPoll(true); return r; };
 const fwCall = (fn, dflt) => { try { const api = fwApi(); return api ? fn(api) : dflt; } catch (e) { return dflt; } };
 // A rule can only be applied to an app with its own scope: Insane OS, a .desktop app, an .lpk or (0.8.5)
-// one of Insane OS's own components with its own scope (lordos:mail, lordos:store, lordos:print,
-// lordos:terminal, lordos:lists). The essential system services (system:dns, system:time,
+// one of Insane OS's own components with its own scope (insaneos:mail, insaneos:store, insaneos:print,
+// insaneos:terminal, insaneos:lists). The essential system services (system:dns, system:time,
 // system:network) are shown but never take a rule.
-const fwEnforceable = (app) => app === 'lordos' || /^(desktop|lpk|lordos):/.test(app || '');
+const fwEnforceable = (app) => app === 'insaneos' || /^(desktop|lpk|insaneos):/.test(app || '');
 const fwCallThrow = (fn) => { const api = fwApi(); if (!api) throw codeError('fw.list.unavailable'); return fn(api); };
 export const firewall = {
   available: () => !!fwApi(),
@@ -214,7 +214,7 @@ function adminDetail(w) {
     if (watched !== w) return;
     w.viaAdmin = false;                         // not allowed after all: what the session can read
     clearInterval(w.timer);
-    lord.monitor.detail(w.pid, w.st);
+    insane.monitor.detail(w.pid, w.st);
   });
 }
 
@@ -225,10 +225,10 @@ function watchProcess(p, { asAdmin = false } = {}) {
   watched = w;
   monitorDetail.set(() => null);
   if (w.viaAdmin) {
-    lord.monitor.detail(0, 0);
+    insane.monitor.detail(0, 0);
     adminDetail(w);
     w.timer = setInterval(() => adminDetail(w), 1000);
-  } else lord.monitor.detail(p.pid, p.st);
+  } else insane.monitor.detail(p.pid, p.st);
   return () => stopWatching(w);
 }
 
@@ -236,7 +236,7 @@ function stopWatching(w) {
   if (watched !== w) return;
   clearInterval(w.timer);
   watched = null;
-  lord.monitor.detail(0, 0);
+  insane.monitor.detail(0, 0);
   monitorDetail.set(() => null);
 }
 
@@ -244,31 +244,31 @@ function stopWatching(w) {
 async function stopProcess(p, kind, { own } = {}) {
   if (kind !== 'TERM' && kind !== 'KILL') throw codeError('sys.badArgument');
   if (own) {
-    const err = lord.monitor.signal(p.pid, p.st, kind);
+    const err = insane.monitor.signal(p.pid, p.st, kind);
     if (err) throw codeError(err);
     return;
   }
   await admin.run('proc-signal', `${p.pid} ${p.st} ${kind}`, null, { quiet: true });
 }
 
-// The history records in lord-server, with the window closed too; the switch is the user's setting
-// (lord-server ignores it on the login screen and in isolated apps).
+// The history records in insane-server, with the window closed too; the switch is the user's setting
+// (insane-server ignores it on the login screen and in isolated apps).
 let historyOn = null;
 function syncHistory() {
   const on = settings.get()?.monitor?.history !== false;
-  if (on === historyOn || !available() || typeof lord.monitor.historyEnable !== 'function') return;
+  if (on === historyOn || !available() || typeof insane.monitor.historyEnable !== 'function') return;
   historyOn = on;
-  try { lord.monitor.historyEnable(on); } catch (e) { /* an older lord-server */ }
+  try { insane.monitor.historyEnable(on); } catch (e) { /* an older insane-server */ }
 }
-if (typeof lord !== 'undefined') { syncHistory(); settings.subscribe(syncHistory); }
+if (typeof insane !== 'undefined') { syncHistory(); settings.subscribe(syncHistory); }
 
 function history({ from, step, n, app = null }) {
-  if (!available() || typeof lord.monitor.history !== 'function') return null;
-  try { return lord.monitor.history({ from: Math.floor(from), step: Math.floor(step), n: Math.floor(n), app }); } catch (e) { return null; }
+  if (!available() || typeof insane.monitor.history !== 'function') return null;
+  try { return insane.monitor.history({ from: Math.floor(from), step: Math.floor(step), n: Math.floor(n), app }); } catch (e) { return null; }
 }
 function clearHistory() {
-  if (!available() || typeof lord.monitor.historyClear !== 'function') return false;
-  try { return !!lord.monitor.historyClear(); } catch (e) { return false; }
+  if (!available() || typeof insane.monitor.historyClear !== 'function') return false;
+  try { return !!insane.monitor.historyClear(); } catch (e) { return false; }
 }
 
 // (0.8.8.6) The machines' names by id ({ id: name }), for Monitor → Network's Machines row (a running
@@ -279,9 +279,9 @@ function machineNames(ids) {
   if (!want.length || want.every((id) => id in vmNames.map) || Date.now() - vmNames.at < 2000) return vmNames.map;
   vmNames.at = Date.now();
   try {
-    if (typeof lord === 'undefined' || !lord.vm || typeof lord.vm.list !== 'function') return vmNames.map;
+    if (typeof insane === 'undefined' || !insane.vm || typeof insane.vm.list !== 'function') return vmNames.map;
     const map = {};
-    for (const m of lord.vm.list() || []) if (m && typeof m.id === 'string' && typeof m.name === 'string') map[m.id] = m.name;
+    for (const m of insane.vm.list() || []) if (m && typeof m.id === 'string' && typeof m.name === 'string') map[m.id] = m.name;
     vmNames.map = map;
   } catch (e) { /* keeps the last names */ }
   return vmNames.map;
@@ -291,16 +291,16 @@ let infoCache = null;
 export const monitor = {
   machineNames,
   available,
-  info: () => (infoCache ||= available() ? lord.monitor.info() : null),
+  info: () => (infoCache ||= available() ? insane.monitor.info() : null),
   deviceUsers: () => [],                        // phase 2
   watchProcess,
   stopProcess,
   history,
   clearHistory,
   // Monitor → Voltage (docs/MONITOR.md, "Voltage"): only while that view is on screen
-  wantVoltage: (on) => { if (available()) lord.monitor.wantVoltage(!!on); },
-  voltage: () => (available() ? lord.monitor.voltage() : null),
+  wantVoltage: (on) => { if (available()) insane.monitor.wantVoltage(!!on); },
+  voltage: () => (available() ? insane.monitor.voltage() : null),
   // (0.8.8.6) Monitor → GPU and the Overview's GPU card (docs/MONITOR.md, "GPU"): only while one is on screen
-  wantGpu: (on) => { if (available() && typeof lord.monitor.wantGpu === 'function') lord.monitor.wantGpu(!!on); },
-  gpu: () => (available() && typeof lord.monitor.gpu === 'function' ? lord.monitor.gpu(locale.get().lang) : null),
+  wantGpu: (on) => { if (available() && typeof insane.monitor.wantGpu === 'function') insane.monitor.wantGpu(!!on); },
+  gpu: () => (available() && typeof insane.monitor.gpu === 'function' ? insane.monitor.gpu(locale.get().lang) : null),
 };

@@ -1,8 +1,8 @@
 /* csvp.h — CSV reader (RFC 4180) for the importers: quoted fields with "" inside,
  * line breaks inside a field, CRLF or LF, UTF-8 BOM at the start. Fields are copied
  * into the secrets arena (smem.h): a password CSV never goes through the libc heap. */
-#ifndef LORD_VAULT_CSVP_H
-#define LORD_VAULT_CSVP_H
+#ifndef INSANE_VAULT_CSVP_H
+#define INSANE_VAULT_CSVP_H
 
 #include <stddef.h>
 

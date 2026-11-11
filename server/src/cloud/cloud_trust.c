@@ -2,12 +2,12 @@
  * (docs/FILES.md, "Who the server is"; lan/rconnect.c).
  *
  * SFTP: the host's keys are read with ssh-keyscan before an account is added or updated. Keys never seen are shown to the
- * person as fingerprints (a hostKey question); accepted ones go to ~/.config/lordos/cloud/known_hosts/<id> (0600), and
+ * person as fingerprints (a hostKey question); accepted ones go to ~/.config/insaneos/cloud/known_hosts/<id> (0600), and
  * rclone always gets known_hosts_file pointing there, so it checks the same keys on every connection. A key that changed
  * is refused (cloud.hostKeyChanged) with both fingerprints.
  * TLS (an https address: WebDAV, S3 and the rest): openssl s_client reads the certificate. One the system trusts goes on;
  * one it doesn't is shown (a certificate question: fingerprint, subject, issuer) and, accepted, kept in
- * ~/.config/lordos/cloud/certs/<id>.pem (0600) and given to that account alone (rclone's override.ca_cert): only that
+ * ~/.config/insaneos/cloud/certs/<id>.pem (0600) and given to that account alone (rclone's override.ca_cert): only that
  * certificate is trusted for it, never no_check_certificate. A pinned certificate that changed is refused
  * (cloud.certChanged). The certificate must name the host it is used for.
  * ssh-keyscan, ssh-keygen and openssl run through rconnect_run in Cloud's scope: the system read-only, a deadline,
@@ -102,7 +102,7 @@ int ct_needed(const Acc *a, const char *sec) {
 
 static char *question(const Acc *a, const char *kind, const char *host, int port, const char *fp, const char *subject, const char *issuer) {
     char st[64];
-    cl_pf(st, sizeof st, "%s:lordos-trust", a->id);
+    cl_pf(st, sizeof st, "%s:insaneos-trust", a->id);
     JBuf b;
     jb_init(&b);
     jb_raw(&b, "{\"question\":{\"kind\":");
@@ -278,7 +278,7 @@ int ct_key_mismatch(Acc *a, const char *sec, char **q, char *code, size_t cn, ch
             pend(a, 'H', good);
             if (!a->new_acc || a->trust_from_other) {
                 char st[64];
-                cl_pf(st, sizeof st, "%s:lordos-trust", a->id);
+                cl_pf(st, sizeof st, "%s:insaneos-trust", a->id);
                 JBuf b;
                 jb_init(&b);
                 jb_raw(&b, "{\"question\":{\"kind\":");

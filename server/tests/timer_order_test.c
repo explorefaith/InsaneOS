@@ -1,6 +1,6 @@
 /* timer_order_test.c — the timers of src/ui/js_prelude.h against the prelude they replaced.
  *
- * Until 0.8.6, __lordTick looked at every pending timer on every pass of the main loop and built
+ * Until 0.8.6, __insaneTick looked at every pending timer on every pass of the main loop and built
  * an [id, timer] pair per timer. Now it keeps the earliest deadline and returns early when nothing
  * is due (js_prelude.h). This test runs the same scripts on both, in QuickJS, and requires the
  * same trace, byte for byte: which callbacks run, in which order, with which arguments, what the
@@ -8,7 +8,7 @@
  * (seeded): setTimeout, setInterval and setImmediate with equal, zero, negative, fractional,
  * NaN and string delays, clearTimeout of pending, fired, due and unknown ids, timers set and
  * cleared from inside callbacks (also ones already due in that tick), callbacks that throw, and
- * ticks whose `now` is behind the clock lord.now() reads. lord.now() is a deterministic clock that
+ * ticks whose `now` is behind the clock insane.now() reads. insane.now() is a deterministic clock that
  * moves on each read, so both sides must also read it the same number of times.
  *
  * `build/timer-order-test bench` times a tick with nothing due and 200 timers pending, both ways. */
@@ -28,12 +28,12 @@ static const char prelude[] =
     "const g = globalThis;\n"
     "const fmt = v => typeof v === 'string' ? v : v instanceof Error ? (v.message + '\\n' + (v.stack || '')) :\n"
     "  (() => { try { return JSON.stringify(v); } catch (e) { return String(v); } })();\n"
-    "const out = p => (...a) => lord.log(p + a.map(fmt).join(' '));\n"
+    "const out = p => (...a) => insane.log(p + a.map(fmt).join(' '));\n"
     "g.console = { log: out(''), info: out(''), debug: out(''), warn: out('[warn] '), error: out('[error] ') };\n"
-    "g.performance = { now: () => lord.now() };\n"
+    "g.performance = { now: () => insane.now() };\n"
     "let nextId = 1; const timers = new Map();\n"
     "const add = (fn, ms, args, repeat) => { const id = nextId++; ms = Math.max(0, +ms || 0);\n"
-    "  timers.set(id, { fn, args, at: lord.now() + ms, ms, repeat }); return id; };\n"
+    "  timers.set(id, { fn, args, at: insane.now() + ms, ms, repeat }); return id; };\n"
     "g.setTimeout = (fn, ms, ...a) => add(fn, ms, a, false);\n"
     "g.setInterval = (fn, ms, ...a) => add(fn, ms, a, true);\n"
     "g.setImmediate = (fn, ...a) => add(fn, 0, a, false);\n"
@@ -42,7 +42,7 @@ static const char prelude[] =
     "let frames = new Map(), frameId = 1;\n"
     "g.requestAnimationFrame = fn => { const id = frameId++; frames.set(id, fn); return id; };\n"
     "g.cancelAnimationFrame = id => { frames.delete(id); };\n"
-    "g.__lordTick = now => {\n"
+    "g.__insaneTick = now => {\n"
     "  const due = [];\n"
     "  for (const [id, t] of timers) if (t.at <= now) due.push([id, t]);\n"
     "  due.sort((a, b) => a[1].at - b[1].at || a[0] - b[0]);\n"
@@ -51,12 +51,12 @@ static const char prelude[] =
     "    if (t.repeat) t.at = now + Math.max(t.ms, 1); else timers.delete(id);\n"
     "    try { t.fn(...t.args); } catch (e) { console.error('timer:', e); }\n"
     "  }\n"
-    "  now = lord.now(); let next = -1;\n"
+    "  now = insane.now(); let next = -1;\n"
     "  for (const t of timers.values()) { const d = Math.max(0, t.at - now); if (next < 0 || d < next) next = d; }\n"
     "  return next;\n"
     "};\n"
-    "g.__lordWantsFrame = () => frames.size > 0;\n"
-    "g.__lordFrame = now => { const f = frames; frames = new Map();\n"
+    "g.__insaneWantsFrame = () => frames.size > 0;\n"
+    "g.__insaneFrame = now => { const f = frames; frames = new Map();\n"
     "  for (const fn of f.values()) { try { fn(now); } catch (e) { console.error('raf:', e); } } };\n"
     "})();\n";
 #undef prelude
@@ -91,7 +91,7 @@ static const char script[] =
     "globalThis.__poke = () => { for (let i = rnd(5); i-- > 0;) op(0); };\n"
     "})();\n";
 
-/* the clock lord.now() reads: it moves on every read, by steps that are often 0 (equal deadlines) */
+/* the clock insane.now() reads: it moves on every read, by steps that are often 0 (equal deadlines) */
 static double clk;
 static unsigned crng;
 static unsigned rnd(unsigned n) { crng ^= crng << 13; crng ^= crng >> 17; crng ^= crng << 5; return crng % n; }
@@ -156,10 +156,10 @@ static JSValue call(JSContext *c, const char *name, int argc, JSValueConst *argv
 
 static JSContext *new_context(JSRuntime *rt, const char *prel) {
     JSContext *c = JS_NewContext(rt);
-    JSValue g = JS_GetGlobalObject(c), lord = JS_NewObject(c);
-    JS_SetPropertyStr(c, lord, "now", JS_NewCFunction(c, f_now, "now", 0));
-    JS_SetPropertyStr(c, lord, "log", JS_NewCFunction(c, f_log, "log", 1));
-    JS_SetPropertyStr(c, g, "lord", lord);
+    JSValue g = JS_GetGlobalObject(c), insane = JS_NewObject(c);
+    JS_SetPropertyStr(c, insane, "now", JS_NewCFunction(c, f_now, "now", 0));
+    JS_SetPropertyStr(c, insane, "log", JS_NewCFunction(c, f_log, "log", 1));
+    JS_SetPropertyStr(c, g, "insane", insane);
     JS_FreeValue(c, g);
     if (!eval(c, prel, "<prelude>")) exit(2);
     return c;
@@ -188,7 +188,7 @@ static void run(const char *prel, unsigned seed, int steps) {
             now += adv[rnd(sizeof adv / sizeof *adv)];
             if (rnd(4) == 0 && now < clk) now = clk;        /* catch up with the clock now and then */
             JSValue arg = JS_NewFloat64(c, now);
-            JSValue r = call(c, "__lordTick", 1, &arg);
+            JSValue r = call(c, "__insaneTick", 1, &arg);
             double next = -2;
             if (JS_IsException(r)) put("tick threw");
             else JS_ToFloat64(c, &next, r);
@@ -226,7 +226,7 @@ static double bench(const char *prel) {
     double t0 = ms();
     for (int i = 0; i < n; i++) {
         JSValue arg = JS_NewFloat64(c, 1000 + i * 0.001);
-        JS_FreeValue(c, call(c, "__lordTick", 1, &arg));
+        JS_FreeValue(c, call(c, "__insaneTick", 1, &arg));
         drain(rt);
     }
     double per = (ms() - t0) / n * 1000;

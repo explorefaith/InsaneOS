@@ -78,7 +78,7 @@ static int check_device(const JVal *d, char *err, size_t errlen) {
     }
     if (!name || name->type != J_STR || !is_text(name->str, name->len, HWSNAP_NAME_MAX, 1)) { seterr(err, errlen, "bad name for %s", key->str); return -1; }
     if (!is_component(json_str(d, "component"))) { seterr(err, errlen, "bad component for %s", key->str); return -1; }
-    if (!is_version(json_str(d, "lordos"))) { seterr(err, errlen, "bad version for %s", key->str); return -1; }
+    if (!is_version(json_str(d, "insaneos"))) { seterr(err, errlen, "bad version for %s", key->str); return -1; }
     static const char *const counts[] = { "works", "limits", "no", "reports", "references" };
     for (size_t i = 0; i < sizeof counts / sizeof counts[0]; i++)
         if (!is_count(json_get(d, counts[i]))) { seterr(err, errlen, "bad count for %s", key->str); return -1; }

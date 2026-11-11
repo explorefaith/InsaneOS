@@ -4,9 +4,9 @@
  * lease expires or a NAK arrives, it starts over. It follows the link: without carrier it waits,
  * and when it comes back it confirms the same address (INIT-REBOOT). On Wi-Fi it also translates
  * wpa_supplicant's notices (connected/disconnected) into EVENTs. SIGTERM: DHCPRELEASE and cleanup. If the process that
- * started it dies (lord-netd, which lord-sessiond restarts right away) it gets SIGUSR1: it keeps
- * the address and leaves the lease in /run/lordos/dhcp/<if>.lease, and the new client confirms it
- * (INIT-REBOOT) without dropping connections. SIGUSR2 (lord-netd, after the computer wakes from sleep):
+ * started it dies (insane-netd, which insane-sessiond restarts right away) it gets SIGUSR1: it keeps
+ * the address and leaves the lease in /run/insaneos/dhcp/<if>.lease, and the new client confirms it
+ * (INIT-REBOOT) without dropping connections. SIGUSR2 (insane-netd, after the computer wakes from sleep):
  * confirm the lease now (INIT-REBOOT), since the network may have changed and the timers, on
  * CLOCK_MONOTONIC, stood still while asleep.
  *
@@ -289,7 +289,7 @@ static void enter(Dhcp *d, int st) {
     if (st == S_REBOOTING) d->deadline = now_s() + 10;
 }
 
-/* ---- the saved lease (so a new lord-netd can resume it) ---- */
+/* ---- the saved lease (so a new insane-netd can resume it) ---- */
 
 #define LEASE_DIR NET_RUN_DIR "/dhcp"
 #define LEASE_MAGIC 0x4c444c31u           /* "LDL1" */
@@ -370,7 +370,7 @@ static void drop_lease(Dhcp *d, const char *why) {
     admin_event("net dhcp %s %s", d->ifname, why);
 }
 
-/* ---- does the gateway answer? (lord-netd, after waking from sleep) ---- */
+/* ---- does the gateway answer? (insane-netd, after waking from sleep) ---- */
 
 struct arp_pkt {
     uint16_t htype, ptype;
@@ -455,7 +455,7 @@ void dhcp_run(const char *ifname, int wifi) {
     sigaction(SIGUSR1, &sk, NULL);
     struct sigaction sr = { .sa_handler = on_renew };
     sigaction(SIGUSR2, &sr, NULL);
-    prctl(PR_SET_PDEATHSIG, SIGUSR1);           /* lord-netd dies: exit without releasing the address */
+    prctl(PR_SET_PDEATHSIG, SIGUSR1);           /* insane-netd dies: exit without releasing the address */
     d.ifindex = rt_ifindex(ifname);
     gethostname(d.host, sizeof d.host - 1);
     for (char *p = d.host; *p; p++) if (*p == '.') { *p = 0; break; }
@@ -540,7 +540,7 @@ void dhcp_run(const char *ifname, int wifi) {
             }
         }
     }
-    if (keep_flag) {                            /* the next lord-netd resumes it */
+    if (keep_flag) {                            /* the next insane-netd resumes it */
         if (d.lease.addr && d.state == S_BOUND) lease_save(&d);
         _exit(0);
     }

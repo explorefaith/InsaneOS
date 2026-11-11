@@ -1,17 +1,17 @@
-/* js_media.c — lord.media: video, music, photos, screenshots, camera and recorder (see
+/* js_media.c — insane.media: video, music, photos, screenshots, camera and recorder (see
  * server/src/media and docs/MEDIA.md).
  *
  * Rules:
- *   - every file goes through the same roots as lord.fs (home folder and user
+ *   - every file goes through the same roots as insane.fs (home folder and user
  *     mounts); outputs never overwrite anything (temporary + rename without replacing) and cannot go
  *     to the protected folders;
  *   - camera, microphone and screen are checked against the system permissions (sec/perms.c,
  *     per-app permission prompts) in C, not only in the SDK: the prompt is shown by the system (sdk/privacy.js) and here
  *     the saved decision is required to be "allow";
- *   - a firewall restriction of the built-in apps (firewall id "lordos", sec/restrict.h) beats the
+ *   - a firewall restriction of the built-in apps (firewall id "insaneos", sec/restrict.h) beats the
  *     permission: refused with fw.restricted.<perm>, and restricting while a camera, microphone
  *     or screen recording runs stops it at once (media_restricted below);
- *   - the decoder (lord-media) never receives a path: lord-server opens the file and passes the fd. */
+ *   - the decoder (insane-media) never receives a path: insane-server opens the file and passes the fd. */
 #include "js_media.h"
 #include "../media/media_int.h"
 #include "../media/proto.h"
@@ -106,8 +106,8 @@ static int arg_id(JSContext *c, JSValueConst v) {
     return id;
 }
 
-/* Built-in apps run inside lord-server: their firewall id is "lordos" (docs/FIREWALL.md). */
-#define BUILTIN_FWID "lordos"
+/* Built-in apps run inside insane-server: their firewall id is "insaneos" (docs/FIREWALL.md). */
+#define BUILTIN_FWID "insaneos"
 
 static int permitted(JSContext *c, const char *app, Perm p) {
     uint32_t rf = restrict_flag_of(p);
@@ -345,7 +345,7 @@ static JSValue f_edit(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
         snprintf(params + l, sizeof params - l, "cx=%d\ncy=%d\ncw=%d\nch=%d\nrefw=%d\n", opt_int(c, o, "cx", 0, 0, 65536), opt_int(c, o, "cy", 0, 0, 65536),
                  cw, ch, opt_int(c, o, "refw", 0, 0, 65536));
     }
-    /* a new size after the crop: both sides or none (lord-media checks the bound again) */
+    /* a new size after the crop: both sides or none (insane-media checks the bound again) */
     int sw = opt_int(c, o, "width", 0, 0, MP_MAX_DIM), sh = opt_int(c, o, "height", 0, 0, MP_MAX_DIM);
     if (sw > 0 && sh > 0) {
         size_t l = strlen(params);
@@ -450,8 +450,8 @@ static JSValue f_pixels(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return JS_NewArrayBufferCopy(c, out, (size_t)w * (size_t)h * 4);
 }
 
-/* ocr(id, langs) → { sid, req } of a lord-ocr request (the SDK waits for it: media.ocr): the text in a screenshot or
- * picture. The pixels go to the confined lord-ocr helper in a sealed memfd (src/doc/h_ocr.c); lord-server never
+/* ocr(id, langs) → { sid, req } of a insane-ocr request (the SDK waits for it: media.ocr): the text in a screenshot or
+ * picture. The pixels go to the confined insane-ocr helper in a sealed memfd (src/doc/h_ocr.c); insane-server never
  * links Tesseract. One OCR session is kept and started again if it crashed. */
 static int ocr_sid;
 static JSValue f_ocr(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -460,7 +460,7 @@ static JSValue f_ocr(JSContext *c, JSValueConst t, int argc, JSValueConst *argv)
     if (!s || !s->px || (s->kind != SK_CAPTURE && s->kind != SK_IMAGE) || s->w < 1 || s->h < 1) return JS_NULL;
     const char *langs = JS_ToCString(c, argv[1]);
     if (!langs) return JS_EXCEPTION;
-    /* Tesseract data names ("spa+eng"); lord-ocr checks them again */
+    /* Tesseract data names ("spa+eng"); insane-ocr checks them again */
     size_t ll = strlen(langs);
     int ok = ll >= 3 && ll <= 64;
     for (size_t i = 0; ok && i < ll; i++) ok = (langs[i] >= 'a' && langs[i] <= 'z') || langs[i] == '_' || langs[i] == '+';
@@ -596,7 +596,7 @@ static JSValue f_copy_image(JSContext *c, JSValueConst t, int argc, JSValueConst
     if (!rt) return js_throw_code(c, "media.noRuntimeDir", NULL);
     static unsigned seq;
     char dir[PATH_MAX], dst[PATH_MAX + 64], tmp[PATH_MAX + 64];
-    snprintf(dir, sizeof dir, "%s/lordos", rt);
+    snprintf(dir, sizeof dir, "%s/insaneos", rt);
     mkdir(dir, 0700);
     snprintf(dst, sizeof dst, "%s/clip-shot%d-%u.png", dir, (int)getpid(), ++seq);
     snprintf(tmp, sizeof tmp, "%s/.shot%d-%u.part", dir, (int)getpid(), seq);
@@ -795,11 +795,11 @@ static JSValue f_hwaccel(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     return JS_NewString(c, media_hwaccel());
 }
 
-/* composition(): "gpu" when the GPU composes this session (main.c lord_composition). */
-const char *lord_composition(void);
+/* composition(): "gpu" when the GPU composes this session (main.c insane_composition). */
+const char *insane_composition(void);
 static JSValue f_composition(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
-    return JS_NewString(c, lord_composition());
+    return JS_NewString(c, insane_composition());
 }
 
 /* hwDecode(): can this computer decode VP9/AV1 in hardware? The object from media/hwdec.c, or null
@@ -847,7 +847,7 @@ static const JSCFunctionListEntry media_funcs[] = {
 };
 
 /* A restriction was just added to the built-in apps: what it covers stops now, like revoking the
- * permission of an isolated app. The camera's lord-media is killed (the window gets "closed" with
+ * permission of an isolated app. The camera's insane-media is killed (the window gets "closed" with
  * revoked); recordings that use the microphone or the screen are finished properly (the file is
  * kept up to the moment of the restriction). Sources of isolated apps (bk) are the broker's. */
 static void media_restricted(uint32_t added) {
@@ -875,11 +875,11 @@ static void media_restricted(uint32_t added) {
     }
 }
 
-void js_media_register(JSContext *c, JSValue lord) {
+void js_media_register(JSContext *c, JSValue insane) {
     restrict_set_local_hook(media_restricted);
     JSValue m = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, m, media_funcs, sizeof media_funcs / sizeof media_funcs[0]);
-    JS_SetPropertyStr(c, lord, "media", m);
+    JS_SetPropertyStr(c, insane, "media", m);
 }
 
 /* `media` property of a <MediaView> node: which source it draws. */

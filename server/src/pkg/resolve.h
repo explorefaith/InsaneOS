@@ -1,7 +1,7 @@
 /* resolve.h — what has to be installed, upgraded or removed to satisfy a request (like
  * apt's resolver, but simpler: greedy, with bounded backtracking over alternatives). */
-#ifndef LORD_PKG_RESOLVE_H
-#define LORD_PKG_RESOLVE_H
+#ifndef INSANE_PKG_RESOLVE_H
+#define INSANE_PKG_RESOLVE_H
 
 #include "idx.h"
 #include "status.h"
@@ -34,7 +34,7 @@ typedef struct {
     int cascade;                        /* when removing, also remove what depends on it */
     int upgrade_all;                    /* upgrade everything upgradable */
     int orphans;                        /* also remove what was installed as a dependency and is no longer needed */
-    const char *const *autos;           /* those installed as a dependency (/var/lib/lordos/pkg/auto) */
+    const char *const *autos;           /* those installed as a dependency (/var/lib/insaneos/pkg/auto) */
     int nautos;
 } PlanOpts;
 

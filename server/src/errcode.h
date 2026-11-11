@@ -18,8 +18,8 @@
  *   reason=<line>   a nested code line, translated too ("could not install: <reason>").
  * The locale strings live in assets/locales/<lang>/errors.json (status.json for OK/LOG
  * statuses); tools/i18n-check.mjs checks that every code used here has an English string. */
-#ifndef LORD_ERRCODE_H
-#define LORD_ERRCODE_H
+#ifndef INSANE_ERRCODE_H
+#define INSANE_ERRCODE_H
 
 #include <errno.h>
 #include <stdarg.h>

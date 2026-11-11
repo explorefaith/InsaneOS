@@ -2,7 +2,7 @@
 import {
   View, Text, Button, Toggle, Stepper, TextInput, useTheme, useLocale, useSettings, useStore, clipboard, clipboardHistory, clipboardPanel,
   spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useState } from 'react';
 import { Stack, Section, SettingRow, Note, Actions } from './ui.jsx';
 
@@ -16,7 +16,7 @@ export function ClipboardSettings() {
   const put = (patch) => set({ clipboard: { ...c, ...patch } });
   const list = useStore(clipboardHistory);
   const [app, setApp] = useState('');
-  const origins = [...new Set(list.map((x) => x.origin).filter((o) => o && !['lordos', 'terminal', 'linux'].includes(o) && !c.ignoreApps.includes(o)))].slice(0, 8);
+  const origins = [...new Set(list.map((x) => x.origin).filter((o) => o && !['insaneos', 'terminal', 'linux'].includes(o) && !c.ignoreApps.includes(o)))].slice(0, 8);
   const addApp = () => { if (app && !c.ignoreApps.includes(app)) put({ ignoreApps: [...c.ignoreApps, app] }); setApp(''); };
   return (
     <Stack>

@@ -184,7 +184,7 @@ static void test_limits(void) {
 static void test_grants(void) {
     CHECK(sg_id_valid("desktop:org.go-link.desk"));
     CHECK(sg_id_valid("lpk:go-link-desk"));
-    CHECK(!sg_id_valid("lordos"));
+    CHECK(!sg_id_valid("insaneos"));
     CHECK(!sg_id_valid("desktop:"));
     CHECK(!sg_id_valid("desktop:a b"));
     CHECK(!sg_id_valid("desktop:a\"b"));

@@ -3,7 +3,7 @@
  * "Secret Service".
  *
  * This is how Chromium, Firefox, libsecret/secret-tool and other Linux apps store their passwords in
- * the Insane OS keyring without gnome-keyring or kwallet. Runs in lord-vault: lord-server connects the
+ * the Insane OS keyring without gnome-keyring or kwallet. Runs in insane-vault: insane-server connects the
  * session bus socket and hands it over already open (the helper cannot open sockets).
  *
  * Objects:
@@ -16,8 +16,8 @@
  *                                                  "dh-ietf1024-sha256-aes128-cbc-pkcs7")
  *   /org/freedesktop/secrets/prompt/<n>            Prompt (unlock with a system notice)
  * Storage belongs to the keyring (keyring.c), through the interface below. */
-#ifndef LORD_VAULT_SECRETSVC_H
-#define LORD_VAULT_SECRETSVC_H
+#ifndef INSANE_VAULT_SECRETSVC_H
+#define INSANE_VAULT_SECRETSVC_H
 
 #include <stddef.h>
 #include <stdint.h>

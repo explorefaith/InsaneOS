@@ -1,7 +1,7 @@
 /* html_entities.h — HTML5 named entities (single-character ones only), generated from
 * Python's html.entities. Sorted by name for binary search. Do not edit by hand. */
-#ifndef LORD_MAIL_HTML_ENTITIES_H
-#define LORD_MAIL_HTML_ENTITIES_H
+#ifndef INSANE_MAIL_HTML_ENTITIES_H
+#define INSANE_MAIL_HTML_ENTITIES_H
 #include <stdint.h>
 typedef struct { const char *name; uint32_t cp; } HtmlEnt;
 static const HtmlEnt html_ents[] = {

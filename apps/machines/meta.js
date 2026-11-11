@@ -1,7 +1,7 @@
-// meta.js — what the app keeps about a machine that lord-vm doesn't need: the system it runs (for the card's mark and
+// meta.js — what the app keeps about a machine that insane-vm doesn't need: the system it runs (for the card's mark and
 // name), notes, what closing its window does (onClose) and whether it keeps this computer awake (keepAwake, read by
-// lord.vm.awake too). <machine>/app.json, written by the app as the person; machine.json stays lord-vm's alone.
-import { fs } from '@lordos/sdk';
+// insane.vm.awake too). <machine>/app.json, written by the app as the person; machine.json stays insane-vm's alone.
+import { fs } from '@insaneos/sdk';
 
 const cache = new Map();         // dir → { mtime, meta }: the library reads it every 1.5 s
 

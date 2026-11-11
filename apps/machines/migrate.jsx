@@ -1,10 +1,10 @@
 // Migrate from another app (docs/VIRTUALIZATION.md 6.22, the approved mock "Import"): a machine of another
-// virtualization app (.vmx, .vbox, config.pvs, .ova, .ovf, or one disk image) is read by lord-vm --import-plan, shown
+// virtualization app (.vmx, .vbox, config.pvs, .ova, .ovf, or one disk image) is read by insane-vm --import-plan, shown
 // as a plan (what is kept, what changes, what can't come along, what stops it), then imported with progress into a new
-// .lordvm by lord-vm --import-machine. The original is only read. Its identity (the SMBIOS UUID, every MAC address,
+// .insanevm by insane-vm --import-machine. The original is only read. Its identity (the SMBIOS UUID, every MAC address,
 // the disks' serials, firmware, CPU topology) is kept so the guest sees as little change as possible; it starts on
 // devices every system has drivers for, and Configure offers the faster ones later.
-import { View, Text, TextInput, ScrollView, t as tr } from '@lordos/sdk';
+import { View, Text, TextInput, ScrollView, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { parsePlan, importProgress, uniqueName, planNotes, planBlockers, systemOf } from './model.js';
 import { usePal, Btn, Bar, gb, bytes, OsMark } from './ui.jsx';
@@ -45,11 +45,11 @@ export function Migrate({ host, path, names, onClose, onDone, onStart }) {
   // the plan: again when the architecture is switched
   useEffect(() => {
     setPlan(null); setFail(null);
-    const id = lord.vm.importPlan(path, arch ? { arch } : {});
+    const id = insane.vm.importPlan(path, arch ? { arch } : {});
     if (!id) { setFail(tr('machines.mig.unreadable')); return undefined; }
     setPlanJob(id);
     const timer = setInterval(() => {
-      const r = lord.vm.job(id);
+      const r = insane.vm.job(id);
       if (!r || !r.done) return;
       clearInterval(timer);
       setPlanJob(0);
@@ -65,7 +65,7 @@ export function Migrate({ host, path, names, onClose, onDone, onStart }) {
   useEffect(() => {
     if (!job) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(job);
+      const r = insane.vm.job(job);
       if (!r) return;
       const pr = importProgress(r.out);
       setProg(pr);
@@ -75,8 +75,8 @@ export function Migrate({ host, path, names, onClose, onDone, onStart }) {
       if (r.ok && pr.done) {
         const sys = systemOf(plan.guest_os, plan.name);
         writeMeta(pr.done.dir, { os: sys.id, osName: sys.name || plan.guest_os || '', importedFrom: plan.source });
-        setDone(lord.vm.list().find((x) => x.dir === pr.done.dir) || { dir: pr.done.dir, name });
-      } else setFail(r.out.trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || tr('machines.mig.failed'));
+        setDone(insane.vm.list().find((x) => x.dir === pr.done.dir) || { dir: pr.done.dir, name });
+      } else setFail(r.out.trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || tr('machines.mig.failed'));
     }, 300);
     return () => clearInterval(timer);
   }, [job]);
@@ -86,7 +86,7 @@ export function Migrate({ host, path, names, onClose, onDone, onStart }) {
     const req = { path, name, devices: 'compat', network: 'shared' };
     if (arch) req.arch = arch;
     if (plan.kind === 'disk') req.firmware = plan.firmware;
-    const id = lord.vm.importMachine(req);
+    const id = insane.vm.importMachine(req);
     if (!id) { setFail(tr('machines.mig.refused')); return; }
     setProg({ pct: 0, disk: 1, disks: plan.disks.length });
     setJob(id);

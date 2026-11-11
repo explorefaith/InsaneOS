@@ -1,7 +1,7 @@
-// cooling.jsx — the session side of lord-fand (docs/FANS.md), shared by Settings → Cooling and
+// cooling.jsx — the session side of insane-fand (docs/FANS.md), shared by Settings → Cooling and
 // Monitor → Cooling:
 //
-//   useFan()            status of lord-fand ({ temp, fans, profile, curve, step, … } or null), polled
+//   useFan()            status of insane-fand ({ temp, fans, profile, curve, step, … } or null), polled
 //                       every 2 s only while something on screen uses it, plus a short history
 //   fanHistory          store with the last FAN_HISTORY samples { t, temp, pct, rpm }
 //   coolingVariant(s)   'argon' | 'cooler' | 'pc' | 'none': which illustration fits the hardware
@@ -16,7 +16,7 @@
 // while the fan turns and the window is visible, at 20 frames per second, and never with
 // Appearance → Reduce motion.
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, addListener } from '@lordos/runtime';
+import { View, Text, addListener } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme } from './theme.js';
@@ -24,7 +24,7 @@ import { t, formatNumber } from './i18n.js';
 import { useWindowHidden } from './windows.js';
 import { useAppWindow } from './components.jsx';
 
-const has = () => typeof lord !== 'undefined' && lord.fan && typeof lord.fan.status === 'function';
+const has = () => typeof insane !== 'undefined' && insane.fan && typeof insane.fan.status === 'function';
 const call = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
 
 export const FAN_HISTORY = 90;                  // 3 minutes at one sample every 2 s
@@ -35,9 +35,9 @@ export const fanCase = createStore(undefined);
 let users = 0;
 let timer = null;
 function poll() {
-  const s = has() ? call(() => lord.fan.status(), null) : null;
+  const s = has() ? call(() => insane.fan.status(), null) : null;
   fanStatus.set(() => s);
-  if (fanCase.get() === undefined) fanCase.set(() => (has() ? call(() => lord.fan.caseConfig(), null) : null));
+  if (fanCase.get() === undefined) fanCase.set(() => (has() ? call(() => insane.fan.caseConfig(), null) : null));
   if (s && s.temp != null) {
     const f = (s.fans || [])[0];
     const sample = { t: Date.now(), temp: s.temp, pct: f && f.pct >= 0 ? f.pct : 0, rpm: f && f.rpm >= 0 ? f.rpm : -1 };
@@ -60,11 +60,11 @@ export function useFan() {
 // ---- requests: '' when done, or an error code (errors.<code>) ----
 const ask = (fn) => { const r = has() ? call(fn, 'fan.badRequest') : 'fan.unavailable'; refreshFan(); return r; };
 export const fanControl = {
-  setProfile: (p) => ask(() => lord.fan.setProfile(p)),
-  setCurve: (pts) => ask(() => lord.fan.setCurve(pts)),
-  force: (v) => ask(() => lord.fan.force(v)),
-  // (0.8.8.6) an amdgpu card's fan by hand: n from status.gpuFans, v 'auto' or 0..100 (lord-fand keeps 30..100)
-  setGpuFan: (n, v) => ask(() => (typeof lord.fan.setGpuFan === 'function' ? lord.fan.setGpuFan(n, v) : 'fan.unavailable')),
+  setProfile: (p) => ask(() => insane.fan.setProfile(p)),
+  setCurve: (pts) => ask(() => insane.fan.setCurve(pts)),
+  force: (v) => ask(() => insane.fan.force(v)),
+  // (0.8.8.6) an amdgpu card's fan by hand: n from status.gpuFans, v 'auto' or 0..100 (insane-fand keeps 30..100)
+  setGpuFan: (n, v) => ask(() => (typeof insane.fan.setGpuFan === 'function' ? insane.fan.setGpuFan(n, v) : 'fan.unavailable')),
 };
 
 export function coolingVariant(s, caseId = fanCase.get()) {
@@ -89,7 +89,7 @@ export function heatColor(temp, alpha = 1) {
 
 // Rotation that follows the duty: up to 1.2 turns per second at 100 %, eased; stops (no timer) at
 // 0 %, while the window is minimized and with Reduce motion. The rotors are turned with
-// lord.setStyle on their nodes (no React render per frame): lord-server repaints a cached raster.
+// insane.setStyle on their nodes (no React render per frame): insane-server repaints a cached raster.
 function useSpin(pct) {
   const { id } = useAppWindow() || {};
   const hidden = useWindowHidden(id);
@@ -106,7 +106,7 @@ function useSpin(pct) {
       s.v += (target - s.v) * 0.12;
       if (target === 0 && s.v < 0.01) { s.v = 0; return; }
       s.a = (s.a + s.v * 360 / FPS) % 360;
-      for (const [node, k] of s.rotors) call(() => lord.setStyle(node, 'rotate', +(s.a * k).toFixed(1)));
+      for (const [node, k] of s.rotors) call(() => insane.setStyle(node, 'rotate', +(s.a * k).toFixed(1)));
       tm = setTimeout(step, 1000 / FPS);
     };
     tm = setTimeout(step, 1000 / FPS);
@@ -327,7 +327,7 @@ function useBoxWidth(ref, fallback) {
     const m = () => {
       const n = ref.current;
       if (!n) return;
-      const x = Math.round(lord.getLayout(n.id)[2]);
+      const x = Math.round(insane.getLayout(n.id)[2]);
       if (x > 0) setW((o) => (Math.abs(x - o) > 1 ? x : o));
     };
     m();

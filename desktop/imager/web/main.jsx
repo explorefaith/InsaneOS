@@ -20,7 +20,7 @@ app.set((s) => ({ ...s, options: { ...s.options, ...platform.loadOptions() } }))
 await warm();
 createRoot(document.getElementById('root')).render(h(Root));
 
-// tests and screenshots (LORDOS_IMAGER_TEST_STATE, see src-tauri/src/main.rs): a starting state, and
+// tests and screenshots (INSANEOS_IMAGER_TEST_STATE, see src-tauri/src/main.rs): a starting state, and
 // optionally the write itself, only ever to a listed test device
 const ts = info().testState;
 if (ts && typeof ts === 'object') {

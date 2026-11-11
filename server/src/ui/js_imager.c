@@ -1,16 +1,16 @@
-/* js_imager.c — lord.imager: what the Insane OS Imager (apps/imager, docs/IMAGER.md) needs from C in the
+/* js_imager.c — insane.imager: what the Insane OS Imager (apps/imager, docs/IMAGER.md) needs from C in the
  * session. No root, nothing written, no programs run; everything that writes a disk or downloads is
  * an admin action (imager/imager_admin.c).
  *
- *   lord.imager.hashPassword(pass)        yescrypt crypt(3) hash ("$y$…", Debian's default), or null.
+ *   insane.imager.hashPassword(pass)        yescrypt crypt(3) hash ("$y$…", Debian's default), or null.
  *                                         pass: 1..1024 bytes, no NUL. The password never leaves
  *                                         this call; only the hash goes into the first-run file.
- *   lord.imager.wifiPsk(ssid, pass)       the WPA2 key, PBKDF2-HMAC-SHA1(pass, ssid, 4096, 32), as
+ *   insane.imager.wifiPsk(ssid, pass)       the WPA2 key, PBKDF2-HMAC-SHA1(pass, ssid, 4096, 32), as
  *                                         64 hex digits, or null. ssid 1..32 bytes, pass 8..63
  *                                         printable ASCII (IEEE 802.11i)
- *   lord.imager.checkSums(sums, sig)      verifies SHA256SUMS (text) with SHA256SUMS.sig against the
+ *   insane.imager.checkSums(sums, sig)      verifies SHA256SUMS (text) with SHA256SUMS.sig against the
  *                                         release key compiled into Insane OS: { ok, files: {name: hex} }
- *   lord.imager.imageInfo(path)           { kind: 'raw'|'xz', size, raw } of an image in the user's
+ *   insane.imager.imageInfo(path)           { kind: 'raw'|'xz', size, raw } of an image in the user's
  *                                         folders (raw: uncompressed size from the .xz index), or null */
 #include "js_imager.h"
 #include "../fsops.h"
@@ -160,8 +160,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("imageInfo", 1, f_image_info),
 };
 
-void js_imager_register(JSContext *c, JSValue lord) {
+void js_imager_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "imager", o);
+    JS_SetPropertyStr(c, insane, "imager", o);
 }

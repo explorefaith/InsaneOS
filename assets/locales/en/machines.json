@@ -332,7 +332,7 @@
   "cfg.secNote.files": "It may write only its disks, and read its firmware and ISO.",
   "cfg.secNote.network": "No sockets of its own: its network goes through passt, which listens on nothing.",
   "cfg.secNote.limits": "Its own cgroup: at most {limit} of memory and its vCPUs' worth of CPU.",
-  "cfg.secNote.display": "A separate sandboxed helper copies the picture; lord-server never sees QEMU's memory.",
+  "cfg.secNote.display": "A separate sandboxed helper copies the picture; insane-server never sees QEMU's memory.",
   "cfg.secNote.secrets": "A root password given at creation is kept only as a hash, until the first clean shutdown.",
   "cfg.save": "Save",
   "cfg.saving": "Saving…",

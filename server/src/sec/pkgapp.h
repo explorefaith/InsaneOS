@@ -1,15 +1,15 @@
-/* pkgapp.h — packaged apps: the third, read-only app root, /usr/lib/lordos-apps/<id>/ (docs/GO-LINK.md, 3.2).
+/* pkgapp.h — packaged apps: the third, read-only app root, /usr/lib/insaneos-apps/<id>/ (docs/GO-LINK.md, 3.2).
  * Installed by a .deb, with the layout of an unpacked .lpk. Never system code: it isn't in code-manifest.json and it
  * runs in the usual sandbox. A folder there counts only if root owns it and no one else can write it, and it loads
  * only signed by a key Insane OS's signed catalog lists as a Verified author, at every load. Only here does the
  * manifest's "companion" mean anything; the same manifest in a home .lpk is ignored. */
-#ifndef LORD_SEC_PKGAPP_H
-#define LORD_SEC_PKGAPP_H
+#ifndef INSANE_SEC_PKGAPP_H
+#define INSANE_SEC_PKGAPP_H
 
 #include "sign.h"
 #include <stddef.h>
 
-#define PKGAPP_ROOT "/usr/lib/lordos-apps"
+#define PKGAPP_ROOT "/usr/lib/insaneos-apps"
 #define PKGAPP_MANIFEST_MAX (256 * 1024)
 
 typedef struct {

@@ -1,9 +1,9 @@
-// Logs (the approved mock "Logs", 6.19): the machine's log (lord-vm, QEMU and passt), the guest's serial console, the
+// Logs (the approved mock "Logs", 6.19): the machine's log (insane-vm, QEMU and passt), the guest's serial console, the
 // guest's journal when the agent is on (7), and an Overview that brings what they say together (unified diagnostics:
 // state, sandbox, limits, network, engine, storage, recoveries, problems) with Copy report. A filter as you type, Level
 // (all, warnings, errors), Pause with a count of new lines, Clear view, Copy, Save. Read again every second; at most
-// the last 256 KB of a log and 50 000 lines are kept, and guest text has its escape sequences removed (lord.vm.log).
-import { View, Text, TextInput, ScrollView, Segmented, useAppWindow, wm, fs, clipboard, revealPath, t as tr } from '@lordos/sdk';
+// the last 256 KB of a log and 50 000 lines are kept, and guest text has its escape sequences removed (insane.vm.log).
+import { View, Text, TextInput, ScrollView, Segmented, useAppWindow, wm, fs, clipboard, revealPath, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { usePal, Btn, has } from './ui.jsx';
 import { readLog, reportText } from './diag.js';
@@ -16,7 +16,7 @@ function Overview({ dir, m, text }) {
   const p = usePal();
   if (!m) return null;
   const log = readLog(text);
-  const snaps = has() ? (lord.vm.snaps(dir)?.list || []).length : 0;
+  const snaps = has() ? (insane.vm.snaps(dir)?.list || []).length : 0;
   const rows = [
     ['state', `${tr(`machines.state.${m.state === 'stopped' && m.reason === 'suspended' ? 'suspended' : m.state || 'stopped'}`)}${m.detail ? ` — ${m.detail}` : ''}`],
     ['started', log.started || '—'],
@@ -72,9 +72,9 @@ export function Logs({ dir, name }) {
   useEffect(() => {
     const read = () => {
       if (!has()) return;
-      setM(lord.vm.list().find((x) => x.dir === dir) || null);
+      setM(insane.vm.list().find((x) => x.dir === dir) || null);
       const src = which === 'overview' ? 'vm' : which;
-      const t = lord.vm.log(dir, src, 262144);
+      const t = insane.vm.log(dir, src, 262144);
       if (paused) { held.current = Math.max(0, t.split('\n').filter((l) => l.trim()).length - text.split('\n').filter((l) => l.trim()).length); return; }
       held.current = 0;
       setText(t);

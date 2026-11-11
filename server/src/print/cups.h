@@ -8,8 +8,8 @@
  *
  * Each function builds its result as JSON in *out (JBuf from doc/wire.h) and returns 0, or -1 with
  * {"error": "..."} in *out. They block: they're called from print.c's threads. */
-#ifndef LORD_PRINT_CUPS_H
-#define LORD_PRINT_CUPS_H
+#ifndef INSANE_PRINT_CUPS_H
+#define INSANE_PRINT_CUPS_H
 
 #include <stddef.h>
 #include "../doc/wire.h"

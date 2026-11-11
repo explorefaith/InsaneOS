@@ -60,7 +60,7 @@ const badCases = {
   'a fractional count': (r) => { r.system.cpu.threads = 1.5; },
   'a bad result name': (r) => { r.bench.results['../../x'] = { value: 1 }; },
   'a result without value': (r) => { r.bench.results['cpu.js.1'] = { unit: 'runs/s' }; },
-  'a bad version': (r) => { r.lordos = '0.8.7; rm -rf /'; },
+  'a bad version': (r) => { r.insaneos = '0.8.7; rm -rf /'; },
   'a bad date': (r) => { r.createdAt = 'yesterday'; },
   'too many PCI devices': (r) => { r.system.pci = Array.from({ length: 129 }, () => r.system.pci[0]); },
   'a kernel option that is not CONFIG_': (r) => { r.system.software.kernelConfig.HOME = 'y'; },
@@ -84,19 +84,19 @@ const raw = {
   gpus: [{ card: 'card1', bus: 'pci', vendorId: '8086', deviceId: '46a8', vendor: 'Intel', device: 'Iris Xe', driver: 'i915', bootVga: true, renderNode: true, connectors: 4, connected: 1 }],
   network: [{ kind: 'wifi', driver: 'iwlwifi', up: true, speedMbps: null, mac: '3c:22:fb:12:34:56', ssid: 'HomeNet' }],
   storage: [{ name: 'nvme0n1', model: 'SSD', bytes: 512e9, rotational: false, removable: false, transport: 'nvme', link: '', serial: 'S64' }],
-  software: { kernel: '6.12.57', lordos: '0.8.7-beta', landlockAbi: 6, bpfLsm: true, cgroup2: true, live: false, home: '/home/alice', bootMedium: 'internal', bootLinkMbps: null, bootToRam: false, bootDevice: 'nvme0n1p2' },
+  software: { kernel: '6.12.57', insaneos: '0.8.7-beta', landlockAbi: 6, bpfLsm: true, cgroup2: true, live: false, home: '/home/alice', bootMedium: 'internal', bootLinkMbps: null, bootToRam: false, bootDevice: 'nvme0n1p2' },
   session: { composition: 'gpu', gpuInit: 'on', renderer: 'Mesa Intel', renderNode: '/dev/dri/renderD128', dmabuf: true, scanouts: 1, fixture: false },
 };
-const bench = { lordbench: 1, mode: 'quick', at: 1, status: 'done', lordos: '0.8.7-beta', live: true, results: { 'cpu.js.1': { value: 50, unit: 'runs/s', extra: 1 } }, secret: 'x' };
+const bench = { insanebench: 1, mode: 'quick', at: 1, status: 'done', insaneos: '0.8.7-beta', live: true, results: { 'cpu.js.1': { value: 50, unit: 'runs/s', extra: 1 } }, secret: 'x' };
 const built = buildShareReport({ report: raw, bench, compat: compatibility(raw), schema, date: '2026-10-28' });
 ok('the built report is valid', valid(built));
 const text = JSON.stringify(built);
 for (const s of ['alice', 'PF2ABCDE', '3c:22', 'HomeNet', 'renderD128', 'nvme0n1', 'S64', '0x430', 'sse4_2', '"at"', 'secret', 'fixture', '"extra"'])
   ok(`the built report leaves out ${s}`, !text.includes(s));
-eq('format, version, source', [built.format, built.version, built.source, built.createdAt, built.lordos], ['lordos-hwreport', 1, 'community', '2026-10-28', '0.8.7-beta']);
+eq('format, version, source', [built.format, built.version, built.source, built.createdAt, built.insaneos], ['insaneos-hwreport', 1, 'community', '2026-10-28', '0.8.7-beta']);
 eq('the bench keeps only listed fields', built.bench.results['cpu.js.1'], { value: 50, unit: 'runs/s' });
 ok('live from InsaneBench\'s flag', built.live === true);
-eq('a bench of another version is left out', buildShareReport({ report: raw, bench: { ...bench, lordos: '0.8.6-beta' }, compat: [], schema, date: '2026-10-28' }).bench, null);
+eq('a bench of another version is left out', buildShareReport({ report: raw, bench: { ...bench, insaneos: '0.8.6-beta' }, compat: [], schema, date: '2026-10-28' }).bench, null);
 ok('live from the report', buildShareReport({ report: { ...raw, software: { ...raw.software, live: true } }, compat: [], schema, date: '2026-10-28' }).live);
 ok('not live', !buildShareReport({ report: raw, compat: [], schema, date: '2026-10-28' }).live);
 eq('the boot medium is shared as a class', [built.system.software.bootMedium, built.system.software.bootLinkMbps, built.system.software.bootToRam, 'bootDevice' in built.system.software], ['internal', null, false, false]);
@@ -107,20 +107,20 @@ eq('pick caps arrays', pick(Array(40).fill({ kind: 'ethernet' }), schema.$defs.s
 eq('kind, vendors', [reportKind(laptop), gpuVendor(laptop), cpuVendor(laptop)], ['laptop', 'intel', 'intel']);
 eq('kind and vendors of the references', [reportKind(vm), gpuVendor(vm), cpuVendor(vm), reportKind(pi), gpuVendor(pi), cpuVendor(pi)], ['vm', 'virtual', 'intel', 'board', 'broadcom', 'arm']);
 const rows = Object.fromEntries(summaryRows(laptop));
-eq('summary rows', [rows.machine, rows.kind, rows.lordos, rows.live, rows.memory, rows.boot], ['LENOVO 21CB', 'laptop', '0.8.7-beta', 'yes', '15 GB', 'usb, 5000 Mbps']);
+eq('summary rows', [rows.machine, rows.kind, rows.insaneos, rows.live, rows.memory, rows.boot], ['LENOVO 21CB', 'laptop', '0.8.7-beta', 'yes', '15 GB', 'usb, 5000 Mbps']);
 eq('boot row with the copy to memory', Object.fromEntries(summaryRows(variant((r) => { r.system.software.bootToRam = true; delete r.system.software.bootLinkMbps; }))).boot, 'usb, toram');
 ok('no boot row when unknown', !summaryRows(variant((r) => { r.system.software.bootMedium = ''; r.system.software.bootLinkMbps = null; })).some(([k]) => k === 'boot'));
 ok('the summary carries the boot class', summaryText(laptop).includes('boot: usb, 5000 Mbps'));
 ok('the title says live', issueTitle(laptop).endsWith(', live)') && issueTitle(laptop).length <= TITLE_MAX);
 ok('a long machine name keeps the title short', issueTitle({ ...laptop, system: { ...laptop.system, machine: { vendor: 'V'.repeat(80), product: 'P'.repeat(80) } } }).length <= TITLE_MAX);
 const url = new URL(issueUrl(laptop));
-eq('the link goes to the template', [url.origin + url.pathname, url.searchParams.get('template'), url.searchParams.get('lordos')], ['https://github.com/lordbasex/Insane OS/issues/new', 'hardware-report.yml', '0.8.7-beta']);
-eq('only the title, version and summary travel in the link', [...url.searchParams.keys()], ['template', 'title', 'lordos', 'summary']);
+eq('the link goes to the template', [url.origin + url.pathname, url.searchParams.get('template'), url.searchParams.get('insaneos')], ['https://github.com/insaneos/Insane OS/issues/new', 'hardware-report.yml', '0.8.7-beta']);
+eq('only the title, version and summary travel in the link', [...url.searchParams.keys()], ['template', 'title', 'insaneos', 'summary']);
 ok('the summary is short', url.searchParams.get('summary').length <= 600 && issueUrl(laptop).length < 2000);
 ok('the summary has no report-only detail', !/i915.*46a8|totalKB|kernelConfig|results/.test(summaryText(laptop)));
-const taken = new Set(['lordos-hwreport-2026-10-28.json', 'lordos-hwreport-2026-10-28-2.html']);
-eq('file names skip taken ones', shareFileNames('2026-10-28', (f) => taken.has(f)), { json: 'lordos-hwreport-2026-10-28-3.json', html: 'lordos-hwreport-2026-10-28-3.html' });
-eq('file names with a bad date', shareFileNames('../x', () => false).json, 'lordos-hwreport-today.json');
+const taken = new Set(['insaneos-hwreport-2026-10-28.json', 'insaneos-hwreport-2026-10-28-2.html']);
+eq('file names skip taken ones', shareFileNames('2026-10-28', (f) => taken.has(f)), { json: 'insaneos-hwreport-2026-10-28-3.json', html: 'insaneos-hwreport-2026-10-28-3.html' });
+eq('file names with a bad date', shareFileNames('../x', () => false).json, 'insaneos-hwreport-today.json');
 const page = sharePage({ text: { title: 'Share <b>', step2: 'Attach {file}', open: 'Open the form' }, rows: [['Machine', '<script>alert(1)</script>']], url: 'https://github.com/x?a=1&b="2"', jsonName: 'r.json', lang: 'ar', rtl: true });
 ok('the page escapes everything', !page.includes('<script>alert') && page.includes('&lt;script&gt;') && page.includes('Share &lt;b&gt;') && page.includes('a=1&amp;b=&quot;2&quot;'));
 ok('the page is right to left for Arabic', page.includes('<html lang="ar" dir="rtl">'));
@@ -128,11 +128,11 @@ ok('the page runs nothing and loads nothing', !/<script|src=|@import|url\(/i.tes
 ok('the page names the file', page.includes('Attach r.json'));
 
 // ---- the workflow's checks (lib.mjs) ----
-const body = `Summary\n\n[lordos-hwreport-2026-10-28.json](https://github.com/user-attachments/files/123456/lordos-hwreport-2026-10-28.json)\n
-https://github.com/lordbasex/Insane OS/files/77/old.json and https://github.com/someone/else/files/88/evil.json
+const body = `Summary\n\n[insaneos-hwreport-2026-10-28.json](https://github.com/user-attachments/files/123456/insaneos-hwreport-2026-10-28.json)\n
+https://github.com/insaneos/Insane OS/files/77/old.json and https://github.com/someone/else/files/88/evil.json
 https://evil.example/user-attachments/files/1/x.json https://github.com/user-attachments/files/9/x.json.exe javascript:alert(1)`;
-eq('attachment links: GitHub\'s, this repository only, .json only', findAttachments(body, 'lordbasex/Insane OS'),
-  ['https://github.com/user-attachments/files/123456/lordos-hwreport-2026-10-28.json', 'https://github.com/lordbasex/Insane OS/files/77/old.json']);
+eq('attachment links: GitHub\'s, this repository only, .json only', findAttachments(body, 'insaneos/Insane OS'),
+  ['https://github.com/user-attachments/files/123456/insaneos-hwreport-2026-10-28.json', 'https://github.com/insaneos/Insane OS/files/77/old.json']);
 eq('at most three', findAttachments(Array.from({ length: 6 }, (_, i) => `https://github.com/user-attachments/files/${i}/a.json`).join(' '), 'a/b').length, 3);
 eq('a bad repository name matches only user-attachments', findAttachments('https://github.com/x/y/files/1/a.json', '../x'), []);
 eq('allowed hosts', ['https://github.com/user-attachments/files/1/a.json', 'https://objects.githubusercontent.com/x', 'https://github-production-user-asset-6210df.s3.amazonaws.com/x',
@@ -170,13 +170,13 @@ await throws('parse: __proto__', () => parseLimited('{"__proto__":{"x":1}}'), /n
 await throws('parse: not JSON (never evaluated)', () => parseLimited('({a:1})'));
 
 eq('privacy: nothing in the good reports', [privacyScan(laptop), privacyScan(vm), privacyScan(pi)], [[], [], []]);
-eq('privacy: what it finds', privacyScan({ a: 'eth 3c:22:fb:12:34:56', b: 'at 192.168.1.20', c: '4c4c4544-0042-3510-8051-b4c04f4e3732', d: 'me@example.org', e: 'saved in /home/alice/x', lordos: '0.8.4.1-beta', kernel: '10.0.0.1' }).map((x) => x.kind),
+eq('privacy: what it finds', privacyScan({ a: 'eth 3c:22:fb:12:34:56', b: 'at 192.168.1.20', c: '4c4c4544-0042-3510-8051-b4c04f4e3732', d: 'me@example.org', e: 'saved in /home/alice/x', insaneos: '0.8.4.1-beta', kernel: '10.0.0.1' }).map((x) => x.kind),
   ['mac', 'ipv4', 'uuid', 'email', 'path']);
 
 eq('plausible: the laptop', plausibility(laptop, { today: '2026-10-29' }), []);
 const silly = variant((r) => { r.bench.results['cpu.sha256.n'].value = 9e9; r.bench.results['mem.copy'].value = 5000; r.bench.results['gpu.scene'].value = 1e5; r.bench.results['cpu.matmul.n'].value = -1; r.system.memory.totalKB = 1000; });
 eq('implausible numbers', plausibility(silly, { today: '2026-10-29' }).map((f) => f.id), ['memory-size', 'beyond-ceiling', 'not-positive', 'beyond-ceiling', 'far-above-references']);
-eq('mismatches', plausibility(variant((r) => { r.bench.lordos = '0.8.6-beta'; r.bench.arch = 'aarch64'; r.bench.cpus = 4; r.live = false; r.createdAt = '2027-01-01'; }), { today: '2026-10-29' }).map((f) => f.id),
+eq('mismatches', plausibility(variant((r) => { r.bench.insaneos = '0.8.6-beta'; r.bench.arch = 'aarch64'; r.bench.cpus = 4; r.live = false; r.createdAt = '2027-01-01'; }), { today: '2026-10-29' }).map((f) => f.id),
   ['date-future', 'bench-version', 'live-mismatch', 'arch-mismatch', 'cpu-mismatch']);
 
 const today = { today: '2026-10-29' };
@@ -213,11 +213,11 @@ const entries = readReports(REPORTS_DIR, schema);
 eq('the accepted reports', entries.map((e) => [e.file, e.report.source, e.issue]), [['community-42-dell-latitude-7480.json', 'community', 42], ['reference-pi5-16gb.json', 'reference', null], ['reference-vm116.json', 'reference', null]]);
 const snap = buildSnapshot(entries);
 eq('the snapshot shipped is the one the reports give', fs.readFileSync(SNAPSHOT_FILE, 'utf8'), snapshotText(snap));
-eq('snapshot header', [snap.format, snap.version, snap.generated, snap.reports], ['lordos-hwsnapshot', 1, '2026-11-06', 3]);
-ok('snapshot entries add up', snap.devices.every((d) => d.works + d.limits + d.no === d.reports && d.references <= d.reports && /^\d+\.\d+\.\d+(\.\d+)?$/.test(d.lordos)));
+eq('snapshot header', [snap.format, snap.version, snap.generated, snap.reports], ['insaneos-hwsnapshot', 1, '2026-11-06', 3]);
+ok('snapshot entries add up', snap.devices.every((d) => d.works + d.limits + d.no === d.reports && d.references <= d.reports && /^\d+\.\d+\.\d+(\.\d+)?$/.test(d.insaneos)));
 ok('the snapshot is deterministic', snapshotText(buildSnapshot(readReports(REPORTS_DIR, schema))) === snapshotText(snap));
-eq('the virtio GPU is "works with limits" on VM 116', snap.devices.find((d) => d.key === 'pci:1af4:1050'), { key: 'pci:1af4:1050', component: 'gpu', name: 'Red Hat, Inc. Virtio 1.0 GPU', lordos: '0.8.5', works: 0, limits: 1, no: 0, reports: 1, references: 1 });
-eq('the first community report (#42) counts as community, not reference', snap.devices.find((d) => d.key === 'pci:8086:5916'), { key: 'pci:8086:5916', component: 'gpu', name: 'Intel Corporation HD Graphics 620', lordos: '0.8.8.4', works: 1, limits: 0, no: 0, reports: 1, references: 0 });
+eq('the virtio GPU is "works with limits" on VM 116', snap.devices.find((d) => d.key === 'pci:1af4:1050'), { key: 'pci:1af4:1050', component: 'gpu', name: 'Red Hat, Inc. Virtio 1.0 GPU', insaneos: '0.8.5', works: 0, limits: 1, no: 0, reports: 1, references: 1 });
+eq('the first community report (#42) counts as community, not reference', snap.devices.find((d) => d.key === 'pci:8086:5916'), { key: 'pci:8086:5916', component: 'gpu', name: 'Intel Corporation HD Graphics 620', insaneos: '0.8.8.4', works: 1, limits: 0, no: 0, reports: 1, references: 0 });
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hwreport-test-'));
 try {
   fs.writeFileSync(path.join(tmp, 'a.json'), JSON.stringify(laptop));
@@ -226,7 +226,7 @@ try {
   const e2 = readReports(tmp, schema);
   eq('index: issue and fixedIn (validated)', [e2[0].issue, e2[0].fixedIn], [42, { suspend: '0.8.8' }]);
   const s2 = buildSnapshot(e2);
-  eq('a community laptop in the snapshot', s2.devices.filter((d) => d.key === 'pci:8086:46a8').map((d) => [d.component, d.lordos, d.works, d.references]), [['gpu', '0.8.7', 1, 0]]);
+  eq('a community laptop in the snapshot', s2.devices.filter((d) => d.key === 'pci:8086:46a8').map((d) => [d.component, d.insaneos, d.works, d.references]), [['gpu', '0.8.7', 1, 0]]);
   ok('the machine key answers for its own rows only', s2.devices.filter((d) => d.key.startsWith('machine:')).map((d) => d.component).sort().join() === 'display,power,storage');
   fs.writeFileSync(path.join(tmp, 'b.json'), JSON.stringify(variant(badCases['a host name field'])));
   await throws('an invalid report stops the build', () => readReports(tmp, schema), /b\.json/);
@@ -246,11 +246,11 @@ eq('device keys of the laptop', keys.map((k) => `${k.component} ${k.key}`), [
   'display machine:LENOVO|21CB', 'storage machine:LENOVO|21CB', 'power machine:LENOVO|21CB', 'suspend machine:LENOVO|21CB',
   'gpu pci:8086:46a8', 'wifi wifi:iwlwifi', 'network net:e1000e', 'bluetooth bt:btusb', 'audio audio:HDA Intel PCH']);
 ok('no machine key for a virtual machine', deviceKeys(vm.system).every((k) => !k.key.startsWith('machine:')));
-const sn = { format: 'lordos-hwsnapshot', version: 1, generated: '2026-10-29', reports: 3, devices: [
-  { key: 'pci:8086:46a8', component: 'gpu', name: 'Iris Xe', lordos: '0.8.7', works: 2, limits: 1, no: 0, reports: 3, references: 0 },
-  { key: 'pci:8086:46a8', component: 'gpu', name: 'Iris Xe', lordos: '0.8.6', works: 0, limits: 0, no: 5, reports: 5, references: 0 },
-  { key: 'wifi:iwlwifi', component: 'wifi', name: 'iwlwifi', lordos: '0.8.7', works: 0, limits: 0, no: 1, reports: 1, references: 1 },
-  { key: 'machine:LENOVO|21CB', component: 'suspend', name: 'LENOVO 21CB', lordos: '0.8.7', works: 1, limits: 0, no: 0, reports: 1, references: 0 },
+const sn = { format: 'insaneos-hwsnapshot', version: 1, generated: '2026-10-29', reports: 3, devices: [
+  { key: 'pci:8086:46a8', component: 'gpu', name: 'Iris Xe', insaneos: '0.8.7', works: 2, limits: 1, no: 0, reports: 3, references: 0 },
+  { key: 'pci:8086:46a8', component: 'gpu', name: 'Iris Xe', insaneos: '0.8.6', works: 0, limits: 0, no: 5, reports: 5, references: 0 },
+  { key: 'wifi:iwlwifi', component: 'wifi', name: 'iwlwifi', insaneos: '0.8.7', works: 0, limits: 0, no: 1, reports: 1, references: 1 },
+  { key: 'machine:LENOVO|21CB', component: 'suspend', name: 'LENOVO 21CB', insaneos: '0.8.7', works: 1, limits: 0, no: 0, reports: 1, references: 0 },
 ] };
 const cf = communityFor(sn, laptop.system, '0.8.7-beta');
 eq('only the same Insane OS version', cf.gpu, [{ name: 'Intel Corporation Alder Lake-UP3 GT2 [Iris Xe Graphics]', works: 2, limits: 1, no: 0, reports: 3, references: 0 }]);

@@ -1,6 +1,6 @@
 // sidebar.jsx — PDF Viewer sidebar: thumbnails (only the visible ones are drawn, at
 // low priority) or the document outline (PDF bookmarks, collapsible).
-import { View, Text, Segmented, DocImage, t as tr } from '@lordos/sdk';
+import { View, Text, Segmented, DocImage, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { shown } from './geometry.js';
 
@@ -17,7 +17,7 @@ function Thumbs({ doc, sizes, page, onPage, cache, rot, invert, th }) {
   let y = 8;
   for (const hh of heights) { tops.push(y); y += hh; }
   const total = y + 8;
-  useEffect(() => { const id = setInterval(() => { if (box.current) { const l = lord.getLayout(box.current.id); if (l[3] !== h) setH(l[3]); } }, 300); return () => clearInterval(id); }, [h]);
+  useEffect(() => { const id = setInterval(() => { if (box.current) { const l = insane.getLayout(box.current.id); if (l[3] !== h) setH(l[3]); } }, 300); return () => clearInterval(id); }, [h]);
   // follow the current page
   useEffect(() => {
     if (tops[page] == null) return;

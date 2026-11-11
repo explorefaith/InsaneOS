@@ -1,7 +1,7 @@
 // Photos — image viewer and library (our own design, in the style of desktop viewers).
 //
-// The library is the XDG pictures folder, ~/Pictures by default (and its folders), with thumbnails in ~/.cache/lordos/thumbs. The
-// viewer decodes with lord-media (PNG, JPEG, animated GIF, WebP, BMP; HEIC/AVIF if FFmpeg can)
+// The library is the XDG pictures folder, ~/Pictures by default (and its folders), with thumbnails in ~/.cache/insaneos/thumbs. The
+// viewer decodes with insane-media (PNG, JPEG, animated GIF, WebP, BMP; HEIC/AVIF if FFmpeg can)
 // and C draws it: zoom, panning, rotation, full screen and slideshow. Edits (crop with aspect presets
 // and handles, a new size, rotation, brightness and contrast) are saved as a copy: the original is left
 // untouched. Markup opens the picture in the markup editor (arrows, text, redaction…; issue #30).
@@ -9,7 +9,7 @@ import {
   View, Text, Image, MediaView, ScrollView, SidebarItem, SectionTitle, Button, Slider, useTheme, useAppWindow, useKeyboard, useWindowState, wm,
   t as tr, errorText, media, useThumb, userDirs, fs, addListener, direction, print, ThemeProvider, ToolbarButton, ToolbarGroup, EmptyState, useStore, windows,
   Segmented, TextInput, Toggle, openMarkup, imageEdit as M,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const APP = 'photos';
@@ -90,7 +90,7 @@ function Viewer({ list, index, setIndex, onClose, winId, mode }) {
   const pinchK = useRef(1);           // trackpad pinch: scale already applied
   const idRef = useRef(0);
 
-  // File → Print menu (the dialog belongs to the system, to lord-doc)
+  // File → Print menu (the dialog belongs to the system, to insane-doc)
   useEffect(() => {
     if (!path) return;
     wm.setMenus(winId, [{ label: tr('photos.menu.file'), items: [
@@ -135,7 +135,7 @@ function Viewer({ list, index, setIndex, onClose, winId, mode }) {
   useEffect(() => { if (slide && mode !== 'fullscreen') wm.setFullscreen(winId, true); }, [slide]);
   useEffect(() => { if (mode !== 'fullscreen') setSlide(false); }, [mode]);
 
-  const layout = () => (box.current ? lord.getLayout(box.current.id) : [0, 0, 1, 1]);
+  const layout = () => (box.current ? insane.getLayout(box.current.id) : [0, 0, 1, 1]);
   // size of the (rotated) image and current scale
   const dims = () => {
     const w0 = info?.width || 1, h0 = info?.height || 1;

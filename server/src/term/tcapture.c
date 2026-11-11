@@ -1,6 +1,6 @@
 /* tcapture.c — Save to Passwords from the Terminal (see tcapture.h). The typed value lives only in one page
- * of locked memory (mlock, MADV_DONTDUMP; lord-server is not dumpable), is wiped with explicit_bzero on every
- * way out, and leaves only through tcap_value() to termfill.c, which sends it to lord-vault. */
+ * of locked memory (mlock, MADV_DONTDUMP; insane-server is not dumpable), is wiped with explicit_bzero on every
+ * way out, and leaves only through tcap_value() to termfill.c, which sends it to insane-vault. */
 #include "tcapture.h"
 
 #include <stdio.h>
@@ -61,7 +61,7 @@ static Slot *slot_of(int sid) {
 int tcap_excluded(const char *p) {
     /* the user's own login password: never kept by the Terminal */
     static const char *const own[] = { "sudo", "su", "doas", "passwd", "login", "pkexec", "chsh", "chfn", "gpasswd",
-                                       "systemd-ask-password", "systemd-tty-ask-password-agent", "lord-pkexec", NULL };
+                                       "systemd-ask-password", "systemd-tty-ask-password-agent", "insane-pkexec", NULL };
     for (int i = 0; own[i]; i++) if (!strcmp(p, own[i])) return 1;
     return 0;
 }

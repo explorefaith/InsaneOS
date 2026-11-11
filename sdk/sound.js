@@ -7,17 +7,17 @@
 //   sound.setVolume('sink', out.index, 0.5); sound.setMute('sink', out.index, true)
 import { createStore, useStore } from './store.js';
 
-const has = () => typeof lord.sound !== 'undefined';
+const has = () => typeof insane.sound !== 'undefined';
 const EMPTY = { connected: false, sinks: [], sources: [], inputs: [], outputs: [] };
-export const soundState = createStore(has() ? { ...EMPTY, ...lord.sound.state() } : EMPTY);
+export const soundState = createStore(has() ? { ...EMPTY, ...insane.sound.state() } : EMPTY);
 export const soundPeak = createStore({ source: -1, level: 0 });
 
-globalThis.__lordSound = (type, data) => {
+globalThis.__insaneSound = (type, data) => {
   if (type === 'state') soundState.set({ ...EMPTY, ...data });
   else if (type === 'peak') soundPeak.set(data);
 };
 
-const call = (fn, ...a) => (has() ? lord.sound[fn](...a) : false);
+const call = (fn, ...a) => (has() ? insane.sound[fn](...a) : false);
 export const sound = {
   available: has,
   setVolume: (kind, index, v) => call('setVolume', kind, index, v),

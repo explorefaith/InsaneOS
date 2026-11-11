@@ -279,7 +279,7 @@ int gpu_say_parse(const char *text, GpuSay *s) {
     char be[16], q[16], lang[16], mode[16];
     int n = 0;
     memset(s, 0, sizeof *s);
-    if (sscanf(text, "lord-say 1 %15s %15s %15s %15s%n", be, q, lang, mode, &n) != 4) return -1;
+    if (sscanf(text, "insane-say 1 %15s %15s %15s %15s%n", be, q, lang, mode, &n) != 4) return -1;
     if (strcmp(text + n, "\n") && text[n]) return -1;
     if (strcmp(be, "vulkan") && strcmp(be, "cpu")) return -1;
     if (strcmp(q, "hd") && strcmp(q, "standard")) return -1;
@@ -481,7 +481,7 @@ static int proc_stat(const char *proot, int pid, ProcStat *s) {
 
 /* the AI helpers Insane OS starts (docs/MONITOR.md, "GPU"): the model's table (apps/monitor/gpumodel.js) says what each is */
 static int ai_name(const char *comm) {
-    static const char *const ai[] = { "lord-tts", "lord-ocr", "lord-say" };
+    static const char *const ai[] = { "insane-tts", "insane-ocr", "insane-say" };
     for (size_t i = 0; i < sizeof ai / sizeof *ai; i++) if (!strcmp(comm, ai[i])) return 1;
     return 0;
 }
@@ -778,7 +778,7 @@ static void say_note(Js *b, const char *home, const ProcStat *s, unsigned uid, i
     GpuSay say;
     char p[PATH_MAX], t[128];
     if (!home || !*home) return;
-    pathf(p, sizeof p, "%s/.cache/lordos/say/%d", home, s->pid);
+    pathf(p, sizeof p, "%s/.cache/insaneos/say/%d", home, s->pid);
     int fd = p[0] ? open(p, O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK) : -1;
     if (fd < 0) return;
     struct stat st;
@@ -824,7 +824,7 @@ char *gpu_json(const char *root, const char *pci_ids, unsigned uid, int self, co
             jstr(&ai, s.comm);
             jp(&ai, ",\"state\":\"%c\",\"own\":%s}", s.state, own ? "true" : "false");
             fai = 0;
-            if (!strcmp(s.comm, "lord-say")) say_note(&say, home, &s, uid, &fsay);
+            if (!strcmp(s.comm, "insane-say")) say_note(&say, home, &s, uid, &fsay);
         }
         if (!own) continue;                                 /* another user's (or a sandboxed helper's) fds aren't ours to read */
         if (!strncmp(s.comm, "qemu-system", 11)) {

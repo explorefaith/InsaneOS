@@ -1,8 +1,8 @@
 // printdialog.jsx — the system print dialog (print.open in print.js). It is mounted by
 // startShell, so any app uses it without drawing anything of its own. The preview is the same
-// confined PDF reader (lord-doc): what you see is what is sent to CUPS.
+// confined PDF reader (insane-doc): what you see is what is sent to CUPS.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, addListener, mainBox } from '@lordos/runtime';
+import { View, Text, addListener, mainBox } from '@insaneos/runtime';
 import { useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { t, locale } from './i18n.js';
@@ -138,13 +138,13 @@ function Dialog({ req }) {
     setBusy(true);
     try {
       if (dest === PDF_DEST) {
-        const dir = `${lord.fs.home()}/${['Documentos', 'Documents'].find((d) => { try { return lord.fs.stat(d).dir; } catch (e) { return false; } }) || ''}`.replace(/\/$/, '');
+        const dir = `${insane.fs.home()}/${['Documentos', 'Documents'].find((d) => { try { return insane.fs.stat(d).dir; } catch (e) { return false; } }) || ''}`.replace(/\/$/, '');
         const base = String(src.title || t('print.untitled')).replace(/\.[^.]+$/, '').replace(/[/\\\u0000-\u001f]/g, '_').slice(0, 80) || 'pdf';
         let name = `${base}.pdf`;
-        for (let i = 2; i < 500; i++) { try { lord.fs.stat(`${dir}/${name}`); name = `${base} ${i}.pdf`; } catch (e) { break; } }
+        for (let i = 2; i < 500; i++) { try { insane.fs.stat(`${dir}/${name}`); name = `${base} ${i}.pdf`; } catch (e) { break; } }
         const out = `${dir}/${name}`;
         if (blob) saveBlob(blob, out);
-        else lord.fs.copy(src.path, out, false);
+        else insane.fs.copy(src.path, out, false);
         finish({ saved: out });
         return;
       }

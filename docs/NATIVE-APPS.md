@@ -3,7 +3,7 @@
 Besides the apps bundled with the theme (`apps/`), Insane OS installs third-party native apps from
 **.lpk** packages:
 
-- they install without root, in the home folder (`~/.local/share/lordos/apps/<id>/`);
+- they install without root, in the home folder (`~/.local/share/insaneos/apps/<id>/`);
 - they open like any other Insane OS app (app launcher, Dock, start menu);
 - they can ship **WebAssembly** modules for code that has to be fast (see `WASM.md`).
 
@@ -49,9 +49,9 @@ Manifest rules:
 - `name` and `description` can be a string or an object keyed by language.
 - `version` starts with a digit.
 - `icon` is required: every app has its own icon. Without it, `tools/lpk.mjs` won't package and
-  lord-server won't install.
+  insane-server won't install.
 
-When installing, lord-server rejects the package if it finds:
+When installing, insane-server rejects the package if it finds:
 
 - symbolic links, hard links or devices;
 - absolute paths, paths with `..` or with components starting with `.`;
@@ -72,8 +72,8 @@ node tools/lpk.mjs examples/apps/fractal            # → fractal-1.1.0.lpk
 ```
 
 `tools/lpk.mjs` bundles `index.jsx` with esbuild, but **without** React or the SDK. The app uses
-those of the running theme, which the SDK shares in `globalThis.__lordos.require()`:
-`react`, `react/jsx-runtime`, `@lordos/sdk` and `@lordos/runtime`. That keeps the app small
+those of the running theme, which the SDK shares in `globalThis.__insaneos.require()`:
+`react`, `react/jsx-runtime`, `@insaneos/sdk` and `@insaneos/runtime`. That keeps the app small
 (Fractal weighs 5 KB) and lets it share the SDK's state: windows, language, clipboard. `icon.png`,
 `locales/` and `assets/` are added too.
 
@@ -101,7 +101,7 @@ Calendar, Contacts, Reminders and, in 0.8.5, the hidden Sandbox Probe), which In
 against its signed manifest before running them (see [SIGNING.md](SIGNING.md), "Verified system
 code"), and the Store never offers to remove them ("System app — part of Insane OS"). An installed
 `.lpk` is never a system app, even with the same id: the theme's app wins and the package is not
-listed. `isSystemApp(id)` from `@lordos/sdk` tells them apart.
+listed. `isSystemApp(id)` from `@insaneos/sdk` tells them apart.
 
 **Each system app has its own version (0.8.5).** Every `apps/<id>/manifest.json` carries a `version`
 (all start at `0.8.5`); `tools/build-theme.mjs` refuses an app without a valid semver one
@@ -123,13 +123,13 @@ Since M8 there is **package signing** and a **permissions and isolation** model 
 - **Permissions**: the manifest's `permissions` are declared and shown; the system asks the
   first time (a system-drawn prompt) and stores the decision where the app can't write it; they are
   reviewed in Settings → Privacy.
-- **Isolation**: each installed app runs as **its own process** (`lord-server --app <id>`), with
+- **Isolation**: each installed app runs as **its own process** (`insane-server --app <id>`), with
   its own sandbox (Landlock + seccomp + cgroup, `server/src/sec`). It is drawn as a Wayland
-  client with the theme's frame and talks to `lord-server` only through the broker, which checks
+  client with the theme's frame and talks to `insane-server` only through the broker, which checks
   every permission. The SDK API is the same: the app doesn't change. Its files live in
-  `~/.local/share/lordos/appdata/<id>`.
+  `~/.local/share/insaneos/appdata/<id>`.
 
-What **always** limits any app (installed or not): lord-server runs without root, `lord.fs`
+What **always** limits any app (installed or not): insane-server runs without root, `insane.fs`
 writes only in the home folder and the user's mounts (since 0.8.5 it reads the whole tree as the
 user, except `/proc`, `/sys`, `/dev` and `/run`; an isolated app's broker keeps only its data
 folder), never to the launch/install folders, the settings or `permisos.json`, and JS can't run

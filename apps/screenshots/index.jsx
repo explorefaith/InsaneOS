@@ -13,7 +13,7 @@ import {
   View, Text, Image, MediaView, Toggle, Segmented, GroupBox, FormRow, clipboard,
   useTheme, useAppWindow, useStore, useWindows, wm, windows, typeScale,
   t as tr, media, userDirs, fs, addListener, addShortcuts, createStore, windowTitle, settings, useSettings, notify, toast, errorText, dndActive, appNotifyPrefs,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { captureRect, displaysToCapture, displayAt, dragRect, capturePixel, magnify, middleColor, LOUPE_PX, LOUPE_ZOOM } from './geometry.js';
 import { ocrLangs, cleanText } from './ocr.js';
@@ -81,7 +81,7 @@ async function finish(handle, { copy = true } = {}) {
   showThumb(handle, path, failed ? failed.what : null);
 }
 
-// The capture was taken but couldn't be saved or copied (lord-media missing, a full disk…): said, never silent
+// The capture was taken but couldn't be saved or copied (insane-media missing, a full disk…): said, never silent
 function notSaved({ what, error }) {
   const title = tr(what === 'copy' ? 'screenshots.notCopied' : what === 'both' ? 'screenshots.notKept' : 'screenshots.notSaved');
   const body = errorText(error || 'media.noHelper');
@@ -92,7 +92,7 @@ function notSaved({ what, error }) {
 function showThumb(handle, path, failed = null) {
   const id = wm.open(APP, { instance: 'thumb', args: { handle, path, failed } });
   const w = 240, h = 150;
-  wm.setPip(id, { x: lord.screen.width - w - 20, y: lord.screen.height - h - 90, w, h });
+  wm.setPip(id, { x: insane.screen.width - w - 20, y: insane.screen.height - h - 90, w, h });
 }
 
 // takes the screen once a frame without our windows was drawn (it closes them first)
@@ -105,7 +105,7 @@ function withTimer(fn) {
   const secs = opts().timer;
   if (!secs) { fn(); return; }
   const id = wm.open(APP, { instance: 'count', args: { secs, start: Date.now() } });
-  wm.setPip(id, { x: Math.round(lord.screen.width / 2 - 60), y: Math.round(lord.screen.height / 2 - 60), w: 120, h: 120 });
+  wm.setPip(id, { x: Math.round(insane.screen.width / 2 - 60), y: Math.round(insane.screen.height / 2 - 60), w: 120, h: 120 });
   setTimeout(() => { wm.close(id, true); setTimeout(fn, 180); }, secs * 1000);
 }
 
@@ -125,7 +125,7 @@ async function allowed(ask) {
     return got;
   } catch (e) { refused(e); return null; }
 }
-// d: a display of lord.screen.displays (captured at its own resolution), or null for Settings' choice
+// d: a display of insane.screen.displays (captured at its own resolution), or null for Settings' choice
 const grab = (d) => allowed(() => media.screenshot(APP, d ? { display: d.id } : undefined));
 
 // ❖⇧4 on every display at once: a capture and a full-screen overlay per display (geometry.js), sharing one
@@ -139,7 +139,7 @@ function endArea(keep) {
   for (const sh of a.shots) if (sh.handle !== keep) media.close(sh.handle);
 }
 // A window alone (issue #70): the screen painted again up to that window and no further, so what covered it
-// (other windows, a menu, the Dock) is left out and the window is whole. null when lord-server can't (a window
+// (other windows, a menu, the Dock) is left out and the window is whole. null when insane-server can't (a window
 // the theme draws without a frame node, or one gone meanwhile): the still is cropped as before.
 async function windowAlone(r, shot) {
   const node = r && r.win ? wm.frameNode(r.win) : 0;
@@ -158,7 +158,7 @@ async function areaDone(r, at) {
   }
   // r is in logical pixels; the capture is at its display's physical resolution (2× at 200 %)
   const info = media.info(shot.handle);
-  const p = info && captureRect(r, info.width, info.height, lord.screen, shot.display);
+  const p = info && captureRect(r, info.width, info.height, insane.screen, shot.display);
   if (!p) { media.close(shot.handle); return; }
   // a window keeps its own shape: the corners outside its rounded frame come out transparent (issue #70)
   const c = media.crop(shot.handle, p.x, p.y, p.w, p.h, a.mode === 'window' ? p.radius : 0);
@@ -167,7 +167,7 @@ async function areaDone(r, at) {
   await finish(c);
 }
 
-// "Copy the text": the selection read by the lord-ocr helper, in the interface's languages, to the clipboard
+// "Copy the text": the selection read by the insane-ocr helper, in the interface's languages, to the clipboard
 async function copyText(handle) {
   if (!handle) return;
   try {
@@ -183,7 +183,7 @@ function loupeAt(a, x, y) {
   const shot = a.shots.find((sh) => !sh.display || (x >= sh.display.x && y >= sh.display.y && x < sh.display.x + sh.display.w && y < sh.display.y + sh.display.h));
   const info = shot && media.info(shot.handle);
   if (!info) return null;
-  const p = capturePixel(x, y, info.width, info.height, lord.screen, shot.display);
+  const p = capturePixel(x, y, info.width, info.height, insane.screen, shot.display);
   const half = LOUPE_PX >> 1;
   const buf = media.pixels(shot.handle, p.x - half, p.y - half, LOUPE_PX, LOUPE_PX);
   if (!buf) return null;
@@ -199,12 +199,12 @@ export const capture = {
   // ❖⇧3: a file per display, as other systems do
   full: () => afterHide(() => withTimer(async () => {
     let first = true;
-    for (const d of displaysToCapture(lord.screen)) { const h = await grab(d); if (!h) return; await finish(h, { copy: first }); first = false; }
+    for (const d of displaysToCapture(insane.screen)) { const h = await grab(d); if (!h) return; await finish(h, { copy: first }); first = false; }
   })),
   area: (mode = 'area') => afterHide(() => withTimer(async () => {
     endArea();
     const shots = [];
-    for (const d of displaysToCapture(lord.screen)) {
+    for (const d of displaysToCapture(insane.screen)) {
       const h = await grab(d);
       if (!h) { shots.forEach((sh) => media.close(sh.handle)); return; }
       shots.push({ handle: h, display: d });
@@ -236,13 +236,13 @@ export const capture = {
         }
       });
       const rid = wm.open(APP, { instance: 'rec' });
-      wm.setPip(rid, { x: lord.screen.width - 210, y: 40, w: 190, h: 44 });
+      wm.setPip(rid, { x: insane.screen.width - 210, y: 40, w: 190, h: 44 });
     }), 220);
   },
 };
 
 // global shortcuts
-const hasMedia = () => typeof lord !== 'undefined' && !!lord.media;
+const hasMedia = () => typeof insane !== 'undefined' && !!insane.media;
 // While a selection is open its keys are shortcuts: the dispatcher takes them, so they never reach the app in
 // front as well (a C or a Space used to be typed into a Terminal under the overlay).
 const selecting = () => !!area.get();
@@ -337,7 +337,7 @@ function Overlay({ index }) {
       {/* the magnifier: the capture's pixels around the pointer, its color and the capture pixel's coordinates; it
           flips to the other side near the display's right or bottom edge */}
       {a.mode !== 'window' && here && a.loupe ? (() => {
-        const size = LOUPE_PX * LOUPE_ZOOM, w = d ? d.w : lord.screen.width, h = d ? d.h : lord.screen.height;
+        const size = LOUPE_PX * LOUPE_ZOOM, w = d ? d.w : insane.screen.width, h = d ? d.h : insane.screen.height;
         const lx = p.x + 24 + size > w ? p.x - 24 - size : p.x + 24, ly = p.y + 24 + size + 40 > h ? p.y - 24 - size - 40 : p.y + 24;
         return (
           <View style={{ position: 'absolute', left: lx, top: ly, width: size, pointerEvents: 'none', borderRadius: 10, overflow: 'hidden',
@@ -374,8 +374,8 @@ function Thumb({ handle, path, failed }) {
   return (
     <View style={{ flex: 1 }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onClick={() => {
-        const w = Math.min(1000, lord.screen.width - 80), h = Math.min(680, lord.screen.height - 140);
-        wm.open(APP, { instance: `edit${handle}`, args: { handle, path }, frame: { x: Math.round((lord.screen.width - w) / 2), y: 60, w, h } });
+        const w = Math.min(1000, insane.screen.width - 80), h = Math.min(680, insane.screen.height - 140);
+        wm.open(APP, { instance: `edit${handle}`, args: { handle, path }, frame: { x: Math.round((insane.screen.width - w) / 2), y: 60, w, h } });
         setTimeout(() => wm.close(win.id, true), 50);
       }}>
       <MediaView media={handle} style={{ flex: 1 }} />

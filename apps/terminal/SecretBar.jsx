@@ -1,10 +1,10 @@
 // SecretBar.jsx — Passwords in the Terminal (docs/TERMINAL.md): when the program in a pane asks for a
-// password (lord-server reads it from the pty: echo off, and a prompt that names one), a bar offers the
-// Passwords entries. The one picked goes from lord-vault to the pty in C (lord.term.fill, termfill.c):
+// password (insane-server reads it from the pty: echo off, and a prompt that names one), a bar offers the
+// Passwords entries. The one picked goes from insane-vault to the pty in C (insane.term.fill, termfill.c):
 // this code only ever sees the entries' titles and user names, never a password. "Type It" closes the bar.
 // No text field here: whatever is typed while the bar is open goes to the program, which is asking for
 // a password.
-import { View, Text, useTheme, launchApp, vaultRequest, t as T } from '@lordos/sdk';
+import { View, Text, useTheme, launchApp, vaultRequest, t as T } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { meta, patchMeta, toast } from './state.js';
 import { secretHost, rankEntries } from './secret.js';
@@ -12,10 +12,10 @@ import { secretHost, rankEntries } from './secret.js';
 export function SecretBar({ sid, wid, prompt }) {
   const th = useTheme();
   const [list, setList] = useState(null);     // null: closed; 'locked' | 'none' | [entries]
-  // who asks, from its own executable and arguments (lord-server reads /proc), not from the text it printed: a
+  // who asks, from its own executable and arguments (insane-server reads /proc), not from the text it printed: a
   // script that prints "ana@bank's password:" shows as itself, and its host is not taken from that text
   const [who, setWho] = useState(null);
-  useEffect(() => { try { setWho(lord.term.asking(sid)); } catch (e) { setWho(null); } }, [sid, prompt]);
+  useEffect(() => { try { setWho(insane.term.asking(sid)); } catch (e) { setWho(null); } }, [sid, prompt]);
   const program = who?.program || '';
   const host = who?.host || (program === 'git' ? secretHost(prompt, '') : '') || (program ? '' : secretHost(prompt, meta.get()[sid]?.host));
 
@@ -33,7 +33,7 @@ export function SecretBar({ sid, wid, prompt }) {
 
   const pick = (e) => {
     setList(null);
-    if (!lord.term.fill(sid, 'main', e.id, 'password', 0)) toast(wid, T('terminal.secret.failed'));
+    if (!insane.term.fill(sid, 'main', e.id, 'password', 0)) toast(wid, T('terminal.secret.failed'));
   };
   const btn = (label, onClick, primary) => (
     <View onClick={onClick} style={{ paddingHorizontal: 10, height: 24, borderRadius: 6, alignItems: 'center', justifyContent: 'center',

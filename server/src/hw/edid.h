@@ -2,8 +2,8 @@
  * Used to name displays in Settings → Displays and to store each display's configuration by
  * its identity (vendor, product and serial number) rather than by connector. See
  * docs/SETTINGS.md, "Displays". */
-#ifndef LORD_HW_EDID_H
-#define LORD_HW_EDID_H
+#ifndef INSANE_HW_EDID_H
+#define INSANE_HW_EDID_H
 
 #include <stddef.h>
 #include <stdint.h>

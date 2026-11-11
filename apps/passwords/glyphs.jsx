@@ -3,7 +3,7 @@
 // eye / clip / clock / shield shapes used by the detail pane and the dialogs.
 // A category stores the name of its glyph ("globe", "key"…); categories saved by older versions
 // stored an emoji, which iconKind() maps to the closest glyph.
-import { View, Text, useTheme } from '@lordos/sdk';
+import { View, Text, useTheme } from '@insaneos/sdk';
 
 // The glyphs a user category can pick (Settings → New category), in picker order.
 export const GLYPH_KINDS = ['folder', 'globe', 'mail', 'bank', 'card', 'network', 'wifi', 'terminal', 'database', 'apps', 'key', 'braces',

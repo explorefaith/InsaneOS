@@ -1,8 +1,8 @@
-// vault.js — Passwords and the system keyring: talks to lord.vault (the confined helper
-// lord-vault, see docs/PASSWORDS.md). Everything is asynchronous: requests return promises and a
-// timer reads the replies (lord.vault.poll); the desktop never waits.
+// vault.js — Passwords and the system keyring: talks to insane.vault (the confined helper
+// insane-vault, see docs/PASSWORDS.md). Everything is asynchronous: requests return promises and a
+// timer reads the replies (insane.vault.poll); the desktop never waits.
 //
-//   vaultAvailable()                                is lord-vault there?
+//   vaultAvailable()                                is insane-vault there?
 //   vaultRequest(op, args, { files })               → promise with the reply ({ ok, … }) or an error with .code
 //   onVaultEvent(fn)                                events: locked, unlocked, changed, touch, ss-prompt, keyring-mismatch, crash
 //   keyring.set(app, { service, account, secret, label }) / get(app, { service, account }) / remove / list
@@ -12,15 +12,15 @@
 //   <KeyringPrompt />                               system prompt to unlock the keyring (mounted by startShell)
 //   <AutofillButton app service|url|ssid|host account? onFill />   "fill from Passwords" next to a login field
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, mainBox } from '@lordos/runtime';
+import { View, Text, mainBox } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { t } from './i18n.js';
 import { TextInput, Button } from './components.jsx';
 import { Overlay } from './layers.js';
 
-const has = () => typeof lord !== 'undefined' && typeof lord.vault !== 'undefined';
-export const vaultAvailable = () => has() && lord.vault.available();
+const has = () => typeof insane !== 'undefined' && typeof insane.vault !== 'undefined';
+export const vaultAvailable = () => has() && insane.vault.available();
 
 const waiting = new Map();          // id → { resolve, reject }
 const listeners = new Set();
@@ -47,7 +47,7 @@ function dispatch(m) {
 
 function pump() {
   let s = null;
-  try { s = lord.vault.poll(); } catch (e) { s = null; }
+  try { s = insane.vault.poll(); } catch (e) { s = null; }
   if (s) {
     let list = [];
     try { list = JSON.parse(s); } catch (e) { list = []; }
@@ -69,9 +69,9 @@ function startSlow() { if (!slow && has()) slow = setInterval(pump, 600); }
 export function vaultRequest(op, args = {}, { files, fds } = {}) {
   if (!has()) return Promise.reject(Object.assign(new Error('unavailable'), { code: 'unavailable' }));
   let id;
-  // files: paths opened by lord-server (shell); fds: files picked in the system dialog (app process)
-  try { id = lord.vault.request(JSON.stringify({ op, ...args }), files || fds ? { files, fds } : undefined); }
-  // lord.vault.request throws translated errors with a code (server/src/ui/js_err.h)
+  // files: paths opened by insane-server (shell); fds: files picked in the system dialog (app process)
+  try { id = insane.vault.request(JSON.stringify({ op, ...args }), files || fds ? { files, fds } : undefined); }
+  // insane.vault.request throws translated errors with a code (server/src/ui/js_err.h)
   catch (e) { return Promise.reject(Object.assign(new Error(e.message), { code: e.code === 'vault.unavailable' ? 'unavailable' : 'file' })); }
   startSlow();
   return new Promise((resolve, reject) => {
@@ -89,19 +89,19 @@ export function onVaultEvent(fn) {
 }
 
 // ---- the session keyring, per app ----
-// In an isolated .lpk app (lord-server --app <id>) there is no lord.vault: lord.keyring goes through
-// the broker, and lord-server sets the owner from the verified app id ("app.<id>"), so the `app`
+// In an isolated .lpk app (insane-server --app <id>) there is no insane.vault: insane.keyring goes through
+// the broker, and insane-server sets the owner from the verified app id ("app.<id>"), so the `app`
 // argument is ignored there. Reading another app's item makes the system ask the user first.
 // Errors carry the same short codes in both cases (locked, no-keyring, not-found, not-shared,
 // unavailable); `errorCode` keeps the full code (keyring.locked…) and `message` is translated.
 
-const hasAppKeyring = () => typeof lord !== 'undefined' && !has() && lord.keyring && typeof lord.keyring.request === 'function';
+const hasAppKeyring = () => typeof insane !== 'undefined' && !has() && insane.keyring && typeof insane.keyring.request === 'function';
 const KR_SHORT = { 'keyring.locked': 'locked', 'keyring.noKeyring': 'no-keyring', 'keyring.notFound': 'not-found',
   'keyring.notShared': 'not-shared', 'keyring.badRequest': 'bad-request', 'keyring.saveFailed': 'save', 'vault.unavailable': 'unavailable' };
 
 function appKeyring(op, service = '', account = '', label = '', secret) {
   return Promise.resolve().then(() => {
-    try { return JSON.parse(lord.keyring.request(op, String(service), String(account), String(label), secret == null ? '' : String(secret))); }
+    try { return JSON.parse(insane.keyring.request(op, String(service), String(account), String(label), secret == null ? '' : String(secret))); }
     catch (e) { throw Object.assign(e, { errorCode: e.code, code: KR_SHORT[e.code] || 'error' }); }
   });
 }
@@ -117,7 +117,7 @@ export const keyring = {
   remove: (app, { service, account = '' }) => (hasAppKeyring() ? appKeyring('delete', service, account) : vaultRequest('kr-del', { owner: app, service, account })),
   list: async (app) => (hasAppKeyring() ? await appKeyring('list') : await vaultRequest('kr-list', { owner: app })).items || [],
   // the user agreed that `app` may use another app's item (the system asks, not the app); not
-  // available inside an isolated app: there lord-server asks the user by itself on get
+  // available inside an isolated app: there insane-server asks the user by itself on get
   share: (id, app, allow = true) => (hasAppKeyring()
     ? Promise.reject(Object.assign(new Error('denied'), { code: 'denied' }))
     : vaultRequest('kr-share', { admin: true, id, app, allow })),
@@ -147,7 +147,7 @@ export async function autofill(app, { url, service, ssid, host: exact } = {}) {
   return list.filter((e) => !e.trash && hit(e)).map((e) => ({ id: e.id, title: e.title, username: e.sub || '' }));
 }
 
-// The user picked one: username and password (the password leaves lord-vault only now).
+// The user picked one: username and password (the password leaves insane-vault only now).
 export async function autofillReveal(id) {
   const e = (await vaultRequest('get', { id, reveal: true })).entry;
   const f = (k) => e.f.find((x) => x.k === k)?.v || '';
@@ -172,7 +172,7 @@ if (has()) {
       const all = prompts.get();
       for (const p of all) {
         if (p.local) { p.local(true); continue; }
-        try { lord.vault.promptDone(p.prompt, true); } catch (e) { /* */ }
+        try { insane.vault.promptDone(p.prompt, true); } catch (e) { /* */ }
       }
       prompts.set((l) => l.filter((p) => !all.includes(p)));
     }
@@ -196,7 +196,7 @@ export function KeyringPrompt() {
     const all = prompts.get();
     for (const p of all) {
       if (p.local) { p.local(!!ok); continue; }
-      try { lord.vault.promptDone(p.prompt, ok); } catch (e) { /* */ }
+      try { insane.vault.promptDone(p.prompt, ok); } catch (e) { /* */ }
     }
     prompts.set((l) => l.filter((p) => !all.includes(p)));
   };
@@ -222,7 +222,7 @@ export function KeyringPrompt() {
 //
 //   <AutofillButton app="settings" service="wifi:Casa" ssid="Casa" onFill={({ username, password }) => …} />
 // Offers what the app saved in the session keyring (service) and matching Passwords entries.
-// The secret leaves lord-vault only when the user picks one.
+// The secret leaves insane-vault only when the user picks one.
 export function AutofillButton({ app, service, account = '', url, ssid, host, onFill }) {
   const th = useTheme();
   const [open, setOpen] = useState(false);

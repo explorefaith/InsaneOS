@@ -9,17 +9,17 @@
  *   - a successful login clears the failure count (not the strikes);
  *   - there is no per-account lockout (it would let anybody lock the real user out): accounts only
  *     get a slowdown (rl_user_delay).
- * The table lives in lord-sessiond's shared memory (root processes only) and is saved to
- * /var/lib/lordos/remote/blocklist (root, 0600) so blocks survive a restart. */
-#ifndef LORD_REMOTE_LOCKOUT_H
-#define LORD_REMOTE_LOCKOUT_H
+ * The table lives in insane-sessiond's shared memory (root processes only) and is saved to
+ * /var/lib/insaneos/remote/blocklist (root, 0600) so blocks survive a restart. */
+#ifndef INSANE_REMOTE_LOCKOUT_H
+#define INSANE_REMOTE_LOCKOUT_H
 
 #include <stddef.h>
 
 #define RL_MAX 256
 #define RL_FAILS 3                      /* failures that block */
 #define RL_WINDOW (24 * 3600.0)         /* failures and strikes older than this are forgotten */
-#define RL_FILE_DIR "/var/lib/lordos/remote"
+#define RL_FILE_DIR "/var/lib/insaneos/remote"
 #define RL_FILE RL_FILE_DIR "/blocklist"
 #define RL_REQUESTS RL_FILE_DIR "/requests"   /* "unblock <cidr>" lines from the admin helper */
 
@@ -42,7 +42,7 @@ double rl_duration(int strikes);
 /* Removes the entries whose key lies inside `cidr` (text, ipnet.h); returns how many. */
 int    rl_unblock(RlTable *t, const char *cidr);
 void   rl_expire(RlTable *t, double now);
-/* Text of the blocklist file (lord-sessiond writes it with an atomic rename, 0600). rl_format
+/* Text of the blocklist file (insane-sessiond writes it with an atomic rename, 0600). rl_format
  * returns the length or -1; rl_parse replaces the table and skips invalid, non-canonical and expired
  * lines. */
 int    rl_format(const RlTable *t, double now, char *out, size_t n);

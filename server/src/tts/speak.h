@@ -1,6 +1,6 @@
-/* speak.h — reading text aloud from the desktop: lord-server starts lord-say (speak.c, docs/VOICE.md). */
-#ifndef LORD_SPEAK_H
-#define LORD_SPEAK_H
+/* speak.h — reading text aloud from the desktop: insane-server starts insane-say (speak.c, docs/VOICE.md). */
+#ifndef INSANE_SPEAK_H
+#define INSANE_SPEAK_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -9,11 +9,11 @@
 
 #define SPEAK_TEXT_MAX (1u << 20)
 
-int speak_available(void);                                  /* lord-say and lord-tts are installed */
+int speak_available(void);                                  /* insane-say and insane-tts are installed */
 int speak_start(const char *text, size_t n, const char *lang, const char *voice);   /* ends the reading before; lang: the interface's
                                     (es, en, pt or NULL), for a text too short to tell; voice: say's -v, or NULL */
 void speak_stop(void);
-int speak_state(int *exit_code);    /* 1 while reading; exit_code: how the last one ended (lord-say's status), -1 none */
+int speak_state(int *exit_code);    /* 1 while reading; exit_code: how the last one ended (insane-say's status), -1 none */
 int speak_pause(int on);            /* freezes the reading where it is (1) or goes on (0); -1 when nothing is reading */
 int speak_paused(void);
 int speak_replay(void);             /* reads the last text again from the start; -1 when there is none */

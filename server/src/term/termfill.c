@@ -10,7 +10,7 @@
 #include <time.h>
 
 #define FILL_MAX 4
-#define FILL_WAIT_MS 15000              /* lord-vault answers in milliseconds; a forgotten one is dropped */
+#define FILL_WAIT_MS 15000              /* insane-vault answers in milliseconds; a forgotten one is dropped */
 
 static struct { int vid, sid, save; double at; } fills[FILL_MAX];     /* save: saving a typed password, not a fill */
 
@@ -20,7 +20,7 @@ static double mono_ms(void) {
     return ts.tv_sec * 1e3 + ts.tv_nsec / 1e6;
 }
 
-/* entry ids are lord-vault's (hex and dashes); field keys are short names ("password", "pin") */
+/* entry ids are insane-vault's (hex and dashes); field keys are short names ("password", "pin") */
 static int valid_id(const char *s, size_t max) {
     size_t n = s ? strlen(s) : 0;
     if (!n || n > max) return 0;
@@ -110,7 +110,7 @@ int termfill_save(int sid, unsigned token) {
     if (!bad) { w = snprintf(j + k, sizeof j - k, "]}}"); bad = w < 0 || (size_t)w >= sizeof j - k; if (!bad) k += (size_t)w; }
     int vid = bad ? -1 : vc_request_private(j, k);
     explicit_bzero(j, sizeof j);
-    tcap_drop(sid);                         /* the value is in lord-vault's hands now, or lost: not kept here */
+    tcap_drop(sid);                         /* the value is in insane-vault's hands now, or lost: not kept here */
     if (vid <= 0) return -1;
     fills[slot].vid = vid;
     fills[slot].sid = sid;

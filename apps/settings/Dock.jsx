@@ -7,7 +7,7 @@
 import {
   View, Text, Button, useTheme, useLocale, useSettings, Toggle, Slider, Segmented, dockPrefs, dockHideSettings, DOCK_HIDE_MODES, dock, themes,
   spacing, typeScale, menuBarPrefs, menuBarPatch, cleanerItemShown, getApp, menuBarEveryDisplay,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useState } from 'react';
 import { Stack, Section, SettingRow, Actions } from './ui.jsx';
 import { DesktopsSection } from './Desktops.jsx';
@@ -84,7 +84,7 @@ function ResetDock({ classic }) {
   );
 }
 
-// What the bar shows next to the clock, in both themes. The Cleaner item (the crown) shares its key with
+// What the bar shows next to the clock, in both themes. The Cleaner item (the apple) shares its key with
 // Cleaner → Settings.
 function MenuBarSection({ classic }) {
   const { t: tr } = useLocale();

@@ -21,7 +21,7 @@ Think of a careful house clearance. Someone walks through and writes a list, tou
 - **Duplicates** finds exact copies in the folders you choose and, if you ask, similar images. Nothing is selected for you.
 - **Activity** records what ran: counts and sizes, never a path.
 
-One thing does stay on disk with names in it: the storage map is kept between sessions, in `~/.cache/lordos/cleaner-map.txt`, readable only by your user. It holds folder names and sizes, and it stays on this computer. It is on by default: turn it off in Settings, or remove it with Clear in Activity. A saved map holds nothing that can be acted on; to clean anything, you scan again.
+One thing does stay on disk with names in it: the storage map is kept between sessions, in `~/.cache/insaneos/cleaner-map.txt`, readable only by your user. It holds folder names and sizes, and it stays on this computer. It is on by default: turn it off in Settings, or remove it with Clear in Activity. A saved map holds nothing that can be acted on; to clean anything, you scan again.
 
 [[shot:1]]
 
@@ -31,9 +31,9 @@ Cleanup rules never cover cookies, sessions, history or passwords, or `~/.cache`
 
 ## How it stays safe
 
-Scanning runs in `lord-clean`, a sandboxed helper that can only read. Plans are built in `lord-server`, not in the app, and the app only holds candidate ids, never the authority to touch a path. Everything is checked again right before acting, including the files that proved a project folder.
+Scanning runs in `insane-clean`, a sandboxed helper that can only read. Plans are built in `insane-server`, not in the app, and the app only holds candidate ids, never the authority to touch a path. Everything is checked again right before acting, including the files that proved a project folder.
 
-Regenerable cache files beneath fixed folders can be deleted for real, as your own user, and only by this path: `lord.fs` still has no general delete. Anything else, project folders included, goes to the Trash, where you can restore it. Three closed administrator actions clean the system's own files, each confirmed; on a throwaway test system they did what their rules say.
+Regenerable cache files beneath fixed folders can be deleted for real, as your own user, and only by this path: `insane.fs` still has no general delete. Anything else, project folders included, goes to the Trash, where you can restore it. Three closed administrator actions clean the system's own files, each confirmed; on a throwaway test system they did what their rules say.
 
 ## What its motion costs
 

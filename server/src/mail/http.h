@@ -1,8 +1,8 @@
-/* http.h — a small HTTP/1.1 client for lord-maild: WebDAV (CalDAV, CardDAV) and remote images.
+/* http.h — a small HTTP/1.1 client for insane-maild: WebDAV (CalDAV, CardDAV) and remote images.
  * Responses are bounded (max body bytes), chunked transfer coding is decoded, and every read has
- * a deadline. The connection comes from lord-server (see net.h). */
-#ifndef LORD_MAIL_HTTP_H
-#define LORD_MAIL_HTTP_H
+ * a deadline. The connection comes from insane-server (see net.h). */
+#ifndef INSANE_MAIL_HTTP_H
+#define INSANE_MAIL_HTTP_H
 
 #include <stddef.h>
 #include "net.h"

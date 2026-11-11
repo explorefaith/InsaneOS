@@ -1,11 +1,11 @@
-// firstrun.js — writes lordos-firstrun.txt, the file the Raspberry Pi applies on its first boot
-// (lordos-firstrun, server/src/firstrun; format in docs/IMAGER.md, "The first-run file"). Shared
+// firstrun.js — writes insaneos-firstrun.txt, the file the Raspberry Pi applies on its first boot
+// (insaneos-firstrun, server/src/firstrun; format in docs/IMAGER.md, "The first-run file"). Shared
 // by the native and desktop apps. Secrets never go in: the password arrives here already hashed
 // (yescrypt or SHA-512 crypt) and the Wi-Fi password as its derived WPA2 key.
 import * as v from './validate.js';
 import { coolerHasFan } from './catalog.js';
 
-export const FIRSTRUN_NAME = 'lordos-firstrun.txt';
+export const FIRSTRUN_NAME = 'insaneos-firstrun.txt';
 
 // Checks a whole customisation; returns [] or a list of { field, key } problems (key = i18n key).
 // secrets: { passwordHash, psk } (already derived) or { password, confirm, wifiPassword } (raw, in
@@ -35,7 +35,7 @@ export function check(cfg, secrets = {}) {
 // The file. Only what was chosen is written; everything else keeps the image's defaults.
 export function build(cfg, { passwordHash, psk } = {}) {
   const L = ['# Insane OS first-run settings, written by the Insane OS Imager.',
-    '# Read once on the first boot by lordos-firstrun and then deleted. docs/IMAGER.md', 'version=1'];
+    '# Read once on the first boot by insaneos-firstrun and then deleted. docs/IMAGER.md', 'version=1'];
   const put = (k, val) => { if (val !== undefined && val !== null && val !== '') L.push(`${k}=${val}`); };
   const bool = (k, b) => L.push(`${k}=${b ? 1 : 0}`);
   put('hostname', cfg.hostname);
@@ -86,13 +86,13 @@ export function toProfile(name, cfg) {
   const rest = Object.fromEntries(PROFILE_KEYS.filter((k) => k in cfg).map((k) => [k, cfg[k]]));     // a whitelist: nothing else gets in
   rest.sshKeys = (cfg.sshKeys || []).map((k) => k.line || k);    // public keys only
   return {
-    format: 'lordos-imager-profile', version: 1, name: String(name).slice(0, 64),
+    format: 'insaneos-imager-profile', version: 1, name: String(name).slice(0, 64),
     config: { ...rest, user: { name: user?.name || '', fullname: user?.fullname || '', autologin: !!user?.autologin },
       wifi: { enabled: !!wifi?.enabled, ssid: wifi?.ssid || '', hidden: !!wifi?.hidden, open: !!wifi?.open } },
   };
 }
 export function fromProfile(p, base) {
-  if (!p || p.format !== 'lordos-imager-profile' || p.version !== 1 || typeof p.config !== 'object') return null;
+  if (!p || p.format !== 'insaneos-imager-profile' || p.version !== 1 || typeof p.config !== 'object') return null;
   const c = { ...base, ...p.config };
   c.user = { ...base.user, ...(p.config.user || {}) };
   c.wifi = { ...base.wifi, ...(p.config.wifi || {}) };

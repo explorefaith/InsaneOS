@@ -1,6 +1,6 @@
 // smartparse.js — smartctl's JSON (smartmontools, `smartctl -j`) turned into one model the Disks
 // app and the Monitor can show (see docs/SYSTEM.md, "SMART with smartmontools"). Pure functions,
-// no lord.* and no React: tests/smart_parse_test.mjs runs them under node with real smartctl output.
+// no insane.* and no React: tests/smart_parse_test.mjs runs them under node with real smartctl output.
 //
 //   const m = parseSmartctl(json, exitStatus)
 //   m.health            'ok' | 'warning' | 'failing' | 'unknown'   (the UI says OK / Check / Failing)

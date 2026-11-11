@@ -2,7 +2,7 @@
  *
  * SHA-256 and Ed25519 are our own from server/src/pkg/crypto.c (Ed25519 with TweetNaCl's
  * arithmetic, public domain; tested with the RFC 8032 and NIST vectors in tests/sign_test.c).
- * No OpenSSL: by policy only lord-sessiond links it. */
+ * No OpenSSL: by policy only insane-sessiond links it. */
 #include "sign.h"
 #include "json.h"
 #include "keys.h"
@@ -24,7 +24,7 @@
 static void seterr(char *e, size_t n, const char *m) { if (e && n) snprintf(e, n, "%s", m); }
 
 const char *sig_trust_name(LpkTrust t) {
-    return t == LPK_OFFICIAL ? "lordos" : t == LPK_VERIFIED ? "verified" : t == LPK_SIGNED ? "signed" : "unsigned";
+    return t == LPK_OFFICIAL ? "insaneos" : t == LPK_VERIFIED ? "verified" : t == LPK_SIGNED ? "signed" : "unsigned";
 }
 
 static int is_hex(const char *s, size_t n) {
@@ -33,20 +33,20 @@ static int is_hex(const char *s, size_t n) {
     return 1;
 }
 
-#ifdef LORD_SIGN_TEST
+#ifdef INSANE_SIGN_TEST
 /* only in tests/sign_test.c: a test key acts as official (for the catalog) */
 static char test_official[65];
 void sig_test_official(const char *keyhex) { snprintf(test_official, sizeof test_official, "%s", keyhex); }
 #endif
 
 int sig_official(const char *keyhex) {
-    for (int i = 0; lordos_official_keys[i]; i++) if (!strcmp(lordos_official_keys[i], keyhex)) return 1;
-#ifdef LORD_SIGN_TEST
+    for (int i = 0; insaneos_official_keys[i]; i++) if (!strcmp(insaneos_official_keys[i], keyhex)) return 1;
+#ifdef INSANE_SIGN_TEST
     if (test_official[0] && !strcmp(test_official, keyhex)) return 1;
 #endif
-#ifdef LORD_PKGAPP_TEST
-    /* only build/lord-server-pkgtest, a test binary for tests/companion_e2e.sh, never installed */
-    if (getenv("LORD_TEST_OFFICIAL") && !strcmp(getenv("LORD_TEST_OFFICIAL"), keyhex)) return 1;
+#ifdef INSANE_PKGAPP_TEST
+    /* only build/insane-server-pkgtest, a test binary for tests/companion_e2e.sh, never installed */
+    if (getenv("INSANE_TEST_OFFICIAL") && !strcmp(getenv("INSANE_TEST_OFFICIAL"), keyhex)) return 1;
 #endif
     return 0;
 }
@@ -190,7 +190,7 @@ int sig_verify_package(const Lpk *pk, const char *id, const char *version, LpkSi
 
 /* Root's and writable by nobody else, and never a set-id file. */
 static int tree_owned(const struct stat *st) {
-#ifdef LORD_SIGN_TEST
+#ifdef INSANE_SIGN_TEST
     if (st->st_uid == getuid()) return !(st->st_mode & (S_IWGRP | S_IWOTH | S_ISUID | S_ISGID));     /* tests/pkgapp_test.c, no root */
 #endif
     return st->st_uid == 0 && !(st->st_mode & (S_IWGRP | S_IWOTH | S_ISUID | S_ISGID));
@@ -408,8 +408,8 @@ static int load_one(const char *json_path, Catalog *out, struct stat *st) {
 const Catalog *catalog_current(void) {
     char user[PATH_MAX];
     const char *home = getenv("HOME");
-    snprintf(user, sizeof user, "%s/.local/share/lordos/catalog/catalog.json", home ? home : "/nonexistent");
-    const char *paths[2] = { "/usr/share/lordos/catalog.json", user };
+    snprintf(user, sizeof user, "%s/.local/share/insaneos/catalog/catalog.json", home ? home : "/nonexistent");
+    const char *paths[2] = { "/usr/share/insaneos/catalog.json", user };
     struct stat st[2];
     int changed = 0;
     for (int i = 0; i < 2; i++) {

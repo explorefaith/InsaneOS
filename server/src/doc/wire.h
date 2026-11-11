@@ -1,7 +1,7 @@
-/* wire.h — lord-doc protocol messages (proto.h): send and receive a DocHdr + JSON + fds.
- * Both sides use it: lord-server (doc.c) and the helper (helper.c). */
-#ifndef LORD_DOC_WIRE_H
-#define LORD_DOC_WIRE_H
+/* wire.h — insane-doc protocol messages (proto.h): send and receive a DocHdr + JSON + fds.
+ * Both sides use it: insane-server (doc.c) and the helper (helper.c). */
+#ifndef INSANE_DOC_WIRE_H
+#define INSANE_DOC_WIRE_H
 
 #include <stddef.h>
 #include <stdint.h>

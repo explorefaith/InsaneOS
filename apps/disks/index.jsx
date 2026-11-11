@@ -3,14 +3,14 @@
 // (SMART) and the actions: mount, unmount, eject, format, rename, erase and create a bootable USB
 // from an image.
 //
-// lord-server reads the list without root (lord.disks, refreshed by itself on mount and udev
+// insane-server reads the list without root (insane.disks, refreshed by itself on mount and udev
 // events). Anything that changes something goes through the helper with the closed disk-*
 // actions, which validate again on the root side: never the system disk, and internal disks only
 // for an administrator.
 import {
   needsDiskFormats, openDiskFormats, View, Text, ScrollView, useTheme, useLocale, useSystemInfo, useAppWindow, admin, useDisks, disks, formatBytes,
   Toolbar as Bar, ToolbarButton, ToolbarSpacer, MenuButton, Hairline, GroupBox, FormRow, EmptyState, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DisksIcon, DriveGlyph, PartGlyph, fsColor } from './icons.jsx';
 import { DiskDialog } from './dialogs.jsx';
@@ -37,7 +37,7 @@ function useWidth(ref, initial) {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!ref.current) return;
-      const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+      const lw = Math.round(insane.getLayout(ref.current.id)[2]);
       if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
     }, 20);
     return () => clearTimeout(id);

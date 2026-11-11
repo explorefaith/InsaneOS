@@ -50,7 +50,7 @@
       "id": "customise", "title": "Personalize o primeiro boot",
       "text": "Deixe **Preparar o primeiro boot** ligado e a placa já inicia pronta: o nome dela, a sua conta, o Wi-Fi, o acesso remoto, a aparência e o resfriamento. São sete abas e tudo pode ser mudado depois em Ajustes. (Para um pendrive de PC não há o que personalizar: este passo é pulado.)",
       "subs": [
-        ["05-tab-general", "Geral", "O **nome do computador** é como você vai achar a placa na sua rede: aqui `lordos-pi`, ou seja `lordos-pi.local`. Depois, o idioma, o fuso horário, o layout do teclado e o país do Wi-Fi."],
+        ["05-tab-general", "Geral", "O **nome do computador** é como você vai achar a placa na sua rede: aqui `insaneos-pi`, ou seja `insaneos-pi.local`. Depois, o idioma, o fuso horário, o layout do teclado e o país do Wi-Fi."],
         ["06-tab-user", "Usuário", "A sua conta de administrador: nome completo, nome de usuário e uma senha digitada duas vezes. No cartão vai só um hash de mão única da senha. O login automático é opcional."],
         ["07-tab-wifi", "Wi-Fi", "O nome da rede exatamente como aparece (maiúsculas contam) e a senha dela. O cartão guarda a chave derivada da rede, nunca a senha que você digitou. Redes ocultas e abertas também funcionam."],
         ["08-tab-remote", "Acesso remoto", "Login remoto (SSH): desligado, só chaves (o recomendado) ou senha e chaves. Você também pode ligar a área de trabalho remota do Insane OS; ela fica na sua rede local."],
@@ -77,7 +77,7 @@
     {
       "id": "firstboot", "title": "O primeiro boot no Raspberry Pi 5",
       "text": "Coloque o cartão na placa, conecte o monitor, o teclado e o mouse, e depois a fonte. Aparecem a coroa do Insane OS e uma barra de progresso enquanto o sistema cresce para ocupar o cartão e aplica os seus ajustes. Em cerca de um minuto, a tela de login mostra a sua conta.",
-      "points": ["De outro computador da sua casa é `lordos-pi.local`.", "Login remoto: `ssh demo@lordos-pi.local`.", "Área de trabalho remota, se você ligou: `https://lordos-pi.local:5673`."],
+      "points": ["De outro computador da sua casa é `insaneos-pi.local`.", "Login remoto: `ssh demo@insaneos-pi.local`.", "Área de trabalho remota, se você ligou: `https://insaneos-pi.local:5673`."],
       "boot": [["docs/boot/splash-preview.png", "A tela de inicialização durante o primeiro boot"], ["docs/screenshots/greeter.png", "A tela de login (com contas de exemplo)"]],
       "tip": ["celebrate", "Bem-vindo", "O arquivo de ajustes é aplicado uma vez e depois sobrescrito e apagado do cartão."]
     }
@@ -98,7 +98,7 @@
     ["Nada", "**Conservador** (padrão), Equilibrado", "2,0 GHz, para a placa sozinha não chegar a 85 °C e se frear."]
   ],
   "ocTitle": "Overclock leve (só com ventoinha)",
-  "ocText": "2,6 GHz em vez de 2,4 GHz, sem tensão extra. Nem toda placa fica estável: se a sua não iniciar, abra a partição de boot do cartão em outro computador e apague o bloco `lordos-firstrun` do `config.txt`.",
+  "ocText": "2,6 GHz em vez de 2,4 GHz, sem tensão extra. Nem toda placa fica estável: se a sua não iniciar, abra a partição de boot do cartão em outro computador e apague o bloco `insaneos-firstrun` do `config.txt`.",
   "optTitle": "Opções do app",
   "optText": "**Opções do app**, embaixo na barra lateral: um som e ejetar ao terminar, procurar atualizações do app, idioma e aparência, e a pasta de downloads, com quanto ela ocupa e um botão para limpá-la.",
   "optShot": ["20-options", "Opções do app"],
@@ -118,16 +118,16 @@
     ["O meu cartão não aparece", "Só aparecem unidades removíveis: cartões SD e pendrives. Use um leitor se o seu computador não tiver entrada e espere alguns segundos: a lista se atualiza sozinha. Um cartão com a trava ligada, ou com menos de 8 GB, aparece em cinza com o motivo. Os discos do seu computador nunca aparecem, de propósito."],
     ["Diz que a assinatura não foi confirmada", "Então nada foi gravado nem apagado. Os arquivos baixados não batem com o que o Insane OS assinou, quase sempre porque um download falhou. Abra **Opções do app → Downloads → Limpar** e tente de novo. Se continuar, avise a gente (veja a página de segurança)."],
     ["A placa não conecta ao meu Wi-Fi", "Confira o nome da rede (maiúsculas contam), a senha e o país do Wi-Fi em **Geral**. Uma rede que só aceita WPA3 precisa da senha na própria placa: conecte um cabo de rede uma vez e adicione-a em **Ajustes → Rede**."],
-    ["Não acho lordos-pi.local", "Dê um ou dois minutos ao primeiro boot e confira se o seu computador está na mesma rede (redes de convidados costumam separar os aparelhos). A tela de login mostra o endereço da placa num canto; você pode usar esse endereço no lugar do nome."],
-    ["Como entro por SSH?", "Se você ligou: `ssh demo@lordos-pi.local` (com o seu usuário e o nome do seu computador). Só chaves é o mais seguro. Dá para ligar ou desligar depois em **Ajustes → Compartilhar**. A conta root nunca faz login."],
-    ["A placa não inicia depois do overclock", "Coloque o cartão no seu computador, abra a partição de boot e apague o bloco entre `# >>> lordos-firstrun` e `# <<< lordos-firstrun` do `config.txt`. A placa volta a iniciar na velocidade normal."],
+    ["Não acho insaneos-pi.local", "Dê um ou dois minutos ao primeiro boot e confira se o seu computador está na mesma rede (redes de convidados costumam separar os aparelhos). A tela de login mostra o endereço da placa num canto; você pode usar esse endereço no lugar do nome."],
+    ["Como entro por SSH?", "Se você ligou: `ssh demo@insaneos-pi.local` (com o seu usuário e o nome do seu computador). Só chaves é o mais seguro. Dá para ligar ou desligar depois em **Ajustes → Compartilhar**. A conta root nunca faz login."],
+    ["A placa não inicia depois do overclock", "Coloque o cartão no seu computador, abra a partição de boot e apague o bloco entre `# >>> insaneos-firstrun` e `# <<< insaneos-firstrun` do `config.txt`. A placa volta a iniciar na velocidade normal."],
     ["Pulei a personalização. E agora?", "A placa inicia em modo de configuração e entra sozinha. Crie a sua conta em **Ajustes → Usuários**; no próximo boot a conta de configuração é removida. Até lá, não ligue a área de trabalho remota."],
     ["Posso gravar um pendrive para um PC?", "Sim: escolha **PC (pendrive USB)** no passo 1. Ele grava o sistema ao vivo do Insane OS; inicie o PC pelo pendrive para experimentar e depois instale a partir dele."]
   ],
   "endTitle": "Pronto? Baixe o Insane OS Imager",
   "endText": "Livre e de código aberto. Cada imagem oficial é conferida com a assinatura da versão antes de apagar qualquer coisa.",
   "endOther": "Prefere outro jeito de gravar o cartão? Veja a seção de downloads.",
-  "shotsNote": "Telas do Insane OS Imager {v} com valores de exemplo: usuário “demo”, computador “lordos-pi”, rede “HomeNetwork”.",
+  "shotsNote": "Telas do Insane OS Imager {v} com valores de exemplo: usuário “demo”, computador “insaneos-pi”, rede “HomeNetwork”.",
   "home": {
     "title": "Como gravar o Insane OS em um pendrive ou cartão SD",
     "lead": "Para o PC (ISO) e para a imagem do Raspberry Pi 5.",
@@ -139,7 +139,7 @@
     "optPc": "PC (ISO)",
     "optPi": "Raspberry Pi 5",
     "optVerify": "Como conferir a assinatura do SHA256SUMS",
-    "optPiSetup": "Sem o Insane OS Imager, o Pi inicia em modo de configuração. Para prepará-lo, coloque o `lordos-user.txt` e os arquivos interruptor (`ssh`, `remote-desktop`) na partição de boot do cartão antes do primeiro boot.",
-    "optPiLink": "Arquivos interruptor e lordos-user.txt"
+    "optPiSetup": "Sem o Insane OS Imager, o Pi inicia em modo de configuração. Para prepará-lo, coloque o `insaneos-user.txt` e os arquivos interruptor (`ssh`, `remote-desktop`) na partição de boot do cartão antes do primeiro boot.",
+    "optPiLink": "Arquivos interruptor e insaneos-user.txt"
   }
 }

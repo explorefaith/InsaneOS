@@ -1,17 +1,17 @@
-/* js_sys.c — system APIs for themes and apps: lord.fs, lord.system, lord.settings,
- * lord.themes, lord.quit and lord.measureText.
+/* js_sys.c — system APIs for themes and apps: insane.fs, insane.system, insane.settings,
+ * insane.themes, insane.quit and insane.measureText.
  *
  * Security rules: the server already runs as the session user (not root);
- * lord.fs reads the whole tree as the user except /proc, /sys, /dev and /run (fsops_readable;
+ * insane.fs reads the whole tree as the user except /proc, /sys, /dev and /run (fsops_readable;
  * listing, reading up to 8 MB, stat, du, free, search), and changes things only inside the home
  * folder and the user's mounted disks (/media/$USER, /run/media/$USER; fsops_allowed): it writes (up to
  * 32 MB), creates folders, renames, copies and moves (in a thread, fsops.c), and sends to the freedesktop
  * Trash; real deletion is only possible inside the Trash. Writing is atomic (temporary + rename),
  * doesn't follow symbolic links in the final file and can NOT touch ~/.local/share/applications,
- * ~/.config/autostart, ~/.local/share/lordos/apps or ~/.config/lordos/settings.json: from JS it is
- * not possible to create a .desktop (the only thing lord.apps.launch runs), nor to install apps without
- * lpk.c, nor to overwrite the settings. lord.settings only writes to ~/.config/lordos/settings.json;
- * lord.themes only accepts simple names. */
+ * ~/.config/autostart, ~/.local/share/insaneos/apps or ~/.config/insaneos/settings.json: from JS it is
+ * not possible to create a .desktop (the only thing insane.apps.launch runs), nor to install apps without
+ * lpk.c, nor to overwrite the settings. insane.settings only writes to ~/.config/insaneos/settings.json;
+ * insane.themes only accepts simple names. */
 #include "../hw/display.h"
 #include "../hw/hw_admin.h"
 #include "../hw/sleeplock.h"
@@ -41,7 +41,7 @@
 #include "js_share.h"
 #include "../pkg/crypto.h"
 #include "../sysreport/sysreport.h"
-#include "lord_version.h"           /* build/gen: version, channel and build (Makefile) */
+#include "insane_version.h"           /* build/gen: version, channel and build (Makefile) */
 
 #include <ctype.h>
 #include <fcntl.h>
@@ -134,7 +134,7 @@ static int field(const char *text, const char *key, char *out, size_t size) {
     return -1;
 }
 
-/* ---- lord.fs ---- */
+/* ---- insane.fs ---- */
 
 static JSValue f_fs_home(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -176,7 +176,7 @@ static JSValue f_fs_list(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return a.arr;
 }
 
-/* lord.fs.read(path, 'text' | 'binary') — content of a regular file in $HOME, the user's disks or
+/* insane.fs.read(path, 'text' | 'binary') — content of a regular file in $HOME, the user's disks or
  * (read-only) the rest of the tree (resolve_readable) (UTF-8 text or ArrayBuffer). Used, for example, by the Terminal's profile importer. */
 static JSValue f_fs_read(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
@@ -202,7 +202,7 @@ static JSValue f_fs_read(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return v;
 }
 
-/* ---- lord.system ---- */
+/* ---- insane.system ---- */
 
 /* On ARM64 /proc/cpuinfo has no "model name": the core comes from "CPU part" and the board from the device
  * tree ("Cortex-A76 · Raspberry Pi 5 Model B Rev 1.0"). See docs/RASPBERRY.md. */
@@ -234,9 +234,9 @@ void js_sys_cpu_name(char *out, size_t size) {
     free(txt);
 }
 
-/* This boot's time to the first frame, from lord-sessiond's /var/lib/lordos/boot-times.jsonl (root's,
+/* This boot's time to the first frame, from insane-sessiond's /var/lib/insaneos/boot-times.jsonl (root's,
  * one JSON object a line, matched by this boot's id; docs/SESSIONS.md, "Boot time"). Read until found,
- * then kept: it doesn't change during a boot. -1 if there's none (no lord-sessiond, an old one). */
+ * then kept: it doesn't change during a boot. -1 if there's none (no insane-sessiond, an old one). */
 static double boot_secs = -1;
 static char boot_shown[12];
 static void boot_time_load(void) {
@@ -245,7 +245,7 @@ static void boot_time_load(void) {
     if (!id) return;
     id[strspn(id, "0123456789abcdef-")] = 0;
     struct stat st;
-    int fd = open("/var/lib/lordos/boot-times.jsonl", O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+    int fd = open("/var/lib/insaneos/boot-times.jsonl", O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
     if (fd < 0 || fstat(fd, &st) || !S_ISREG(st.st_mode) || st.st_uid != 0 || (st.st_mode & 022) || st.st_size > 256 * 1024 || !id[0]) {
         if (fd >= 0) close(fd);
         free(id);
@@ -320,9 +320,9 @@ static JSValue f_sys_info(JSContext *c, JSValueConst this_val, int argc, JSValue
     JS_SetPropertyStr(c, o, "bootSeconds", JS_NewFloat64(c, boot_secs));
     JS_SetPropertyStr(c, o, "bootShown", JS_NewString(c, boot_shown));
     /* Insane OS itself: package.json's version and channel ("beta"; empty for a stable release) and the build */
-    JS_SetPropertyStr(c, o, "version", JS_NewString(c, LORD_VERSION));
-    JS_SetPropertyStr(c, o, "channel", JS_NewString(c, LORD_CHANNEL));
-    JS_SetPropertyStr(c, o, "build", JS_NewString(c, LORD_BUILD));
+    JS_SetPropertyStr(c, o, "version", JS_NewString(c, INSANE_VERSION));
+    JS_SetPropertyStr(c, o, "channel", JS_NewString(c, INSANE_CHANNEL));
+    JS_SetPropertyStr(c, o, "build", JS_NewString(c, INSANE_BUILD));
     JS_SetPropertyStr(c, o, "user", JS_NewString(c, getenv("USER") ? getenv("USER") : ""));
     /* full name (first GECOS field) and whether they are an administrator (sudo/admin/wheel) */
     struct passwd *pw = getpwuid(getuid());
@@ -346,17 +346,17 @@ static JSValue f_sys_info(JSContext *c, JSValueConst this_val, int argc, JSValue
     /* live system (ISO): the installer shows up there */
     int live = access("/run/live/medium/live/filesystem.squashfs", F_OK) == 0;
     JS_SetPropertyStr(c, o, "live", JS_NewBool(c, live));
-    /* the live ISO's "Check this computer" boot entry (lordos.check=1): only a yes or no leaves here,
+    /* the live ISO's "Check this computer" boot entry (insaneos.check=1): only a yes or no leaves here,
      * and only on a live system. sdk/livestart.js opens System Information for it. */
     int check = 0;
     if (live) {
         char *cmd = read_small("/proc/cmdline", 4096, NULL);
-        check = cmd && sysreport_cmdline_has(cmd, "lordos.check=1");
+        check = cmd && sysreport_cmdline_has(cmd, "insaneos.check=1");
         free(cmd);
     }
     JS_SetPropertyStr(c, o, "liveCheck", JS_NewBool(c, check));
     /* the OVA's first boot: the installer's account screens, until the person has an account */
-    JS_SetPropertyStr(c, o, "firstAccount", JS_NewBool(c, access("/etc/lordos/first-account", F_OK) == 0));
+    JS_SetPropertyStr(c, o, "firstAccount", JS_NewBool(c, access("/etc/insaneos/first-account", F_OK) == 0));
     struct statvfs vs;                      /* system disk (/) */
     if (!statvfs("/", &vs)) {
         JS_SetPropertyStr(c, o, "diskTotal", JS_NewFloat64(c, (double)vs.f_blocks * vs.f_frsize));
@@ -382,10 +382,10 @@ static JSValue f_sys_cpu(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return a;
 }
 
-/* ---- lord.settings ---- */
+/* ---- insane.settings ---- */
 
 static void settings_path(char *out, size_t size, const char *suffix) {
-    snprintf(out, size, "%s/.config/lordos/settings.json%s", home, suffix);
+    snprintf(out, size, "%s/.config/insaneos/settings.json%s", home, suffix);
 }
 
 static JSValue f_settings_load(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -409,7 +409,7 @@ static JSValue f_settings_save(JSContext *c, JSValueConst this_val, int argc, JS
     char dir[PATH_MAX + 64], tmp[PATH_MAX + 64], path[PATH_MAX + 64];
     snprintf(dir, sizeof dir, "%s/.config", home);
     mkdir(dir, 0700);
-    snprintf(dir, sizeof dir, "%s/.config/lordos", home);
+    snprintf(dir, sizeof dir, "%s/.config/insaneos", home);
     mkdir(dir, 0700);
     settings_path(tmp, sizeof tmp, ".tmp");
     settings_path(path, sizeof path, "");
@@ -428,7 +428,7 @@ static JSValue f_settings_save(JSContext *c, JSValueConst this_val, int argc, JS
     return JS_NewBool(c, ok);
 }
 
-/* ---- lord.themes ---- */
+/* ---- insane.themes ---- */
 
 static int valid_id(const char *s) {
     if (!*s || strlen(s) > 64) return 0;
@@ -488,9 +488,9 @@ static JSValue f_themes_use(JSContext *c, JSValueConst this_val, int argc, JSVal
     return JS_NewBool(c, ok);
 }
 
-/* ---- lord.fonts ---- */
+/* ---- insane.fonts ---- */
 
-/* lord.fonts.list({ rescan }) → [{ family, style, ps, weight, italic, mono, color }] */
+/* insane.fonts.list({ rescan }) → [{ family, style, ps, weight, italic, mono, color }] */
 static JSValue f_fonts_list(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     int force = 0;
@@ -518,15 +518,15 @@ static JSValue f_fonts_list(JSContext *c, JSValueConst this_val, int argc, JSVal
     return arr;
 }
 
-/* ---- lord.admin: privileged helper actions (admin.c) ---- */
+/* ---- insane.admin: privileged helper actions (admin.c) ---- */
 
 static JSValue f_admin_available(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     return JS_NewBool(c, admin_fd() >= 0);
 }
 
-/* lord.admin.request(action, argument): returns the request id (0 if it couldn't be sent);
- * responses arrive at __lordAdmin(id, kind, text). Only actions from admin.c's closed list,
+/* insane.admin.request(action, argument): returns the request id (0 if it couldn't be sent);
+ * responses arrive at __insaneAdmin(id, kind, text). Only actions from admin.c's closed list,
  * which also validates each argument on the root side. */
 static JSValue f_admin_request(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -538,7 +538,7 @@ static JSValue f_admin_request(JSContext *c, JSValueConst this_val, int argc, JS
     return JS_NewInt32(c, id > 0 ? id : 0);
 }
 
-/* ---- lord.locale: the user's region and interface languages ---- */
+/* ---- insane.locale: the user's region and interface languages ---- */
 
 static int valid_locale_name(const char *s) {
     size_t n = strlen(s);
@@ -587,7 +587,7 @@ static void apply_locale_conf(void) {
     }
 }
 
-/* lord.locale.get() → { user: {LANG…}, system: {LANG…} } */
+/* insane.locale.get() → { user: {LANG…}, system: {LANG…} } */
 static JSValue f_locale_get(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue o = JS_NewObject(c), u = JS_NewObject(c), sys = JS_NewObject(c);
@@ -600,7 +600,7 @@ static JSValue f_locale_get(JSContext *c, JSValueConst this_val, int argc, JSVal
     return o;
 }
 
-/* lord.locale.set({ LANG, LC_TIME, … }) writes ~/.config/locale.conf and applies it to the
+/* insane.locale.set({ LANG, LC_TIME, … }) writes ~/.config/locale.conf and applies it to the
  * processes launched from now on (Terminal shells, and apps in the future). */
 static JSValue f_locale_set(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -629,7 +629,7 @@ static JSValue f_locale_set(JSContext *c, JSValueConst this_val, int argc, JSVal
     return JS_NewBool(c, ok);
 }
 
-/* lord.locale.available() → [{ name: "es_AR.UTF-8", generated }] (glibc UTF-8) */
+/* insane.locale.available() → [{ name: "es_AR.UTF-8", generated }] (glibc UTF-8) */
 static JSValue f_locale_available(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue arr = JS_NewArray(c);
@@ -650,7 +650,7 @@ static JSValue f_locale_available(JSContext *c, JSValueConst this_val, int argc,
     return arr;
 }
 
-/* lord.locale.formats("lt_LT") → { dfmt, tfmt, am, pm, decimal, group } from glibc's own data for the
+/* insane.locale.formats("lt_LT") → { dfmt, tfmt, am, pm, decimal, group } from glibc's own data for the
  * region (LC_TIME, LC_NUMERIC), or null when that locale isn't generated. sdk/regionformat.js turns it
  * into a format.json: the clock, date order and separators of a region whose language Insane OS has no
  * format.json for (#45). Only reads the compiled locale; no file name is built from the argument. */
@@ -692,14 +692,14 @@ static int valid_id_dot(const char *s) {
     return 1;
 }
 
-/* Catalog folders: assets/locales (bundled) and ~/.local/share/lordos/locales
+/* Catalog folders: assets/locales (bundled) and ~/.local/share/insaneos/locales
  * (the user's language packs; they win if both exist). */
 static void locale_root(int user, char *out, size_t n) {
-    if (user) snprintf(out, n, "%s/.local/share/lordos/locales", home);
+    if (user) snprintf(out, n, "%s/.local/share/insaneos/locales", home);
     else snprintf(out, n, "%s/locales", assets);
 }
 
-/* lord.locale.catalog(language, namespace) → JSON text or null */
+/* insane.locale.catalog(language, namespace) → JSON text or null */
 static JSValue f_locale_catalog(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *lang = JS_ToCString(c, argv[0]), *ns = JS_ToCString(c, argv[1]);
@@ -727,7 +727,7 @@ static JSValue f_locale_catalog(JSContext *c, JSValueConst this_val, int argc, J
     return r;
 }
 
-/* lord.locale.languages() → [{ id, meta (text of meta.json), user }] */
+/* insane.locale.languages() → [{ id, meta (text of meta.json), user }] */
 static JSValue f_locale_languages(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue arr = JS_NewArray(c);
@@ -755,8 +755,8 @@ static JSValue f_locale_languages(JSContext *c, JSValueConst this_val, int argc,
     return arr;
 }
 
-/* lord.locale.installPack(language, { namespace: JSONtext }) → copies a Insane OS language pack
- * to ~/.local/share/lordos/locales/<language>/ (doesn't need root). */
+/* insane.locale.installPack(language, { namespace: JSONtext }) → copies a Insane OS language pack
+ * to ~/.local/share/insaneos/locales/<language>/ (doesn't need root). */
 static JSValue f_locale_install(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *lang = JS_ToCString(c, argv[0]);
@@ -766,8 +766,8 @@ static JSValue f_locale_install(JSContext *c, JSValueConst this_val, int argc, J
         char p[PATH_MAX + 64];
         snprintf(p, sizeof p, "%s/.local", home); mkdir(p, 0700);
         snprintf(p, sizeof p, "%s/.local/share", home); mkdir(p, 0700);
-        snprintf(p, sizeof p, "%s/.local/share/lordos", home); mkdir(p, 0700);
-        snprintf(p, sizeof p, "%s/.local/share/lordos/locales", home); mkdir(p, 0700);
+        snprintf(p, sizeof p, "%s/.local/share/insaneos", home); mkdir(p, 0700);
+        snprintf(p, sizeof p, "%s/.local/share/insaneos/locales", home); mkdir(p, 0700);
         snprintf(dir, sizeof dir, "%s/%s", p, lang);
         mkdir(dir, 0700);
         JSPropertyEnum *props;
@@ -795,7 +795,7 @@ static JSValue f_locale_install(JSContext *c, JSValueConst this_val, int argc, J
     return JS_NewBool(c, ok);
 }
 
-/* ---- lord.keyboard: layouts (libxkbcommon, keyboard.c) ---- */
+/* ---- insane.keyboard: layouts (libxkbcommon, keyboard.c) ---- */
 
 static JSValue f_kb_set(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -817,7 +817,7 @@ static JSValue f_kb_current(JSContext *c, JSValueConst this_val, int argc, JSVal
     return o;
 }
 
-/* lord.keyboard.system() → { layouts: "us", variants: "" }: the computer's (/etc/default/keyboard), what a
+/* insane.keyboard.system() → { layouts: "us", variants: "" }: the computer's (/etc/default/keyboard), what a
  * user who never chose one types with (sdk/keyboard.js) */
 static JSValue f_kb_system(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -837,7 +837,7 @@ static JSValue f_kb_group(JSContext *c, JSValueConst this_val, int argc, JSValue
     return JS_UNDEFINED;
 }
 
-/* ---- lord.ime: input methods (ime.c) ---- */
+/* ---- insane.ime: input methods (ime.c) ---- */
 
 static JSValue f_ime_set(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -874,7 +874,7 @@ static JSValue f_kb_compose(JSContext *c, JSValueConst this_val, int argc, JSVal
     return JS_UNDEFINED;
 }
 
-/* lord.keyboard.list() → [{ id, name, variants: [{ id, name }] }] from xkb-data (evdev.lst) */
+/* insane.keyboard.list() → [{ id, name, variants: [{ id, name }] }] from xkb-data (evdev.lst) */
 static JSValue f_kb_list(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue arr = JS_NewArray(c);
@@ -930,7 +930,7 @@ static JSValue f_kb_list(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return arr;
 }
 
-/* ---- lord.time: time zone ---- */
+/* ---- insane.time: time zone ---- */
 
 static JSValue f_time_zone(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -941,7 +941,7 @@ static JSValue f_time_zone(JSContext *c, JSValueConst this_val, int argc, JSValu
     return JS_NewString(c, z ? z + 9 : "UTC");
 }
 
-/* lord.time.zones() → ["America/Argentina/Buenos_Aires", …] (tzdata's zone1970.tab) */
+/* insane.time.zones() → ["America/Argentina/Buenos_Aires", …] (tzdata's zone1970.tab) */
 static JSValue f_time_zones(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue arr = JS_NewArray(c);
@@ -985,7 +985,7 @@ static JSValue f_measure_text(JSContext *c, JSValueConst this_val, int argc, JSV
     return JS_NewFloat64(c, w);
 }
 
-/* ---- lord.text: language (CJK font), direction of the interface and of a text ---- */
+/* ---- insane.text: language (CJK font), direction of the interface and of a text ---- */
 
 static JSValue f_text_language(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1015,7 +1015,7 @@ static JSValue f_text_direction(JSContext *c, JSValueConst this_val, int argc, J
     return JS_NewString(c, rtl ? "rtl" : "ltr");
 }
 
-/* lord.text.covered(text) → does an installed font draw every character (Emoji & Symbols, #56)? Only in the
+/* insane.text.covered(text) → does an installed font draw every character (Emoji & Symbols, #56)? Only in the
  * session (js_sys_register), where the pickers live; isolated apps don't get it. */
 static JSValue f_text_covered(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1026,7 +1026,7 @@ static JSValue f_text_covered(JSContext *c, JSValueConst this_val, int argc, JSV
     return JS_NewBool(c, ok);
 }
 
-/* lord.image.size(path) → { width, height } of a PNG/JPEG in the home folder (or null).
+/* insane.image.size(path) → { width, height } of a PNG/JPEG in the home folder (or null).
  * Used by the notes' markdown to avoid enlarging small images. */
 static JSValue f_image_size(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1055,7 +1055,7 @@ static const JSCFunctionListEntry text_funcs[] = {
     JS_CFUNC_DEF("direction", 1, f_text_direction),
 };
 
-/* ---- lord.fs: writing (see the rules at the top of the file) ---- */
+/* ---- insane.fs: writing (see the rules at the top of the file) ---- */
 
 #define FS_WRITE_MAX (32 * 1024 * 1024)
 
@@ -1074,7 +1074,7 @@ static JSValue fs_path_error(JSContext *c, int r) {
     return js_throw_code(c, r == -2 ? "fs.protected" : share_down ? "share.notResponding" : "fs.outsideHome", NULL);
 }
 
-/* lord.fs.write(path, text | ArrayBuffer): creates or replaces the file atomically. */
+/* insane.fs.write(path, text | ArrayBuffer): creates or replaces the file atomically. */
 static JSValue f_fs_write(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1100,7 +1100,7 @@ static JSValue f_fs_write(JSContext *c, JSValueConst this_val, int argc, JSValue
         mode = st.st_mode & 07777;
     }
     char tmp[PATH_MAX + 64];
-    snprintf(tmp, sizeof tmp, "%s/.lordos-write-XXXXXX", dir);
+    snprintf(tmp, sizeof tmp, "%s/.insaneos-write-XXXXXX", dir);
     int fd = mkstemp(tmp);
     int ok = fd >= 0;
     if (ok) {
@@ -1121,7 +1121,7 @@ static JSValue f_fs_write(JSContext *c, JSValueConst this_val, int argc, JSValue
     return JS_TRUE;
 }
 
-/* lord.fs.mkdir(path): a new folder (the parent must exist). */
+/* insane.fs.mkdir(path): a new folder (the parent must exist). */
 static JSValue f_fs_mkdir(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1134,7 +1134,7 @@ static JSValue f_fs_mkdir(JSContext *c, JSValueConst this_val, int argc, JSValue
     return JS_TRUE;
 }
 
-/* lord.fs.rename(from, to): move or rename inside the home folder (the link itself,
+/* insane.fs.rename(from, to): move or rename inside the home folder (the link itself,
  * if it is a link: rename doesn't follow it). Doesn't overwrite an existing destination. */
 static JSValue f_fs_rename(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1150,9 +1150,9 @@ static JSValue f_fs_rename(JSContext *c, JSValueConst this_val, int argc, JSValu
     return JS_TRUE;
 }
 
-/* ---- lord.fs: copy, move, Trash, info and searches (fsops.c) ---- */
+/* ---- insane.fs: copy, move, Trash, info and searches (fsops.c) ---- */
 
-/* lord.fs.copy(from, to, move) → job id (in a thread; progress with lord.fs.jobs()). */
+/* insane.fs.copy(from, to, move) → job id (in a thread; progress with insane.fs.jobs()). */
 static JSValue f_fs_copy(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     const char *a = JS_ToCString(c, argv[0]), *b = JS_ToCString(c, argv[1]);
@@ -1170,7 +1170,7 @@ static JSValue f_fs_copy(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return JS_NewInt32(c, id);
 }
 
-/* lord.fs.jobs() → [{ id, src, dst, move, done, failed, error, bytes, total, files }] */
+/* insane.fs.jobs() → [{ id, src, dst, move, done, failed, error, bytes, total, files }] */
 static JSValue f_fs_jobs(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue arr = JS_NewArray(c);
@@ -1211,7 +1211,7 @@ static JSValue f_fs_job_forget(JSContext *c, JSValueConst this_val, int argc, JS
     return JS_UNDEFINED;
 }
 
-/* lord.fs.trash(path): to the freedesktop Trash (the home one or the mounted disk's). */
+/* insane.fs.trash(path): to the freedesktop Trash (the home one or the mounted disk's). */
 static JSValue f_fs_trash(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1238,7 +1238,7 @@ static void trash_cb(void *ud, const char *id, const char *name, const char *ori
     JS_SetPropertyUint32(a->c, a->arr, a->n++, o);
 }
 
-/* lord.fs.trashList() → [{ id, name, original, deleted, dir, size }] */
+/* insane.fs.trashList() → [{ id, name, original, deleted, dir, size }] */
 static JSValue f_fs_trash_list(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     Acc a = { c, JS_NewArray(c), 0 };
@@ -1268,7 +1268,7 @@ static JSValue f_fs_trash_empty(JSContext *c, JSValueConst this_val, int argc, J
     return JS_NewInt32(c, fstrash_empty());
 }
 
-/* lord.fs.stat(path) → { name, path, dir, link, target, size, mode, user, group, mtime, atime, ctime, btime } */
+/* insane.fs.stat(path) → { name, path, dir, link, target, size, mode, user, group, mtime, atime, ctime, btime } */
 static JSValue f_fs_stat(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1300,7 +1300,7 @@ static JSValue f_fs_stat(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return o;
 }
 
-/* lord.fs.du(folder, ms) → { size, files, dirs, complete } (stops after ms, 800 by default) */
+/* insane.fs.du(folder, ms) → { size, files, dirs, complete } (stops after ms, 800 by default) */
 static JSValue f_fs_du(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1326,7 +1326,7 @@ static JSValue f_fs_du(JSContext *c, JSValueConst this_val, int argc, JSValueCon
     return o;
 }
 
-/* lord.fs.free(path) → { total, free } of the disk it is on */
+/* insane.fs.free(path) → { total, free } of the disk it is on */
 static JSValue f_fs_free(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -1365,7 +1365,7 @@ static int32_t opt_int(JSContext *c, JSValueConst o, const char *k, int32_t def,
     return v < 1 ? 1 : v > max ? max : v;
 }
 
-/* lord.fs.search(folder, text, { limit, depth }) → [{ path, name, dir, size, mtime }] (by name, no hidden files) */
+/* insane.fs.search(folder, text, { limit, depth }) → [{ path, name, dir, size, mtime }] (by name, no hidden files) */
 static JSValue f_fs_search(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     const char *p = JS_ToCString(c, argv[0]), *q = argc > 1 ? JS_ToCString(c, argv[1]) : NULL;
@@ -1380,7 +1380,7 @@ static JSValue f_fs_search(JSContext *c, JSValueConst this_val, int argc, JSValu
     return a.arr;
 }
 
-/* lord.fs.recent(limit, days) → files in the home folder modified recently */
+/* insane.fs.recent(limit, days) → files in the home folder modified recently */
 static JSValue f_fs_recent(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     int32_t limit = 60, days = 30;
@@ -1405,7 +1405,7 @@ static void vol_cb(void *ud, const char *path, const char *fstype, double total,
     JS_SetPropertyUint32(a->c, a->arr, a->n++, o);
 }
 
-/* lord.fs.volumes() → disks and USB sticks mounted in /media/$USER or /run/media/$USER */
+/* insane.fs.volumes() → disks and USB sticks mounted in /media/$USER or /run/media/$USER */
 static JSValue f_fs_volumes(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     Acc a = { c, JS_NewArray(c), 0 };
@@ -1413,9 +1413,9 @@ static JSValue f_fs_volumes(JSContext *c, JSValueConst this_val, int argc, JSVal
     return a.arr;
 }
 
-/* ---- lord.fs: the calls that may wait on a slow file system, off this thread (fsasync.c) ----
+/* ---- insane.fs: the calls that may wait on a slow file system, off this thread (fsasync.c) ----
  * listAsync(path) / statAsync(path) / trashAsync(path) / freeAsync(path) / mkdirAsync(path) / renameAsync(from, to)
- * → req; the answer comes as __lordFsReply(req, { entries } | { stat } | { ok } | { total, free } | { error: code line }).
+ * → req; the answer comes as __insaneFsReply(req, { entries } | { stat } | { ok } | { total, free } | { error: code line }).
  * The worker resolves and checks the paths with the same fsops.c functions as list / stat / trash / free / mkdir /
  * rename above. */
 static JSValue fs_async(JSContext *c, JSValueConst arg, int op) {
@@ -1444,7 +1444,7 @@ static JSValue f_fs_rename_async(JSContext *c, JSValueConst t, int argc, JSValue
     return JS_NewInt32(c, req);
 }
 
-/* lord.fs.mounts() → [{ path, remote }]: every mount point, and whether it is a cloud, network or other FUSE mount
+/* insane.fs.mounts() → [{ path, remote }]: every mount point, and whether it is a cloud, network or other FUSE mount
  * (fsops_remote_path's test), from the mount table without touching any path. sdk/fs.js isRemote(path) uses it: Files
  * lists and changes those folders with the Async calls. */
 static void mount_cb(void *ud, const char *path, int remote) {
@@ -1520,7 +1520,7 @@ static const JSCFunctionListEntry keyboard_funcs[] = {
     JS_CFUNC_DEF("reloadCompose", 0, f_kb_compose),
     JS_CFUNC_DEF("list", 0, f_kb_list),
 };
-/* ---- lord.wayland: Linux app windows (wl/wl.c) ---- */
+/* ---- insane.wayland: Linux app windows (wl/wl.c) ---- */
 
 static JSValue f_wl_focus(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1539,8 +1539,8 @@ static JSValue f_wl_close(JSContext *c, JSValueConst this_val, int argc, JSValue
     return JS_UNDEFINED;
 }
 
-/* lord.wayland.kill(id) → '' or an error code: Force Quit of a Linux app's window (wl_kill: its own
- * process only, same user, never X11 or lord-server). */
+/* insane.wayland.kill(id) → '' or an error code: Force Quit of a Linux app's window (wl_kill: its own
+ * process only, same user, never X11 or insane-server). */
 static JSValue f_wl_kill(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     int32_t id = 0;
@@ -1569,7 +1569,7 @@ static JSValue f_wl_info(JSContext *c, JSValueConst this_val, int argc, JSValueC
     return o;
 }
 
-/* lord.wayland.paste(): synthetic Ctrl+V to the Linux app with keyboard focus (only to that app). */
+/* insane.wayland.paste(): synthetic Ctrl+V to the Linux app with keyboard focus (only to that app). */
 static JSValue f_wl_paste(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     return JS_NewBool(c, wl_send_paste());
@@ -1579,8 +1579,8 @@ static JSValue f_wl_has_focus(JSContext *c, JSValueConst this_val, int argc, JSV
     return JS_NewBool(c, wl_has_key_focus());
 }
 
-/* lord.wayland.grabKeys(name) → bool: which fixed table of keys the shell keeps from apps, by name
- * only (wl/keygrab.c). There is no way to pass a key. lord.wayland exists only in the session. */
+/* insane.wayland.grabKeys(name) → bool: which fixed table of keys the shell keeps from apps, by name
+ * only (wl/keygrab.c). There is no way to pass a key. insane.wayland exists only in the session. */
 static JSValue f_wl_grab_keys(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     if (argc < 1 || !JS_IsString(argv[0])) return JS_FALSE;
@@ -1607,9 +1607,9 @@ static const JSCFunctionListEntry wayland_funcs[] = {
     JS_CFUNC_DEF("info", 0, f_wl_info),
 };
 
-/* ---- lord.apps: installed Linux apps (.desktop, apps.c) ---- */
+/* ---- insane.apps: installed Linux apps (.desktop, apps.c) ---- */
 
-/* lord.apps.linux(language) → [{ id, name, genericName, comment, keywords, categories, wmClass, icon, user }] */
+/* insane.apps.linux(language) → [{ id, name, genericName, comment, keywords, categories, wmClass, icon, user }] */
 static JSValue f_apps_linux(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     const char *lang = argc > 0 && JS_IsString(argv[0]) ? JS_ToCString(c, argv[0]) : NULL;
@@ -1640,7 +1640,7 @@ static JSValue f_apps_linux(JSContext *c, JSValueConst this_val, int argc, JSVal
     return arr;
 }
 
-/* lord.apps.launch(id): only the id of a .desktop from the list (see apps.c); no arguments. */
+/* insane.apps.launch(id): only the id of a .desktop from the list (see apps.c); no arguments. */
 static JSValue f_apps_launch(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *id = JS_ToCString(c, argv[0]);
@@ -1649,7 +1649,7 @@ static JSValue f_apps_launch(JSContext *c, JSValueConst this_val, int argc, JSVa
     return JS_NewBool(c, ok);
 }
 
-/* lord.apps.actions(id, language) → [{ id, name }]: the desktop actions of an installed .desktop
+/* insane.apps.actions(id, language) → [{ id, name }]: the desktop actions of an installed .desktop
  * (apps.c, apps_actions); [] for an unknown id. */
 static JSValue f_apps_actions(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
@@ -1674,8 +1674,8 @@ static JSValue f_apps_actions(JSContext *c, JSValueConst this_val, int argc, JSV
     return arr;
 }
 
-/* lord.apps.launchAction(id, action): runs one desktop action of an installed .desktop, through
- * the same launcher as lord.apps.launch (apps_launch_action): only an action the file lists,
+/* insane.apps.launchAction(id, action): runs one desktop action of an installed .desktop, through
+ * the same launcher as insane.apps.launch (apps_launch_action): only an action the file lists,
  * never caller arguments or commands. */
 static JSValue f_apps_launch_action(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
@@ -1688,19 +1688,19 @@ static JSValue f_apps_launch_action(JSContext *c, JSValueConst this_val, int arg
     return JS_NewBool(c, ok);
 }
 
-/* lord.apps.lastError(): the error code of the last refused launch ("" if none), no arguments */
+/* insane.apps.lastError(): the error code of the last refused launch ("" if none), no arguments */
 static JSValue f_apps_last_error(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     return JS_NewString(c, apps_last_error());
 }
 
-/* ---- lord.apps: native Insane OS app packages (.lpk, lpk.c) ---- */
+/* ---- insane.apps: native Insane OS app packages (.lpk, lpk.c) ---- */
 
 #define LPK_JS_MAX (16 * 1024 * 1024)
 
 /* A package id cannot overwrite Insane OS's string namespaces (shell, files, terminal…). */
 static int lpk_reserved(const char *id) {
-    static const char *const fixed[] = { "shell", "apps", "common", "linux", "desktop", "lordos", "sdk", "store", NULL };
+    static const char *const fixed[] = { "shell", "apps", "common", "linux", "desktop", "insaneos", "sdk", "store", NULL };
     for (int i = 0; fixed[i]; i++) if (!strcmp(id, fixed[i])) return 1;
     char path[PATH_MAX * 2];
     struct stat st;
@@ -1810,7 +1810,7 @@ static JSValue lpk_check(JSContext *c, JSValueConst arg, int install) {
     return o;
 }
 
-/* lord.apps.inspectPackage(path) / installPackage(path): see lpk_check. */
+/* insane.apps.inspectPackage(path) / installPackage(path): see lpk_check. */
 static JSValue f_apps_inspect(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     return lpk_check(c, argv[0], 0);
@@ -1848,7 +1848,7 @@ static uint32_t package_entry(JSContext *c, JSValue arr, uint32_t n, const char 
     return 1;
 }
 
-/* lord.apps.packages() → [{ id, dir, manifest (text), packaged }] of the installed apps: the third root first, and a
+/* insane.apps.packages() → [{ id, dir, manifest (text), packaged }] of the installed apps: the third root first, and a
  * home folder of the same id doesn't count. Whether a packaged app really loads is checked when it starts. */
 static JSValue f_apps_packages(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -1868,7 +1868,7 @@ static JSValue f_apps_packages(JSContext *c, JSValueConst this_val, int argc, JS
     return arr;
 }
 
-/* lord.apps.packagedStamp() → when the third root last changed, in ms; 0 if it isn't there. One stat: the shell
+/* insane.apps.packagedStamp() → when the third root last changed, in ms; 0 if it isn't there. One stat: the shell
  * asks every few seconds, so that what dpkg did behind its back shows without a new session. */
 static JSValue f_apps_packaged_stamp(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -1889,7 +1889,7 @@ static char *lpk_read(const char *id, const char *rel, size_t max, size_t *len) 
     return read_small(real, max, len);
 }
 
-/* lord.apps.loadPackage(id): evaluates its app.js (which leaves globalThis.__lordosApp) and returns
+/* insane.apps.loadPackage(id): evaluates its app.js (which leaves globalThis.__insaneosApp) and returns
  * that object { default, Icon }. Runs in the same context as the theme (see NATIVE-APPS.md). */
 static JSValue f_apps_load(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -1906,15 +1906,15 @@ static JSValue f_apps_load(JSContext *c, JSValueConst this_val, int argc, JSValu
     if (JS_IsException(r)) return r;
     JS_FreeValue(c, r);
     JSValue g = JS_GetGlobalObject(c);
-    JSValue app = JS_GetPropertyStr(c, g, "__lordosApp");
-    JSAtom a = JS_NewAtom(c, "__lordosApp");
+    JSValue app = JS_GetPropertyStr(c, g, "__insaneosApp");
+    JSAtom a = JS_NewAtom(c, "__insaneosApp");
     JS_DeleteProperty(c, g, a, 0);
     JS_FreeAtom(c, a);
     JS_FreeValue(c, g);
     return app;
 }
 
-/* lord.apps.packageFile(id, path) → ArrayBuffer (up to 32 MB): the app's .wasm files and data. */
+/* insane.apps.packageFile(id, path) → ArrayBuffer (up to 32 MB): the app's .wasm files and data. */
 static JSValue f_apps_file(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *id = JS_ToCString(c, argv[0]), *rel = JS_ToCString(c, argv[1]);
@@ -1928,7 +1928,7 @@ static JSValue f_apps_file(JSContext *c, JSValueConst this_val, int argc, JSValu
     return v;
 }
 
-/* lord.apps.launchWith(id, path): opens a file with a Linux app that declares it (MimeType). */
+/* insane.apps.launchWith(id, path): opens a file with a Linux app that declares it (MimeType). */
 static JSValue f_apps_launch_with(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *id = JS_ToCString(c, argv[0]), *p = JS_ToCString(c, argv[1]);
@@ -1939,7 +1939,7 @@ static JSValue f_apps_launch_with(JSContext *c, JSValueConst this_val, int argc,
     return JS_NewBool(c, ok);
 }
 
-/* lord.apps.launchUri(id, uri): a vnc:// or rdp:// address for a Linux app that declares the scheme. */
+/* insane.apps.launchUri(id, uri): a vnc:// or rdp:// address for a Linux app that declares the scheme. */
 static JSValue f_apps_launch_uri(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *id = JS_ToCString(c, argv[0]), *u = JS_ToCString(c, argv[1]);
@@ -1949,7 +1949,7 @@ static JSValue f_apps_launch_uri(JSContext *c, JSValueConst this_val, int argc, 
     return JS_NewBool(c, ok);
 }
 
-/* ---- lord.remote: state of the sessions and of remote desktop (lord-sessiond; read-only) ---- */
+/* ---- insane.remote: state of the sessions and of remote desktop (insane-sessiond; read-only) ---- */
 
 static JSValue text_or_null(JSContext *c, const char *path, size_t max) {
     size_t len;
@@ -1961,16 +1961,16 @@ static JSValue text_or_null(JSContext *c, const char *path, size_t max) {
     return v;
 }
 
-/* lord.remote.status() → { config (text), fingerprint, status (lord-sessiond JSON or null),
- *                          installed (lord-sessiond is running) } */
+/* insane.remote.status() → { config (text), fingerprint, status (insane-sessiond JSON or null),
+ *                          installed (insane-sessiond is running) } */
 static JSValue f_remote_status(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue o = JS_NewObject(c);
-    JS_SetPropertyStr(c, o, "config", text_or_null(c, "/etc/lordos/remote/config", 4096));
-    JS_SetPropertyStr(c, o, "fingerprint", text_or_null(c, "/etc/lordos/remote/fingerprint", 256));
-    JS_SetPropertyStr(c, o, "status", text_or_null(c, "/run/lordos/status.json", 65536));
+    JS_SetPropertyStr(c, o, "config", text_or_null(c, "/etc/insaneos/remote/config", 4096));
+    JS_SetPropertyStr(c, o, "fingerprint", text_or_null(c, "/etc/insaneos/remote/fingerprint", 256));
+    JS_SetPropertyStr(c, o, "status", text_or_null(c, "/run/insaneos/status.json", 65536));
     struct stat st;
-    int installed = !stat("/run/lordos/status.json", &st) && st.st_uid == 0;
+    int installed = !stat("/run/insaneos/status.json", &st) && st.st_uid == 0;
     JS_SetPropertyStr(c, o, "installed", JS_NewBool(c, installed));
     return o;
 }
@@ -1979,7 +1979,7 @@ static const JSCFunctionListEntry remote_funcs[] = {
     JS_CFUNC_DEF("status", 0, f_remote_status),
 };
 
-/* ---- lord.ssh: state of remote login (SSH) for Settings → Sharing (read-only) ----
+/* ---- insane.ssh: state of remote login (SSH) for Settings → Sharing (read-only) ----
  * Changes go through the ssh-set / ssh-allow admin actions (remote/ssh_admin.c). */
 
 static int b64_val(int ch) {
@@ -2046,7 +2046,7 @@ static int sshd_running(void) {
     return found;
 }
 
-/* lord.ssh.status() → { installed, enabled (starts at boot), running, allow ('all'|'admins'),
+/* insane.ssh.status() → { installed, enabled (starts at boot), running, allow ('all'|'admins'),
  *                       fingerprint (ED25519 host key, 'SHA256:…' or '') } */
 static JSValue f_ssh_status(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -2058,7 +2058,7 @@ static JSValue f_ssh_status(JSContext *c, JSValueConst this_val, int argc, JSVal
     JS_SetPropertyStr(c, o, "installed", JS_NewBool(c, installed));
     JS_SetPropertyStr(c, o, "enabled", JS_NewBool(c, enabled));
     JS_SetPropertyStr(c, o, "running", JS_NewBool(c, installed && sshd_running()));
-    JS_SetPropertyStr(c, o, "allow", JS_NewString(c, lstat("/etc/ssh/sshd_config.d/11-lordos-allow.conf", &st) ? "all" : "admins"));
+    JS_SetPropertyStr(c, o, "allow", JS_NewString(c, lstat("/etc/ssh/sshd_config.d/11-insaneos-allow.conf", &st) ? "all" : "admins"));
     char fp[64] = "";
     char *pub = installed ? read_small("/etc/ssh/ssh_host_ed25519_key.pub", 1024, NULL) : NULL;
     if (pub && ssh_fingerprint(pub, fp, sizeof fp)) fp[0] = 0;
@@ -2071,7 +2071,7 @@ static const JSCFunctionListEntry ssh_funcs[] = {
     JS_CFUNC_DEF("status", 0, f_ssh_status),
 };
 
-/* ---- lord.users: accounts of the people on the machine (Settings → Users; read-only) ---- */
+/* ---- insane.users: accounts of the people on the machine (Settings → Users; read-only) ---- */
 
 static int user_in_group(const struct passwd *pw, const char *const *names) {
     gid_t groups[256];
@@ -2084,7 +2084,7 @@ static int user_in_group(const struct passwd *pw, const char *const *names) {
     return 0;
 }
 
-/* lord.users.list() → { users: [{ name, full, uid, admin, color, image, self }], autologin } */
+/* insane.users.list() → { users: [{ name, full, uid, admin, color, image, self }], autologin } */
 static JSValue f_users_list(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     static const char *const admin_groups[] = { "sudo", "admin", "wheel", NULL };
@@ -2106,14 +2106,14 @@ static JSValue f_users_list(JSContext *c, JSValueConst this_val, int argc, JSVal
         JS_SetPropertyStr(c, u, "admin", JS_NewBool(c, user_in_group(pw, admin_groups)));
         JS_SetPropertyStr(c, u, "self", JS_NewBool(c, pw->pw_uid == me));
         char p[160], color[16] = "";
-        snprintf(p, sizeof p, "/var/lib/lordos/users/%s.json", pw->pw_name);
+        snprintf(p, sizeof p, "/var/lib/insaneos/users/%s.json", pw->pw_name);
         size_t len;
         char *j = read_small(p, 512, &len);
         const char *cp = j ? strstr(j, "\"color\":\"#") : NULL;
         if (cp && strspn(cp + 10, "0123456789abcdefABCDEF") >= 6) snprintf(color, sizeof color, "%.7s", cp + 9);
         free(j);
         JS_SetPropertyStr(c, u, "color", JS_NewString(c, color));
-        snprintf(p, sizeof p, "/var/lib/lordos/users/%s.png", pw->pw_name);
+        snprintf(p, sizeof p, "/var/lib/insaneos/users/%s.png", pw->pw_name);
         struct stat st;
         JS_SetPropertyStr(c, u, "image", !lstat(p, &st) && S_ISREG(st.st_mode) ? JS_NewString(c, p) : JS_NULL);
         JS_SetPropertyUint32(c, arr, n++, u);
@@ -2122,7 +2122,7 @@ static JSValue f_users_list(JSContext *c, JSValueConst this_val, int argc, JSVal
     JS_SetPropertyStr(c, o, "users", arr);
     char au[40] = "";
     size_t len;
-    char *conf = read_small("/etc/lordos/session.conf", 4096, &len);
+    char *conf = read_small("/etc/insaneos/session.conf", 4096, &len);
     const char *a = conf ? strstr(conf, "AUTOLOGIN=") : NULL;
     if (a) { a += 10; size_t k = strspn(a, "abcdefghijklmnopqrstuvwxyz0123456789_-"); if (k < sizeof au) { memcpy(au, a, k); au[k] = 0; } }
     free(conf);
@@ -2134,15 +2134,15 @@ static const JSCFunctionListEntry users_funcs[] = {
     JS_CFUNC_DEF("list", 0, f_users_list),
 };
 
-/* ---- lord.session: lock and switch user (lord-sessiond, docs/SESSIONS.md) ---- */
+/* ---- insane.session: lock and switch user (insane-sessiond, docs/SESSIONS.md) ---- */
 
 static int greeter_mode;
 void js_sys_set_greeter(int on) { greeter_mode = on; }
 
-/* is the session managed by lord-sessiond (is there a login screen to go back to)? */
+/* is the session managed by insane-sessiond (is there a login screen to go back to)? */
 static JSValue f_session_managed(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
-    return JS_NewBool(c, getenv("LORDOS_SESSIOND") != NULL);
+    return JS_NewBool(c, getenv("INSANEOS_SESSIOND") != NULL);
 }
 
 /* The lock carries this session's idle state for the login screen (docs/SETTINGS.md): "dark" when the
@@ -2166,9 +2166,9 @@ static JSValue f_session_switch(JSContext *c, JSValueConst this_val, int argc, J
     return JS_NewBool(c, mirror_has_seat());
 }
 
-/* lord.session.power('reboot'|'poweroff'): asks lord-sessiond (root), which decides (docs/SESSIONS.md,
- * "Restart and Shut Down from a session"). Only those two words, sent as a fixed message; lord-server
- * runs nothing. false if no lord-sessiond drives this session's monitor. */
+/* insane.session.power('reboot'|'poweroff'): asks insane-sessiond (root), which decides (docs/SESSIONS.md,
+ * "Restart and Shut Down from a session"). Only those two words, sent as a fixed message; insane-server
+ * runs nothing. false if no insane-sessiond drives this session's monitor. */
 static JSValue f_session_power(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     const char *w = argc ? JS_ToCString(c, argv[0]) : NULL;
@@ -2181,8 +2181,8 @@ static JSValue f_session_power(JSContext *c, JSValueConst this_val, int argc, JS
     return JS_TRUE;
 }
 
-/* lord.session.onMonitor(): is this session the one lord-sessiond shows on the monitor (it holds the
- * seat connection)? Only that session's requests reach lord-sessiond, so Restart and Shut Down are
+/* insane.session.onMonitor(): is this session the one insane-sessiond shows on the monitor (it holds the
+ * seat connection)? Only that session's requests reach insane-sessiond, so Restart and Shut Down are
  * offered only there; a session seen only through the remote desktop doesn't have it. */
 static JSValue f_session_on_monitor(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -2197,7 +2197,7 @@ static const JSCFunctionListEntry session_funcs[] = {
     JS_CFUNC_DEF("switchUser", 0, f_session_switch),
 };
 
-/* ---- lord.greeter (only the login screen theme): requests to lord-sessiond ----
+/* ---- insane.greeter (only the login screen theme): requests to insane-sessiond ----
  * The password travels from here to the root process, which verifies it; JS never sees /etc/shadow. */
 static JSValue f_greeter_send(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
@@ -2214,7 +2214,7 @@ static const JSCFunctionListEntry greeter_funcs[] = {
     JS_CFUNC_DEF("send", 1, f_greeter_send),
 };
 
-/* lord.apps.launchPackage(id): launches a .lpk app as its own isolated process (app_spawn,
+/* insane.apps.launchPackage(id): launches a .lpk app as its own isolated process (app_spawn,
  * the third bounded exception; see AGENTS.md and docs/PRIVACY.md). */
 static JSValue f_apps_launch_package(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -2267,39 +2267,39 @@ static void add_object(JSContext *c, JSValue parent, const char *name, const JSC
     JS_SetPropertyStr(c, parent, name, o);
 }
 
-void js_sys_register_app(JSContext *c, JSValue lord) {
-    add_object(c, lord, "text", text_funcs, sizeof text_funcs / sizeof text_funcs[0]);
-    add_object(c, lord, "image", image_funcs, sizeof image_funcs / sizeof image_funcs[0]);
+void js_sys_register_app(JSContext *c, JSValue insane) {
+    add_object(c, insane, "text", text_funcs, sizeof text_funcs / sizeof text_funcs[0]);
+    add_object(c, insane, "image", image_funcs, sizeof image_funcs / sizeof image_funcs[0]);
     /* text measuring is local (fonts already loaded): Mail's body editor lays out lines with it */
-    JS_SetPropertyStr(c, lord, "measureText", JS_NewCFunction(c, f_measure_text, "measureText", 3));
+    JS_SetPropertyStr(c, insane, "measureText", JS_NewCFunction(c, f_measure_text, "measureText", 3));
 }
 
-void js_sys_register(JSContext *c, JSValue lord) {
-    add_object(c, lord, "fs", fs_funcs, sizeof fs_funcs / sizeof fs_funcs[0]);
-    add_object(c, lord, "system", system_funcs, sizeof system_funcs / sizeof system_funcs[0]);
-    add_object(c, lord, "settings", settings_funcs, sizeof settings_funcs / sizeof settings_funcs[0]);
-    add_object(c, lord, "themes", themes_funcs, sizeof themes_funcs / sizeof themes_funcs[0]);
-    add_object(c, lord, "fonts", fonts_funcs, sizeof fonts_funcs / sizeof fonts_funcs[0]);
-    add_object(c, lord, "admin", admin_funcs, sizeof admin_funcs / sizeof admin_funcs[0]);
-    add_object(c, lord, "locale", locale_funcs, sizeof locale_funcs / sizeof locale_funcs[0]);
-    add_object(c, lord, "time", time_funcs, sizeof time_funcs / sizeof time_funcs[0]);
-    add_object(c, lord, "keyboard", keyboard_funcs, sizeof keyboard_funcs / sizeof keyboard_funcs[0]);
-    add_object(c, lord, "text", text_funcs, sizeof text_funcs / sizeof text_funcs[0]);
+void js_sys_register(JSContext *c, JSValue insane) {
+    add_object(c, insane, "fs", fs_funcs, sizeof fs_funcs / sizeof fs_funcs[0]);
+    add_object(c, insane, "system", system_funcs, sizeof system_funcs / sizeof system_funcs[0]);
+    add_object(c, insane, "settings", settings_funcs, sizeof settings_funcs / sizeof settings_funcs[0]);
+    add_object(c, insane, "themes", themes_funcs, sizeof themes_funcs / sizeof themes_funcs[0]);
+    add_object(c, insane, "fonts", fonts_funcs, sizeof fonts_funcs / sizeof fonts_funcs[0]);
+    add_object(c, insane, "admin", admin_funcs, sizeof admin_funcs / sizeof admin_funcs[0]);
+    add_object(c, insane, "locale", locale_funcs, sizeof locale_funcs / sizeof locale_funcs[0]);
+    add_object(c, insane, "time", time_funcs, sizeof time_funcs / sizeof time_funcs[0]);
+    add_object(c, insane, "keyboard", keyboard_funcs, sizeof keyboard_funcs / sizeof keyboard_funcs[0]);
+    add_object(c, insane, "text", text_funcs, sizeof text_funcs / sizeof text_funcs[0]);
     {
-        JSValue t = JS_GetPropertyStr(c, lord, "text");
+        JSValue t = JS_GetPropertyStr(c, insane, "text");
         JS_SetPropertyStr(c, t, "covered", JS_NewCFunction(c, f_text_covered, "covered", 1));
         JS_FreeValue(c, t);
     }
-    add_object(c, lord, "image", image_funcs, sizeof image_funcs / sizeof image_funcs[0]);
-    add_object(c, lord, "ime", ime_funcs, sizeof ime_funcs / sizeof ime_funcs[0]);
-    add_object(c, lord, "wayland", wayland_funcs, sizeof wayland_funcs / sizeof wayland_funcs[0]);
-    add_object(c, lord, "apps", apps_funcs, sizeof apps_funcs / sizeof apps_funcs[0]);
-    add_object(c, lord, "remote", remote_funcs, sizeof remote_funcs / sizeof remote_funcs[0]);
-    js_share_register(c, lord);
-    add_object(c, lord, "ssh", ssh_funcs, sizeof ssh_funcs / sizeof ssh_funcs[0]);
-    add_object(c, lord, "session", session_funcs, sizeof session_funcs / sizeof session_funcs[0]);
-    add_object(c, lord, "users", users_funcs, sizeof users_funcs / sizeof users_funcs[0]);
-    if (greeter_mode) add_object(c, lord, "greeter", greeter_funcs, sizeof greeter_funcs / sizeof greeter_funcs[0]);
-    JS_SetPropertyStr(c, lord, "quit", JS_NewCFunction(c, f_quit, "quit", 0));
-    JS_SetPropertyStr(c, lord, "measureText", JS_NewCFunction(c, f_measure_text, "measureText", 3));
+    add_object(c, insane, "image", image_funcs, sizeof image_funcs / sizeof image_funcs[0]);
+    add_object(c, insane, "ime", ime_funcs, sizeof ime_funcs / sizeof ime_funcs[0]);
+    add_object(c, insane, "wayland", wayland_funcs, sizeof wayland_funcs / sizeof wayland_funcs[0]);
+    add_object(c, insane, "apps", apps_funcs, sizeof apps_funcs / sizeof apps_funcs[0]);
+    add_object(c, insane, "remote", remote_funcs, sizeof remote_funcs / sizeof remote_funcs[0]);
+    js_share_register(c, insane);
+    add_object(c, insane, "ssh", ssh_funcs, sizeof ssh_funcs / sizeof ssh_funcs[0]);
+    add_object(c, insane, "session", session_funcs, sizeof session_funcs / sizeof session_funcs[0]);
+    add_object(c, insane, "users", users_funcs, sizeof users_funcs / sizeof users_funcs[0]);
+    if (greeter_mode) add_object(c, insane, "greeter", greeter_funcs, sizeof greeter_funcs / sizeof greeter_funcs[0]);
+    JS_SetPropertyStr(c, insane, "quit", JS_NewCFunction(c, f_quit, "quit", 0));
+    JS_SetPropertyStr(c, insane, "measureText", JS_NewCFunction(c, f_measure_text, "measureText", 3));
 }

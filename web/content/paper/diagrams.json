@@ -45,9 +45,9 @@
             "pt": "Servidor gráfico e compositor Wayland do Insane OS"
           },
           "sub": {
-            "en": "lord-server, in C: KMS without libdrm, evdev without libinput, composition on CPU or GPU. Linux apps and isolated .lpk apps connect here as Wayland clients",
-            "es": "lord-server, en C: KMS sin libdrm, evdev sin libinput, composición en CPU o GPU. Las apps de Linux y las .lpk aisladas se conectan acá como clientes Wayland",
-            "pt": "lord-server, em C: KMS sem libdrm, evdev sem libinput, composição na CPU ou GPU. Apps Linux e apps .lpk isolados se conectam aqui como clientes Wayland"
+            "en": "insane-server, in C: KMS without libdrm, evdev without libinput, composition on CPU or GPU. Linux apps and isolated .lpk apps connect here as Wayland clients",
+            "es": "insane-server, en C: KMS sin libdrm, evdev sin libinput, composición en CPU o GPU. Las apps de Linux y las .lpk aisladas se conectan acá como clientes Wayland",
+            "pt": "insane-server, em C: KMS sem libdrm, evdev sem libinput, composição na CPU ou GPU. Apps Linux e apps .lpk isolados se conectam aqui como clientes Wayland"
           },
           "tone": "ours"
         },
@@ -104,9 +104,9 @@
             "pt": "Processos de apps isolados"
           },
           "sub": {
-            "en": "lord-server --app <id>: one per .lpk app, and Passwords, Mail, Calendar, Contacts and Reminders; Landlock, seccomp, cgroup",
-            "es": "lord-server --app <id>: uno por app .lpk, y Contraseñas, Correo, Calendario, Contactos y Recordatorios; Landlock, seccomp, cgroup",
-            "pt": "lord-server --app <id>: um por app .lpk, e Senhas, E-mail, Calendário, Contatos e Lembretes; Landlock, seccomp, cgroup"
+            "en": "insane-server --app <id>: one per .lpk app, and Passwords, Mail, Calendar, Contacts and Reminders; Landlock, seccomp, cgroup",
+            "es": "insane-server --app <id>: uno por app .lpk, y Contraseñas, Correo, Calendario, Contactos y Recordatorios; Landlock, seccomp, cgroup",
+            "pt": "insane-server --app <id>: um por app .lpk, e Senhas, E-mail, Calendário, Contatos e Lembretes; Landlock, seccomp, cgroup"
           },
           "tone": "user"
         },
@@ -118,18 +118,18 @@
             "pt": "Ajudantes isolados"
           },
           "sub": {
-            "en": "lord-doc, lord-media, lord-maild, lord-vault, lord-fetch: no sockets, no exec, files only as descriptors",
-            "es": "lord-doc, lord-media, lord-maild, lord-vault, lord-fetch: sin sockets, sin exec, archivos solo como descriptores",
-            "pt": "lord-doc, lord-media, lord-maild, lord-vault, lord-fetch: sem sockets, sem exec, arquivos só como descritores"
+            "en": "insane-doc, insane-media, insane-maild, insane-vault, insane-fetch: no sockets, no exec, files only as descriptors",
+            "es": "insane-doc, insane-media, insane-maild, insane-vault, insane-fetch: sin sockets, sin exec, archivos solo como descriptores",
+            "pt": "insane-doc, insane-media, insane-maild, insane-vault, insane-fetch: sem sockets, sem exec, arquivos só como descritores"
           },
           "tone": "ours"
         },
         {
           "id": "session",
           "label": {
-            "en": "lord-server (one per user)",
-            "es": "lord-server (uno por usuario)",
-            "pt": "lord-server (um por usuário)"
+            "en": "insane-server (one per user)",
+            "es": "insane-server (uno por usuario)",
+            "pt": "insane-server (um por usuário)"
           },
           "sub": {
             "en": "Runs as the user: compositor, UI engine, broker; no command execution",
@@ -146,9 +146,9 @@
             "pt": "Serviços root com interfaces fechadas"
           },
           "sub": {
-            "en": "lord-sessiond, lord-netd, lord-netperm, lord-fand, and the admin helper's fixed action table",
-            "es": "lord-sessiond, lord-netd, lord-netperm, lord-fand y la tabla fija de acciones del ayudante admin",
-            "pt": "lord-sessiond, lord-netd, lord-netperm, lord-fand e a tabela fixa de ações do ajudante admin"
+            "en": "insane-sessiond, insane-netd, insane-netperm, insane-fand, and the admin helper's fixed action table",
+            "es": "insane-sessiond, insane-netd, insane-netperm, insane-fand y la tabla fija de acciones del ayudante admin",
+            "pt": "insane-sessiond, insane-netd, insane-netperm, insane-fand e a tabela fixa de ações do ajudante admin"
           },
           "tone": "kernel"
         },
@@ -191,18 +191,18 @@
             "pt": "Tela de login"
           },
           "sub": {
-            "en": "Runs as lordos-greeter; only sends the request",
-            "es": "Corre como lordos-greeter; solo envía el pedido",
-            "pt": "Roda como lordos-greeter; só envia o pedido"
+            "en": "Runs as insaneos-greeter; only sends the request",
+            "es": "Corre como insaneos-greeter; solo envía el pedido",
+            "pt": "Roda como insaneos-greeter; só envia o pedido"
           },
           "tone": "user"
         },
         {
           "id": "sessiond",
           "label": {
-            "en": "lord-sessiond (root)",
-            "es": "lord-sessiond (root)",
-            "pt": "lord-sessiond (root)"
+            "en": "insane-sessiond (root)",
+            "es": "insane-sessiond (root)",
+            "pt": "insane-sessiond (root)"
           },
           "sub": {
             "en": "Verifies the password against /etc/shadow",
@@ -233,9 +233,9 @@
             "pt": "Sessão do usuário"
           },
           "sub": {
-            "en": "lord-server as the user, composing on GPU or CPU",
-            "es": "lord-server como el usuario, componiendo en GPU o CPU",
-            "pt": "lord-server como o usuário, compondo na GPU ou CPU"
+            "en": "insane-server as the user, composing on GPU or CPU",
+            "es": "insane-server como el usuario, componiendo en GPU o CPU",
+            "pt": "insane-server como o usuário, compondo na GPU ou CPU"
           },
           "tone": "ours"
         },
@@ -448,9 +448,9 @@
         {
           "id": "broker",
           "label": {
-            "en": "Broker in lord-server",
-            "es": "Broker en lord-server",
-            "pt": "Broker no lord-server"
+            "en": "Broker in insane-server",
+            "es": "Broker en insane-server",
+            "pt": "Broker no insane-server"
           },
           "sub": {
             "en": "Looks up the stored decision (perms.c)",
@@ -705,9 +705,9 @@
         {
           "id": "broker",
           "label": {
-            "en": "Broker in lord-server",
-            "es": "Broker en lord-server",
-            "pt": "Broker no lord-server"
+            "en": "Broker in insane-server",
+            "es": "Broker en insane-server",
+            "pt": "Broker no insane-server"
           },
           "sub": {
             "en": "Isolated apps (.lpk, Passwords, Mail, Calendar, Contacts, Reminders): all eight restrictions, refused without a prompt",
@@ -761,9 +761,9 @@
         {
           "id": "kernel",
           "label": {
-            "en": "lord-netperm's eBPF programs in the kernel",
-            "es": "Programas eBPF de lord-netperm en el kernel",
-            "pt": "Programas eBPF do lord-netperm no kernel"
+            "en": "insane-netperm's eBPF programs in the kernel",
+            "es": "Programas eBPF de insane-netperm en el kernel",
+            "pt": "Programas eBPF do insane-netperm no kernel"
           },
           "sub": {
             "en": "Network hooks; cgroup/dev for camera, USB, ALSA capture and /dev/fb; BPF LSM socket_create for Bluetooth sockets",
@@ -806,9 +806,9 @@
         {
           "id": "server",
           "label": {
-            "en": "lord-server",
-            "es": "lord-server",
-            "pt": "lord-server"
+            "en": "insane-server",
+            "es": "insane-server",
+            "pt": "insane-server"
           },
           "sub": {
             "en": "Validates the path and opens the file",
@@ -839,9 +839,9 @@
             "pt": "Memória compartilhada selada"
           },
           "sub": {
-            "en": "Pixels or pages, validated by lord-server",
-            "es": "Píxeles o páginas, validados por lord-server",
-            "pt": "Pixels ou páginas, validados pelo lord-server"
+            "en": "Pixels or pages, validated by insane-server",
+            "es": "Píxeles o páginas, validados por insane-server",
+            "pt": "Pixels ou páginas, validados pelo insane-server"
           },
           "tone": "allow"
         }

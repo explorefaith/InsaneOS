@@ -1,6 +1,6 @@
 /* canvas.h — our own 2D software rasterizer (XRGB8888). */
-#ifndef LORD_CANVAS_H
-#define LORD_CANVAS_H
+#ifndef INSANE_CANVAS_H
+#define INSANE_CANVAS_H
 
 #include <stdint.h>
 
@@ -14,7 +14,7 @@ typedef struct {
 
 enum { FIT_FILL, FIT_COVER, FIT_CONTAIN };
 
-/* Optional: run row-local pixel loops on a pool (lord-server passes par_rows, see par.h); same pixels. */
+/* Optional: run row-local pixel loops on a pool (insane-server passes par_rows, see par.h); same pixels. */
 typedef void (*CanvasPar)(int j0, int j1, void (*fn)(void *ctx, int a, int b), void *ctx);
 void canvas_parallel(CanvasPar fn);
 int  canvas_parallel_on(void);       /* the pool is in use now (heavy frames) */

@@ -1,9 +1,9 @@
 /* appid.h — which app a process belongs to, by its cgroup (the launcher's root-owned scopes,
- * sec/cgroup.h): ".../lordos-session-<uid>/app-lordos-<id>.scope[/...]" → "desktop:<id>",
- * "app-lordos-lpk-<id>.scope" → "lpk:<id>" (fw_app_canon). Used by the notification server and the
+ * sec/cgroup.h): ".../insaneos-session-<uid>/app-insaneos-<id>.scope[/...]" → "desktop:<id>",
+ * "app-insaneos-lpk-<id>.scope" → "lpk:<id>" (fw_app_canon). Used by the notification server and the
  * PipeWire guard to apply the firewall's restrictions to Linux apps. */
-#ifndef LORD_SEC_APPID_H
-#define LORD_SEC_APPID_H
+#ifndef INSANE_SEC_APPID_H
+#define INSANE_SEC_APPID_H
 
 #include <stddef.h>
 

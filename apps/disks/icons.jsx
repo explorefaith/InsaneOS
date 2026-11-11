@@ -1,6 +1,6 @@
 // icons.jsx — the Disks app icon and disk glyphs, drawn with View (no icon fonts): a silver hard
 // drive with its platter, arm and activity light.
-import { View } from '@lordos/sdk';
+import { View } from '@insaneos/sdk';
 
 export function DisksIcon({ size: s = 32 }) {
   const r = s * 0.225;

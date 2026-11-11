@@ -1,6 +1,6 @@
 // vpnform.js — the VPN form's data, without a screen (Settings → Network → VPN, Network.jsx):
 // PEM blocks from the files the person picks, the edit form's values from net-vpn-config and the
-// import lines sent to lord-netd (docs/NETWORK.md, "Import formats"). Tested by
+// import lines sent to insane-netd (docs/NETWORK.md, "Import formats"). Tested by
 // server/tests/vpnform_test.mjs.
 
 // The first PEM block of a kind in a text (a file may hold the certificate and the key, or other

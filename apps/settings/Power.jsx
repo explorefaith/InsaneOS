@@ -4,7 +4,7 @@
 import {
   View, Text, useTheme, useLocale, useSettings, Toggle, Segmented, admin, useBattery, usePowerProfiles, onPowerProfileResult, tOptional,
   BatteryGlyph, powerPrefs,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { GroupBox, SettingRow, PageHeader, PopUp, Stack, Badge } from './ui.jsx';
 
@@ -13,7 +13,7 @@ const duration = (tr, m) => (m >= 60 ? tr('prefs.power.hm', { h: Math.floor(m / 
 
 // Charge limit (macOS's Optimized Battery Charging, the manual version): a root admin action
 // writes charge_control_end_threshold on every battery that exposes it (ThinkPads and most
-// modern laptops) and keeps the value in /etc/lordos/battery-limit for the boot service.
+// modern laptops) and keeps the value in /etc/insaneos/battery-limit for the boot service.
 function ChargeLimitRow({ tr }) {
   const [s, set] = useSettings();
   const [err, setErr] = useState('');
@@ -56,7 +56,7 @@ function ProfileRow({ tr }) {
   if (!list.length) return <SettingRow label={tr('prefs.power.mode')} hint={tr('prefs.power.noProfiles')} disabled />;
   const set = (v) => {
     setPending(v);
-    if (!(p.daemon && lord.power.setProfile(v))) admin.run('power-profile', v).then(() => setErr(''), (e) => setErr(e.message));
+    if (!(p.daemon && insane.power.setProfile(v))) admin.run('power-profile', v).then(() => setErr(''), (e) => setErr(e.message));
   };
   return (
     <SettingRow label={tr('prefs.power.mode')} hint={err || (p.degraded ? tr('prefs.power.degraded') : tr(p.daemon ? 'prefs.power.modeHint' : 'prefs.power.modeGovernor', { gov: p.governor }))}>
@@ -66,13 +66,13 @@ function ProfileRow({ tr }) {
 }
 
 function Buttons({ hasLid, tr }) {
-  const [b, setB] = useState(() => lord.power.buttons());
+  const [b, setB] = useState(() => insane.power.buttons());
   const [err, setErr] = useState('');
   const isAdmin = admin.available();
   const acts = () => ['suspend', 'hibernate', 'poweroff', 'ignore'].map((a) => [a, tr(`prefs.power.act.${a}`)]);
   const save = (x) => {
     const n = { ...b, ...x };
-    admin.run('power-buttons', `${n.power} ${n.lid} ${n.lidAC}`).then(() => { setB(lord.power.buttons()); setErr(''); }, (e) => setErr(e.message));
+    admin.run('power-buttons', `${n.power} ${n.lid} ${n.lidAC}`).then(() => { setB(insane.power.buttons()); setErr(''); }, (e) => setErr(e.message));
     setB(n);
   };
   return (

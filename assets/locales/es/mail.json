@@ -17,7 +17,7 @@
   "flagged": "Marcados",
   "addAccount": "Agregar cuenta",
   "noAccounts": "Agregá una cuenta de correo para empezar. Sirve cualquier cuenta IMAP/SMTP; los proveedores populares se configuran solos.",
-  "unavailable": "No está instalado el ayudante de Mail (lord-maild).",
+  "unavailable": "No está instalado el ayudante de Mail (insane-maild).",
   "empty": "No hay mensajes",
   "noSelection": "Ningún mensaje seleccionado",
   "noSubject": "(sin asunto)",

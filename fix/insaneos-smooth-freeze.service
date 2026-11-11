@@ -1,0 +1,15 @@
+[Unit]
+Description=InsaneOS smooth freeze (pressure-based background app freezer)
+Documentation=https://github.com/insaneos/InsaneOS
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/insaneos-smooth-freeze.sh
+ExecStopPost=%h/.local/bin/insaneos-smooth-freeze.sh thaw
+Restart=on-failure
+RestartSec=5
+# never freeze the freezer's own group by accident
+OOMScoreAdjust=-500
+
+[Install]
+WantedBy=default.target

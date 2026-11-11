@@ -1,12 +1,12 @@
-/* js_vm.c — lord.vm: the Machines app (docs/VIRTUALIZATION.md 3.1 and "Phase 1 implementation"). lord-server plays
- * the part server/tests/vm_dev.c plays in the tests: it starts lord-vm on a control socketpair (fd 3), asks it for
- * the display connection, starts lord-vmdisplay with it (fd 3 its channel, fd 4 the D-Bus descriptor), gives the
+/* js_vm.c — insane.vm: the Machines app (docs/VIRTUALIZATION.md 3.1 and "Phase 1 implementation"). insane-server plays
+ * the part server/tests/vm_dev.c plays in the tests: it starts insane-vm on a control socketpair (fd 3), asks it for
+ * the display connection, starts insane-vmdisplay with it (fd 3 its channel, fd 4 the D-Bus descriptor), gives the
  * helper a sealed picture memfd that the engine shows as a media node, acknowledges frames once they were painted
  * and forwards input. Nothing here blocks: each poll takes at most VD_POLL_MAX messages per channel.
  *
  *   host() → { arch, cpus, ramMb, kvmDevice, kvm, vcpusRecommended, memMaxMb, missing: { amd64, arm64 }, ready }
  *   list() → [{ dir, folder, name, id, arch, accel, vcpus, memoryMb, diskGb, firmware, network, iso, state, reason,
- *              code, detail, since, error }]   the machines in ~/Machines (<name>.lordvm)
+ *              code, detail, since, error }]   the machines in ~/Machines (<name>.insanevm)
  *   create({ name, arch, vcpus, memoryMb, diskGb, import | iso }) → job id (0: refused);  job(id) → { done, ok, out, dir }
  *   start(dir) → session id · attach(dir) → session id (a machine already running, through its runtime socket)
  *   poll(id) → { state, reason, code, detail, vcpus, memoryMb, sandbox, cgroup, display, w, h, media, ended, exit,
@@ -14,7 +14,7 @@
  *   cmd(id, 'shutdown'|'poweroff'|'pause'|'resume'|'reset'|'display') · stop(dir, how) for a machine with no session
  *   key(id, evdev, down) · motion(id, x, y) · button(id, b, down) · wheel(id, dy, dx) · release(id)
  *   resize(id, w, h) · rate(id, hz) · close(id)
- *   log(dir) → the end of the machine's lord-vm.log (what failed)
+ *   log(dir) → the end of the machine's insane-vm.log (what failed)
  *   cdrom(id, path | null) → a disc into (or out of) a running machine's drive; poll's cd / cdMessage say how it went */
 #include "js_vm.h"
 #include "../media/media_int.h"
@@ -95,7 +95,7 @@ static int library(char *out, size_t n, int make) {
     return 0;
 }
 
-/* a machine folder the app may act on: a real folder <name>.lordvm directly in ~/Machines */
+/* a machine folder the app may act on: a real folder <name>.insanevm directly in ~/Machines */
 static int machine_dir(JSContext *c, JSValueConst v, char *out, size_t n) {
     const char *s = JS_ToCString(c, v);
     if (!s) return -1;
@@ -105,7 +105,7 @@ static int machine_dir(JSContext *c, JSValueConst v, char *out, size_t n) {
     JS_FreeCString(c, s);
     if (!ok) return -1;
     size_t ll = strlen(lib), rl = strlen(real);
-    if (strncmp(real, lib, ll) || real[ll] != '/' || strchr(real + ll + 1, '/') || rl < ll + 8 || strcmp(real + rl - 7, ".lordvm") || rl >= n) return -1;
+    if (strncmp(real, lib, ll) || real[ll] != '/' || strchr(real + ll + 1, '/') || rl < ll + 8 || strcmp(real + rl - 7, ".insanevm") || rl >= n) return -1;
     memcpy(out, real, rl + 1);
     return 0;
 }
@@ -148,8 +148,8 @@ static JSValue f_host(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     vm_missing_packages(2, pk, sizeof pk); set_str(c, miss, "amd64", pk);
     vm_missing_packages(1, pk, sizeof pk); set_str(c, miss, "arm64", pk);
     JS_SetPropertyStr(c, o, "missing", miss);
-    JS_SetPropertyStr(c, o, "ready", JS_NewBool(c, !bin_path("lord-vm", bin, sizeof bin)));
-    JS_SetPropertyStr(c, o, "display", JS_NewBool(c, !bin_path("lord-vmdisplay", bin, sizeof bin)));
+    JS_SetPropertyStr(c, o, "ready", JS_NewBool(c, !bin_path("insane-vm", bin, sizeof bin)));
+    JS_SetPropertyStr(c, o, "display", JS_NewBool(c, !bin_path("insane-vmdisplay", bin, sizeof bin)));
     char lib[PATH_MAX];
     set_str(c, o, "library", library(lib, sizeof lib, 0) ? "" : lib);
     /* where machines live: free space and what kind of disk (a microSD card is slow for machines) */
@@ -180,8 +180,8 @@ static JSValue f_host(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
 
 /* ---- the library ---- */
 
-/* run.json, read as lord-vm writes it; a state that says "active" with no lord-vm behind it is a machine whose
- * supervisor died: lord-vm recovers it at the next start, the list says so now */
+/* run.json, read as insane-vm writes it; a state that says "active" with no insane-vm behind it is a machine whose
+ * supervisor died: insane-vm recovers it at the next start, the list says so now */
 static void run_state(const char *dir, JSContext *c, JSValue o) {
     char p[PATH_MAX + 16], buf[2048];
     snprintf(p, sizeof p, "%s/run.json", dir);
@@ -213,7 +213,7 @@ static void run_state(const char *dir, JSContext *c, JSValue o) {
                 ssize_t k = cf >= 0 ? read(cf, comm, sizeof comm - 1) : -1;
                 if (cf >= 0) close(cf);
                 if (k > 0) comm[k] = 0;
-                if (k <= 0 || strncmp(comm, "lord-vm", 7)) { snprintf(st, sizeof st, "stopped"); snprintf(rs, sizeof rs, "supervisor-lost"); }
+                if (k <= 0 || strncmp(comm, "insane-vm", 7)) { snprintf(st, sizeof st, "stopped"); snprintf(rs, sizeof rs, "supervisor-lost"); }
             }
             json_free(&d);
         }
@@ -238,14 +238,14 @@ static JSValue f_list(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     struct dirent *e;
     while ((e = readdir(d)) && n < 256) {
         size_t l = strlen(e->d_name);
-        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".lordvm")) continue;
+        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".insanevm")) continue;
         char dir[PATH_MAX + 260];
         snprintf(dir, sizeof dir, "%s/%s", lib, e->d_name);
         struct stat st;
         if (lstat(dir, &st) || !S_ISDIR(st.st_mode)) continue;
         char mj[PATH_MAX + 300];
         snprintf(mj, sizeof mj, "%s/machine.json", dir);
-        if (access(mj, F_OK)) continue;          /* being created (lord-vm --create writes it last) */
+        if (access(mj, F_OK)) continue;          /* being created (insane-vm --create writes it last) */
         JSValue o = JS_NewObject(c);
         set_str(c, o, "dir", dir);
         char folder[260];
@@ -319,7 +319,7 @@ static JSValue f_list(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     return arr;
 }
 
-/* ---- creating (lord-vm --create, in the background) ---- */
+/* ---- creating (insane-vm --create, in the background) ---- */
 
 #define MAX_JOBS 4
 typedef struct { int used, fd, done, ok, exit; pid_t pid; char out[16384]; size_t n; char dir[PATH_MAX + 80]; char hash[160]; char creds[PATH_MAX]; } Job;
@@ -381,8 +381,8 @@ static void xkb_desc(const char *code, char *out, size_t n) {
     fclose(f);
 }
 
-/* an unattended install's spec for lord-vm --unattended (vm/vmunattend.h): the object's words as JSON, the password
- * replaced by its SHA-512 crypt hash, in a 0600 file of the runtime folder that lord-vm reads and removes. 0, or -1 */
+/* an unattended install's spec for insane-vm --unattended (vm/vmunattend.h): the object's words as JSON, the password
+ * replaced by its SHA-512 crypt hash, in a 0600 file of the runtime folder that insane-vm reads and removes. 0, or -1 */
 static int unattended_spec(JSContext *c, JSValueConst o, const char *arch, char *path, size_t pn) {
     static const char *const keys[] = { "kind", "user", "fullname", "hostname", "timezone", "keymap", "variant", "locale", "release",
                                         "kernel", "initrd", "append", NULL };
@@ -431,8 +431,8 @@ static int unattended_spec(JSContext *c, JSValueConst o, const char *arch, char 
     if (!ok || n >= sizeof buf) return -1;
     const char *rt = getenv("XDG_RUNTIME_DIR");
     static unsigned k;
-    if (rt && rt[0] == '/' && strlen(rt) < 200) snprintf(path, pn, "%s/.lordos-vm-unattended-%d-%u", rt, (int)getpid(), ++k);
-    else snprintf(path, pn, "/run/user/%u/.lordos-vm-unattended-%d-%u", (unsigned)getuid(), (int)getpid(), ++k);
+    if (rt && rt[0] == '/' && strlen(rt) < 200) snprintf(path, pn, "%s/.insaneos-vm-unattended-%d-%u", rt, (int)getpid(), ++k);
+    else snprintf(path, pn, "/run/user/%u/.insaneos-vm-unattended-%d-%u", (unsigned)getuid(), (int)getpid(), ++k);
     int fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
     int good = fd >= 0 && write(fd, buf, n) == (ssize_t)n;
     if (fd >= 0) close(fd);
@@ -447,7 +447,7 @@ static JSValue f_create(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     int slot = -1;
     for (int i = 0; i < MAX_JOBS; i++) if (!jobs[i].used) { slot = i; break; }
     char bin[PATH_MAX], lib[PATH_MAX];
-    if (slot < 0 || bin_path("lord-vm", bin, sizeof bin) || library(lib, sizeof lib, 1)) return JS_NewInt32(c, 0);
+    if (slot < 0 || bin_path("insane-vm", bin, sizeof bin) || library(lib, sizeof lib, 1)) return JS_NewInt32(c, 0);
     JSValue vn = JS_GetPropertyStr(c, argv[0], "name"), va = JS_GetPropertyStr(c, argv[0], "arch");
     JSValue vi = JS_GetPropertyStr(c, argv[0], "import"), vs = JS_GetPropertyStr(c, argv[0], "iso");
     const char *name = JS_ToCString(c, vn), *arch = JS_ToCString(c, va);
@@ -497,12 +497,12 @@ static JSValue f_create(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     if (ok) {
         char folder[64], dir[PATH_MAX + 80];
         folder_name(name, folder, sizeof folder);
-        snprintf(dir, sizeof dir, "%s/%s.lordvm", lib, folder);
-        for (int k = 2; !access(dir, F_OK) && k < 100; k++) snprintf(dir, sizeof dir, "%s/%s %d.lordvm", lib, folder, k);
+        snprintf(dir, sizeof dir, "%s/%s.insanevm", lib, folder);
+        for (int k = 2; !access(dir, F_OK) && k < 100; k++) snprintf(dir, sizeof dir, "%s/%s %d.insanevm", lib, folder, k);
         int native = (!strcmp(arch, "amd64") ? VM_ARCH_AMD64 : VM_ARCH_ARM64) == host_arch();
         char sv[16], sm[16], sd[16];
         snprintf(sv, sizeof sv, "%d", vcpus); snprintf(sm, sizeof sm, "%d", mem); snprintf(sd, sizeof sd, "%d", disk);
-        char *args[32] = { "lord-vm", "--create", dir, "--name", (char *)name, "--arch", (char *)arch, "--accel", native ? "kvm" : "tcg",
+        char *args[32] = { "insane-vm", "--create", dir, "--name", (char *)name, "--arch", (char *)arch, "--accel", native ? "kvm" : "tcg",
                          "--vcpus", sv, "--memory", sm, "--disk", sd, "--network", isolated ? "isolated" : "shared", has_imp ? "--import" : "--iso", has_imp ? imp : iso, NULL };
         int na = 0;
         while (args[na]) na++;
@@ -543,12 +543,12 @@ static JSValue f_create(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return JS_NewInt32(c, id);
 }
 
-/* lord-vm with args in the background, as a job (f_job reads it); 0 when it couldn't start */
+/* insane-vm with args in the background, as a job (f_job reads it); 0 when it couldn't start */
 static int spawn_job(char *const args[], const char *dir) {
     int slot = -1;
     for (int i = 0; i < MAX_JOBS; i++) if (!jobs[i].used) { slot = i; break; }
     char bin[PATH_MAX];
-    if (slot < 0 || bin_path("lord-vm", bin, sizeof bin)) return 0;
+    if (slot < 0 || bin_path("insane-vm", bin, sizeof bin)) return 0;
     int p[2];
     if (pipe2(p, O_CLOEXEC)) return 0;
     pid_t pid = fork();
@@ -572,20 +572,20 @@ static int spawn_job(char *const args[], const char *dir) {
     return slot + 1;
 }
 
-/* (security scan F5) A guest writes to a writable shared folder: never one that is, sits under or holds a path lord.fs
+/* (security scan F5) A guest writes to a writable shared folder: never one that is, sits under or holds a path insane.fs
  * protects (settings.json, the Terminal's configuration wherever the user put it, launchers…), or the guest could rewrite
  * what the host runs. Checked when the shares are set and again before every start: the Terminal's file can move into a
  * shared folder after the share was made. The reason a call returned 0 is kept for refusal(). */
 static char refusal[48];
 static int share_writable_ok(const char *path) {
     char real[PATH_MAX];
-    if (!realpath(path, real)) return 1;            /* not there: lord-vm refuses the share itself */
+    if (!realpath(path, real)) return 1;            /* not there: insane-vm refuses the share itself */
     return !fsops_protected_resolved(real);
 }
 static int machine_shares_ok(const char *dir) {
     VmMachine m;
     char err[256];
-    if (vm_machine_load(dir, &m, err, sizeof err) != VM_OK) return 1;   /* a bad machine.json is lord-vm's to report */
+    if (vm_machine_load(dir, &m, err, sizeof err) != VM_OK) return 1;   /* a bad machine.json is insane-vm's to report */
     for (int i = 0; i < m.n_shares; i++)
         if (m.share_rw[i] && !share_writable_ok(m.share_path[i])) { snprintf(refusal, sizeof refusal, "vm.shareProtected"); return 0; }
     return 1;
@@ -597,15 +597,15 @@ static JSValue f_refusal(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     return r;
 }
 
-/* set(dir, { name, vcpus, memoryMb, diskGb, network, iso, shares: [{ tag, path, writable }] }) → job id: lord-vm --set on a
- * machine that is off (Configure). shares replaces the list ([] empties it); lord-vm decides which folders may be shared */
+/* set(dir, { name, vcpus, memoryMb, diskGb, network, iso, shares: [{ tag, path, writable }] }) → job id: insane-vm --set on a
+ * machine that is off (Configure). shares replaces the list ([] empties it); insane-vm decides which folders may be shared */
 static JSValue f_set(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     char dir[PATH_MAX];
     if (argc < 2 || !JS_IsObject(argv[1]) || machine_dir(c, argv[0], dir, sizeof dir)) return JS_NewInt32(c, 0);
     char *args[32 + 2 * VM_SHARES], shv[VM_SHARES][VM_TAG_MAX + VM_PATH_MAX + 8], sv[16], sm[16], sd[16], name[VM_NAME_MAX + 8] = "", net[16] = "", iso[PATH_MAX] = "";
     int n = 0, ok = 1;
-    args[n++] = "lord-vm"; args[n++] = "--set"; args[n++] = dir;
+    args[n++] = "insane-vm"; args[n++] = "--set"; args[n++] = dir;
     JSValue v = JS_GetPropertyStr(c, argv[1], "name");
     if (JS_IsString(v)) {
         const char *s = JS_ToCString(c, v);
@@ -749,8 +749,8 @@ static JSValue f_stats(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
             buf[k] = 0;
             char *nl = strchr(buf, '\n');
             if (nl) *nl = 0;
-            /* QEMU's own leaf, or the machine's scope when lord-vm couldn't divide it; never an unrelated cgroup */
-            if (strstr(buf + 3, "lordos-vm-") && strlen(buf + 3) < sizeof cg) snprintf(cg, sizeof cg, "%s", buf + 3);
+            /* QEMU's own leaf, or the machine's scope when insane-vm couldn't divide it; never an unrelated cgroup */
+            if (strstr(buf + 3, "insaneos-vm-") && strlen(buf + 3) < sizeof cg) snprintf(cg, sizeof cg, "%s", buf + 3);
         }
     }
     if (cg[0]) {
@@ -839,7 +839,7 @@ static JSValue f_job(JSContext *c, JSValueConst t, int argc, JSValueConst *argv)
 
 #define MAX_SESS 4
 typedef struct {
-    int used, vm, vd, err;              /* channels; lord-vm's stderr (until its log is open) */
+    int used, vm, vd, err;              /* channels; insane-vm's stderr (until its log is open) */
     pid_t vm_pid, vd_pid;
     char dir[PATH_MAX], id[37];
     int state, reason, code, vcpus, mem, sandbox, cg, have_info;
@@ -854,7 +854,7 @@ typedef struct {
     int ended, exit_code;
     char last_error[VM_TEXT_MAX];
     char errtail[400];
-    char creds[PATH_MAX];               /* the first-boot settings file, removed once lord-vm read it */
+    char creds[PATH_MAX];               /* the first-boot settings file, removed once insane-vm read it */
     uint8_t *cur;                       /* the guest's pointer (VD_CURSOR) until there's a picture to give it to */
     int cur_w, cur_h, cur_hx, cur_hy;
     int job_kind, job_status, job_pct;  /* the last VM_JOB (suspend, resume, snapshots) */
@@ -869,8 +869,8 @@ typedef struct {
     char ag_msg[VM_TEXT_MAX];
     char *clip_in;                      /* the guest's clipboard text (VM_CLIP_DATA), and a counter of them */
     int clip_seq;
-    char *clip_html;                    /* its rich text (sanitized by lord-vm) and picture (header checked by lord-vm,
-                                         * re-encoded by lord-media before it's used), when it came as VCF_CLIPX */
+    char *clip_html;                    /* its rich text (sanitized by insane-vm) and picture (header checked by insane-vm,
+                                         * re-encoded by insane-media before it's used), when it came as VCF_CLIPX */
     uint8_t *clip_png;
     size_t clip_html_n, clip_png_n;
     uint64_t clip_last;                 /* what went either way last (its main form's hash): not sent back */
@@ -879,13 +879,13 @@ typedef struct {
     uint32_t console_seq;
     int rec;                            /* a recording of the picture (6.20): its media source, fed as frames come */
     double rec_fed;
-    int rec_sound;                      /* lord-vmdisplay writes the guest's sound into the recording's ring */
+    int rec_sound;                      /* insane-vmdisplay writes the guest's sound into the recording's ring */
     int notice, notice_code, notice_seq; /* VM_NOTICE: VMN_*, its number, a counter of them, and its words */
     char notice_text[VM_TEXT_MAX];
 } Sess;
 static Sess sess[MAX_SESS];
 
-/* lord-vm processes whose window closed before they exited */
+/* insane-vm processes whose window closed before they exited */
 static pid_t orphans[16];
 static void later(pid_t p) {
     for (int i = 0; i < 16; i++) if (!orphans[i]) { orphans[i] = p; return; }
@@ -920,7 +920,7 @@ static void init_sess(Sess *s, const char *dir) {
 /* First-boot settings for a guest that asks for them (systemd's credentials: a Debian "nocloud" image otherwise stops
  * at a prompt on its serial line, where nobody sees it): this computer's language, keyboard and time zone (5.2,
  * "copied from the host"). Only words of a closed alphabet; no password. A file of the person's, 0600, in the runtime
- * folder; lord-vm reads it at start and lord-server removes it at the first message. */
+ * folder; insane-vm reads it at start and insane-server removes it at the first message. */
 static int safe_word(const char *s, const char *extra) {
     if (!*s || strlen(s) > 64) return 0;
     for (const char *p = s; *p; p++) if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || strchr(extra, *p))) return 0;
@@ -953,7 +953,7 @@ static void host_defaults(char *lang, size_t ln, char *tz, size_t tn, char *km, 
     host_keymap(km, kn);
 }
 
-/* lord.vm.hostDefaults() → { locale, timezone, keymap }: this computer's, what an unattended install starts from */
+/* insane.vm.hostDefaults() → { locale, timezone, keymap }: this computer's, what an unattended install starts from */
 static JSValue f_host_defaults(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
     char lang[80], tz[96], km[64];
@@ -970,7 +970,7 @@ static int write_creds(char *path, size_t n, const char *dir) {
     char base[256];
     if (rt && rt[0] == '/' && strlen(rt) < 200) snprintf(base, sizeof base, "%s", rt); else snprintf(base, sizeof base, "/run/user/%u", (unsigned)getuid());
     static unsigned k;
-    snprintf(path, n, "%s/.lordos-vm-firstboot-%d-%u", base, (int)getpid(), ++k);
+    snprintf(path, n, "%s/.insaneos-vm-firstboot-%d-%u", base, (int)getpid(), ++k);
     int fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
     if (fd < 0) { path[0] = 0; return -1; }
     char lang[80] = "C.UTF-8", tz[96] = "UTC", km[64], buf[512], lt[256];
@@ -1024,12 +1024,12 @@ static JSValue f_start(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
         JS_FreeValue(c, v);
     }
     int slot = new_slot();
-    if (slot < 0 || machine_dir(c, argv[0], dir, sizeof dir) || bin_path("lord-vm", bin, sizeof bin)) return JS_NewInt32(c, 0);
+    if (slot < 0 || machine_dir(c, argv[0], dir, sizeof dir) || bin_path("insane-vm", bin, sizeof bin)) return JS_NewInt32(c, 0);
     if (!machine_shares_ok(dir)) return JS_NewInt32(c, 0);
     int sv[2], ep[2];
     if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) return JS_NewInt32(c, 0);
     if (pipe2(ep, O_CLOEXEC)) { close(sv[0]); close(sv[1]); return JS_NewInt32(c, 0); }
-    /* lord-vm writes to stderr with nobody waiting: never let a full pipe stop the supervisor */
+    /* insane-vm writes to stderr with nobody waiting: never let a full pipe stop the supervisor */
     fcntl(ep[1], F_SETFL, O_NONBLOCK);
     fcntl(ep[0], F_SETFL, O_NONBLOCK);
     char creds[PATH_MAX];
@@ -1045,10 +1045,10 @@ static JSValue f_start(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
         sigset_t none;
         sigemptyset(&none);
         sigprocmask(SIG_SETMASK, &none, NULL);
-        /* no cgroup_enter here: lord-vm places itself in the machine's scope through lord-sessiond */
+        /* no cgroup_enter here: insane-vm places itself in the machine's scope through insane-sessiond */
         char *args[16];
         int k = 0;
-        args[k++] = "lord-vm"; args[k++] = "--start"; args[k++] = dir; args[k++] = "--control-fd"; args[k++] = "3"; args[k++] = "--paused";
+        args[k++] = "insane-vm"; args[k++] = "--start"; args[k++] = dir; args[k++] = "--control-fd"; args[k++] = "3"; args[k++] = "--paused";
         if (anyway) args[k++] = "--resume-anyway";
         if (discard) args[k++] = "--discard-state";
         if (loadvm[0]) { args[k++] = "--loadvm"; args[k++] = loadvm; }
@@ -1070,7 +1070,7 @@ static JSValue f_start(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     return JS_NewInt32(c, slot + 1);
 }
 
-/* a machine already running: its runtime socket ($XDG_RUNTIME_DIR/lordos-vm/<id>.sock) */
+/* a machine already running: its runtime socket ($XDG_RUNTIME_DIR/insaneos-vm/<id>.sock) */
 static JSValue f_attach(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     char dir[PATH_MAX];
@@ -1080,7 +1080,7 @@ static JSValue f_attach(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     const char *rt = getenv("XDG_RUNTIME_DIR");
     char base[256], path[sizeof ((struct sockaddr_un *)0)->sun_path];
     if (rt && rt[0] == '/') snprintf(base, sizeof base, "%s", rt); else snprintf(base, sizeof base, "/run/user/%u", (unsigned)getuid());
-    if ((size_t)snprintf(path, sizeof path, "%s/lordos-vm/%s.sock", base, m.id) >= sizeof path) return JS_NewInt32(c, 0);
+    if ((size_t)snprintf(path, sizeof path, "%s/insaneos-vm/%s.sock", base, m.id) >= sizeof path) return JS_NewInt32(c, 0);
     int fd = socket(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
     struct sockaddr_un a = { .sun_family = AF_UNIX };
     memcpy(a.sun_path, path, strlen(path) + 1);
@@ -1096,7 +1096,7 @@ static JSValue f_attach(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
 static void spawn_vmdisplay(Sess *s, int dbus_fd) {
     char bin[PATH_MAX];
     int sv[2];
-    if (bin_path("lord-vmdisplay", bin, sizeof bin) || socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) { close(dbus_fd); s->display_failed = 1; return; }
+    if (bin_path("insane-vmdisplay", bin, sizeof bin) || socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) { close(dbus_fd); s->display_failed = 1; return; }
     pid_t p = fork();
     if (!p) {
         int a = fcntl(sv[1], F_DUPFD, 20), b = fcntl(dbus_fd, F_DUPFD, 21);
@@ -1108,7 +1108,7 @@ static void spawn_vmdisplay(Sess *s, int dbus_fd) {
         sigset_t none;
         sigemptyset(&none);
         sigprocmask(SIG_SETMASK, &none, NULL);
-        char *args[] = { "lord-vmdisplay", s->id, NULL };
+        char *args[] = { "insane-vmdisplay", s->id, NULL };
         execve(bin, args, environ);
         _exit(127);
     }
@@ -1153,7 +1153,7 @@ static void from_vm(Sess *s) {
         VmMsg m;
         int fd = -1;
         int r = vm_recv(s->vm, &m, &fd);
-        if (r) drop_creds(s);           /* lord-vm read its arguments long before it says anything */
+        if (r) drop_creds(s);           /* insane-vm read its arguments long before it says anything */
         if (r < 0) { close(s->vm); s->vm = -1; break; }
         if (!r) break;
         if (!vm_msg_valid(&m, 0)) { if (fd >= 0) close(fd); continue; }
@@ -1194,7 +1194,7 @@ static void from_vm(Sess *s) {
                         AgClip cx;
                         if (m.b == VCF_TEXT) { s->clip_in = t; t = NULL; s->clip_seq++; }
                         else if (!ag_clipx_parse((const uint8_t *)t, (size_t)m.a, &cx)) {
-                            /* lord-vm checked every part; kept as parts, the picture still to be re-encoded */
+                            /* insane-vm checked every part; kept as parts, the picture still to be re-encoded */
                             if (cx.text && (s->clip_in = malloc(cx.text_n + 1))) { memcpy(s->clip_in, cx.text, cx.text_n); s->clip_in[cx.text_n] = 0; }
                             if (cx.html && (s->clip_html = malloc(cx.html_n + 1))) { memcpy(s->clip_html, cx.html, cx.html_n); s->clip_html[cx.html_n] = 0; s->clip_html_n = cx.html_n; }
                             if (cx.png && (s->clip_png = malloc(cx.png_n))) { memcpy(s->clip_png, cx.png, cx.png_n); s->clip_png_n = cx.png_n; }
@@ -1370,9 +1370,9 @@ static JSValue f_poll(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
         if (s->ended) {
             read_err(s);
             drop_creds(s);
-            /* lord-vm gone without a last state: it never started the machine, or it died */
+            /* insane-vm gone without a last state: it never started the machine, or it died */
             if (s->state != VS_STOPPED && s->state != VS_CRASHED) {
-                /* it never ran (exit status from lord-vm's own checks), or it died while the machine ran */
+                /* it never ran (exit status from insane-vm's own checks), or it died while the machine ran */
                 int ran = s->have_info || s->state == VS_RUNNING || s->state == VS_PAUSED || s->state == VS_STOPPING;
                 s->state = ran ? VS_STOPPED : VS_CRASHED;
                 s->reason = ran || s->exit_code >= 128 ? VR_SUPERVISOR_LOST : VR_START_FAILED;
@@ -1435,7 +1435,7 @@ static JSValue f_poll(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
 }
 
 /* cdrom(id, path | null) → bool: a disc into the running machine's drive (the file is opened here, for the person, and
- * handed to lord-vm), or out with null. poll's cd says how it went (1 waiting, 2 done, 3 failed: cdMessage). */
+ * handed to insane-vm), or out with null. poll's cd says how it went (1 waiting, 2 done, 3 failed: cdMessage). */
 static JSValue f_cdrom(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     Sess *s = argc >= 1 ? get(c, argv[0]) : NULL;
@@ -1469,7 +1469,7 @@ static JSValue f_cmd(JSContext *c, JSValueConst t, int argc, JSValueConst *argv)
         else if (!strcmp(w, "keep")) ok = ask(s, VM_KEEP, 1) > 0;
         else if (!strcmp(w, "nokeep")) ok = ask(s, VM_KEEP, 0) > 0;
         else if (!strcmp(w, "display")) {
-            /* the picture again after lord-vmdisplay went away */
+            /* the picture again after insane-vmdisplay went away */
             if (s->vd < 0 && (s->state == VS_RUNNING || s->state == VS_PAUSED)) { s->display_asked = 0; s->display_failed = 0; s->vd_state = -1; maybe_display(s); ok = 1; }
         }
     }
@@ -1526,7 +1526,7 @@ static JSValue f_rate(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     return JS_UNDEFINED;
 }
 
-/* the window let go of the machine: a machine this session started is shut down by lord-vm when its control
+/* the window let go of the machine: a machine this session started is shut down by insane-vm when its control
  * channel closes (ACPI, then off after 60 s); an attached one keeps running */
 static JSValue f_close(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
@@ -1541,7 +1541,7 @@ static JSValue f_close(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     drop_creds(s);
     if (s->vm >= 0) close(s->vm);
     if (s->err >= 0) close(s->err);
-    /* lord-vm finishes on its own (up to a minute for an ACPI shutdown): reaped later */
+    /* insane-vm finishes on its own (up to a minute for an ACPI shutdown): reaped later */
     if (s->vm_pid > 0 && waitpid(s->vm_pid, NULL, WNOHANG) == 0) later(s->vm_pid);
     MediaSrc *m = s->media ? media_src_get(s->media) : NULL;
     if (m) media_src_close(m);
@@ -1566,7 +1566,7 @@ static JSValue f_stop(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     int seq = type >= 0 ? ask(s, (uint16_t)type, 0) : -1;
     int ok = seq > 0;
     if (w) JS_FreeCString(c, w);
-    /* lord-vm answers each request: wait for that answer (half a second at most), so it isn't sent to a closed socket */
+    /* insane-vm answers each request: wait for that answer (half a second at most), so it isn't sent to a closed socket */
     for (int k = 0; ok && k < 8; k++) {
         struct pollfd pf = { s->vm, POLLIN, 0 };
         if (poll(&pf, 1, 60) <= 0) continue;
@@ -1586,7 +1586,7 @@ static JSValue f_log(JSContext *c, JSValueConst t, int argc, JSValueConst *argv)
     (void)t; (void)argc;
     char dir[PATH_MAX];
     if (machine_dir(c, argv[0], dir, sizeof dir)) return JS_NewString(c, "");
-    /* log(dir[, which, bytes]): the end of lord-vm.log ("vm", the default) or of the guest's serial console ("serial"),
+    /* log(dir[, which, bytes]): the end of insane-vm.log ("vm", the default) or of the guest's serial console ("serial"),
      * 4 KB by default and 256 KB at most */
     int max = argc > 2 ? ival(c, argv[2]) : 4096;
     if (max < 1024) max = 1024;
@@ -1595,7 +1595,7 @@ static JSValue f_log(JSContext *c, JSValueConst t, int argc, JSValueConst *argv)
     int serial = which && !strcmp(which, "serial"), journal = which && !strcmp(which, "journal");
     if (which) JS_FreeCString(c, which);
     char p[PATH_MAX + 32];
-    snprintf(p, sizeof p, "%s/log/%s", dir, serial ? "serial.log" : journal ? "journal.log" : "lord-vm.log");
+    snprintf(p, sizeof p, "%s/log/%s", dir, serial ? "serial.log" : journal ? "journal.log" : "insane-vm.log");
     int fd = open(p, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
     if (fd < 0) return JS_NewString(c, "");
     char *buf = malloc((size_t)max + 1);
@@ -1667,7 +1667,7 @@ static JSValue f_agent(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     return JS_TRUE;
 }
 
-/* clipboardSend(session, text) → bool: the host's clipboard text for the guest, in a sealed memfd (lord-vm passes it
+/* clipboardSend(session, text) → bool: the host's clipboard text for the guest, in a sealed memfd (insane-vm passes it
  * on only in the directions machine.json allows). clipboardTake(session) → the guest's last text (poll's clipIn counts) */
 static JSValue f_clip_send(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -1676,7 +1676,7 @@ static JSValue f_clip_send(JSContext *c, JSValueConst t, int argc, JSValueConst 
     const char *txt = s ? JS_ToCStringLen(c, &n, argv[1]) : NULL;
     int ok = 0;
     if (txt && n > 0 && n <= VM_CLIP_MAX && s->vm >= 0) {
-        int fd = memfd_create("lordos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+        int fd = memfd_create("insaneos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING);
         if (fd >= 0 && write(fd, txt, n) == (ssize_t)n && !fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_WRITE | F_SEAL_SEAL)) {
             VmMsg m = vm_msg(VM_CLIP, ++s->seq, (int)n, 0, 0, 0, NULL);
             ok = !vm_send(s->vm, &m, fd);
@@ -1720,7 +1720,7 @@ static char *html_text(const char *h, size_t n) {
 }
 
 /* clipboardApply(session) → "image" | "html" | "text" | "": the guest's last clipboard on this computer's. A picture is
- * re-encoded in lord-media's sandbox first (decoded and written again as a PNG: nothing the guest crafted reaches an
+ * re-encoded in insane-media's sandbox first (decoded and written again as a PNG: nothing the guest crafted reaches an
  * app) and arrives a moment later; rich text goes with its text (wl_clip_set_html); plain text is left to the app
  * (clipboard.set, which keeps the history's ways). */
 static JSValue f_clip_apply(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -1731,9 +1731,9 @@ static JSValue f_clip_apply(JSContext *c, JSValueConst t, int argc, JSValueConst
         const char *rt = getenv("XDG_RUNTIME_DIR");
         char dir[PATH_MAX], dst[PATH_MAX + 64], tmp[PATH_MAX + 64];
         static unsigned seq;
-        int in = memfd_create("lordos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING), o = -1;
+        int in = memfd_create("insaneos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING), o = -1;
         if (rt && in >= 0 && write(in, s->clip_png, s->clip_png_n) == (ssize_t)s->clip_png_n && !fcntl(in, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_WRITE | F_SEAL_SEAL)) {
-            snprintf(dir, sizeof dir, "%s/lordos", rt);
+            snprintf(dir, sizeof dir, "%s/insaneos", rt);
             mkdir(dir, 0700);
             snprintf(dst, sizeof dst, "%s/clip-vm%d-%u.png", dir, (int)getpid(), ++seq);
             snprintf(tmp, sizeof tmp, "%s/.vm%d-%u.part", dir, (int)getpid(), seq);
@@ -1764,7 +1764,7 @@ static JSValue f_clip_apply(JSContext *c, JSValueConst t, int argc, JSValueConst
 
 /* clipboardSendHost(session) → bool: this computer's clipboard for the guest, as it is now: a picture, or text with its
  * rich text when an app gave some; never a secret (Passwords, password fields). Not sent again if it's what went
- * either way last. lord-vm checks it all again and sends it on only the ways machine.json allows. */
+ * either way last. insane-vm checks it all again and sends it on only the ways machine.json allows. */
 static JSValue f_clip_send_host(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     Sess *s = get(c, argv[0]);
@@ -1794,7 +1794,7 @@ static JSValue f_clip_send_host(JSContext *c, JSValueConst t, int argc, JSValueC
     int ok = 0;
     if (buf) {
         ag_clipx_write(&cx, buf);
-        int fd = memfd_create("lordos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+        int fd = memfd_create("insaneos-vm-clipboard", MFD_CLOEXEC | MFD_ALLOW_SEALING);
         if (fd >= 0 && write(fd, buf, n) == (ssize_t)n && !fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_WRITE | F_SEAL_SEAL)) {
             VmMsg m = vm_msg(VM_CLIP, ++s->seq, (int)n, VCF_CLIPX, 0, 0, NULL);
             ok = !vm_send(s->vm, &m, fd);
@@ -1806,8 +1806,8 @@ static JSValue f_clip_send_host(JSContext *c, JSValueConst t, int argc, JSValueC
     return JS_NewBool(c, ok);
 }
 
-/* console(session) → bool: asks lord-vm for the serial console's stream; poll's console is then the terminal session to
- * show in a <Terminal> (lord.term.key writes to it). Asking again replaces it. */
+/* console(session) → bool: asks insane-vm for the serial console's stream; poll's console is then the terminal session to
+ * show in a <Terminal> (insane.term.key writes to it). Asking again replaces it. */
 static JSValue f_console(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     Sess *s = get(c, argv[0]);
@@ -1821,7 +1821,7 @@ static JSValue f_console(JSContext *c, JSValueConst t, int argc, JSValueConst *a
 /* the recording's sound ring (aring.h): a sealed memfd, 48 kHz, 16-bit, one channel, about 5 s */
 static int sound_ring(void) {
     uint32_t size = 1u << 19;
-    int fd = memfd_create("lordos-vm-sound", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-vm-sound", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)ar_bytes(size)) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { close(fd); return -1; }
     ARingHdr *h = mmap(NULL, AR_HDR, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -1836,9 +1836,9 @@ static int sound_ring(void) {
 }
 
 /* record(session) → a media id (0: couldn't): the guest's picture at its size into ~/Pictures/Screenshots as
- * "<machine> <date> <time>.mp4", the way the Screenshots app records (lord-media, hardware encoding where there is
+ * "<machine> <date> <time>.mp4", the way the Screenshots app records (insane-media, hardware encoding where there is
  * some). No screen-capture permission: it's the machine's own picture, never the screen, so protected windows can't be
- * in it. Stopped with lord.media.stop(id) (its "done" event names the file), or when the window closes. */
+ * in it. Stopped with insane.media.stop(id) (its "done" event names the file), or when the window closes. */
 static JSValue f_record(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     Sess *s = get(c, argv[0]);
@@ -1868,7 +1868,7 @@ static JSValue f_record(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     int render = media_render_fd(), W = m->w & ~1, H = m->h & ~1;
     char params[160];
     snprintf(params, sizeof params, "width=%d\nheight=%d\nfps=30\nhw=%d\nhwaccel=%s\n", W, H, render >= 0, media_hwaccel());
-    /* the guest's sound (6.9): a ring lord-vmdisplay writes and lord-media reads, where a screen recording takes the
+    /* the guest's sound (6.9): a ring insane-vmdisplay writes and insane-media reads, where a screen recording takes the
      * microphone (48 kHz, one channel); muxed as the recording's audio track */
     int ring = s->vd >= 0 ? sound_ring() : -1;
     int fds[3] = { fd, ring, render };
@@ -1888,7 +1888,7 @@ static JSValue f_record(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return JS_NewInt32(c, r->id);
 }
 
-/* takes the ISO out of a machine that is off (after an install): machine.json without "iso". Refused while lord-vm
+/* takes the ISO out of a machine that is off (after an install): machine.json without "iso". Refused while insane-vm
  * holds the machine's lock. true when done */
 static JSValue f_eject(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
@@ -1910,14 +1910,14 @@ static JSValue f_eject(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     return JS_NewBool(c, ok);
 }
 
-/* startDetached(dir) → job id: the machine starts with no window (lord-vm --detach --keep-running); a window can
+/* startDetached(dir) → job id: the machine starts with no window (insane-vm --detach --keep-running); a window can
  * attach to it later, and it keeps running when that window closes */
 static JSValue f_start_detached(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     char dir[PATH_MAX], creds[PATH_MAX];
     if (machine_dir(c, argv[0], dir, sizeof dir) || !machine_shares_ok(dir)) return JS_NewInt32(c, 0);
     int have = !write_creds(creds, sizeof creds, dir);
-    char *args[] = { "lord-vm", "--start", dir, "--detach", "--keep-running", have ? "--credentials-file" : NULL, creds, NULL };
+    char *args[] = { "insane-vm", "--start", dir, "--detach", "--keep-running", have ? "--credentials-file" : NULL, creds, NULL };
     int id = spawn_job(args, dir);
     if (!id) { if (have) unlink(creds); return JS_NewInt32(c, 0); }
     if (have) snprintf(jobs[id - 1].creds, sizeof jobs[id - 1].creds, "%s", creds);
@@ -1929,7 +1929,7 @@ static JSValue f_discard(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     (void)t; (void)argc;
     char dir[PATH_MAX];
     if (machine_dir(c, argv[0], dir, sizeof dir)) return JS_NewInt32(c, 0);
-    char *args[] = { "lord-vm", "--discard-state", dir, NULL };
+    char *args[] = { "insane-vm", "--discard-state", dir, NULL };
     return JS_NewInt32(c, spawn_job(args, dir));
 }
 
@@ -1945,7 +1945,7 @@ static JSValue f_awake(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     struct dirent *e;
     while ((e = readdir(d))) {
         size_t l = strlen(e->d_name);
-        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".lordvm")) continue;
+        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".insanevm")) continue;
         char p[PATH_MAX + 300], buf[2048];
         snprintf(p, sizeof p, "%s/%s/run.json", lib, e->d_name);
         int fd = open(p, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
@@ -1974,7 +1974,7 @@ static JSValue f_awake(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     return JS_NewInt32(c, n);
 }
 
-/* ---- snapshots (6.2): lord-vm --snapshot as a job (through the running lord-vm when the machine is on) ---- */
+/* ---- snapshots (6.2): insane-vm --snapshot as a job (through the running insane-vm when the machine is on) ---- */
 
 /* snaps(dir) → { list: [{ tag, name, created, memory, vmstate, picture }], max, warn } */
 static JSValue f_snaps(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -2004,7 +2004,7 @@ static JSValue f_snaps(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
 }
 
 /* snapTake(dir, name[, session]) → { job, tag }: the picture first (the session's live one, or the card's), then
- * lord-vm --snapshot DIR take NAME TAG */
+ * insane-vm --snapshot DIR take NAME TAG */
 static JSValue f_snap_take(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     char dir[PATH_MAX];
@@ -2035,7 +2035,7 @@ static JSValue f_snap_take(JSContext *c, JSValueConst t, int argc, JSValueConst 
         if (a >= 0) close(a);
         if (b >= 0) close(b);
     }
-    char *args[] = { "lord-vm", "--snapshot", dir, "take", nm, tag, NULL };
+    char *args[] = { "insane-vm", "--snapshot", dir, "take", nm, tag, NULL };
     int id = spawn_job(args, dir);
     if (!id) return JS_NULL;
     JSValue o = JS_NewObject(c);
@@ -2054,7 +2054,7 @@ static JSValue snap_job(JSContext *c, int argc, JSValueConst *argv, const char *
     if (tag && vm_snap_tag_valid(tag)) snprintf(tg, sizeof tg, "%s", tag);
     if (tag) JS_FreeCString(c, tag);
     if (!tg[0]) return JS_NewInt32(c, 0);
-    char *args[] = { "lord-vm", "--snapshot", dir, (char *)what, tg, NULL };
+    char *args[] = { "insane-vm", "--snapshot", dir, (char *)what, tg, NULL };
     return JS_NewInt32(c, spawn_job(args, dir));
 }
 static JSValue f_snap_revert(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) { (void)t; return snap_job(c, argc, argv, "revert"); }
@@ -2112,7 +2112,7 @@ static JSValue f_clone_info(JSContext *c, JSValueConst t, int argc, JSValueConst
     return o;
 }
 
-/* clone(dir, { name, duplicate, linked, fromSnapshot, hostname, keepIdentity }) → job id (lord-vm --clone; its out is the new
+/* clone(dir, { name, duplicate, linked, fromSnapshot, hostname, keepIdentity }) → job id (insane-vm --clone; its out is the new
  * machine's JSON). A Clone's guest gets `hostname` (else "<name>-clone"), a new machine-id and SSH host keys at its first
  * start, through the agent, unless keepIdentity */
 static JSValue f_clone(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -2135,11 +2135,11 @@ static JSValue f_clone(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
         snprintf(nm, sizeof nm, "%s", name);
         if (snap) snprintf(tg, sizeof tg, "%s", snap);
         folder_name(nm, folder, sizeof folder);
-        snprintf(dst, sizeof dst, "%s/%s.lordvm", lib, folder);
-        for (int k = 2; !access(dst, F_OK) && k < 100; k++) snprintf(dst, sizeof dst, "%s/%s %d.lordvm", lib, folder, k);
+        snprintf(dst, sizeof dst, "%s/%s.insanevm", lib, folder);
+        for (int k = 2; !access(dst, F_OK) && k < 100; k++) snprintf(dst, sizeof dst, "%s/%s %d.insanevm", lib, folder, k);
         char *args[14];
         int k = 0;
-        args[k++] = "lord-vm"; args[k++] = "--clone"; args[k++] = dir; args[k++] = dst; args[k++] = "--name"; args[k++] = nm;
+        args[k++] = "insane-vm"; args[k++] = "--clone"; args[k++] = dir; args[k++] = dst; args[k++] = "--name"; args[k++] = nm;
         if (dup) args[k++] = "--duplicate";
         if (linked) args[k++] = "--linked";
         if (!dup && keep) args[k++] = "--keep-identity";
@@ -2154,13 +2154,13 @@ static JSValue f_clone(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
     return JS_NewInt32(c, id);
 }
 
-/* compact(dir, estimate) → job id: lord-vm --compact [--estimate] (the estimate's out is JSON) */
+/* compact(dir, estimate) → job id: insane-vm --compact [--estimate] (the estimate's out is JSON) */
 static JSValue f_compact(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     char dir[PATH_MAX];
     if (machine_dir(c, argv[0], dir, sizeof dir)) return JS_NewInt32(c, 0);
     int est = argc > 1 && JS_ToBool(c, argv[1]) > 0;
-    char *args[] = { "lord-vm", "--compact", dir, est ? "--estimate" : NULL, NULL };
+    char *args[] = { "insane-vm", "--compact", dir, est ? "--estimate" : NULL, NULL };
     return JS_NewInt32(c, spawn_job(args, dir));
 }
 
@@ -2247,7 +2247,7 @@ static JSValue f_storage(JSContext *c, JSValueConst t, int argc, JSValueConst *a
         struct dirent *e;
         while (d && (e = readdir(d))) {
             size_t l = strlen(e->d_name);
-            if (l < 8 || strcmp(e->d_name + l - 7, ".lordvm")) continue;
+            if (l < 8 || strcmp(e->d_name + l - 7, ".insanevm")) continue;
             char p[PATH_MAX + 260];
             snprintf(p, sizeof p, "%s/%s", tr, e->d_name);
             trash += tree_bytes(p, 0);
@@ -2261,7 +2261,7 @@ static JSValue f_storage(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     struct dirent *e;
     while (d && (e = readdir(d))) {
         size_t l = strlen(e->d_name);
-        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".lordvm")) continue;
+        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".insanevm")) continue;
         char p[PATH_MAX + 260];
         snprintf(p, sizeof p, "%s/%s", lib, e->d_name);
         VmMachine m;
@@ -2271,7 +2271,7 @@ static JSValue f_storage(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     uint32_t k = 0;
     while (d && (e = readdir(d)) && k < 256) {
         size_t l = strlen(e->d_name);
-        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".lordvm")) continue;
+        if (e->d_name[0] == '.' || l < 8 || strcmp(e->d_name + l - 7, ".insanevm")) continue;
         char p[PATH_MAX + 260], f[PATH_MAX + 300];
         snprintf(p, sizeof p, "%s/%s", lib, e->d_name);
         VmMachine m;
@@ -2380,7 +2380,7 @@ static JSValue f_remove_base(JSContext *c, JSValueConst t, int argc, JSValueCons
     return JS_NewBool(c, !used && !unlink(path));
 }
 
-/* ---- importing a machine of another virtualization app (6.22): lord-vm --import-plan and --import-machine ---- */
+/* ---- importing a machine of another virtualization app (6.22): insane-vm --import-plan and --import-machine ---- */
 
 /* a file or a folder the person chose: absolute, real, readable, no control characters */
 static int user_path(JSContext *c, JSValueConst v, char *out, size_t n) {
@@ -2410,18 +2410,18 @@ static int opt_str(JSContext *c, JSValueConst o, const char *k, char *out, size_
     return r;
 }
 
-/* importPlan(path, { arch }) → job id; the job's out is the plan's JSON (lord-vm --import-plan) */
+/* importPlan(path, { arch }) → job id; the job's out is the plan's JSON (insane-vm --import-plan) */
 static JSValue f_import_plan(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     char src[PATH_MAX], arch[16];
     if (argc < 1 || user_path(c, argv[0], src, sizeof src) || opt_str(c, argc > 1 ? argv[1] : JS_UNDEFINED, "arch", arch, sizeof arch)) return JS_NewInt32(c, 0);
     if (arch[0] && strcmp(arch, "amd64") && strcmp(arch, "arm64")) return JS_NewInt32(c, 0);
-    char *args[] = { "lord-vm", "--import-plan", src, arch[0] ? "--arch" : NULL, arch, NULL };
+    char *args[] = { "insane-vm", "--import-plan", src, arch[0] ? "--arch" : NULL, arch, NULL };
     return JS_NewInt32(c, spawn_job(args, ""));
 }
 
 /* importMachine({ path, name, arch, devices, network, firmware, vcpus, memoryMb }) → job id; progress lines, then
- * {"imported":true,"dir":...}. The new folder is ~/Machines/<name>.lordvm, as for create */
+ * {"imported":true,"dir":...}. The new folder is ~/Machines/<name>.insanevm, as for create */
 static JSValue f_import(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     if (argc < 1 || !JS_IsObject(argv[0])) return JS_NewInt32(c, 0);
@@ -2439,14 +2439,14 @@ static JSValue f_import(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     if (vcpus < 0 || vcpus > VM_VCPUS_MAX || mem < 0 || mem > VM_MEM_MAX_MB || (mem && mem < VM_MEM_MIN_MB)) return JS_NewInt32(c, 0);
     char folder[64], dir[PATH_MAX + 80], sv[16], sm[16];
     folder_name(name, folder, sizeof folder);
-    snprintf(dir, sizeof dir, "%s/%s.lordvm", lib, folder);
-    for (int k = 2; !access(dir, F_OK) && k < 100; k++) snprintf(dir, sizeof dir, "%s/%s %d.lordvm", lib, folder, k);
+    snprintf(dir, sizeof dir, "%s/%s.insanevm", lib, folder);
+    for (int k = 2; !access(dir, F_OK) && k < 100; k++) snprintf(dir, sizeof dir, "%s/%s %d.insanevm", lib, folder, k);
     if (!access(dir, F_OK)) return JS_NewInt32(c, 0);
     snprintf(sv, sizeof sv, "%d", vcpus);
     snprintf(sm, sizeof sm, "%d", mem);
     char *args[24];
     int n = 0;
-    args[n++] = "lord-vm"; args[n++] = "--import-machine"; args[n++] = src; args[n++] = dir; args[n++] = "--name"; args[n++] = name;
+    args[n++] = "insane-vm"; args[n++] = "--import-machine"; args[n++] = src; args[n++] = dir; args[n++] = "--name"; args[n++] = name;
     if (arch[0]) { args[n++] = "--arch"; args[n++] = arch; }
     if (devs[0]) { args[n++] = "--devices"; args[n++] = devs; }
     if (net[0]) { args[n++] = "--network"; args[n++] = net; }
@@ -2491,8 +2491,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("startDetached", 1, f_start_detached), JS_CFUNC_DEF("refusal", 0, f_refusal), JS_CFUNC_DEF("discardState", 1, f_discard), JS_CFUNC_DEF("awake", 0, f_awake),
 };
 
-void js_vm_register(JSContext *c, JSValue lord) {
+void js_vm_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "vm", o);
+    JS_SetPropertyStr(c, insane, "vm", o);
 }

@@ -42,8 +42,8 @@ replaces its keys there; an entry with no `label` is not listed. A held key runs
 
 `server/src/wl/keygrab.c` holds fixed tables, one per theme, written at build time: keyboard keys only, each
 a modifier set plus a letter or an evdev code. `wl_key` compares modifiers exactly, so ⌃Tab and plain ⌃Q
-always stay with the app. The shell picks a table by name, `lord.wayland.grabKeys('flow' | 'flow-desktops' | 'classic' | '')`:
-any other name is refused, and nothing can add a key. `lord.wayland` does not exist in an isolated app's
+always stay with the app. The shell picks a table by name, `insane.wayland.grabKeys('flow' | 'flow-desktops' | 'classic' | '')`:
+any other name is refused, and nothing can add a key. `insane.wayland` does not exist in an isolated app's
 process (`js_broker_register`), which has no compositor to change either. `startShell` clears the table,
 so a theme that asks for none keeps none.
 
@@ -87,7 +87,7 @@ on-screen keyboard injects takes another path and can't press it. With no share 
 
 With the `flow` table, ❖C, V, X, A, Z, F, T, W, N, L, R, P and S with no other modifier reach the focused Linux
 app as Ctrl+key, or Ctrl+Shift+key if its `.desktop` lists the `TerminalEmulator` category (`sdk/wayland.js`
-passes that with `lord.wayland.focus`). `send_remapped` follows `wl_send_paste`: only that client, with
+passes that with `insane.wayland.focus`). `send_remapped` follows `wl_send_paste`: only that client, with
 Super taken out of the modifiers it sees, and the real press and release, so the app repeats on its own.
 `wl_key` returns 2, which the shell receives as `forwarded`: nothing runs, but ❖ no longer counts as pressed
 alone. So with a Linux app in front ❖L is that app's, and the screen locks with ❖⌃Q; ❖V pastes and the

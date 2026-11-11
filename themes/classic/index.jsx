@@ -18,8 +18,8 @@ import {
   useShortcuts, runShortcut, AppSwitcher, openSwitcher, switcherKeys, switcherGrabs, switcherHold, toggleShowDesktop, spotlight, launchApp, dockActivate,
   classicDesktopKeys, desktopSwipe, DesktopHud, OverviewBackdrop, OverviewChrome, openOverview, closeOverview, toggleOverview, overview, LevelHud,
   menuBarPrefs, menuBarEveryDisplay, barDisplays, pointerDisplay, keepWindowsInWorkAreas,
-} from '@lordos/sdk';
-import { apps } from '@lordos/apps';
+} from '@insaneos/sdk';
+import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState, Fragment } from 'react';
 import { makeTheme } from './tokens.js';
 import { Window, TITLE_H, MENU_H } from './components/Window.jsx';

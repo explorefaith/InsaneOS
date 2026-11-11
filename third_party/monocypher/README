@@ -9,5 +9,5 @@ Archivos copiados sin cambios:
   src/optional/monocypher-ed25519.{c,h}              -> solo para las pruebas oficiales
   tests/test.c, tests/utils.{c,h}, tests/vectors.h   -> tests/ (vectores oficiales; `make -C server test`)
   LICENCE.md, AUTHORS.md
-LordOS usa: crypto_aead_lock/unlock (XChaCha20-Poly1305), crypto_argon2 (Argon2id/Argon2d),
+InsaneOS usa: crypto_aead_lock/unlock (XChaCha20-Poly1305), crypto_argon2 (Argon2id/Argon2d),
 crypto_blake2b, crypto_chacha20_ietf/crypto_chacha20_djb (KDBX), crypto_wipe y crypto_verify*.

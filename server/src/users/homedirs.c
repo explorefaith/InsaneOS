@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* The same list as tools/iso/rootfs/usr/lib/lordos/lordos-live-prep (there with _ for spaces). */
+/* The same list as tools/iso/rootfs/usr/lib/insaneos/insaneos-live-prep (there with _ for spaces). */
 static const char *const names[5][HOMEDIRS_COUNT] = {
     { "Escritorio", "Documentos", "Descargas", "Música", "Imágenes", "Videos" },   /* i18n-ok */
     { "Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos" },

@@ -1,7 +1,7 @@
 // Console (the approved mock): every query a connection sent, with its time, who sent it (you, or the app reading the
 // structure, the tables, a page), how long it took and its error. It lives in memory with the connection and is gone
 // when it closes; passwords never show (model.redactSql). A window of its own: wm.open('databases', { args: { console } }).
-import { View, Text, SearchField, FilePicker, useStore, useAppWindow, wm, fs, formatTime, t as tr } from '@lordos/sdk';
+import { View, Text, SearchField, FilePicker, useStore, useAppWindow, wm, fs, formatTime, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { usePal, Btn, Check, Note, MONO, useSize } from './ui.jsx';
 import { Grid } from './grid.jsx';

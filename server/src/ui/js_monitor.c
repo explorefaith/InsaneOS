@@ -1,4 +1,4 @@
-/* js_monitor.c — lord.monitor: system metrics for the Monitor app (see docs/MONITOR.md).
+/* js_monitor.c — insane.monitor: system metrics for the Monitor app (see docs/MONITOR.md).
  *
  * Everything is read-only. Reads of /proc, /sys and sock_diag are done by a dedicated thread
  * (monitor/mon.c) only while someone has called start() and is querying; these functions never
@@ -135,7 +135,7 @@ static int arg_lang(JSContext *c, int argc, JSValueConst *argv, char *out, size_
 
 static const char *base(const char *p) { const char *b = strrchr(p, '/'); return b ? b + 1 : p; }
 
-/* App of a process: lord-server itself is Insane OS; otherwise, the one from the .desktop whose program
+/* App of a process: insane-server itself is Insane OS; otherwise, the one from the .desktop whose program
  * matches the executable, argv[0] or the process name (comm, truncated to 15). */
 static const DesktopApp *match(const DesktopApp *apps, int n, const char *exe, const char *cmd, const char *name) {
     const char *eb = exe[0] ? base(exe) : "";
@@ -150,7 +150,7 @@ static const DesktopApp *match(const DesktopApp *apps, int n, const char *exe, c
     return NULL;
 }
 
-/* The cgroup scope of a process (app-lordos-<id>.scope / app-lordos-lpk-<id>.scope), the same
+/* The cgroup scope of a process (app-insaneos-<id>.scope / app-insaneos-lpk-<id>.scope), the same
  * identity the firewall uses in the kernel (docs/FIREWALL.md): this way a curl running inside
  * foot counts as foot. A small /proc read per pid, with a cache of 64 pids. */
 static int scope_of(int pid, char *kind, char *id, size_t n) {
@@ -170,7 +170,7 @@ static int scope_of(int pid, char *kind, char *id, size_t n) {
             const char *leaf = strrchr(line, '/');
             leaf = leaf ? leaf + 1 : line + 3;
             size_t l = strlen(leaf);
-            if (l > 17 && !strncmp(leaf, "app-lordos-", 11) && !strcmp(leaf + l - 6, ".scope") && l - 17 < sizeof buf) {
+            if (l > 17 && !strncmp(leaf, "app-insaneos-", 11) && !strcmp(leaf + l - 6, ".scope") && l - 17 < sizeof buf) {
                 const char *b = leaf + 11;
                 size_t bl = l - 17;
                 if (bl > 4 && !strncmp(b, "lpk-", 4)) { k = 'l'; b += 4; bl -= 4; } else k = 'd';
@@ -212,7 +212,7 @@ static JSValue annotate(JSContext *c, JSValue obj, const char *lang) {
         JSValue self = JS_GetPropertyStr(c, e, "self");
         int is_self = JS_ToBool(c, self) > 0;
         JS_FreeValue(c, self);
-        if (is_self) JS_SetPropertyStr(c, e, "app", JS_NewString(c, "lordos"));
+        if (is_self) JS_SetPropertyStr(c, e, "app", JS_NewString(c, "insaneos"));
         else {
             char exe[4096], cmd[256], name[64];
             str_prop(c, e, "exe", exe, sizeof exe);
@@ -557,12 +557,12 @@ static const JSCFunctionListEntry monitor_funcs[] = {
     JS_CFUNC_DEF("historyClear", 0, f_history_clear),
 };
 
-void js_monitor_register(JSContext *c, JSValue lord, const char *assets_dir) {
+void js_monitor_register(JSContext *c, JSValue insane, const char *assets_dir) {
     mon_init(assets_dir);
     map_init(assets_dir);
     mon_reset();                       /* new context: the previous one's start() calls don't count */
     seq_sample = seq_procs = seq_conns = seq_detail = seq_temps = seq_volt = seq_gpu = 0;
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, monitor_funcs, sizeof monitor_funcs / sizeof monitor_funcs[0]);
-    JS_SetPropertyStr(c, lord, "monitor", o);
+    JS_SetPropertyStr(c, insane, "monitor", o);
 }

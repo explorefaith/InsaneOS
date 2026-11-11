@@ -1,11 +1,11 @@
 // regionformat.js — a region's formats from glibc's own locale data (#45).
 //
-// lord.locale.formats('lt_LT') gives glibc's LC_TIME and LC_NUMERIC fields for a generated region:
+// insane.locale.formats('lt_LT') gives glibc's LC_TIME and LC_NUMERIC fields for a generated region:
 //   { dfmt: '%Y-%m-%d', tfmt: '%T', am: '', pm: '', decimal: ',', group: '.' }
 // fromGlibc() turns them into the part of a format.json that comes from the region (sdk/i18n.js):
 //   { date: { numeric: '{yyyy}-{mm}-{dd}' }, hour12: false, decimal: ',', group: '.' }
 // so a region whose language Insane OS has no format.json for (lt_LT, de_DE, pl_PL…) still gets its own
-// 24-hour clock, date order and separators instead of the interface language's. Pure: no lord.*;
+// 24-hour clock, date order and separators instead of the interface language's. Pure: no insane.*;
 // tests in server/tests/regionformat_test.mjs.
 import { regionOf, regionCountry } from './localename.js';
 

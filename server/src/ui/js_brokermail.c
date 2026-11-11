@@ -1,19 +1,19 @@
-/* js_brokermail.c — lord.mail inside the process of the isolated system Mail, Calendar, Contacts
- * and Reminders (`lord-server --app <id>`). The same API as the session's lord.mail (js_mail.c), so
+/* js_brokermail.c — insane.mail inside the process of the isolated system Mail, Calendar, Contacts
+ * and Reminders (`insane-server --app <id>`). The same API as the session's insane.mail (js_mail.c), so
  * sdk/mail.js, sdk/calendar.js and sdk/contacts.js work unchanged, but every call goes over the
- * broker (BOP_MAIL, sec/brokermail.c) and lord-server checks it:
+ * broker (BOP_MAIL, sec/brokermail.c) and insane-server checks it:
  *
  *   request(json, [fds])   → id; files are fds the app holds (from the system file dialog)
- *   poll() / pending()     results and events, which lord-server pushes as "mail" events in chunks
+ *   poll() / pending()     results and events, which insane-server pushes as "mail" events in chunks
  *   available() / start()
  *   config() / saveConfig(json) / allowImages([urls])        Mail only
- *   bind(node, image) / release(image)   lord-server hands a sealed memfd with the pixels
+ *   bind(node, image) / release(image)   insane-server hands a sealed memfd with the pixels
  *   attachmentFd(rel)      → read-only fd of a cached attachment (Mail; to save it), or -1
  *   openAttachment(rel, name)   the session opens it with the user's apps (Mail)
  *   cacheDir()             "" (this process cannot read the cache)
  *   appMode                true
  *
- * The process has no network and no access to ~/.local/share/lordos/mail or the accounts file. */
+ * The process has no network and no access to ~/.local/share/insaneos/mail or the accounts file. */
 #include "js_broker.h"
 #include "js_err.h"
 #include "ui.h"
@@ -110,7 +110,7 @@ static JSValue f_request(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     char *out = NULL;
     uint32_t ol = 0;
     if (len > BIG_REQ) {
-        int m = memfd_create("lordos-mail-req", MFD_CLOEXEC);
+        int m = memfd_create("insaneos-mail-req", MFD_CLOEXEC);
         size_t w = 0;
         while (m >= 0 && w < len) { ssize_t k = write(m, j + w, len - w); if (k <= 0) break; w += (size_t)k; }
         if (m < 0 || w != len) { if (m >= 0) close(m); JS_FreeCString(c, j); return js_throw_code(c, "mail.requestTooLarge", NULL); }
@@ -201,7 +201,7 @@ static JSValue f_allow_images(JSContext *c, JSValueConst t, int argc, JSValueCon
     return JS_UNDEFINED;
 }
 
-/* lord.mail.bind(node, image): the pixels come in a sealed memfd from lord-server */
+/* insane.mail.bind(node, image): the pixels come in a sealed memfd from insane-server */
 static JSValue f_bind(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     int32_t nid = -1, handle = 0;
@@ -278,11 +278,11 @@ static const JSCFunctionListEntry mail_funcs[] = {
     JS_CFUNC_DEF("openAttachment", 2, f_open_attachment),
 };
 
-void js_brokermail_register(JSContext *c, JSValue lord, const char *app_id) {
-    /* only the system apps that use lord-maild (lord-server refuses everyone else anyway) */
+void js_brokermail_register(JSContext *c, JSValue insane, const char *app_id) {
+    /* only the system apps that use insane-maild (insane-server refuses everyone else anyway) */
     if (!app_id || (strcmp(app_id, "mail") && strcmp(app_id, "calendar") && strcmp(app_id, "contacts") && strcmp(app_id, "reminders"))) return;
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, mail_funcs, sizeof mail_funcs / sizeof mail_funcs[0]);
     JS_SetPropertyStr(c, o, "appMode", JS_TRUE);
-    JS_SetPropertyStr(c, lord, "mail", o);
+    JS_SetPropertyStr(c, insane, "mail", o);
 }

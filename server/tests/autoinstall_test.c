@@ -1,4 +1,4 @@
-/* autoinstall_test.c — lordos-auto.conf's reader (src/install/autoinstall.c): defaults, refusals and the
+/* autoinstall_test.c — insaneos-auto.conf's reader (src/install/autoinstall.c): defaults, refusals and the
  * checks that decide whether a disk gets erased. Nothing here touches a disk. */
 #define AUTOINSTALL_TEST
 #include "install/autoinstall.c"
@@ -21,7 +21,7 @@ int main(void) {
     T(!strcmp(c.keyboard, "us") && !strcmp(c.autologin, "no") && !strcmp(c.after, "reboot") && !c.has_disk_bytes && !c.erase[0]);
     /* a full file, spaces around '=' and values with spaces */
     T(parse("disk = vda\ndisk_bytes = 34359738368\nmode = erase\nerase = yes\nuser = alex\nfullname = Alex Rivera\n"
-            "password_hash = $6$abc$def\nhostname = lordos-test\nswap = 2048\nautologin = yes\nafter = poweroff\n", &c) == NULL);
+            "password_hash = $6$abc$def\nhostname = insaneos-test\nswap = 2048\nautologin = yes\nafter = poweroff\n", &c) == NULL);
     T(!strcmp(c.disk, "vda") && c.has_disk_bytes && c.disk_bytes == 34359738368ull && !strcmp(c.fullname, "Alex Rivera"));
     T(c.swap == 2048 && !strcmp(c.after, "poweroff") && !strcmp(c.password_hash, "$6$abc$def"));
     /* refusals: an unknown key (a typo must never fall back to a default), a line without '=', bad numbers */

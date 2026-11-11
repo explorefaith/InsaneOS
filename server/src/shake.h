@@ -2,8 +2,8 @@
  * left-right strokes make the cursor grow for a moment. Pure logic, no time source of its own: the
  * caller passes the time and the pointer's motion, and reads back how much to grow (0 = normal size,
  * 1 = the largest the cursor plane takes). Checked by build/shake-test. */
-#ifndef LORD_SHAKE_H
-#define LORD_SHAKE_H
+#ifndef INSANE_SHAKE_H
+#define INSANE_SHAKE_H
 
 #define SHAKE_STROKES 4         /* direction changes that make a shake ... */
 #define SHAKE_WINDOW_MS 900     /* ... within this time */

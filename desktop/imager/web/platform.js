@@ -1,6 +1,6 @@
 // platform.js — the Insane OS Imager on the desktop (Tauri: `macos`, `windows`, `linux`). The same functions as
 // apps/imager/platform.js (Insane OS), backed by the app's Rust commands (src-tauri/src/main.rs) and
-// lordos-imager-core. build-web.mjs puts this file in place of the native one.
+// insaneos-imager-core. build-web.mjs puts this file in place of the native one.
 import { createElement as h } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
@@ -42,7 +42,7 @@ export async function init() {
   appearance.set(options.theme || 'auto');
   // drives appear and leave: the list is asked for again 2 s after the last answer came back (never
   // while one is still running); the Rust side only lists for real when the disks changed and backs off
-  // after a failure (lordos-imager-core, drives::list_polled)
+  // after a failure (insaneos-imager-core, drives::list_polled)
   const poll = async () => { try { await refreshDrives(); } finally { setTimeout(poll, 2000); } };
   await poll();
 }
@@ -168,7 +168,7 @@ const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').m
 function findUpdate(text) {
   try {
     for (const r of JSON.parse(text)) for (const a of r.assets || []) {
-      const m = /^(?:lordos-imager|Insane OS[ ._-]Imager)[_-]v?(\d+\.\d+\.\d+(?:\.\d+)?)/i.exec(a.name || '');
+      const m = /^(?:insaneos-imager|Insane OS[ ._-]Imager)[_-]v?(\d+\.\d+\.\d+(?:\.\d+)?)/i.exec(a.name || '');
       if (m && newer(m[1], info_.version) && (!platform.appUpdate || newer(m[1], platform.appUpdate.version))) platform.appUpdate = { version: m[1], tag: r.tag_name };
     }
   } catch { /* not a list */ }

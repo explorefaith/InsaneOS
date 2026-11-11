@@ -1,7 +1,7 @@
 /* freepart.h — "install in free space": looking at a disk and creating the one new partition, with
  * its undo. Used by install.c; the decisions are in freespace.c. */
-#ifndef LORD_FREEPART_H
-#define LORD_FREEPART_H
+#ifndef INSANE_FREEPART_H
+#define INSANE_FREEPART_H
 
 #include "freespace.h"
 
@@ -65,7 +65,7 @@ int  fp_settle(void);
 int  fp_kernel_sees(const char *disk, const char *part, unsigned lsec, uint64_t start, uint64_t end);
 
 #ifdef FP_TEST
-/* tests/freepart_cli.c only, never in lord-server. */
+/* tests/freepart_cli.c only, never in insane-server. */
 extern int fp_test_uefi;        /* act as if booted through UEFI, with efibootmgr present */
 extern int fp_test_fail;        /* 1: after sgdisk wrote; 2: instead of mkfs; 3: sgdisk -n itself gets a bad type */
 #endif

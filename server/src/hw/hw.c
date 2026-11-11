@@ -71,8 +71,8 @@ void hw_start(const DisplayHost *h, int with_bus) {
         pkagent_start(hw_emit);
         sysbus_on_signal(td_signal);
         sysbus_add_match("type='signal',sender='org.freedesktop.timedate1',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/timedate1'");
-        /* a session lord-sessiond shows can be locked: it locks before the computer sleeps (#36) */
-        if (getenv("LORDOS_SESSIOND")) sleeplock_start();
+        /* a session insane-sessiond shows can be locked: it locks before the computer sleeps (#36) */
+        if (getenv("INSANEOS_SESSIOND")) sleeplock_start();
     }
 }
 

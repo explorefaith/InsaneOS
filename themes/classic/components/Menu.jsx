@@ -7,7 +7,7 @@
 // click in its menu as inside (the start menu), or it unmounts the menu before the row's click lands.
 // The menu stays inside the display of the point it opens at (a jump list near the edge of one taskbar must not
 // spill onto the next display).
-import { View, Text, Layer, ScrollView, addListener, takeTextFocus, releaseTextFocus, direction, displayAt } from '@lordos/sdk';
+import { View, Text, Layer, ScrollView, addListener, takeTextFocus, releaseTextFocus, direction, displayAt } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const ROW = 30, SEP = 9;

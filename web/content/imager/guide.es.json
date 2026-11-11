@@ -50,7 +50,7 @@
       "id": "customise", "title": "Personalizá el primer arranque",
       "text": "Dejá activado **Preparar el primer arranque** y la placa arranca lista: su nombre, tu cuenta, el Wi-Fi, el acceso remoto, la apariencia y la refrigeración. Son siete pestañas y todo se puede cambiar después en Ajustes. (Para un pendrive de PC no hay nada que personalizar: este paso se saltea.)",
       "subs": [
-        ["05-tab-general", "General", "El **nombre de la computadora** es cómo vas a encontrar la placa en tu red: acá `lordos-pi`, o sea `lordos-pi.local`. Después, el idioma, la zona horaria, la distribución del teclado y el país del Wi-Fi."],
+        ["05-tab-general", "General", "El **nombre de la computadora** es cómo vas a encontrar la placa en tu red: acá `insaneos-pi`, o sea `insaneos-pi.local`. Después, el idioma, la zona horaria, la distribución del teclado y el país del Wi-Fi."],
         ["06-tab-user", "Usuario", "Tu cuenta de administrador: nombre completo, nombre de usuario y una contraseña escrita dos veces. A la tarjeta solo va un hash de un solo sentido de la contraseña. El inicio de sesión automático es opcional."],
         ["07-tab-wifi", "Wi-Fi", "El nombre de la red tal como aparece (las mayúsculas cuentan) y su contraseña. La tarjeta guarda la clave derivada de la red, nunca la contraseña que escribiste. También sirven las redes ocultas y abiertas."],
         ["08-tab-remote", "Acceso remoto", "Inicio de sesión remoto (SSH): apagado, solo claves (lo recomendado) o contraseña y claves. También podés activar el escritorio remoto de Insane OS; queda en tu red local."],
@@ -77,7 +77,7 @@
     {
       "id": "firstboot", "title": "El primer arranque en la Raspberry Pi 5",
       "text": "Poné la tarjeta en la placa, conectá el monitor, el teclado y el mouse, y después la fuente. Aparecen la corona de Insane OS y una barra de progreso mientras el sistema crece hasta ocupar la tarjeta y aplica tus ajustes. En más o menos un minuto, la pantalla de inicio de sesión muestra tu cuenta.",
-      "points": ["Desde otra computadora de tu casa es `lordos-pi.local`.", "Inicio de sesión remoto: `ssh demo@lordos-pi.local`.", "Escritorio remoto, si lo activaste: `https://lordos-pi.local:5673`."],
+      "points": ["Desde otra computadora de tu casa es `insaneos-pi.local`.", "Inicio de sesión remoto: `ssh demo@insaneos-pi.local`.", "Escritorio remoto, si lo activaste: `https://insaneos-pi.local:5673`."],
       "boot": [["docs/boot/splash-preview.png", "La pantalla de arranque durante el primer arranque"], ["docs/screenshots/greeter.png", "La pantalla de inicio de sesión (con cuentas de ejemplo)"]],
       "tip": ["celebrate", "Bienvenida a casa", "El archivo de ajustes se aplica una sola vez y después se sobrescribe y se borra de la tarjeta."]
     }
@@ -98,7 +98,7 @@
     ["Nada", "**Conservador** (predeterminado), Equilibrado", "2,0 GHz, para que la placa sola no llegue a 85 °C y se frene."]
   ],
   "ocTitle": "Overclock suave (solo con ventilador)",
-  "ocText": "2,6 GHz en lugar de 2,4 GHz, sin más voltaje. No todas las placas son estables: si la tuya no arranca, abrí la partición de arranque de la tarjeta en otra computadora y borrá el bloque `lordos-firstrun` de `config.txt`.",
+  "ocText": "2,6 GHz en lugar de 2,4 GHz, sin más voltaje. No todas las placas son estables: si la tuya no arranca, abrí la partición de arranque de la tarjeta en otra computadora y borrá el bloque `insaneos-firstrun` de `config.txt`.",
   "optTitle": "Opciones de la app",
   "optText": "**Opciones de la app**, abajo en la barra lateral: un sonido y expulsar al terminar, buscar actualizaciones de la app, idioma y apariencia, y la carpeta de descargas, con cuánto ocupa y un botón para vaciarla.",
   "optShot": ["20-options", "Opciones de la app"],
@@ -118,16 +118,16 @@
     ["Mi tarjeta no aparece", "Solo aparecen unidades extraíbles: tarjetas SD y pendrives. Usá un lector si tu computadora no tiene ranura y esperá unos segundos: la lista se actualiza sola. Una tarjeta con la traba puesta, o de menos de 8 GB, aparece en gris con el motivo. Los discos de tu computadora nunca se muestran, a propósito."],
     ["Dice que la firma no se pudo verificar", "Entonces no se grabó ni se borró nada. Los archivos descargados no coinciden con lo que firmó Insane OS, casi siempre porque se cortó una descarga. Abrí **Opciones de la app → Descargas → Vaciar** y probá de nuevo. Si sigue pasando, avisanos (mirá la página de seguridad)."],
     ["La placa no se conecta a mi Wi-Fi", "Revisá el nombre de la red (las mayúsculas cuentan), la contraseña y el país del Wi-Fi en **General**. Una red que solo acepta WPA3 necesita su contraseña en la placa: conectá un cable de red una vez y agregala en **Ajustes → Red**."],
-    ["No encuentro lordos-pi.local", "Dale un minuto o dos al primer arranque y fijate que tu computadora esté en la misma red (las redes de invitados suelen separar los equipos). La pantalla de inicio de sesión muestra la dirección de la placa en una esquina; podés usar esa dirección en lugar del nombre."],
-    ["¿Cómo entro por SSH?", "Si lo activaste: `ssh demo@lordos-pi.local` (con tu usuario y el nombre de tu computadora). Solo claves es lo más seguro. Lo podés activar o apagar después en **Ajustes → Compartir**. La cuenta root nunca inicia sesión."],
-    ["La placa no arranca después del overclock", "Poné la tarjeta en tu computadora, abrí su partición de arranque y borrá el bloque entre `# >>> lordos-firstrun` y `# <<< lordos-firstrun` de `config.txt`. La placa vuelve a arrancar a su velocidad normal."],
+    ["No encuentro insaneos-pi.local", "Dale un minuto o dos al primer arranque y fijate que tu computadora esté en la misma red (las redes de invitados suelen separar los equipos). La pantalla de inicio de sesión muestra la dirección de la placa en una esquina; podés usar esa dirección en lugar del nombre."],
+    ["¿Cómo entro por SSH?", "Si lo activaste: `ssh demo@insaneos-pi.local` (con tu usuario y el nombre de tu computadora). Solo claves es lo más seguro. Lo podés activar o apagar después en **Ajustes → Compartir**. La cuenta root nunca inicia sesión."],
+    ["La placa no arranca después del overclock", "Poné la tarjeta en tu computadora, abrí su partición de arranque y borrá el bloque entre `# >>> insaneos-firstrun` y `# <<< insaneos-firstrun` de `config.txt`. La placa vuelve a arrancar a su velocidad normal."],
     ["Me salteé la personalización. ¿Y ahora?", "La placa arranca en modo de configuración e inicia sesión sola. Creá tu cuenta en **Ajustes → Usuarios**; en el próximo arranque se borra la cuenta de configuración. Hasta entonces, no actives el escritorio remoto."],
     ["¿Puedo grabar un pendrive para una PC?", "Sí: elegí **PC (pendrive USB)** en el paso 1. Graba el sistema en vivo de Insane OS; arrancá la PC desde el pendrive para probarlo y después instalalo desde ahí."]
   ],
   "endTitle": "¿Listo? Bajá Insane OS Imager",
   "endText": "Libre y de código abierto. Cada imagen oficial se verifica con la firma de la versión antes de borrar nada.",
   "endOther": "¿Preferís otra forma de grabar la tarjeta? Mirá la sección de descargas.",
-  "shotsNote": "Pantallas de Insane OS Imager {v} con valores de ejemplo: usuario «demo», computadora «lordos-pi», red «HomeNetwork».",
+  "shotsNote": "Pantallas de Insane OS Imager {v} con valores de ejemplo: usuario «demo», computadora «insaneos-pi», red «HomeNetwork».",
   "home": {
     "title": "Cómo grabar Insane OS en un pendrive o una tarjeta SD",
     "lead": "Para la PC (ISO) y para la imagen de la Raspberry Pi 5.",
@@ -139,7 +139,7 @@
     "optPc": "PC (ISO)",
     "optPi": "Raspberry Pi 5",
     "optVerify": "Cómo verificar la firma de SHA256SUMS",
-    "optPiSetup": "Sin Insane OS Imager, la Pi arranca en modo de configuración. Para prepararla, poné `lordos-user.txt` y los archivos interruptor (`ssh`, `remote-desktop`) en la partición de arranque de la tarjeta antes del primer arranque.",
-    "optPiLink": "Archivos interruptor y lordos-user.txt"
+    "optPiSetup": "Sin Insane OS Imager, la Pi arranca en modo de configuración. Para prepararla, poné `insaneos-user.txt` y los archivos interruptor (`ssh`, `remote-desktop`) en la partición de arranque de la tarjeta antes del primer arranque.",
+    "optPiLink": "Archivos interruptor y insaneos-user.txt"
   }
 }

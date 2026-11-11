@@ -1,13 +1,13 @@
 # Contributing to Insane OS
 
 Thank you for helping. The full guide is at
-**[lordos.org/legal/contributing](https://lordos.org/legal/contributing/)**; this is the short
+**[insaneos.org/legal/contributing](https://insaneos.org/legal/contributing/)**; this is the short
 version.
 
 ## Reporting a bug
 
 **Security problems are not reported in issues**: see [SECURITY.md](SECURITY.md). For anything else, open an
-[issue](https://github.com/lordbasex/Insane OS/issues/new/choose) and include what is below. It makes the difference between a
+[issue](https://github.com/insaneos/Insane OS/issues/new/choose) and include what is below. It makes the difference between a
 problem we can fix and one we can only guess at.
 
 ### 1. Collect the report
@@ -15,21 +15,21 @@ problem we can fix and one we can only guess at.
 Open Terminal and run:
 
 ```sh
-lordos-issue
+insaneos-issue
 ```
 
-It only reads, sends nothing, and saves `~/lordos-issue-<date>.txt` with your Insane OS version, PCI and USB devices (`lspci`, `lsusb`), CPU, memory, disks and partitions,
+It only reads, sends nothing, and saves `~/insaneos-issue-<date>.txt` with your Insane OS version, PCI and USB devices (`lspci`, `lsusb`), CPU, memory, disks and partitions,
 displays, input devices, network, sound, drivers, an integrity check (Insane OS's signed code, each app's signature, changed files, kernel taint and software sources), failed services, firmware messages, the session's log and the errors of this boot. Addresses, your user and computer names and home paths are replaced.
 It asks for your password to read the kernel log and every package file; without it, the report is shorter. **Read the file before posting it**, since issues are public. Paste it in the **Logs** box of the form.
 
 If the problem stops you from using the desktop, press **Ctrl+Alt+F2** to get a text console, sign in and run it there. On the live
-system it works the same way. If `lordos-issue` isn't there (before 0.8.7.1), send the output of these:
+system it works the same way. If `insaneos-issue` isn't there (before 0.8.7.1), send the output of these:
 
 ```sh
-lordos-fetch --share --color=never
+insaneos-fetch --share --color=never
 grep -E '^N:' /proc/bus/input/devices
 journalctl -b -p warning --no-pager | tail -n 80
-tail -n 60 ~/.cache/lordos/session.log
+tail -n 60 ~/.cache/insaneos/session.log
 ```
 
 ### 2. Say what happened
@@ -44,7 +44,7 @@ If everything works, a hardware report helps too: **System Information → Repor
 
 ## Ideas
 
-Use the feature form, and say what problem it solves. Check [the open issues](https://github.com/lordbasex/Insane OS/issues) first.
+Use the feature form, and say what problem it solves. Check [the open issues](https://github.com/insaneos/Insane OS/issues) first.
 
 ## Pull requests
 
@@ -76,7 +76,7 @@ Pull requests with unsigned commits can't be merged.
   helpers or the sandbox), plus `node tools/i18n-check.mjs`, which also runs
   `tools/brand-check.mjs` and `tools/err-check.mjs`.
 - **Follow AGENTS.md** for the architecture and code rules of each part.
-- **Brand rules:** use the Insane OS name, the crown logo and Lumo as described in
-  [docs/LORDOS-BRAND.md](docs/LORDOS-BRAND.md), and don't use third-party brand or product names in
+- **Brand rules:** use the Insane OS name, the apple logo and Lumo as described in
+  [docs/INSANEOS-BRAND.md](docs/INSANEOS-BRAND.md), and don't use third-party brand or product names in
   the interface.
 - Be kind: everyone here follows the [code of conduct](CODE_OF_CONDUCT.md).

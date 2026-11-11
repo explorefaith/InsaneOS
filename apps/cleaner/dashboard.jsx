@@ -1,7 +1,7 @@
 // The full scan: one tile per module that really runs. The tile being scanned grows large in the middle with its own
 // colour, and finished ones shrink aside with their result. Every number is the module's real result, the line
-// under the title is the real path being read. Moves are left, top, width and height through lord.setStyle.
-import { View, Image, t as tr, formatBytes, formatNumber, typeScale, spacing } from '@lordos/sdk';
+// under the title is the real path being read. Moves are left, top, width and height through insane.setStyle.
+import { View, Image, t as tr, formatBytes, formatNumber, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
 import { Label, tween, usePal, midTrim } from './ui.jsx';
 import { foundSoFar } from './sections.jsx';

@@ -1,7 +1,7 @@
 // Drop-down / context menu. Closes when clicking outside or with Escape. Keyboard: ↑/↓ move,
 // Home/End jump, Enter/Space choose, → opens a submenu and ← closes it. A menu taller than the
 // screen scrolls (wheel or touchpad), and the keyboard keeps the highlighted item in view.
-import { View, Text, addListener, useTheme, screen, direction, ScrollView, takeTextFocus, releaseTextFocus, focusToken, restoreFocus, Layer, displayAt, insideDisplay } from '@lordos/sdk';
+import { View, Text, addListener, useTheme, screen, direction, ScrollView, takeTextFocus, releaseTextFocus, focusToken, restoreFocus, Layer, displayAt, insideDisplay } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const ROW = 24, SEP_H = 9, HEAD_H = 22;
@@ -21,7 +21,7 @@ function Item({ item, onClose, onSub, active, onHover }) {
   const lit = active && !off;
   const enter = () => {
     onHover();
-    if (item.submenu && self.current) { const [x, y, w] = lord.getLayout(self.current.id); onSub({ items: item.submenu, x: x + w - 4, y: y - 5 }); }
+    if (item.submenu && self.current) { const [x, y, w] = insane.getLayout(self.current.id); onSub({ items: item.submenu, x: x + w - 4, y: y - 5 }); }
     else onSub(null);
   };
   return (
@@ -42,7 +42,7 @@ function fitWidth(items, min) {
   let w = min;
   for (const it of items) {
     if (it === '-' || !it?.label) continue;
-    const need = 10 + 16 + lord.measureText(it.label, 13, 400) + (it.hint ? 18 + lord.measureText(it.hint, 12, 400) : 0) + 10 + 10 + (it.submenu ? 14 : 0);
+    const need = 10 + 16 + insane.measureText(it.label, 13, 400) + (it.hint ? 18 + insane.measureText(it.hint, 12, 400) : 0) + 10 + 10 + (it.submenu ? 14 : 0);
     if (need > w) w = need;
   }
   return Math.min(Math.ceil(w), screen.width - 8);

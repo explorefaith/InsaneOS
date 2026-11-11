@@ -1,10 +1,10 @@
-/* js_brokercam.c — `lord.media` inside an isolated .lpk app: the camera, through lord-server
+/* js_brokercam.c — `insane.media` inside an isolated .lpk app: the camera, through insane-server
  * (sec/brokercam.c, docs/PRIVACY.md «Camera»).
  *
- * The app never opens /dev/video* nor runs lord-media. lord-server does, after consent, and gives
- * the app a READ-ONLY fd of lord-media's frame ring: mapped PROT_READ here and drawn by the same
+ * The app never opens /dev/video* nor runs insane-media. insane-server does, after consent, and gives
+ * the app a READ-ONLY fd of insane-media's frame ring: mapped PROT_READ here and drawn by the same
  * <MediaView> code as in the session (media/mview.c), from a local media source with no helper.
- * Each frame arrives as a broker event; the app acknowledges the slot it now shows (lord-server
+ * Each frame arrives as a broker event; the app acknowledges the slot it now shows (insane-server
  * validates every ACK). Photos and videos go to a file the user picks in the system's save dialog;
  * the app only learns the file name. */
 #include "js_broker.h"
@@ -38,7 +38,7 @@ static int cmd(const char *fmt, int sid, const char *rest, int *st_out) {
     return st == BST_OK;
 }
 
-/* (re)map the ring lord-server gives us: read-only */
+/* (re)map the ring insane-server gives us: read-only */
 static void fetch_ring(ACam *a) {
     char p[32], info[128];
     int n = snprintf(p, sizeof p, "ring %d", a->sid);
@@ -97,7 +97,7 @@ void js_brokercam_event(const char *data, size_t len) {
         char p[48];
         int n = snprintf(p, sizeof p, "ack %d %u", sid, id);
         js_broker_send(BOP_CAMERA, p, (uint32_t)n);
-        /* lord-media scales to the box where it is shown (as MM_SIZE does in the session) */
+        /* insane-media scales to the box where it is shown (as MM_SIZE does in the session) */
         int bw = s->box_w, bh = s->box_h;
         if (bw > 0 && bh > 0 && (bw != a->sent_w || bh != a->sent_h) && !s->view.zoom && !s->view.fit) {
             int rw = (s->view.rot % 180) ? bh : bw, rh = (s->view.rot % 180) ? bw : bh;
@@ -120,7 +120,7 @@ void js_brokercam_event(const char *data, size_t len) {
     }
 }
 
-/* ---- lord.media (camera subset) ---- */
+/* ---- insane.media (camera subset) ---- */
 
 static int arg_id(JSContext *c, JSValueConst v) { int32_t id = 0; JS_ToInt32(c, &id, v); return id; }
 
@@ -148,7 +148,7 @@ static JSValue f_cameras(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     return v;
 }
 
-/* camera(app, '/dev/videoN', { width, height }) → id (lord-server checks the permission) */
+/* camera(app, '/dev/videoN', { width, height }) → id (insane-server checks the permission) */
 static JSValue f_camera(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     const char *dev = argc > 1 ? JS_ToCString(c, argv[1]) : NULL;
@@ -202,7 +202,7 @@ static JSValue f_live(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     return JS_NewInt32(c, s->id);
 }
 
-/* liveMic(id, on) → true: lord-server checks the permission, opens the microphone and lights its indicator */
+/* liveMic(id, on) → true: insane-server checks the permission, opens the microphone and lights its indicator */
 static JSValue f_live_mic(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     ACam *a = argc >= 2 ? by_local(arg_id(c, argv[0])) : NULL;
@@ -294,8 +294,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("protectedCount", 0, f_zero), JS_CFUNC_DEF("hwaccel", 0, f_none),
 };
 
-void js_brokercam_register(JSContext *c, JSValue lord) {
+void js_brokercam_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "media", o);
+    JS_SetPropertyStr(c, insane, "media", o);
 }

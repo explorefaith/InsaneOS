@@ -1,5 +1,5 @@
-/* pkg_js_test.c — tests lord.pkg (js_pkg.c) with QuickJS against the system's real index:
- *   build/pkg-js-test 'JS code'   (lord.pkg and print() available; measures the time) */
+/* pkg_js_test.c — tests insane.pkg (js_pkg.c) with QuickJS against the system's real index:
+ *   build/pkg-js-test 'JS code'   (insane.pkg and print() available; measures the time) */
 #include "ui/js_pkg.h"
 
 #include <quickjs.h>
@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
     if (argc < 2) { fprintf(stderr, "usage: pkg-js-test 'code'\n"); return 2; }
     JSRuntime *rt = JS_NewRuntime();
     JSContext *c = JS_NewContext(rt);
-    JSValue g = JS_GetGlobalObject(c), lord = JS_NewObject(c);
-    js_pkg_register(c, lord);
-    JS_SetPropertyStr(c, g, "lord", lord);
+    JSValue g = JS_GetGlobalObject(c), insane = JS_NewObject(c);
+    js_pkg_register(c, insane);
+    JS_SetPropertyStr(c, g, "insane", insane);
     JS_SetPropertyStr(c, g, "print", JS_NewCFunction(c, js_print, "print", 1));
     JS_SetPropertyStr(c, g, "now", JS_NewCFunction(c, js_now, "now", 0));
     JS_FreeValue(c, g);

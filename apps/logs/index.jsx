@@ -1,8 +1,8 @@
 // Logs — a log viewer (see docs/SYSTEM.md, «Logs»).
 //
 // Sources (sidebar):
-//   - Insane OS: the session logs (~/.cache/lordos/<name>.log: session.log…);
-//   - My logs: the user's journal (user-<uid>.journal), read by lord-server as the user with our
+//   - Insane OS: the session logs (~/.cache/insaneos/<name>.log: session.log…);
+//   - My logs: the user's journal (user-<uid>.journal), read by insane-server as the user with our
 //     own reader (server/src/logs/journal.c);
 //   - System and Kernel: the system journal. If the user is in systemd-journal or adm it is read
 //     directly; otherwise an administrator asks for it via the helper's closed logs-system action.
@@ -12,7 +12,7 @@ import {
   View, Text, TextInput, Segmented, SidebarItem, SectionTitle, useTheme, useLocale,
   logs, fs, formatDate, formatNumber, addListener,
   Toolbar, ToolbarButton, ToolbarSpacer, SearchField, EmptyState, Hairline, spacing, typeScale, useAppWindow,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const ROW = 22;
@@ -77,7 +77,7 @@ function useSize(ref, initial) {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!ref.current) return;
-      const l = lord.getLayout(ref.current.id);
+      const l = insane.getLayout(ref.current.id);
       const w = Math.round(l[2]), h = Math.round(l[3]);
       if (w > 0 && h > 0 && (Math.abs(w - size[0]) > 2 || Math.abs(h - size[1]) > 2)) setSize([w, h]);
     }, 20);
@@ -95,7 +95,7 @@ function VirtualList({ items, selected, onSelect, stick, onStick, renderRow }) {
   const total = items.length * ROW, max = Math.max(0, total - h);
   const y = stick ? max : Math.min(off, max);
   useEffect(() => {
-    const id = setTimeout(() => { if (box.current) { const v = lord.getLayout(box.current.id)[3]; if (v > 0 && Math.abs(v - h) > 1) setH(v); } }, 30);
+    const id = setTimeout(() => { if (box.current) { const v = insane.getLayout(box.current.id)[3]; if (v > 0 && Math.abs(v - h) > 1) setH(v); } }, 30);
     return () => clearTimeout(id);
   });
   const scrollTo = (v) => {
@@ -174,7 +174,7 @@ export default function Registros() {
   const { t: tr } = useLocale();
   const { args } = useAppWindow() || {};
   // opened on one Insane OS log (Settings → Cloud → Show Log: { file: 'cloud.log' })
-  const [src, setSrc] = useState(() => (/^[a-z0-9._-]+\.log$/.test(args?.file || '') ? { kind: 'lordos', file: args.file } : { kind: 'user' }));        // { kind: 'user'|'system'|'kernel'|'lordos', file }
+  const [src, setSrc] = useState(() => (/^[a-z0-9._-]+\.log$/.test(args?.file || '') ? { kind: 'insaneos', file: args.file } : { kind: 'user' }));        // { kind: 'user'|'system'|'kernel'|'insaneos', file }
   const [items, setItems] = useState([]);
   const [level, setLevel] = useState('all');
   const [range, setRange] = useState('hour');
@@ -192,7 +192,7 @@ export default function Registros() {
   const [width, height] = useSize(box, [820, 600]);
   const newest = useRef(0);
 
-  const isJournal = src.kind !== 'lordos';
+  const isJournal = src.kind !== 'insaneos';
   const procValid = !proc || logs.validMatch(proc);
 
   const buildQuery = (since) => {
@@ -243,7 +243,7 @@ export default function Registros() {
     return () => clearTimeout(id);
   }, [src.kind, src.file, level, range, search, proc]);
 
-  // live: inotify in lord-server notifies; only new entries are requested (at most ~1 per second)
+  // live: inotify in insane-server notifies; only new entries are requested (at most ~1 per second)
   useEffect(() => {
     if (!live) return undefined;
     let timer = null, busy = false;
@@ -323,12 +323,12 @@ export default function Registros() {
         {side('user', tr('logs.src.user'), '☺')}
         {side('system', tr('logs.src.system'), '▣')}
         {side('kernel', tr('logs.src.kernel'), '◐')}
-        <SectionTitle>{tr('logs.section.lordos')}</SectionTitle>
-        {files.length ? files.map((f) => side('lordos', f.name.replace(/\.log$/, ''), '≡', { file: f.name })) :
+        <SectionTitle>{tr('logs.section.insaneos')}</SectionTitle>
+        {files.length ? files.map((f) => side('insaneos', f.name.replace(/\.log$/, ''), '≡', { file: f.name })) :
           <Text style={{ fontSize: typeScale.caption, color: t.textDim, paddingHorizontal: 10, textAlign: 'start' }}>{tr('logs.noFiles')}</Text>}
         <View style={{ flex: 1 }} />
         <Text style={{ fontSize: typeScale.caption, color: t.textDim, lineHeight: 1.4, paddingHorizontal: spacing.s, paddingBottom: spacing.m, textAlign: 'start' }}>
-          {src.kind === 'user' ? tr('logs.hint.user') : src.kind === 'lordos' ? tr('logs.hint.lordos') : sources.system ? tr('logs.hint.systemDirect') : tr('logs.hint.systemAdmin')}
+          {src.kind === 'user' ? tr('logs.hint.user') : src.kind === 'insaneos' ? tr('logs.hint.insaneos') : sources.system ? tr('logs.hint.systemDirect') : tr('logs.hint.systemAdmin')}
         </Text>
         <Hairline edge="end" />
       </View>

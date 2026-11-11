@@ -1,9 +1,9 @@
 {
-  "format": "lordos-hwreport",
+  "format": "insaneos-hwreport",
   "version": 1,
   "createdAt": "2026-10-28",
   "source": "community",
-  "lordos": "0.8.7-beta",
+  "insaneos": "0.8.7-beta",
   "live": true,
   "system": {
     "machine": {
@@ -170,7 +170,7 @@
       "osId": "debian",
       "osVersion": "13",
       "kernel": "6.12.57+deb13-amd64",
-      "lordos": "0.8.7-beta",
+      "insaneos": "0.8.7-beta",
       "lsm": "lockdown,capability,landlock,yama,apparmor,bpf",
       "landlockAbi": 6,
       "bpfLsm": true,
@@ -184,10 +184,10 @@
         "CONFIG_BPF_LSM": "y"
       },
       "services": {
-        "lord-sessiond": true,
-        "lord-netd": true,
-        "lord-netperm": true,
-        "lord-fand": false
+        "insane-sessiond": true,
+        "insane-netd": true,
+        "insane-netperm": true,
+        "insane-fand": false
       }
     },
     "session": {
@@ -251,12 +251,12 @@
     }
   ],
   "bench": {
-    "lordbench": 1,
+    "insanebench": 1,
     "mode": "quick",
     "seconds": 52,
     "status": "done",
     "stopReason": "",
-    "lordos": "0.8.7-beta",
+    "insaneos": "0.8.7-beta",
     "kernel": "6.12.57+deb13-amd64",
     "arch": "x86_64",
     "live": true,

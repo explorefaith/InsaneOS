@@ -1,7 +1,7 @@
 // keyboard_default_test.mjs — (0.8.8.6, #55) the keyboard of a user who never chose one: the computer's
-// (/etc/default/keyboard through lord.keyboard.system(), US without it), never Latin American because a
+// (/etc/default/keyboard through insane.keyboard.system(), US without it), never Latin American because a
 // default said so; and settings migration 4, which drops the saved 'latam' default. Bundles the real
-// sdk/keyboard.js and sdk/settings.js with esbuild over a stub '@lordos/runtime'. Needs node_modules (esbuild).
+// sdk/keyboard.js and sdk/settings.js with esbuild over a stub '@insaneos/runtime'. Needs node_modules (esbuild).
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,7 @@ globalThis.__out = { keyboard, systemKeyboards, settings, migrateSettings };`;
 const stub = {
   name: 'runtime-stub',
   setup(b) {
-    b.onResolve({ filter: /^@lordos\/runtime$/ }, () => ({ path: 'runtime', namespace: 'stub' }));
+    b.onResolve({ filter: /^@insaneos\/runtime$/ }, () => ({ path: 'runtime', namespace: 'stub' }));
     b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export const setLayout = (l) => { globalThis.__fallback = l; };', loader: 'js' }));
   },
 };
@@ -35,7 +35,7 @@ const eq = (what, got, want) => {
 // A fresh session: settings.json as `file`, /etc/default/keyboard as `system`.
 async function session(file, system) {
   const sets = [];
-  globalThis.lord = {
+  globalThis.insane = {
     settings: { load: () => file, save: () => true },
     keyboard: {
       current: () => ({ xkb: true }), system: () => system,

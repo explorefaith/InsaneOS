@@ -7,9 +7,9 @@
  *  - the grid from a terminal's box (term_grid_size): the same on every display scale and in every scaled
  *    pass (overview, minimize), and none for a box that can't hold one (no 2 × 1 SIGWINCH);
  *  - the pty's size (pty_sync_size): set back to the grid's when something else changed it;
- *  - the holders (hold.c): while one lord-server has a session, a second one of the same user gets nothing
+ *  - the holders (hold.c): while one insane-server has a session, a second one of the same user gets nothing
  *    (two readers of one pty split the program's output and fight over its size), and gets it once the
- *    first is gone; a lord-server with its own XDG_RUNTIME_DIR looks for holders there.
+ *    first is gone; a insane-server with its own XDG_RUNTIME_DIR looks for holders there.
  *
  * The binary is also the holder it starts (hold_spawn re-executes /proc/self/exe --term-holder). */
 #include "term/term.h"
@@ -200,7 +200,7 @@ static void test_pty_size(void) {
     int s = open(name, O_RDWR | O_NOCTTY);
     pty_resize(m, 260, 56, 0, 0);
     check(pty_sync_size(m, 260, 56, 0, 0) == 0, "the grid's size: nothing to set");
-    /* something else sets it (a program's `stty cols 80`, another lord-server) */
+    /* something else sets it (a program's `stty cols 80`, another insane-server) */
     struct winsize ws = { 24, 80, 0, 0 };
     ioctl(s, TIOCSWINSZ, &ws);
     check(pty_sync_size(m, 260, 56, 0, 0) == 1, "another size: set again");
@@ -226,7 +226,7 @@ static void adopt(int fd, int ctrl, pid_t pid, const char *key) {
 }
 
 static void test_holder(void) {
-    char tmp[] = "/tmp/lord-hold-test-XXXXXX";
+    char tmp[] = "/tmp/insane-hold-test-XXXXXX";
     if (!mkdtemp(tmp)) { printf("skipped holders: no temporary folder\n"); return; }
     setenv("XDG_RUNTIME_DIR", tmp, 1);
     int m = posix_openpt(O_RDWR | O_NOCTTY | O_CLOEXEC);
@@ -238,22 +238,22 @@ static void test_holder(void) {
     check(ctrl >= 0, "a holder starts");
     if (ctrl < 0) return;
     char sock[400];
-    snprintf(sock, sizeof sock, "%s/lordos-term/%s.sock", tmp, key);
+    snprintf(sock, sizeof sock, "%s/insaneos-term/%s.sock", tmp, key);
     for (int i = 0; i < 200 && access(sock, F_OK); i++) usleep(10000);
-    check(!access(sock, F_OK), "its socket is in $XDG_RUNTIME_DIR/lordos-term");
+    check(!access(sock, F_OK), "its socket is in $XDG_RUNTIME_DIR/insaneos-term");
     usleep(50000);      /* the holder in its poll */
 
-    /* the first lord-server (this process, by the socket pair) has it: a second one gets nothing */
+    /* the first insane-server (this process, by the socket pair) has it: a second one gets nothing */
     got_n = 0;
     hold_restore(adopt);
-    check(got_n == 0, "while a lord-server has the session, a second one doesn't get it");
+    check(got_n == 0, "while a insane-server has the session, a second one doesn't get it");
     check(!access(sock, F_OK), "and the holder stays");
 
     /* the first one goes away: the next one gets it */
     close(ctrl);
     usleep(50000);
     hold_restore(adopt);
-    check(got_n == 1 && got_fd >= 0, "once it is gone, the next lord-server gets the session");
+    check(got_n == 1 && got_fd >= 0, "once it is gone, the next insane-server gets the session");
     int first = got_ctrl;
     if (got_n == 1) {
         /* the same master: what one end writes the other reads */
@@ -272,7 +272,7 @@ static void test_holder(void) {
     close(m);
     close(slave);
     char st[400];
-    snprintf(st, sizeof st, "%s/lordos-term", tmp);
+    snprintf(st, sizeof st, "%s/insaneos-term", tmp);
     rmdir(st);
     rmdir(tmp);
     while (waitpid(-1, NULL, WNOHANG) > 0) {}

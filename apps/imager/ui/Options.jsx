@@ -1,6 +1,6 @@
 // App options: sound and eject when finished, updates of the app, language and theme (the desktop
 // app; on Insane OS they follow the system), the download cache. No telemetry, ever.
-import { View, Text, Button, useTheme, useLocale, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Button, useTheme, useLocale, typeScale, spacing } from '@insaneos/sdk';
 import { useState } from 'react';
 import { platform } from '../platform.js';
 import { set, setOptions } from '../state.js';

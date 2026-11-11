@@ -2,8 +2,8 @@
  * can check them without a network: resolving hrefs, reading the discovery answers, planning what
  * to download and what to drop, deciding what an upload's status means, and giving a kept copy
  * a new UID. Everything here works on bounded buffers and validates what it reads. */
-#ifndef LORD_MAIL_DAVUTIL_H
-#define LORD_MAIL_DAVUTIL_H
+#ifndef INSANE_MAIL_DAVUTIL_H
+#define INSANE_MAIL_DAVUTIL_H
 
 #include <stddef.h>
 
@@ -19,7 +19,7 @@ int dav_href_resolve(const char *base, const char *href, char *out, size_t cap);
 /* 1 when two absolute URLs have the same scheme, host and port (an item and its collection). */
 int dav_same_origin(const char *a, const char *b);
 /* 1 when two absolute https URLs are on the same site: the host's last two labels match
- * ("p07-caldav.example.test" and "caldav.example.test"), the rule lord-server applies to discovery
+ * ("p07-caldav.example.test" and "caldav.example.test"), the rule insane-server applies to discovery
  * hosts. A server's answer may move the homes only within its own site, so the account's
  * credentials never go to another account's server. */
 int dav_same_site(const char *a, const char *b);

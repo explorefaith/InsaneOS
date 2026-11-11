@@ -1,8 +1,8 @@
 /* vmproto.h — Machines (docs/VIRTUALIZATION.md, "Phase 1 implementation"): the fixed binary messages between
- * lord-server and the two per-machine helpers.
+ * insane-server and the two per-machine helpers.
  *
- *   lord-server ──VmMsg──▶ lord-vm         supervisor of one machine: QEMU, passt, QMP, limits, state
- *   lord-server ──VdMsg──▶ lord-vmdisplay  the machine's picture and input, peer to peer D-Bus with QEMU
+ *   insane-server ──VmMsg──▶ insane-vm         supervisor of one machine: QEMU, passt, QMP, limits, state
+ *   insane-server ──VdMsg──▶ insane-vmdisplay  the machine's picture and input, peer to peer D-Bus with QEMU
  *
  * Both channels are AF_UNIX SOCK_SEQPACKET: one message per packet, never split, never merged. Every message is
  * exactly sizeof(VmMsg) or sizeof(VdMsg) bytes; a packet of any other length is a protocol error and the reader
@@ -10,14 +10,14 @@
  * the message that names them, at most one per message. Nothing here is JSON and nothing here is parsed from
  * text, except VmMsg.text, which is always NUL-terminated by the reader (vm_msg_fix) before use.
  *
- * ---- lord-vm ----
- * Started as `lord-vm --control-fd 3 [--paused] <machine dir>` (lord-server keeps the other end), or by the
- * development CLI (`lord-vm --start <dir>`). Each running lord-vm also listens on
- * $XDG_RUNTIME_DIR/lordos-vm/<id>.sock (folder 0700, socket 0600, peer uid checked), with the same messages,
- * so a restarted lord-server or the CLI can reach a machine that is already running. lord-vm exits when QEMU
+ * ---- insane-vm ----
+ * Started as `insane-vm --control-fd 3 [--paused] <machine dir>` (insane-server keeps the other end), or by the
+ * development CLI (`insane-vm --start <dir>`). Each running insane-vm also listens on
+ * $XDG_RUNTIME_DIR/insaneos-vm/<id>.sock (folder 0700, socket 0600, peer uid checked), with the same messages,
+ * so a restarted insane-server or the CLI can reach a machine that is already running. insane-vm exits when QEMU
  * has exited, after the last VM_STATE.
  *
- *   to lord-vm (requests; seq is echoed in the VM_REPLY)
+ *   to insane-vm (requests; seq is echoed in the VM_REPLY)
  *     VM_STATUS     → VM_INFO, then VM_STATE
  *     VM_PAUSE      QMP stop                                    → VM_REPLY
  *     VM_RESUME     QMP cont                                    → VM_REPLY
@@ -25,16 +25,16 @@
  *     VM_POWEROFF   QMP quit, then SIGKILL after 5 s
  *     VM_RESET      QMP system_reset
  *     VM_DISPLAY    → VM_DISPLAY_FD with one descriptor: a D-Bus connection QEMU already accepted
- *                   (QMP getfd + add_client @dbus-display). lord-server hands it to lord-vmdisplay as fd 4.
+ *                   (QMP getfd + add_client @dbus-display). insane-server hands it to insane-vmdisplay as fd 4.
  *                   Refused (VM_REPLY VME_NO_DISPLAY) for a machine whose display is "none".
- *     VM_QMP        development only (lord-vm --dev-qmp): text is one QMP command; the reply's text is the
+ *     VM_QMP        development only (insane-vm --dev-qmp): text is one QMP command; the reply's text is the
  *                   start of QEMU's answer. Used by the isolation test; refused otherwise.
- *     VM_CDROM      the CD/DVD drive while the machine runs. With a descriptor (an image lord-server opened read-only
+ *     VM_CDROM      the CD/DVD drive while the machine runs. With a descriptor (an image insane-server opened read-only
  *                   for the person): that disc goes in, through QMP add-fd and /dev/fdset (QEMU never opens a path,
  *                   so its Landlock rules don't change); text = the image's path, kept in machine.json when it fits.
  *                   Without one: the disc comes out. → VM_REPLY once the tray is closed again
  *     VM_SUSPEND    saves the machine's memory and devices to <machine>/suspend.state (QMP migrate to a descriptor
- *                   lord-vm opened) and stops QEMU; the next start resumes from it (6.1). VM_JOB reports progress;
+ *                   insane-vm opened) and stops QEMU; the next start resumes from it (6.1). VM_JOB reports progress;
  *                   → VM_REPLY when the state is on disk (QEMU then quits: VM_STATE stopped, suspended)
  *     VM_KEEP       a = 1: the machine keeps running when the control channel closes (Keep Running); 0: it shuts
  *                   down then, as by default
@@ -42,29 +42,29 @@
  *                   comes out of it (the last 8 KB first), what's written to it goes to the guest. One at a time; a
  *                   new one replaces the old. The serial log goes on as before.
  *     VM_AGENT      the guest agent (6.17; machine.json "agent"): a = VAG_SHUTDOWN (guest-shutdown), VAG_TIMESYNC
- *                   (guest-set-time from this computer's clock), VAG_INSTALL (copies lordos-guest, the clipboard helper,
+ *                   (guest-set-time from this computer's clock), VAG_INSTALL (copies insaneos-guest, the clipboard helper,
  *                   into the guest through qemu-guest-agent and enables it) → VM_REPLY
  *     VM_CLIP       the host's clipboard for the guest: one descriptor, a memfd of a bytes (at most VM_CLIP_MAX); b =
  *                   VCF_TEXT: UTF-8 text; VCF_CLIPX: text, HTML and/or a PNG in AGK_CLIPX's layout (vmagent.h), checked
  *                   and sanitized again here. Sent on only when machine.json's clipboard allows to-guest and
- *                   lordos-guest said hello (as text only to a helper without "clipx")
+ *                   insaneos-guest said hello (as text only to a helper without "clipx")
  *     VM_SNAPSHOT   a = VSN_TAKE, VSN_REVERT or VSN_DELETE; text = "TAG\tNAME" (take) or "TAG". qcow2 internal
  *                   snapshots of every writable disk at once (system disk and UEFI variables), with the machine's
  *                   memory (QMP snapshot-save, snapshot-load, snapshot-delete jobs), under operation.json; the entry
  *                   in snapshots.json is written last (6.2). VM_JOB reports it; → VM_REPLY when it's done
- *   from lord-vm (events and replies)
+ *   from insane-vm (events and replies)
  *     VM_REPLY      seq of the request; a = VME_* (0 ok); text = reason in English, for the log
  *     VM_STATE      a = VS_*, b = VR_* (why), c = QEMU's exit status or signal, d = QEMU's pid; text = detail.
  *                   Sent to every client on each change and in answer to VM_STATUS.
  *     VM_INFO       a = vCPUs, b = memory MB, c = VMS_* bits (what the sandbox applied), d = VMC_* (cgroups);
  *                   text = the machine's id. Sent once QEMU runs, so it can follow the first VM_STATEs
- *                   (starting, paused); lord-server asks for the display once it has both.
+ *                   (starting, paused); insane-server asks for the display once it has both.
  *     VM_DISPLAY_FD seq of the VM_DISPLAY; the descriptor; a = console width, b = height if known (else 0)
  *     VM_AGENT_STATE a = VAS_* (off, waiting, connected), b = VAC_* (what works now), text = "version\tsystem" as
  *                   the guest reported them (untrusted, shown as text only). Sent on each change and after VM_STATUS
  *     VM_CLIP_DATA  the guest's clipboard (machine.json allows from-guest): a sealed memfd of a bytes; b = VCF_TEXT
  *                   (UTF-8) or VCF_CLIPX (AGK_CLIPX's layout, every part already checked: UTF-8 text, sanitized HTML,
- *                   a PNG whose header is sane; lord-server still re-encodes the picture before it's used)
+ *                   a PNG whose header is sane; insane-server still re-encodes the picture before it's used)
  *     VM_JOB        progress of a long request: a = VJ_* (suspend, resume, snapshot), b = VJS_* (running, done,
  *                   failed), c = percent (0..100, -1 unknown), text = detail
  *     VM_NOTICE     something the person should know that isn't a state: a = VMN_* (VMN_NET_LOST: passt ended while
@@ -75,17 +75,17 @@
  *                   text = detail.
  *                   Sent to every client, and again to one that connects later (VM_STATUS)
  *
- * ---- lord-vmdisplay ----
- * Started by lord-server as `lord-vmdisplay <machine id>` with fd 3 = this channel and fd 4 = the D-Bus
+ * ---- insane-vmdisplay ----
+ * Started by insane-server as `insane-vmdisplay <machine id>` with fd 3 = this channel and fd 4 = the D-Bus
  * descriptor from VM_DISPLAY_FD. It speaks D-Bus to QEMU only through fd 4, then applies the helper sandbox
  * (no files, no new sockets, no exec) before it reads anything QEMU sends about the picture.
  *
- *   The picture: VD_SIZE (helper → server) a = width, b = height. lord-server makes a memfd of width × height × 4
+ *   The picture: VD_SIZE (helper → server) a = width, b = height. insane-server makes a memfd of width × height × 4
  *   bytes sealed against shrinking and growing (vm_picture_memfd), maps it read-only and sends it back with
  *   VD_SHM. The helper writes 32-bit pixels, B, G, R, X bytes in memory (x8r8g8b8 little endian; alpha is not
- *   meaningful, treat it as opaque), stride width × 4. It never hands lord-server QEMU's own memory: it copies
+ *   meaningful, treat it as opaque), stride width × 4. It never hands insane-server QEMU's own memory: it copies
  *   the damaged area from QEMU's buffer into this one, at most VD_RATE times a second.
- *   VD_FRAME a, b, c, d = damage x, y, w, h (inside the picture), e = frame number. lord-server reads the picture
+ *   VD_FRAME a, b, c, d = damage x, y, w, h (inside the picture), e = frame number. insane-server reads the picture
  *   (uploads it) and answers VD_FRAME_DONE e = that frame number; the helper doesn't write the picture again
  *   until then (no tearing), or until 250 ms passed with no answer.
  *   VD_CURSOR a, b = width, height (1..256), c, d = hotspot; one descriptor: a memfd sealed against writing,
@@ -104,12 +104,12 @@
  *
  *   Sound (6.9, 6.20): QEMU's audio goes to the helper as org.qemu.Display1.AudioOutListener calls on a second peer
  *   connection. VD_AUDIO_REC a = 1 with one descriptor: a recording started; the descriptor is a ring of aring.h
- *   (sealed memfd, 48 kHz, 16-bit, one channel) that lord-media reads; the helper writes the guest's sound into it,
+ *   (sealed memfd, 48 kHz, 16-bit, one channel) that insane-media reads; the helper writes the guest's sound into it,
  *   mixed to one channel, and silence for the time the guest plays nothing, so the sound keeps time with the picture.
  *   a = 0: the recording ended.
  */
-#ifndef LORD_VM_PROTO_H
-#define LORD_VM_PROTO_H
+#ifndef INSANE_VM_PROTO_H
+#define INSANE_VM_PROTO_H
 
 #include <errno.h>
 #include <fcntl.h>
@@ -124,13 +124,13 @@
 
 #define VM_PROTO_VERSION 1
 
-/* ---- lord-server ↔ lord-vm ---- */
+/* ---- insane-server ↔ insane-vm ---- */
 
 enum {
     VM_STATUS = 1, VM_PAUSE, VM_RESUME, VM_SHUTDOWN, VM_POWEROFF, VM_RESET, VM_DISPLAY, VM_QMP,   /* requests */
     VM_CDROM, VM_SUSPEND, VM_KEEP, VM_SNAPSHOT, VM_CONSOLE, VM_AGENT, VM_CLIP,
     VM_REQ_LAST = VM_CLIP,
-    VM_REPLY = 64, VM_STATE, VM_INFO, VM_DISPLAY_FD, VM_NOTICE, VM_JOB, VM_CONSOLE_FD,           /* from lord-vm */
+    VM_REPLY = 64, VM_STATE, VM_INFO, VM_DISPLAY_FD, VM_NOTICE, VM_JOB, VM_CONSOLE_FD,           /* from insane-vm */
     VM_AGENT_STATE, VM_CLIP_DATA,
 };
 /* VM_NOTICE a */
@@ -162,7 +162,7 @@ enum {
     VR_OUT_OF_MEMORY,       /* killed by the machine's memory limit */
     VR_START_FAILED,        /* never ran: text says why (missing disk, no KVM, ...) */
     VR_GUEST_PANIC,         /* the guest reported a panic */
-    VR_SUPERVISOR_LOST,     /* the previous lord-vm died; found at the next start or status */
+    VR_SUPERVISOR_LOST,     /* the previous insane-vm died; found at the next start or status */
     VR_GUEST_RESET,         /* the guest or VM_RESET restarted it (state stays running) */
     VR_USER,                /* VM_PAUSE / VM_RESUME */
     VR_SUSPENDED,           /* VM_SUSPEND: the memory is in suspend.state, the next start resumes from it */
@@ -182,8 +182,8 @@ enum {
 /* VM_INFO d: cgroups */
 enum {
     VMC_NONE = 0,           /* no cgroup could be used: no limits */
-    VMC_SCOPE = 1,          /* the machine's scope, with its memory and CPU limits (lord-sessiond or self) */
-    VMC_NESTED = 2,         /* also leaves for lord-vm, QEMU and passt inside it, QEMU's with its own limits */
+    VMC_SCOPE = 1,          /* the machine's scope, with its memory and CPU limits (insane-sessiond or self) */
+    VMC_NESTED = 2,         /* also leaves for insane-vm, QEMU and passt inside it, QEMU's with its own limits */
 };
 
 #define VM_TEXT_MAX 200
@@ -195,7 +195,7 @@ typedef struct {
     char text[VM_TEXT_MAX];
 } VmMsg;
 
-/* ---- lord-server ↔ lord-vmdisplay ---- */
+/* ---- insane-server ↔ insane-vmdisplay ---- */
 
 enum {
     VD_READY = 1, VD_SIZE, VD_FRAME, VD_CURSOR, VD_POINTER, VD_STATE, VD_STATS,               /* helper → server */
@@ -218,7 +218,7 @@ typedef struct {
 #define VD_MAX_DIM      8192u
 #define VD_MAX_BYTES    (256u * 1024 * 1024)
 #define VD_MAX_CURSOR   256
-#define VD_POLL_MAX     256         /* messages lord-server takes per poll, as Remote Desk */
+#define VD_POLL_MAX     256         /* messages insane-server takes per poll, as Remote Desk */
 
 /* ---- helpers shared by both ends ---- */
 
@@ -290,7 +290,7 @@ static inline VdMsg vd_msg(uint16_t type, int a, int b, int c, int d, int e, int
     return m;
 }
 
-/* Is this message one the receiving side may act on? `to_vm` 1: lord-vm checks a request; 0: lord-server
+/* Is this message one the receiving side may act on? `to_vm` 1: insane-vm checks a request; 0: insane-server
  * checks an event. Ranges only; the meaning is checked where it's used. */
 static inline int vm_msg_valid(const VmMsg *m, int to_vm) {
     if (m->version != VM_PROTO_VERSION) return 0;
@@ -312,7 +312,7 @@ static inline int vm_msg_valid(const VmMsg *m, int to_vm) {
     }
 }
 
-/* the same for the display channel: `to_helper` 1: lord-vmdisplay checks what lord-server sent. Picture
+/* the same for the display channel: `to_helper` 1: insane-vmdisplay checks what insane-server sent. Picture
  * coordinates are checked against the current size where they're used. */
 static inline int vd_msg_valid(const VdMsg *m, int to_helper) {
     if (m->version != VM_PROTO_VERSION) return 0;
@@ -341,20 +341,20 @@ static inline int vd_msg_valid(const VdMsg *m, int to_helper) {
     }
 }
 
-/* a damage rectangle inside a w × h picture (lord-server checks every VD_FRAME with it) */
+/* a damage rectangle inside a w × h picture (insane-server checks every VD_FRAME with it) */
 static inline int vd_rect_inside(const VdMsg *m, int w, int h) {
     return m->a >= 0 && m->b >= 0 && m->c > 0 && m->d > 0 && (int64_t)m->a + m->c <= w && (int64_t)m->b + m->d <= h;
 }
 
-/* lord-server: the picture for VD_SIZE, sealed so the helper can't shrink it under lord-server's mapping */
+/* insane-server: the picture for VD_SIZE, sealed so the helper can't shrink it under insane-server's mapping */
 static inline int vm_picture_memfd(size_t len) {
-    int fd = (int)syscall(SYS_memfd_create, "lordos-vmdisplay", 3u /* MFD_CLOEXEC | MFD_ALLOW_SEALING */);
+    int fd = (int)syscall(SYS_memfd_create, "insaneos-vmdisplay", 3u /* MFD_CLOEXEC | MFD_ALLOW_SEALING */);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)len) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { close(fd); return -1; }
     return fd;
 }
 
-/* lord-server: is the cursor memfd from VD_CURSOR safe to map? sealed against shrink, grow and write, and exactly
+/* insane-server: is the cursor memfd from VD_CURSOR safe to map? sealed against shrink, grow and write, and exactly
  * w × h × 4 bytes. 0 yes. */
 static inline int vm_cursor_check(int fd, int w, int h) {
     int seals = fcntl(fd, F_GET_SEALS);

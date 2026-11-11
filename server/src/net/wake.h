@@ -1,6 +1,6 @@
 /* wake.h — Wi-Fi after the computer wakes from sleep (issue #14; see wake.c). */
-#ifndef LORD_WAKE_H
-#define LORD_WAKE_H
+#ifndef INSANE_WAKE_H
+#define INSANE_WAKE_H
 
 #define WAKE_MAX        16
 #define WAKE_SETTLE_MS  3000    /* first look: the driver and wpa_supplicant get a moment after waking */

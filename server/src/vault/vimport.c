@@ -158,7 +158,7 @@ static int istrue(const char *s) { return s && (!strcmp(s, "1") || !strcasecmp(s
 
 static int csv_kind(const CsvRow *h) {
 #define HAS(x) (csv_col(h, x) >= 0)
-    if (HAS("category") && HAS("title") && HAS("username") && HAS("password") && HAS("fields")) return IMP_LORD_CSV;
+    if (HAS("category") && HAS("title") && HAS("username") && HAS("password") && HAS("fields")) return IMP_INSANE_CSV;
     if (HAS("group") && HAS("title") && HAS("username") && HAS("password") && (HAS("totp") || HAS("last modified"))) return IMP_KEEPASSXC_CSV;
     if ((HAS("folder") || HAS("collections")) && HAS("login_uri") && HAS("login_password")) return IMP_BITWARDEN_CSV;
     if (HAS("httprealm") && HAS("formactionorigin") && HAS("password")) return IMP_FIREFOX_CSV;
@@ -223,7 +223,7 @@ static int parse_csv(int kind, const uint8_t *data, size_t len, ImpList *l) {
         k.title = csv_col(&h, "title"); k.url = csv_col(&h, "url"); k.user = csv_col(&h, "username");
         k.pass = csv_col(&h, "password"); k.notes = csv_col(&h, "notes"); k.totp = csv_col(&h, "otpauth");
         break;
-    case IMP_LORD_CSV:
+    case IMP_INSANE_CSV:
         k.group = csv_col(&h, "category"); k.title = csv_col(&h, "title"); k.user = csv_col(&h, "username");
         k.pass = csv_col(&h, "password"); k.url = csv_col(&h, "url"); k.notes = csv_col(&h, "notes");
         k.totp = csv_col(&h, "totp"); k.tags = csv_col(&h, "tags"); k.fav = csv_col(&h, "favorite");
@@ -295,7 +295,7 @@ static int parse_csv(int kind, const uint8_t *data, size_t len, ImpList *l) {
             if (e->modified < 0) e->modified = 0;
             /* Firefox "Never save" entries come without a password: they are imported anyway */
         }
-        if (kind == IMP_LORD_CSV) {
+        if (kind == IMP_INSANE_CSV) {
             bad |= set(&e->group, csv_get(&r, k.group));
             bad |= split_add(&e->tags, &e->ntags, csv_get(&r, k.tags), ";");
             e->favorite = istrue(csv_get(&r, k.fav));
@@ -491,7 +491,7 @@ int imp_parse(int kind, const uint8_t *data, size_t len, const char *password,
     case IMP_KDBX: rc = kdbx_parse(data, len, password, keyfile, kflen, l); break;
     case IMP_BITWARDEN_JSON: rc = parse_bitwarden(data, len, l); break;
     case IMP_KEEPASSXC_CSV: case IMP_BITWARDEN_CSV: case IMP_CHROME_CSV: case IMP_FIREFOX_CSV:
-    case IMP_APPLE_CSV: case IMP_LORD_CSV:
+    case IMP_APPLE_CSV: case IMP_INSANE_CSV:
         rc = parse_csv(kind, data, len, l);
         break;
     default:

@@ -1,20 +1,20 @@
-/* fwsub.h — the user's blocklist subscriptions, lord-server's side (0.8.5, docs/FIREWALL.md,
+/* fwsub.h — the user's blocklist subscriptions, insane-server's side (0.8.5, docs/FIREWALL.md,
  * "Blocklists").
  *
  *   assets/fw/blocklists.json        the curated catalog (our own asset: id, topic, url, format,
  *                                    licence, source); every entry's licence was checked before it
  *                                    went in
- *   ~/.config/lordos/fwlists.json    which ones are on, and the custom lists (https URLs)
- *   ~/.cache/lordos/fwlists/<id>.txt the normalized download of each list, and <id>.json its state
- *   ~/.config/lordos/fwlists.txt     every enabled list compiled (fw/fwlists.h); lord-netperm reads it
+ *   ~/.config/insaneos/fwlists.json    which ones are on, and the custom lists (https URLs)
+ *   ~/.cache/insaneos/fwlists/<id>.txt the normalized download of each list, and <id>.json its state
+ *   ~/.config/insaneos/fwlists.txt     every enabled list compiled (fw/fwlists.h); insane-netperm reads it
  *
  * All three user files are written only here (fsops_protected). The work (downloading through
- * lord-fetch and compiling) runs on its own thread: the screen never waits. When it ends,
- * fws_poll() swaps the set in and says so, and lord.fw sends lord-netperm its RELOAD. Lists are
+ * insane-fetch and compiling) runs on its own thread: the screen never waits. When it ends,
+ * fws_poll() swaps the set in and says so, and insane.fw sends insane-netperm its RELOAD. Lists are
  * downloaded when enabled, and again when the last download is older than a day (fws_update(0)
  * every hour from the SDK). */
-#ifndef LORD_FW_FWSUB_H
-#define LORD_FW_FWSUB_H
+#ifndef INSANE_FW_FWSUB_H
+#define INSANE_FW_FWSUB_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,7 +24,7 @@
 #define FWS_URL_MAX     400
 #define FWS_STALE_S     (20 * 3600)     /* "daily": older than this is downloaded again */
 
-/* home: the user's real home folder; assets: Insane OS's assets folder; bindir: where lord-fetch is. */
+/* home: the user's real home folder; assets: Insane OS's assets folder; bindir: where insane-fetch is. */
 int   fws_init(const char *home, const char *assets, const char *bindir);
 /* {"catalog":[…],"custom":[…],"enabled":[…],"state":{id:{…}},"busy":bool,"domains":N,"nets":N} (malloc'd) */
 char *fws_json(void);

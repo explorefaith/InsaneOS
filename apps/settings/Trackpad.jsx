@@ -2,8 +2,8 @@
 // (speed, natural scrolling, primary button) and Trackpad (speed, touch sensitivity, tap to click,
 // secondary click, three-finger drag, scrolling and its speed, inertia, pinch and swipe). Each
 // trackpad row comes with a small drawing of the gesture that animates on mouse hover. Saved in
-// settings.trackpad and applied live (sdk/trackpad.js → lord.input.configure). See docs/TRACKPAD.md.
-import { View, Text, useTheme, useLocale, Toggle, Segmented, Slider, useSettings, useTrackpads, TRACKPAD_DEFAULTS, setTrackpad, spacing, typeScale } from '@lordos/sdk';
+// settings.trackpad and applied live (sdk/trackpad.js → insane.input.configure). See docs/TRACKPAD.md.
+import { View, Text, useTheme, useLocale, Toggle, Segmented, Slider, useSettings, useTrackpads, TRACKPAD_DEFAULTS, setTrackpad, spacing, typeScale } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Note } from './ui.jsx';
 import { useEffect, useState } from 'react';
 
@@ -38,8 +38,8 @@ function GestureDemo({ kind, active }) {
   const [p, setP] = useState(0.35);
   useEffect(() => {
     if (!active) { setP(0.35); return undefined; }
-    const t0 = lord.now();
-    const id = setInterval(() => setP(((lord.now() - t0) / 1600) % 1), 50);
+    const t0 = insane.now();
+    const id = setInterval(() => setP(((insane.now() - t0) / 1600) % 1), 50);
     return () => clearInterval(id);
   }, [active]);
   // natural: a "page" that moves up with the fingers; inertia: keeps going by itself for a while afterwards

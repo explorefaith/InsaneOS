@@ -12,18 +12,18 @@
 
 static void seterr(char *e, size_t n, const char *m) { if (e && n) snprintf(e, n, "%s", m); }
 
-#ifdef LORD_SIGN_TEST
+#ifdef INSANE_SIGN_TEST
 static const char *test_root;
 void pkgapp_test_root(const char *path) { test_root = path; }     /* only tests/pkgapp_test.c */
 #endif
 
 const char *pkgapp_root(void) {
-#ifdef LORD_SIGN_TEST
+#ifdef INSANE_SIGN_TEST
     if (test_root) return test_root;
 #endif
-#ifdef LORD_PKGAPP_TEST
-    /* only build/lord-server-pkgtest: a root-owned folder under the test's own */
-    const char *t = getenv("LORD_TEST_APPS_ROOT");
+#ifdef INSANE_PKGAPP_TEST
+    /* only build/insane-server-pkgtest: a root-owned folder under the test's own */
+    const char *t = getenv("INSANE_TEST_APPS_ROOT");
     if (t && t[0] == '/') return t;
 #endif
     return PKGAPP_ROOT;
@@ -32,7 +32,7 @@ const char *pkgapp_root(void) {
 static int safe_dir(const char *path) {
     struct stat st;
     return !lstat(path, &st) && S_ISDIR(st.st_mode) && !(st.st_mode & (S_IWGRP | S_IWOTH)) &&
-#ifdef LORD_SIGN_TEST
+#ifdef INSANE_SIGN_TEST
            (st.st_uid == 0 || st.st_uid == getuid());
 #else
            st.st_uid == 0;

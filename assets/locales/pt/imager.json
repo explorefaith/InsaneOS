@@ -18,7 +18,7 @@
   "cooling.noneWarnTitle": "Sem resfriamento a placa desacelera sozinha",
   "cooling.overclock": "Overclock leve",
   "cooling.overclockHint": "2,6 GHz em vez de 2,4 GHz, sem tensão extra. Só com ventoinha.",
-  "cooling.overclockWarn": "Se a placa não iniciar, abra a partição de boot do cartão em outro computador e apague o bloco lordos-firstrun do config.txt.",
+  "cooling.overclockWarn": "Se a placa não iniciar, abra a partição de boot do cartão em outro computador e apague o bloco insaneos-firstrun do config.txt.",
   "cooling.overclockWarnTitle": "Nem toda placa fica estável com overclock",
   "cooling.p.balanced": "Equilibrado",
   "cooling.p.balancedHint": "A ventoinha liga a 55 °C e acelera com a temperatura. O padrão.",

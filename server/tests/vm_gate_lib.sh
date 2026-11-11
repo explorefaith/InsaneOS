@@ -1,9 +1,9 @@
 # vm_gate_lib.sh — what Machines' release gates share (docs/VIRTUALIZATION.md 12): sourced by vm_integrity.sh,
 # vm_recovery.sh and vm_leak.sh. Runs as a normal user who can open /dev/kvm, with qemu-img and passt installed.
-#   BIN   folder with lord-vm          IMG   a Debian 13 "nocloud" qcow2 of this computer's architecture (copied)
+#   BIN   folder with insane-vm          IMG   a Debian 13 "nocloud" qcow2 of this computer's architecture (copied)
 #   W     work folder (made here, removed at the end unless KEEP=1)
 set -u
-VM="$BIN/lord-vm"
+VM="$BIN/insane-vm"
 pass=0 fail=0 skip=0
 ok()   { pass=$((pass + 1)); echo "PASS  $1"; }
 bad()  { fail=$((fail + 1)); echo "FAIL  $1${2:+: $2}"; }
@@ -33,18 +33,18 @@ wait_serial() {  # DIR TEXT SECONDS
 # synced, over and over), so a kill lands in the middle of writes
 gate_creds() {
     UNIT=$(printf '%s\n' '[Unit]' 'After=local-fs.target' '[Service]' \
-        "ExecStart=/bin/sh -c 'echo \"<3>LORDVM-WRITER\" >/dev/kmsg; while :; do dd if=/dev/urandom of=/var/tmp/w bs=1M count=500 conv=fsync status=none; sync; done'")
-    DROP=$(printf '[Unit]\nWants=lordvm-writer.service\n')
+        "ExecStart=/bin/sh -c 'echo \"<3>INSANEVM-WRITER\" >/dev/kmsg; while :; do dd if=/dev/urandom of=/var/tmp/w bs=1M count=500 conv=fsync status=none; sync; done'")
+    DROP=$(printf '[Unit]\nWants=insanevm-writer.service\n')
     umask 077
     PW="lvg-$(od -An -N6 -tx1 /dev/urandom | tr -d ' \n')"      # a throwaway root password: systemd-firstboot asks otherwise
     { echo "firstboot.locale=C.UTF-8"; echo "firstboot.keymap=us"; echo "firstboot.timezone=UTC"; echo "passwd.plaintext-password.root=$PW"
-      echo "binary:systemd.extra-unit.lordvm-writer.service=$(printf '%s\n' "$UNIT" | base64 -w0)"
+      echo "binary:systemd.extra-unit.insanevm-writer.service=$(printf '%s\n' "$UNIT" | base64 -w0)"
       echo "binary:systemd.unit-dropin.multi-user.target=$(printf '%s\n' "$DROP" | base64 -w0)"; } >"$W/creds"
     umask 022
 }
 start_busy() {   # DIR: started, and writing (the unit said so on the console)
     "$VM" --start "$1" --detach --keep-running --credentials-file "$W/creds" >/dev/null 2>&1 || return 1
-    wait_state "$1" running 60 && wait_serial "$1" LORDVM-WRITER 120 && sleep 3
+    wait_state "$1" running 60 && wait_serial "$1" INSANEVM-WRITER 120 && sleep 3
 }
 # qemu-img check of every disk of a machine (and its base): 0 clean, 3 leaked clusters only, anything else corrupt
 check_disks() {  # DIR LABEL [leaks-ok]
@@ -58,7 +58,7 @@ check_disks() {  # DIR LABEL [leaks-ok]
     done
     t "$2" '[ $rc_all = 0 ]'
 }
-# the next open: lord-vm starts it (recovery runs first), then it's turned off; the disks are checked again, clean
+# the next open: insane-vm starts it (recovery runs first), then it's turned off; the disks are checked again, clean
 reopen() {       # DIR LABEL
     "$VM" --start "$1" --detach --keep-running >/dev/null 2>&1
     wait_state "$1" running 60 || true
@@ -67,12 +67,12 @@ reopen() {       # DIR LABEL
     check_disks "$1" "$2"
 }
 gate_cleanup() {
-    for d in "$W"/*.lordvm; do [ -d "$d" ] && "$VM" --poweroff "$d" >/dev/null 2>&1; done
+    for d in "$W"/*.insanevm; do [ -d "$d" ] && "$VM" --poweroff "$d" >/dev/null 2>&1; done
     [ "${KEEP:-}" = 1 ] || rm -rf "$W"
 }
 gate_begin() {
     [ "$(id -u)" = 0 ] && { echo "run as a normal user"; exit 2; }
-    [ -x "$VM" ] || { echo "no lord-vm in $BIN"; exit 2; }
+    [ -x "$VM" ] || { echo "no insane-vm in $BIN"; exit 2; }
     [ -e "$W" ] && { echo "$W exists: give a new work folder"; exit 2; }
     mkdir -p "$W" || exit 2
     trap gate_cleanup EXIT

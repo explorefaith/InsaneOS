@@ -4,7 +4,7 @@
 //
 // x, y and bounds are in the window's coordinates. A click outside or Esc closes it.
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, addListener } from '@lordos/runtime';
+import { View, Text, addListener } from '@insaneos/runtime';
 import { useTheme } from './theme.js';
 
 const inside = (inst, ref) => { for (let n = inst; n; n = n.parent) if (n === ref?.current) return true; return false; };
@@ -60,7 +60,7 @@ export function ContextMenu({ x, y, items, onClose, bounds = { w: 4000, h: 4000 
     return () => { a(); b(); };
   }, []);
   items = items.filter(Boolean);
-  const width = (list) => Math.min(320, Math.max(190, ...list.filter((i) => i && i.label).map((i) => 46 + lord.measureText(i.label, 13, 400) + (i.hint ? 16 + lord.measureText(i.hint, 11, 400) : 0))));
+  const width = (list) => Math.min(320, Math.max(190, ...list.filter((i) => i && i.label).map((i) => 46 + insane.measureText(i.label, 13, 400) + (i.hint ? 16 + insane.measureText(i.hint, 11, 400) : 0))));
   return (
     <>
       <MenuBox items={items} x={x} y={y} width={width(items)} onClose={onClose} onSub={setSub} boxRef={ref} bounds={bounds} />

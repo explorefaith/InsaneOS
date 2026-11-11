@@ -1,4 +1,4 @@
-/* vmagent.c — org.lordos.agent frames, UTF-8, base64, and what lord-vm checks of a clipboard the other side sent (see
+/* vmagent.c — org.insaneos.agent frames, UTF-8, base64, and what insane-vm checks of a clipboard the other side sent (see
  * vmagent.h).
  *
  * HTML (6.8): the guest is untrusted, and the HTML goes on to apps on this computer that render it. What stays:

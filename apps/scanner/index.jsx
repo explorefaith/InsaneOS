@@ -1,10 +1,10 @@
 // Scanner: "driverless" network scanners (eSCL / AirScan) with our own client, without SANE:
 // preview, a hand-drawn area, resolution, color or grayscale, and save as PDF, PNG or JPEG. What
-// the scanner sends is decoded and converted in the sandboxed lord-doc helper.
+// the scanner sends is decoded and converted in the sandboxed insane-doc helper.
 import {
   View, Text, Button, Segmented, Hairline, EmptyState, ScrollView, useTheme, useAppWindow, wm, fs, print, DocImage, releaseImage, decodeImage, convertImage,
   formatDate, formatTime, typeScale, t as tr,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 export function Icon({ size: s }) {
@@ -109,7 +109,7 @@ export default function Scanner() {
   // area: drag on the preview
   const onDown = (ev) => {
     if (!preview || !box.current) return;
-    const [bx, by, bw, bh] = lord.getLayout(box.current.id);
+    const [bx, by, bw, bh] = insane.getLayout(box.current.id);
     const fx = (ev.x - bx) / bw, fy = (ev.y - by) / bh;
     drag.current = { bx, by, bw, bh, fx, fy };
     setArea([fx, fy, 0, 0]);

@@ -1,6 +1,6 @@
-/* rdesksnd.c — the remote computer's sound in lord-rdesk: an rdpsnd device of our own ("sys:lordos") that writes PCM
- * into the audio ring lord-server made for the session (media/aring.h, the same ring lord-media's players use). The
- * helper never talks to PipeWire, opens no socket and no file for it: lord-server owns the stream and plays what the
+/* rdesksnd.c — the remote computer's sound in insane-rdesk: an rdpsnd device of our own ("sys:insaneos") that writes PCM
+ * into the audio ring insane-server made for the session (media/aring.h, the same ring insane-media's players use). The
+ * helper never talks to PipeWire, opens no socket and no file for it: insane-server owns the stream and plays what the
  * ring holds (docs/FILES.md, "Remote desktop"). Only 16-bit PCM at 44.1 or 48 kHz is offered to the server; the ring
  * is 48 kHz stereo, so 44.1 kHz is resampled here (linear) and mono doubled. */
 #include "../media/aring.h"
@@ -116,6 +116,6 @@ static UINT entry(PFREERDP_RDPSND_DEVICE_ENTRY_POINTS ep) {
 
 /* the library's own channels, plus our sound device */
 PVIRTUALCHANNELENTRY rd_addin_provider(LPCSTR name, LPCSTR subsystem, LPCSTR type, DWORD flags) {
-    if (name && subsystem && !strcmp(name, "rdpsnd") && !strcmp(subsystem, "lordos")) return (PVIRTUALCHANNELENTRY)(void *)entry;
+    if (name && subsystem && !strcmp(name, "rdpsnd") && !strcmp(subsystem, "insaneos")) return (PVIRTUALCHANNELENTRY)(void *)entry;
     return freerdp_channels_load_static_addin_entry(name, subsystem, type, flags);
 }

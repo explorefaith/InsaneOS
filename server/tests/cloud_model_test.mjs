@@ -40,7 +40,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   eq('rel path', [M.relPath(`${H}/Cloud/Work/Projects/2026/a.pdf`, accs[0]), M.relPath(`${H}/Cloud/Work`, accs[0])], ['Projects/2026/a.pdf', '']);
   eq('where line', [M.whereLine(`${H}/Cloud/Work/Projects/a.pdf`, accs[0]), M.whereLine(`${H}/Cloud/Work/Projects/2026`, accs[0], '·', false)], ['Work › Projects', 'Work · Projects · 2026']);
   eq('account colors in order, then around', [M.accountColor(accs, '1'), M.accountColor(accs, '2')], ['#0a84ff', '#bf5af2']);
-  eq('cloud volume', [M.isCloudVolume({ fs: 'fuse.rclone', path: `${H}/Cloud/Work` }, H), M.isCloudVolume({ fs: 'fuse.rclone', path: `${H}/.local/share/lordos/remote/x` }, H), M.isCloudVolume({ fs: 'ext4', path: `${H}/Cloud/W` }, H)], [true, false, false]);
+  eq('cloud volume', [M.isCloudVolume({ fs: 'fuse.rclone', path: `${H}/Cloud/Work` }, H), M.isCloudVolume({ fs: 'fuse.rclone', path: `${H}/.local/share/insaneos/remote/x` }, H), M.isCloudVolume({ fs: 'ext4', path: `${H}/Cloud/W` }, H)], [true, false, false]);
 }
 
 // ---- space ----
@@ -162,7 +162,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   eq('full with waiting', M.menuGlyph(st([acc('1', 'A', { about: { total: 1, used: 1, free: 0 }, up: { files: 3 } })])).badge, '!');
   eq('waiting changes count', M.menuGlyph(st([acc('1', 'A', { state: 'offline', up: { files: 4 } }), acc('2', 'B', { state: 'paused', up: { files: 1 } })])).badge, 5);
   eq('all paused', [M.allPaused(st([acc('1', 'A', { state: 'paused' })])), M.allPaused(st([acc('1', 'A', { state: 'paused' }), acc('2', 'B')])), M.allPaused(st([]))], [true, false, false]);
-  // #71: Pause All on an account in error: lord-server's pauseAll says it took, though the account still shows the error
+  // #71: Pause All on an account in error: insane-server's pauseAll says it took, though the account still shows the error
   eq('all paused by the option', [M.allPaused({ accounts: [acc('1', 'A', { state: 'error' })], options: { pauseAll: true } }),
     M.allPaused({ accounts: [acc('1', 'A', { state: 'error', paused: true }), acc('2', 'B', { state: 'paused' })], options: { pauseAll: false } }),
     M.allPaused({ accounts: [acc('1', 'A', { state: 'error' })], options: { pauseAll: false } }), M.allPaused({ accounts: [], options: { pauseAll: true } })], [true, true, false, false]);
@@ -227,11 +227,11 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   const timers = [];
   globalThis.setInterval = (fn) => { timers.push(fn); return 0; };
   globalThis.setTimeout = (fn) => { timers.push(fn); return 0; };
-  globalThis.lord = { fs: { home: () => H, mkdir: (p) => files.set(p, 'dir'), write: (p, d) => files.set(p, d), stat: (p) => { if (!files.has(p)) throw new Error('ENOENT'); return {}; } } };
+  globalThis.insane = { fs: { home: () => H, mkdir: (p) => files.set(p, 'dir'), write: (p, d) => files.set(p, d), stat: (p) => { if (!files.has(p)) throw new Error('ENOENT'); return {}; } } };
   let pushed = null;
-  globalThis.__lordCloud = (st) => { pushed = st; };
+  globalThis.__insaneCloud = (st) => { pushed = st; };
   installCloudMock(H);
-  const c = globalThis.lord.cloud;
+  const c = globalThis.insane.cloud;
   const API = ['available', 'state', 'providers', 'beginSignIn', 'openSignInPage', 'cancelSignIn', 'add', 'remove', 'rename', 'refreshAbout', 'websiteUrl',
     'status', 'keep', 'unkeep', 'free', 'link', 'unlink', 'links', 'pause', 'resume', 'setOptions', 'restart', 'showLog', 'answer', 'emptyTrash', 'measure', 'delete'];
   eq('every call of section 17', API.filter((k) => typeof c[k] !== 'function'), []);
@@ -324,9 +324,9 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   eq('report: an odd version or label stays plain', buildReport({ version: 'x\nEvil: 1', label: 'A\nB', steps: [] }).split('\n').length, 10);
   eq('works', [checkWorks(steps), checkWorks([{ result: 'fail' }]), checkWorks([{ result: 'fail' }, { result: 'fail' }, { result: 'fail' }])], ['yes', 'partly', 'no']);
   const u = issueUrl({ label: 'pCloud', report: rep, version: '0.8.8.5 · Beta' });
-  eq('issue url', [u.startsWith('https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20pCloud&provider=pCloud&version=0.8.8.5%20%C2%B7%20Beta&report='),
+  eq('issue url', [u.startsWith('https://github.com/insaneos/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20pCloud&provider=pCloud&version=0.8.8.5%20%C2%B7%20Beta&report='),
     decodeURIComponent(u.split('&report=')[1]) === rep], [true, true]);
-  eq('issue url without a report (Add Account\'s line)', issueUrl({ label: 'Box' }), 'https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20Box&provider=Box');
+  eq('issue url without a report (Add Account\'s line)', issueUrl({ label: 'Box' }), 'https://github.com/insaneos/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud%20provider%3A%20Box&provider=Box');
   eq('special characters encoded', issueUrl({ label: 'A&B=C #1' }).includes('provider=A%26B%3DC%20%231'), true);
   const long = Array.from({ length: 900 }, (_, i) => `  line ${i} ä€`).join('\n');
   const lu = issueUrl({ label: 'X', report: long });
@@ -341,7 +341,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   eq('random bytes: repeatable, not flat', [hashBytes(randomBytes(64, 7)) === hashBytes(randomBytes(64, 7)), hashBytes(randomBytes(64, 7)) === hashBytes(randomBytes(64, 8)), new Set(randomBytes(256, 3)).size > 100], [true, false, true]);
   eq('hash sees one byte', hashBytes(new Uint8Array([1, 2, 3])) === hashBytes(new Uint8Array([1, 2, 4])), false);
   eq('check folder', [checkFolder({ group: 'server', mount: '/m' }, [], 't').path, checkFolder({ group: 'object', mount: '/m' }, [{ name: 'zeta', dir: true }, { name: 'alpha', dir: true }, { name: 'f', dir: false }], 't').path,
-    checkFolder({ group: 'object', mount: '/m' }, [], 't').path], ['/m/.lordos-check-t', '/m/alpha/.lordos-check-t', '/m/lordos-check-t']);
+    checkFolder({ group: 'object', mount: '/m' }, [], 't').path], ['/m/.insaneos-check-t', '/m/alpha/.insaneos-check-t', '/m/insaneos-check-t']);
   // a world: files in a map, a cloud that sends what is written up after two looks, a clock that sleeps instantly
   const world = (opts = {}) => {
     let clock = 1.7e12;
@@ -380,7 +380,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   let out = await runCheck(w.acc, w.env, () => { seen++; });
   eq('a good account: every step passes', res(out), CHECK_STEPS.map((id) => `${id}:pass`).join(' '));
   eq('steps reported as they go', seen >= CHECK_STEPS.length, true);
-  eq('nothing left: not in the cloud, not in the home, not in the Trash', [[...w.files.keys()].filter((k) => k.includes('lordos-check')), w.trash.length], [[], 0]);
+  eq('nothing left: not in the cloud, not in the home, not in the Trash', [[...w.files.keys()].filter((k) => k.includes('insaneos-check')), w.trash.length], [[], 0]);
   w = world({ noAbout: true });
   out = await runCheck(w.acc, w.env);
   eq('no space info, no links: skipped, not failed', [out[0].result, out[0].note, out.find((x) => x.id === 'link').note], ['skipped', 'noSpaceInfo', 'noLinks']);
@@ -388,7 +388,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   out = await runCheck(w.acc, w.env);
   eq('an upload that fails: that step fails, the rest is skipped, the folder still goes', res(out).replace(/about:\w+ /, ''),
     'list:pass folder:pass write:pass up:fail(cloud.transferFailed) free:skipped(notReached) read:skipped(notReached) link:skipped(notReached) delete:pass deleteUp:pass');
-  eq('and nothing left', [...w.files.keys()].filter((k) => k.includes('lordos-check')), []);
+  eq('and nothing left', [...w.files.keys()].filter((k) => k.includes('insaneos-check')), []);
   w = world({ corrupt: true });
   out = await runCheck(w.acc, w.env);
   eq('different bytes back: read fails', out.find((x) => x.id === 'read').note, 'cloud.checkMismatch');
@@ -594,7 +594,7 @@ eq('labels', M.statusGlyph({ st: 'kept' }).key, 'cloud.status.kept');
   eq('Files: cloud.browse on opening a cloud folder and every minute', /cloud\.browse\(loc\.path\);[\s\S]{0,80}setInterval\(\(\) => \{ cloud\.browse\(loc\.path\)/.test(files), true);
   eq('Files: no statfs in a cloud folder (rclone asks the provider)', /curDir && !curAcc && [^\n]*fs\.free\(curDir\)/.test(files), true);
   const sdkCloud = fs.readFileSync(path.join(root, 'sdk/cloud.js'), 'utf8');
-  eq('sdk: cloud.browse goes to lord.cloud.browse', /browse: \(path\) => \{ if \(has\(\) && typeof lord\.cloud\.browse === 'function'\) lord\.cloud\.browse\(String\(path\)\)/.test(sdkCloud), true);
+  eq('sdk: cloud.browse goes to insane.cloud.browse', /browse: \(path\) => \{ if \(has\(\) && typeof insane\.cloud\.browse === 'function'\) insane\.cloud\.browse\(String\(path\)\)/.test(sdkCloud), true);
 }
 
 console.log(`cloud model: ${ok} checks ${process.exitCode ? 'with failures' : 'passed'}`);

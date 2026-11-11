@@ -1,7 +1,7 @@
 // Step 3 — the card or stick to write: only removable drives are listed, never an internal disk or
 // the disk this computer runs from (the write action refuses those as well). Lumo warns that the
 // drive will be erased.
-import { View, Text, useTheme, useLocale, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, useTheme, useLocale, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { platform } from '../platform.js';
 import { set } from '../state.js';

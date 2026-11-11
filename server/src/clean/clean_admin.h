@@ -7,8 +7,8 @@
  *   clean-var-tmp    regular, root-owned, single-link files directly in /var/tmp, older than 30 days
  *                    by modification and change time, and open in no process                           admin
  */
-#ifndef LORD_CLEAN_ADMIN_H
-#define LORD_CLEAN_ADMIN_H
+#ifndef INSANE_CLEAN_ADMIN_H
+#define INSANE_CLEAN_ADMIN_H
 
 #include "../admin.h"
 #include <sys/types.h>

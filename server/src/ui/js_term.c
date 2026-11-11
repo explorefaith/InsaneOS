@@ -1,6 +1,6 @@
-/* js_term.c — lord.term.* and lord.clipboard for the Terminal app.
+/* js_term.c — insane.term.* and insane.clipboard for the Terminal app.
  *
- * lord.term.create() is the only API that starts a process: always the login shell of the
+ * insane.term.create() is the only API that starts a process: always the login shell of the
  * user already running the session (see term/pty.c). It accepts no commands or arguments. */
 #include "js_term.h"
 #include "../wl/wl.h"
@@ -282,7 +282,7 @@ static JSValue f_text(JSContext *c, JSValueConst this_val, int argc, JSValueCons
     return str_or_null(c, out);
 }
 
-/* lord.term.highlight(id, text, fg, bg): 0xRRGGBB colors or -1 = unchanged. */
+/* insane.term.highlight(id, text, fg, bg): 0xRRGGBB colors or -1 = unchanged. */
 static JSValue f_highlight(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     Session *s = arg_session(c, argv[0]);
@@ -300,7 +300,7 @@ static JSValue f_highlight(JSContext *c, JSValueConst this_val, int argc, JSValu
     return JS_NewBool(c, ok);
 }
 
-/* lord.term.ackRestored(): the app already announced that sessions were recovered after a restart;
+/* insane.term.ackRestored(): the app already announced that sessions were recovered after a restart;
  * a later theme change must not repeat the notice. */
 static JSValue f_ack_restored(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)c; (void)this_val; (void)argc; (void)argv;
@@ -311,7 +311,7 @@ static JSValue f_ack_restored(JSContext *c, JSValueConst this_val, int argc, JSV
 
 /* ---- tmux -CC ---- */
 
-/* lord.term.tmuxPane(gateway, n) → id of the virtual session of pane %n */
+/* insane.term.tmuxPane(gateway, n) → id of the virtual session of pane %n */
 static JSValue f_tmux_pane(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     Session *g = arg_session(c, argv[0]);
@@ -321,7 +321,7 @@ static JSValue f_tmux_pane(JSContext *c, JSValueConst this_val, int argc, JSValu
     return v ? JS_NewInt32(c, v->id) : JS_NULL;
 }
 
-/* lord.term.tmuxCommand(gateway, "tmux command"): one line, without newlines. Only while the
+/* insane.term.tmuxCommand(gateway, "tmux command"): one line, without newlines. Only while the
  * session is in control mode: it's the same as what the user would type in that tmux. */
 static JSValue f_tmux_command(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -337,7 +337,7 @@ static JSValue f_tmux_command(JSContext *c, JSValueConst this_val, int argc, JSV
     return JS_NewBool(c, ok);
 }
 
-/* lord.term.feed(id, text): writes to the screen (not to the shell). For tmux panes. */
+/* insane.term.feed(id, text): writes to the screen (not to the shell). For tmux panes. */
 static JSValue f_feed(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     Session *s = arg_session(c, argv[0]);
@@ -623,8 +623,8 @@ static JSValue f_clip_get(JSContext *c, JSValueConst this_val, int argc, JSValue
     return JS_NewString(c, term_clipboard());
 }
 
-/* lord.clipboard.set(text, { secure, origin }): secure marks the copy as sensitive (a
- * password: the history doesn't keep it); origin is a short name ("lordos", the app's id). */
+/* insane.clipboard.set(text, { secure, origin }): secure marks the copy as sensitive (a
+ * password: the history doesn't keep it); origin is a short name ("insaneos", the app's id). */
 static JSValue f_clip_set(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     size_t n;
@@ -633,7 +633,7 @@ static JSValue f_clip_set(JSContext *c, JSValueConst this_val, int argc, JSValue
     term_set_clipboard(s, n > (16u << 20) ? 16u << 20 : n);
     JS_FreeCString(c, s);
     int secure = 0;
-    char origin[64] = "lordos";
+    char origin[64] = "insaneos";
     if (argc > 1 && JS_IsObject(argv[1])) {
         JSValue v = JS_GetPropertyStr(c, argv[1], "secure");
         secure = JS_ToBool(c, v);
@@ -701,7 +701,7 @@ static JSValue f_drop_secret(JSContext *c, JSValueConst this_val, int argc, JSVa
     return JS_TRUE;
 }
 
-/* fill(sid, vault, entry, field, index): the entry's field goes from lord-vault to the pty without passing
+/* fill(sid, vault, entry, field, index): the entry's field goes from insane-vault to the pty without passing
  * through here; the "fill" event says how it ended. false when it couldn't be asked for. */
 static JSValue f_fill(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
@@ -759,7 +759,7 @@ static const JSCFunctionListEntry term_funcs[] = {
     JS_CFUNC_DEF("ackRestored", 0, f_ack_restored),
 };
 
-/* lord.clipboard.state() → { gen, kind: 'text' | 'image', image (PNG preview), imageGen } */
+/* insane.clipboard.state() → { gen, kind: 'text' | 'image', image (PNG preview), imageGen } */
 static JSValue f_clip_state(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     JSValue o = JS_NewObject(c);
@@ -773,8 +773,8 @@ static JSValue f_clip_state(JSContext *c, JSValueConst this_val, int argc, JSVal
     return o;
 }
 
-/* lord.clipboard.saveImage(path): saves the copied image (if the last thing copied is an
- * image) as PNG to a path in the home folder (same rules as lord.fs.write). For the
+/* insane.clipboard.saveImage(path): saves the copied image (if the last thing copied is an
+ * image) as PNG to a path in the home folder (same rules as insane.fs.write). For the
  * persistent history and for notes. */
 static JSValue f_clip_save_image(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -790,7 +790,7 @@ static JSValue f_clip_save_image(JSContext *c, JSValueConst this_val, int argc, 
     FILE *in = fopen(src, "rb");
     if (!in) return JS_FALSE;
     char tmp[PATH_MAX + 320];
-    snprintf(tmp, sizeof tmp, "%s.lordos-tmp", dst);
+    snprintf(tmp, sizeof tmp, "%s.insaneos-tmp", dst);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
     FILE *out = fd >= 0 ? fdopen(fd, "wb") : NULL;
     int ok = out != NULL;
@@ -804,8 +804,8 @@ static JSValue f_clip_save_image(JSContext *c, JSValueConst this_val, int argc, 
     return JS_NewBool(c, ok);
 }
 
-/* lord.clipboard.useImage(path): copies an image from the history again (only the
- * previews the compositor saved in $XDG_RUNTIME_DIR/lordos). */
+/* insane.clipboard.useImage(path): copies an image from the history again (only the
+ * previews the compositor saved in $XDG_RUNTIME_DIR/insaneos). */
 static JSValue f_clip_use_image(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
     const char *p = JS_ToCString(c, argv[0]);
@@ -814,8 +814,8 @@ static JSValue f_clip_use_image(JSContext *c, JSValueConst this_val, int argc, J
     return JS_NewBool(c, ok);
 }
 
-/* lord.clipboard.imageData() → ArrayBuffer with the copied PNG (or null). To save it, the app
- * uses lord.fs.write, which has its own rules (only the home folder). */
+/* insane.clipboard.imageData() → ArrayBuffer with the copied PNG (or null). To save it, the app
+ * uses insane.fs.write, which has its own rules (only the home folder). */
 static JSValue f_clip_image_data(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     size_t n = 0;
@@ -823,8 +823,8 @@ static JSValue f_clip_image_data(JSContext *c, JSValueConst this_val, int argc, 
     return png ? JS_NewArrayBufferCopy(c, png, n) : JS_NULL;
 }
 
-/* lord.clipboard.deleteSaved(name): deletes an image from the saved history. Only names
- * img-<letters, numbers, hyphens>.png inside ~/.local/share/lordos/clipboard (there is no general
+/* insane.clipboard.deleteSaved(name): deletes an image from the saved history. Only names
+ * img-<letters, numbers, hyphens>.png inside ~/.local/share/insaneos/clipboard (there is no general
  * file deletion). */
 static JSValue f_clip_delete_saved(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -835,7 +835,7 @@ static JSValue f_clip_delete_saved(JSContext *c, JSValueConst this_val, int argc
     for (size_t i = 4; ok && i < len - 4; i++) ok = (n[i] >= 'a' && n[i] <= 'z') || (n[i] >= '0' && n[i] <= '9') || n[i] == '-';
     char path[PATH_MAX];
     const char *home = getenv("HOME");
-    if (ok && home) snprintf(path, sizeof path, "%s/.local/share/lordos/clipboard/%s", home, n);
+    if (ok && home) snprintf(path, sizeof path, "%s/.local/share/insaneos/clipboard/%s", home, n);
     JS_FreeCString(c, n);
     return JS_NewBool(c, ok && home && unlink(path) == 0);
 }
@@ -850,11 +850,11 @@ static const JSCFunctionListEntry clip_funcs[] = {
     JS_CFUNC_DEF("deleteSaved", 1, f_clip_delete_saved),
 };
 
-void js_term_register(JSContext *c, JSValue lord) {
+void js_term_register(JSContext *c, JSValue insane) {
     JSValue t = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, t, term_funcs, sizeof term_funcs / sizeof term_funcs[0]);
-    JS_SetPropertyStr(c, lord, "term", t);
+    JS_SetPropertyStr(c, insane, "term", t);
     JSValue k = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, k, clip_funcs, sizeof clip_funcs / sizeof clip_funcs[0]);
-    JS_SetPropertyStr(c, lord, "clipboard", k);
+    JS_SetPropertyStr(c, insane, "clipboard", k);
 }

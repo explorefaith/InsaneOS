@@ -1,8 +1,8 @@
 /* gscissor.h — what a composed frame must redraw, from its buffer's age (EGL_EXT_buffer_age; docs/GPU.md,
  * "The buffer-age scissor"). No GL here: gpu.c queries the age and draws, build/engine-test runs this same code
  * against a simulated swap chain. */
-#ifndef LORD_GSCISSOR_H
-#define LORD_GSCISSOR_H
+#ifndef INSANE_GSCISSOR_H
+#define INSANE_GSCISSOR_H
 
 #include "../canvas.h"
 

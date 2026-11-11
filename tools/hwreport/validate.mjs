@@ -33,7 +33,7 @@ async function api(method, route, body) {
     method,
     headers: {
       authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json',
-      'x-github-api-version': '2022-11-28', 'user-agent': 'lordos-hwreport-check', ...(body ? { 'content-type': 'application/json' } : {}),
+      'x-github-api-version': '2022-11-28', 'user-agent': 'insaneos-hwreport-check', ...(body ? { 'content-type': 'application/json' } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
   });

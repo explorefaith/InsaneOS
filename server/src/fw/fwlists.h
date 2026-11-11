@@ -3,7 +3,7 @@
  * Three pieces, all pure C with no network and no files of their own:
  *
  *   1. The raw parsers (fwl_parse_raw): what a list's server sent (a hosts file, one domain per
- *      line, or one address / network per line) → normalized lines. They run in lord-fetch, the
+ *      line, or one address / network per line) → normalized lines. They run in insane-fetch, the
  *      sandboxed helper, on untrusted bytes. Strict: a NUL byte, a line longer than FWL_LINE_MAX,
  *      or too many lines that don't parse reject the whole list; LAN networks, networks broader
  *      than /8 (IPv4) or /16 (IPv6), names without a dot and the usual hosts-file names
@@ -14,11 +14,11 @@
  *      64-bit hashes (seeded per process) in sorted arrays: about 10 bytes a name. Name lookups walk
  *      the labels right to left; address lookups try each prefix length present (binary search).
  *
- *   3. The compiled file, ~/.config/lordos/fwlists.txt: written by lord-server (js_fw.c, after
- *      validating every line again) and read by lord-netperm (root) through the same fixed-path,
+ *   3. The compiled file, ~/.config/insaneos/fwlists.txt: written by insane-server (js_fw.c, after
+ *      validating every line again) and read by insane-netperm (root) through the same fixed-path,
  *      no-links reader as firewall.json, with fwl_load_text:
  *
- *        lordos-fwlists 1
+ *        insaneos-fwlists 1
  *        d tracker.example        an exact name
  *        s ads.example            the name and every name below it
  *        n 192.0.2.0/24           an address or a network (bits outside the prefix are 0)
@@ -26,8 +26,8 @@
  *      Any line that doesn't validate rejects the whole file (the previous set stays in use).
  *
  * Lists never override a rule the owner wrote for that destination (rules.h, FwQuery.listed). */
-#ifndef LORD_FW_FWLISTS_H
-#define LORD_FW_FWLISTS_H
+#ifndef INSANE_FW_FWLISTS_H
+#define INSANE_FW_FWLISTS_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -39,7 +39,7 @@
 #define FWL_MAX_DOMAINS  600000         /* in the compiled set, every list together */
 #define FWL_MAX_NETS     150000
 #define FWL_FILE_MAX     (32u << 20)    /* the compiled file */
-#define FWL_HEADER       "lordos-fwlists 1"
+#define FWL_HEADER       "insaneos-fwlists 1"
 
 typedef enum { FWL_FMT_HOSTS = 1, FWL_FMT_DOMAINS = 2, FWL_FMT_IPS = 3 } FwlFormat;
 
@@ -67,7 +67,7 @@ void     fwl_free(FwLists *l);
  * repeated entry goes at the next lookup or fwl_finish, the first tag stays), -1 invalid line,
  * -2 the set is full. */
 int      fwl_add_line(FwLists *l, const char *line, size_t len, uint16_t tag);
-/* Only checks a line, as fwl_add_line would (lord-server compiles the file without keeping it). */
+/* Only checks a line, as fwl_add_line would (insane-server compiles the file without keeping it). */
 int      fwl_check_line(const char *line, size_t len);
 /* Sorts and drops repeated entries; returns how many went. Lookups and counts do it on their own. */
 size_t   fwl_finish(FwLists *l);

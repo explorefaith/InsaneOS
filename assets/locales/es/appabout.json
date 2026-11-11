@@ -1,7 +1,7 @@
 {
   "isolated": "Corre aislada, en su propio proceso",
   "linux": "App de Linux",
-  "lordos": "App de Insane OS",
+  "insaneos": "App de Insane OS",
   "package": "App instalada (.lpk)",
   "system": "App del sistema — parte de Insane OS, verificada con él",
   "title": "Acerca de {app}",

@@ -3,8 +3,8 @@
  * new partitions, building sgdisk's arguments and proving afterwards that the table changed exactly
  * as planned and in no other way. No I/O here: tests/manual_test.c feeds it hostile input. The part
  * that touches a disk is manualpart.c. */
-#ifndef LORD_MANUAL_H
-#define LORD_MANUAL_H
+#ifndef INSANE_MANUAL_H
+#define INSANE_MANUAL_H
 
 #include "freespace.h"
 

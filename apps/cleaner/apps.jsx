@@ -1,18 +1,18 @@
 // Apps: what is installed, largest first, and what removed Insane OS apps left behind. A Linux app is removed by the
-// package engine with lord.pkg.plan shown first and the admin helper's pkg-remove, as in the Store; a Insane OS app with
+// package engine with insane.pkg.plan shown first and the admin helper's pkg-remove, as in the Store; a Insane OS app with
 // packages.remove. Leftovers are candidates of one rule, whole folders chosen by name, to the Trash.
-import { View, Image, ScrollView, ConfirmDialog, admin, cleaner, packages, t as tr, formatBytes, locale, typeScale, spacing } from '@lordos/sdk';
+import { View, Image, ScrollView, ConfirmDialog, admin, cleaner, packages, t as tr, formatBytes, locale, typeScale, spacing } from '@insaneos/sdk';
 import { useMemo, useState } from 'react';
 import { Label, Glass, GlassButton, Check, Enter, PagedList, SelectAll, usePal } from './ui.jsx';
 import { allIds } from './sections.jsx';
 
-const pkgReady = () => { try { return lord.pkg.available(); } catch (e) { return false; } };
+const pkgReady = () => { try { return insane.pkg.available(); } catch (e) { return false; } };
 
 function listApps() {
   const lang = locale.get().lang;
   const out = [];
-  if (pkgReady()) for (const p of lord.pkg.installed({ lang })) {
-    if (p.app && !p.essential && p.name !== 'lordos') out.push({ key: `deb:${p.name}`, name: p.app.name || p.name, icon: p.app.icon, detail: p.name, size: p.installedSize, pkg: p.name });
+  if (pkgReady()) for (const p of insane.pkg.installed({ lang })) {
+    if (p.app && !p.essential && p.name !== 'insaneos') out.push({ key: `deb:${p.name}`, name: p.app.name || p.name, icon: p.app.icon, detail: p.name, size: p.installedSize, pkg: p.name });
   }
   for (const a of packages.list().filter((x) => !x.packaged)) out.push({ key: `lpk:${a.id}`, name: a.name, icon: null, detail: a.id, size: 0, lpk: a.id });
   return out.sort((a, b) => b.size - a.size || a.name.localeCompare(b.name));
@@ -73,8 +73,8 @@ export function AppsView({ scan, onFind, selected, setSelected }) {
   const remove = (app) => {
     setMsg('');
     if (app.lpk) { setAsk({ app, items: [] }); return; }
-    const p = lord.pkg.plan({ remove: [app.pkg] });
-    if (!p.ok || p.items.some((i) => i.name === 'lordos')) { setMsg(tr('cleaner.apps.refused', { name: app.name })); return; }
+    const p = insane.pkg.plan({ remove: [app.pkg] });
+    if (!p.ok || p.items.some((i) => i.name === 'insaneos')) { setMsg(tr('cleaner.apps.refused', { name: app.name })); return; }
     setAsk({ app, items: p.items.filter((i) => i.action === 'remove').map((i) => i.name) });
   };
   const run = () => {

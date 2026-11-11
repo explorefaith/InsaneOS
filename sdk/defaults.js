@@ -1,10 +1,10 @@
 // defaults.js — default applications (Settings → Default Apps, docs/SETTINGS.md). They are kept
 // in ~/.config/mimeapps.list (freedesktop spec, so GNOME/KDE apps and xdg-open agree) through
-// lord.mime; the terminal goes in ~/.config/xdg-terminals.list. Insane OS's own apps are written as
-// "lordos-<app>.desktop".
+// insane.mime; the terminal goes in ~/.config/xdg-terminals.list. Insane OS's own apps are written as
+// "insaneos-<app>.desktop".
 //
 //   DEFAULT_CATEGORIES                  [{ id, mimes, natives, terminal?, family? }]
-//   defaultFor(categoryId)              'lordos-photos.desktop' | 'org.gnome.Loupe.desktop' | null
+//   defaultFor(categoryId)              'insaneos-photos.desktop' | 'org.gnome.Loupe.desktop' | null
 //   defaultInfo(categoryId)             { id, auto } for Settings: auto when the user chose nothing
 //   setDefaultFor(categoryId, id)       writes every MIME type of the category
 //   resetDefaultFor(categoryId)         back to automatic (removes the user's lines)
@@ -13,8 +13,8 @@
 import { getApp } from './windows.js';
 import { appName } from './i18n.js';
 
-const NATIVE = (id) => `lordos-${id}.desktop`;
-export const nativeOf = (desktopId) => (desktopId && /^lordos-[a-z0-9_-]+\.desktop$/.test(desktopId) ? desktopId.slice(7, -8) : null);
+const NATIVE = (id) => `insaneos-${id}.desktop`;
+export const nativeOf = (desktopId) => (desktopId && /^insaneos-[a-z0-9_-]+\.desktop$/.test(desktopId) ? desktopId.slice(7, -8) : null);
 
 // First MIME type is the one read back to show the current choice.
 export const DEFAULT_CATEGORIES = [
@@ -32,20 +32,20 @@ export const DEFAULT_CATEGORIES = [
 ];
 
 const cat = (id) => DEFAULT_CATEGORIES.find((c) => c.id === id);
-const api = () => typeof lord !== 'undefined' && lord.mime;
+const api = () => typeof insane !== 'undefined' && insane.mime;
 
 export function defaultFor(id) {
   const c = cat(id);
   if (!c || !api()) return null;
-  if (c.terminal) return lord.mime.terminal() || NATIVE('terminal');
-  for (const m of c.mimes) { const d = lord.mime.get(m); if (d) return d; }
+  if (c.terminal) return insane.mime.terminal() || NATIVE('terminal');
+  for (const m of c.mimes) { const d = insane.mime.get(m); if (d) return d; }
   return c.natives.find((n) => getApp(n)) ? NATIVE(c.natives.find((n) => getApp(n))) : null;
 }
 
-// lord.mime.resolve: { id, explicit, source: 'user'|'system'|'declared' } or null. The app
+// insane.mime.resolve: { id, explicit, source: 'user'|'system'|'declared' } or null. The app
 // launchWith('') opens a file of that type with: the user's choice, else the system's default
 // (mimeapps.list/defaults.list), else the first installed app that declares the type.
-const resolve = (mime) => (api() && lord.mime.resolve ? lord.mime.resolve(mime) : null);
+const resolve = (mime) => (api() && insane.mime.resolve ? insane.mime.resolve(mime) : null);
 
 // What Settings shows for a category: { id, auto } or null. auto: the user chose nothing, and this
 // is what opens these files (the system's default, else Insane OS's own app, else the first installed
@@ -68,18 +68,18 @@ export function defaultInfo(id) {
 // Back to automatic: the user's lines for the category's types leave ~/.config/mimeapps.list.
 export function resetDefaultFor(id) {
   const c = cat(id);
-  if (!c || c.terminal || !api() || !lord.mime.unset) return false;
+  if (!c || c.terminal || !api() || !insane.mime.unset) return false;
   let ok = true;
-  for (const m of c.mimes) ok = lord.mime.unset(m) && ok;
+  for (const m of c.mimes) ok = insane.mime.unset(m) && ok;
   return ok;
 }
 
 export function setDefaultFor(id, desktopId) {
   const c = cat(id);
   if (!c || !api() || !desktopId) return false;
-  if (c.terminal) return lord.mime.setTerminal(desktopId);
+  if (c.terminal) return insane.mime.setTerminal(desktopId);
   let ok = true;
-  for (const m of c.mimes) ok = lord.mime.set(m, desktopId) && ok;
+  for (const m of c.mimes) ok = insane.mime.set(m, desktopId) && ok;
   return ok;
 }
 

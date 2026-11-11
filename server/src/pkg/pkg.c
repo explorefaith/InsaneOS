@@ -2,14 +2,14 @@
  *
  *   pkg-update                      reads apt's sources, downloads the InRelease files, verifies the
  *                                   signatures, downloads Packages/Translation/DEP-11 verified by
- *                                   SHA-256 and builds /var/lib/lordos/pkg/index.bin
+ *                                   SHA-256 and builds /var/lib/insaneos/pkg/index.bin
  *   pkg-install a b [--recommends] [--allow-remove]
  *   pkg-remove a b [--cascade] [--purge] [--keep-orphans]
  *   pkg-autoremove                  removes the dependencies left unused
  *   pkg-upgrade [--allow-remove]
  *   pkg-install-file <path.deb in the user's folder> [--allow-remove]
  *
- * Install = resolve (resolve.c), download the .debs (http.c, as nobody) to /var/cache/lordos/pkg,
+ * Install = resolve (resolve.c), download the .debs (http.c, as nobody) to /var/cache/insaneos/pkg,
  * verify their SHA-256 against the signed index and only then hand the files to dpkg (the only
  * one that touches /var/lib/dpkg). Progress for the interface: LOG lines "progress <phase> <done> <total>"
  * (phases: lists, index, download, unpack, configure, remove) and "plan <action> <package>
@@ -126,7 +126,7 @@ static void mirror_uri(const char *in, char *out, size_t n) {
         return;
     }
     if (!strncmp(in, "mirror+", 7)) in += 7;
-    /* (0.8.5) https:// stays https (http.c → lord-tls); the signature is still what is trusted */
+    /* (0.8.5) https:// stays https (http.c → insane-tls); the signature is still what is trusted */
     if (!strncmp(in, "https://", 8) || !strncmp(in, "http://", 7)) snprintf(out, n, "%s", in);
     else if (!strncmp(in, "file:/", 6)) snprintf(out, n, "%s", in);       /* a local repository (http.c) */
     size_t l = strlen(out);
@@ -441,7 +441,7 @@ static void icons_cleanup(IdxBuilder *b) {
 #define NOTES_MAX (4u << 20)
 
 /* PKG_DIR/notes: the verified ReleaseNotes of every source (deb822: Package, Version, Notes), read
- * by lord.pkg.releaseNotes() without root. Replaced whole; removed when no source has any. */
+ * by insane.pkg.releaseNotes() without root. Replaced whole; removed when no source has any. */
 static void write_notes(const char *notes, size_t len) {
     if (!len) { unlink(PKG_DIR "/notes"); return; }
     int fd = open(PKG_DIR "/.notes.new", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);

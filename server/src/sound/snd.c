@@ -77,7 +77,7 @@ static struct {
     int meter_pending;
     double peak;
     int peak_ready;
-    int debug;                          /* LORD_SND_DEBUG=1: every packet to stderr */
+    int debug;                          /* INSANE_SND_DEBUG=1: every packet to stderr */
     int samples_uploaded, uploading, play_after;   /* bits: pop, notify, error */
     char last_error[128];
 } S = { .fd = -1, .timer = -1, .meter_source = PA_INVALID_INDEX, .meter_channel = PA_INVALID_INDEX };
@@ -333,9 +333,9 @@ static void send_client_name(void) {
     char pid[16];
     snprintf(pid, sizeof pid, "%d", (int)getpid());
     const char *kv[] = {
-        "application.name", "Insane OS", "application.id", "org.lordos.Server",
+        "application.name", "Insane OS", "application.id", "org.insaneos.Server",
         "application.icon_name", "audio-card", "application.process.id", pid,
-        "application.process.binary", "lord-server",
+        "application.process.binary", "insane-server",
     };
     ts_proplist(&t, kv, 5);
     cmd_send(&t, tag, R_NAME, 0, 0);
@@ -422,7 +422,7 @@ static void disconnect(const char *why) {
 }
 
 int snd_start(void) {
-    S.debug = getenv("LORD_SND_DEBUG") != NULL;
+    S.debug = getenv("INSANE_SND_DEBUG") != NULL;
     if (try_connect()) { disconnect("no server"); return -1; }
     return 0;
 }
@@ -679,7 +679,7 @@ static void bstreams(Buf *b, const StreamList *l, int output) {
         const Stream *s = &l->s[i];
         /* our own streams (meter, system sounds) aren't shown: otherwise the microphone
          * meter would make it look like someone is recording */
-        if (!strcmp(s->appid, "org.lordos.Server")) continue;
+        if (!strcmp(s->appid, "org.insaneos.Server")) continue;
         bput(b, "%s{\"index\":%u,\"name\":", first ? "" : ",", s->index);
         first = 0;
         bstr(b, s->name);
@@ -861,7 +861,7 @@ int snd_meter(uint32_t source) {
     ts_bool(&t, 0);                                 /* variable_rate */
     ts_bool(&t, 0);                                 /* peak_detect: no, computed here */
     ts_bool(&t, 1);                                 /* adjust_latency */
-    const char *kv2[] = { "media.name", "Insane OS: level meter", "application.id", "org.lordos.Server" };
+    const char *kv2[] = { "media.name", "Insane OS: level meter", "application.id", "org.insaneos.Server" };
     ts_proplist(&t, kv2, 2);
     ts_u32(&t, PA_INVALID_INDEX);                   /* direct_on_input */
     ts_bool(&t, 0);                                 /* early_requests */
@@ -879,7 +879,7 @@ int snd_meter(uint32_t source) {
 
 /* ---- system sounds ---- */
 
-static const char *const sample_names[4] = { "lordos-pop", "lordos-notify", "lordos-error", "lordos-chime" };
+static const char *const sample_names[4] = { "insaneos-pop", "insaneos-notify", "insaneos-error", "insaneos-chime" };
 
 #define SR 44100
 
@@ -950,7 +950,7 @@ static int play_sample(int which) {
     ts_str(&t, NULL);                               /* the default output */
     ts_u32(&t, PA_VOLUME_NORM);
     ts_str(&t, sample_names[which]);
-    const char *kv[] = { "media.role", "event", "application.name", "Insane OS", "application.id", "org.lordos.Server", "event.id", sample_names[which] };
+    const char *kv[] = { "media.role", "event", "application.name", "Insane OS", "application.id", "org.insaneos.Server", "event.id", sample_names[which] };
     ts_proplist(&t, kv, 4);
     return cmd_send(&t, tag, R_ACK, PA_CMD_PLAY_SAMPLE, 0);
 }

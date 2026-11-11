@@ -1,10 +1,10 @@
-// releases.js — the Insane OS releases, from the list GitHub publishes for lordbasex/Insane OS
-// (https://api.github.com/repos/lordbasex/Insane OS/releases, the same list the Debian installer reads).
+// releases.js — the Insane OS releases, from the list GitHub publishes for insaneos/Insane OS
+// (https://api.github.com/repos/insaneos/Insane OS/releases, the same list the Debian installer reads).
 // Shared by the native and desktop apps. Only names and sizes are taken from it: what is written is
 // trusted only after SHA256SUMS.sig verifies with the release key (docs/IMAGER.md).
 import { deviceById } from './catalog.js';
 
-export const REPO = 'lordbasex/Insane OS';
+export const REPO = 'insaneos/Insane OS';
 export const RELEASES_URL = `https://api.github.com/repos/${REPO}/releases?per_page=10`;
 export const downloadUrl = (tag, name) => `https://github.com/${REPO}/releases/download/${tag}/${name}`;
 // The fingerprint docs/SIGNING.md publishes (SHA-256 of the DER public key)

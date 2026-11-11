@@ -1,12 +1,12 @@
 // scrollview_reset_scene.mjs — the scene of tests/scrollview_reset_test.mjs (not run by itself): the SDK's
-// ScrollView rendered through runtime/index.js with a stub `lord` (the banner of the bundle). A view
+// ScrollView rendered through runtime/index.js with a stub `insane` (the banner of the bundle). A view
 // 100 px high over 1000 px of content is scrolled to 600, then its resetKey changes. Prints one line
 // per check: "ok <name>" or "FAIL <name> <detail>".
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 import { ScrollView } from '../../sdk/components.jsx';
 
-const { styles } = globalThis.__lordTest;
+const { styles } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 

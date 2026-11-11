@@ -9,8 +9,8 @@ theme bundle with a driver, commands run in the session as its user, input and p
 
 | File | What |
 |---|---|
-| `session.sh` | as root: `install TREE` (to `/opt/lordos-vm-e2e`, root-owned, and the catalog with the makers' keys in `/usr/lib/lordos/assets/machines`), `start USER` (lord-server as root with `--user`, as lord-sessiond does, so the session has its administration helper), `stop`, `status`, `purge` |
-| `driver.js`, `build-e2e.mjs` | the bundle: the real default theme plus a driver that runs `~/.e2e/cmd-N.js` with `lord`, `wm`, `admin`, `launchApp` |
+| `session.sh` | as root: `install TREE` (to `/opt/insaneos-vm-e2e`, root-owned, and the catalog with the makers' keys in `/usr/lib/insaneos/assets/machines`), `start USER` (insane-server as root with `--user`, as insane-sessiond does, so the session has its administration helper), `stop`, `status`, `purge` |
+| `driver.js`, `build-e2e.mjs` | the bundle: the real default theme plus a driver that runs `~/.e2e/cmd-N.js` with `insane`, `wm`, `admin`, `launchApp` |
 | `lc.py` | `lc.py USER JS [TIMEOUT]` (as root): runs JS in the session |
 | `ui.py` | `ui.py SOCK cmd…` (as root): clicks, keys, typing with the whole US keyboard (the VM window passes key codes to the guest), `grab:FILE.png` |
 | `preseed-debian.cfg` | the answers of an unattended Debian 13 install (user `tester`, password `Vm-guest-0001`) |
@@ -23,7 +23,7 @@ rsync -a --delete --exclude .git --exclude node_modules --exclude server/build -
 ssh VM 'cd ~/Insane OS-089/server && make -j6 && sudo sh ../tools/vm/e2e/session.sh install ~/Insane OS-089'
 ssh VM 'sudo sh ~/Insane OS-089/tools/vm/e2e/session.sh start m89a'
 ssh VM 'sudo python3 -I ~/Insane OS-089/tools/vm/e2e/lc.py m89a "launchApp(\"machines\"); await sleep(2000); return wm.windows()"'
-ssh VM 'sudo python3 -I ~/Insane OS-089/tools/vm/e2e/ui.py /run/vm-e2e-rt/m89a/lordos/remote.sock grab:/tmp/a.png'
+ssh VM 'sudo python3 -I ~/Insane OS-089/tools/vm/e2e/ui.py /run/vm-e2e-rt/m89a/insaneos/remote.sock grab:/tmp/a.png'
 ```
 
 Since the assistant's *Install without questions* (docs/VIRTUALIZATION.md 3.9) a card installs with nothing typed in the

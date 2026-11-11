@@ -12,7 +12,7 @@ Which apps are in the Dock, and in which order, is up to you: see "Customizing t
 
 In the Insane Classic theme, the same section chooses the taskbar position: bottom, top, left or right.
 Everything is applied live, without restarting, and is saved in
-`~/.config/lordos/settings.json`.
+`~/.config/insaneos/settings.json`.
 
 | | |
 |---|---|
@@ -48,7 +48,7 @@ The SDK records recent apps in `dockRecentApps` every time an app opens a window
 
 Every app can go in the Dock: Insane OS apps, installed `.lpk` packages and Linux apps from their
 `.desktop` files (Firefox, Chromium, GTK and Qt apps). The arrangement is saved per user in
-`~/.config/lordos/settings.json` → `dockPinned`.
+`~/.config/insaneos/settings.json` → `dockPinned`.
 
 | | |
 |---|---|
@@ -105,8 +105,8 @@ an unpinned running item until it quits.
 | Id | What | Opened with |
 |---|---|---|
 | `app:<id>` | a Insane OS app bundled with the theme | `wm.open` (`launchApp`) |
-| `lpk:<id>` | an installed `.lpk` package | `lord.apps.launchPackage(id)` |
-| `desktop:<desktop id>` | a Linux app's `.desktop` | `lord.apps.launch(id)` |
+| `lpk:<id>` | an installed `.lpk` package | `insane.apps.launchPackage(id)` |
+| `desktop:<desktop id>` | a Linux app's `.desktop` | `insane.apps.launch(id)` |
 | `shell:launcher` | the theme's app launcher | the theme |
 
 Only these existing paths open a Dock item (`launchDockItem`): no new way to run anything, no
@@ -234,7 +234,7 @@ with the frame they are drawn at (`wm.frame`: a maximized window fills its work 
 window covering its whole display. Insane OS apps and Linux windows (Wayland and X11) are in the same list.
 The Dock is only on the main display, so a window on another display never covers it. The pointer at
 the edge still brings it over the windows, and it goes again 500 ms after the pointer leaves. A window
-moved by the mouse is moved by lord-server with no JS per frame, so the Dock answers when it is dropped.
+moved by the mouse is moved by insane-server with no JS per frame, so the Dock answers when it is dropped.
 
 ## Above and below
 

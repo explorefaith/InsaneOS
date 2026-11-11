@@ -1,15 +1,15 @@
 // System Information (0.8.5, docs/BENCHMARK.md): every piece of hardware detected and what Insane OS
 // makes of it. (0.8.7) Report → Share on GitHub (share.js) and community data in Compatibility (community.js). Overview, Hardware (a source list and a detail pane) and Compatibility. The report
-// comes from lord.sysinfo.report() (server/src/sysreport, the same collector as lordos-sysreport and
-// lordos-fetch), read once on open and again with Refresh; model.js works out the GPU layers and the
+// comes from insane.sysinfo.report() (server/src/sysreport, the same collector as insaneos-sysreport and
+// insaneos-fetch), read once on open and again with Refresh; model.js works out the GPU layers and the
 // Compatibility panel; Performance (0.8.6, performance.jsx) runs InsaneBench. The report holds no serial numbers, addresses or names.
 // Two things on the Hardware tab are not part of it and never go into it: the serial numbers (SerialNumbers, on request) and
 // the peripherals' names (Peripherals). Both live in their own component's state; nothing here hands them to `r`.
 import {
-  View, Text, ScrollView, Button, useTheme, useLocale, InsaneLogo, systemReport, systemInfo, lordosVersion, formatBytes, formatNumber,
+  View, Text, ScrollView, Button, useTheme, useLocale, InsaneLogo, systemReport, systemInfo, insaneosVersion, formatBytes, formatNumber,
   Toolbar, ToolbarSpacer, ToolbarButton, Segmented, SidebarItem, GroupBox, FormRow, EmptyState, Hairline, spacing, typeScale,
   fs, userDirs, clipboard, wm, admin, remote, codeStatus, launchApp, useAppWindow, useBluetooth, formatDate,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useState } from 'react';
 import { evaluate as evaluateChecks, evaluateProbe, evaluateBench, PENDING as PENDING_CHECKS, PROBE_CHECKS } from './checks.js';
 import Performance from './performance.jsx';
@@ -92,7 +92,7 @@ function Card({ title, value, sub }) {
 function Overview({ r, info }) {
   const t = useTheme();
   const { t: tr } = useLocale();
-  const ver = lordosVersion(info);
+  const ver = insaneosVersion(info);
   const c = r.cpu || {};
   const s = r.session || {};
   const reason = compositionReason(s);
@@ -109,7 +109,7 @@ function Overview({ r, info }) {
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text style={{ fontSize: typeScale.largeTitle, fontWeight: 600, color: t.text, textAlign: 'start' }}>{machineName(r) || tr('sysinfo.thisComputer')}</Text>
             <Text style={{ fontSize: typeScale.callout, color: t.textDim, textAlign: 'start' }}>
-              {[kind, ver.channel ? tr('sysinfo.lordosChannel', { v: ver.version, channel: ver.channel }) : tr('sysinfo.lordos', { v: ver.version }), sw.os].filter(Boolean).join(' · ')}
+              {[kind, ver.channel ? tr('sysinfo.insaneosChannel', { v: ver.version, channel: ver.channel }) : tr('sysinfo.insaneos', { v: ver.version }), sw.os].filter(Boolean).join(' · ')}
             </Text>
             {s.fixture ? <Text style={{ fontSize: typeScale.caption, color: '#ff9f0a', textAlign: 'start' }}>{tr('sysinfo.fixture')}</Text> : null}
           </View>
@@ -128,7 +128,7 @@ function Overview({ r, info }) {
           <Card title={tr('sysinfo.section.storage')} value={formatBytes(disks.reduce((a, d) => a + d.bytes, 0))}
             sub={tr('sysinfo.disks', { count: disks.length })} />
           <Card title={tr('sysinfo.isolation')} value={sw.landlockAbi > 0 ? tr('sysinfo.landlock', { abi: sw.landlockAbi }) : tr('sysinfo.landlockUnknown')}
-            sub={[sw.bpfLsm ? tr('sysinfo.bpfLsm') : '', sw.cgroup2 ? tr('sysinfo.cgroup2') : '', sw.services?.['lord-netperm'] ? tr('sysinfo.appFirewall') : ''].filter(Boolean).join(' · ')} />
+            sub={[sw.bpfLsm ? tr('sysinfo.bpfLsm') : '', sw.cgroup2 ? tr('sysinfo.cgroup2') : '', sw.services?.['insane-netperm'] ? tr('sysinfo.appFirewall') : ''].filter(Boolean).join(' · ')} />
         </View>
       </View>
     </ScrollView>
@@ -286,9 +286,9 @@ function BootloaderRows({ pi }) {
   ];
 }
 
-// The chosen case, as Settings → Cooling keeps it (lord.fan.caseConfig): null when this isn't a Insane OS Raspberry Pi image.
+// The chosen case, as Settings → Cooling keeps it (insane.fan.caseConfig): null when this isn't a Insane OS Raspberry Pi image.
 function chosenCase() {
-  try { return (typeof lord !== 'undefined' && lord.fan && lord.fan.caseConfig()) || null; } catch (e) { return null; }
+  try { return (typeof insane !== 'undefined' && insane.fan && insane.fan.caseConfig()) || null; } catch (e) { return null; }
 }
 
 function Computer({ r }) {
@@ -378,7 +378,7 @@ function SerialNumbers() {
 function Peripherals({ r }) {
   const { t: tr } = useLocale();
   const bt = useBluetooth();
-  const local = useMemo(() => { try { return lord.sysinfo.peripherals() || []; } catch (e) { return []; } }, [r]);
+  const local = useMemo(() => { try { return insane.sysinfo.peripherals() || []; } catch (e) { return []; } }, [r]);
   const list = useMemo(() => peripherals(local, bt), [local, bt]);
   return (
     <GroupBox footer={tr('sysinfo.periph.footer')}>
@@ -452,10 +452,10 @@ function compatNote(tr, c) {
   return tr(`sysinfo.compat.${c.note.replace('.', '_')}`, c.vars);
 }
 
-// (0.8.7) the catalogue's snapshot, verified in C (lord.sysinfo.community(), sysreport/hwsnap.c): { state, snapshot }
+// (0.8.7) the catalogue's snapshot, verified in C (insane.sysinfo.community(), sysreport/hwsnap.c): { state, snapshot }
 function useCommunity(r) {
   return useMemo(() => {
-    try { return (typeof lord !== 'undefined' && lord.sysinfo.community && lord.sysinfo.community()) || { state: 'missing' }; } catch (e) { return { state: 'missing' }; }
+    try { return (typeof insane !== 'undefined' && insane.sysinfo.community && insane.sysinfo.community()) || { state: 'missing' }; } catch (e) { return { state: 'missing' }; }
   }, [r]);
 }
 
@@ -471,7 +471,7 @@ function Compatibility({ r }) {
   const { t: tr } = useLocale();
   const rows = useMemo(() => compatibility(r), [r]);
   const comm = useCommunity(r);
-  const version = (r.software && r.software.lordos) || '';
+  const version = (r.software && r.software.insaneos) || '';
   const byRow = useMemo(() => (comm.state === 'ok' ? communityFor(comm.snapshot, r, version) : {}), [comm, r, version]);
   const sn = comm.state === 'ok' ? comm.snapshot : null;
   return (
@@ -527,19 +527,19 @@ function CheckRow({ c }) {
 }
 
 // The Sandbox Probe (apps/sysprobe): started like any isolated app; its result arrives through
-// lord-server (lord.sysinfo.probe()). It takes well under a second; after 10 s it didn't report.
+// insane-server (insane.sysinfo.probe()). It takes well under a second; after 10 s it didn't report.
 function useProbe() {
-  const [st, setSt] = useState(() => { let p = null; try { p = lord.sysinfo.probe(); } catch (e) { /* older server */ } return { busy: false, result: p, error: null }; });
+  const [st, setSt] = useState(() => { let p = null; try { p = insane.sysinfo.probe(); } catch (e) { /* older server */ } return { busy: false, result: p, error: null }; });
   const run = () => {
     const since = Date.now() - 1000;
     setSt((x) => ({ ...x, busy: true, error: null }));
     let ok = false;
-    try { ok = !!lord.apps.launchPackage('sysprobe'); } catch (e) { ok = false; }
+    try { ok = !!insane.apps.launchPackage('sysprobe'); } catch (e) { ok = false; }
     if (!ok) { setSt((x) => ({ ...x, busy: false, error: 'start' })); return; }
     const t0 = Date.now();
     const id = setInterval(() => {
       let p = null;
-      try { p = lord.sysinfo.probe(); } catch (e) { p = null; }
+      try { p = insane.sysinfo.probe(); } catch (e) { p = null; }
       if (p && p.at >= since) { clearInterval(id); setSt({ busy: false, result: p, error: null }); }
       else if (Date.now() - t0 > 10000) { clearInterval(id); setSt((x) => ({ ...x, busy: false, error: 'timeout' })); }
     }, 250);
@@ -547,11 +547,11 @@ function useProbe() {
   return [st, run];
 }
 
-// The Test Bench (a Wayland client of its own, lordos-testbench): its last report, read from the user's state
+// The Test Bench (a Wayland client of its own, insaneos-testbench): its last report, read from the user's state
 // folder, and a button that opens it from the launcher like any Linux app.
 function useBenchReport(n) {
   return useMemo(() => {
-    try { return JSON.parse(fs.read(`${fs.home()}/.local/state/lordos/testbench.json`)); } catch (e) { return null; }
+    try { return JSON.parse(fs.read(`${fs.home()}/.local/state/insaneos/testbench.json`)); } catch (e) { return null; }
   }, [n]);
 }
 
@@ -569,7 +569,7 @@ function BenchGroup() {
           <Text style={{ fontSize: typeScale.callout, color: t.textDim, textAlign: 'start', lineHeight: 1.4 }}>{tr('sysinfo.bench.intro')}</Text>
         </View>
         <Button label={tr('sysinfo.bench.reload')} onClick={() => setN(n + 1)} />
-        <Button primary label={tr('sysinfo.bench.open')} onClick={() => launchApp('desktop:lordos-testbench')} />
+        <Button primary label={tr('sysinfo.bench.open')} onClick={() => launchApp('desktop:insaneos-testbench')} />
       </View>
       <GroupBox footer={b && b.at ? tr('sysinfo.probe.when', { time: new Date(b.at).toLocaleString() }) : null}>
         {rows ? rows.map((c) => <CheckRow key={c.id} c={c} />)
@@ -584,9 +584,9 @@ function Checks({ r }) {
   const { t: tr } = useLocale();
   const rows = useMemo(() => {
     let facts = null, rem = null, stats = null;
-    try { facts = lord.sysinfo.facts(); } catch (e) { /* older server */ }
+    try { facts = insane.sysinfo.facts(); } catch (e) { /* older server */ }
     try { rem = remote.status(); } catch (e) { /* no remote desktop */ }
-    try { stats = lord.stats(); } catch (e) { /* no stats */ }
+    try { stats = insane.stats(); } catch (e) { /* no stats */ }
     return evaluateChecks({ report: r, facts, code: codeStatus(), remote: rem, stats });
   }, [r]);
   const [probe, runProbe] = useProbe();
@@ -640,16 +640,16 @@ function Preview({ text }) {
 
 // ---- Share on GitHub (0.8.7) ----
 
-const SHARE_ROWS = ['machine', 'kind', 'cpu', 'gpu', 'memory', 'arch', 'lordos', 'kernel', 'live', 'boot', 'bench', 'compat'];
+const SHARE_ROWS = ['machine', 'kind', 'cpu', 'gpu', 'memory', 'arch', 'insaneos', 'kernel', 'live', 'boot', 'bench', 'compat'];
 const PAGE_KEYS = ['title', 'lead', 'summaryHead', 'sharedHead', 'shared1', 'shared2', 'shared3', 'shared4', 'neverHead', 'never1', 'never2', 'never3',
   'stepsHead', 'step1', 'step2', 'step3', 'step4', 'open', 'fileLabel', 'footer'];
 
 function savedBench(which) {
-  try { return (typeof lord !== 'undefined' && lord.sysinfo.bench.saved(which)) || null; } catch (e) { return null; }
+  try { return (typeof insane !== 'undefined' && insane.sysinfo.bench.saved(which)) || null; } catch (e) { return null; }
 }
 
 // What the system started from, in the user's language (0.8.7): the medium's class, a USB link speed, the copy to
-// memory of a live session. rep: a shared report, or { system: lord.sysinfo.report() }.
+// memory of a live session. rep: a shared report, or { system: insane.sysinfo.report() }.
 function bootLabel(tr, rep) {
   const b = bootInfo(rep);
   return [b.medium ? tr(`sysinfo.boot.${b.medium}`) : tr('sysinfo.unknown'),
@@ -665,7 +665,7 @@ function shareRows(tr, rep) {
 }
 
 // Preview first, explicit consent on every share (nothing is remembered); then the report and the page are saved to
-// Documents and the page opens in the default browser through lord.apps.launchWith('', path). Insane OS sends nothing.
+// Documents and the page opens in the default browser through insane.apps.launchWith('', path). Insane OS sends nothing.
 function Share({ r, onClose }) {
   const t = useTheme();
   const { t: tr, lang, dir } = useLocale();
@@ -688,7 +688,7 @@ function Share({ r, onClose }) {
       fs.write(`${docs}/${names.html}`, html);
     } catch (e) { setMsg({ ok: false, text: tr('sysinfo.share.failed') }); return; }
     let opened = false;
-    try { opened = !!lord.apps.launchWith('', `${docs}/${names.html}`); } catch (e) { opened = false; }
+    try { opened = !!insane.apps.launchWith('', `${docs}/${names.html}`); } catch (e) { opened = false; }
     setMsg({ ok: true, dir: docs, text: tr(opened ? 'sysinfo.share.opened' : 'sysinfo.share.savedOnly', { json: names.json, html: names.html }) });
   };
   return (
@@ -727,7 +727,7 @@ function ReportText({ r, onShare }) {
   const { t: tr } = useLocale();
   const [fmt, setFmt] = useState('markdown');
   const [msg, setMsg] = useState(null);
-  const md = useMemo(() => { try { return lord.sysinfo.markdown() || ''; } catch (e) { return ''; } }, [r]);
+  const md = useMemo(() => { try { return insane.sysinfo.markdown() || ''; } catch (e) { return ''; } }, [r]);
   const text = fmt === 'json' ? reportJson(r) : md;
   const save = () => {
     const dir = userDirs().documents;

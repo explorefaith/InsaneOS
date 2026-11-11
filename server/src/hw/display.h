@@ -1,4 +1,4 @@
-/* display.h — Settings → Displays on the lord-server side (docs/SETTINGS.md, "Displays", and
+/* display.h — Settings → Displays on the insane-server side (docs/SETTINGS.md, "Displays", and
  * docs/DISPLAYS.md for several displays and HiDPI).
  *
  *   - lists the card's outputs with their EDID name, modes, scale and place in the arrangement;
@@ -6,7 +6,7 @@
  *     (100–300 % in 25 % steps), position in the global logical space, extend or mirror, and the
  *     main display (menu bar and Dock). main.c applies it between frames (display_take_resync);
  *   - live changes are kept per display (EDID identity) and saved on "Keep" in
- *     ~/.config/lordos/displays.json;
+ *     ~/.config/insaneos/displays.json;
  *   - Night Light: a color temperature on every CRTC's gamma LUT, or a software LUT applied while
  *     copying frames when a card has no gamma (virtio-gpu, some ARM boards);
  *   - idle: screen off (DPMS on every display) after N seconds without input, plus "lock" and
@@ -14,8 +14,8 @@
  *   - hotplug: hw/uevent.c calls display_hotplug() on a DRM "change" uevent;
  *   - automatic rotation of the built-in panel from the accelerometer (hw/accel.h): its orientation is
  *     added to the chosen rotation, is never saved, and is read only while the screen is on. */
-#ifndef LORD_HW_DISPLAY_H
-#define LORD_HW_DISPLAY_H
+#ifndef INSANE_HW_DISPLAY_H
+#define INSANE_HW_DISPLAY_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -26,7 +26,7 @@
 typedef struct {
     Kms *(*kms)(void);                  /* the main card head while the session is on the monitor, else NULL */
     void (*redraw)(void);               /* full damage (the software tint changed, screen back on) */
-    void (*event)(const char *kind, const char *json);   /* → __lordHw(kind, data) */
+    void (*event)(const char *kind, const char *json);   /* → __insaneHw(kind, data) */
     int (*heads)(Kms **out, int max);   /* every display head in use (gamma, DPMS); NULL = only kms() */
 } DisplayHost;
 
@@ -67,7 +67,7 @@ void display_hotplug(void);             /* DRM uevent: connectors may have chang
  * (a board booted headless, the monitor plugged in later). */
 unsigned display_hotplug_seq(void);
 
-/* JSON for lord.display.list(). Returns a malloc'd string. */
+/* JSON for insane.display.list(). Returns a malloc'd string. */
 char *display_list_json(void);
 /* Apply live (not saved): output id, w×h, refresh in mHz (0 = best), rotation 0..3 (×90°), scale in
  * percent (100–300, 25 % steps; 1 and 2 are read as 100 and 200). 0 if accepted. */
@@ -119,7 +119,7 @@ void display_tick(double now_ms);
 int  display_is_off(void);              /* DPMS off: main.c does not render */
 int  display_on_monitor(void);          /* this session has the card (it is the one on the screen) */
 double display_dark_ms(double now_ms);  /* how long the screen has been off after idle (0 if it is on) */
-void display_left(void);                /* RP_UNDISPLAY (for LORD_IDLE_HEADLESS, development only) */
+void display_left(void);                /* RP_UNDISPLAY (for INSANE_IDLE_HEADLESS, development only) */
 void display_wake(void);                /* turn the screen back on now */
 /* Turn the screen off as soon as this process has the card (now, or when it is lent), until the next
  * input: the login screen shown by an idle lock stays dark (docs/SETTINGS.md). */

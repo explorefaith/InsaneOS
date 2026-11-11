@@ -126,7 +126,7 @@ void vpn_kv_free(VpnKv *kv) {
     memset(kv, 0, sizeof *kv);
 }
 
-/* Saves the config (0600): /etc/lordos/net/vpn/<name>.<type> with the keys and
+/* Saves the config (0600): /etc/insaneos/net/vpn/<name>.<type> with the keys and
  * <name>.<key>.pem with each PEM. */
 int vpn_kv_save(const char *name, const char *type, const VpnKv *kv) {
     Buf b = {0};
@@ -205,7 +205,7 @@ int vpn_resolve(const char *host, int *family, uint8_t a[16]) {
 
 /* Full tunnel without touching the system's default route (like "redirect-gateway def1"):
  * 0.0.0.0/1 and 128.0.0.0/1 through the tunnel, and a route to the server via where it went
- * before. All with protocol RTPROT_LORDOS, so they can always be deleted (also after a cut). */
+ * before. All with protocol RTPROT_INSANEOS, so they can always be deleted (also after a cut). */
 int vpn_routes_full(const char *ifn, int sfam, const uint8_t server[16]) {
     int fd = nl_open(NETLINK_ROUTE, 0);
     if (fd < 0) return -1;
@@ -213,10 +213,10 @@ int vpn_routes_full(const char *ifn, int sfam, const uint8_t server[16]) {
     uint8_t gw[16];
     int has_gw = 0, oif = 0;
     if (!rt_get(fd, sfam, server, gw, &has_gw, &oif) && oif != idx)
-        rt_route_proto(fd, 1, sfam, server, sfam == AF_INET ? 32 : 128, has_gw ? gw : NULL, oif, 0, 0, RTPROT_LORDOS);
+        rt_route_proto(fd, 1, sfam, server, sfam == AF_INET ? 32 : 128, has_gw ? gw : NULL, oif, 0, 0, RTPROT_INSANEOS);
     uint8_t lo[16] = {0}, hi[16] = {0x80};
-    int r = rt_route_proto(fd, 1, AF_INET, lo, 1, NULL, idx, 0, 0, RTPROT_LORDOS);
-    if (!r) r = rt_route_proto(fd, 1, AF_INET, hi, 1, NULL, idx, 0, 0, RTPROT_LORDOS);
+    int r = rt_route_proto(fd, 1, AF_INET, lo, 1, NULL, idx, 0, 0, RTPROT_INSANEOS);
+    if (!r) r = rt_route_proto(fd, 1, AF_INET, hi, 1, NULL, idx, 0, 0, RTPROT_INSANEOS);
     close(fd);
     if (r) { char e[200]; admin_event("net vpn - error %s", lerr_set(e, sizeof e, "vpn.routesFailed", "dev", ifn, "errno", lerr_errno(-r), NULL)); }
     return r ? -1 : 0;
@@ -231,7 +231,7 @@ int vpn_routes_list(const char *ifn, const char *list) {
     snprintf(copy, sizeof copy, "%s", list);
     for (char *t = strtok(copy, ", "); t; t = strtok(NULL, ", ")) {
         Cidr c;
-        if (!parse_cidr(t, &c, 1) && !rt_route_proto(fd, 1, c.family, c.a, c.prefix, NULL, idx, 0, 0, RTPROT_LORDOS)) n++;
+        if (!parse_cidr(t, &c, 1) && !rt_route_proto(fd, 1, c.family, c.a, c.prefix, NULL, idx, 0, 0, RTPROT_INSANEOS)) n++;
     }
     close(fd);
     return n;
@@ -241,7 +241,7 @@ int vpn_routes_list(const char *ifn, const char *list) {
 void vpn_routes_clear(int sfam, const uint8_t server[16]) {
     int fd = nl_open(NETLINK_ROUTE, 0);
     if (fd < 0) return;
-    rt_flush_proto(fd, RTPROT_LORDOS, sfam, server);
+    rt_flush_proto(fd, RTPROT_INSANEOS, sfam, server);
     close(fd);
 }
 

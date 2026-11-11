@@ -3,7 +3,7 @@
  * A focused app gets every key before the theme (wl_key in wl.c). The few combinations a theme needs
  * over an app live here, in fixed tables written at build time: keyboard keys only (no pointer, no
  * text), each one a modifier set plus a letter or an evdev code. The shell chooses a table by name
- * with lord.wayland.grabKeys; nothing can add an entry. lord.wayland does not exist in an isolated
+ * with insane.wayland.grabKeys; nothing can add an entry. insane.wayland does not exist in an isolated
  * app's process (js_broker_register), and that process has no compositor to change anyway.
  *
  * Letters are compared by what the layout produces, as sdk/shortcuts.js does, so ❖Z is the key

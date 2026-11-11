@@ -1,10 +1,10 @@
 #!/bin/sh
 # vm_recovery.sh — Machines' release gate "failure recovery" (docs/VIRTUALIZATION.md 3.6, 12): each multi-step operation
-# (suspend, resume, snapshot take, revert and delete, compaction, linked clone, import of another app's machine) is interrupted by killing lord-vm, and
-# the next open (lord-vm, as the app starts it: no terminal) finishes it or rolls it back, says which in the log, and
+# (suspend, resume, snapshot take, revert and delete, compaction, linked clone, import of another app's machine) is interrupted by killing insane-vm, and
+# the next open (insane-vm, as the app starts it: no terminal) finishes it or rolls it back, says which in the log, and
 # leaves nothing half-made: no operation.json, no temporary file, snapshots.json and the disks' tags agreeing.
 # Then the network (6.5): passt is killed while the guest fetches over HTTP twice a second, and the guest's network
-# must come back by itself (measured), again after more kills, until lord-vm gives up after 5 in a minute and says so;
+# must come back by itself (measured), again after more kills, until insane-vm gives up after 5 in a minute and says so;
 # and SIGTERM to the whole machine at once (a host shutdown) saves it to disk. Needs the network (deb.debian.org).
 #
 #   sh tests/vm_recovery.sh BUILD_DIR GUEST_IMAGE [WORK_DIR]
@@ -15,13 +15,13 @@ W=${3:-${TMPDIR:-/var/tmp}/lvg-rec.$$}   # /var/tmp: /tmp is often a small tmpfs
 . "$(dirname "$0")/vm_gate_lib.sh"
 gate_begin
 gate_creds
-D=$W/r.lordvm
+D=$W/r.insanevm
 "$VM" --create "$D" --name recovery --import "$IMG" --vcpus 2 --memory 1024 >/dev/null 2>&1
 t "create" '[ -f "$D/disks/system.qcow2" ]'
 tags() { qemu-img snapshot -l -U "$D/disks/system.qcow2" 2>/dev/null | awk 'NR > 2 { print $2 }' | sort | tr '\n' ' '; }
 jtags() { "$VM" --snapshot "$D" list | sed 's/"tag":"/\n/g' | sed -n 's/^\(s[0-9-]*\)".*/\1/p' | sort | tr '\n' ' '; }
-said() { grep -q "recovery: .*$1" "$D/log/lord-vm.log"; }
-interrupt() {    # LABEL COMMAND...: the machine runs; COMMAND in the background; lord-vm killed when operation.json appears
+said() { grep -q "recovery: .*$1" "$D/log/insane-vm.log"; }
+interrupt() {    # LABEL COMMAND...: the machine runs; COMMAND in the background; insane-vm killed when operation.json appears
     label=$1; shift
     lv=$(runpid "$D")
     "$@" >/dev/null 2>&1 &
@@ -93,10 +93,10 @@ check_disks "$D" "compaction: disks clean"
 echo "-- linked clone"
 ok_link=0
 for d in 0.005 0.02 0.04 0.08; do
-    "$VM" --clone "$D" "$W/l.lordvm" --name linked --linked >/dev/null 2>&1 &
+    "$VM" --clone "$D" "$W/l.insanevm" --name linked --linked >/dev/null 2>&1 &
     cp=$!; sleep $d; kill -9 $cp 2>/dev/null; wait $cp 2>/dev/null
     [ -f "$D/operation.json" ] && { ok_link=1; break; }
-    rm -rf "$W/l.lordvm"
+    rm -rf "$W/l.insanevm"
     if grep -q '"base"' "$D/machine.json"; then break; fi
 done
 if [ $ok_link = 1 ]; then ok "linked clone: interrupted with operation.json in place"; else skp "linked clone: interrupted" "it finished before the kill"; fi
@@ -109,10 +109,10 @@ check_disks "$D" "linked clone: disks clean"
 echo "-- network: passt killed while the guest fetches"
 PROBE=$(printf '%s\n' '[Unit]' 'After=network-online.target' '[Service]' "ExecStart=/bin/bash -c 'while :; do if timeout 2 bash -c \"exec 3<>/dev/tcp/deb.debian.org/80; printf \\\\\"HEAD / HTTP/1.0\\\\\\\\r\\\\\\\\nHost: deb.debian.org\\\\\\\\r\\\\\\\\n\\\\\\\\r\\\\\\\\n\\\\\" >&3; head -1 <&3\" >/dev/null 2>&1; then echo \"<3>NETOK\" >/dev/kmsg; else echo \"<3>NETFAIL\" >/dev/kmsg; fi; sleep 0.5; done'")
 umask 077
-{ grep -v 'systemd\.' "$W/creds"; echo "binary:systemd.extra-unit.lordvm-net.service=$(printf '%s\n' "$PROBE" | base64 -w0)"
-  echo "binary:systemd.unit-dropin.multi-user.target=$(printf '[Unit]\nWants=lordvm-net.service\n' | base64 -w0)"; } >"$W/netcreds"
+{ grep -v 'systemd\.' "$W/creds"; echo "binary:systemd.extra-unit.insanevm-net.service=$(printf '%s\n' "$PROBE" | base64 -w0)"
+  echo "binary:systemd.unit-dropin.multi-user.target=$(printf '[Unit]\nWants=insanevm-net.service\n' | base64 -w0)"; } >"$W/netcreds"
 umask 022
-N=$W/n.lordvm
+N=$W/n.insanevm
 "$VM" --create "$N" --name network --import "$IMG" --vcpus 1 --memory 768 --display none >/dev/null 2>&1
 "$VM" --start "$N" --detach --keep-running --credentials-file "$W/netcreds" >/dev/null 2>&1
 wait_state "$N" running 60; wait_serial "$N" NETOK 180
@@ -126,20 +126,20 @@ back_after_kill() {    # kills passt, prints the milliseconds until the guest's 
 }
 b1=$(back_after_kill)
 t "network: back by itself after passt was killed ($b1 ms to the guest's next fetch)" '[ "$b1" -ge 0 ] && [ "$b1" -lt 10000 ]'
-t "network: lord-vm said it reconnected" 'grep -q "network: the network is back" "$N/log/lord-vm.log"'
+t "network: insane-vm said it reconnected" 'grep -q "network: the network is back" "$N/log/insane-vm.log"'
 sleep 2; b2=$(back_after_kill); sleep 2; b3=$(back_after_kill)
 t "network: back again after two more kills ($b2 ms, $b3 ms)" '[ "$b2" -ge 0 ] && [ "$b3" -ge 0 ]'
 t "network: the new passt runs" 'kill -0 "$(sed -n "s/.*\"passt_pid\":\([0-9]*\).*/\1/p" "$N/run.json")"'
 for k in 1 2 3; do pp=$(sed -n 's/.*"passt_pid":\([0-9]*\).*/\1/p' "$N/run.json"); kill -9 "$pp" 2>/dev/null; sleep 9; done
-t "network: after 5 restarts in a minute it gives up, and says so" 'grep -q "again and again: the machine has no network" "$N/log/lord-vm.log"'
+t "network: after 5 restarts in a minute it gives up, and says so" 'grep -q "again and again: the machine has no network" "$N/log/insane-vm.log"'
 t "network: the machine itself keeps running" '[ "$(field "$N" state)" = running ]'
 
-echo "-- the computer stops: SIGTERM to lord-vm, QEMU and passt at once"
+echo "-- the computer stops: SIGTERM to insane-vm, QEMU and passt at once"
 lv=$(runpid "$N"); qp=$(qemupid "$N")
 kill -TERM "$lv" "$qp" 2>/dev/null; wait_gone "$lv" 60
-t "host stop: the machine was saved to disk, not shut down" '[ -f "$N/suspend.state" ] && grep -q "state stopped (suspended)" "$N/log/lord-vm.log"'
+t "host stop: the machine was saved to disk, not shut down" '[ -f "$N/suspend.state" ] && grep -q "state stopped (suspended)" "$N/log/insane-vm.log"'
 "$VM" --start "$N" --detach --keep-running >/dev/null 2>&1; wait_state "$N" running 60
-t "host stop: the next start resumes it" 'grep -q "resume: loaded" "$N/log/lord-vm.log" && [ ! -f "$N/suspend.state" ]'
+t "host stop: the next start resumes it" 'grep -q "resume: loaded" "$N/log/insane-vm.log" && [ ! -f "$N/suspend.state" ]'
 pl=$(sed -n 's/.*"passt_pid":\([0-9]*\).*/\1/p' "$N/run.json")
 "$VM" --poweroff "$N" >/dev/null 2>&1; wait_state "$N" stopped 30
 t "network: its passt is gone with it" 'sleep 1; ! kill -0 "$pl" 2>/dev/null'
@@ -153,34 +153,34 @@ isum() { find "$IB" -type f -exec sha256sum {} + | sort | sha256sum | cut -c1-16
 before=$(isum)
 ok_imp=0
 for d in 0.3 0.8 1.5; do
-    "$VM" --import-machine "$IB" "$W/i.lordvm" >"$W/imp1.out" 2>&1 &
+    "$VM" --import-machine "$IB" "$W/i.insanevm" >"$W/imp1.out" 2>&1 &
     ip=$!
     end=$(( $(ms) + 20000 ))
     part=""
-    while [ "$(ms)" -lt "$end" ]; do part=$(ls -d "$W"/.i.lordvm.part-* 2>/dev/null | head -n1); [ -n "$part" ] && [ -f "$part/operation.json" ] && break; sleep 0.01; done
+    while [ "$(ms)" -lt "$end" ]; do part=$(ls -d "$W"/.i.insanevm.part-* 2>/dev/null | head -n1); [ -n "$part" ] && [ -f "$part/operation.json" ] && break; sleep 0.01; done
     sleep $d
     kill -9 $ip 2>/dev/null; wait $ip 2>/dev/null
-    if [ -n "$part" ] && [ -f "$part/operation.json" ] && [ ! -e "$W/i.lordvm" ]; then ok_imp=1; break; fi
-    rm -rf "${W:?}/i.lordvm"
+    if [ -n "$part" ] && [ -f "$part/operation.json" ] && [ ! -e "$W/i.insanevm" ]; then ok_imp=1; break; fi
+    rm -rf "${W:?}/i.insanevm"
 done
 if [ $ok_imp = 1 ]; then
     ok "import: killed in the middle, its intent ($(sed -n 's/.*"op":"\([a-z]*\)".*/\1/p' "$part/operation.json")) in a hidden folder"
     sleep 0.5
-    t "import: no qemu-img left running (it dies with lord-vm)" '! pgrep -f "qemu-img convert.*\.i\.lordvm\.part" >/dev/null'
-    t "import: nothing in the library's place for it" '[ ! -e "$W/i.lordvm" ]'
+    t "import: no qemu-img left running (it dies with insane-vm)" '! pgrep -f "qemu-img convert.*\.i\.insanevm\.part" >/dev/null'
+    t "import: nothing in the library's place for it" '[ ! -e "$W/i.insanevm" ]'
     # the next import in the library (or a clone) removes what the killed one left, says so, and finishes
-    if "$VM" --import-machine "$IB" "$W/i.lordvm" >"$W/imp2.out" 2>&1; then ok "import: the next one finishes"; else bad "import: the next one finishes" "$(tail -2 "$W/imp2.out")"; fi
+    if "$VM" --import-machine "$IB" "$W/i.insanevm" >"$W/imp2.out" 2>&1; then ok "import: the next one finishes"; else bad "import: the next one finishes" "$(tail -2 "$W/imp2.out")"; fi
     t "import: the half-made folder is gone, and that was said" '[ ! -d "$part" ] && grep -q "an import that didn.t finish was removed" "$W/imp2.out"'
-    t "import: no operation left on the new machine" '[ ! -f "$W/i.lordvm/operation.json" ]'
-    check_disks "$W/i.lordvm" "import: the new disks are clean"
+    t "import: no operation left on the new machine" '[ ! -f "$W/i.insanevm/operation.json" ]'
+    check_disks "$W/i.insanevm" "import: the new disks are clean"
 else skp "import: interrupted" "it finished before the kill"; fi
 t "import: the source is unchanged" '[ "$(isum)" = "$before" ]'
 # the step after the rename: operation.json "import" left in a finished machine is closed at its next start
-if [ -f "$W/i.lordvm/machine.json" ]; then
-    printf '{"op":"import","tag":"","a":"%s","b":"%s","started":"2026-11-05T12:00:00Z"}\n' "$IB" "$W/i.lordvm" >"$W/i.lordvm/operation.json"
-    "$VM" --start "$W/i.lordvm" --detach --keep-running >/dev/null 2>&1; wait_state "$W/i.lordvm" running 60
-    "$VM" --poweroff "$W/i.lordvm" >/dev/null 2>&1; wait_state "$W/i.lordvm" stopped 30
-    t "import: an intent left after the rename is closed at the next start, and said" '[ ! -f "$W/i.lordvm/operation.json" ] && grep -q "recovery: the import had finished" "$W/i.lordvm/log/lord-vm.log"'
+if [ -f "$W/i.insanevm/machine.json" ]; then
+    printf '{"op":"import","tag":"","a":"%s","b":"%s","started":"2026-11-05T12:00:00Z"}\n' "$IB" "$W/i.insanevm" >"$W/i.insanevm/operation.json"
+    "$VM" --start "$W/i.insanevm" --detach --keep-running >/dev/null 2>&1; wait_state "$W/i.insanevm" running 60
+    "$VM" --poweroff "$W/i.insanevm" >/dev/null 2>&1; wait_state "$W/i.insanevm" stopped 30
+    t "import: an intent left after the rename is closed at the next start, and said" '[ ! -f "$W/i.insanevm/operation.json" ] && grep -q "recovery: the import had finished" "$W/i.insanevm/log/insane-vm.log"'
 fi
-rm -rf "${IB:?}" "${W:?}/i.lordvm"
+rm -rf "${IB:?}" "${W:?}/i.insanevm"
 gate_end "vm-recovery"

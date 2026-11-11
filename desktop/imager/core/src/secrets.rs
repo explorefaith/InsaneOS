@@ -1,5 +1,5 @@
 //! The two secrets of the first-run file, derived on this computer so only the results reach the
-//! card: the password's SHA-512 crypt hash ($6$, accepted by lordos-firstrun and by every Linux
+//! card: the password's SHA-512 crypt hash ($6$, accepted by insaneos-firstrun and by every Linux
 //! PAM) and the WPA2 key PBKDF2-HMAC-SHA1(password, ssid, 4096, 32) (IEEE 802.11i).
 use crate::{Error, Result};
 

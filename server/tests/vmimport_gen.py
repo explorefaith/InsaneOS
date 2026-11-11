@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # vmimport_gen.py — makes snapshot layers of other virtualization apps' disk formats for the importer's tests
-# (docs/VIRTUALIZATION.md 6.22): QEMU can read a VDI or an .hds base but not a layer over it, so lord-vm merges them
+# (docs/VIRTUALIZATION.md 6.22): QEMU can read a VDI or an .hds base but not a layer over it, so insane-vm merges them
 # itself, and these files check that merge byte for byte. Everything here is invented test data.
 #
 #   vmimport_gen.py vdi-diff BASE.vdi OUT.vdi OFFSET_MB...   a VDI differencing layer over BASE: the 1 MB blocks at

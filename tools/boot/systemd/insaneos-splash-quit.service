@@ -1,0 +1,12 @@
+[Unit]
+Description=InsaneOS: end the boot splash once the login screen is up
+Documentation=file:///usr/share/doc/insaneos/README.md
+# started by insaneos.service (Wants=); plymouth-quit.service is ordered after this one
+# (plymouth-quit.service.d/insaneos.conf), so Plymouth is never ended before InsaneOS has painted
+After=insaneos.service plymouth-start.service
+ConditionPathExists=/usr/bin/plymouth
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/insaneos/insaneos-splash quit
+TimeoutStartSec=60

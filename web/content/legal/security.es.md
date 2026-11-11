@@ -17,10 +17,10 @@ Podés escribir en inglés, español o portugués.
 
 **Dentro del alcance:**
 
-- el código propio de Insane OS: `lord-server` (el servidor gráfico y compositor Wayland), `lord-sessiond` y la pantalla de inicio de sesión, el aislamiento de apps y el intermediario de permisos, `lord-netperm`, `lord-vault`, los procesos auxiliares de correo, documentos y multimedia, el motor de paquetes, las apps nativas y el SDK;
-- los archivos de cada versión y sus firmas, y el script de instalación para Debian (`lordos.org/install.sh`);
+- el código propio de Insane OS: `insane-server` (el servidor gráfico y compositor Wayland), `insane-sessiond` y la pantalla de inicio de sesión, el aislamiento de apps y el intermediario de permisos, `insane-netperm`, `insane-vault`, los procesos auxiliares de correo, documentos y multimedia, el motor de paquetes, las apps nativas y el SDK;
+- los archivos de cada versión y sus firmas, y el script de instalación para Debian (`insaneos.org/install.sh`);
 - la configuración del sistema que trae Insane OS (por ejemplo, los servicios que activa);
-- el sitio lordos.org.
+- el sitio insaneos.org.
 
 **Fuera del alcance** (reportalos a sus propios proyectos):
 
@@ -55,7 +55,7 @@ Te vamos a mantener al tanto, te vamos a mencionar en las notas de la versión s
 
 Cada archivo de una versión (la ISO, la imagen para Raspberry Pi y el `.deb`) figura con su SHA-256 en `SHA256SUMS`, y `SHA256SUMS` está firmado con la clave de versiones de Insane OS (Ed25519). El script de instalación para Debian se niega a instalar si la firma falta o no es válida.
 
-- Clave pública: [lordos-release.pub.pem](/lordos-release.pub.pem)
+- Clave pública: [insaneos-release.pub.pem](/insaneos-release.pub.pem)
 - Huella (SHA-256 de la clave pública en DER):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
@@ -63,7 +63,7 @@ Para verificar una descarga a mano:
 
 ```
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 ```
 

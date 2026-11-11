@@ -44,7 +44,7 @@ the rest of the tab, and the first generation of the list.
 - **Left:** search (by app, address or country) and one row per app with its icon, number of
   connections, a traffic bar (received in green, sent in orange, relative to the app that moved
   the most), a tiny live activity indicator (its traffic over the last 12 s, one bar per second),
-  the bytes and the **Rule** column: a per-app allow/deny switch that `lord-netperm`
+  the bytes and the **Rule** column: a per-app allow/deny switch that `insane-netperm`
   enforces in the kernel (see "Phase 2"). Each app expands to show its destinations, one row per
   name the system resolver gave (its addresses together) or per address, with the country, the
   ones the firewall reported recently ("recent connection" or "recently denied") and, since 0.8.2,
@@ -59,7 +59,7 @@ the rest of the tab, and the first generation of the list.
   LLDP…) and the interface. Raw and packet sockets need `CAP_NET_RAW` and can see or forge traffic, so
   the row says so. `build/conn-dump` prints one reading for checking it by hand (on VM 116: a ping, a raw
   ICMP socket and an ARP packet socket on eth0, the last two from a process given `CAP_NET_RAW`). The remote desktop's bridge runs as the user but isn't dumpable, so
-  its sockets can't be traced to a pid; `conn.c` gives the sockets in `lordos.service`'s root-owned
+  its sockets can't be traced to a pid; `conn.c` gives the sockets in `insaneos.service`'s root-owned
   `supervisor` group to Remote Desktop (its WebRTC UDP ports), instead of an unknown "?". At the bottom,
   the machine's traffic:
   - the current download and upload speed;
@@ -103,7 +103,7 @@ the rest of the tab, and the first generation of the list.
   without a cgroup (ping and raw sockets from /proc/net, packet sockets) take their process's
   (`/proc/<pid>/cgroup`, `conn.c`). The
   dots are small ready-made images (a ring and the direction's color, drawn once) moved with
-  `lord.setStyle`, no React render per frame: 12 frames per second with the window in front, 5
+  `insane.setStyle`, no React render per frame: 12 frames per second with the window in front, 5
   behind it, at most the 12 busiest arcs and only those on screen; the timer stops with the window
   minimized, while the map is being moved and when nothing moves. Each frame repaints only the
   small rectangles the dots left and entered (0.8.2, "Several damaged rectangles", off by default
@@ -149,15 +149,15 @@ backed by its own process and cgroup scope, so its rules are enforced by the ker
 
 | Row | Firewall id | Its traffic |
 |---|---|---|
-| Mail and calendars | `lordos:mail` | lord-maild's servers (Mail, Calendar, Contacts, Reminders sync), made by Mail's connector |
-| Store and updates | `lordos:store` | the package engine's downloads (the Store, Settings → General, the daily update check) |
-| Printers and scanners | `lordos:print` | IPP and eSCL to network printers and scanners, and their mDNS discovery |
-| Terminal | `lordos:terminal` | the shell of every terminal and every program it starts; the detail lists the programs by name |
-| Blocklist updates | `lordos:lists` | the daily blocklist downloads (`lord-fetch`) |
-| VPN | `lordos:vpn` | the counters of Insane OS's own VPN interfaces (Settings → Network); not blockable |
+| Mail and calendars | `insaneos:mail` | insane-maild's servers (Mail, Calendar, Contacts, Reminders sync), made by Mail's connector |
+| Store and updates | `insaneos:store` | the package engine's downloads (the Store, Settings → General, the daily update check) |
+| Printers and scanners | `insaneos:print` | IPP and eSCL to network printers and scanners, and their mDNS discovery |
+| Terminal | `insaneos:terminal` | the shell of every terminal and every program it starts; the detail lists the programs by name |
+| Blocklist updates | `insaneos:lists` | the daily blocklist downloads (`insane-fetch`) |
+| VPN | `insaneos:vpn` | the counters of Insane OS's own VPN interfaces (Settings → Network); not blockable |
 | Name resolution (DNS) | `system:dns` | systemd-resolved; shown, never blockable |
 | Time synchronization | `system:time` | systemd-timesyncd; shown, never blockable |
-| Network service | `system:network` | lord-netd's own leaf (DHCP, Wi-Fi, the VPN daemons); shown, never blockable |
+| Network service | `system:network` | insane-netd's own leaf (DHCP, Wi-Fi, the VPN daemons); shown, never blockable |
 
 Apps that never touch the network (Calculator, Notes…) never appear: a row exists only for traffic.
 The essential system rows show "System" instead of a connection count and a dash instead of a switch.
@@ -165,7 +165,7 @@ Blocking the Store asks first, because no security update arrives while it is bl
 
 ![Blocking the Store and updates asks first](monitor-net2-store-warning.png)
 
-The **"Insane OS" row** is now what is left in lord-server itself, close to zero; every socket a
+The **"Insane OS" row** is now what is left in insane-server itself, close to zero; every socket a
 component's connector made counts as that component's, also in the open-connections list (the
 socket's cgroup, `INET_DIAG_CGROUP_ID`, mapped to the session's scopes: conn.c `cgApp`).
 
@@ -178,7 +178,7 @@ UDP 443…). Every row has its received and sent bytes, a tiny up/down meter of 
 decides it (another rule, the app's default, a restriction, the deny mode or a blocklist: "Blocked
 by the list Scam sites"). Long lists fold after eight rows ("N more…"). For an address reached
 through a CNAME chain the row shows the shortest name (usually the one the app asked for) and
-searches every name of the chain. The per-port bytes come from lord-netperm (np_flows is per
+searches every name of the chain. The per-port bytes come from insane-netperm (np_flows is per
 address and port since 0.8.5; COUNTS sends each address's eight busiest ports).
 
 **The view menu** (one pop-up button at the top of the column) holds the whole view, kept per user in
@@ -226,8 +226,8 @@ Its panel:
   0.8.5, `ROADMAP.md`);
 - the blocklists (lists on, entries) and "Open Monitor…".
 
-While the item is shown it reads `lord.monitor.netTotals()` (one read of `/proc/net/dev`) once
-per second, without the Monitor's sampling thread; lord-netperm's notices are read only while the
+While the item is shown it reads `insane.monitor.netTotals()` (one read of `/proc/net/dev`) once
+per second, without the Monitor's sampling thread; insane-netperm's notices are read only while the
 panel is open. Hidden, it costs nothing. `sdk/netstatus.jsx`.
 
 ![The panel](menubar-network-panel.png) ![Deny silently cut the open download; DNS still works](menubar-network-deny.png)
@@ -248,7 +248,7 @@ denied.
 ### Measurements (0.8.5, VM 118, 4 vCPU Xeon Silver 4108, kernel 6.12)
 
 Same session, same test traffic (curl in an app scope: a 120 KB/s download and HTTPS requests every
-4 s), main's build (0.8.3 + 0.8.4 so far) against this one, 30 s each, lord-server's CPU in % of
+4 s), main's build (0.8.3 + 0.8.4 so far) against this one, 30 s each, insane-server's CPU in % of
 one core:
 
 | | main | this build |
@@ -258,8 +258,8 @@ one core:
 | desktop idle, menu bar item on | — | 2.95 % |
 | desktop with traffic, item on / its panel open | — | 0.97 % / 3.87 % |
 
-Memory with 4 lists (379,991 names, 19,405 networks): lord-netperm 13.8 MB (2.9 MB without lists),
-lord-server 142 MB with the Monitor open (131 MB on main). The per-packet cost is in `FIREWALL.md`
+Memory with 4 lists (379,991 names, 19,405 networks): insane-netperm 13.8 MB (2.9 MB without lists),
+insane-server 142 MB with the Monitor open (131 MB on main). The per-packet cost is in `FIREWALL.md`
 ("Measurements, 0.8.5").
 
 **Before** (main, no lists: the scam site connects) **and after:**
@@ -270,9 +270,9 @@ lord-server 142 MB with the Monitor open (131 MB on main). The per-packet cost i
 
 While the remote desktop is on (Settings → Sharing), it is one more row in the app list, **Remote
 desktop**, with the Sharing icon: its traffic bar and bytes, the number of browsers connected and,
-in the red badge, the failed sign-ins of the last 24 hours. `lord-sessiond` serves it as root,
+in the red badge, the failed sign-ins of the last 24 hours. `insane-sessiond` serves it as root,
 outside the session's apps, so its sockets never appear among them (they are counted in "From other
-users"); the row is built from `lord-sessiond`'s own state (`apps/monitor/RemoteDesktop.jsx`). Its
+users"); the row is built from `insane-sessiond`'s own state (`apps/monitor/RemoteDesktop.jsx`). Its
 Rule switch is fixed: the per-app firewall doesn't apply to it; its own lists do.
 
 The detail panel, in the same folding sections:
@@ -289,8 +289,8 @@ The detail panel, in the same folding sections:
 
 Every action is one of the fixed admin actions Settings uses (`remote-block`, `remote-unblock`;
 `sdk/remote.js` `remoteAccess`), validated again on the root side. Everything else is read-only:
-`/run/lordos/status.json` (clients, blocks, lists; no user names typed by strangers) through
-`lord.remote.status()`. See [REMOTE.md](REMOTE.md), "Blocked and allowed addresses".
+`/run/insaneos/status.json` (clients, blocks, lists; no user names typed by strangers) through
+`insane.remote.status()`. See [REMOTE.md](REMOTE.md), "Blocked and allowed addresses".
 
 ![Monitor → Network: the remote desktop (dark)](monitor-remote-desktop-dark.png)
 
@@ -299,7 +299,7 @@ Every action is one of the fixed admin actions Settings uses (`remote-block`, `r
 ### Blocking cuts what is open (0.8.3)
 
 Switching an app's rule off (or a destination's switch, or adding a restriction) now also ends the
-connections it already had: the kernel drops their packets and `lord-netperm` closes the sockets
+connections it already had: the kernel drops their packets and `insane-netperm` closes the sockets
 (`FIREWALL.md`, "Existing connections are cut"). Each cut connection adds one to the app's
 *denied* count, and the bytes dropped meanwhile show in its details as **Blocked traffic**
 (`COUNTS` index 7). Within a second of the switch the row shows it.
@@ -311,7 +311,7 @@ An open app row lists the destinations it reached and gives each one an allow/bl
 edits (`FIREWALL.md`, "Rules by app"); there is no new enforcement:
 
 - **What a row is:** one per name the system resolver gave for the app's addresses (from
-  `lord-netperm`'s notices, `hosts`), with its addresses together ("cdn.example.net (4)"), or one
+  `insane-netperm`'s notices, `hosts`), with its addresses together ("cdn.example.net (4)"), or one
   per address when no name is known. The first eight show, then "N more…" (and "Show fewer").
   While the row is open the order is kept: busiest first when it opens, newcomers below, so a
   switch never moves under the pointer.
@@ -324,8 +324,8 @@ edits (`FIREWALL.md`, "Rules by app"); there is no new enforcement:
 - **What a click does** (`toggleOp()`): it writes the rule for exactly that name (or address),
   any port and protocol, with the other verdict; if that name already has its own rule it is flipped,
   or removed when the app's other rules alone already give the new verdict, so going back and forth
-  never piles up rules. It goes through `lord.fw.addRule` / `updateRule` / `removeRule`, which save
-  `firewall.json` and send `RELOAD`; `lord-netperm` applies it to the next connection.
+  never piles up rules. It goes through `insane.fw.addRule` / `updateRule` / `removeRule`, which save
+  `firewall.json` and send `RELOAD`; `insane-netperm` applies it to the next connection.
 - Domains match the names the system resolver returned (`FIREWALL.md`, "What domain rules can't
   see"): a browser using its own encrypted DNS shows addresses, and those rows write address rules.
 - **Tests:** `server/tests/fw_domain_cases.txt`, 37 cases (exact names, wildcards, CNAME chains,
@@ -334,13 +334,13 @@ edits (`FIREWALL.md`, "Rules by app"); there is no new enforcement:
   `firewall.json` text — and through `decide()` by `fwrule_input_test.mjs`, which also checks the
   switch's add / flip / remove choices. On VM 119 a click on a Firefox ESR destination wrote
   `{"app":"desktop:firefox-esr","dst":"scripts.webcontentassessor.com","action":"deny"}` and
-  `lord-netperm` logged the reload.
+  `insane-netperm` logged the reload.
 
 ### Traffic history (0.8.2)
 
-The chart's zoom reads a history lord-server keeps: bytes received and sent **per minute for 7 days
+The chart's zoom reads a history insane-server keeps: bytes received and sent **per minute for 7 days
 and per hour for 30 days**, for the machine (every interface but `lo`, as the live totals) and for
-each of the user's apps (`lord-netperm`'s per-app counters, the ones the live list uses).
+each of the user's apps (`insane-netperm`'s per-app counters, the ones the live list uses).
 
 | Zoom | Window | One bar |
 |---|---|---|
@@ -358,22 +358,22 @@ window's totals.
 **Privacy.**
 
 - **Whose file:** the apps are the user's own, so the history is the user's:
-  `$XDG_STATE_HOME/lordos/net-history.bin` (default `~/.local/state/lordos/net-history.bin`),
-  mode 0600 in a 0700 folder, written by the user's own lord-server. No root process writes into
+  `$XDG_STATE_HOME/insaneos/net-history.bin` (default `~/.local/state/insaneos/net-history.bin`),
+  mode 0600 in a 0700 folder, written by the user's own insane-server. No root process writes into
   a home folder, and the machine's total is recorded only while that user's session runs.
-- **What it holds:** app ids (`desktop:firefox-esr`, `lpk:…`, `lordos`) and byte counts. **Never an
+- **What it holds:** app ids (`desktop:firefox-esr`, `lpk:…`, `insaneos`) and byte counts. **Never an
   address, a domain name or a country**, whatever the "connections" switch says: the long-term
   file can't be used to rebuild where the machine went, only how much each app moved. (The live
   lists keep showing addresses and names while the Monitor is open and "connections" is on.)
 - **Switch and Clear:** Settings → Privacy → Monitor → **Keep a traffic history** (on by default;
   `settings.monitor.history`) stops recording at once; **Clear History** deletes the file and what
   is in memory. Nothing leaves the machine.
-- The login screen and isolated apps never record (lord-server only allows it in a user session).
+- The login screen and isolated apps never record (insane-server only allows it in a user session).
 
 **How it is written** (`server/src/monitor/netrec.c`, `nethist.c`):
 
-- every 5 s lord-server reads `/proc/net/dev` and the latest per-app counters `lord-netperm`
-  already sends it (`COUNTS`, read without waiting from the same socket `lord.fw` uses), and adds
+- every 5 s insane-server reads `/proc/net/dev` and the latest per-app counters `insane-netperm`
+  already sends it (`COUNTS`, read without waiting from the same socket `insane.fw` uses), and adds
   the difference to the minute in progress (in memory: its totals and one entry per app that
   moved bytes);
 - when the minute ends it **appends one record** to the file, a few dozen bytes in one `write`;
@@ -393,7 +393,7 @@ is bigger than 8 MB is not read; a symlink in its place is refused.
 **Cost.** One small file read and a look at a buffer every 5 s, one append per minute: nothing
 measurable next to the session (the main loop wakes every 5 s for it, only while recording is on).
 
-`lord.monitor.history({ from, step, n, app })` returns `{ res, oldest, now, enabled, rx: [n], tx: [n],
+`insane.monitor.history({ from, step, n, app })` returns `{ res, oldest, now, enabled, rx: [n], tx: [n],
 top: [[app, rx, tx]] }`: bytes per bucket (`from` and `step` in Unix seconds, `n` ≤ 1500), for the
 machine or one app id; `res` is the finest resolution found (60 or 3600 s), records longer than a
 bucket are spread over it. `historyEnable(on)` and `historyClear()` go with the setting and the
@@ -422,8 +422,8 @@ The arrow keys move the selection. Both buttons are disabled while nothing is se
 **Stop** opens a sheet: *Are you sure you want to quit "name"?* with **Quit** (SIGTERM: the process
 is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
 
-- **The user's own processes** (same uid) are signalled by `lord-server` itself with a syscall,
-  not a program: `lord.monitor.signal(pid, start, 'TERM' | 'KILL')` (`js_monitor.c` →
+- **The user's own processes** (same uid) are signalled by `insane-server` itself with a syscall,
+  not a program: `insane.monitor.signal(pid, start, 'TERM' | 'KILL')` (`js_monitor.c` →
   `proc_signal()` in `monitor/procctl.c`).
 - **Another user's or root's processes**, only for administrators (sudo/admin/wheel): the root
   helper's fixed action `proc-signal <pid> <start> TERM|KILL` (`monitor/proc_admin.c`), the same
@@ -444,10 +444,10 @@ is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
   |---|---|---|
   | `init` | PID 1 | "This process starts and runs the whole system." |
   | `kernel` | kernel threads (`PF_KTHREAD`) | "This is part of the Linux kernel." |
-  | `session` | the session's own `lord-server` | "This is your Insane OS session. To end it, use Log Out…" |
-  | `system` | `lord-sessiond`, `lord-netperm`, `lord-netd`, `lord-fand`, `lord-vault`, `lord-maild`, `lord-doc`, `lord-media`, the root helper (`lord-admin`), any `lord-server` that is not an isolated app (another session, a terminal holder), PipeWire (`pipewire`, `pipewire-pulse`, `wireplumber`) and the systemd managers | "This process is part of Insane OS." |
+  | `session` | the session's own `insane-server` | "This is your Insane OS session. To end it, use Log Out…" |
+  | `system` | `insane-sessiond`, `insane-netperm`, `insane-netd`, `insane-fand`, `insane-vault`, `insane-maild`, `insane-doc`, `insane-media`, the root helper (`insane-admin`), any `insane-server` that is not an isolated app (another session, a terminal holder), PipeWire (`pipewire`, `pipewire-pulse`, `wireplumber`) and the systemd managers | "This process is part of Insane OS." |
 
-  An isolated `.lpk` app (`lord-server --app <id>`) is not protected: a hung app can be quit. The
+  An isolated `.lpk` app (`insane-server --app <id>`) is not protected: a hung app can be quit. The
   names are matched against the process name and, when it can be read, the executable's name. This
   is a guard against mistakes, not a security boundary (the kernel's rules on who may signal whom
   still apply; a terminal can always `kill` the user's own processes).
@@ -464,7 +464,7 @@ is asked to close), **Force Quit** (SIGKILL) and **Cancel**.
   switches (voluntary and forced), page faults (minor and major), start time, nice and priority, the
   control group (the app scope, as the firewall sees it) and the restrictions Insane OS knows about:
   an isolated Insane OS app (Landlock, seccomp, its own cgroup), a seccomp filter, "no new
-  privileges", a network block rule and the app's restrictions from Settings → Privacy (`lord.fw`).
+  privileges", a network block rule and the app's restrictions from Settings → Privacy (`insane.fw`).
 - **Open files and ports:** each descriptor of `/proc/<pid>/fd` (up to 300; the total is always
   shown): files, devices, pipes, kernel objects and sockets, with the protocol, local and remote
   address and TCP state from that process's own `/proc/<pid>/net/{tcp,tcp6,udp,udp6,unix}`. Same
@@ -536,9 +536,9 @@ processor with no sensor driver has no `in*_input` at all, so nothing is shown f
 in range is left out (`volt_parse_int`), not guessed.
 
 **Reading.** `monitor/voltage.c` runs on the Monitor's thread, because a slow embedded controller must not hold a frame. It
-reads only after `lord.monitor.wantVoltage(true)`, at most every 1.9 s; `apps/monitor/Voltage.jsx` asks only while the view
+reads only after `insane.monitor.wantVoltage(true)`, at most every 1.9 s; `apps/monitor/Voltage.jsx` asks only while the view
 is mounted and its window isn't minimized, and calls `rpi-pmic` once per cycle. The trace starts over when the view opens.
-With the tab elsewhere or the window minimized nothing is read. `lord.monitor.voltage()` takes no arguments.
+With the tab elsewhere or the window minimized nothing is read. `insane.monitor.voltage()` takes no arguments.
 
 **Tested.** `vcgencmd`'s real text from a Raspberry Pi 5 (`tests/settings_hw_test.c`, with 30 damaged variants; the board's
 driver module holds the exact "Undervoltage detected!" text) and the sysfs layout of the same board. On fake trees: a desktop,
@@ -553,7 +553,7 @@ sensor chip, a real battery or adapter.
 One tab per machine, one view per graphics card (a picker when there are several). Everything comes from files the
 session user may read; nothing runs as root, nothing is executed, no library is loaded and no new one is linked.
 `monitor/gpustat.c` reads on the Monitor's thread, once per second (`tick % 4 == 3`), only after
-`lord.monitor.wantGpu(true)`; `apps/monitor/Gpu.jsx` asks while the GPU tab or the Overview is mounted and the window
+`insane.monitor.wantGpu(true)`; `apps/monitor/Gpu.jsx` asks while the GPU tab or the Overview is mounted and the window
 isn't minimized (other tabs: nothing is read). `apps/monitor/gpumodel.js` turns the raw counters into rates (tested by
 `server/tests/gpu_model_test.mjs`). A whole reading took 4–8 ms on the RX 580 machine with a browser running.
 
@@ -573,17 +573,17 @@ and the load light take the temperature's color.
 | Apps | `/proc/<pid>/fd` → `/dev/dri/*`, then `/proc/<pid>/fdinfo/<fd>`: `drm-driver`, `drm-pdev`, `drm-client-id`, `drm-engine-*` (ns), `drm-engine-capacity-*`, `drm-cycles-*`/`drm-total-cycles-*` (xe), `drm-memory-*`, `drm-total-*`, `drm-resident-*`, `drm-shared-*` | every driver with DRM usage stats (amdgpu, i915, xe, v3d, msm, panfrost, nouveau on recent kernels) |
 | APIs in use | `/proc/<pid>/maps` of those processes: `libvulkan*`, `libGLX*`/`libEGL*`/`libGLESv2*`, `*_dri.so`, `libgallium-*`, `libOpenCL*`, `libcuda*`, `libva*`/`*_drv_video.so`, `libvdpau*`, `libnvcuvid`, `libnvidia-encode`, `libamdhip64`, `libggml-*` (at most 1 MB read, kept 10 s per process) | all |
 | APIs installed | Vulkan ICDs in `/usr/share/vulkan/icd.d` and `/etc/vulkan/icd.d` (`library_path`, `api_version`, read with `sec/json.c`), Mesa's `dri/*_dri.so` and `libgallium-<version>.so`, VA-API `dri/*_drv_video.so`, `vdpau/`, OpenCL `/etc/OpenCL/vendors/*.icd`, the loaders by name, `/dev/kfd` and `libamdhip64` (ROCm), `/proc/driver/nvidia/version` and `libcuda`/`libnvcuvid`/`libnvidia-encode` (NVIDIA); read once a minute | all |
-| AI | `/proc/<pid>/stat` of `lord-tts`, `lord-ocr`, `lord-say`; lord-say's note `~/.cache/lordos/say/<pid>` | — |
+| AI | `/proc/<pid>/stat` of `insane-tts`, `insane-ocr`, `insane-say`; insane-say's note `~/.cache/insaneos/say/<pid>` | — |
 | Machines | `/proc/<pid>/stat` of the user's `qemu-system-*` (CPU from tick deltas, resident memory) | — |
 
 **Apps.** Only the user's own processes are read (another user's fds are the kernel's to refuse; we don't try).
 A client duplicated across fds or handed to another process is counted once (the pair `drm-pdev` + `drm-client-id`,
 under the lowest pid). An engine's share is Δns ÷ (Δt × capacity), or Δcycles ÷ Δtotal-cycles on xe, capped at 100 %;
 the first second shows memory but no share. Processes become apps exactly as in Processes and Network (`annotate()`
-in `js_monitor.c`: the cgroup scope, then the `.desktop` program; lord-server itself is "Insane OS"). Each app shows its
+in `js_monitor.c`: the cgroup scope, then the `.desktop` program; insane-server itself is "Insane OS"). Each app shows its
 busiest engine, the categories (3D, compute, video, encode, copy), its graphics memory (VRAM; on a GPU that shares the
 computer's memory, the system memory it holds) and its APIs, e.g. a browser "OpenGL (radeonsi), Video decoding",
-lord-server "OpenGL ES (radeonsi)", a game "Vulkan (RADV)".
+insane-server "OpenGL ES (radeonsi)", a game "Vulkan (RADV)".
 
 **APIs installed.** Each line is *available* only with the files that prove it (the card's driver's ICD and the
 loader, the Mesa driver for the card, …); *not installed* when this card has a driver for it that isn't there;
@@ -591,20 +591,20 @@ loader, the Mesa driver for the card, …); *not installed* when this card has a
 `simpledrm`); *not available* when nothing was found and there is no known driver. WebGPU is shown as "in browsers,
 through Vulkan". ROCm with `/dev/kfd` but no runtime says so. NVIDIA's paths are tested with fixtures only.
 
-**AI.** A small table of Insane OS's AI helpers (`AI_ENGINES` in the model, `ai_name` in C): the voice (`lord-tts`,
-started by `lord-say`) and text in pictures (`lord-ocr`, Tesseract, always on the processor). lord-tts runs sandboxed and
+**AI.** A small table of Insane OS's AI helpers (`AI_ENGINES` in the model, `ai_name` in C): the voice (`insane-tts`,
+started by `insane-say`) and text in pictures (`insane-ocr`, Tesseract, always on the processor). insane-tts runs sandboxed and
 not dumpable, so its `/proc/<pid>/fd`, `fdinfo` and `maps` belong to root and its graphics memory is shown as hidden
-("it runs isolated"): its sandbox is untouched. What it runs on comes from lord-say, which is not sandboxed: once the first
-sentence is made it writes `~/.cache/lordos/say/<pid>` (0600 folder, not lord-tts's folder) with `lord-say 1
+("it runs isolated"): its sandbox is untouched. What it runs on comes from insane-say, which is not sandboxed: once the first
+sentence is made it writes `~/.cache/insaneos/say/<pid>` (0600 folder, not insane-tts's folder) with `insane-say 1
 <vulkan|cpu> <hd|standard> <language> <speak|save>`, removes it when it ends (also on SIGTERM), and removes notes of dead
-lord-say processes; `gpustat.c` reads it only for a running `lord-say` with that pid, as a regular file owned by the user,
+insane-say processes; `gpustat.c` reads it only for a running `insane-say` with that pid, as a regular file owned by the user,
 and parses it strictly (`gpu_say_parse`). So the card says "Graphics card · Vulkan (ggml)" or "Processor", Standard or HD,
 the language, and Speaking, Paused (SIGSTOP), or Saving to a file. With nothing running, it says "No AI engine is using
 the GPU right now" and summarizes the installed voice models and the quality and backend settings (`scanVoices`,
 `voiceConf`).
 
 **The fan by hand** (amdgpu only): see `FANS.md`, "GPU fans". The card shows a switch (Automatic) and a slider
-(30–100 %) to administrators when lord-fand reports a controllable fan for this card's PCI slot; everyone else sees
+(30–100 %) to administrators when insane-fand reports a controllable fan for this card's PCI slot; everyone else sees
 whether it is automatic or set by hand.
 
 **What each driver gives** (others: whatever of the above they expose; a missing file is left out, never guessed):
@@ -625,12 +625,12 @@ the model uses RPM ÷ fan1_max: 20 %), 19–22 W of a 145 W cap, sclk 1315–132
 libgallium-25.0.7, libva. Mesa 25.0.7, Vulkan RADV 1.4.305, no OpenCL platform installed, `/dev/kfd` present without
 ROCm.
 
-**Tested.** `build/gpustat-test` (fdinfo of amdgpu, i915, xe, v3d and hostile lines; pp_dpm; lord-say's note; maps
+**Tested.** `build/gpustat-test` (fdinfo of amdgpu, i915, xe, v3d and hostile lines; pp_dpm; insane-say's note; maps
 lines; a fake machine with an RX 580-like card, a client shared by two fds, an AI helper, a VM and the installed APIs
 including NVIDIA's), `tests/gpu_model_test.mjs` (69 checks), and in a headless session of this branch on the RX 580
-machine: the tab and the Overview open with no errors, and `lord.monitor.gpu()` answers only while one of them is
+machine: the tab and the Overview open with no errors, and `insane.monitor.gpu()` answers only while one of them is
 on screen. Not yet seen: a screenshot (the headless session's `remote.sock` takes only root), Intel, NVIDIA, a
-Raspberry Pi, a VM with virtio-gpu, lord-tts actually running on the GPU.
+Raspberry Pi, a VM with virtio-gpu, insane-tts actually running on the GPU.
 
 ## Disk temperature and health (0.8.2)
 
@@ -642,7 +642,7 @@ hwmon sensor, which the session reads like any other sysfs file (`server/src/mon
 | Disk | Sensor | Where it sits in sysfs |
 |---|---|---|
 | NVMe / M.2 (also an M.2 drive on a Raspberry Pi 5 HAT) | the nvme driver's own (`CONFIG_NVME_HWMON`, on in Debian's and Insane OS's Pi kernel) | `/sys/block/nvme0n1/device` is the controller; the sensor is its child `hwmonN` (name `nvme`). With native multipath the block device's `device` is the `nvme-subsysN`, and the sensor is found through the controllers it lists |
-| SATA | `drivetemp` (`CONFIG_SENSORS_DRIVETEMP=m`), loaded at boot by `/usr/lib/modules-load.d/lordos-drivetemp.conf` from the `lordos` package (migration `003-0.8.2-drivetemp` loads it once on an upgraded running system) | `/sys/block/sda/device` is the SCSI device; the sensor is in its glue folder `hwmon/hwmonN` (name `drivetemp`) |
+| SATA | `drivetemp` (`CONFIG_SENSORS_DRIVETEMP=m`), loaded at boot by `/usr/lib/modules-load.d/insaneos-drivetemp.conf` from the `insaneos` package (migration `003-0.8.2-drivetemp` loads it once on an upgraded running system) | `/sys/block/sda/device` is the SCSI device; the sensor is in its glue folder `hwmon/hwmonN` (name `drivetemp`) |
 | microSD / eMMC cards, virtual disks (virtio, QEMU), optical drives, most USB bridges | none | the tab says **No sensor**: there is never a made-up value |
 
 Only chips named `nvme` or `drivetemp` count, `temp1_input` is the drive's main temperature
@@ -678,9 +678,9 @@ more than 90 % of its rated life used. "Open in Disks" opens the Disks app on th
 **Notifications** (`sdk/diskwatch.js`, started by `startShell`), on by default, with a switch at the
 bottom of the tab (`settings.monitor.diskAlerts`):
 
-- **too hot:** while the Monitor is closed, `lord.monitor.watchDisks(true)` lets the sampling thread
+- **too hot:** while the Monitor is closed, `insane.monitor.watchDisks(true)` lets the sampling thread
   wake every 30 s and read only the disk list and their sensors (spinning disks only when awake);
-  the session polls `lord.monitor.diskTemps()` every 30 s, which does not keep the 4 Hz sampling
+  the session polls `insane.monitor.diskTemps()` every 30 s, which does not keep the 4 Hz sampling
   alive. A notice when a disk reaches its limit ("critical temperature", and it stays on screen, at
   its critical limit), at most one per disk every 30 minutes and again only after it has cooled
   3 °C below the limit;
@@ -707,27 +707,27 @@ sdk/netmodel.js          (0.8.5) search tokens, filters, the tree, sorting and t
 sdk/netstatus.jsx        (0.8.5) the menu bar network item and the blocklists' hourly update check
 sdk/monitor.js           useMonitor(), stores monitorSamples / monitorProcesses / monitorConnections /
                          monitorDetail; monitor.watchProcess(), monitor.stopProcess()
-server/src/ui/js_monitor.c   lord.monitor (read-only, validated API)
+server/src/ui/js_monitor.c   insane.monitor (read-only, validated API)
 server/src/monitor/mon.c     sampling thread: /proc, /sys, processes
 server/src/monitor/disktemp.c  which hwmon sensor belongs to which disk (nvme, drivetemp)
 server/src/monitor/conn.c    connections via sock_diag + inode → process
 server/src/monitor/mmdb.c    our own MaxMind DB reader (IP → country)
 server/src/monitor/map.c     vector map, on its own thread
 server/src/monitor/nethist.c the traffic history file (append, query, compaction)
-server/src/monitor/netrec.c  feeds it every 5 s from /proc/net/dev and lord-netperm's counters
+server/src/monitor/netrec.c  feeds it every 5 s from /proc/net/dev and insane-netperm's counters
 server/src/monitor/procctl.c the protected list, proc_signal() (pidfd) and the Get Info JSON
 server/src/monitor/proc_admin.c  the root helper's proc-signal / proc-info (administrators)
 assets/monitor/          land.bin (Natural Earth 1:50m), geoip-country.mmdb.xz (DB-IP Lite)
 tools/gen-monitor-data.py    generates that data, countries.js and the country names
 apps/monitor/RemoteDesktop.jsx  (0.8.3) the remote desktop row and its detail
-apps/monitor/Cooling.jsx     the Cooling tab (lord.fan, see FANS.md)
+apps/monitor/Cooling.jsx     the Cooling tab (insane.fan, see FANS.md)
 apps/monitor/Voltage.jsx, voltmodel.js   (0.8.7) the Voltage tab and its pure model
 server/src/monitor/voltage.c  hwmon, batteries and adapters, read on the Monitor's thread
 apps/monitor/Firewall.jsx, FwRules.jsx, RuleSheet.jsx   Settings → Privacy's firewall sections and the rule sheet
 server/tests/mmdb_test.c, server/tests/map_bench.c   reader test and map benchmark
 ```
 
-### lord.monitor
+### insane.monitor
 
 | Function | What it does |
 |---|---|
@@ -760,7 +760,7 @@ read; `awake`: I/O in the last minute).
 No function takes paths or commands: the only arguments are booleans, a language code (letters,
 digits, `-` and `_`, up to 15), a PID with its start time (integers), `'TERM'` or `'KILL'`, and the
 history's integers and app id (`[A-Za-z0-9._:@+~/-]`, up to 127).
-`lord-server` runs nothing for the Monitor.
+`insane-server` runs nothing for the Monitor.
 
 ### Sampling without slowing the screen
 
@@ -787,13 +787,13 @@ also reads ICMP "ping", raw IP and packet sockets from `/proc/net/{icmp,icmp6,ra
 
 **Bytes per app (0.8.1).** `tcp_info` only exists for TCP and only while the socket is open, so up
 to 0.8.0 UDP — and with it QUIC: HTTP/3, a browser playing a video — counted nothing, and a closed
-connection took its bytes with it (a browser streaming music showed 13 KB). With `lord-netperm`
+connection took its bytes with it (a browser streaming music showed 13 KB). With `insane-netperm`
 running, the bytes and rates of each app and of each of its addresses come from the kernel instead:
 its `cgroup_skb` programs count every packet of the app's sockets, TCP and UDP, both directions
 (`FIREWALL.md`, "Traffic accounting"), and its `COUNTS` notice brings, every second, the app's
 totals since its scope appeared, its rates over the last second and its 64 busiest addresses
-(`lord.fw.poll()`, `firewallState.counts`). An address whose socket already closed keeps its bytes
-and its country (remembered from the last open connection to it). Without `lord-netperm` (or with
+(`insane.fw.poll()`, `firewallState.counts`). An address whose socket already closed keeps its bytes
+and its country (remembered from the last open connection to it). Without `insane-netperm` (or with
 `STATUS` `bytes: false`) the Monitor falls back to `tcp_info`.
 
 The owning process of each of the user's sockets comes from `/proc/<pid>/fd` (`socket:[inode]`) of
@@ -809,7 +809,7 @@ listening one) or `out`. Scope: `internet`, `lan` (private, CGNAT, link-local, U
 0. (0.8.5) a socket made in one of the session's scopes is that scope's app (`cgApp`, from the
    socket's cgroup id; conn.c reads the session's scope ids every 5 s): Mail's connector, the
    Terminal's programs, an app's own sockets;
-1. `lord-server` itself is **Insane OS** (native apps and the Store run inside it);
+1. `insane-server` itself is **Insane OS** (native apps and the Store run inside it);
 2. otherwise, the `.desktop` whose `Exec` program (`DesktopApp.bin`) matches the executable,
    `argv[0]` or the process name;
 3. otherwise, `StartupWMClass` equal to the process name;
@@ -867,7 +867,7 @@ The map is drawn as vectors, sharp at any zoom (no scaled PNG).
 
 ### Charts
 
-`Chart.jsx` draws in pixels at the box's real width (`lord.getLayout`):
+`Chart.jsx` draws in pixels at the box's real width (`insane.getLayout`):
 
 - gradient fill from 0.32 to 0.02 opacity and a 1.6 px line, as in TangoOS;
 - guides at 25/50/75 %;
@@ -891,7 +891,7 @@ four switches, saved in `settings.monitor`, and a button:
 
 **Done (firewall, see `FIREWALL.md`):**
 
-- The **Rule** column is a per-app switch (`lord.fw.setAppRule`). `lord-netperm` applies it in the
+- The **Rule** column is a per-app switch (`insane.fw.setAppRule`). `insane-netperm` applies it in the
   kernel and a denied app gets EPERM.
 - The **allowed** and **denied** counters in the summary and for each app come from the kernel.
 - An app with no open connections but with denied attempts still shows up in the list.
@@ -902,7 +902,7 @@ four switches, saved in `settings.monitor`, and a button:
   the system resolver returned; an app with its own encrypted DNS is held only by address rules.
   Screenshots: [light](firewall-domain-rules-monitor-light.png),
   [dark](firewall-domain-rules-monitor-dark.png).
-- **Host names** without asking anyone (0.8.2): `lord-netperm` learns them from the system resolver
+- **Host names** without asking anyone (0.8.2): `insane-netperm` learns them from the system resolver
   and its notices carry them (`hosts`); the destinations are listed by those names.
 - (0.8.2) Each destination's own switch and the traffic history; (0.8.3) blocking cuts the open
   connections; (0.8.5) the tree, the "Deny silently" mode, the blocklists and Insane OS's own components
@@ -920,7 +920,7 @@ four switches, saved in `settings.monitor`, and a button:
 
 VM 123 (4 vCPU Xeon Silver 4108 at 1.8 GHz, `virtio_gpu` without 3D, CPU compositing, 1280×800).
 
-### lord-server CPU
+### insane-server CPU
 
 Percentage of one core, 30 s average (`~/thr.sh`, per thread, from `/proc/<pid>/task`). During the
 measurement there were 13 downloads in progress and Firefox open on the Network tab.
@@ -951,7 +951,7 @@ measurement there were 13 downloads in progress and Firefox open on the Network 
 
 VM 118: 4 vCPU Xeon Silver 4108 at 1.8 GHz, `virtio_gpu` without 3D, CPU compositing, 1280×800.
 Network tab in front, five downloads running (one over HTTP/3), arcs to 4–6 countries.
-`lord-server` (whole process, % of one core), 3 × 30 s each:
+`insane-server` (whole process, % of one core), 3 × 30 s each:
 
 | Build | Runs | Mean |
 |---|---|---|
@@ -965,10 +965,10 @@ Network tab in front, five downloads running (one over HTTP/3), arcs to 4–6 co
 - **The moving dots** cost about 0.3 points per frame per second (5 fps: 10.1 %, 15 fps:
   13.6 %): each frame repaints the box around all the dots, which with arcs across the world is
   most of the map. 12 fps is the compromise. (0.8.2: several damaged rectangles, see below.)
-- An `lord.setStyle` that only moves an absolutely positioned node (the dots, the map image while
+- An `insane.setStyle` that only moves an absolutely positioned node (the dots, the map image while
   panning) now just places it again instead of remeasuring every ancestor (`js.c`, like a window
   drag); it made no measurable difference here because painting dominates.
-- **`lord-netperm`** stays at 0.0–0.07 % with traffic flowing (one map read per app per second,
+- **`insane-netperm`** stays at 0.0–0.07 % with traffic flowing (one map read per app per second,
   plus one batch read of the address table only while bytes move).
 - **The kernel side** of the accounting is in `FIREWALL.md` ("Measurements").
 
@@ -979,8 +979,8 @@ minimized over the animated map once (out of five tries) left a grey rectangle o
 the window came back. The cause was not found in time: `test_minimize_damage` in
 `build/engine-test` (a window remounted with a shrinking, fading transform towards a blurred Dock
 and then removed, over moving dots, every frame compared with a full repaint) passes, so it is not
-in the scene's painting as the test models it. Until it is found, lord-server repaints one box per
-frame, exactly as in 0.8.1; `LORD_DAMAGE=multi` in its environment turns on the several-rectangles
+in the scene's painting as the test models it. Until it is found, insane-server repaints one box per
+frame, exactly as in 0.8.1; `INSANE_DAMAGE=multi` in its environment turns on the several-rectangles
 path described here (with the clipped-subtree skip and the per-rectangle present, which follow the
 same switch). The measurements below are with it on. The 9×9 dot images and the map frame's opaque
 color (below, "The Monitor's side") stay on.
@@ -1001,7 +1001,7 @@ rasters of transformed subtrees kept after a change made while hidden, unscaled 
 transform; a raster grid that moved with the subtree's extent; a raster changing kind (a blur
 coming in) outside the damage; blurs taking in what is painted above them from outside the
 repainted area; and several frames' rectangles cutting through a blurred node. Which one the 0.8.2
-report was is not proven (the reported scene itself never failed), so `LORD_DAMAGE=multi` is still
+report was is not proven (the reported scene itself never failed), so `INSANE_DAMAGE=multi` is still
 needed to turn the several-rectangles path on. The margin of a blurred surface is now repainted
 with it: in `test_multi_damage` the pixels repainted per frame went from 24,078 to 27,363.
 
@@ -1009,7 +1009,7 @@ with it: in `test_multi_damage` the pixels repainted per frame went from 24,078 
 real default theme (own home, runtime folder and bus; 1280×800, CPU composition), driven over its
 remote desktop socket. The viewer subscribes to the video with lossless tiles and keeps its own copy
 of the screen from them; for the test, the VM copy of `mirror.c` sends the changed tiles every frame
-instead of only once the screen is still (`LORD_TEST_TILES`, never committed), so the copy is exactly
+instead of only once the screen is still (`INSANE_TEST_TILES`, never committed), so the copy is exactly
 what the partial repaints left. At each check a second connection makes the session repaint the whole
 screen (`cb.refresh`), and the copy before is compared with the copy after; pixels that changed within
 2.2 s before or after are left out as animation. The scene: Monitor → Network with ten slow downloads
@@ -1032,7 +1032,7 @@ last partial frame and the full one; both are the scene changing between the two
 appears when the scene is still for 7 s. The grey rectangle did not appear in either build, so the
 0.8.2 report is still not reproduced, and several rectangles stay off by default.
 
-Cost, the same sessions with one viewer (`lord-server` whole process, % of one core, 5 × 30 s, two
+Cost, the same sessions with one viewer (`insane-server` whole process, % of one core, 5 × 30 s, two
 batches, the build alternated):
 
 | Scene | Mode | Before | After |
@@ -1042,9 +1042,9 @@ batches, the build alternated):
 | the same with the blurred Terminal over the map | one box | 35.8 / 36.4 % | 38.0 / 37.7 % |
 | the same with the blurred Terminal over the map | several | 36.7 / 36.6 % | 37.5 / 35.9 % |
 
-Layout and paint per frame (`LORD_FRAME_STATS`) were the same within 0.1 ms in every row (14.6 to
+Layout and paint per frame (`INSANE_FRAME_STATS`) were the same within 0.1 ms in every row (14.6 to
 14.8 ms). `--profile` shows why: in these sessions every frame repainted one box of 64 to 79 % of the
-screen, also with `LORD_DAMAGE=multi`, so the blur margin adds next to nothing. The reason, found
+screen, also with `INSANE_DAMAGE=multi`, so the blur margin adds next to nothing. The reason, found
 afterwards (next section): those sessions had a translucent, blurred Terminal hidden behind Monitor,
 and the blur rule repainted it whole every frame. Most of the process's CPU here is the remote
 desktop's frame comparison and the session itself, not paint. InsaneBench's desktop mode in the headless harness (`perf-theme.js`, three runs each):
@@ -1053,7 +1053,7 @@ desktop's frame comparison and the session itself, not paint. InsaneBench's desk
 
 **A blurred window hidden behind Monitor (0.8.6, VM 116).** Why the repeated scene gave one box of
 64 to 79 % per frame where VM 119 gave 5 to 11 small rectangles: the harness left the Terminal's
-session holder (`lord-term-holder`) of an earlier run alive (it killed holders with a pattern that
+session holder (`insane-term-holder`) of an earlier run alive (it killed holders with a pattern that
 never matched the holder's process name), so each new session restored a Terminal window at 30 %
 transparency with blur, and Monitor opened over it. A debug build printing `multi_rects`' steps
 showed three blurred nodes every frame: the menu bar, the Dock and the hidden Terminal's body
@@ -1067,7 +1067,7 @@ rectangles under 1 % of the screen.
 The blur rule now leaves out a blurred node that an opaque node painted after it covers whole
 (`blur_hidden` in `paint.c`, the opaque-cover skip's test in paint order; CPU path without a dragged
 window). The same scene, Terminal opened first and Monitor → Network over it, ten downloads, one
-remote viewer, `--profile` over the last 150 frames, and `lord-server`'s CPU (whole process, % of
+remote viewer, `--profile` over the last 150 frames, and `insane-server`'s CPU (whole process, % of
 one core, 5 × 30 s, two batches):
 
 | Mode | Repainted per frame | Paint per frame | CPU before | CPU after |
@@ -1105,7 +1105,7 @@ one box (paint 1.24 ms) and 3.3 % in 5.8 rectangles (0.82 ms); Monitor → Netwo
 
 VM 119: 4 vCPU Xeon Silver 4108 at 1.8 GHz, `virtio` GPU without 3D, CPU compositing, 1280×800.
 Network tab in front, ten slow downloads to mirrors in ten countries (arcs to 8–11 countries, about
-20 moving dots). `lord-server` (whole process, % of one core), 5 × 30 s each, the same session
+20 moving dots). `insane-server` (whole process, % of one core), 5 × 30 s each, the same session
 restarted with each build:
 
 | Build | Dots moving | Reduce motion (still) | Animation's cost |
@@ -1129,7 +1129,7 @@ moving, about 14 frames per second):
   the box around them; `paint_damage` joins pairs whose union wastes less than `DAMAGE_PASS_PX`
   (1,024 px, measured: 256 to 4,096 px all cost within 10 %), falls back to one box when they
   cover 70 % of it, and `paint_out` paints each one (clear, `paint_root` clipped to it). Only on
-  the CPU path and without a window being dragged; only with `LORD_DAMAGE=multi` (off by default
+  the CPU path and without a window being dragged; only with `INSANE_DAMAGE=multi` (off by default
   in 0.8.2, see above).
 - **Blurred surfaces** keep the 0.8.1 rule ("Paint: repaint a blurred surface whole"): a rectangle
   that touches a blurred node or the margin its blur samples grows to the whole node, and every
@@ -1244,7 +1244,7 @@ It runs outside the frame. While it draws, the screen shows the previous frame s
 - **Countries by IP:** DB-IP Lite Country © db-ip.com, CC BY 4.0 license
   (<https://creativecommons.org/licenses/by/4.0/>).
   - The attribution is shown in About Insane OS, at the foot of the map and in
-    `/usr/share/doc/lordos/copyright`.
+    `/usr/share/doc/insaneos/copyright`.
   - Source used: `dbip-country-lite-2026-10`.
 - **Country outlines and names:** Natural Earth (<https://www.naturalearthdata.com>), public
   domain.

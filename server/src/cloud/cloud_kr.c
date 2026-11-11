@@ -1,5 +1,5 @@
 /* cloud_kr.c — Cloud's secrets in the session keyring (docs/CLOUD.md 4.3): one item per account, owner "cloud",
- * service "cloud:<id>", the secret a JSON object of rclone options. lord-server's cloud thread asks lord-vault
+ * service "cloud:<id>", the secret a JSON object of rclone options. insane-server's cloud thread asks insane-vault
  * itself on the system channel (vc_request_wait): the reply never reaches JS. */
 #include "cloud_kr.h"
 #include "../sec/json.h"

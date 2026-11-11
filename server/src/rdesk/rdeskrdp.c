@@ -117,9 +117,9 @@ int rdesk_rdp(int sock, const char *host, const char *user, const char *domain, 
             if (!freerdp_client_add_device_channel(s, 3, params)) return 1;
         }
     }
-    /* the sound: played here (our rdpsnd device, into lord-server's ring), left on the remote computer, or none */
+    /* the sound: played here (our rdpsnd device, into insane-server's ring), left on the remote computer, or none */
     if (view->sound == RD_SOUND_HERE) {
-        const char *params[] = { "rdpsnd", "sys:lordos" };
+        const char *params[] = { "rdpsnd", "sys:insaneos" };
         freerdp_settings_set_bool(s, FreeRDP_AudioPlayback, TRUE);
         if (!freerdp_client_add_static_channel(s, 2, params)) return 1;
         /* servers that offer it send the sound over the dynamic channel (AUDIO_PLAYBACK_DVC): without our device there

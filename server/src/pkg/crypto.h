@@ -1,8 +1,8 @@
 /* crypto.h — just enough to verify Debian's signature: SHA-256, SHA-512, RSA (PKCS#1 v1.5)
  * and Ed25519. Our own code. Signing with Ed25519 is only used by .lpk packages (the user's own
  * key for "Share my version", see docs/SIGNING.md). */
-#ifndef LORD_PKG_CRYPTO_H
-#define LORD_PKG_CRYPTO_H
+#ifndef INSANE_PKG_CRYPTO_H
+#define INSANE_PKG_CRYPTO_H
 
 #include <stddef.h>
 #include <stdint.h>

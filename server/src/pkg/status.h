@@ -1,7 +1,7 @@
 /* status.h — installed packages, read from /var/lib/dpkg/status (read-only: the dpkg
  * database is written only by dpkg). */
-#ifndef LORD_PKG_STATUS_H
-#define LORD_PKG_STATUS_H
+#ifndef INSANE_PKG_STATUS_H
+#define INSANE_PKG_STATUS_H
 
 #include <stddef.h>
 #include <stdint.h>

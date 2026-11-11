@@ -3,7 +3,7 @@
 import {
   View, Text, TextInput, Button, Slider, SearchField, ToolbarButton, Hairline, useStore, useTheme, term, clipboard, clipboardHistory, useClock,
   t as tr, formatTime, weekdayName,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import {
   meta, patchWin, getWin, selectTab, closeTab, addTab, tabTitle, sessionTitle, leaves, recentDirs, notes,
@@ -65,7 +65,7 @@ function Tab({ t, wid, tab, active, index, maxChars, onMenu }) {
 export function TabBar({ t, wid, w, onTabMenu }) {
   const ref = useRef(null);
   const [width, setWidth] = useState(600);
-  useEffect(() => { if (ref.current) { const lw = lord.getLayout(ref.current.id)[2]; if (lw && Math.abs(lw - width) > 4) setWidth(lw); } });
+  useEffect(() => { if (ref.current) { const lw = insane.getLayout(ref.current.id)[2]; if (lw && Math.abs(lw - width) > 4) setWidth(lw); } });
   const tabW = Math.min(260, (width - 50) / Math.max(1, w.tabs.length));
   const maxChars = Math.max(6, Math.floor((tabW - 64) / 6.6));
   return (
@@ -93,8 +93,8 @@ function useClaude(info) {
   const pid = info?.fgPid;
   useEffect(() => {
     if (!on) { setC(null); return undefined; }
-    const home = lord.fs.home();
-    const read = (path) => { try { return lord.fs.read(path); } catch (e) { return null; } };
+    const home = insane.fs.home();
+    const read = (path) => { try { return insane.fs.read(path); } catch (e) { return null; } };
     let checked = 0, connected = null;
     const tick = () => {
       const s = parseSession(read(sessionFile(home, pid)), pid);
@@ -167,7 +167,7 @@ export function StatusBar({ t, sid, wid }) {
     return () => clearInterval(id);
   }, [sid]);
   if (!info) return null;
-  const home = lord.fs.home();
+  const home = insane.fs.home();
   const cwd = (m.cwd || info.cwd || '').replace(home, '~');
   const Item = ({ label, color, onClick }) => <Text onClick={onClick} style={small(t, { color: color || t.textDim })}>{label}</Text>;
   return (
@@ -274,7 +274,7 @@ export function Toolbelt({ t, wid, w, sid }) {
   const cmds = useStore(commandHistory);
   const caps = useStore(captured);
   const [note, setNote] = useState('');
-  const home = lord.fs.home();
+  const home = insane.fs.home();
   const profiles = terminalSettings().profiles;
   const sessions = w.tabs.flatMap((tab) => leaves(tab.root));
   const quote = (s) => `'${s.replace(/'/g, "'\\''")}'`;

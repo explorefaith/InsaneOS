@@ -1,6 +1,6 @@
 # Linux apps in Insane OS (Wayland)
 
-lord-server is also a **Wayland compositor**: GTK, Qt and any other app that speaks Wayland open
+insane-server is also a **Wayland compositor**: GTK, Qt and any other app that speaks Wayland open
 as Insane OS windows, inside the theme, next to the native apps. There's no X server of its own, Weston,
 wlroots or Mutter: only `libwayland-server` (it serializes the protocol; it's been in the dependency policy
 since M1) and the code `wayland-scanner` generates from the `wayland-protocols` XML files. The
@@ -8,7 +8,7 @@ compositor lives in `server/src/wl/wl.c`.
 Apps that only speak X11 open through Xwayland, started on demand, with our own X window manager
 (see "X11 apps (Xwayland)" below).
 
-## Screenshots (VM, real lord-server)
+## Screenshots (VM, real insane-server)
 
 | | |
 |---|---|
@@ -76,7 +76,7 @@ app id or by `StartupWMClass`).
 It's the second exception to "the server doesn't run commands"; the first is the Terminal's
 shell. The user approved it for M7. Limits:
 
-- `lord.apps.launch(id)` only receives the id of a `.desktop` in those two folders, which must
+- `insane.apps.launch(id)` only receives the id of a `.desktop` in those two folders, which must
   also pass the filters:
   - `Type=Application`;
   - no `NoDisplay` or `Hidden`;
@@ -86,7 +86,7 @@ shell. The user approved it for M7. Limits:
 - The command is that file's `Exec` line, re-read at launch time:
   - `argv` is built according to the specification (quotes and escapes);
   - file codes (`%f %u %F %U`) are removed and no caller arguments are passed;
-  - with `lord.apps.launchWith(id, path)` (Files' «Open With»), the path goes as a single
+  - with `insane.apps.launchWith(id, path)` (Files' «Open With»), the path goes as a single
     argument in the first `%f`/`%F` (or as `file://…` in `%u`/`%U`), and only if the app declares
     `MimeType` in its `.desktop`; the path is resolved with realpath and must be in the home
     folder or on a disk mounted by the user (`/media/$USER`, `/run/media/$USER`);
@@ -94,8 +94,8 @@ shell. The user approved it for M7. Limits:
   - the program is looked up in a fixed PATH (`/usr/local/bin`, `/usr/bin`, `/bin`, games, and
     `~/.local/bin` only for the user's `.desktop` files).
 - **Desktop actions (0.8.1):** the Dock's right-click menu lists the `Actions=` of an app's
-  `.desktop` (a browser's "New Private Window", for instance). `lord.apps.actions(id, language)`
-  returns `[{ id, name }]` and `lord.apps.launchAction(id, action)` runs one, through the **same**
+  `.desktop` (a browser's "New Private Window", for instance). `insane.apps.actions(id, language)`
+  returns `[{ id, name }]` and `insane.apps.launchAction(id, action)` runs one, through the **same**
   launcher (`apps_launch_action` → `launch()`): same id rules and filters, same scope, restrictions
   and fixed PATH, no shell, no caller arguments, no file. Only that action's `Exec` line replaces the
   main one, and only if:
@@ -106,9 +106,9 @@ shell. The user approved it for M7. Limits:
   Anything else (an unlisted group, a bad name, no `Exec`) is refused. Tested by
   `build/apps-actions-test` (in `make test`).
 - The app starts as an orphaned grandchild, in its own session, with normal signals and no other
-  descriptors. Its output goes to `~/.cache/lordos/apps.log`, which is trimmed when it passes 1 MB.
+  descriptors. Its output goes to `~/.cache/insaneos/apps.log`, which is trimmed when it passes 1 MB.
 - A `.desktop` can't be created from JS:
-  - `lord.fs.write` rejects `~/.local/share/applications` and `~/.config/autostart`, also
+  - `insane.fs.write` rejects `~/.local/share/applications` and `~/.config/autostart`, also
     through a symlink (see `EDITOR.md`);
   - `.lpk` packages are installed in another folder.
 
@@ -118,13 +118,13 @@ shell. The user approved it for M7. Limits:
   and `-` turned into `-` (`Insane OS-Imager`), and the app is listed and launched from its real file;
   the id rules above are unchanged. The two folders' modification times are compared in nanoseconds,
   so an app installed in the same second the list was last read also shows up.
-- **Force Quit (0.8.5):** `lord.wayland.kill(surface)` sends SIGKILL only to the Wayland client that
-  owns that surface, a process of the same user, never `lord-server`; X11 windows are only asked to
+- **Force Quit (0.8.5):** `insane.wayland.kill(surface)` sends SIGKILL only to the Wayland client that
+  owns that surface, a process of the same user, never `insane-server`; X11 windows are only asked to
   close (`WINDOWS.md`, "The Window menu, the app menu and Force Quit").
 
 Icons: the `hicolor` PNG (64, 48, 128… px) or the one in `/usr/share/pixmaps` is used. Apps that
 only ship SVG (FeatherPad, GTK Demo) use the 64 px PNG Debian publishes in AppStream, which the
-package engine already downloads (`/var/lib/lordos/pkg/icons/64`, see `PACKAGES.md`). If it's not
+package engine already downloads (`/var/lib/insaneos/pkg/icons/64`, see `PACKAGES.md`). If it's not
 there either, the initial is shown: Insane OS doesn't draw SVG yet.
 
 ## Clipboard
@@ -148,8 +148,8 @@ There's a single one for the whole session:
 **History (❖V quick, ❖⇧V full):** it keeps everything copied anywhere: text, links, colors,
 code, paths and images, with the source (the app_id of the Linux app that copied). It's stored in
 the home folder and survives reboots. Image previews are first stored in
-`$XDG_RUNTIME_DIR/lordos` (the last 10 are kept) and the history copies them to
-`~/.local/share/lordos/clipboard`. Whatever an app marks as secret
+`$XDG_RUNTIME_DIR/insaneos` (the last 10 are kept) and the history copies them to
+`~/.local/share/insaneos/clipboard`. Whatever an app marks as secret
 (`x-kde-passwordManagerHint`, like KeePassXC) can be pasted, but isn't stored. Details in
 `SPOTLIGHT.md`.
 
@@ -168,10 +168,10 @@ the home folder and survives reboots. Image previews are first stored in
 5. After each frame is presented, the apps' `frame` callbacks are answered (so they don't draw
    faster than the screen).
 
-Memory: with foot, FeatherPad and GTK Demo open, lord-server goes from ~51 to 53 MB of RSS
+Memory: with foot, FeatherPad and GTK Demo open, insane-server goes from ~51 to 53 MB of RSS
 (each window keeps a copy of its buffer).
 
-**Moving and resizing** (`xdg_toplevel.move`/`resize`) is tracked by lord-server in C, with no JS
+**Moving and resizing** (`xdg_toplevel.move`/`resize`) is tracked by insane-server in C, with no JS
 per frame, just like Insane OS windows; while it lasts, the app doesn't receive the pointer. All
 Linux windows, including those with their own frame, have the theme's invisible borders for
 resizing (see `WINDOWS.md`).
@@ -200,11 +200,11 @@ An app chooses; Insane OS **prefers** its own frame and honors the app's answer.
 - **`org_kde_kwin_server_decoration`** (GTK 3, so Firefox and Mousepad): default «server»;
   `request_mode(client)` is answered «client».
 - **Live.** When an open window changes mode (Chromium's «Use system title bar and borders»,
-  Firefox's «Title Bar»), lord-server sends JS a `deco` event (`{ csd }`) and `sdk/wayland.js` sets
+  Firefox's «Title Bar»), insane-server sends JS a `deco` event (`{ csd }`) and `sdk/wayland.js` sets
   `args.csd` on the **same** window (`wm.setArgs`): place, size (the outer frame stays where it was;
   the content grows or shrinks by the theme's bar and the app gets a `configure`), maximized state,
   focus and Dock entry don't change.
-- **Before 0.8.4** lord-server answered `SERVER_SIDE` whatever the app asked. Chromium with its own
+- **Before 0.8.4** insane-server answered `SERVER_SIDE` whatever the app asked. Chromium with its own
   bar then drew its tab strip and buttons and Insane OS put its frame on top: two bars.
 - Tested with `build/deco-client` (`server/tests/deco_client.c`, run inside a session): every mode
   request in both protocols, before and after mapping, with the `xdg_surface.configure` that must
@@ -251,7 +251,7 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   (`custom_chrome_frame` on) with the **Classic** theme, whose window buttons are Chromium's own
   (minimize, maximize and close glyphs, on Insane OS's side and in its order), not Insane OS's traffic
   lights; next to native windows they look like the Insane Classic theme's. Not a Insane OS frame or
-  decoration bug: lord-server answers Brave's `xdg-decoration` request (it runs as a native Wayland
+  decoration bug: insane-server answers Brave's `xdg-decoration` request (it runs as a native Wayland
   client, `--ozone-platform=wayland`) exactly as Chromium's, and with the GTK theme the same Brave
   draws the traffic lights. The switch below now also writes Brave's profiles
   (`~/.config/BraveSoftware/Brave-Browser`), and Store → Third-party apps installs it; in Brave
@@ -264,11 +264,11 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   |---|---|
   | ![brave classic](brave-classic-theme.png) | ![brave gtk](brave-gtk-theme.png) |
   | A new Brave profile: its own bar with the Classic theme's buttons | After the switch («Change them»): the same profile with Insane OS's traffic lights |
-- **Firefox ESR.** `/etc/firefox-esr/lordos.js` has `pref("browser.tabs.inTitlebar", 1)`: its own
+- **Firefox ESR.** `/etc/firefox-esr/insaneos.js` has `pref("browser.tabs.inTitlebar", 1)`: its own
   bar, with the window buttons in Insane OS's order and side (it reads the same `button-layout`), drawn
   in Firefox's own style: Firefox draws those buttons itself, not with the GTK theme, so they aren't
   traffic lights. Back to the Insane OS frame: Customize Toolbar → «Title Bar». Firefox draws with GTK
-  3, which doesn't speak xdg-decoration: lord-server also advertises
+  3, which doesn't speak xdg-decoration: insane-server also advertises
   **`org_kde_kwin_server_decoration_manager`** (KDE's), with «server» as the default mode, so GTK 3
   windows without their own bar (Firefox with «Title Bar», Mousepad) ask Insane OS for the frame. The
   protocol tables are hand-written in `wl.c`, without plasma-wayland-protocols' XML.
@@ -283,7 +283,7 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   theme, so the button stays 16 px and the circle is a 13 px radial gradient inside it; measured on
   the VM: 12–13 px circles, 21 px from center to center, like Insane OS's own frame.
 - **GTK 4 / libadwaita (GNOME).** They read the mode, the accent and the button order from
-  **`org.freedesktop.portal.Settings`**, and **`org.freedesktop.portal.FileChooser`** for apps with no file dialog of their own (`OpenFile`, `SaveFile`, version 2 so browsers keep theirs; the dialog is the shell's, inside the home folder, and the answer goes only to the app that asked). lord-server itself serves both (`server/src/ui/portal.c`)
+  **`org.freedesktop.portal.Settings`**, and **`org.freedesktop.portal.FileChooser`** for apps with no file dialog of their own (`OpenFile`, `SaveFile`, version 2 so browsers keep theirs; the dialog is the shell's, inside the home folder, and the answer goes only to the app that asked). insane-server itself serves both (`server/src/ui/portal.c`)
   on the session bus, without xdg-desktop-portal, with Passwords' own D-Bus client
   (`server/src/vault/dbus.c`). Keys:
   - `org.freedesktop.appearance`: `color-scheme`, `accent-color`, `contrast`;
@@ -293,7 +293,7 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   When they change, `SettingChanged` is sent. If another program already owns the name
   `org.freedesktop.portal.Desktop`, Insane OS doesn't take it over and says so in the log.
 - **GTK 3.** Outside Flatpak it doesn't read the portal: it reads GSettings.
-  - lord-server passes `GSETTINGS_BACKEND=keyfile` to the apps and writes the same keys to
+  - insane-server passes `GSETTINGS_BACKEND=keyfile` to the apps and writes the same keys to
     `~/.config/glib-2.0/settings/keyfile`, without deleting what the apps store. GLib watches that
     file, so GTK 3 also changes live.
   - The `Insane OS`/`Insane OS-dark` theme (`assets/gtk/`, installed in `/usr/share/themes`) is Adwaita
@@ -306,8 +306,8 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   `appmenu:close`: a lone close button on the right, which is what an app shows when it reads neither
   the keyfile nor the portal: one restricted to «no access to your files» (its view has no
   `~/.config/glib-2.0` and no session bus), one started outside the session, or one on X11 (Xwayland),
-  where GTK reads only XSETTINGS, which Insane OS doesn't serve. The `lordos` package now ships
-  `/usr/share/glib-2.0/schemas/90_lordos.gschema.override` (GLib's dpkg trigger compiles it) and
+  where GTK reads only XSETTINGS, which Insane OS doesn't serve. The `insaneos` package now ships
+  `/usr/share/glib-2.0/schemas/90_insaneos.gschema.override` (GLib's dpkg trigger compiles it) and
   `/etc/gtk-3.0/settings.ini` and `/etc/gtk-4.0/settings.ini` (`gtk-decoration-layout`), both with
   Insane Flow's `close,minimize,maximize:`. They are defaults only: a value stored by the user or the
   theme (the keyfile) wins, and `~/.config/gtk-3.0/settings.ini` wins over `/etc`. Those apps don't
@@ -316,7 +316,7 @@ What a window with its own bar still gets from Insane OS (both themes, `WINDOWS.
   agree.
 - **Qt/KDE.** They use the theme's frame (xdg-decoration). Qt 6 also reads `color-scheme` from the
   portal; not tested.
-- **The JS.** The SDK's `ThemeProvider` sends mode, accent and buttons with `lord.portal.set` when
+- **The JS.** The SDK's `ThemeProvider` sends mode, accent and buttons with `insane.portal.set` when
   they change.
 
 ### The switch in Settings (0.8.4)
@@ -335,8 +335,8 @@ own profiles, only when the switch is turned (never by itself at login):
 
 *Switch off: the same Chromium profile with the Insane OS frame.*
 
-- **Who writes:** `lord-server`, as the user, in C (`server/src/hw/brframe.c`, exposed as
-  `lord.browserFrame` in `ui/js_hw.c`; the page is `apps/settings/BrowserFrame.jsx`, the logic
+- **Who writes:** `insane-server`, as the user, in C (`server/src/hw/brframe.c`, exposed as
+  `insane.browserFrame` in `ui/js_hw.c`; the page is `apps/settings/BrowserFrame.jsx`, the logic
   `sdk/browserframe.js`). No program is run and JS passes no path: only `on`/`off` and which
   browser. The folders are fixed (`$XDG_CONFIG_HOME` or `~/.config`, and `~`); every file is opened
   without following links, must be a regular file owned by the user and is size-capped.
@@ -354,15 +354,15 @@ own profiles, only when the switch is turned (never by itself at login):
   it quits. The edit is surgical: only those values change, the rest of the file stays byte for
   byte; the file must parse as JSON before (strict reader, `sec/json.c`) and after, with the asked
   value in it; a malformed or unexpected file (`browser` not an object, an escaped duplicate key) is
-  left alone and reported. The previous file goes to `Preferences.lordos-backup`, then the new one
+  left alone and reported. The previous file goes to `Preferences.insaneos-backup`, then the new one
   is written next to it (`O_EXCL`, `fsync`) and renamed over it, keeping its mode. Chromium
   accepts the edited file (tested with Chromium 155: no reset, the value survives its own rewrite).
 - **Firefox** (`~/.config/mozilla/firefox`, where Firefox 153 makes new profiles, and the legacy
   `~/.mozilla/firefox`; the relative profiles of `profiles.ini`): one marked line
-  `user_pref("browser.tabs.inTitlebar", 1|0); // lordos: …` in `user.js`, which Firefox reads at
+  `user_pref("browser.tabs.inTitlebar", 1|0); // insaneos: …` in `user.js`, which Firefox reads at
   start, so it can be written while Firefox runs (it applies when Firefox restarts). Not needed
   when `prefs.js` already holds the value. A `user.js` line the user wrote themselves is never
-  touched («kept», and the page says so). At login `lord.browserFrame.tidy()` removes Insane OS's line
+  touched («kept», and the page says so). At login `insane.browserFrame.tidy()` removes Insane OS's line
   again once Firefox has started with it (its `lock` link or `.parentlock` newer than `user.js`,
   the profile not open: a live `.parentlock` lock or a `lock` link to a live `firefox` process), so
   a later choice in Firefox's own «Title Bar» sticks. `prefs.js` is only read, never written.
@@ -394,22 +394,22 @@ like any other Linux app.
 | | |
 |---|---|
 | ![xterm](xwayland-xterm.png) | ![menu](xwayland-xterm-menu.png) |
-| XTerm opened from search: the theme's frame, its icon in the Dock (`StartupWMClass=XTerm`), the menu bar, and its process in `app-lordos-debian-xterm.scope` | XTerm's Ctrl+click menu: an override-redirect X window, drawn above the Dock |
+| XTerm opened from search: the theme's frame, its icon in the Dock (`StartupWMClass=XTerm`), the menu bar, and its process in `app-insaneos-debian-xterm.scope` | XTerm's Ctrl+click menu: an override-redirect X window, drawn above the Dock |
 | ![swing](xwayland-swing-clipboard.png) | ![combo](xwayland-swing-combo.png) |
 | A Swing app (OpenJDK 21): pasted with Ctrl+V what a Wayland app copied | Its list, the pointer at the right place |
 | ![neverball](xwayland-neverball.png) | ![fullscreen](xwayland-neverball-fullscreen.png) |
 | Neverball with `SDL_VIDEODRIVER=x11` (OpenGL through Mesa) | Its "Fullscreen" option: `_NET_WM_STATE_FULLSCREEN`, presented by the compositor |
 | ![gpu](xwayland-gpu.png) | ![firewall](xwayland-firewall.png) |
-| The same on the GPU composition path (`LORD_GPU=1`) | XTerm restricted to no internet (Settings → Firewall): its `curl` is refused, the per-app rules apply to X11 apps |
+| The same on the GPU composition path (`INSANE_GPU=1`) | XTerm restricted to no internet (Settings → Firewall): its `curl` is refused, the per-app rules apply to X11 apps |
 
 ### How it starts (`server/src/wl/xwayland.c`)
 
 - At the start of a user session (not the login screen, not app mode), if `/usr/bin/Xwayland`
-  exists, lord-server reserves a display: the lock file `/tmp/.X<n>-lock` and the socket
+  exists, insane-server reserves a display: the lock file `/tmp/.X<n>-lock` and the socket
   `/tmp/.X11-unix/X<n>` with mode **0600** (only this user's programs can connect; no abstract
   socket, no TCP). It sets `DISPLAY=:<n>` (and `_JAVA_AWT_WM_NONREPARENTING=1`, see below) for the
   apps it starts. **Nothing else runs.**
-- When the first X11 client connects, lord-server starts Xwayland with a fixed argument list:
+- When the first X11 client connects, insane-server starts Xwayland with a fixed argument list:
 
   ```
   /usr/bin/Xwayland :<n> -rootless -listenfd 3 -wm 5 -nolisten tcp -extension XTEST
@@ -420,20 +420,20 @@ like any other Linux app.
   window manager's connection. This is the fourth launcher exception (`AGENTS.md`): the binary must
   be a root-owned file nobody else can write; there are no arguments from JS or from anyone; the
   only trigger is a connection to the session's own X socket.
-- Xwayland runs in its own scope (`lordos-xwayland.scope`, never lord-server's), in an empty network
+- Xwayland runs in its own scope (`insaneos-xwayland.scope`, never insane-server's), in an empty network
   namespace inside a user namespace that maps only the user (it has no network at all), with
-  `no_new_privs`, a minimal environment and its log in `~/.cache/lordos/xwayland.log`. **XTEST is
+  `no_new_privs`, a minimal environment and its log in `~/.cache/insaneos/xwayland.log`. **XTEST is
   off**: an X11 app can't type or click into another one with synthetic input.
 - **Off when unused.** The window manager is an X client too, so Xwayland's own `-terminate` never
   fires: 10 s after the last X window closes, the window manager asks the X-Resource extension
   whether any other client is still connected (a clipboard tool without windows) and, if none,
-  stops Xwayland. The socket stays in lord-server, so the next X11 app starts it again (about a
+  stops Xwayland. The socket stays in insane-server, so the next X11 app starts it again (about a
   second). Three failed starts in a row → X11 apps are refused for a minute (logged).
 
 ### The window manager (`server/src/wl/xwm.c`, `x11wire.c`)
 
 Our own, in C: it speaks the X11 protocol itself (no libxcb or libX11, dependency policy), fully
-asynchronously, so lord-server never waits on Xwayland while Xwayland waits on the compositor.
+asynchronously, so insane-server never waits on Xwayland while Xwayland waits on the compositor.
 
 - **Windows.** It redirects the root's children (Composite, manual: rootless Xwayland then gives each
   top-level window a `wl_surface` and says which with `WL_SURFACE_ID`), takes SubstructureRedirect
@@ -498,7 +498,7 @@ display.
   X apps while no X window has the keyboard.
 - `tests/xwayland/keysnoop.sh`: an X keylogger (polling the X keyboard state) sees the keys typed
   into an X window, and **none** of those typed into Passwords.
-- On VM 118 (CPU path and `LORD_GPU=1` with llvmpipe): xeyes, XTerm, a Swing app (OpenJDK 21),
+- On VM 118 (CPU path and `INSANE_GPU=1` with llvmpipe): xeyes, XTerm, a Swing app (OpenJDK 21),
   Neverball with `SDL_VIDEODRIVER=x11` (windowed and fullscreen), menus, move and resize from the
   frame, close, the Dock icons, Xwayland stopping 10 s after the last app and starting again, the
   firewall restriction on XTerm, and the protected-window checks in `PRIVACY.md`.
@@ -525,7 +525,7 @@ display.
 - **The selection goes to the focused client, its owner included.** `offer_selection` and `prim_offer_to`
   used to skip the client that set the selection; the protocol says the client with the keyboard gets every
   new selection. Now it does, and `dev_set_selection` offers the new selection at once (a receive from the
-  owner is forwarded to its own source). Found by `lordos-testbench` (`docs/PAPER-VALIDATION.md`).
+  owner is forwarded to its own source). Found by `insaneos-testbench` (`docs/PAPER-VALIDATION.md`).
 - **`zwp_idle_inhibit_manager_v1`**: a video player or a presentation creates an inhibitor on its surface;
   while that surface is mapped, `wl_idle_inhibited()` is true and `main.c` resets the idle timers (screen off,
   lock, sleep; Settings → Battery) on every loop.

@@ -1,7 +1,7 @@
 // fwrule.js — checks and normalizes what the user types for a firewall rule (Settings → Privacy →
 // per-app network, and the Monitor's "Allow / Block this domain"), with the same rules as the C
 // store (server/src/fw/rules.c: fw_parse_dest, fw_format_dest, norm_domain; docs/FIREWALL.md).
-// lord.fw.addRule validates again in C: this module only lets the sheet say what is wrong before
+// insane.fw.addRule validates again in C: this module only lets the sheet say what is wrong before
 // saving, and shows the rules in the order the engine weighs them. Pure functions, no imports, so
 // node can test them (server/tests/fwrule_input_test.mjs, against the C parser with the shared cases
 // in server/tests/fw_dest_cases.txt).
@@ -225,7 +225,7 @@ export const sortByPrecedence = (rules) => [...rules].sort(comparePrecedence);
 
 // ---- one destination's verdict (the Monitor's per-domain switch, 0.8.2) --------------------------
 // The same decision fw_decide makes for one connection of an app (rules.c, docs/FIREWALL.md
-// "Precedence"), over that app's rules as lord.fw.rules(app) lists them: the restrictions first,
+// "Precedence"), over that app's rules as insane.fw.rules(app) lists them: the restrictions first,
 // then the most specific matching rule. Without a rule the mode decides (null here: allowed in the
 // silent and off modes). server/tests/fw_domain_cases.txt is run through both this and fw_decide
 // (build/fwdest-test and fwrule_input_test.mjs), so the Monitor shows what the kernel will do.

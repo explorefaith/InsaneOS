@@ -213,7 +213,7 @@ static void test_mimeapps(void) {
     CHECK(mime_valid("image/svg+xml"));
     CHECK(!mime_valid("text") && !mime_valid("/plain") && !mime_valid("text/") && !mime_valid("a/b/c") && !mime_valid("Text/plain"));
     CHECK(!mime_valid("text/pl ain") && !mime_valid("text/plain;"));
-    CHECK(desktop_id_valid("org.gnome.Evince.desktop") && desktop_id_valid("lordos-photos.desktop"));
+    CHECK(desktop_id_valid("org.gnome.Evince.desktop") && desktop_id_valid("insaneos-photos.desktop"));
     CHECK(!desktop_id_valid("../x.desktop") && !desktop_id_valid("a/b.desktop") && !desktop_id_valid("x.desk") && !desktop_id_valid(".desktop"));
     CHECK(!desktop_id_valid("-x.desktop") && !desktop_id_valid("a b.desktop"));
 
@@ -242,11 +242,11 @@ static void test_mimeapps(void) {
     CHECK(strstr(t2, "[Default Applications]\ntext/plain=mousepad.desktop;\napplication/pdf=bad/../id;org.gnome.Evince.desktop;\n\n[Removed"));
     CHECK(strstr(t2, "[Added Associations]\ntext/plain=mousepad.desktop;\n\n"));
     CHECK(strstr(t2, "image/png=gimp.desktop;\n"));
-    char *t3 = mimeapps_set_default(t2, "image/png", "lordos-photos.desktop");
-    CHECK(t3 && mimeapps_default(t3, "image/png", id, sizeof id) == 0 && !strcmp(id, "lordos-photos.desktop"));
+    char *t3 = mimeapps_set_default(t2, "image/png", "insaneos-photos.desktop");
+    CHECK(t3 && mimeapps_default(t3, "image/png", id, sizeof id) == 0 && !strcmp(id, "insaneos-photos.desktop"));
     /* new key goes at the end of its group, before the blank line */
-    CHECK(t3 && strstr(t3, "application/pdf=bad/../id;org.gnome.Evince.desktop;\nimage/png=lordos-photos.desktop;\n\n[Removed"));
-    CHECK(t3 && strstr(t3, "[Added Associations]\ntext/plain=mousepad.desktop;\nimage/png=lordos-photos.desktop;\n"));
+    CHECK(t3 && strstr(t3, "application/pdf=bad/../id;org.gnome.Evince.desktop;\nimage/png=insaneos-photos.desktop;\n\n[Removed"));
+    CHECK(t3 && strstr(t3, "[Added Associations]\ntext/plain=mousepad.desktop;\nimage/png=insaneos-photos.desktop;\n"));
     char *t4 = mimeapps_set_default(t3, "text/plain", "org.gnome.TextEditor.desktop");
     CHECK(t4 && strstr(t4, "[Added Associations]\ntext/plain=org.gnome.TextEditor.desktop;mousepad.desktop;\n"));
     free(t2); free(t3); free(t4);
@@ -291,7 +291,7 @@ static void wfile(const char *dir, const char *dev, const char *name, const char
 }
 
 static void test_power(void) {
-    char dir[] = "/tmp/lord-power-test-XXXXXX";
+    char dir[] = "/tmp/insane-power-test-XXXXXX";
     if (!mkdtemp(dir)) { CHECK(0); return; }
     PowerState ps;
     CHECK(power_read(dir, &ps) == 0 && !ps.has_battery && ps.on_ac && ps.percent == -1);

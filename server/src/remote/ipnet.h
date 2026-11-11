@@ -1,11 +1,11 @@
 /* ipnet.h — addresses, networks (CIDR) and the remote desktop's address rules (docs/REMOTE.md,
- * "Security analysis (0.8.3)"). Plain libc: shared by lord-sessiond (who may connect) and the
+ * "Security analysis (0.8.3)"). Plain libc: shared by insane-sessiond (who may connect) and the
  * admin helper (the remote-block / remote-unblock / remote-allow actions validate with it).
  *
  * An IPv4 address is kept as its IPv4-mapped IPv6 form (::ffff:a.b.c.d), so one comparison covers
  * both families; prefixes of IPv4 networks are stored +96. */
-#ifndef LORD_REMOTE_IPNET_H
-#define LORD_REMOTE_IPNET_H
+#ifndef INSANE_REMOTE_IPNET_H
+#define INSANE_REMOTE_IPNET_H
 
 #include <stddef.h>
 
@@ -35,7 +35,7 @@ int  rs_key_parse(const char *key, RsCidr *c);              /* the reverse; 0 if
 /* Private, loopback, link-local, CGNAT and unique-local ranges (never public internet). */
 int  rs_addr_is_local(const RsAddr *a);
 
-/* Manual lists (/etc/lordos/remote/access, written only by the admin actions):
+/* Manual lists (/etc/insaneos/remote/access, written only by the admin actions):
  *   allow <cidr>      networks for net=list
  *   block <cidr>      blocked until removed */
 typedef struct { RsCidr allow[RS_ACCESS_MAX]; int nallow; RsCidr block[RS_ACCESS_MAX]; int nblock; } RsAccess;

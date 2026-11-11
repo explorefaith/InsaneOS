@@ -1,4 +1,4 @@
-# LordOS Imager desktop downloads (docs/IMAGER.md, "Building the desktop downloads"). Builds the Mac,
+# InsaneOS Imager desktop downloads (docs/IMAGER.md, "Building the desktop downloads"). Builds the Mac,
 # Windows and Linux downloads on hosted runners and keeps them as workflow artifacts. Runs only by
 # hand: nothing is published or signed here.
 name: Imager desktop downloads
@@ -39,11 +39,11 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: node build-web.mjs
       - name: Core tests
-        run: cargo test -p lordos-imager-core
+        run: cargo test -p insaneos-imager-core
       - run: npx tauri build --bundles ${{ matrix.bundles }}
       - uses: actions/upload-artifact@v4
         with:
-          name: lordos-imager-${{ matrix.label }}
+          name: insaneos-imager-${{ matrix.label }}
           path: |
             desktop/imager/target/release/bundle/dmg/*.dmg
             desktop/imager/target/release/bundle/nsis/*.exe

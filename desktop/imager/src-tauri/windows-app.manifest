@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <!-- LordOS Imager: writing a whole USB drive or SD card needs administrator rights -->
+  <!-- InsaneOS Imager: writing a whole USB drive or SD card needs administrator rights -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>

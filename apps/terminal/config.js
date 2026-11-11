@@ -1,14 +1,14 @@
 // config.js — where the Terminal's configuration lives (docs/TERMINAL.md, "Configuration file"): profiles, schemes,
 // key mappings, shortcuts, the hotkey and the windows to restore, in their own file instead of settings.json.
-// lord.termconf (server/src/termconf.c) reads and writes it: atomically, 0600, with five rotating backups, and
-// protected from lord.fs wherever it is. settings.json keeps only the chosen place ("terminalConfigPath").
+// insane.termconf (server/src/termconf.c) reads and writes it: atomically, 0600, with five rotating backups, and
+// protected from insane.fs wherever it is. settings.json keeps only the chosen place ("terminalConfigPath").
 //
 //   termConfig            the store: { data, path, cache, custom, readOnly, problem, reloaded }
 //   loadTermConfig()      at the first use: the chosen place, the migration out of settings.json, the read
 //   saveTermConfig(data)  the whole configuration (in memory only while read-only)
 //   chooseLocation(path, how)  'move' (write the current configuration there) | 'use' (read the one that is there)
 //   retryTermConfig()     read the chosen file again (a disk mounted, a folder put back)
-import { settings, createStore } from '@lordos/sdk';
+import { settings, createStore } from '@insaneos/sdk';
 
 export const SCHEMA = 1;
 
@@ -20,7 +20,7 @@ export const termConfig = createStore({
   reloaded: 0,               // goes up when the file was changed from outside and read again
 });
 
-const api = () => (typeof lord !== 'undefined' && lord.termconf && typeof lord.termconf.setPath === 'function' ? lord.termconf : null);
+const api = () => (typeof insane !== 'undefined' && insane.termconf && typeof insane.termconf.setPath === 'function' ? insane.termconf : null);
 const fail = (code) => Object.assign(new Error(code), { code });
 let mtime = 0, timer = null, loaded = false;
 
@@ -65,7 +65,7 @@ export function loadTermConfig() {
   if (loaded) return;
   loaded = true;
   const a = api();
-  if (!a) {                                         // no lord.termconf (an old server): as before
+  if (!a) {                                         // no insane.termconf (an old server): as before
     termConfig.set((s) => ({ ...s, data: settings.get().terminal || {} }));
     return;
   }

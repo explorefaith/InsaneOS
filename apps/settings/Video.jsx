@@ -2,7 +2,7 @@
 // Never) and "Lower quality automatically when video stutters" (docs/VIDEO.md). The SDK (sdk/video.js)
 // finds out what the hardware decodes and writes the browsers' settings with the closed admin
 // action video-optimize.
-import { useLocale, useStore, Toggle, videoPrefs, setVideoPrefs, videoHardware, videoError, videoOptimizing, useSettings } from '@lordos/sdk';
+import { useLocale, useStore, Toggle, videoPrefs, setVideoPrefs, videoHardware, videoError, videoOptimizing, useSettings } from '@insaneos/sdk';
 import { Section, SettingRow, PopUp, Note } from './ui.jsx';
 
 function statusText(tr, prefs, hw) {

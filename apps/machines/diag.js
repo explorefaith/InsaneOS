@@ -1,11 +1,11 @@
-// diag.js — unified diagnostics (6.19): one place that says what a machine did, from what lord-vm wrote (run.json
-// through lord.vm.list, the machine log) and what the library knows (snapshots, saved session, shared base). Pure: the
+// diag.js — unified diagnostics (6.19): one place that says what a machine did, from what insane-vm wrote (run.json
+// through insane.vm.list, the machine log) and what the library knows (snapshots, saved session, shared base). Pure: the
 // Logs window feeds it, server/tests/vm_model_test.mjs checks it.
 
 const TIME = /^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)[.\d]*Z\s+(.*)$/;
 const PROBLEM = /(fail|error|refus|crash|killed|panic|cannot|can't|couldn't|lost|stopped unexpectedly)/i;
 
-// the last run's lines of lord-vm.log → the facts the Overview shows
+// the last run's lines of insane-vm.log → the facts the Overview shows
 export function readLog(text) {
   const out = { started: '', version: '', sandbox: '', cgroup: '', network: [], recovery: [], problems: [], notes: [] };
   for (const raw of String(text || '').split('\n')) {
@@ -13,7 +13,7 @@ export function readLog(text) {
     const at = m ? m[1].replace('T', ' ') : '';
     const l = m ? m[2] : raw;
     if (!l.trim()) continue;
-    if (/^lord-vm \d+: machine /.test(l)) { out.started = at; out.recovery = []; out.problems = []; out.network = []; out.notes = []; out.cgroup = ''; }
+    if (/^insane-vm \d+: machine /.test(l)) { out.started = at; out.recovery = []; out.problems = []; out.network = []; out.notes = []; out.cgroup = ''; }
     else if (l.startsWith('qemu: version ')) out.version = l.slice(14);
     else if (/^qemu: pid \d+; sandbox: /.test(l)) out.sandbox = l.replace(/^qemu: pid \d+; sandbox: /, '');
     else if (l.startsWith('cgroup: ')) { if (!out.cgroup || /^in |nested leaves/.test(l.slice(8))) out.cgroup = l.slice(8); }

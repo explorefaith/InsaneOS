@@ -577,7 +577,7 @@ static void fill_event(const IcComp *c, IcEvent *e) {
     IcProp *co = ic_prop(c, "COMPLETED");
     if (co) ic_time(co, &e->completed, &ad, tz, sizeof tz);
     if (!e->completed && !strcmp(e->status, "COMPLETED")) e->completed = e->modified ? e->modified : 1;
-    IcProp *fl = ic_prop(c, "X-LORDOS-FLAGGED");
+    IcProp *fl = ic_prop(c, "X-INSANEOS-FLAGGED");
     if (fl) e->flagged = bnum(fl->value, 0, 1, 0, NULL) != 0;
     IcProp *rel = ic_prop(c, "RELATED-TO");
     if (rel) ic_unescape(rel->value, e->parent_uid, sizeof e->parent_uid);
@@ -1034,7 +1034,7 @@ char *ical_build(const IcBuild *x, size_t *olen) {
             fmt_utc(x->completed > 1 ? x->completed : (int64_t)time(NULL), c, sizeof c);
             jb_printf(&b, "STATUS:COMPLETED\r\nCOMPLETED:%s\r\nPERCENT-COMPLETE:100\r\n", c);
         } else jb_raw(&b, "STATUS:NEEDS-ACTION\r\n");
-        if (x->flagged) jb_raw(&b, "X-LORDOS-FLAGGED:1\r\n");
+        if (x->flagged) jb_raw(&b, "X-INSANEOS-FLAGGED:1\r\n");
         kv(&b, "RELATED-TO", x->parent_uid);
     }
     for (int i = 0; i < x->nalarms && i < 8; i++) {

@@ -1,8 +1,8 @@
 /* actions.c — the "net-*" actions of the privileged helper (admin.c). Each one validates its
  * argument here; none passes user text to a shell or as free-form arguments.
  *
- *   net-restore                 at startup: applies the configs in /etc/lordos/net/if and brings up DHCP
- *                               (and Wi-Fi) on the free interfaces. With lord-netd it runs it itself
+ *   net-restore                 at startup: applies the configs in /etc/insaneos/net/if and brings up DHCP
+ *                               (and Wi-Fi) on the free interfaces. With insane-netd it runs it itself
  *                               at boot ("system"), and for each one that appears later; see admin.c
  *   net-up / net-down <if>
  *   net-config <if>\n<lines>    method=dhcp|static|off, address=ip/prefix (several),
@@ -23,7 +23,7 @@
  *   net-vpn-up / net-vpn-down / net-vpn-delete <name>
  *   net-vpn-status [name]       LOG per VPN (JSON) and OK
  *
- * lord-netd also hears the computer wake from sleep (net_wake_event, below; wake.c). */
+ * insane-netd also hears the computer wake from sleep (net_wake_event, below; wake.c). */
 #include "net.h"
 #include "netpriv.h"
 #include "vpn.h"
@@ -268,10 +268,10 @@ static int wpa_has_networks(const char *name) {
 
 static void wake_logf(const char *name, const char *what, int why) {
     if (why != WK_OK) {
-        fprintf(stderr, "lord-netd: after sleep: %s: %s (%s)\n", name, what, wake_why(why));
+        fprintf(stderr, "insane-netd: after sleep: %s: %s (%s)\n", name, what, wake_why(why));
         admin_event("net wake %s %s %s", name, what, wake_why(why));
     } else {
-        fprintf(stderr, "lord-netd: after sleep: %s: %s\n", name, what);
+        fprintf(stderr, "insane-netd: after sleep: %s: %s\n", name, what);
         admin_event("net wake %s %s", name, what);
     }
 }
@@ -352,7 +352,7 @@ void net_wake_event(int sleeping, const char *source) {
         wake_snap_set = 1;
         wake_snap_gap = gap;
         if (ifs) if_freenameindex(ifs);
-        fprintf(stderr, "lord-netd: going to sleep (%s)\n", source);
+        fprintf(stderr, "insane-netd: going to sleep (%s)\n", source);
         return;
     }
     long now = mono_ms();
@@ -378,7 +378,7 @@ void net_wake_event(int sleeping, const char *source) {
         else want = wpa_has_networks(name);                 /* not known: a radio with saved networks */
         if (want) names[n++] = name;
     }
-    fprintf(stderr, "lord-netd: woke from sleep (%s, %ld s asleep): renewing %d wired, checking %d Wi-Fi\n",
+    fprintf(stderr, "insane-netd: woke from sleep (%s, %ld s asleep): renewing %d wired, checking %d Wi-Fi\n",
             source, snap_ok ? (gap - wake_snap_gap) / 1000 : -1L, wired, n);
     wake_begin(&wake_t, names, n, now);
     wake_snap_set = 0;
@@ -418,9 +418,9 @@ void net_watch_run(int readable) {
 void net_act_restore(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     mkdir(NET_RUN_DIR, 0755);
-    /* Normally the network belongs to the system: lord-netd brings it up at boot (arg "system", see
-     * admin.c) and the sessions' net-restore never gets here. Without lord-netd (a standalone
-     * lord-server, in development) the session's helper brings it up; with several, only the first
+    /* Normally the network belongs to the system: insane-netd brings it up at boot (arg "system", see
+     * admin.c) and the sessions' net-restore never gets here. Without insane-netd (a standalone
+     * insane-server, in development) the session's helper brings it up; with several, only the first
      * (its pid in net-owner, while alive), so two don't start two DHCP clients on the same NIC. */
     if (!(len == 6 && !strcmp(arg, "system"))) {
         char *o = read_file(NET_RUN_DIR "/net-owner", 32, NULL);
@@ -432,10 +432,10 @@ void net_act_restore(const AdminReq *r, const char *arg, size_t len) {
         FILE *of = fopen(NET_RUN_DIR "/net-owner", "w");
         if (of) { fprintf(of, "%d\n", (int)getpid()); fclose(of); }
     } else unlink(NET_RUN_DIR "/net-owner");
-    /* VPN routes left over from a session that was cut off (protocol RTPROT_LORDOS) */
+    /* VPN routes left over from a session that was cut off (protocol RTPROT_INSANEOS) */
     int rfd = nl_open(NETLINK_ROUTE, 0);
-    if (rfd >= 0) { rt_flush_proto(rfd, RTPROT_LORDOS, AF_INET, NULL); rt_flush_proto(rfd, RTPROT_LORDOS, AF_INET6, NULL); close(rfd); }
-    /* no config: the free physical ones use DHCP, like NetworkManager. Under lord-netd, one that isn't
+    if (rfd >= 0) { rt_flush_proto(rfd, RTPROT_INSANEOS, AF_INET, NULL); rt_flush_proto(rfd, RTPROT_INSANEOS, AF_INET6, NULL); close(rfd); }
+    /* no config: the free physical ones use DHCP, like NetworkManager. Under insane-netd, one that isn't
      * ready yet (or isn't there at all) is picked up by net_watch_run; a session has no such loop */
     int n = 0, sys = len == 6 && !strcmp(arg, "system");
     if_force = !sys;
@@ -522,7 +522,7 @@ void net_act_manage(const AdminReq *r, const char *arg, size_t len) {
     if (check_if(arg, 0)) return;
     if (!managed_by_system(arg)) { admin_ok("net.alreadyManaged", "name", arg, NULL); return; }
     char path[160];
-    snprintf(path, sizeof path, "/etc/systemd/network/00-lordos-%s.network", arg);
+    snprintf(path, sizeof path, "/etc/systemd/network/00-insaneos-%s.network", arg);
     char body[200];
     int n = snprintf(body, sizeof body, "# Insane OS manages this interface (net-manage)\n[Match]\nName=%s\n\n[Link]\nUnmanaged=yes\n", arg);
     if (write_file_atomic(path, body, (size_t)n, 0644)) { admin_err("sys.writeFailed", "path", path, NULL); return; }
@@ -551,7 +551,7 @@ void net_act_unmanage(const AdminReq *r, const char *arg, size_t len) {
     char path[160];
     snprintf(path, sizeof path, NET_IF_DIR "/%s.conf", arg);
     unlink(path);
-    snprintf(path, sizeof path, "/etc/systemd/network/00-lordos-%s.network", arg);
+    snprintf(path, sizeof path, "/etc/systemd/network/00-insaneos-%s.network", arg);
     if (unlink(path) == 0 && access(NETWORKCTL, X_OK) == 0) {
         char out[256];
         const char *argv[] = { NETWORKCTL, "reload", NULL };
@@ -861,7 +861,7 @@ void net_act_vpn_delete(const AdminReq *r, const char *arg, size_t len) {
         unlink(p);
     }
     /* generated configs */
-    static const char *const gen[] = { NET_DIR "/ppp/%s.options", NET_DIR "/fortinet/%s.conf", "/etc/strongswan.d/lordos/%s.conf" };
+    static const char *const gen[] = { NET_DIR "/ppp/%s.options", NET_DIR "/fortinet/%s.conf", "/etc/strongswan.d/insaneos/%s.conf" };
     for (size_t i = 0; i < sizeof gen / sizeof gen[0]; i++) {
         char p[200];
         snprintf(p, sizeof p, gen[i], arg);

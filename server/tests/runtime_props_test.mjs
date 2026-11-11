@@ -2,7 +2,7 @@
 // node's flattened style is the same as last time (same keys, same order, same primitive values). This
 // checks that the skip changes nothing the server sees: tests/runtime_props_scene.mjs is bundled twice
 // with esbuild, as the theme is built, once as it is and once with the skip turned off (the runtime
-// before the change), and both must send exactly the same lord.* calls, in the same order, over fuzzed
+// before the change), and both must send exactly the same insane.* calls, in the same order, over fuzzed
 // trees, and end with the same styles. Also checks that the skip really ran. Needs node and the
 // repository's node_modules (esbuild, react, react-reconciler); run by tests/run_suites.sh.
 import { createRequire } from 'node:module';
@@ -19,13 +19,13 @@ let esbuild = null;
 for (const p of nodePaths) { try { esbuild = createRequire(path.join(p, 'x.js'))('esbuild'); break; } catch (e) { /* next */ } }
 if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 
-// The recording lord: every native call as a line, and each node's style as the server would hold it.
-const MOCK = `globalThis.__lordTest = (() => {
+// The recording insane: every native call as a line, and each node's style as the server would hold it.
+const MOCK = `globalThis.__insaneTest = (() => {
   const log = [], state = new Map();
   const fmt = (v) => (typeof v === 'number' ? (Object.is(v, -0) ? '-0' : String(v)) : v === undefined ? 'undef'
     : JSON.stringify(v, (k, x) => (typeof x === 'number' && (x !== x || Object.is(x, -0)) ? String(x) + 'n' : x)));
   let nextId = 1;
-  globalThis.lord = {
+  globalThis.insane = {
     screen: { width: 1920, height: 1080, displays: [], mirror: false },
     version: 'test', now: () => 0, stats: () => ({}), getLayout: () => [0, 0, 0, 0],
     createNode: (t) => { const id = nextId++; log.push('create ' + t + ' ' + id); state.set(id, {}); return id; },
@@ -61,7 +61,7 @@ function variant(off) {
   };
 }
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-runtime-props-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-runtime-props-'));
 let bad = 0;
 try {
   const files = {};
@@ -69,7 +69,7 @@ try {
     const out = await esbuild.build({
       entryPoints: [path.join(here, 'runtime_props_scene.mjs')], bundle: true, write: false, format: 'esm',
       platform: 'node', target: 'es2022', nodePaths, logLevel: 'error',
-      alias: { '@lordos/runtime': runtime }, define: { 'process.env.NODE_ENV': '"production"' },
+      alias: { '@insaneos/runtime': runtime }, define: { 'process.env.NODE_ENV': '"production"' },
       banner: { js: MOCK }, plugins: [variant(off)],
     });
     files[off ? 'off' : 'on'] = path.join(dir, off ? 'off.mjs' : 'on.mjs');

@@ -1,7 +1,7 @@
 // Insane Classic theme glyphs, drawn with views (our own shapes: no icon font, no color emoji; see
 // docs/DESIGN.md, "Icons"). Each one takes a color and, where it needs to cut a hole, the color
 // of what is behind it (bg).
-import { View } from '@lordos/sdk';
+import { View } from '@insaneos/sdk';
 
 const box = (s, extra) => ({ width: s, height: s, alignItems: 'center', justifyContent: 'center', ...extra });
 

@@ -1,6 +1,6 @@
-/* js_pkg.c — lord.pkg: queries about Debian packages (read-only).
+/* js_pkg.c — insane.pkg: queries about Debian packages (read-only).
  *
- * Reads the index built by the helper (/var/lib/lordos/pkg/index.bin, via mmap) and the dpkg
+ * Reads the index built by the helper (/var/lib/insaneos/pkg/index.bin, via mmap) and the dpkg
  * database (/var/lib/dpkg/status). None of this modifies the system: installing, removing and upgrading
  * are actions of the privileged helper (admin.run('pkg-install', …) in the SDK). See
  * docs/PACKAGES.md. */
@@ -525,9 +525,9 @@ static JSValue f_icon(JSContext *c, JSValueConst this_val, int argc, JSValueCons
     return icon[0] && !access(path, R_OK) ? JS_NewString(c, path) : JS_NULL;
 }
 
-/* lord.pkg.releaseNotes(name, version) → Markdown text or null: the release notes a source publishes
+/* insane.pkg.releaseNotes(name, version) → Markdown text or null: the release notes a source publishes
  * for that version (ReleaseNotes in its signed Release, stored by pkg-update; docs/UPDATES.md). */
-/* lord.pkg.featured(): the Store's banner the last update verified (pkg.c, featured_valid), as
+/* insane.pkg.featured(): the Store's banner the last update verified (pkg.c, featured_valid), as
  * { data: <the JSON object>, image: path or null }, or null without one. No arguments, read-only. */
 static JSValue f_featured(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -589,7 +589,7 @@ static JSValue f_release_notes(JSContext *c, JSValueConst this_val, int argc, JS
     return r;
 }
 
-/* lord.pkg.rebootRequired() → null, or the packages that asked for a restart ([] if none named):
+/* insane.pkg.rebootRequired() → null, or the packages that asked for a restart ([] if none named):
  * the Debian convention /run/reboot-required(.pkgs), written by Insane OS's postinst and its kernel hook. */
 static JSValue f_reboot_required(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
@@ -633,8 +633,8 @@ static const JSCFunctionListEntry pkg_funcs[] = {
     JS_CFUNC_DEF("icon", 1, f_icon),
 };
 
-void js_pkg_register(JSContext *c, JSValue lord) {
+void js_pkg_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, pkg_funcs, sizeof pkg_funcs / sizeof pkg_funcs[0]);
-    JS_SetPropertyStr(c, lord, "pkg", o);
+    JS_SetPropertyStr(c, insane, "pkg", o);
 }

@@ -1,13 +1,13 @@
 // Mail — a native mail app in the spirit of a classic three-pane client: accounts and folders,
 // the message list with previews (conversations grouped), and the reading pane. Everything comes
-// from the sandboxed helper lord-maild (docs/MAIL.md): IMAP with IDLE, SMTP, a local cache with
+// from the sandboxed helper insane-maild (docs/MAIL.md): IMAP with IDLE, SMTP, a local cache with
 // an offline search index, and HTML turned into our own views without running anything.
 import {
   View, Text, useTheme, useStore, useAppWindow, useKeyboard, Button, TextInput, ScrollView, t, wm, fs, monthName, formatDate, formatTime,
   Toolbar, ToolbarButton, ToolbarSpacer, ToolbarDivider, SearchField, Hairline, direction, textDirection,
   mailRequest, onMailEvent, mailStatus, mailConfig, mailAccounts, mailAvailable, addListener, clipboard, registerDockActions,
   trackMailStatus, isolatedPim, saveFile,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { HtmlView, TextView } from './HtmlView.jsx';
 import { Compose } from './Compose.jsx';
@@ -113,7 +113,7 @@ function useSize(ref, every = 250) {
   useEffect(() => {
     const id = setInterval(() => {
       if (!ref.current) return;
-      const [, , w, h] = lord.getLayout(ref.current.id);
+      const [, , w, h] = insane.getLayout(ref.current.id);
       setSz((o) => (Math.abs(o.w - w) > 1 || Math.abs(o.h - h) > 1 ? { w, h } : o));
     }, every);
     return () => clearInterval(id);
@@ -154,7 +154,7 @@ function Row({ it, selected, onClick, onRightClick, cfg }) {
   );
 }
 
-// A virtual list: only the visible rows exist; rows load in windows from lord-maild as you scroll.
+// A virtual list: only the visible rows exist; rows load in windows from insane-maild as you scroll.
 function MessageList({ src, rev, selected, onSelect, onMenu, cfg }) {
   const th = useTheme();
   const box = useRef(null);
@@ -300,12 +300,12 @@ function Attachments({ msg }) {
   const atts = (msg.atts || []).filter((a) => !(a.inline && a.cid && msg.html));
   if (!atts.length) return null;
   const rel = async (a) => (await mailRequest('attachment', { acct: msg.acct, folder: msg.folder, uid: msg.uid, idx: a.idx })).path;
-  const fetch = async (a) => `${lord.mail.cacheDir()}/${await rel(a)}`;
+  const fetch = async (a) => `${insane.mail.cacheDir()}/${await rel(a)}`;
   const open = async (a) => {
     setBusy(a.idx);
-    // in its own process Mail cannot open files: lord-server checks the cached attachment and the
+    // in its own process Mail cannot open files: insane-server checks the cached attachment and the
     // session opens it with the user's apps
-    try { if (isolatedPim()) lord.mail.openAttachment(await rel(a), a.name); else openPath(await fetch(a), a.name); } catch (e) { /* shown in the row */ }
+    try { if (isolatedPim()) insane.mail.openAttachment(await rel(a), a.name); else openPath(await fetch(a), a.name); } catch (e) { /* shown in the row */ }
     setBusy(null);
   };
   const save = async (a) => {
@@ -313,8 +313,8 @@ function Attachments({ msg }) {
     if (isolatedPim()) {
       // a read-only fd of the cached attachment, then the system's save dialog
       try {
-        const fd = lord.mail.attachmentFd(await rel(a));
-        if (fd >= 0) { const data = lord.broker.fdRead(fd); lord.broker.fdClose(fd); await saveFile(safeName(a.name), data); }
+        const fd = insane.mail.attachmentFd(await rel(a));
+        if (fd >= 0) { const data = insane.broker.fdRead(fd); insane.broker.fdClose(fd); await saveFile(safeName(a.name), data); }
       } catch (e) { /* cancelled or restricted */ }
       setBusy(null);
       return;
@@ -372,7 +372,7 @@ function MessageView({ msg, width, onLink, cfg, onTrustSender, collapsed, onExpa
   // the grant has to exist before the images ask for their hosts (children's effects run first)
   const granted = useRef('');
   const gkey = `${msg.acct}|${msg.folder}|${msg.uid}`;
-  if (showRemote && msg.html?.remote?.length && granted.current !== gkey) { lord.mail.allowImages(msg.html.remote); granted.current = gkey; }
+  if (showRemote && msg.html?.remote?.length && granted.current !== gkey) { insane.mail.allowImages(msg.html.remote); granted.current = gkey; }
   const from = msg.from?.[0] || {};
   const nRemote = msg.html?.stats?.remote || 0, nTrackers = msg.html?.stats?.trackers || 0;
   const warns = (msg.html?.links || []).filter((l) => l.w);
@@ -428,7 +428,7 @@ function MessageView({ msg, width, onLink, cfg, onTrustSender, collapsed, onExpa
 
 export default function Mail() {
   const { args } = useAppWindow();
-  trackMailStatus();                      // only in its own process (lord.mail.appMode)
+  trackMailStatus();                      // only in its own process (insane.mail.appMode)
   if (args?.compose) return <Compose draft={typeof args.compose === 'object' ? args.compose : {}} />;
   return <MailMain />;
 }
@@ -547,9 +547,9 @@ function MailMain() {
         try {
           const r = await mailRequest('attachment', { acct: msg.acct, folder: msg.folder, uid: msg.uid, idx: a.idx });
           if (isolatedPim()) {
-            const fd = lord.mail.attachmentFd(r.path);
+            const fd = insane.mail.attachmentFd(r.path);
             if (fd >= 0) paths.push({ fd, name: safeName(a.name), size: a.size || 0 });
-          } else paths.push(`${lord.mail.cacheDir()}/${r.path}`);
+          } else paths.push(`${insane.mail.cacheDir()}/${r.path}`);
         } catch (e) { /* skip */ }
       }
       delete d.forwardAtts;

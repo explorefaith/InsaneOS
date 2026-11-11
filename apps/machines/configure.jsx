@@ -1,7 +1,7 @@
 // Configure (the approved mock "Configure"): a sidebar of sections with a one-line summary each, and the section's
-// pane. What lord-vm can change (name, CPU, memory, network, disk size, the ISO) goes through `lord-vm --set`, only
+// pane. What insane-vm can change (name, CPU, memory, network, disk size, the ISO) goes through `insane-vm --set`, only
 // while the machine is off; what the app keeps (system, notes) is saved at once. Sections of later phases say so.
-import { View, Text, TextInput, Stepper, Segmented, Toggle, FilePicker, ScrollView, useAppWindow, wm, revealPath, clipboard, t as tr } from '@lordos/sdk';
+import { View, Text, TextInput, Stepper, Segmented, Toggle, FilePicker, ScrollView, useAppWindow, wm, revealPath, clipboard, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { stateView, memLimit, systemOf, closeChoice, CLOSE_CHOICES, PROFILES, profileSize, profileOf, shareTag, mountCommand } from './model.js';
 import { usePal, has, gb, bytes, Bar, Btn, MenuBtn, OsMark, vmRefusal } from './ui.jsx';
@@ -37,7 +37,7 @@ export function Configure({ dir, section: section0 }) {
   const p = usePal();
   const { id: winId } = useAppWindow();
   const [m, setM] = useState(null);
-  const [host] = useState(() => (has() ? lord.vm.host() : null));
+  const [host] = useState(() => (has() ? insane.vm.host() : null));
   const [sec, setSec] = useState(SECTIONS.includes(section0) ? section0 : 'general');
   const [draft, setDraft] = useState({});
   const [meta, setMeta] = useState(() => readMeta(dir));
@@ -47,20 +47,20 @@ export function Configure({ dir, section: section0 }) {
   const [pickShare, setPickShare] = useState(false);
   const [disk, setDisk] = useState(null);
   const load = () => {
-    const x = has() ? lord.vm.list().find((y) => y.dir === dir) : null;
+    const x = has() ? insane.vm.list().find((y) => y.dir === dir) : null;
     setM(x || null);
-    if (x) { const s = lord.vm.stats(dir); setDisk(s?.diskBytes ?? null); }
+    if (x) { const s = insane.vm.stats(dir); setDisk(s?.diskBytes ?? null); }
   };
   useEffect(() => { load(); const timer = setInterval(load, 2000); return () => clearInterval(timer); }, []);
   useEffect(() => { if (m) wm.setTitle(winId, tr('machines.cfg.title', { name: m.name })); }, [m?.name]);
   useEffect(() => {
     if (!job) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(job);
+      const r = insane.vm.job(job);
       if (!r || !r.done) return;
       setJob(0);
       if (r.ok) { setDraft({}); setMsg({ ok: true, text: tr('machines.cfg.saved') }); }
-      else setMsg({ ok: false, text: r.out.trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || r.out.trim() });
+      else setMsg({ ok: false, text: r.out.trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || r.out.trim() });
       load();
     }, 300);
     return () => clearInterval(timer);
@@ -76,7 +76,7 @@ export function Configure({ dir, section: section0 }) {
   const save = (patch) => {
     const change = patch || Object.fromEntries(Object.entries(draft).filter(([k, val]) => differs(k, val)));
     if (!Object.keys(change).length) return;
-    const id = lord.vm.set(dir, change);
+    const id = insane.vm.set(dir, change);
     if (!id) setMsg({ ok: false, text: vmRefusal(tr('machines.cfg.refused')) }); else { setJob(id); setMsg({ ok: true, text: tr('machines.cfg.saving') }); }
   };
   const emulated = m.accel === 'tcg';

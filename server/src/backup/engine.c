@@ -543,7 +543,7 @@ typedef struct {
 
 static int rcancel(Rest *x) { return x->o->cancel && *x->o->cancel; }
 
-/* May dst be written? Its (resolved) folder must be inside the lord.fs roots and the final name
+/* May dst be written? Its (resolved) folder must be inside the insane.fs roots and the final name
  * must not fall inside a protected folder. */
 static int writable_target(const char *dst) {
     char parent[PATH_MAX], real[PATH_MAX], full[PATH_MAX + 256];

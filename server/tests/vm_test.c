@@ -204,7 +204,7 @@ static void test_schema(void) {
             snprintf(d, sizeof d, "%s/Work", real); mkdir(d, 0700);
             snprintf(lib, sizeof lib, "%s/Machines", real); mkdir(lib, 0700);
             snprintf(lnk, sizeof lnk, "%s/.config", real); mkdir(lnk, 0700);
-            snprintf(lnk, sizeof lnk, "%s/Machines/A.lordvm", real); mkdir(lnk, 0700);
+            snprintf(lnk, sizeof lnk, "%s/Machines/A.insanevm", real); mkdir(lnk, 0700);
             CHECK(vm_share_allowed(d, real, "u", lib, err, sizeof err) == 0);
             CHECK(vm_share_allowed(real, real, "u", lib, err, sizeof err) < 0);            /* all of home */
             CHECK(vm_share_allowed(lib, real, "u", lib, err, sizeof err) < 0);             /* the library */
@@ -220,7 +220,7 @@ static void test_schema(void) {
             CHECK(vm_share_allowed("/", real, "u", lib, err, sizeof err) < 0);
             CHECK(vm_share_allowed("/mnt", real, "u", lib, err, sizeof err) < 0);
             snprintf(lnk, sizeof lnk, "%s/Link", real); unlink(lnk);
-            snprintf(lnk, sizeof lnk, "%s/Machines/A.lordvm", real); rmdir(lnk);
+            snprintf(lnk, sizeof lnk, "%s/Machines/A.insanevm", real); rmdir(lnk);
             rmdir(lib); rmdir(d);
             snprintf(lnk, sizeof lnk, "%s/.config", real); rmdir(lnk);
             rmdir(real);
@@ -317,7 +317,7 @@ static void test_messages(void) {
     q = vm_msg(VM_REPLY, 3, 99, 0, 0, 0, NULL); CHECK(!vm_msg_valid(&q, 0));
     q = vm_msg(200, 0, 0, 0, 0, 0, NULL); CHECK(!vm_msg_valid(&q, 0) && !vm_msg_valid(&q, 1));
     q = vm_msg(VM_STATUS, 0, 0, 0, 0, 0, NULL); q.version = 2; CHECK(!vm_msg_valid(&q, 1));
-    /* Beta: the CD/DVD drive while running is a request; a notice comes only from lord-vm, with a known kind */
+    /* Beta: the CD/DVD drive while running is a request; a notice comes only from insane-vm, with a known kind */
     q = vm_msg(VM_CDROM, 4, 0, 0, 0, 0, "/x.iso"); CHECK(vm_msg_valid(&q, 1) && !vm_msg_valid(&q, 0));
     q = vm_msg(VM_NOTICE, 0, VMN_NET_LOST, 11, 0, 0, "passt"); CHECK(vm_msg_valid(&q, 0) && !vm_msg_valid(&q, 1));
     q.a = VMN_COUNT; CHECK(!vm_msg_valid(&q, 0));
@@ -384,7 +384,7 @@ static void test_messages(void) {
     close(mfd);
     /* picture and cursor memfds */
     int pic = vm_picture_memfd(640 * 480 * 4);
-    CHECK(pic >= 0 && ftruncate(pic, 10) != 0);                        /* lord-server's picture can't shrink */
+    CHECK(pic >= 0 && ftruncate(pic, 10) != 0);                        /* insane-server's picture can't shrink */
     if (pic >= 0) close(pic);
     int cur = memfd_create("c", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     CHECK(cur >= 0 && !ftruncate(cur, 64 * 64 * 4));
@@ -536,7 +536,7 @@ static void test_ops(void) {
     (void)!system(p);
 }
 
-/* Beta: org.lordos.agent frames, UTF-8, base64 (the guest is untrusted) */
+/* Beta: org.insaneos.agent frames, UTF-8, base64 (the guest is untrusted) */
 static void test_agent(void) {
     uint8_t b[64];
     ag_frame_head(b, AGK_CLIP, 0, 3);

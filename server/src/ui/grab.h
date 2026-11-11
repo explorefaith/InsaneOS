@@ -1,11 +1,11 @@
 /* grab.h — moving and resizing windows in C (docs/WINDOWS.md).
  *
- * The theme starts the drag (lord.wm.grab) and lord-server follows it on its own: each frame moves the
+ * The theme starts the drag (insane.wm.grab) and insane-server follows it on its own: each frame moves the
  * window's node with the pointer, without calling JS or repainting its content (when moving,
  * the window is painted once into a layer and then only copied). On release, JS receives the
- * result (__lordWm('end', …)) and updates the window manager. */
-#ifndef LORD_GRAB_H
-#define LORD_GRAB_H
+ * result (__insaneWm('end', …)) and updates the window manager. */
+#ifndef INSANE_GRAB_H
+#define INSANE_GRAB_H
 
 #include "ui.h"
 
@@ -28,7 +28,7 @@ int  grab_begin(int node, int edges, const GrabLimits *lim);
 int  grab_active(void);
 int  grab_cursor(void);                     /* cursor shape during the drag (cursor.h) */
 /* Where the pointer is now and the drag's edges (0 = moving); 1 while a drag is active. Read by the
- * theme a few times per second for the window snapping preview (lord.wm.pointer, docs/WINDOWS.md). */
+ * theme a few times per second for the window snapping preview (insane.wm.pointer, docs/WINDOWS.md). */
 int  grab_state(float *x, float *y, int *edges);
 void grab_motion(float x, float y);         /* once per frame, with the accumulated pointer */
 /* Finished (the button was released): 1 and the node's change relative to the start. */

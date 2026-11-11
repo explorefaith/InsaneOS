@@ -1,27 +1,27 @@
 #!/bin/bash
-# netperm_integration.sh — test of lord-netperm with the real kernel (docs/FIREWALL.md, step 2).
-# Run it in the test VM as the session user (with passwordless sudo), with lord-sessiond
-# (Delegate=yes) and lord-netperm running:
+# netperm_integration.sh — test of insane-netperm with the real kernel (docs/FIREWALL.md, step 2).
+# Run it in the test VM as the session user (with passwordless sudo), with insane-sessiond
+# (Delegate=yes) and insane-netperm running:
 #
 #   bash server/tests/netperm_integration.sh [gateway]
 #
-# Builds an app scope by hand (as the lord-server launcher does), writes rules to
-# ~/.config/lordos/firewall.json, asks lord-netperm to reload them over its socket and tests:
+# Builds an app scope by hand (as the insane-server launcher does), writes rules to
+# ~/.config/insaneos/firewall.json, asks insane-netperm to reload them over its socket and tests:
 # deny and allow, a domain rule that leaves a single site, "LAN only", "no incoming
 # connections" and "no network". It only uses the gateway, the machine itself and example.com/debian.org.
 # At the end it leaves firewall.json as it was.
 set -u
 GW=${1:-172.17.0.1}
 U=$(id -u)
-SESS=/sys/fs/cgroup/system.slice/lordos.service/lordos-session-$U
-SC=$SESS/app-lordos-nptest.scope
-FW=~/.config/lordos/firewall.json
+SESS=/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-$U
+SC=$SESS/app-insaneos-nptest.scope
+FW=~/.config/insaneos/firewall.json
 pass=0; fail=0
 ok()  { pass=$((pass+1)); echo "  ok:   $*"; }
 bad() { fail=$((fail+1)); echo "  BAD:  $*"; }
 [ -d "$SESS" ] || { echo "no Insane OS session for uid $U ($SESS)"; exit 2; }
-[ -S /run/lordos/netperm.sock ] || { echo "lord-netperm is not running"; exit 2; }
-mkdir -p ~/.config/lordos
+[ -S /run/insaneos/netperm.sock ] || { echo "insane-netperm is not running"; exit 2; }
+mkdir -p ~/.config/insaneos
 BACKUP=$(mktemp); HAD=0
 [ -f "$FW" ] && { cp "$FW" "$BACKUP"; HAD=1; }
 trap 'if [ $HAD = 1 ]; then cp "$BACKUP" "$FW"; else rm -f "$FW"; fi; reload; rm -f "$BACKUP"' EXIT
@@ -30,7 +30,7 @@ sudo mkdir -p "$SC" && sudo chown "$U" "$SC" "$SC/cgroup.procs" 2>/dev/null
 reload() {
     python3 - <<'PY'
 import socket, struct, time
-s = socket.socket(socket.AF_UNIX); s.connect('/run/lordos/netperm.sock')
+s = socket.socket(socket.AF_UNIX); s.connect('/run/insaneos/netperm.sock')
 s.sendall(struct.pack('<IB', 1, 1)); time.sleep(0.3); s.close()
 PY
 }
@@ -117,7 +117,7 @@ echo "9. connection notices carry the names the resolver gave (hosts)"
 rules '{"v":1,"mode":"silent","trusted":[],"restricted":{},"rules":[{"app":"'$APP'","dir":"out","dst":"example.com","action":"deny","when":0}]}'
 HOSTPY='
 import socket, struct, sys, time, json
-s = socket.socket(socket.AF_UNIX); s.connect("/run/lordos/netperm.sock"); s.settimeout(8)
+s = socket.socket(socket.AF_UNIX); s.connect("/run/insaneos/netperm.sock"); s.settimeout(8)
 buf = b""; end = time.time() + 8
 while time.time() < end:
     try: d = s.recv(65536)

@@ -30,7 +30,7 @@ static unsigned char *slurp(const char *path, size_t *n) {
 /* the release public key, from the PEM in the tree (the last 32 bytes of the DER) */
 static void release_key(uint8_t pub[32]) {
     size_t n;
-    char *pem = (char *)slurp("../tools/release/lordos-release.pub.pem", &n);
+    char *pem = (char *)slurp("../tools/release/insaneos-release.pub.pem", &n);
     char *b = strstr(pem, "-----\n") + 6;
     char *e = strstr(b, "\n-----END");
     *e = 0;
@@ -92,11 +92,11 @@ static void signature(void) {
 
     uint8_t h[32];
     char hex[65];
-    CHECK(img_sums_find((char *)sums, n, "lordos-0.8.1-rpi5-arm64.img.xz", h) == 0);
+    CHECK(img_sums_find((char *)sums, n, "insaneos-0.8.1-rpi5-arm64.img.xz", h) == 0);
     hex_encode(h, 32, hex);
     CHECK(!strcmp(hex, "a7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45"));
-    CHECK(img_sums_find((char *)sums, n, "lordos-live-0.8.1-amd64.iso", h) == 0);
-    CHECK(img_sums_find((char *)sums, n, "lordos-0.8.1-rpi5-arm64.img", h) == -1);
+    CHECK(img_sums_find((char *)sums, n, "insaneos-live-0.8.1-amd64.iso", h) == 0);
+    CHECK(img_sums_find((char *)sums, n, "insaneos-0.8.1-rpi5-arm64.img", h) == -1);
     CHECK(img_sums_find((char *)sums, n, "rpi5-arm64.img.xz", h) == -1);
     CHECK(img_sums_find("zz", 2, "x", h) == -2);
     const char dup[] = "a7714f4f3d437a9e48088cb89579a93638b36e8a93944add23e18a126f04ea45  x.img\n"
@@ -109,8 +109,8 @@ static void signature(void) {
 }
 
 static void names(void) {
-    CHECK(img_valid_name("lordos-0.8.4-rpi5-arm64.img.xz"));
-    CHECK(img_valid_name("lordos-live-0.8.4-amd64.iso"));
+    CHECK(img_valid_name("insaneos-0.8.4-rpi5-arm64.img.xz"));
+    CHECK(img_valid_name("insaneos-live-0.8.4-amd64.iso"));
     CHECK(!img_valid_name("../x.img"));
     CHECK(!img_valid_name(".x.img"));
     CHECK(!img_valid_name("-x.img"));

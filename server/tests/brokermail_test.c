@@ -1,8 +1,8 @@
-/* brokermail_test.c — lord-maild for the isolated system apps (src/sec/brokermail.c, BOP_MAIL and
+/* brokermail_test.c — insane-maild for the isolated system apps (src/sec/brokermail.c, BOP_MAIL and
  * BOP_SYS_OPEN): who may ask, which requests each app may send, which files may travel to
- * lord-maild, the Mail-only verbs (accounts file, remote images, attachments) and opening another
+ * insane-maild, the Mail-only verbs (accounts file, remote images, attachments) and opening another
  * app. The real brokermail.c runs against stand-ins for brokersrv.c and mailc.c that record what
- * would have reached lord-maild or the session. Temporary HOME.
+ * would have reached insane-maild or the session. Temporary HOME.
  * `make build/brokermail-test && build/brokermail-test`. */
 #include "sec/broker_int.h"
 #include "mail/mailc.h"
@@ -199,7 +199,7 @@ int main(void) {
     check(call(0, "open", "att/../secret.txt\0x", 19, NULL, 0) == BST_DENIED && !shell_kind[0], "…never a path outside the cache");
 
     /* opening another system app */
-    check(sysopen(3, "mail", 1, "{\"compose\":{\"to\":[{\"email\":\"dana@lordos.test\"}]}}") == BST_OK && !strcmp(shell_kind, "launch") && strstr(shell_json, "\"new\":true"),
+    check(sysopen(3, "mail", 1, "{\"compose\":{\"to\":[{\"email\":\"dana@insaneos.test\"}]}}") == BST_OK && !strcmp(shell_kind, "launch") && strstr(shell_json, "\"new\":true"),
           "Contacts → Mail: a new message (session event)");
     check(sysopen(0, "calendar", 0, "{\"at\":1,\"uid\":\"x\"}") == BST_OK, "Mail → Calendar: an invitation");
     check(sysopen(0, "files", 0, "{}") == BST_DENIED && !shell_kind[0], "not to an app outside the four");

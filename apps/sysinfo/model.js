@@ -1,5 +1,5 @@
 // model.js — System Information's model (docs/BENCHMARK.md, "0.8.5 — System Information"): the GPU
-// as separate layers and the Compatibility panel, worked out from lord.sysinfo.report(). Pure
+// as separate layers and the Compatibility panel, worked out from insane.sysinfo.report(). Pure
 // functions with no UI and no SDK, tested by server/tests/sysinfo_model_test.mjs. States and notes
 // are codes; the app turns them into text with t('sysinfo.…').
 //
@@ -7,7 +7,7 @@
 // version). Compatibility states: 'works', 'limits' (works, with a limit the note names), 'no'
 // (doesn't work), 'absent' (no such device), 'unchecked'.
 
-// Why this session composes on the CPU, from lord_composition() and gpu_info()'s outcome.
+// Why this session composes on the CPU, from insane_composition() and gpu_info()'s outcome.
 export function compositionReason(session) {
   const s = session || {};
   if (s.composition === 'gpu') return null;
@@ -174,8 +174,8 @@ const BT_ADDRESS = /^[0-9a-f]{2}([:-][0-9a-f]{2}){5}$/i;
 const KIND_ORDER = ['keyboard', 'mouse', 'touchpad', 'receiver', 'gamepad', 'tablet', 'input', 'audio'];
 const kindRank = (k) => { const i = KIND_ORDER.indexOf(k); return i < 0 ? KIND_ORDER.length : i; };
 
-// The Peripherals section: what lord.sysinfo.peripherals() found on USB and the input buses, plus BlueZ's paired or
-// connected devices (lord.bt). Built field by field, so an address or a D-Bus path can't come along; a device that
+// The Peripherals section: what insane.sysinfo.peripherals() found on USB and the input buses, plus BlueZ's paired or
+// connected devices (insane.bt). Built field by field, so an address or a D-Bus path can't come along; a device that
 // only has its address for a name gets no name. On screen only: this is never part of a report.
 export function peripherals(local, bt) {
   const out = (Array.isArray(local) ? local : []).map((p) => ({
@@ -206,9 +206,9 @@ export function machineName(r) {
   return [m.vendor, m.product].filter(Boolean).join(' ') || m.model || '';
 }
 
-// The Report tab's file name: lordos-report-<date>.<ext>, or -2, -3… when one with that name exists.
+// The Report tab's file name: insaneos-report-<date>.<ext>, or -2, -3… when one with that name exists.
 export function reportFileName(date, ext, exists) {
-  const base = `lordos-report-${/^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : 'today'}`;
+  const base = `insaneos-report-${/^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : 'today'}`;
   for (let i = 1; i < 100; i++) {
     const name = `${base}${i > 1 ? `-${i}` : ''}.${ext}`;
     if (!exists(name)) return name;

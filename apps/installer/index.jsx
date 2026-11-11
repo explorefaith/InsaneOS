@@ -3,11 +3,11 @@
 // the administration helper with closed actions (server/src/install): install-disks, install-run
 // (validates everything again on the root side) and install-reboot. See docs/ISO.md.
 // On the OVA image's first boot the same wizard, without the disk, makes the person's account on the
-// running system (install-account): lord.system.info().firstAccount.
+// running system (install-account): insane.system.info().firstAccount.
 import {
   View, Text, Button, TextInput, ScrollView, Toggle, Segmented, SearchField, Hairline, GroupBox, FormRow, MenuButton, useTheme, useLocale, useStore, createStore,
   admin, keyboard, languages, setLanguage, formatBytes, locale, regionOf, localeOf, regionCountry, tOptional, wm, useAppWindow, useSystemInfo, typeScale, statusText, errorText, Lumo,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { emptyManual, actionsFor, setAction, addPartition, removeAdded, placeIn, rows as manualRows, review as manualReview } from './manualmodel.js';
 
@@ -44,7 +44,7 @@ const RESERVED = ['root', 'daemon', 'bin', 'sys', 'sync', 'games', 'man', 'lp', 
 const ascii = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const suggestUser = (full) => (ascii(full).split(/\s+/)[0] || '').replace(/[^a-z0-9_-]/g, '').slice(0, 32);
 
-const FIRST_ACCOUNT = (() => { try { return !!lord.system.info().firstAccount; } catch (e) { return false; } })();
+const FIRST_ACCOUNT = (() => { try { return !!insane.system.info().firstAccount; } catch (e) { return false; } })();
 const STEPS = ['welcome', 'language', 'keyboard', ...(FIRST_ACCOUNT ? [] : ['disk']), 'user', 'summary', 'install'];
 
 function Card({ children, style }) {
@@ -106,8 +106,8 @@ function Language() {
   const { t: tr } = useLocale();
   const s = useStore(wiz);
   const langs = languages();
-  const [locales] = useState(() => [...new Set(lord.locale.available().map((l) => regionOf(l.name)))]);
-  const [zones] = useState(() => lord.time.zones().sort((a, b) => (a === 'UTC' ? -1 : b === 'UTC' ? 1 : a.localeCompare(b))));
+  const [locales] = useState(() => [...new Set(insane.locale.available().map((l) => regionOf(l.name)))]);
+  const [zones] = useState(() => insane.time.zones().sort((a, b) => (a === 'UTC' ? -1 : b === 'UTC' ? 1 : a.localeCompare(b))));
   const lang = s.lang || locale.get().lang.split('-')[0];
   // "United Kingdom · en_GB": found by the country's name too (#53)
   const regions = locales.filter((r) => r.startsWith(`${lang}_`))
@@ -392,7 +392,7 @@ function ManualPanel() {
 
 const userErrors = (s, tr) => ({
   fullname: !s.fullname.trim() ? tr('installer.user.errFull') : /[:,\n]/.test(s.fullname) ? tr('installer.user.errFullChars') : null,
-  user: !RE_USER.test(s.user) ? tr('installer.user.errUser') : RESERVED.includes(s.user) || (FIRST_ACCOUNT && s.user === 'lordos') ? tr('installer.user.errReserved') : null,
+  user: !RE_USER.test(s.user) ? tr('installer.user.errUser') : RESERVED.includes(s.user) || (FIRST_ACCOUNT && s.user === 'insaneos') ? tr('installer.user.errReserved') : null,
   pass: !s.pass ? tr('installer.user.errPass') : null,
   pass2: s.pass !== s.pass2 ? tr('installer.user.errPass2') : null,
   host: !RE_HOST.test(s.host) ? tr('installer.user.errHost') : null,
@@ -447,7 +447,7 @@ const plan = (s) => {
   return {
     // without a choice: the language's own region (its meta.json: lt → lt_LT), not en_US
     lang, region: region || ({ es: 'es_ES', en: 'en_US', pt: 'pt_BR', fr: 'fr_FR', it: 'it_IT' }[lang] || languages().find((l) => l.id === lang)?.region || 'en_US'),
-    zone: s.zone || lord.time.zone() || 'UTC', kb,
+    zone: s.zone || insane.time.zone() || 'UTC', kb,
   };
 };
 

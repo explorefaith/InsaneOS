@@ -280,7 +280,7 @@ static Node *view(Node *parent) {
     if (parent) node_append(parent, n);
     return n;
 }
-/* as lord.setStyle (js.c): set, then invalidate */
+/* as insane.setStyle (js.c): set, then invalidate */
 static void sn(Node *n, const char *k, double v) { if (style_set_number(&n->s, k, v) && !quiet) { printf("unknown style %s\n", k); fails++; } node_invalidate(n); }
 static void ss(Node *n, const char *k, const char *v) { if (style_set_string(&n->s, k, v) && !quiet) { printf("unknown style %s=%s\n", k, v); fails++; } node_invalidate(n); }
 
@@ -459,7 +459,7 @@ static void test_layers(void) {
     sn(base, "width", 160); sn(base, "height", 100);
     Node *win = box_in(base, 0, 0, 160, 100, 0xff0000ff);         /* a window: blue */
     Node *dock = box_in(dockl, 0, 10, 30, 80, 0xff00ff00);        /* the Dock on the left: green */
-    Node *menu = box_in(pop, 10, 20, 60, 30, 0xffff0000);         /* the crown menu: red */
+    Node *menu = box_in(pop, 10, 20, 60, 30, 0xffff0000);         /* the apple menu: red */
     Node *ghost = box_in(pop, 100, 60, 20, 20, 0xff000000);       /* pointerEvents none: never hit */
     ss(ghost, "pointerEvents", "none");
     render(root, 160, 100);
@@ -604,7 +604,7 @@ static int full_differs(Node *root, int w, int h, int *where) {
 
 static void test_multi_damage(void) {
     enum { W = 640, H = 400, DOTS = 24 };
-    paint_multi_damage = 1;                 /* off by default (paint.c); LORD_DAMAGE=multi */
+    paint_multi_damage = 1;                 /* off by default (paint.c); INSANE_DAMAGE=multi */
     ui_reset();
     Node *root = view(NULL);
     ui.root = root;
@@ -667,7 +667,7 @@ static void test_multi_damage(void) {
         one += area;
         ones++;
         int where = 0;
-        CHECK(n <= 1 && full_differs(root, W, H, &where) <= 1, "one rectangle (LORD_DAMAGE=1) differs from a full repaint");
+        CHECK(n <= 1 && full_differs(root, W, H, &where) <= 1, "one rectangle (INSANE_DAMAGE=1) differs from a full repaint");
     }
     paint_multi_damage = 1;
     if (multi && ones) printf("multi-damage: %d frames, %.0f px per frame in rectangles; one box: %.0f px\n", multi, saved / multi, one / ones);
@@ -719,7 +719,7 @@ static Node *mk_window(Node *root, float x, float y, float w, float h) {
 static void test_minimize_damage(void) {
     enum { W = 640, H = 400, DOTS = 24 };
     for (int variant = 0; variant < 8; variant++) {
-        paint_multi_damage = variant < 4;     /* both: several rectangles (LORD_DAMAGE=multi) and one box */
+        paint_multi_damage = variant < 4;     /* both: several rectangles (INSANE_DAMAGE=multi) and one box */
         ui_reset();
         Node *root = view(NULL);
         ui.root = root;
@@ -877,8 +877,8 @@ static void test_hidden_blur_damage(void) {
     paint_multi_damage = 0;
 }
 
-/* ---- lord-server's whole CPU damage pipeline (main.c), modelled ----
- * The tests above paint each frame's rectangles straight into one canvas. lord-server does more:
+/* ---- insane-server's whole CPU damage pipeline (main.c), modelled ----
+ * The tests above paint each frame's rectangles straight into one canvas. insane-server does more:
  * paint_ui adds each frame's rectangles to the display's pending list (o->pl, o->pend) and a display
  * whose page flip is still pending keeps gathering them; paint_out paints the gathered list into
  * the scene; present_cpu copies into the KMS back buffer what that buffer is missing (what the
@@ -1134,7 +1134,7 @@ static SimWin sim_window(Node *parent, float x, float y, float w, float h, int t
     sn(sw.inner, "shadowBlur", 56);
     sn(sw.inner, "shadowOffsetY", 24);
     Node *bar = box_in(sw.inner, 0, 0, w, 40, 0xff2c2c2f);
-    sw.title = with_title ? text(bar, terminal ? "lord@lordos: ~" : "Monitor", 13) : NULL;
+    sw.title = with_title ? text(bar, terminal ? "insane@insaneos: ~" : "Monitor", 13) : NULL;
     if (sw.title) { sn(sw.title, "color", 0xffe0e0e0); ss(sw.title, "position", "absolute"); sn(sw.title, "left", w / 2 - 50); sn(sw.title, "top", 12); }
     static const uint32_t lights[3] = { 0xffff5f57, 0xfffebc2e, 0xff28c840 };
     for (int i = 0; i < 3; i++) { Node *l = box_in(bar, 14 + i * 21, 13, 13, 13, lights[i]); sn(l, "borderRadius", 7); }
@@ -1143,7 +1143,7 @@ static SimWin sim_window(Node *parent, float x, float y, float w, float h, int t
         Node *pane = box_in(sw.inner, 0, 41, w, h - 41, 0xc81e1e1e);   /* translucent profile, with blur */
         ss(pane, "overflow", "hidden");
         sn(pane, "backdropBlur", 14);
-        for (int i = 0; i < 4; i++) { Node *t = text(pane, "lord@lordos:~$ ls -la /usr/share", 13); sn(t, "color", 0xffd0d0d0); ss(t, "position", "absolute"); sn(t, "left", 8); sn(t, "top", 6 + i * 18); }
+        for (int i = 0; i < 4; i++) { Node *t = text(pane, "insane@insaneos:~$ ls -la /usr/share", 13); sn(t, "color", 0xffd0d0d0); ss(t, "position", "absolute"); sn(t, "left", 8); sn(t, "top", 6 + i * 18); }
     }
     return sw;
 }
@@ -1228,7 +1228,7 @@ static int sim_run(const SimPlan *pl, int *painted_frames, int *multi_frames) {
             term = sim_window(root, tx, ty, tw, th, 1, 1);
             state = 0;
         }
-        if (state == 0 && term.title && rnd() % 9 == 0) node_set_text(term.title->first, rnd() % 2 ? "lord@lordos: ~/src" : "lord@lordos: ~");
+        if (state == 0 && term.title && rnd() % 9 == 0) node_set_text(term.title->first, rnd() % 2 ? "insane@insaneos: ~/src" : "insane@insaneos: ~");
         if (rnd() % 20 == 0) {                   /* a menu opens or closes */
             if (menu) { node_destroy(menu); menu = NULL; }
             else { menu = box_in(popl, (float)(rnd() % 1000), 24, 220, 260, 0xf0303034); sn(menu, "borderRadius", 8); sn(menu, "shadowColor", 0x60000000); sn(menu, "shadowBlur", 20); }
@@ -1831,7 +1831,7 @@ static void test_overlay_scrollbar(void) {
  * InsaneBench's desktop scene (apps/sysinfo/scene.jsx: a 760×480 window, a 72 px square turning inside
  * it, six cards with shadows and text; a rounded window below; a menu bar and a Dock with backdrop
  * blur) moved along InsaneBench's figure of eight (lbi_path, one step a frame as grab_script_tick does
- * by the clock) for 480 frames, the square turning 6° a frame through lord.setStyle's C path
+ * by the clock) for 480 frames, the square turning 6° a frame through insane.setStyle's C path
  * (node_restyled with 'rotate', as scene.jsx sends it), and painted as main.c paints a frame
  * (paint_ui, then paint_out on one display).
  * Every frame's pixels are hashed (FNV-1a over the 32-bit pixels) and compared with
@@ -1864,8 +1864,8 @@ static void test_overlay_scrollbar(void) {
  * where 001633b's rule painted everything), with the earlier runs' hashes unchanged. In them the GPU
  * path's list of app windows is hashed with the pixels. Every frame that uses the copy where
  * 001633b's rule painted everything is also painted that old way on a copy of the canvas
- * (paint_below_verify), and not one pixel may differ; LORD_BELOW_SWITCH=0 runs the test without it.
- * The pixels that differ from a full repaint (paint_root_full, as LORD_PAINT_VERIFY) are printed as a
+ * (paint_below_verify), and not one pixel may differ; INSANE_BELOW_SWITCH=0 runs the test without it.
+ * The pixels that differ from a full repaint (paint_root_full, as INSANE_PAINT_VERIFY) are printed as a
  * second number, which may only go down (step 9 took the long run from 2,265 to 2,217 on the CPU
  * path and from 70,940 to 70,882 on the GPU path; the corners' restore took them to 248 and 70,864;
  * what is left: the largest at the Dock's rounded corners, under its backdrop blur, while the window
@@ -1961,7 +1961,7 @@ static uint64_t frame_hash(const Canvas *c) {
     return h;
 }
 
-/* lord.setStyle with a number (js.c): set, then node_restyled decides what to place or repaint */
+/* insane.setStyle with a number (js.c): set, then node_restyled decides what to place or repaint */
 static void js_set(Node *n, const char *k, double v) {
     Style before = n->s;
     StyleExt xb;
@@ -2451,7 +2451,7 @@ static void drag_run_n(int dc, DOut *const *os, int nos, uint64_t *hash, long *f
         if (dc == DC_REMOVE && f == 35) node_detach(s.child);
         if (dc == DC_EDGE) js_set(s.edge, "rotate", rot);
         if (dc == DC_CHILD) js_set(s.child, "left", 40 + (f * 5) % 640);
-        if (dc == DC_TEXT && f % 15 == 7)               /* lord.setText on the caption: one line or two */
+        if (dc == DC_TEXT && f % 15 == 7)               /* insane.setText on the caption: one line or two */
             node_set_text(s.caption->first, (f / 15) & 1 ? "Card 1" : "Card 1, measured while a busy app runs");
         if (dc == DC_TERM && f % 10 == 5 && term_at.x1 > term_at.x0) {
             term_cursor = !term_cursor;                 /* term_damage: the cursor's row, where it was painted */
@@ -2677,7 +2677,7 @@ static void test_drag_exact(int write) {
         GdragStats gdrags;
         paint_gdrag_stats(&gdrags);
         gdrag_quads = 0;
-        if (getenv("LORD_BELOW_SWITCH")) paint_below_switch = atoi(getenv("LORD_BELOW_SWITCH"));
+        if (getenv("INSANE_BELOW_SWITCH")) paint_below_switch = atoi(getenv("INSANE_BELOW_SWITCH"));
         for (int dc = 0; dc < DC_N; dc++) {
             drag_run(dc, dc_k2(dc) ? &o2 : &o, hash + k, &fullw[dc], &worst[dc]);
             k += dc_frames[dc] + 1;
@@ -2817,7 +2817,7 @@ static void test_drag_corners(void) {
  * other changes (a width that moves by fractions of a pixel, a font size, the root's size), so text
  * measured within its half-pixel cache is in play. Every node must lay out exactly the same (box,
  * absolute position, matrices, text measure) and both trees must paint the same pixels. 'transform'
- * itself (apps/sysinfo/scene.jsx, sdk/cooling.jsx) is no key lord.setStyle takes: it changes nothing. */
+ * itself (apps/sysinfo/scene.jsx, sdk/cooling.jsx) is no key insane.setStyle takes: it changes nothing. */
 typedef struct { Node *root, *col, *label, *spin[5]; } TScene;
 
 static TScene tr_scene(void) {
@@ -3123,7 +3123,7 @@ static void bench(void) {
 }
 
 int main(int argc, char **argv) {
-    const char *dir = getenv("LORD_FONTS") ? getenv("LORD_FONTS") : "../assets/fonts";
+    const char *dir = getenv("INSANE_FONTS") ? getenv("INSANE_FONTS") : "../assets/fonts";
     fonts_set_builtin_dir(dir);
     if (text_init(dir)) { printf("engine-test: no fonts in %s\n", dir); return 1; }
     if (argc > 1 && !strcmp(argv[1], "bench")) { bench(); return 0; }

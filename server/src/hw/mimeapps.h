@@ -1,10 +1,10 @@
 /* mimeapps.h — default applications (freedesktop "MIME Applications Associations" spec):
  * reading and editing mimeapps.list text and guessing a file's MIME type from shared-mime-info's
  * globs2. Pure functions over text; the files are read and written by ui/js_hw.c. Used by
- * Settings → Default Apps, Files' "Open With" and lord.apps.launchWith. See docs/SETTINGS.md.
+ * Settings → Default Apps, Files' "Open With" and insane.apps.launchWith. See docs/SETTINGS.md.
  * Unit-tested in tests/mimeapps_test.c. */
-#ifndef LORD_HW_MIMEAPPS_H
-#define LORD_HW_MIMEAPPS_H
+#ifndef INSANE_HW_MIMEAPPS_H
+#define INSANE_HW_MIMEAPPS_H
 
 #include <stddef.h>
 
@@ -13,7 +13,7 @@
 
 /* "type/subtype" (also x-scheme-handler/https): [a-z0-9] start, then [A-Za-z0-9.+_-]. */
 int  mime_valid(const char *mime);
-/* A desktop file id: "org.gnome.Evince.desktop", "lordos-photos.desktop". No '/', no "..". */
+/* A desktop file id: "org.gnome.Evince.desktop", "insaneos-photos.desktop". No '/', no "..". */
 int  desktop_id_valid(const char *id);
 
 /* First application in [Default Applications] for mime (the "mime=a.desktop;b.desktop;" list).

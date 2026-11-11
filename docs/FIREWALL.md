@@ -6,12 +6,12 @@ access" permission on Android and other systems. It is built in steps:
 | Step | What | Status |
 |---|---|---|
 | 1 | Rule store, the decision maker and the names learned from DNS (`server/src/fw`), with tests | **done** |
-| 2 | Enforce it in the kernel with cgroup hooks: the root service `lord-netperm` (`server/src/netperm`) | **done** (VM 122) |
+| 2 | Enforce it in the kernel with cgroup hooks: the root service `insane-netperm` (`server/src/netperm`) | **done** (VM 122) |
 | 3 | Monitor: the "Rule" column and the counters | **done**: per-app switch, counters and "Allow / Block this domain" per destination |
 | 4 | Settings: "Trusted apps" and "Restricted apps" | **done**: lists and mode (silent / off; deny since 0.8.5) |
 | 4b | Settings: network rules by app (domains, addresses, networks) | **done** (VM 122), see [Rules by app](#rules-by-app-settings-and-monitor) |
 | 5 | "Ask" mode | planned (see "The ask mode") |
-| 0.8.5 | Blocklists, the deny mode, Insane OS's components and the system services as their own apps | **done** (VM 118), see [Blocklists](#blocklists-085), [components](#lordos-components-in-their-own-scopes-085) |
+| 0.8.5 | Blocklists, the deny mode, Insane OS's components and the system services as their own apps | **done** (VM 118), see [Blocklists](#blocklists-085), [components](#insaneos-components-in-their-own-scopes-085) |
 
 Step 1 is C code only, with no daemon and without touching the kernel or the network (step 2,
 below, is the service that enforces it):
@@ -65,13 +65,13 @@ Destination details:
 
 `fw_app_canon` accepts:
 
-- `lordos` (lord-server and its built-in apps);
-- `desktop:<id>` (Linux apps with a `.desktop`). Three ids belong to Insane OS's own helpers: `desktop:lordos-rclone` (rclone for remote folders, with `ssh-keyscan` and `openssl`), `desktop:lordos-cloud` (Cloud's `rclone rcd` and `rclone authorize`, 0.8.8.5, docs/CLOUD.md) and `desktop:lordos-rdesk` (the RDP and VNC apps). The launcher refuses a `.desktop` with any of these ids (`app_scope_reserved`), so none can inherit their rules;
+- `insaneos` (insane-server and its built-in apps);
+- `desktop:<id>` (Linux apps with a `.desktop`). Three ids belong to Insane OS's own helpers: `desktop:insaneos-rclone` (rclone for remote folders, with `ssh-keyscan` and `openssl`), `desktop:insaneos-cloud` (Cloud's `rclone rcd` and `rclone authorize`, 0.8.8.5, docs/CLOUD.md) and `desktop:insaneos-rdesk` (the RDP and VNC apps). The launcher refuses a `.desktop` with any of these ids (`app_scope_reserved`), so none can inherit their rules;
 - `lpk:<id>` (`.lpk` apps);
 - the absolute path of the executable (what the Monitor uses when it can't find a `.desktop`).
 
-cgroup scopes are translated automatically: `app-lordos-lpk-<id>.scope` → `lpk:<id>` and
-`app-lordos-<id>.scope` → `desktop:<id>` (see `server/src/sec/cgroup.h`). This way the kernel hook,
+cgroup scopes are translated automatically: `app-insaneos-lpk-<id>.scope` → `lpk:<id>` and
+`app-insaneos-<id>.scope` → `desktop:<id>` (see `server/src/sec/cgroup.h`). This way the kernel hook,
 which sees the scope, and the Monitor, which sees the `.desktop`, talk about the same app.
 
 A valid id:
@@ -85,21 +85,21 @@ A valid id:
 - **Trusted apps:** nothing is recorded and nothing is asked for them. Explicit rules still
   apply: a `deny` the owner set for a trusted app is enforced.
 - **Restricted apps:** each one has a set of restrictions. The four network ones are decided by
-  `fw_decide` and enforced in the kernel by `lord-netperm` for every app with its own scope. The
+  `fw_decide` and enforced in the kernel by `insane-netperm` for every app with its own scope. The
   others are enforced where the resource is handed out (see
   [Non-network restrictions](#non-network-restrictions)).
 
-  | Restriction | In the JSON | .lpk apps and Passwords (`lpk:<id>`) | Built-in apps (`lordos`) | Linux apps (`desktop:<id>`) |
+  | Restriction | In the JSON | .lpk apps and Passwords (`lpk:<id>`) | Built-in apps (`insaneos`) | Linux apps (`desktop:<id>`) |
   |---|---|---|---|---|
-  | no internet | `no-internet` | `lord-netperm` | `lord-netperm` | `lord-netperm` |
+  | no internet | `no-internet` | `insane-netperm` | `insane-netperm` | `insane-netperm` |
   | no LAN | `no-lan` | same (also `127.0.0.1` and `::1`) | same | same |
   | no network | `no-network` | same | same | same |
   | no incoming connections | `no-incoming` | same | same | same |
-  | no camera | `no-camera` | broker (`brokercam.c`) | `js_media.c` | `lord-netperm` (`cgroup/dev`) and the PipeWire guard |
-  | no microphone | `no-mic` | broker (`BOP_MIC`, camera videos) | `js_media.c` | the PipeWire guard and `lord-netperm` (ALSA capture nodes) |
-  | no screen capture | `no-screen` | broker (the `screen` permission; isolated apps have no capture API) | `js_media.c` | by design (no capture protocol), and `lord-netperm` (`/dev/fb*`) |
-  | no USB | `no-usb` | broker (`BOP_VAULT_FIDO`, the `usb` permission) | not offered (the desktop itself) | `lord-netperm` (`cgroup/dev`) |
-  | no Bluetooth | `no-bluetooth` | broker (the `bluetooth` permission; no Bluetooth API in app mode) | not offered (the desktop itself) | `lord-netperm` (`socket(AF_BLUETOOTH)`); BlueZ over D-Bus is not covered |
+  | no camera | `no-camera` | broker (`brokercam.c`) | `js_media.c` | `insane-netperm` (`cgroup/dev`) and the PipeWire guard |
+  | no microphone | `no-mic` | broker (`BOP_MIC`, camera videos) | `js_media.c` | the PipeWire guard and `insane-netperm` (ALSA capture nodes) |
+  | no screen capture | `no-screen` | broker (the `screen` permission; isolated apps have no capture API) | `js_media.c` | by design (no capture protocol), and `insane-netperm` (`/dev/fb*`) |
+  | no USB | `no-usb` | broker (`BOP_VAULT_FIDO`, the `usb` permission) | not offered (the desktop itself) | `insane-netperm` (`cgroup/dev`) |
+  | no Bluetooth | `no-bluetooth` | broker (the `bluetooth` permission; no Bluetooth API in app mode) | not offered (the desktop itself) | `insane-netperm` (`socket(AF_BLUETOOTH)`); BlueZ over D-Bus is not covered |
   | no access to your files | `no-files` | broker (file picker, camera saves, the `files` permission) | not offered (the desktop itself) | the launcher (own namespaces + Landlock), at the next launch |
   | no reading the clipboard | `no-clipboard` | broker (`BOP_CLIP_GET`, the `clipboard` permission) | not offered (the desktop itself) | not offered yet |
   | no notifications | `no-notifications` | `sdk/notify.js` and the `notifications` permission | `sdk/notify.js` | `hw/notifyd.c` (by the caller's cgroup) |
@@ -114,7 +114,7 @@ restricted app with no camera doesn't get it even if it was given once.
 
 ### Non-network restrictions
 
-`lord.fw` (`ui/js_fw.c`) owns the rule store; `restrict_set_store()` hands the same store to
+`insane.fw` (`ui/js_fw.c`) owns the rule store; `restrict_set_store()` hands the same store to
 `sec/restrict.c`, so a change made in Settings applies to the next request at once, without
 reloading anything. What each kind of app goes through:
 
@@ -132,24 +132,24 @@ reloading anything. What each kind of app goes through:
     `BOP_VAULT_FIDO` (the USB security key of Passwords) are refused;
   - `BOP_DEVICE` does not light the indicator for a restricted device;
   - a prompt the user allows, or a file the user picks, after the app was restricted is refused too.
-- **Built-in apps inside `lord-server` (firewall id `lordos`).** They share one JS context with
+- **Built-in apps inside `insane-server` (firewall id `insaneos`).** They share one JS context with
   the desktop shell, so the checks are at the native boundary that knows what is asked for:
   `js_media.c` `permitted()` refuses camera, microphone and screen capture and recording with
   `fw.restricted.*`, before the permission. `sdk/notify.js` drops notifications from built-in and
-  isolated apps (`lord.fw.blocks()`); Settings' own system warnings (battery) are exempt. The
+  isolated apps (`insane.fw.blocks()`); Settings' own system warnings (battery) are exempt. The
   `Insane OS` row in Settings does not offer files, USB, clipboard or Bluetooth: that row is the
   desktop itself (Files, copy and paste, Disks, Settings → Bluetooth), and the screen says so in
   one line. Restrict individual apps instead.
 - **Linux apps (`desktop:<id>`).** They are not sandboxed by default and reach devices, sockets
   and the sound server directly, so each restriction is enforced at a point the app can't go
-  around: the kernel (`lord-netperm`), the launcher (`no-files`), our notification server and our
-  connection to PipeWire. See [Linux apps](#linux-apps). Terminal programs run in `lord-server`'s
-  cgroup and count as `lordos` (network rules only); a program started some other way, outside
+  around: the kernel (`insane-netperm`), the launcher (`no-files`), our notification server and our
+  connection to PipeWire. See [Linux apps](#linux-apps). Terminal programs run in `insane-server`'s
+  cgroup and count as `insaneos` (network rules only); a program started some other way, outside
   the launcher, is in no app scope and gets no per-app restriction.
 
 **Live revocation.** Adding a restriction to a running app (`restrict_changed()`, called by
 `setRestricted`) takes the device away at once, the same way revoking the permission does: for an
-isolated app `brokersrv_revoke()` sends `revoke`, kills the camera's `lord-media`, closes the
+isolated app `brokersrv_revoke()` sends `revoke`, kills the camera's `insane-media`, closes the
 microphone stream and stops a camera video that records sound; for the built-in apps a hook in
 `js_media.c` kills the camera helper (the window gets `closed` with `revoked`) and finishes
 microphone and screen recordings properly. New notifications and file picks are refused from that
@@ -161,21 +161,21 @@ revocation of camera and microphone and the built-in apps' hook.
 
 ### Linux apps
 
-A Linux app started from the launcher (`lord.apps.launch`, `launchWith`) runs in its own
-root-owned scope, `app-lordos-<id>.scope`, which gives it the firewall id `desktop:<id>`. Every
+A Linux app started from the launcher (`insane.apps.launch`, `launchWith`) runs in its own
+root-owned scope, `app-insaneos-<id>.scope`, which gives it the firewall id `desktop:<id>`. Every
 restriction below is checked against that scope, or against the PID's cgroup, never against a name
 the app gives itself.
 
 | Restriction | Where | How | Applies | Tested by |
 |---|---|---|---|---|
-| network (4) | `lord-netperm` | cgroup `sock_addr`/`sock_create` programs (above) | at once: new connections, binds and sockets | `tests/netperm_integration.sh` |
-| no camera | `lord-netperm`, `cgroup/dev` | `open()` of a V4L2 node (major 81) → `EPERM` | at once (next `open`; an fd already open stays usable) | `tests/fwlinux/devices.sh` (v4l2loopback, `v4l2-ctl`) |
+| network (4) | `insane-netperm` | cgroup `sock_addr`/`sock_create` programs (above) | at once: new connections, binds and sockets | `tests/netperm_integration.sh` |
+| no camera | `insane-netperm`, `cgroup/dev` | `open()` of a V4L2 node (major 81) → `EPERM` | at once (next `open`; an fd already open stays usable) | `tests/fwlinux/devices.sh` (v4l2loopback, `v4l2-ctl`) |
 | | PipeWire guard (`sec/pwguard.c`) | `Video/Source` nodes hidden from the app, its `Stream/Input/Video` streams destroyed | within 1 s | unit test only (no PipeWire camera node on the test VM) |
-| no USB | `lord-netperm`, `cgroup/dev` | `/dev/bus/usb/*` (189), `/dev/hidraw*` (dynamic, from `/proc/devices`), `/dev/ttyACM*` (166), `/dev/ttyUSB*` (188) | at once (next `open`) | `devices.sh` |
-| no Bluetooth | `lord-netperm`, `cgroup/lsm_socket_create` | `socket(AF_BLUETOOTH, …)` → `EPERM` | at once (new sockets) | `tests/fwlinux/bluetooth.sh` |
-| no screen capture | by design, and `lord-netperm` | the compositor offers no capture protocol, Xwayland (0.8.3) sees only X windows and a restricted app gets no X display, no screen-cast portal is installed; `/dev/fb*` (29) is denied | always | `tests/fwlinux/screen.sh` |
+| no USB | `insane-netperm`, `cgroup/dev` | `/dev/bus/usb/*` (189), `/dev/hidraw*` (dynamic, from `/proc/devices`), `/dev/ttyACM*` (166), `/dev/ttyUSB*` (188) | at once (next `open`) | `devices.sh` |
+| no Bluetooth | `insane-netperm`, `cgroup/lsm_socket_create` | `socket(AF_BLUETOOTH, …)` → `EPERM` | at once (new sockets) | `tests/fwlinux/bluetooth.sh` |
+| no screen capture | by design, and `insane-netperm` | the compositor offers no capture protocol, Xwayland (0.8.3) sees only X windows and a restricted app gets no X display, no screen-cast portal is installed; `/dev/fb*` (29) is denied | always | `tests/fwlinux/screen.sh` |
 | no microphone | PipeWire guard | capture nodes (`Audio/Source*`, `Audio/Duplex`) and their ports hidden, the app's `Stream/Input/Audio` streams destroyed, including a recording already running | within 1 s | `tests/fwlinux/mic.sh` (`pw-record`, `parecord`, `arecord`) |
-| | `lord-netperm`, `cgroup/dev` | ALSA capture PCM nodes (`/dev/snd/pcmC*D*c`, from `/sys/class/sound`): recording from the card without PipeWire | at once (next `open`) | `mic.sh` |
+| | `insane-netperm`, `cgroup/dev` | ALSA capture PCM nodes (`/dev/snd/pcmC*D*c`, from `/sys/class/sound`): recording from the card without PipeWire | at once (next `open`) | `mic.sh` |
 | no access to your files | the launcher (`apps.c`, `sec/sandbox.c`) | its own user, mount and PID namespace and Landlock (below) | at the next launch | `tests/fwlinux/files.sh` (a probe app, malicious `.desktop` files, `gtk4-print-editor`) |
 | no notifications | `hw/notifyd.c` | the caller's PID from the bus → its cgroup → its app: dropped, answered with a valid id | the next notification | `tests/fwlinux/notify.sh`, `notifyd-test` |
 | no reading the clipboard | — | not offered for Linux apps yet: the Wayland data device is not mediated per app | — | — |
@@ -184,8 +184,8 @@ Settings → Privacy shows "(at next launch)" next to "No access to your files" 
 says that everything else applies at once, and has one help line per restriction.
 
 **Devices (`cgroup/dev`).** In cgroup v2 the device controller *is* a `BPF_PROG_TYPE_CGROUP_DEVICE`
-program; with none attached, everything is allowed. `lord-netperm` attaches one (with a
-`bpf_link`, multi-attach) to `lordos.service` and to each session's `user@<uid>.service`. It looks
+program; with none attached, everything is allowed. `insane-netperm` attaches one (with a
+`bpf_link`, multi-attach) to `insaneos.service` and to each session's `user@<uid>.service`. It looks
 the app up exactly like the network programs (its scope's ancestor id, or the `user@` union), runs
 on `open()` and `mknod()` of a device node, and returns 0 only for the device classes the app is
 restricted from (`np_dev_restriction()` in `np_shared.h`, plus, for "no microphone", the ALSA
@@ -197,8 +197,8 @@ nodes to the user's own PipeWire and WirePlumber, and the microphone would be go
 server: the user controls that manager (units, drop-ins, environment, PipeWire's own config), so
 no such check is unforgeable. Instead a restricted app can't get there: see "Its own view"
 below. Everything else returns 1. Programs systemd attaches higher up (`DeviceAllow=`) still
-apply: the kernel allows only what all of them allow. A denial is logged by `lord-netperm` once per
-5 s, not counted with the connections. `lord-server`'s own scope (`lordos`) never gets device
+apply: the kernel allows only what all of them allow. A denial is logged by `insane-netperm` once per
+5 s, not counted with the connections. `insane-server`'s own scope (`insaneos`) never gets device
 restrictions in the kernel: it opens the camera, the FIDO key and the sound for the apps after
 their own permission and restriction checks.
 
@@ -210,17 +210,17 @@ reach the app through the input, sound and camera paths, not as raw USB.
 **Bluetooth sockets (`cgroup/lsm_socket_create`).** The inet `sock_create` hook never sees
 `AF_BLUETOOTH`, so this is a per-cgroup LSM program (`BPF_LSM_CGROUP`, kernel 6.0 or later, with
 the `bpf` LSM active, as in Debian 13) on the `socket_create` hook. Its attach point is the BTF id
-of `bpf_lsm_socket_create`, which `lord-netperm` reads from `/sys/kernel/btf/vmlinux` with its own
+of `bpf_lsm_socket_create`, which `insane-netperm` reads from `/sys/kernel/btf/vmlinux` with its own
 small reader (`bpfs_btf_func_id`). The kernel only loads LSM programs that declare a
 GPL-compatible license: this one declares "Dual MIT/GPL" (our code is MIT, which may also be
 distributed under the GPL); the others keep "Insane OS". If the kernel refuses the device or the
 Bluetooth program, the network ones still work and the status says `"devices":false` or
 `"bluetooth":false`.
 
-On the Raspberry Pi 5 this needs the Insane OS kernel from 0.8.1 on (`6.18.57-2+lordos`, built with
+On the Raspberry Pi 5 this needs the Insane OS kernel from 0.8.1 on (`6.18.57-2+insaneos`, built with
 `CONFIG_BPF_LSM` and BTF; see `RASPBERRY.md`, "The Insane OS kernel"). 0.8.0's Pi kernel had neither,
-so there `lord-netperm` reported `"bluetooth":false` and "No Bluetooth" wasn't enforced. Tested on
-a Pi 5 (2026-10-18): `lord-netperm: 9 BPF programs loaded (devices: yes, Bluetooth sockets: yes)`,
+so there `insane-netperm` reported `"bluetooth":false` and "No Bluetooth" wasn't enforced. Tested on
+a Pi 5 (2026-10-18): `insane-netperm: 9 BPF programs loaded (devices: yes, Bluetooth sockets: yes)`,
 `npverify-test` 37/37, and the steps of `tests/fwlinux/bluetooth.sh` (as root, for the board's
 user): `socket(AF_BLUETOOTH)` in the restricted app's scope → `EPERM`, inet and unix sockets there
 still work, the same call outside the scope works, and lifting the restriction gives it back.
@@ -243,12 +243,12 @@ socket" check predates Xwayland: with the session's X socket in place since 0.8.
 and needs updating.) If a screen-cast portal backend is
 ever installed, this no longer holds and `screen.sh` fails.
 
-**The PipeWire guard (`sec/pwguard.c`).** `lord-server` keeps one connection of its own to the
+**The PipeWire guard (`sec/pwguard.c`).** `insane-server` keeps one connection of its own to the
 session's PipeWire, on the manager socket, with our own implementation of the native protocol
 (no libpipewire). It binds every client, reads who it is and, for a restricted app, sends
 `update_permissions`: permission 0 on every capture node and its ports and on every other client
 (so it can't see or link a microphone, nor change another client's permissions), and destroys the
-capture streams that client creates. The rules are lord.fw's store, read every second, so setting
+capture streams that client creates. The rules are insane.fw's store, read every second, so setting
 or lifting a restriction applies to a running app within a second; nothing is written to a file
 the apps could change. Who a client is:
 
@@ -266,7 +266,7 @@ the apps could change. Who a client is:
   reports its inner PID, so a claim of its outer PID is someone else's);
 - `pipewire-pulse`'s own connection carries the streams of modules a pulse client loaded; while a
   restricted app runs its capture streams are closed. Module loading itself is off in Insane OS
-  (`/etc/pipewire/pipewire-pulse.conf.d/lordos-no-modules.conf`: a loopback from the
+  (`/etc/pipewire/pipewire-pulse.conf.d/insaneos-no-modules.conf`: a loopback from the
   microphone, a tunnel to any host or a pipe at any path would run outside the app's scope);
 - a client of a process under `user@<uid>` (escaped with `systemd-run --user`, or D-Bus
   activated) is treated as restricted while a restricted app runs, except PipeWire, WirePlumber and
@@ -302,8 +302,8 @@ the apps could change. Who a client is:
   `firewall.json` itself. Such a change takes effect outside the restriction later (the next
   login, a reload). Only `no-files` keeps an app from them.
 - A Linux app restricted without `no-files` runs as the user, so it could take over another of the
-  user's processes (lord-server, PipeWire, another app) with `ptrace` and act through it. Insane OS
-  sets `kernel.yama.ptrace_scope = 1` (`/usr/lib/sysctl.d/50-lordos-ptrace.conf`): only a
+  user's processes (insane-server, PipeWire, another app) with `ptrace` and act through it. Insane OS
+  sets `kernel.yama.ptrace_scope = 1` (`/usr/lib/sysctl.d/50-insaneos-ptrace.conf`): only a
   process's own descendants can be traced.
 - A pulse socket of its own for each restricted app (`pipewire-pulse` listening on a per-app
   address bound into the app's view) would remove the need to trust `application.process.id` at
@@ -350,7 +350,7 @@ Its own folders come **only from its canonical desktop id**: `~/.config/<id>`, `
 whose data folder isn't named after them (`firefox-esr` → `~/.mozilla`). Never from `Exec`,
 `StartupWMClass` or `Name`, which a `.desktop` file can set to anything, and never a home-level
 folder. An id that names someone else's folder (`autostart`, `applications`, `systemd`,
-`lordos*`, `ssh`, `gnupg`, `git`, shells' and editors' config folders...) gets none, and a grant
+`insaneos*`, `ssh`, `gnupg`, `git`, shells' and editors' config folders...) gets none, and a grant
 never lands on a folder in `fsops_protected()` or on a shell startup file. The file passed by
 "Open with" is bound read-write (read only if it is one of the protected ones). Everything else in
 the home folder doesn't exist for the app, and `/media`, `/run/media` and other users' homes are
@@ -466,11 +466,11 @@ In the test, with 50,000 rules from 500 apps, a decision with one name and one I
 
 ### File
 
-There is one per user: `~/.config/lordos/firewall.json`. It is compact JSON read by the strict
+There is one per user: `~/.config/insaneos/firewall.json`. It is compact JSON read by the strict
 reader in `server/src/sec/json.c`. For example:
 
 ```json
-{"v":1,"mode":"ask","trusted":["lordos"],"restricted":{"lpk:juego":["no-internet","no-camera"]},
+{"v":1,"mode":"ask","trusted":["insaneos"],"restricted":{"lpk:juego":["no-internet","no-camera"]},
  "rules":[{"app":"desktop:org.chromium.Chromium","dir":"out","dst":"*.doubleclick.net","action":"deny","when":1760000000},
           {"app":"lpk:juego","dir":"in","dst":"lan","port":"27015","proto":"udp","action":"allow","when":0}]}
 ```
@@ -493,7 +493,7 @@ reader in `server/src/sec/json.c`. For example:
   The store only changes if everything validated: a new one is built and swapped in. If the file
   doesn't exist, `fw_load` returns 1 and the store stays as it was.
 
-The path is on the `lord.fs` deny list (`server/src/fsops.c`, like `settings.json` and
+The path is on the `insane.fs` deny list (`server/src/fsops.c`, like `settings.json` and
 `permisos.json`, see `AGENTS.md`): a Insane OS app can't write its own rules. A Linux app runs as the
 user and could edit the file, just like `permisos.json`; `.lpk` apps can't, because of Landlock.
 
@@ -564,7 +564,7 @@ Otherwise, an app with its own DNS server could claim that `permitido.com` is an
 During development they were also run with `-fsanitize=address,undefined`, with clang on the development machine and
 with gcc 14 on Linux.
 
-## Step 2: `lord-netperm`, the rules in the kernel
+## Step 2: `insane-netperm`, the rules in the kernel
 
 ```
 server/src/netperm/np_shared.h   map types and the decision (np_decide), identical in BPF and C
@@ -573,9 +573,9 @@ server/src/netperm/bpf2c.c       build tool: clang's .o → build/gen/np_bpf.h
 server/src/netperm/bpfsys.{c,h}  direct bpf() syscall: maps, load, bpf_link, ring
 server/src/netperm/npcompile.{c,h}  rules → map entries (pure C, with a test)
 server/src/netperm/npdns.{c,h}   names from the system resolver
-server/src/netperm/npproto.h     the socket between lord-server and lord-netperm
+server/src/netperm/npproto.h     the socket between insane-server and insane-netperm
 server/src/netperm/netperm.c     the service
-server/src/ui/js_fw.c            lord.fw (lord-server)
+server/src/ui/js_fw.c            insane.fw (insane-server)
 tests/npcompile_test.c           build/npcompile-test (in make test)
 tests/netperm_integration.sh     test against the kernel (on the VM)
 tests/netperm_bench.c, netperm_measure.sh   measurements
@@ -583,8 +583,8 @@ tests/netperm_bench.c, netperm_measure.sh   measurements
 
 ### The service
 
-`lord-netperm` is a separate root process, with its own systemd unit (`lord-netperm.service`,
-`Restart=always`, before `lordos.service`). It isn't part of `lord-netd` or `lord-sessiond`.
+`insane-netperm` is a separate root process, with its own systemd unit (`insane-netperm.service`,
+`Restart=always`, before `insaneos.service`). It isn't part of `insane-netd` or `insane-sessiond`.
 
 - **No arguments, no execution.** It doesn't launch programs. With arguments, it doesn't start.
 - **No network of its own.** It creates no AF_INET or AF_INET6 sockets. The unit enforces this with
@@ -597,9 +597,9 @@ tests/netperm_bench.c, netperm_measure.sh   measurements
   everything the loader can't resolve: non-inlined functions, global data and relocations that
   aren't maps. No ELF file is read at run time. Neither libbpf nor bcc is used. Without clang
   (`BPF=0`) it still builds, and the service reports "BPF not available" and does nothing.
-- **Where it attaches.** To the cgroup of `lordos.service`, with `bpf_link`, which contains the
+- **Where it attaches.** To the cgroup of `insaneos.service`, with `bpf_link`, which contains the
   subtree of every session. A single attachment covers all users: each scope has its own id.
-  - systemd deletes and recreates that cgroup every time `lordos.service` restarts. That's why the
+  - systemd deletes and recreates that cgroup every time `insaneos.service` restarts. That's why the
     service watches it with inotify on `system.slice` and once per second, and re-attaches if the
     id changed.
   - If the service stops, the links are closed and everything is allowed. The desktop doesn't
@@ -609,11 +609,11 @@ tests/netperm_bench.c, netperm_measure.sh   measurements
     programs are attached a second time, with a `bpf_link` per session, to each Insane OS session
     user's `user@<uid>.service` cgroup. Re-attached the same way when that cgroup changes (the user
     manager restarting) or disappears.
-- **The apps.** It reads the session folders (`lordos-session-<uid>`) with inotify, plus a rescan
+- **The apps.** It reads the session folders (`insaneos-session-<uid>`) with inotify, plus a rescan
   every 5 s:
-  - `server` is `lordos`;
-  - `app-lordos-<id>.scope` is `desktop:<id>`;
-  - `app-lordos-lpk-<id>.scope` is `lpk:<id>`.
+  - `server` is `insaneos`;
+  - `app-insaneos-<id>.scope` is `desktop:<id>`;
+  - `app-insaneos-lpk-<id>.scope` is `lpk:<id>`.
 
   The cgroup id comes from `name_to_handle_at`, which is the same thing the kernel sees.
 
@@ -637,7 +637,7 @@ Each program does the following:
 2. It decides with `np_decide` (`np_shared.h`).
 3. It returns 1, or 0. With 0 the app gets `EPERM` ("Operation not permitted").
 
-Anything that isn't a session app passes right away: `lord-sessiond`, the login screen and the rest
+Anything that isn't a session app passes right away: `insane-sessiond`, the login screen and the rest
 of the system.
 
 #### Escape via `systemd-run --user` (the `user@` union)
@@ -647,17 +647,17 @@ scope, but an unsandboxed Linux app can still ask its own systemd **user manager
 `systemd-run --user --scope <cmd>` (a scope) or `systemd-run --user <cmd>` (a transient service).
 The user manager has PID 1 do the move (`AttachProcessesToUnit`), which only checks the UID, not
 the source cgroup, so the process lands in `user@<uid>.service/app.slice/…` — outside
-`lordos.service`, where the programs above are not attached. A "no internet" app could reach the
+`insaneos.service`, where the programs above are not attached. A "no internet" app could reach the
 internet from there.
 
 **Chosen fix (option a): attach to `user@<uid>.service` + a per-user restriction union.** For each
-Insane OS session user, `lord-netperm` attaches the same cgroup programs a second time to that user's
+Insane OS session user, `insane-netperm` attaches the same cgroup programs a second time to that user's
 `user@<uid>.service`. There the process is not in any app scope, so `find_app` (`np.bpf.c`) falls
 back to `np_union`, keyed by the `user@<uid>` cgroup id (the ancestor at `cfg->user_level`). Its
 value is the **strictest union** of the restrictions (the `NP_R_*` bits ORed) of all of that user's
 currently-running restricted apps, with `trusted=1` so anything the union does not forbid is
 allowed silently. If the user has no restricted app running, there is no entry and `user@` is fully
-open (the user manager and its own services are untouched). `lord-netperm` rebuilds the union
+open (the user manager and its own services are untouched). `insane-netperm` rebuilds the union
 whenever a scope or a rule changes (`sync_union`), and removes it when the user's session or user
 manager goes away.
 
@@ -674,7 +674,7 @@ Why this and not the alternatives:
 - The union is **restriction-only**: it never grants access, so an escaped process is always at
   least as restricted as its own policy. The cost is that it is coarse — while a restricted app is
   running, every process under that user's `user@` is held to the union. That is acceptable because
-  Insane OS's own apps live under `lordos.service` (unaffected), and it activates only while a
+  Insane OS's own apps live under `insaneos.service` (unaffected), and it activates only while a
   restricted app runs. A precise per-process identity (option c) is a possible future refinement if
   the loader gains tracing support.
 
@@ -720,17 +720,17 @@ connection took its bytes with it: a browser playing a video showed a few KB. No
 `cgroup_skb` programs (ingress and egress) count every packet of the session's apps:
 
 - the app is the socket's cgroup at the scope level (`bpf_skb_ancestor_cgroup_id`), the same id
-  as the other programs; they only **add** to an `np_counts` entry that `lord-netperm` creates when
+  as the other programs; they only **add** to an `np_counts` entry that `insane-netperm` creates when
   the scope appears, so nothing outside an app (login screen, the system) is counted or stored;
 - the bytes are the IP length of each skb (one GRO/GSO segment, so a fast TCP flow is a few
   thousand calls per second, not one per wire packet); the remote address comes from the IP header
   (source going in, destination going out) into the `np_flows` LRU;
 - loopback (`ifindex` 1) isn't counted, so the totals compare with the interfaces' counters;
-- they are attached only to `lordos.service`, not to `user@<uid>.service` (`np_attach_user`), and
+- they are attached only to `insaneos.service`, not to `user@<uid>.service` (`np_attach_user`), and
   are optional: a kernel that refuses them leaves the firewall working and the Monitor falls back
   to `tcp_info` (`STATUS` says `"bytes": false`).
 
-Every second `lord-netperm` reads `np_counts` (one lookup per app) and, only if bytes moved, the
+Every second `insane-netperm` reads `np_counts` (one lookup per app) and, only if bytes moved, the
 whole `np_flows` table in one `BPF_MAP_LOOKUP_BATCH` call, works out the rates and sends `COUNTS`
 (below). With nothing moving it reads no table and sends nothing.
 
@@ -758,7 +758,7 @@ milliseconds, in two layers:
      sock_diag dump) is decided as `in` on that port, like `bind`. So denying an app's outgoing
      internet doesn't cut the clients of a server it runs, and "no incoming connections" now also
      cuts the connections already accepted.
-2. **Destroy the socket.** So the app sees the connection end instead of a stall, `lord-netperm`
+2. **Destroy the socket.** So the app sees the connection end instead of a stall, `insane-netperm`
    destroys it over sock_diag netlink (`SOCK_DESTROY`, `npdiag.c`): the kernel aborts it (TCP sends
    a reset, the app gets `ECONNABORTED`). Two triggers:
    - **right after every reload:** a dump of the machine's TCP sockets and connected UDP sockets
@@ -766,7 +766,7 @@ milliseconds, in two layers:
      same decision denies is destroyed. This also cuts idle connections (a push channel, an SSH
      session) that send nothing;
    - **when the filter drops a packet of a socket** it reports it once (an `NpEvent` with `cut`,
-     the 4-tuple and the socket cookie, deduplicated in `np_seen` by cookie) and `lord-netperm`
+     the 4-tuple and the socket cookie, deduplicated in `np_seen` by cookie) and `insane-netperm`
      destroys exactly that socket (the cookie must match). That covers a domain whose address the
      resolver gave after the connection opened, and sockets outside the dump's reach.
 
@@ -777,15 +777,15 @@ milliseconds, in two layers:
    packet after the reload passes, and new connections work at once.
 
 **What the Monitor shows:** every cut socket counts as one more *denied* connection (the kernel
-counts it on the first drop; a sweep's destroyed sockets are added by `lord-netperm`) and appears
+counts it on the first drop; a sweep's destroyed sockets are added by `insane-netperm`) and appears
 in the connection log as denied; the bytes dropped are sent as *blocked* (`COUNTS`, index 7, and
 per address at index 5) and the app's detail shows "Blocked traffic". The counters go out every
 second, so the row shows the block within a second.
 
 **Kernels:** `SOCK_DESTROY` needs `CONFIG_INET_DIAG_DESTROY` (TCP) and `CONFIG_INET_UDP_DIAG` (UDP).
 Debian 13's kernel (6.12) has both. The Raspberry Pi kernel of the 0.8.2 and 0.8.3 images
-(`6.18.57-2+lordos`) doesn't; the Insane OS Pi kernel has them since `6.18.57-3+lordos`
-(`6.18.57-lordos.3-rpi-2712`, 0.8.4; `RASPBERRY.md`, "The Insane OS kernel"). With an older kernel the
+(`6.18.57-2+insaneos`) doesn't; the Insane OS Pi kernel has them since `6.18.57-3+insaneos`
+(`6.18.57-insaneos.3-rpi-2712`, 0.8.4; `RASPBERRY.md`, "The Insane OS kernel"). With an older kernel the
 drop still applies and the journal says once that the app will see a stall (TCP retransmits until
 it gives up) instead of a reset. All 11 programs pass the verifier on 6.12 (VM 118) and on the Pi's
 6.18.57 (`npverify-test`, built and run in a temporary folder, removed afterwards).
@@ -827,7 +827,7 @@ again afterwards):
   a video over QUIC is a few thousand packets per second. TCP throughput is unchanged within
   run-to-run noise.
 - The CPU columns are the client's system CPU (% of one core over 15 s, `iperf3 -J`), two runs each.
-- `lord-netperm` itself only works on a reload (one sock_diag dump) and on a cut socket.
+- `insane-netperm` itself only works on a reload (one sock_diag dump) and on a cut socket.
 
 ### From rules to maps (`npcompile.c`)
 
@@ -911,15 +911,15 @@ connect to the IPs of `permitido.com` even if another one requested them.
 
 ### The socket
 
-`/run/lordos/netperm.sock` is 0666: anyone can connect.
+`/run/insaneos/netperm.sock` is 0666: anyone can connect.
 
-- `lord-netperm` knows who each client is through `SO_PEERCRED`. There are up to 4 connections
+- `insane-netperm` knows who each client is through `SO_PEERCRED`. There are up to 4 connections
   per user and each one sees only its user's apps.
 - The protocol is in `npproto.h`: `u32` length, `u8` type and the data.
-- **From lord-server to lord-netperm** there is a single message, with no data: `RELOAD`. Anything
+- **From insane-server to insane-netperm** there is a single message, with no data: `RELOAD`. Anything
   else drops the connection.
-- **The rules don't travel over the socket.** `lord-netperm` reads the user's
-  `~/.config/lordos/firewall.json` itself, with `CAP_DAC_READ_SEARCH`:
+- **The rules don't travel over the socket.** `insane-netperm` reads the user's
+  `~/.config/insaneos/firewall.json` itself, with `CAP_DAC_READ_SEARCH`:
   - folder by folder with `openat`, `O_NOFOLLOW` and `O_NONBLOCK`;
   - each folder and the file must belong to the user;
   - the file must be a regular file of up to 4 MB;
@@ -927,7 +927,7 @@ connect to the IPs of `permitido.com` even if another one requested them.
     stay.
 
   It reads it when the session appears and on every `RELOAD`.
-- **From lord-netperm to lord-server:**
+- **From insane-netperm to insane-server:**
   - `STATUS`: `{bpf, devices, bluetooth, bytes, dns, error}` (`bytes`: the accounting programs are loaded);
   - `EVENT`: `{app, v, dir, proto, addr, port, by, rule, flag, record}`, a new connection;
   - `COUNTS`: `{app: [allowed, denied, rx, tx, rxRate, txRate, [[addr, rx, tx, rxRate, txRate], ...]]}`,
@@ -938,10 +938,10 @@ connect to the IPs of `permitido.com` even if another one requested them.
 
   If nobody reads, notices are dropped. Counters are sent again when they change.
 
-### `lord.fw` (lord-server, `js_fw.c`)
+### `insane.fw` (insane-server, `js_fw.c`)
 
-lord-server owns the user's rules: it loads them at startup, changes them and saves them with
-`fw_save`. Then it sends `RELOAD`. The socket never blocks. It is read in `lord.fw.poll()`, which
+insane-server owns the user's rules: it loads them at startup, changes them and saves them with
+`fw_save`. Then it sends `RELOAD`. The socket never blocks. It is read in `insane.fw.poll()`, which
 the SDK calls once per second while the Monitor's Network tab is open.
 
 | Call | What it does |
@@ -963,9 +963,9 @@ Everything is validated in C:
 - ports from 1 to 65535 (`lo ≤ hi`);
 - protocols, actions and restriction names against their closed lists.
 
-No call takes paths. Isolated `.lpk` apps don't have `lord.fw`.
+No call takes paths. Isolated `.lpk` apps don't have `insane.fw`.
 
-In the SDK, `firewall` and `firewallState` from `sdk/monitor.js`, exported in `@lordos/sdk`.
+In the SDK, `firewall` and `firewallState` from `sdk/monitor.js`, exported in `@insaneos/sdk`.
 
 **The Monitor** also attributes each process to the scope it runs in (`js_monitor.c`, `scope_of`,
 which reads `/proc/<pid>/cgroup` with a cache). This way a `curl` inside `foot` is `foot`, just as
@@ -994,9 +994,9 @@ NFQUEUE) is per-connection work outside the kernel. It will work as a "retry" pr
 
 1. An app's first connection to a destination with no rule is **denied right away** (EPERM). The
    `ask` verdict goes in `np_apps`, and the notice goes out through the ring with `record`.
-2. lord-netperm passes it to lord-server, and the SDK shows a system prompt (`PermissionPrompt`):
+2. insane-netperm passes it to insane-server, and the SDK shows a system prompt (`PermissionPrompt`):
    ""App" wants to connect to ejemplo.com:443 — Allow once / Always / Deny".
-3. The answer becomes a rule (once, until quit, or forever) and lord-netperm compiles it at once.
+3. The answer becomes a rule (once, until quit, or forever) and insane-netperm compiles it at once.
 4. The app retries: browsers and most clients do it on their own, and the prompt offers "Retry"
    for the rest. The second connection gets through.
 
@@ -1006,7 +1006,7 @@ the prompt: `np_seen` already groups them for 5 s.
 ### Tested on VM 122
 
 `tests/netperm_integration.sh` sets up an app scope like the launcher does and writes rules:
-**18 out of 18**, with `lord-netperm` as a hardened systemd service.
+**18 out of 18**, with `insane-netperm` as a hardened systemd service.
 
 | Case | Result |
 |---|---|
@@ -1030,7 +1030,7 @@ and `/dev/tcp`:
   works and the internet doesn't.
 
 **`systemd-run --user` escape (the `user@` union).** With a restricted app running
-(`desktop:aisla`, "no internet"), from a `foot` terminal placed in `app-lordos-aisla.scope`:
+(`desktop:aisla`, "no internet"), from a `foot` terminal placed in `app-insaneos-aisla.scope`:
 
 | Escape attempt | Result |
 |---|---|
@@ -1039,11 +1039,11 @@ and `/dev/tcp`:
 | `systemd-run --user curl https://example.com` (transient service) | blocked — same, even though the user manager forks it |
 | `setsid curl https://example.com` | blocked — `setsid` does not change the cgroup, stays in the app scope |
 
-`lord-netperm` logs each `user@` denial as `uid 1000 user@: denied … (union of
-restricted apps no-internet)`. A normal process outside `user@`/`lordos.service` app scopes (e.g. an
+`insane-netperm` logs each `user@` denial as `uid 1000 user@: denied … (union of
+restricted apps no-internet)`. A normal process outside `user@`/`insaneos.service` app scopes (e.g. an
 SSH session scope) still reaches the internet while the restricted app runs, so normal apps are
 unaffected. Cross-user: a restricted app for `bob` (uid 1001) blocks `bob`'s `systemd-run --user`
-escape while `lord` (uid 1000, no restricted app) keeps full access — the union is per
+escape while `insane` (uid 1000, no restricted app) keeps full access — the union is per
 `user@<uid>`, never leaking between users. The screenshot shows the four attempts blocked:
 
 ![systemd-run escape blocked](firewall-escape-blocked.png)
@@ -1055,7 +1055,7 @@ over TCP on 127.0.0.1.
 
 | | TCP connect (median) | UDP connect (median) | throughput |
 |---|---|---|---|
-| lord-netperm off | 13.9 / 13.7 / 16.7 µs | 2.1 / 2.0 / 2.5 µs | 842 MB/s |
+| insane-netperm off | 13.9 / 13.7 / 16.7 µs | 2.1 / 2.0 / 2.5 µs | 842 MB/s |
 | on, no rules (silent) | 13.7 / 17.4 / 17.4 µs | 2.4 / 2.5 / 3.0 µs | 818 MB/s |
 | on, 402 rules for the app | 13.7 / 13.8 / 17.7 µs | 3.1 / 2.6 / 2.5 µs | 829 MB/s |
 
@@ -1063,8 +1063,8 @@ over TCP on 127.0.0.1.
   **0.5 µs**. In TCP it stays within loopback noise.
 - **Throughput doesn't change:** the differences are within run-to-run noise. (These loopback
   numbers predate the accounting programs of 0.8.1, which return at once on loopback.)
-- **The compositor:** lord-server's main thread, with the Monitor open on Network (which calls
-  `lord.fw.poll` once per second), used 3.20 % of a core with lord-netperm on, 3.20 % off and
+- **The compositor:** insane-server's main thread, with the Monitor open on Network (which calls
+  `insane.fw.poll` once per second), used 3.20 % of a core with insane-netperm on, 3.20 % off and
   3.13 % on again. 30 s each. Nothing of the firewall runs in the frame: `poll` reads a socket that
   doesn't block. Per-frame times weren't measured separately.
 
@@ -1085,7 +1085,7 @@ Before, the same QUIC download showed "—" (0 B): UDP had no `tcp_info`.
 client inside an app scope; system CPU as % of one core over 15 s, two runs with the accounting
 programs:
 
-| | 0.8.0 `lord-netperm` | 0.8.1 (accounting) |
+| | 0.8.0 `insane-netperm` | 0.8.1 (accounting) |
 |---|---|---|
 | TCP, ~24 Gbit/s (GSO/GRO: few, large skbs) | 162.0 / 161.6 % | 164.5 / 163.1 %, 162.4 / 162.3 % |
 | UDP 1 Gbit/s, 1200 B datagrams (104,000 packets/s), sending | 91.5 % | 94.7 %, 100.2 % |
@@ -1095,42 +1095,42 @@ programs:
 - UDP at 104,000 packets per second: about 5 % of one core more, roughly 0.5 µs per packet (two
   map lookups, two atomic adds, one header read). A QUIC video at a few MB/s is a few thousand
   packets per second: well under 0.1 %.
-- `lord-netperm` itself: 0.00–0.01 s of CPU per 15 s run (one counter read per app per second,
+- `insane-netperm` itself: 0.00–0.01 s of CPU per 15 s run (one counter read per app per second,
   plus one batch read of `np_flows` only while bytes move).
 - Script: `bench-monred-118.sh` in the scratchpad (veth `npb0`/`npb1`, namespace `npb`, both
   removed afterwards); `iperf3` was installed on VM 118 for this (`VM-SETUP.md`).
 
 ### Insane OS components in their own scopes (0.8.5)
 
-Built-in parts that use the network used to run inside lord-server, so their traffic was
+Built-in parts that use the network used to run inside insane-server, so their traffic was
 "Insane OS" and a rule could only take all of them at once. Since 0.8.5 each one has its own process in
-its own scope, `lordos-net-<name>.scope`, which lord-netperm reads as the firewall app
-`lordos:<name>` (`fw_component_scope`, a fixed list: `mail`, `store`, `print`, `terminal`,
+its own scope, `insaneos-net-<name>.scope`, which insane-netperm reads as the firewall app
+`insaneos:<name>` (`fw_component_scope`, a fixed list: `mail`, `store`, `print`, `terminal`,
 `lists`). The kernel attributes a socket to the cgroup of the process that *created* it, so:
 
-- **Connectors** (`server/src/sec/netconn.c`): for Mail (lord-maild's servers: Mail, Calendar,
+- **Connectors** (`server/src/sec/netconn.c`): for Mail (insane-maild's servers: Mail, Calendar,
   Contacts, Reminders), printers and scanners (IPP and eSCL over TCP, the mDNS socket) and the
-  blocklist downloads, lord-server starts `lord-server --net-connector <name>`: the **same binary**
-  re-executed (like the terminal holders), fixed argv, `LANG` and `LORDOS_SESSIOND` only, the channel
-  on fd 3 and every other descriptor closed. It asks lord-sessiond to place it in its scope, waits a
-  quarter of a second so lord-netperm sees the new scope, and then only answers fixed-size requests:
+  blocklist downloads, insane-server starts `insane-server --net-connector <name>`: the **same binary**
+  re-executed (like the terminal holders), fixed argv, `LANG` and `INSANEOS_SESSIOND` only, the channel
+  on fd 3 and every other descriptor closed. It asks insane-sessiond to place it in its scope, waits a
+  quarter of a second so insane-netperm sees the new scope, and then only answers fixed-size requests:
   family (IPv4/IPv6), type (stream/datagram), and an address and port to `connect()` to
-  (non-blocking; lord-server waits for the result). It returns the socket over SCM_RIGHTS and
-  lord-server checks it is the kind it asked for. It takes no names or paths, runs nothing, has
-  `no_new_privs`, is not dumpable and has 64 file descriptors; it only does what lord-server could
+  (non-blocking; insane-server waits for the result). It returns the socket over SCM_RIGHTS and
+  insane-server checks it is the kind it asked for. It takes no names or paths, runs nothing, has
+  `no_new_privs`, is not dumpable and has 64 file descriptors; it only does what insane-server could
   do itself, as the same user. **Fail closed:** in a Insane OS session a connector that can't enter its
-  scope exits and the request fails (the traffic would otherwise be lord-server's and decided by
+  scope exits and the request fails (the traffic would otherwise be insane-server's and decided by
   its rules). Outside a session (development, the tests) the socket is made in place, as before.
 - **Store and updates:** the package engine's download child (the root admin helper's fork that
-  drops to `nobody`) moves itself into `lordos-net-store.scope` before dropping root
+  drops to `nobody`) moves itself into `insaneos-net-store.scope` before dropping root
   (`cgroup_enter_root`: only from its session's `server` leaf, only itself, a root-owned scope;
-  lord-sessiond's placement service only places session users).
-- **Terminal:** the shell of each terminal (`term/pty.c`) enters `lordos-net-terminal.scope` before
+  insane-sessiond's placement service only places session users).
+- **Terminal:** the shell of each terminal (`term/pty.c`) enters `insaneos-net-terminal.scope` before
   exec, so every program started there is "Terminal" (the Monitor lists them by name). Best effort:
   a terminal that can't be placed still opens.
-- **The network service:** lord-sessiond starts lord-netd in `lordos.service/netd`, its own leaf
+- **The network service:** insane-sessiond starts insane-netd in `insaneos.service/netd`, its own leaf
   (`cgroup_service_leaf`), so its traffic (DHCP, the VPN daemons) can be counted apart from
-  lord-sessiond's.
+  insane-sessiond's.
 
 Because these are ordinary firewall apps, every rule, restriction and switch works on them (Settings
 → Privacy lists them, restrictions are the network ones). The Monitor shows the VPN tunnels from
@@ -1149,11 +1149,11 @@ neither).
 Files → Network (`FILES.md`, "Network") uses the network for one thing: one bounded pass over the LAN while its page
 is open. By the rule above its sockets come from a connector of its own, approved by the maintainer on 2026-10-31.
 Borrowing `print` was rejected: file-share probes would show as "Printers and scanners" in the Monitor and follow that
-row's rules. Making the sockets in lord-server was rejected too: the traffic would be Insane OS's own.
+row's rules. Making the sockets in insane-server was rejected too: the traffic would be Insane OS's own.
 
-**What was added:** a component `lan` (firewall app `lordos:lan`, scope `lordos-net-lan.scope`): the same connector,
+**What was added:** a component `lan` (firewall app `insaneos:lan`, scope `insaneos-net-lan.scope`): the same connector,
 same fixed-size requests, no new request type, used by `lan.c` only for one unconnected UDP socket per link
-(`sendto` 224.0.0.251:5353, kept by lord-server) and TCP to ports 445, 2049, 111, 22 and mountd's on addresses
+(`sendto` 224.0.0.251:5353, kept by insane-server) and TCP to ports 445, 2049, 111, 22 and mountd's on addresses
 `on_link` accepts. Connectors can't tell ports apart; `lan.c` is what bounds them. The change is `NC_LAN`, the name in
 `NAMES`, `FW_COMPONENTS` and `netconn_test`, a row in `sdk/netmodel.js` with its text in three languages, and
 `lan_socket` calling `netconn_socket`.
@@ -1161,20 +1161,20 @@ same fixed-size requests, no new request type, used by `lan.c` only for one unco
 ### Machines' downloads (0.8.9)
 
 The New Machine assistant downloads systems (`VIRTUALIZATION.md`, 3.9, "The Linux download cards"). They are a
-component of their own, `machines` (firewall app `lordos:machines`, scope `lordos-net-machines.scope`), so they show as
+component of their own, `machines` (firewall app `insaneos:machines`, scope `insaneos-net-machines.scope`), so they show as
 "Machines" in the Monitor and follow their own rules instead of the Store's. No connector is involved: the
 downloads go through the Store's downloader (`pkg/http.c`), whose child enters a component's scope before dropping to
-`nobody`; `fetch_batch_in` takes the scope (the Store keeps `lordos-net-store.scope`), and the closed actions
-`vm-image-list` and `vm-image-get` pass `lordos-net-machines.scope`. The change is the name in `FW_COMPONENTS`, a row in
+`nobody`; `fetch_batch_in` takes the scope (the Store keeps `insaneos-net-store.scope`), and the closed actions
+`vm-image-list` and `vm-image-get` pass `insaneos-net-machines.scope`. The change is the name in `FW_COMPONENTS`, a row in
 `sdk/netmodel.js` with its text in five languages, and that parameter.
 
 **The running machines' traffic (0.8.8.6).** A running machine's QEMU and passt (its user-mode network) live in
-`app-lordos-lordos-vm-<id>.scope` (`vm/lordvm.c`; the prefix is reserved, `app_scope_reserved`), so the guest's
-connections are made by sockets of that scope. Before, that scope read as the app `desktop:lordos-vm-<id>`, which has no
+`app-insaneos-insaneos-vm-<id>.scope` (`vm/insanevm.c`; the prefix is reserved, `app_scope_reserved`), so the guest's
+connections are made by sockets of that scope. Before, that scope read as the app `desktop:insaneos-vm-<id>`, which has no
 `.desktop` file: Monitor showed the guest's traffic as an app named "?" (passt isn't dumpable, so no process name either,
 and with nested leaves the socket's cgroup wasn't even a known scope), and a rule for Machines didn't reach the guest.
-Now `fw_scope_app` (`fw/rules.c`), the one translation lord-netperm and Monitor (`monitor/conn.c`) share, reads a
-machine's scope (`fw_vm_scope`: the id is the machine's lowercase UUID) as `lordos:machines`, the same app as the
+Now `fw_scope_app` (`fw/rules.c`), the one translation insane-netperm and Monitor (`monitor/conn.c`) share, reads a
+machine's scope (`fw_vm_scope`: the id is the machine's lowercase UUID) as `insaneos:machines`, the same app as the
 downloads. Several scopes can share one app: their rules are installed once under the app's index (dropping one scope
 keeps them while another runs), and the per-second counters add them together under one key. Monitor also maps the
 scope's leaves (`qemu`, `passt`, `supervisor`) and adds the machine's id to each connection (`cgSub`), so the row reads
@@ -1185,16 +1185,16 @@ scope's leaves (`qemu`, `passt`, `supervisor`) and adds the machine's id to each
 Name resolution, time and the network service are shown but can never be blocked: they are not in
 any app's scope, so no rule reaches them. The accounting programs alone (`cgroup/skb_ingress`,
 `skb_egress`) are also attached to `system.slice/systemd-resolved.service` and
-`systemd-timesyncd.service` (lord-netd's leaf is already under `lordos.service`), and `np_sysc`
+`systemd-timesyncd.service` (insane-netd's leaf is already under `insaneos.service`), and `np_sysc`
 gets an entry for each, keyed by its cgroup id; a packet that isn't an app's is looked up there by
 its socket's cgroup (`bpf_skb_cgroup_id`) and only counted, never filtered. COUNTS carries them as
-`system:dns`, `system:time` and `system:network` for every user. lord-netd's DHCP client uses a
+`system:dns`, `system:time` and `system:network` for every user. insane-netd's DHCP client uses a
 raw socket for discovery, which the cgroup programs don't see: only its unicast renewals count.
 
 ### Measurements, 0.8.5 (VM 118)
 
 `iperf3` through a veth pair into a private namespace (eth0 untouched), the client in an app scope,
-system CPU in % of one core over 15 s, 0.8.3's lord-netperm and this one interleaved twice:
+system CPU in % of one core over 15 s, 0.8.3's insane-netperm and this one interleaved twice:
 
 | | 0.8.3 | 0.8.5 |
 |---|---|---|
@@ -1210,7 +1210,7 @@ gave the same numbers as this one, so the difference is not the port parsing its
 
 ### Known limits
 
-- **App scopes are root's now** (was: "Scopes belong to the user"). `lord-sessiond` creates the
+- **App scopes are root's now** (was: "Scopes belong to the user"). `insane-sessiond` creates the
   scopes and places each process; every `cgroup.procs` of the session subtree is root-owned, so a
   Linux app can no longer move itself to another scope, to `server` or to a new cgroup (tested on
   VM 122, see `PRIVACY.md`, «Root-owned app scopes»).
@@ -1230,10 +1230,10 @@ gave the same numbers as this one, so the difference is not the port parsing its
 
   Incoming connections that arrive at an already open port are now decided per packet by the
   filter (0.8.3, [Existing connections are cut](#existing-connections-are-cut)).
-- **Cutting under `user@`:** the packet filter is attached only to `lordos.service`, so a process
+- **Cutting under `user@`:** the packet filter is attached only to `insaneos.service`, so a process
   that escaped to `user@<uid>.service` keeps the connections it already had when a restriction is
   added; its new ones are refused by the union as before.
-- **Cuts after a restart of `lord-netperm`:** the ports an app bound before the restart come back
+- **Cuts after a restart of `insane-netperm`:** the ports an app bound before the restart come back
   from the listening TCP sockets only; a UDP server bound before it is decided as outgoing until it
   binds again.
 - **Per-port rules with direction `in`** are applied at `bind`, with an unknown address.
@@ -1263,15 +1263,15 @@ gave the same numbers as this one, so the difference is not the port parsing its
 A curated catalog of public lists by topic (advertising, trackers, malware and attacks), domain-
 and address-based, that the owner turns on in Settings → Privacy → Blocklists, plus custom lists by
 https address. Lists are downloaded daily over HTTPS by an unprivileged, sandboxed helper, parsed
-strictly, checked again by lord-server, compiled into one file and enforced by lord-netperm in the
+strictly, checked again by insane-server, compiled into one file and enforced by insane-netperm in the
 existing per-app maps. They never override a rule the owner wrote for a destination.
 
 ```
 assets/fw/blocklists.json        the catalog: id, topic, url, format, licence, source, date checked
 server/src/fw/fwlists.{c,h}      raw parsers, the set (hashes), the compiled file's reader
-server/src/fw/fwsub.{c,h}        lord-server: subscriptions, the download job, compiling
-server/src/fetch/fetch.c         lord-fetch, the downloader (OpenSSL), fetchproto.h its protocol
-server/src/ui/js_fw.c            lord.fw.lists / setList / addList / removeList / updateLists / listMatch
+server/src/fw/fwsub.{c,h}        insane-server: subscriptions, the download job, compiling
+server/src/fetch/fetch.c         insane-fetch, the downloader (OpenSSL), fetchproto.h its protocol
+server/src/ui/js_fw.c            insane.fw.lists / setList / addList / removeList / updateLists / listMatch
 apps/monitor/Blocklists.jsx      Settings → Privacy → Blocklists
 tests/fwlists_test.c, fwsub_test.c
 ```
@@ -1294,20 +1294,20 @@ Left out: a malware URL feed whose terms are fair use without a stated licence; 
 address list (CC0) that was empty when checked; The Block List Project's malware list (2.6 million
 entries, over the size limit); lists under non-commercial licences.
 
-### Downloading: lord-fetch
+### Downloading: insane-fetch
 
-- **Who connects:** lord-server resolves the list's host and connects through the blocklists'
-  connector, so the socket is `lordos:lists`'s (its own row and rules). Only `https://` addresses
+- **Who connects:** insane-server resolves the list's host and connects through the blocklists'
+  connector, so the socket is `insaneos:lists`'s (its own row and rules). Only `https://` addresses
   (`fws_split_url`: a host name with a dot, an optional port, a printable path; no user info, no
   addresses in brackets).
-- **lord-fetch** (`server/src/fetch/fetch.c`): posix_spawned by the job thread from lord-server's
+- **insane-fetch** (`server/src/fetch/fetch.c`): posix_spawned by the job thread from insane-server's
   folder (root's or the user's, not writable by others), no arguments, `LANG` only, the channel
-  (lord-doc's framing) on fd 3. It loads the CA bundle and then calls `sandbox_apply_helper` (scope
-  `lordos-fetch.scope`, 256 MB; no socket, connect, bind or exec; no files). For each list it gets the
+  (insane-doc's framing) on fd 3. It loads the CA bundle and then calls `sandbox_apply_helper` (scope
+  `insaneos-fetch.scope`, 256 MB; no socket, connect, bind or exec; no files). For each list it gets the
   connected socket and `{host, path, format, sub}`; it speaks TLS 1.2 or later with the certificate
   checked against the system CA store and the host name (mail/net.c, never relaxed), sends one
   HTTP/1.1 GET with `Accept-Encoding: identity`, and reads at most 16 MB with deadlines
-  (mail/http.c). A redirect comes back to lord-server, which follows at most three, https only.
+  (mail/http.c). A redirect comes back to insane-server, which follows at most three, https only.
 - **Strict parsing, in the helper** (`fwl_parse_raw`): a NUL byte, a line over 1024 bytes or a body
   over 16 MB reject the list; comments (`#`, `!`, `;`, `//`, inline ` #`) are dropped; a hosts file
   only maps names to `0.0.0.0`, `127.0.0.1`, `::` or `::1`; a domain list has one name per line
@@ -1317,22 +1317,22 @@ entries, over the size limit); lists under non-commercial licences.
   and networks broader than /8 or /16. More than 10 % unparsable lines (over 20) reject the list as
   the wrong format. At most 300,000 names or 100,000 networks per list (the rest is cut and said).
   What comes back is normalized lines (`d name`, `s name`, `n cidr`), each once, in a sealed memfd.
-- **lord-server checks it again** (every line with the same validator) before keeping a copy in
-  `~/.cache/lordos/fwlists/<id>.txt` with its state (`<id>.json`: when, how many, the last error).
-- **Daily:** `sdk/netstatus.jsx` asks once an hour (`lord.fw.updateLists`); lord-server downloads
+- **insane-server checks it again** (every line with the same validator) before keeping a copy in
+  `~/.cache/insaneos/fwlists/<id>.txt` with its state (`<id>.json`: when, how many, the last error).
+- **Daily:** `sdk/netstatus.jsx` asks once an hour (`insane.fw.updateLists`); insane-server downloads
   only the enabled lists whose copy is more than 20 hours old, and a list that failed is tried again
   after an hour. Turning a list on downloads it at once if there's no copy.
 
 ### Compiling and enforcing
 
-- **One file:** the job thread writes every enabled list's lines into `~/.config/lordos/fwlists.txt`
-  (header `lordos-fwlists 1`, at most 32 MB) and keeps a set of hashes for the Monitor's "on the list
-  …" (`lord.fw.listMatch`); when the job ends lord-server sends the usual RELOAD. The three files
-  are on `lord.fs`'s deny list.
-- **lord-netperm** reads `fwlists.txt` with the same fixed-path, no-links, user-owned, size-limited
+- **One file:** the job thread writes every enabled list's lines into `~/.config/insaneos/fwlists.txt`
+  (header `insaneos-fwlists 1`, at most 32 MB) and keeps a set of hashes for the Monitor's "on the list
+  …" (`insane.fw.listMatch`); when the job ends insane-server sends the usual RELOAD. The three files
+  are on `insane.fs`'s deny list.
+- **insane-netperm** reads `fwlists.txt` with the same fixed-path, no-links, user-owned, size-limited
   reader as `firewall.json`, and any invalid line keeps the previous set. Names are kept as 64-bit
   hashes (keyed per process) in sorted arrays, about 10 bytes a name: 380,000 names and 19,000
-  networks take 13.8 MB of lord-netperm's memory.
+  networks take 13.8 MB of insane-netperm's memory.
 - **In the kernel:** each user with lists gets a set in `np_blk4`/`np_blk6` (LPM tries keyed by
   set and address), and each of their apps carries it (`NpApp.blk`). The set holds the lists'
   networks and, from the system resolver's answers, the addresses of listed names; an address is
@@ -1351,22 +1351,22 @@ own encrypted DNS is only checked by address.
 **Tested:** `fwlists-test` (hosts, domains and address formats, every rejection rule, the set and its
 lookups, CNAME-style shared addresses, the file reader, 20,000 mutated lists; also under ASan and
 UBSan) and `fwsub-test` (URL parsing, the catalog and config, compiling seeded copies, custom lists,
-and lord-fetch refusing bad requests and a peer without TLS, without network). On VM 118: two lists
+and insane-fetch refusing bad requests and a peer without TLS, without network). On VM 118: two lists
 downloaded over HTTPS (8,527 names and 19,405 networks), then all four; `curl` from the Terminal to
 a listed domain and to a listed address failed with `denied out tcp … (list)`; switching that
-domain's row on in the Monitor wrote `{"app":"lordos:terminal","dst":"nationalityship.com","action":"allow"}`
+domain's row on in the Monitor wrote `{"app":"insaneos:terminal","dst":"nationalityship.com","action":"allow"}`
 and the next connection went through; switching it off removed the rule.
 
 ## Rules by app (Settings and Monitor)
 
-The rules the store always supported (`lord.fw.addRule`: domains, wildcards, addresses, networks,
+The rules the store always supported (`insane.fw.addRule`: domains, wildcards, addresses, networks,
 ports, protocols) now have screens:
 
 ```
 apps/monitor/FwRules.jsx     Settings → Privacy → "Network rules by app" (registerPrivacySection)
 apps/monitor/RuleSheet.jsx   the add / edit sheet, shared with the Monitor
 apps/monitor/Network.jsx     Monitor → Network: "Allow / Block this domain" on an app's destinations
-sdk/fwrule.js                checks what is typed, orders rules by precedence (fwRule in @lordos/sdk)
+sdk/fwrule.js                checks what is typed, orders rules by precedence (fwRule in @insaneos/sdk)
 server/tests/fw_dest_cases.txt, fwdest_test.c, fwrule_input_test.mjs   the parser tests
 ```
 
@@ -1400,18 +1400,18 @@ rules in exactly that order (`sortByPrecedence` in `sdk/fwrule.js`, a copy of `c
   user can replace with a domain.
 
 Short connections (a `curl`) close before the next sample, so besides the open sockets each app
-lists the destinations `lord-netperm` reported recently ("recent connection" / "recently denied").
+lists the destinations `insane-netperm` reported recently ("recent connection" / "recently denied").
 Since 0.8.2 each destination in an app's open row also has its own allow/block switch: it shows what
 the app's rules decide for that name or address (the same order as `fw_decide`, mirrored in
 `sdk/fwrule.js` `decide()` and checked against it with `server/tests/fw_domain_cases.txt`) and a
 click writes, flips or removes the exact-name rule (`MONITOR.md`, "Per-destination switches").
 The detail pane also links to "Rules for this app" (Settings → Privacy, with that app open).
 
-**Last match.** `lord-netperm`'s `EVENT` notices carry the rule that decided (`"by":"rule"`,
-`"rule": N`). lord-server keeps, per rule, the time it last saw one (memory only, like the counters;
+**Last match.** `insane-netperm`'s `EVENT` notices carry the rule that decided (`"by":"rule"`,
+`"rule": N`). insane-server keeps, per rule, the time it last saw one (memory only, like the counters;
 `lastMatch` in `rules()`), and Settings reads it every 5 s while shown. Two details:
 
-- `lord-netperm` numbers rules on its own: on every reload it reads `firewall.json` into a new
+- `insane-netperm` numbers rules on its own: on every reload it reads `firewall.json` into a new
   store, so its ids are 1, 2, 3… in file order. After every save `js_fw.c` reads the saved text the
   same way and maps those ids to its own rules by app, direction, destination, ports and protocol.
 - Notices are deduplicated per destination for 5 s, and only those this session received count:
@@ -1445,10 +1445,10 @@ Settings says this in a footer under the rules, in the user's language.
 - `server/tests/fwrule_input_test.mjs` (run by `run_suites.sh` when `node` is installed, otherwise
   "skipped: needs node") runs the same file through the sheet's parser, plus ports, protocols, the
   default rule and the precedence order: 99 checks. Both parsers read one file, so they can't drift.
-- End to end on VM 122 (`lord-netperm` from the package, the new `lord-server` and bundle): a
+- End to end on VM 122 (`insane-netperm` from the package, the new `insane-server` and bundle): a
   `.desktop` "Curl test" (`foot -e` a loop of `curl https://example.com` and
   `https://www.debian.org`, every 4 s) started from the launcher runs in
-  `app-lordos-curltest.scope`. From the Monitor, "Block this address" → typed `*.example.com` →
+  `app-insaneos-curltest.scope`. From the Monitor, "Block this address" → typed `*.example.com` →
   Add rule:
 
   | Time | `example.com` | `www.debian.org` |
@@ -1457,7 +1457,7 @@ Settings says this in a footer under the rules, in the user's language.
   | rule added (14:55:02) | `curl: (7) Failed to connect … Could not connect to server` from 14:55:07 | 200 |
   | rule deleted in Settings (14:58:18) | 200 at 14:58:18 | 200 |
 
-  `lord-netperm` logged each denial for `desktop:curltest` (`tcp 172.66.147.243:443 (rule)`, the
+  `insane-netperm` logged each denial for `desktop:curltest` (`tcp 172.66.147.243:443 (rule)`, the
   other address, and UDP 443 for HTTP/3). Edit (`10.0.0.0/8` → `10.1.0.0/16`) replaced the rule in
   `firewall.json` in place.
 
@@ -1477,11 +1477,11 @@ Settings says this in a footer under the rules, in the user's language.
 
 ## How the next steps plug in
 
-What remains of steps 3 and 4 (the original design; what's done is above, in "`lord.fw`").
+What remains of steps 3 and 4 (the original design; what's done is above, in "`insane.fw`").
 
 ### Step 3: Monitor, the "Rule" column
 
-- **The column:** `apps/monitor` already groups by `appKey` (`lordos`, `desktop:<id>` or the
+- **The column:** `apps/monitor` already groups by `appKey` (`insaneos`, `desktop:<id>` or the
   path), which is the same canonical id as here. Each app's switch writes the rule
   `{app, out, any, allow|deny, forever}`. Since adding the same destination replaces, going back
   and forth doesn't pile up rules.
@@ -1505,5 +1505,5 @@ What remains of steps 3 and 4 (the original design; what's done is above, in "`l
   `sec/restrict.h`) before `perms.c`, by the broker for isolated apps and by `js_media.c` and
   `sdk/notify.js` for the built-in apps. Exactly what is enforced where is in
   [Non-network restrictions](#non-network-restrictions).
-- **The JS API:** goes in its own `js_fw.c`, with input validation like the rest of `lord.*`. It
+- **The JS API:** goes in its own `js_fw.c`, with input validation like the rest of `insane.*`. It
   never takes paths: the file's path is fixed by the server.

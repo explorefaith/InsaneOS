@@ -84,15 +84,15 @@ int main(void) {
 
     /* a parent of a protected path can't be trashed, renamed, moved or restored over: that would take
      * the protected path with it, or bring a crafted one in */
-    static const char *const dirs[] = { ".config", ".config/lordos", ".config/plain", ".local", ".local/share", ".local/share/lordos",
-                                         ".local/share/lordos/vault", "box", NULL };
+    static const char *const dirs[] = { ".config", ".config/insaneos", ".config/plain", ".local", ".local/share", ".local/share/insaneos",
+                                         ".local/share/insaneos/vault", "box", NULL };
     for (int i = 0; dirs[i]; i++) { path(a, dirs[i]); mkdir(a, 0700); }
-    put(".config/lordos/settings.json", "{}");
-    put(".config/lordos/other.json", "{}");
-    put(".local/share/lordos/vault/v", "x");
+    put(".config/insaneos/settings.json", "{}");
+    put(".config/insaneos/other.json", "{}");
+    put(".local/share/insaneos/vault/v", "x");
     put(".config/plain/a.txt", "a");
     put("box/settings.json", "{\"evil\":1}");
-    static const char *const parents[] = { ".config/lordos", ".config", ".local/share/lordos", ".local/share", ".local", NULL };
+    static const char *const parents[] = { ".config/insaneos", ".config", ".local/share/insaneos", ".local/share", ".local", NULL };
     for (int i = 0; parents[i]; i++) {
         path(a, parents[i]);
         CHECK(fsops_protected_below(a));
@@ -102,10 +102,10 @@ int main(void) {
         CHECK(fsjob_start(a, b, 1, err, sizeof err) == -1 && !strncmp(err, "fs.protected", 12));
         CHECK(exists(parents[i]) && !exists("moved-away"));
     }
-    CHECK(exists(".config/lordos/settings.json"));
+    CHECK(exists(".config/insaneos/settings.json"));
     /* nor can a folder take such a name */
-    path(a, ".config/lordos");
-    path(b, ".config/lordos-old");
+    path(a, ".config/insaneos");
+    path(b, ".config/insaneos-old");
     char c2[512];
     path(c2, "box");
     CHECK(!rename(a, b));
@@ -120,9 +120,9 @@ int main(void) {
     CHECK(!fsops_rename(a, b, err, sizeof err));
     CHECK(exists(".config/plain2/a.txt"));
     CHECK(!fstrash_put(b, err, sizeof err));
-    path(a, ".config/lordos/other.json");
+    path(a, ".config/insaneos/other.json");
     CHECK(!fsops_protected_below(a));
-    path(b, ".config/lordos/renamed.json");
+    path(b, ".config/insaneos/renamed.json");
     CHECK(!fsops_rename(a, b, err, sizeof err));
     path(a, "box");
     path(b, "box2");
@@ -155,11 +155,11 @@ int main(void) {
         path(info, ".local/share/Trash/info/plain3.trashinfo");
         FILE *f = fopen(info, "w");
         if (f) {
-            fprintf(f, "[Trash Info]\nPath=%s/.config/lordos\nDeletionDate=2026-01-01T00:00:00\n", H);
+            fprintf(f, "[Trash Info]\nPath=%s/.config/insaneos\nDeletionDate=2026-01-01T00:00:00\n", H);
             fclose(f);
         }
-        path(a, ".config/lordos");
-        path(b, ".config/lordos-kept");
+        path(a, ".config/insaneos");
+        path(b, ".config/insaneos-kept");
         CHECK(!rename(a, b));
         CHECK(fstrash_restore(t, err, sizeof err) == -1 && !strncmp(err, "fs.protected", 12));
         CHECK(!rename(b, a));
@@ -251,7 +251,7 @@ int main(void) {
     {
         char e[512], l[512], f[600], d[512];
         snprintf(e, sizeof e, "%s/elsewhere", H); mkdir(e, 0755);
-        snprintf(d, sizeof d, "%s/elsewhere/lordos", H); mkdir(d, 0755);
+        snprintf(d, sizeof d, "%s/elsewhere/insaneos", H); mkdir(d, 0755);
         snprintf(f, sizeof f, "%s/settings.json", d);
         FILE *sf = fopen(f, "w"); if (sf) { fputs("{}", sf); fclose(sf); }
         char keep[520];
@@ -265,7 +265,7 @@ int main(void) {
         /* a protected file not written yet, in a folder reached through the link: still seen where it would be */
         fsops_protect_file(FSOPS_PF_TERMINAL, "");
         char tj[600];
-        snprintf(tj, sizeof tj, "%s/.config/lordos/terminal.json", H);
+        snprintf(tj, sizeof tj, "%s/.config/insaneos/terminal.json", H);
         fsops_protect_file(FSOPS_PF_TERMINAL, tj);
         unlink(f);                                      /* settings.json gone too: only the missing file is left */
         CHECK(fsops_protected_resolved(d));

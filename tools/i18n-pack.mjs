@@ -1,15 +1,15 @@
 // i18n-pack.mjs — builds a Insane OS language pack (a single JSON file).
 //
 //   node tools/i18n-pack.mjs new fr "Français" French one-other fr_FR
-//        → lordos-lang-fr.json with every key in English, to translate
+//        → insaneos-lang-fr.json with every key in English, to translate
 //   node tools/i18n-pack.mjs export pt
-//        → lordos-lang-pt.json with the pt language as it is
+//        → insaneos-lang-pt.json with the pt language as it is
 //
 // The pack is installed in Insane OS by copying it to ~/Downloads and using Settings → Language and
-// region → "Add"; it ends up in ~/.local/share/lordos/locales/<id>/. Available plural
+// region → "Add"; it ends up in ~/.local/share/insaneos/locales/<id>/. Available plural
 // rules: one-other, zero-one-other, none, east-slavic, polish, czech-slovak, lithuanian, arabic
 // (see sdk/i18n.js). The direction ("rtl" for Arabic, Hebrew, Persian, Urdu…) comes from the id.
-// Check it with: node tools/i18n-check.mjs lordos-lang-fr.json
+// Check it with: node tools/i18n-check.mjs insaneos-lang-fr.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,6 +40,6 @@ else if (cmd === 'new') {
   const direction = RTL.includes(id.split('-')[0]) ? 'rtl' : 'ltr';
   pack = { meta: { id, name: name || id, english: english || id, plural, region, direction }, catalogs: en.catalogs };
 } else { console.error('unknown command'); process.exit(2); }
-const out = `lordos-lang-${id}.json`;
+const out = `insaneos-lang-${id}.json`;
 fs.writeFileSync(out, `${JSON.stringify(pack, null, 2)}\n`);
 console.log(`${out}: ${Object.values(pack.catalogs).reduce((n, c) => n + Object.keys(c).length, 0)} strings`);

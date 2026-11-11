@@ -1,7 +1,7 @@
 /* ifwatch.c — every interface gets its saved state once, whenever it appears.
  *
  * Boot used to be a single pass over the interfaces that existed at that moment. A radio whose driver
- * finishes loading its firmware later than lord-netd starts (issue #8) was not in that list, nothing
+ * finishes loading its firmware later than insane-netd starts (issue #8) was not in that list, nothing
  * looked again, and it stayed down until the person switched it on. A radio udev had yet to rename was
  * configured under a name its saved config doesn't have.
  *

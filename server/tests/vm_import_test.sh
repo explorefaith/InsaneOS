@@ -1,16 +1,16 @@
 #!/bin/sh
-# vm_import_test.sh — Machines: what `lord-vm --create --import` refuses (docs/VIRTUALIZATION.md, "Phase 1
+# vm_import_test.sh — Machines: what `insane-vm --create --import` refuses (docs/VIRTUALIZATION.md, "Phase 1
 # implementation", Import). A crafted qcow2 can name a backing file or an external data file; if the import
 # followed it, the new disk would hold a copy of a file the guest must never read. Also: a raw file named .qcow2,
 # a qcow2 with a backing file hidden under a .img name, and a system disk swapped for one with a backing file
-# after the machine was made (lord-vm refuses to start it).
+# after the machine was made (insane-vm refuses to start it).
 #
 #   sh tests/vm_import_test.sh BUILD_DIR
 #
 # Needs qemu-img and qemu-system-<this arch> (no KVM: nothing boots). One line per check; exit 1 on any FAIL.
 set -u
 BIN=$(cd "$1" && pwd) || exit 2
-VM="$BIN/lord-vm"
+VM="$BIN/insane-vm"
 W=$(mktemp -d /tmp/lvimp.XXXXXX) || exit 2
 trap 'rm -rf "$W"' EXIT
 pass=0 fail=0
@@ -21,11 +21,11 @@ command -v qemu-img >/dev/null || { echo "SKIP  qemu-img isn't installed"; exit 
 # the "secret": a file the person can read, with a marker the guest must never see
 SECRET="$W/secret.raw"
 head -c 1048576 /dev/zero >"$SECRET"
-printf 'LORDOS-IMPORT-SECRET-MARKER' | dd of="$SECRET" conv=notrunc 2>/dev/null
-has_secret() { qemu-img convert -q -O raw "$1" "$W/probe.raw" 2>/dev/null && grep -aq LORDOS-IMPORT-SECRET-MARKER "$W/probe.raw"; r=$?; rm -f "$W/probe.raw"; return $r; }
+printf 'INSANEOS-IMPORT-SECRET-MARKER' | dd of="$SECRET" conv=notrunc 2>/dev/null
+has_secret() { qemu-img convert -q -O raw "$1" "$W/probe.raw" 2>/dev/null && grep -aq INSANEOS-IMPORT-SECRET-MARKER "$W/probe.raw"; r=$?; rm -f "$W/probe.raw"; return $r; }
 
 refused() {   # NAME IMAGE
-    D="$W/m-$1.lordvm"
+    D="$W/m-$1.insanevm"
     if "$VM" --create "$D" --name "$1" --import "$2" --network isolated --vcpus 1 --memory 512 >"$W/$1.out" 2>&1; then
         bad "$1: refused" "$(cat "$W/$1.out")"
         [ -f "$D/disks/system.qcow2" ] && has_secret "$D/disks/system.qcow2" && bad "$1: the secret reached the new disk"
@@ -55,12 +55,12 @@ refused patched-backing-offset "$W/patched.qcow2"
 
 # a good qcow2 and a good raw image: accepted, and the new disk has no backing file
 qemu-img create -q -f qcow2 "$W/good.qcow2" 64M
-D="$W/m-good.lordvm"
+D="$W/m-good.insanevm"
 if "$VM" --create "$D" --name good --import "$W/good.qcow2" --network isolated --vcpus 1 --memory 512 >"$W/good.out" 2>&1; then
     if qemu-img info "$D/disks/system.qcow2" | grep -q "backing file"; then bad "good qcow2: new disk without backing"; else ok "good qcow2: imported, no backing file"; fi
 else bad "good qcow2: imported" "$(cat "$W/good.out")"; fi
 head -c 2097152 /dev/zero >"$W/good.img"
-D2="$W/m-raw.lordvm"
+D2="$W/m-raw.insanevm"
 if "$VM" --create "$D2" --name raw --import "$W/good.img" --network isolated --vcpus 1 --memory 512 >"$W/raw.out" 2>&1; then ok "good raw .img: imported"
 else bad "good raw .img: imported" "$(cat "$W/raw.out")"; fi
 
@@ -80,16 +80,16 @@ if [ -f "$D2/machine.json" ]; then
     if [ "$(cat "$W/locked.rc")" = 3 ]; then ok "set: refused while the machine runs (lock held)"; else bad "set: refused while running" "$(cat "$W/locked.out")"; fi
 fi
 
-# the system disk swapped afterwards for one with a backing file: lord-vm refuses to start it
+# the system disk swapped afterwards for one with a backing file: insane-vm refuses to start it
 if [ -f "$D/disks/system.qcow2" ]; then
     cp "$W/backing.qcow2" "$D/disks/system.qcow2"
     timeout 30 "$VM" --start "$D" >"$W/start.out" 2>&1
-    if "$VM" --status "$D" --json | grep -q '"reason":"start-failed"' && grep -q "system disk can't be used" "$D/log/lord-vm.log"; then ok "swapped system disk: start refused"
-    else bad "swapped system disk: start refused" "$("$VM" --status "$D" --json) $(tail -3 "$D/log/lord-vm.log")"; fi
+    if "$VM" --status "$D" --json | grep -q '"reason":"start-failed"' && grep -q "system disk can't be used" "$D/log/insane-vm.log"; then ok "swapped system disk: start refused"
+    else bad "swapped system disk: start refused" "$("$VM" --status "$D" --json) $(tail -3 "$D/log/insane-vm.log")"; fi
 fi
 
 
-# ---- machines of other virtualization apps (6.22): lord-vm --import-plan and --import-machine ----
+# ---- machines of other virtualization apps (6.22): insane-vm --import-plan and --import-machine ----
 # Every file of a source is hostile: a name that leaves the bundle, a symlink out, an XML declaration, a disk piece
 # elsewhere must all be refused, and the secret must never reach a new disk. Merged snapshot layers must give the
 # same bytes as the source's current state. The sources are only read.
@@ -98,11 +98,11 @@ LIB="${W:?}/lib"; mkdir -p "$LIB"
 planok() { "$VM" --import-plan "$1" >"$W/plan.json" 2>"$W/plan.err" && ! grep -q '"blockers":\[{' "$W/plan.json"; }
 imp_refused() {   # LABEL SRC [TEXT]: refused by plan and import, nothing made, the secret nowhere
     if [ -z "${NOPLAN:-}" ] && planok "$2"; then bad "$1: the plan refuses" "$(cut -c1-300 "$W/plan.json")"; fi
-    if "$VM" --import-machine "$2" "$LIB/x.lordvm" >"$W/imp.out" 2>&1; then bad "$1: refused" "$(tail -2 "$W/imp.out")"
-        for f in "$LIB"/x.lordvm/disks/*.qcow2; do [ -f "$f" ] && has_secret "$f" && bad "$1: the secret reached the new disk"; done
-        rm -rf "${LIB:?}/x.lordvm"
+    if "$VM" --import-machine "$2" "$LIB/x.insanevm" >"$W/imp.out" 2>&1; then bad "$1: refused" "$(tail -2 "$W/imp.out")"
+        for f in "$LIB"/x.insanevm/disks/*.qcow2; do [ -f "$f" ] && has_secret "$f" && bad "$1: the secret reached the new disk"; done
+        rm -rf "${LIB:?}/x.insanevm"
     elif [ -n "${3:-}" ] && ! grep -q "$3" "$W/imp.out"; then bad "$1: refused for the right reason" "$(tail -1 "$W/imp.out")"
-    elif ls -d "$LIB"/x.lordvm "$LIB"/.x.lordvm.part-* >/dev/null 2>&1; then bad "$1: nothing left behind"
+    elif ls -d "$LIB"/x.insanevm "$LIB"/.x.insanevm.part-* >/dev/null 2>&1; then bad "$1: nothing left behind"
     else ok "$1: refused ($(grep -v '^20..-' "$W/imp.out" | tail -1 | cut -c10-100))"; fi
 }
 vmx() {   # DIR NAME FILENAME [EXTRA...]: a small .vmx with one disk
@@ -170,7 +170,7 @@ mkdir -p "$W/o2"
 printf '<Envelope><References><File id="f" href="../secret.vmdk"/></References><DiskSection><Disk diskId="d" fileRef="f"/></DiskSection><VirtualSystem id="x"><VirtualHardwareSection><Item><ResourceType>4</ResourceType><VirtualQuantity>512</VirtualQuantity></Item><Item><ResourceType>17</ResourceType><HostResource>ovf:/disk/d</HostResource></Item></VirtualHardwareSection></VirtualSystem></Envelope>\n' >"$W/o2/m.ovf"
 imp_refused "ovf: a disk href with .." "$W/o2/m.ovf" "outside its folder"
 
-# merges: VMDK snapshots (qemu-img stacks them, each layer named by us), VDI and .hds snapshots (lord-vm merges them)
+# merges: VMDK snapshots (qemu-img stacks them, each layer named by us), VDI and .hds snapshots (insane-vm merges them)
 head -c 8388608 /dev/urandom >"$W/base8.raw"
 t_same() { if [ "$(sums "$1")" = "$2" ]; then ok "$3: the source is unchanged"; else bad "$3: the source is unchanged"; fi; }
 B="$W/m1.vmwarevm"; mkdir -p "$B"
@@ -182,10 +182,10 @@ qemu-io -c "write -P 0xc2 5M 1M" "$B/d-000002.vmdk" >/dev/null
 vmx "$B" chain "d-000002.vmdk"
 before=$(sums "$B")
 python3 -I "$GEN" expect "$W/base8.raw" "$W/m1.expect" 2:0xc1 5:0xc2
-if "$VM" --import-machine "$B" "$LIB/m1.lordvm" >"$W/m1.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m1.lordvm/disks/system.qcow2" "$W/m1.raw" && cmp -s "$W/m1.raw" "$W/m1.expect"
+if "$VM" --import-machine "$B" "$LIB/m1.insanevm" >"$W/m1.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m1.insanevm/disks/system.qcow2" "$W/m1.raw" && cmp -s "$W/m1.raw" "$W/m1.expect"
 then ok "vmdk: a split base and two snapshots merged, byte for byte"; else bad "vmdk: two snapshots merged" "$(tail -2 "$W/m1.out")"; fi
 t_same "$B" "$before" "vmdk"
-if qemu-img info "$LIB/m1.lordvm/disks/system.qcow2" | grep -q "backing file"; then bad "vmdk: the new disk has no backing file"; else ok "vmdk: the new disk has no backing file"; fi
+if qemu-img info "$LIB/m1.insanevm/disks/system.qcow2" | grep -q "backing file"; then bad "vmdk: the new disk has no backing file"; else ok "vmdk: the new disk has no backing file"; fi
 
 B="$W/m2"; mkdir -p "$B/Snapshots"
 qemu-img convert -q -f raw -O vdi "$W/base8.raw" "$B/base.vdi"
@@ -209,10 +209,10 @@ cat >"$B/m.vbox" <<EOF
 EOF
 before=$(sums "$B")
 python3 -I "$GEN" expect "$W/base8.raw" "$W/m2.expect" 1:0 3:0xa1
-if "$VM" --import-machine "$B/m.vbox" "$LIB/m2.lordvm" >"$W/m2.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m2.lordvm/disks/system.qcow2" "$W/m2.raw" && cmp -s "$W/m2.raw" "$W/m2.expect"
-then ok "vdi: two differencing layers merged by lord-vm, byte for byte (a block replaced, one zeroed)"; else bad "vdi: differencing layers merged" "$(tail -2 "$W/m2.out")"; fi
+if "$VM" --import-machine "$B/m.vbox" "$LIB/m2.insanevm" >"$W/m2.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m2.insanevm/disks/system.qcow2" "$W/m2.raw" && cmp -s "$W/m2.raw" "$W/m2.expect"
+then ok "vdi: two differencing layers merged by insane-vm, byte for byte (a block replaced, one zeroed)"; else bad "vdi: differencing layers merged" "$(tail -2 "$W/m2.out")"; fi
 t_same "$B" "$before" "vdi"
-if grep -q '"disk_serial": "VB' "$LIB/m2.lordvm/machine.json" 2>/dev/null && grep -q '"mac": "08:00:27:a1:b2:c3"' "$LIB/m2.lordvm/machine.json"
+if grep -q '"disk_serial": "VB' "$LIB/m2.insanevm/machine.json" 2>/dev/null && grep -q '"mac": "08:00:27:a1:b2:c3"' "$LIB/m2.insanevm/machine.json"
 then ok "vdi: the default SATA serial and the MAC carried"; else bad "vdi: serial and MAC carried"; fi
 
 B="$W/m3.pvm"; mkdir -p "$B/harddisk.hdd"
@@ -230,10 +230,10 @@ EOF
 printf '<?xml version="1.0"?><ParallelsVirtualMachine><Identification><VmUuid>{deadbeef-0000-4000-8000-00000000c0de}</VmUuid><VmName>hds chain</VmName></Identification><Hardware><Cpu><Number>1</Number></Cpu><Memory><RAM>512</RAM></Memory><Hdd id="0"><Enabled>1</Enabled><SystemName>/elsewhere/harddisk.hdd</SystemName><InterfaceType>2</InterfaceType></Hdd><NetworkAdapter id="0"><Enabled>1</Enabled><MAC>001C42ABCDEF</MAC></NetworkAdapter></Hardware></ParallelsVirtualMachine>\n' >"$B/config.pvs"
 before=$(sums "$B")
 python3 -I "$GEN" expect "$W/base8.raw" "$W/m3.expect" 2:0xb0 4:0xb1
-if "$VM" --import-machine "$B" "$LIB/m3.lordvm" >"$W/m3.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m3.lordvm/disks/system.qcow2" "$W/m3.raw" && cmp -s "$W/m3.raw" "$W/m3.expect"
-then ok "hds: a snapshot layer merged by lord-vm, byte for byte"; else bad "hds: snapshot layer merged" "$(tail -2 "$W/m3.out")"; fi
+if "$VM" --import-machine "$B" "$LIB/m3.insanevm" >"$W/m3.out" 2>&1 && qemu-img convert -q -O raw "$LIB/m3.insanevm/disks/system.qcow2" "$W/m3.raw" && cmp -s "$W/m3.raw" "$W/m3.expect"
+then ok "hds: a snapshot layer merged by insane-vm, byte for byte"; else bad "hds: snapshot layer merged" "$(tail -2 "$W/m3.out")"; fi
 t_same "$B" "$before" "hds"
-if grep -q '"id": "deadbeef-0000-4000-8000-00000000c0de"' "$LIB/m3.lordvm/machine.json" 2>/dev/null && grep -q '"mac": "00:1c:42:ab:cd:ef"' "$LIB/m3.lordvm/machine.json"
+if grep -q '"id": "deadbeef-0000-4000-8000-00000000c0de"' "$LIB/m3.insanevm/machine.json" 2>/dev/null && grep -q '"mac": "00:1c:42:ab:cd:ef"' "$LIB/m3.insanevm/machine.json"
 then ok "hds: the UUID and the MAC carried"; else bad "hds: UUID and MAC carried"; fi
 # a layer whose block table points past its file
 cp -r "$B" "$W/m4.pvm"

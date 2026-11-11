@@ -50,7 +50,7 @@
       "id": "customise", "title": "Customise the first boot",
       "text": "Leave **Prepare the first boot** on and the board starts ready: its name, your account, Wi-Fi, remote access, look and cooling. Seven tabs, and everything can be changed later in Settings. (For a PC stick there's nothing to customise: this step is skipped.)",
       "subs": [
-        ["05-tab-general", "General", "The **computer name** is how you'll find the board on your network: here `lordos-pi`, so `lordos-pi.local`. Then the language, time zone, keyboard layout and Wi-Fi country."],
+        ["05-tab-general", "General", "The **computer name** is how you'll find the board on your network: here `insaneos-pi`, so `insaneos-pi.local`. Then the language, time zone, keyboard layout and Wi-Fi country."],
         ["06-tab-user", "User", "Your administrator account: full name, user name and a password typed twice. Only a one-way hash of the password goes on the card. Automatic login is optional."],
         ["07-tab-wifi", "Wi-Fi", "The network name exactly as it appears (capitals count) and its password. The card keeps the network's derived key, never the password you typed. Hidden and open networks work too."],
         ["08-tab-remote", "Remote access", "Remote login (SSH): off, keys only (recommended) or password and keys. You can also turn on Insane OS remote desktop; it stays on your local network."],
@@ -76,8 +76,8 @@
     },
     {
       "id": "firstboot", "title": "The first boot on the Raspberry Pi 5",
-      "text": "Put the card in the board, connect the monitor, keyboard and mouse, then the power supply. The Insane OS crown and a progress bar appear while the system grows to fill the card and applies your settings. After about a minute the login screen shows your account.",
-      "points": ["From another computer at home it's `lordos-pi.local`.", "Remote login: `ssh demo@lordos-pi.local`.", "Remote desktop, if you turned it on: `https://lordos-pi.local:5673`."],
+      "text": "Put the card in the board, connect the monitor, keyboard and mouse, then the power supply. The Insane OS apple and a progress bar appear while the system grows to fill the card and applies your settings. After about a minute the login screen shows your account.",
+      "points": ["From another computer at home it's `insaneos-pi.local`.", "Remote login: `ssh demo@insaneos-pi.local`.", "Remote desktop, if you turned it on: `https://insaneos-pi.local:5673`."],
       "boot": [["docs/boot/splash-preview.png", "The boot screen while the first boot runs"], ["docs/screenshots/greeter.png", "The login screen (shown with example accounts)"]],
       "tip": ["celebrate", "Welcome home", "The settings file is applied once, then overwritten and deleted from the card."]
     }
@@ -98,7 +98,7 @@
     ["Nothing", "**Conservative** (default), Balanced", "2.0 GHz, so a bare board doesn't reach 85 °C and throttle."]
   ],
   "ocTitle": "Mild overclock (only with a fan)",
-  "ocText": "2.6 GHz instead of 2.4 GHz, with no extra voltage. Not every board is stable: if yours doesn't start, open the card's boot partition on another computer and delete the `lordos-firstrun` block in `config.txt`.",
+  "ocText": "2.6 GHz instead of 2.4 GHz, with no extra voltage. Not every board is stable: if yours doesn't start, open the card's boot partition on another computer and delete the `insaneos-firstrun` block in `config.txt`.",
   "optTitle": "App options",
   "optText": "**App options**, at the bottom of the sidebar: a sound and ejecting when finished, checking for app updates, language and appearance, and the download folder, with how much it uses and a button to clear it.",
   "optShot": ["20-options", "App options"],
@@ -118,16 +118,16 @@
     ["My card isn't listed", "Only removable drives appear: SD cards and USB drives. Use a card reader if your computer has no slot, and wait a few seconds: the list updates by itself. A card whose lock switch is on, or one under 8 GB, is shown greyed out with the reason. Your computer's own disks are never shown, on purpose."],
     ["It says the signature didn't verify", "Then nothing was written and nothing was erased. The downloaded files don't match what Insane OS signed, usually because a download broke. Open **App options → Downloads → Clear** and try again. If it keeps happening, tell us (see the security page)."],
     ["The board doesn't join my Wi-Fi", "Check the network name (capitals count), the password and the Wi-Fi country in **General**. A network that only accepts WPA3 needs its password on the board itself: connect a network cable once and add it in **Settings → Network**."],
-    ["I can't find lordos-pi.local", "Give the first boot a minute or two, and make sure your computer is on the same network (guest networks often keep devices apart). The login screen shows the board's address in its corner; you can use that address instead of the name."],
-    ["How do I log in with SSH?", "If you turned it on: `ssh demo@lordos-pi.local` (with your user name and computer name). Keys only is the safest choice. You can turn it on or off later in **Settings → Sharing**. The root account never logs in."],
-    ["The board doesn't start after the overclock", "Put the card in your computer, open its boot partition and delete the block between `# >>> lordos-firstrun` and `# <<< lordos-firstrun` in `config.txt`. The board starts at its normal speed again."],
+    ["I can't find insaneos-pi.local", "Give the first boot a minute or two, and make sure your computer is on the same network (guest networks often keep devices apart). The login screen shows the board's address in its corner; you can use that address instead of the name."],
+    ["How do I log in with SSH?", "If you turned it on: `ssh demo@insaneos-pi.local` (with your user name and computer name). Keys only is the safest choice. You can turn it on or off later in **Settings → Sharing**. The root account never logs in."],
+    ["The board doesn't start after the overclock", "Put the card in your computer, open its boot partition and delete the block between `# >>> insaneos-firstrun` and `# <<< insaneos-firstrun` in `config.txt`. The board starts at its normal speed again."],
     ["I skipped Customise. Now what?", "The board starts in setup mode and logs in by itself. Create your account in **Settings → Users**; on the next start the setup account is removed. Don't turn on remote desktop until then."],
     ["Can I write a USB stick for a PC?", "Yes: choose **PC (USB stick)** in step 1. It writes the Insane OS live system; boot the PC from the stick to try it, then install it from there."]
   ],
   "endTitle": "Ready? Get Insane OS Imager",
   "endText": "Free and open source. Every official image is checked against the release signature before anything is erased.",
   "endOther": "Prefer another way to write the card? See the download section.",
-  "shotsNote": "Screens from Insane OS Imager {v} with demo values: user “demo”, computer “lordos-pi”, network “HomeNetwork”.",
+  "shotsNote": "Screens from Insane OS Imager {v} with demo values: user “demo”, computer “insaneos-pi”, network “HomeNetwork”.",
   "home": {
     "title": "How to write Insane OS to a USB stick or SD card",
     "lead": "For the PC (ISO) and for the Raspberry Pi 5 image.",
@@ -139,7 +139,7 @@
     "optPc": "PC (ISO)",
     "optPi": "Raspberry Pi 5",
     "optVerify": "How to check the signature of SHA256SUMS",
-    "optPiSetup": "Without Insane OS Imager the Pi starts in setup mode. To prepare it, put `lordos-user.txt` and the switch files (`ssh`, `remote-desktop`) on the card's boot partition before the first boot.",
-    "optPiLink": "Switch files and lordos-user.txt"
+    "optPiSetup": "Without Insane OS Imager the Pi starts in setup mode. To prepare it, put `insaneos-user.txt` and the switch files (`ssh`, `remote-desktop`) on the card's boot partition before the first boot.",
+    "optPiLink": "Switch files and insaneos-user.txt"
   }
 }

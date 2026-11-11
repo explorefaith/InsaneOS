@@ -18,7 +18,7 @@
   "cooling.noneWarnTitle": "Sans refroidissement, la carte ralentit d’elle-même",
   "cooling.overclock": "Overclocking léger",
   "cooling.overclockHint": "2,6 GHz au lieu de 2,4 GHz, sans tension supplémentaire. Uniquement avec un ventilateur.",
-  "cooling.overclockWarn": "Si la carte ne démarre pas, ouvrez la partition de démarrage de la carte SD sur un autre ordinateur et supprimez le bloc lordos-firstrun dans config.txt.",
+  "cooling.overclockWarn": "Si la carte ne démarre pas, ouvrez la partition de démarrage de la carte SD sur un autre ordinateur et supprimez le bloc insaneos-firstrun dans config.txt.",
   "cooling.overclockWarnTitle": "Toutes les cartes ne sont pas stables en overclocking",
   "cooling.p.balanced": "Équilibré",
   "cooling.p.balancedHint": "Le ventilateur démarre à 55 °C et accélère avec la température. Le profil par défaut.",

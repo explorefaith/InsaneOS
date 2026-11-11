@@ -1,5 +1,5 @@
-/* appspawn.c — lord-server launches an .lpk app as its own isolated process
- * (`lord-server --app <id>`), the third narrow exception to "the server does not run commands"
+/* appspawn.c — insane-server launches an .lpk app as its own isolated process
+ * (`insane-server --app <id>`), the third narrow exception to "the server does not run commands"
  * (see AGENTS.md). The only argument is a VALIDATED id of an installed package, never caller
  * arguments. The broker socket (socketpair) is created here and handed to the child; the server
  * end is registered in brokersrv.c together with the app process's real pid. */
@@ -43,7 +43,7 @@ int app_package_dir(const char *id, const char *assets, char *out, size_t n) {
     return -1;
 }
 
-/* System apps that get their own channel to lord-vault (vc_attach_app): only Passwords. */
+/* System apps that get their own channel to insane-vault (vc_attach_app): only Passwords. */
 static int wants_vault(const char *id, int system) { return system == 1 && !strcmp(id, "passwords"); }
 
 /* 0 if the process was started (and its broker registered). The id must be an installed package. */
@@ -54,7 +54,7 @@ int app_spawn(const char *id) {
     if (sys < 0) return -1;
     if (sys == 2 && js_sys_reserved_id(id)) return -1;    /* Insane OS's own string namespaces, as for a home .lpk */
     /* one process per app: if it is already running, it opens another window instead */
-    if (!brokersrv_new_window(id)) { fprintf(stderr, "lord-server: app '%s' already running: new window\n", id); return 0; }
+    if (!brokersrv_new_window(id)) { fprintf(stderr, "insane-server: app '%s' already running: new window\n", id); return 0; }
 
     char self[PATH_MAX];
     ssize_t n = readlink("/proc/self/exe", self, sizeof self - 1);
@@ -69,7 +69,7 @@ int app_spawn(const char *id) {
      * Wayland client is this app: wl.c routes its ❖ shortcuts to it) */
     int pp[2];
     if (pipe2(pp, O_CLOEXEC)) { close(sv[0]); close(sv[1]); return -1; }
-    /* Passwords talks to lord-vault on its own channel: decrypted data never passes through here */
+    /* Passwords talks to insane-vault on its own channel: decrypted data never passes through here */
     int vfd = wants_vault(id, sys) ? vc_attach_app() : -1;
     int bcfd = apphost_bc_dup_ro();
 
@@ -80,7 +80,7 @@ int app_spawn(const char *id) {
         if (g != 0) { if (g > 0 && write(pp[1], &g, sizeof g) != (ssize_t)sizeof g) _exit(1); _exit(0); }
         signal(SIGTERM, SIG_DFL);
         signal(SIGHUP, SIG_DFL);
-        sigset_t none;                       /* lord-server blocks SIGINT/SIGTERM (signalfd): not the app */
+        sigset_t none;                       /* insane-server blocks SIGINT/SIGTERM (signalfd): not the app */
         sigemptyset(&none);
         sigprocmask(SIG_SETMASK, &none, NULL);
         char fdstr[16];
@@ -88,10 +88,10 @@ int app_spawn(const char *id) {
         setenv(BROKER_FD_ENV, fdstr, 1);
         if (vfd >= 0) {
             char vstr[16];
-            fcntl(vfd, F_SETFD, 0);          /* inherited by the app process (LORD_VAULT_FD) */
+            fcntl(vfd, F_SETFD, 0);          /* inherited by the app process (INSANE_VAULT_FD) */
             snprintf(vstr, sizeof vstr, "%d", vfd);
-            setenv("LORD_VAULT_FD", vstr, 1);
-        } else unsetenv("LORD_VAULT_FD");
+            setenv("INSANE_VAULT_FD", vstr, 1);
+        } else unsetenv("INSANE_VAULT_FD");
         if (bcfd >= 0) {                     /* the app host as bytecode (apphost_bc.c), read-only */
             char bstr[16];
             fcntl(bcfd, F_SETFD, 0);
@@ -100,7 +100,7 @@ int app_spawn(const char *id) {
         } else unsetenv(APPHOST_BC_ENV);
         int null = open("/dev/null", O_RDWR);
         if (null >= 0) { dup2(null, 0); if (null > 2) close(null); }
-        /* lord-server passes the id, already validated; there are no caller arguments */
+        /* insane-server passes the id, already validated; there are no caller arguments */
         char *const argv[] = { self, (char *)"--app", (char *)id, NULL };
         unsetenv("DISPLAY");                    /* no X11 for isolated apps (their seccomp has no unix socket() either) */
         execve("/proc/self/exe", argv, environ);   /* not `self`: after a package upgrade it is "<path> (deleted)" */
@@ -118,8 +118,8 @@ int app_spawn(const char *id) {
     if (brokersrv_add(sv[0], id, (int)app)) { close(sv[0]); return -1; }
     if (vfd >= 0) brokersrv_set_vault(sv[0]);   /* this app may also ask for the FIDO2 device */
     if (sys == 2) brokersrv_set_packaged(sv[0]);  /* may ask for its companion; the app process itself proves nothing */
-    if (sys == 1) brokersrv_set_system(sv[0]);  /* a system package: its keyring owner, lord-maild (brokermail.c) */
-    fprintf(stderr, "lord-server: app '%s' started as an isolated process (pid %d)\n", id, (int)app);
+    if (sys == 1) brokersrv_set_system(sv[0]);  /* a system package: its keyring owner, insane-maild (brokermail.c) */
+    fprintf(stderr, "insane-server: app '%s' started as an isolated process (pid %d)\n", id, (int)app);
     return 0;
 }
 
@@ -132,7 +132,7 @@ int app_companion_spawn(const char *id, int network, int share_fd, int *app_fd, 
     pid_t pid = fork();
     if (pid == 0) {
         setsid();
-        prctl(PR_SET_PDEATHSIG, SIGKILL);       /* it doesn't outlive lord-server */
+        prctl(PR_SET_PDEATHSIG, SIGKILL);       /* it doesn't outlive insane-server */
         signal(SIGTERM, SIG_DFL);
         signal(SIGHUP, SIG_DFL);
         sigset_t none;
@@ -143,7 +143,7 @@ int app_companion_spawn(const char *id, int network, int share_fd, int *app_fd, 
         if (b >= 0) { if (dup2(b, 4) != 4) _exit(127); } else close(4);
         close(5);
         syscall(SYS_close_range, 7U, ~0U, 0U);  /* nothing of the compositor's follows */
-        char *const argv[] = { (char *)"lord-companion", (char *)"--companion", (char *)id, (char *)(network ? "1" : "0"), NULL };
+        char *const argv[] = { (char *)"insane-companion", (char *)"--companion", (char *)id, (char *)(network ? "1" : "0"), NULL };
         execve("/proc/self/exe", argv, environ);
         _exit(127);
     }

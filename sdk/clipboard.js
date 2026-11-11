@@ -3,7 +3,7 @@
 // A single one for the whole session: shared by the terminal, text fields and Linux apps
 // (Wayland; the compositor bridges both ways). The history keeps everything that gets
 // copied in any of them —text, links, colors, code, paths and images— with its
-// origin and time. It is stored in ~/.local/share/lordos/clipboard/ (history.json + img-*.png) and
+// origin and time. It is stored in ~/.local/share/insaneos/clipboard/ (history.json + img-*.png) and
 // survives a reboot; it is turned off or limited in Settings → Clipboard.
 //
 // Never stored: what was copied from a password field (clipboard.set(t, { secure: true })), what
@@ -14,7 +14,7 @@
 //   useStore(clipboardHistory) → [{ id, kind: 'text'|'image', type, text?, image?, origin, time, pinned }]
 //   <ClipboardPanel /> (❖V quick, ❖⇧V full) is mounted by startShell: every theme has it.
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, Image, addListener, screen, mainBox } from '@lordos/runtime';
+import { View, Text, Image, addListener, screen, mainBox } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { t, formatDate } from './i18n.js';
@@ -23,7 +23,7 @@ import { wm } from './windows.js';
 import { TextInput, focusToken, restoreFocus, pasteIntoFocused } from './components.jsx';
 import * as fs from './fs.js';
 
-const DIR = '.local/share/lordos/clipboard';
+const DIR = '.local/share/insaneos/clipboard';
 const FILE = `${DIR}/history.json`;
 export const DEFAULTS = { save: true, max: 500, maxMB: 200, expireDays: 30, ignoreApps: [], clearOnLogout: false };
 const conf = () => ({ ...DEFAULTS, ...(settings.get().clipboard || {}) });
@@ -53,7 +53,7 @@ const ensureDir = () => {
   for (const part of DIR.split('/')) { cur = cur ? `${cur}/${part}` : part; try { fs.mkdir(cur); } catch (e) { /* already exists */ } }
 };
 const imageName = (p) => String(p).split('/').pop();
-const ownImage = (p) => String(p).includes('/.local/share/lordos/clipboard/img-');
+const ownImage = (p) => String(p).includes('/.local/share/insaneos/clipboard/img-');
 
 function prune(list) {
   const c = conf();
@@ -68,7 +68,7 @@ function prune(list) {
   }
   // images left out are deleted from disk
   const keep = new Set(out.filter((x) => x.image).map((x) => x.image));
-  for (const x of list) if (x.image && ownImage(x.image) && !keep.has(x.image)) { try { lord.clipboard.deleteSaved(imageName(x.image)); } catch (e) { /* already gone */ } }
+  for (const x of list) if (x.image && ownImage(x.image) && !keep.has(x.image)) { try { insane.clipboard.deleteSaved(imageName(x.image)); } catch (e) { /* already gone */ } }
   return out;
 }
 
@@ -109,7 +109,7 @@ function push(item, same) {
 
 const ignored = (origin) => conf().ignoreApps.includes(origin);
 
-const remember = (text, origin = 'lordos') => {
+const remember = (text, origin = 'insaneos') => {
   if (!text || ignored(origin)) return;
   push({ kind: 'text', text: text.length > 1048576 ? text.slice(0, 1048576) : text, origin }, (x) => x.text === text);
 };
@@ -119,11 +119,11 @@ function rememberImage(tmpPath, origin, gen) {
   // the compositor's preview lives in $XDG_RUNTIME_DIR (lost on reboot): copy it to home
   let path = tmpPath;
   let bytes = 0;
-  if (conf().save && lord.clipboard.saveImage) {
+  if (conf().save && insane.clipboard.saveImage) {
     try {
       ensureDir();
       const name = `img-${Date.now().toString(36)}-${gen || 0}.png`;
-      if (lord.clipboard.saveImage(`${DIR}/${name}`)) {
+      if (insane.clipboard.saveImage(`${DIR}/${name}`)) {
         path = `${fs.home()}/${DIR}/${name}`;
         try { bytes = fs.list(DIR).find((e) => e.name === name)?.size || 0; } catch (e) { bytes = 0; }
       }
@@ -132,44 +132,44 @@ function rememberImage(tmpPath, origin, gen) {
   push({ kind: 'image', image: path, origin, bytes, src: tmpPath }, (x) => x.src === tmpPath && x.image);
 }
 
-const state = () => (lord.clipboard.state ? lord.clipboard.state() : { kind: 'text' });
+const state = () => (insane.clipboard.state ? insane.clipboard.state() : { kind: 'text' });
 let skipNext = false;           // we generate the next notification ourselves (re-copying)
-globalThis.__lordClipboard = () => {
+globalThis.__insaneClipboard = () => {
   const s = state();
   if (skipNext) { skipNext = false; return; }
   if (s.sensitive) return;                          // password: not added to history
   if (s.kind === 'image') rememberImage(s.image, s.origin || 'linux', s.imageGen);
-  else remember(lord.clipboard.get(), s.origin || 'lordos');
+  else remember(insane.clipboard.get(), s.origin || 'insaneos');
 };
 
 // ---- API ----
 
 export const clipboard = {
-  get: () => lord.clipboard.get(),
+  get: () => insane.clipboard.get(),
   // secure: comes from a password field (not added to history).
-  set(text, { secure = false, origin = 'lordos' } = {}) {
+  set(text, { secure = false, origin = 'insaneos' } = {}) {
     const s = String(text);
-    lord.clipboard.set(s, { secure, origin });
+    insane.clipboard.set(s, { secure, origin });
     if (!secure) remember(s, origin);
     else skipNext = true;
   },
   // re-copies a history entry (and moves it to the top)
   use(item) {
-    if (item.image) { skipNext = true; lord.clipboard.useImage(item.image); }
-    else if (item.text != null) { lord.clipboard.set(item.text, { origin: item.origin || 'lordos' }); skipNext = true; }
+    if (item.image) { skipNext = true; insane.clipboard.useImage(item.image); }
+    else if (item.text != null) { insane.clipboard.set(item.text, { origin: item.origin || 'insaneos' }); skipNext = true; }
     clipboardHistory.set((list) => [{ ...item, time: Date.now() }, ...list.filter((x) => x.id !== item.id)]);
     scheduleSave();
   },
   pin(item) { clipboardHistory.set((list) => list.map((x) => (x.id === item.id ? { ...x, pinned: !x.pinned } : x))); scheduleSave(); },
   remove(item) {
     clipboardHistory.set((list) => list.filter((x) => x.id !== item.id));
-    if (item.image && ownImage(item.image)) { try { lord.clipboard.deleteSaved(imageName(item.image)); } catch (e) { /* already gone */ } }
+    if (item.image && ownImage(item.image)) { try { insane.clipboard.deleteSaved(imageName(item.image)); } catch (e) { /* already gone */ } }
     scheduleSave();
   },
   clear({ keepPinned = true } = {}) {
     const list = clipboardHistory.get();
     const keep = keepPinned ? list.filter((x) => x.pinned) : [];
-    for (const x of list) if (!keep.includes(x) && x.image && ownImage(x.image)) { try { lord.clipboard.deleteSaved(imageName(x.image)); } catch (e) { /* */ } }
+    for (const x of list) if (!keep.includes(x) && x.image && ownImage(x.image)) { try { insane.clipboard.deleteSaved(imageName(x.image)); } catch (e) { /* */ } }
     clipboardHistory.set(keep);
     scheduleSave();
   },
@@ -180,7 +180,7 @@ export const clipboard = {
   paste(item, target) {
     clipboard.use(item);
     if (target?.text && (restoreFocus(target.text), pasteIntoFocused())) return 'pasted';
-    if (target?.linux && typeof lord.wayland !== 'undefined' && lord.wayland.hasKeyboard() && lord.wayland.paste()) return 'pasted';
+    if (target?.linux && typeof insane.wayland !== 'undefined' && insane.wayland.hasKeyboard() && insane.wayland.paste()) return 'pasted';
     return 'copied';
   },
   remember,
@@ -219,7 +219,7 @@ function relTime(ms) {
   if (s < 86400) return t('shell.clipboard.hours', { count: Math.floor(s / 3600) });
   return formatDate(new Date(ms), 'short');
 }
-const originLabel = (o) => (!o || o === 'lordos' ? 'Insane OS' : o === 'terminal' ? t('shell.clipboard.fromTerminal') : o === 'linux' ? 'Linux' : o.replace(/^.*\./, ''));
+const originLabel = (o) => (!o || o === 'insaneos' ? 'Insane OS' : o === 'terminal' ? t('shell.clipboard.fromTerminal') : o === 'linux' ? 'Linux' : o.replace(/^.*\./, ''));
 
 function Swatch({ color, size = 14 }) {
   return h(View, { style: { width: size, height: size, borderRadius: 3, backgroundColor: color, border: '1px solid rgba(128,128,128,0.5)' } });

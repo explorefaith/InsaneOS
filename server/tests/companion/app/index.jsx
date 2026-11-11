@@ -1,8 +1,8 @@
-// A test package for tests/companion_e2e.sh: it passes what the companion says to a file through lord.fs, and sets a status item.
+// A test package for tests/companion_e2e.sh: it passes what the companion says to a file through insane.fs, and sets a status item.
 import { useEffect, useState } from 'react';
-import { View, Text, companion, statusItem } from '@lordos/sdk';
+import { View, Text, companion, statusItem } from '@insaneos/sdk';
 
-const say = (name, v) => { try { lord.fs.write(name, JSON.stringify(v)); } catch (e) { /* */ } };
+const say = (name, v) => { try { insane.fs.write(name, JSON.stringify(v)); } catch (e) { /* */ } };
 
 export default function App() {
   const [line, setLine] = useState('waiting');

@@ -1,9 +1,9 @@
 {
-  "format": "lordos-hwreport",
+  "format": "insaneos-hwreport",
   "version": 1,
   "createdAt": "2026-10-27",
   "source": "reference",
-  "lordos": "0.8.5-beta",
+  "insaneos": "0.8.5-beta",
   "live": false,
   "system": {
     "machine": {
@@ -385,7 +385,7 @@
       "osId": "debian",
       "osVersion": "13",
       "kernel": "6.12.113+deb13-amd64",
-      "lordos": "0.8.5-beta",
+      "insaneos": "0.8.5-beta",
       "lsm": "lockdown,capability,landlock,yama,apparmor,tomoyo,bpf,ipe,ima,evm",
       "landlockAbi": 6,
       "bpfLsm": true,
@@ -407,10 +407,10 @@
         "CONFIG_UHID": "m"
       },
       "services": {
-        "lord-sessiond": true,
-        "lord-netd": true,
-        "lord-netperm": true,
-        "lord-fand": false
+        "insane-sessiond": true,
+        "insane-netd": true,
+        "insane-netperm": true,
+        "insane-fand": false
       },
       "live": false
     },
@@ -473,11 +473,11 @@
     }
   ],
   "bench": {
-    "lordbench": 1,
+    "insanebench": 1,
     "mode": "full",
     "status": "done",
     "stopReason": "",
-    "lordos": "0.8.5-beta",
+    "insaneos": "0.8.5-beta",
     "live": false,
     "results": {
       "cpu.sha256.1": {

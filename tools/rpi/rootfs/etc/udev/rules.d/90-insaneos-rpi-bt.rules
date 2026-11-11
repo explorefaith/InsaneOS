@@ -1,0 +1,4 @@
+# InsaneOS on Raspberry Pi: the on-board Bluetooth controller (a serdev child of a UART) gets its
+# SCO routing from /usr/lib/insaneos/rpi/bt-uart (insaneos-rpi-bt@.service). See docs/RASPBERRY.md.
+ACTION=="add", SUBSYSTEM=="bluetooth", KERNEL=="hci[0-9]*", ENV{DEVTYPE}=="host", SUBSYSTEMS=="serial", \
+  TAG+="systemd", ENV{SYSTEMD_WANTS}+="insaneos-rpi-bt@%k.service"

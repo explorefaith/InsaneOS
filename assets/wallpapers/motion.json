@@ -1,15 +1,15 @@
 {
  "format": 1,
- "base": "https://raw.githubusercontent.com/lordbasex/Insane OS-wallpapers/main",
+ "base": "https://raw.githubusercontent.com/insaneos/Insane OS-wallpapers/main",
  "items": [
   {
-   "id": "crown",
+   "id": "apple",
    "section": "dynamic",
-   "name": "Crystal Crown",
+   "name": "Crystal Apple",
    "author": "Federico Pereira, Insane OS",
    "license": "MIT",
    "licenseUrl": "https://opensource.org/license/mit",
-   "source": "https://lordos.org",
+   "source": "https://insaneos.org",
    "variants": [
     {
      "name": "1080.hevc",
@@ -18,9 +18,9 @@
      "h": 1080,
      "fps": 60.0,
      "seconds": 6.0,
-     "file": "crown/1080.hevc.mp4",
-     "size": 1529048,
-     "sha256": "78c79ceb6c1869e711c7df25a2f2955a800b2978d155a175d0d47f2ae56c7451"
+     "file": "apple/1080.hevc.mp4",
+     "size": 119149,
+     "sha256": "245e226b594f077981e8a85c8e748dd368f6af3289c717f056f3b7b72b116d5f"
     },
     {
      "name": "2160.hevc",
@@ -29,7 +29,7 @@
      "h": 2160,
      "fps": 60.0,
      "seconds": 6.0,
-     "file": "crown/2160.hevc.mp4",
+     "file": "apple/2160.hevc.mp4",
      "size": 3314029,
      "sha256": "8e2fc72f1be285070c6d82f10bf78bc81f8f398cbc94f8cfe7290c2b53bb132a"
     },
@@ -40,9 +40,9 @@
      "h": 1080,
      "fps": 60.0,
      "seconds": 6.0,
-     "file": "crown/1080.h264.mp4",
-     "size": 3125809,
-     "sha256": "48bb24797460ed413e469e46d70846ba01647140f7430f61c86281fef155dc41"
+     "file": "apple/1080.h264.mp4",
+     "size": 874100,
+     "sha256": "a62c998d3c1d8acd7af390e67bb3da494279b3868be60f3cb82c1d558d4c8ccc"
     }
    ]
   },

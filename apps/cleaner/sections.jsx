@@ -1,7 +1,7 @@
 // Scan, Cleanup, Large files, Activity and Settings.
 import {
   View, ScrollView, TextInput, ConfirmDialog, admin, cleaner, CLEANER_THEMES, oldKernels, kernelPlanOk, systemInfo, t as tr, formatBytes, formatNumber, formatDate, formatTime, revealPath, useSettings, typeScale, spacing,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Label, Glass, GlassButton, Pill, Check, Bar, Hero, Enter, Tile, PagedList, CountUp, ProgressRing, SectionScan, SelectBar, ORB_SPACE, usePal } from './ui.jsx';
 
@@ -201,12 +201,12 @@ function OldKernels({ setDialog }) {
   const [plan, setPlan] = useState(null);
   const [msg, setMsg] = useState('');
   const release = useMemo(() => { try { return systemInfo().kernel; } catch (e) { return ''; } }, []);
-  const old = useMemo(() => { try { return lord.pkg.available() ? oldKernels(lord.pkg.installed({}), release) : []; } catch (e) { return []; } }, [gen]);
+  const old = useMemo(() => { try { return insane.pkg.available() ? oldKernels(insane.pkg.installed({}), release) : []; } catch (e) { return []; } }, [gen]);
   useEffect(() => { setDialog(plan ? <ConfirmDialog destructive title={tr('cleaner.kernels.title')} detail={`${plan.items.map((i) => i.name).join(', ')}. ${tr('cleaner.system.confirm')}`} okLabel={tr('cleaner.clean')} cancelLabel={tr('cleaner.cancel')} onOk={run} onCancel={() => setPlan(null)} /> : null); }, [plan]);
   if (!old.length || !admin.available()) return msg ? <Label dim size={typeScale.callout}>{msg}</Label> : null;
   const size = old.reduce((a, p) => a + p.installedSize, 0);
   const review = () => {
-    const p = lord.pkg.plan({ remove: old.map((k) => k.name) });
+    const p = insane.pkg.plan({ remove: old.map((k) => k.name) });
     if (kernelPlanOk(p, release)) setPlan(p);
     else setMsg(tr('cleaner.kernels.refused'));
   };
@@ -231,7 +231,7 @@ function OldKernels({ setDialog }) {
   );
 }
 
-// ---- Large files: found by a tree scan, filtered in lord-server ----
+// ---- Large files: found by a tree scan, filtered in insane-server ----
 
 export function LargeHero() {
   return <Hero art="large" title={tr('cleaner.hero.large.title')} line={tr('cleaner.hero.large.line')} features={[['large', tr('cleaner.hero.large.f1')], ['activity', tr('cleaner.hero.large.f2')], ['cleanup', tr('cleaner.hero.large.f3')]]} />;

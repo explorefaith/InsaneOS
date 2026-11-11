@@ -3,7 +3,7 @@
   "leftM": "Velocidade máxima · faltam {m} min",
   "leftHM": "Velocidade máxima · faltam {h} h {m} min",
   "serviceOff": "O serviço de ventoinhas não está em execução",
-  "serviceOffHint": "O serviço de ventoinhas (lord-fand) não está em execução. O kernel ou o firmware continuam resfriando o computador.",
+  "serviceOffHint": "O serviço de ventoinhas (insane-fand) não está em execução. O kernel ou o firmware continuam resfriando o computador.",
   "firmwareManaged": "Ventoinhas controladas pelo firmware",
   "firmwareHint": "Estas ventoinhas informam a velocidade, mas quem as controla é o firmware. O Insane OS não mexe nelas.",
   "noFans": "Nenhuma ventoinha controlável",

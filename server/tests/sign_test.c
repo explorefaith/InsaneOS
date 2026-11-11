@@ -132,7 +132,7 @@ static void test_packages(void) {
     memset(seed2, 9, 32);
     ed25519_public(seed, pub);
     hex_encode(pub, 32, key);
-    static const char manifest[] = "{\"id\":\"hola\",\"version\":\"1.0.0\"}", appjs[] = "var __lordosApp={};";
+    static const char manifest[] = "{\"id\":\"hola\",\"version\":\"1.0.0\"}", appjs[] = "var __insaneosApp={};";
     LpkFile files[5] = { { "manifest.json", (const uint8_t *)manifest, sizeof manifest - 1 }, { "app.js", (const uint8_t *)appjs, sizeof appjs - 1 } };
     Lpk pk = { NULL, files, 2 };
     LpkSigInfo si;
@@ -150,7 +150,7 @@ static void test_packages(void) {
     CHECK(!r && si.trust == LPK_SIGNED && !strcmp(si.key, key) && !strcmp(si.signer, "Ana"), "signed: %s", err);
 
     /* a changed file */
-    static const char evil[] = "var __lordosApp={x:1};";
+    static const char evil[] = "var __insaneosApp={x:1};";
     files[1].data = (const uint8_t *)evil;
     files[1].size = sizeof evil - 1;
     CHECK(sig_verify_package(&pk, "hola", "1.0.0", &si, err, sizeof err) && lerr_has(err, "sig.fileModified") && strstr(err, "path=app.js"), "altered file: %s", err);

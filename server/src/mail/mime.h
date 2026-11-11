@@ -1,10 +1,10 @@
-/* mime.h — mail messages (RFC 5322, MIME 2045-2049, 2047, 2231) for lord-maild.
+/* mime.h — mail messages (RFC 5322, MIME 2045-2049, 2047, 2231) for insane-maild.
  *
  * Everything works on the raw in-memory message and checks every index against the length:
  * a broken or malicious message yields empty parts, never a read outside the buffer. What is
  * handed to the UI is always valid UTF-8 (invalid input becomes U+FFFD). */
-#ifndef LORD_MAIL_MIME_H
-#define LORD_MAIL_MIME_H
+#ifndef INSANE_MAIL_MIME_H
+#define INSANE_MAIL_MIME_H
 
 #include <stddef.h>
 #include <stdint.h>

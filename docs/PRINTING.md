@@ -21,9 +21,9 @@ Printers & Scanners, the system print dialog and the Scanner app.
 ```
 apps (PDF Viewer, Editor, Notes, Photos…)
   └── print.open(...)        sdk/print.js + sdk/printdialog.jsx  (system dialog)
-        ├── preview          lord-doc (built PDF or the app's PDF), see DOCUMENTS.md
-        └── lord.print.submit(printer, blob | path, options)
-              └── server/src/print  (lord-server threads, never the compositor)
+        ├── preview          insane-doc (built PDF or the app's PDF), see DOCUMENTS.md
+        └── insane.print.submit(printer, blob | path, options)
+              └── server/src/print  (insane-server threads, never the compositor)
                     ├── ipp.c     our own IPP/1.1 encoder/decoder
                     ├── phttp.c   minimal HTTP/1.1 (CUPS unix socket, TCP to the LAN)
                     ├── cups.c    operations: printers, queue, print, cancel, add…
@@ -33,7 +33,7 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
 ```
 
 - **Asynchronous:** each request runs on its own thread (up to 8 at a time) and the result reaches
-  JS with `lord.print.poll()`. The compositor never waits, not even while CUPS builds the PPD for a
+  JS with `insane.print.poll()`. The compositor never waits, not even while CUPS builds the PPD for a
   new printer, which takes a few seconds.
 - **Printing:** **PDF** is always sent (`document-format application/pdf`), with the IPP job
   attributes:
@@ -43,7 +43,7 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
 
   CUPS converts and applies the rest with its filters. What the apps print:
   - **an app's PDF:** the path (it's checked to be `%PDF-` and from the home folder);
-  - **a built or annotated PDF:** a "blob" from lord-doc (sealed memfd).
+  - **a built or annotated PDF:** a "blob" from insane-doc (sealed memfd).
 
 ### Why without libcups
 
@@ -101,8 +101,8 @@ CUPS (/run/cups/cups.sock) → Debian filters and drivers → the printer
   at every byte and with a pointer loop.
 
 **Their own firewall app** (0.8.5): the IPP and eSCL connections to network printers and scanners,
-and the mDNS discovery socket, are made by the printers' connector (`lord-server --net-connector
-print`, `lordos-net-print.scope`), so they are "Printers and scanners" (`lordos:print`) in Monitor →
+and the mDNS discovery socket, are made by the printers' connector (`insane-server --net-connector
+print`, `insaneos-net-print.scope`), so they are "Printers and scanners" (`insaneos:print`) in Monitor →
 Network, with their own rules (`FIREWALL.md`, "Insane OS components in their own scopes"). The local
 CUPS socket is a Unix socket and isn't affected.
 
@@ -116,13 +116,13 @@ CUPS socket is a Unix socket and isn't affected.
 - **Scanning:**
   - `POST /eSCL/ScanJobs` with ScanSettings: area in 1/300", resolution, ColorMode and format;
   - `201 Location`, then `GET …/NextDocument`, retrying while it answers 503;
-  - what arrives is saved in `~/.cache/lordos/scan/`.
+  - what arrives is saved in `~/.cache/insaneos/scan/`.
 - **Preview** at the lowest resolution. **The area** is chosen by dragging over the preview.
 - **Save as PDF, PNG or JPEG** in Documents or Pictures, as "Scan <date> <time>" (named in the interface language):
   - if the scanner provides that format, it's copied as is;
-  - otherwise lord-doc converts it (stb_image and cairo), at the real size according to the
+  - otherwise insane-doc converts it (stb_image and cairo), at the real size according to the
     resolution;
-  - the image the scanner sends **is decoded in lord-doc**, confined, never in lord-server.
+  - the image the scanner sends **is decoded in insane-doc**, confined, never in insane-server.
 - **Security:**
   - only IPv4 addresses on the local network (10/8, 172.16/12, 192.168/16, 169.254/16, 127/8), so
     the app can't be used to request things from the internet;
@@ -131,14 +131,14 @@ CUPS socket is a Unix socket and isn't affected.
 
 ### The system print dialog
 
-`print.open(source)` (from `@lordos/sdk`) opens it on top of everything. `startShell` mounts it, so
+`print.open(source)` (from `@insaneos/sdk`) opens it on top of everything. `startShell` mounts it, so
 any app has it without drawing anything of its own:
 
 | Source | What it prints | Who uses it |
 |---|---|---|
 | `{ title, path }` | a PDF as is | — |
 | `{ title, doc }` | a PDF opened with `pdf.open`, with its forms and annotations (`doc.blob()`) | PDF Viewer |
-| `{ title, text, mono }` | text built as a PDF in lord-doc: cairo and FreeType, a font with per-character fallback, a header with the title and page number | Editor (❖P, File → Print), Notes (File → Print) |
+| `{ title, text, mono }` | text built as a PDF in insane-doc: cairo and FreeType, a font with per-character fallback, a header with the title and page number | Editor (❖P, File → Print), Notes (File → Print) |
 | `{ title, image }` | an image centered on the page (landscape if it's wide) | Scanner; Photos, from the media agent |
 
 **What the dialog has:**
@@ -149,10 +149,10 @@ any app has it without drawing anything of its own:
 - A4, letter, legal or A5 paper: letter by default in the regions that use it (US, Canada,
   Mexico…).
 
-**The preview** is the same PDF that gets sent, drawn by lord-doc, and with a range it shows only
+**The preview** is the same PDF that gets sent, drawn by insane-doc, and with a range it shows only
 those pages. If the paper changes, the text or the image is rebuilt. Esc or Cancel close it.
 
-### API (`sdk/print.js`, `lord.print` in `js_print.c`)
+### API (`sdk/print.js`, `insane.print` in `js_print.c`)
 
 | | |
 |---|---|
@@ -174,11 +174,11 @@ Inputs are validated on the C side:
 ## How it was tested (VM 116)
 
 **Packages:** `cups`, `printer-driver-cups-pdf`, `cups-ipp-utils` and `avahi-daemon` (see
-`VM-SETUP.md`). The user `lord` is in the `lpadmin` group.
+`VM-SETUP.md`). The user `insane` is in the `lpadmin` group.
 
 **Virtual printer (cups-pdf, the "PDF" queue):**
 - the filled-in form was printed from the PDF Viewer;
-- the PDF cups-pdf left in `~/PDF/` has the values typed in ("Imprimir el informe", "lord").
+- the PDF cups-pdf left in `~/PDF/` has the values typed in ("Imprimir el informe", "insane").
 
 **"Network" printer, IPP Everywhere:**
 
@@ -208,7 +208,7 @@ Python's standard library:
 Results:
 - preview at 75 dpi (637×877);
 - a 123×93 mm area saved as a 349×265 pt **PDF**, the real size;
-- the same area at 150 dpi as a 728×551 **JPEG** (converted in lord-doc).
+- the same area at 150 dpi as a 728×551 **JPEG** (converted in insane-doc).
 
 **Headless tests:** `build/ipp-test`, 40/40:
 - the IPP encoder and decoder, round trip;
@@ -219,7 +219,7 @@ Results:
 
 ## Pending
 
-- Scanners over `_uscans` (TLS) and direct `ipps` printers: lord-server doesn't link TLS. CUPS does
+- Scanners over `_uscans` (TLS) and direct `ipps` printers: insane-server doesn't link TLS. CUPS does
   speak ipps with the printers it adds.
 - mDNS over IPv6 and continuous discovery (today it searches when Settings opens and with "Search
   again").

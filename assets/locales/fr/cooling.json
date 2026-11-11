@@ -3,7 +3,7 @@
   "leftM": "Pleine vitesse · {m} min restantes",
   "leftHM": "Pleine vitesse · {h} h {m} min restantes",
   "serviceOff": "Le service des ventilateurs n’est pas en cours d’exécution",
-  "serviceOffHint": "Le service des ventilateurs (lord-fand) n’est pas en cours d’exécution. Le noyau ou le firmware continue de refroidir l’ordinateur.",
+  "serviceOffHint": "Le service des ventilateurs (insane-fand) n’est pas en cours d’exécution. Le noyau ou le firmware continue de refroidir l’ordinateur.",
   "firmwareManaged": "Ventilateurs gérés par le firmware",
   "firmwareHint": "Ces ventilateurs indiquent leur vitesse, mais le firmware les contrôle. Insane OS n’y touche pas.",
   "noFans": "Aucun ventilateur contrôlable",

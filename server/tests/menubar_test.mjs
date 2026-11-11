@@ -1,7 +1,7 @@
 // menubar_test.mjs — (0.8.8.6, #58) what the bar and Insane Flow's panels show, and (0.8.8.6) a bar on every display: the Control Center's tiles that
 // Settings → Desktop & Dock turns off, the output list by the volume (a click makes that output the default one)
 // and the clock panel's calendar. Bundles tests/menubar_scene.mjs with esbuild (as the theme is built) over a stub
-// `lord` with two sound outputs, a Wi-Fi radio and a Bluetooth adapter that records lord.sound calls, runs it, and
+// `insane` with two sound outputs, a Wi-Fi radio and a Bluetooth adapter that records insane.sound calls, runs it, and
 // reads its checks. Needs node and the repository's node_modules (esbuild, react, react-reconciler).
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
@@ -17,19 +17,19 @@ let esbuild = null;
 for (const p of nodePaths) { try { esbuild = createRequire(path.join(p, 'x.js'))('esbuild'); break; } catch (e) { /* next */ } }
 if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 
-// The native namespaces the SDK, the runtime and the theme use (lord.<ns>.<fn>(…)): absent in the stub, so
+// The native namespaces the SDK, the runtime and the theme use (insane.<ns>.<fn>(…)): absent in the stub, so
 // the SDK takes its «not available» path for each, as in a session without that service.
 const NS = new Set();
 for (const d of ['sdk', 'runtime', 'themes/default', 'themes/default/components']) {
   for (const f of readdirSync(path.join(root, d))) {
     if (!/\.(m?js|jsx)$/.test(f)) continue;
-    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/lord\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
+    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/insane\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
   }
 }
 
-// A stub lord: nodes, their styles and texts (and which ones left the tree); two sound outputs whose
-// lord.sound.setDefault calls are recorded; a Wi-Fi radio and a Bluetooth adapter; any other native call is a no-op.
-const MOCK = `globalThis.__lordTest = (() => {
+// A stub insane: nodes, their styles and texts (and which ones left the tree); two sound outputs whose
+// insane.sound.setDefault calls are recorded; a Wi-Fi radio and a Bluetooth adapter; any other native call is a no-op.
+const MOCK = `globalThis.__insaneTest = (() => {
   const styles = new Map(), texts = new Map(), parents = new Map(), removed = new Set(), calls = [];
   let nextId = 1;
   const base = {
@@ -61,11 +61,11 @@ const MOCK = `globalThis.__lordTest = (() => {
   };
   for (const ns of ${JSON.stringify([...NS])}) if (!(ns in base)) base[ns] = undefined;
   const noop = () => undefined;
-  globalThis.lord = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
+  globalThis.insane = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
   return { styles, texts, parents, removed, calls };
 })();`;
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-menubar-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-menubar-'));
 let bad = 0, n = 0;
 try {
   // menubar_scene.mjs: the panels (#58); menubar_displays_scene.mjs: a bar on every display (0.8.8.6)
@@ -73,7 +73,7 @@ try {
     const out = await esbuild.build({
       entryPoints: [path.join(here, scene)], bundle: true, write: false, format: 'esm',
       platform: 'node', target: 'es2022', nodePaths, logLevel: 'error', jsx: 'automatic',
-      alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js'), '@lordos/sdk': path.join(root, 'sdk', 'index.js') },
+      alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js'), '@insaneos/sdk': path.join(root, 'sdk', 'index.js') },
       define: { 'process.env.NODE_ENV': '"production"' },
       banner: { js: MOCK },
     });

@@ -219,7 +219,7 @@ size_t ntlm_user_auth(uint8_t *o, size_t cap, const uint8_t *neg, size_t nlen, c
         p += 4 + (size_t)l;
     }
     uint8_t hash[16], temp[3072], proof[16], base[16], nt[3100], ub[512], db[512], wb[32], ext[2600];
-    size_t ul, dl, wl = text_utf16("LORDOS", wb, sizeof wb, 0), el = av_extended(ext, sizeof ext, av, al, spn);
+    size_t ul, dl, wl = text_utf16("INSANEOS", wb, sizeof wb, 0), el = av_extended(ext, sizeof ext, av, al, spn);
     if (!el || ntlmv2_hash(user, domain, password, hash) || field16(user, ub, sizeof ub, 0, &ul) || field16(domain, db, sizeof db, 0, &dl)) return 0;
     size_t tl = ntlmv2_temp(temp, sizeof temp, ft, rnd, ext, el);
     if (!tl) return 0;

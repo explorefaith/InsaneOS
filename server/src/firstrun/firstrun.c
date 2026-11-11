@@ -1,4 +1,4 @@
-/* firstrun.c — strict parser of lordos-firstrun.txt (see firstrun.h and docs/IMAGER.md).
+/* firstrun.c — strict parser of insaneos-firstrun.txt (see firstrun.h and docs/IMAGER.md).
  *
  * Pure: no I/O, no locale, no allocation except the SSH key lines. Every byte is accounted for:
  * the file is UTF-8 text with LF or CRLF line ends, at most FR_MAX_FILE bytes, no NUL. A line is
@@ -29,10 +29,10 @@ int fr_valid_hostname(const char *s) {
 
 static const char *const RESERVED[] = {
     "root", "daemon", "bin", "sys", "sync", "games", "man", "lp", "mail", "news", "uucp", "proxy",
-    "www-data", "backup", "list", "irc", "nobody", "lordos", "lordos-greeter", "messagebus",
+    "www-data", "backup", "list", "irc", "nobody", "insaneos", "insaneos-greeter", "messagebus",
     "polkitd", "sshd", "pipewire", "sudo", "admin", "wheel", "users", "staff", "adm", "disk",
     "audio", "video", "input", "render", "plugdev", "netdev", "bluetooth", "avahi", "_apt",
-    "lordos-remote", "operator", "shadow", "utmp", "tty", "kmem", "dialout", "cdrom",
+    "insaneos-remote", "operator", "shadow", "utmp", "tty", "kmem", "dialout", "cdrom",
 };
 
 int fr_valid_user(const char *s) {

@@ -1,6 +1,6 @@
 // ops.js — what the Files windows share: the file clipboard, copy jobs in progress, color tags
 // and opening files with the right app.
-import { createStore, fs, wm, launchApp, archive, defaultOpenerId, nativeOf, errorText } from '@lordos/sdk';
+import { createStore, fs, wm, launchApp, archive, defaultOpenerId, nativeOf, errorText } from '@insaneos/sdk';
 import { kindOf, mimesOf, appOpens, isTextual, isImage } from './kinds.js';
 
 // Changes every time something changed on disk (a copy finished, the trash…): the views reload.
@@ -14,7 +14,7 @@ export const cutFiles = (paths) => fileClipboard.set({ mode: 'cut', paths });
 
 // Free name in a folder: "photo.png" → "photo 2.png", "photo 3.png"…
 export function freeName(dir, name, existing) {
-  const taken = existing || new Set(lord.fs.list(dir).map((e) => e.name));
+  const taken = existing || new Set(insane.fs.list(dir).map((e) => e.name));
   if (!taken.has(name)) return name;
   const m = /^(.*?)(\.[^.]+)?$/.exec(name);
   const stem = m[1].replace(/ \d+$/, ''), ext = m[2] || '';
@@ -47,7 +47,7 @@ function watchJobs() { if (!polling) polling = setInterval(poll, 250); poll(); }
 // known: the names already in destDir when the caller has them (a slow folder's listing, apps/files/remotedirs.js),
 // so a Cloud or network folder isn't listed here on the interface's thread; a name taken since is refused (fs.exists)
 export function transfer(paths, destDir, move, known) {
-  const existing = known ? new Set(known) : new Set(lord.fs.list(destDir).map((e) => e.name));
+  const existing = known ? new Set(known) : new Set(insane.fs.list(destDir).map((e) => e.name));
   const errors = [];
   for (const p of paths) {
     const name = fs.basename(p);
@@ -72,8 +72,8 @@ export function paste(destDir, known) {
   if (c.mode === 'cut') fileClipboard.set(null);
 }
 
-// ---- tags (~/.local/share/lordos/tags.json: path → [colors]) ----
-const TAGS_FILE = '.local/share/lordos/tags.json';
+// ---- tags (~/.local/share/insaneos/tags.json: path → [colors]) ----
+const TAGS_FILE = '.local/share/insaneos/tags.json';
 export const tagStore = createStore((() => {
   try { return JSON.parse(fs.read(TAGS_FILE)); } catch (e) { return {}; }
 })());
@@ -87,10 +87,10 @@ export function toggleTag(paths, color) {
     if (cur.size) all[p] = [...cur]; else delete all[p];
   }
   tagStore.set(all);
-  try { fs.mkdir('.local/share/lordos'); fs.write(TAGS_FILE, JSON.stringify(all, null, 1)); } catch (e) { /* no disk */ }
+  try { fs.mkdir('.local/share/insaneos'); fs.write(TAGS_FILE, JSON.stringify(all, null, 1)); } catch (e) { /* no disk */ }
 }
-// Comments, kept like tags (~/.local/share/lordos/comments.json: path → text).
-const COMMENTS_FILE = '.local/share/lordos/comments.json';
+// Comments, kept like tags (~/.local/share/insaneos/comments.json: path → text).
+const COMMENTS_FILE = '.local/share/insaneos/comments.json';
 export const commentStore = createStore((() => {
   try { return JSON.parse(fs.read(COMMENTS_FILE)); } catch (e) { return {}; }
 })());
@@ -99,7 +99,7 @@ export function setComment(path, text) {
   const all = { ...commentStore.get() };
   if (text.trim()) all[path] = text.slice(0, 500); else delete all[path];
   commentStore.set(all);
-  try { fs.mkdir('.local/share/lordos'); fs.write(COMMENTS_FILE, JSON.stringify(all, null, 1)); } catch (e) { /* no disk */ }
+  try { fs.mkdir('.local/share/insaneos'); fs.write(COMMENTS_FILE, JSON.stringify(all, null, 1)); } catch (e) { /* no disk */ }
 }
 // Moving or renaming keeps the tags.
 export function moveTags(from, to) {
@@ -126,12 +126,12 @@ export function openersFor(e, linuxApps, t) {
   if (k === 'image') out.push({ id: 'photos', label: t('apps.photos'), run: () => wm.open('photos', { new: true, args: { path: e.path } }) });
   if (k === 'audio' || k === 'video') out.push({ id: 'player', label: t('apps.player'), run: () => wm.open('player', { args: { path: e.path } }) });
   if (isTextual(e) || k === 'other') out.push({ id: 'editor', label: t('apps.editor'), run: () => wm.open('editor', { args: { path: e.path } }) });
-  // the system's MIME database's type first (lord.mime.guess), then Files' own table: an app that
+  // the system's MIME database's type first (insane.mime.guess), then Files' own table: an app that
   // declares either one opens the file (issue #49: an .xlsx had no type of its own here, so WPS and
   // GridCraft, which declare it, were never offered)
-  const mimes = mimesOf(e, typeof lord.mime !== 'undefined' && lord.mime.guess ? (n) => lord.mime.guess(n) : null);
+  const mimes = mimesOf(e, typeof insane.mime !== 'undefined' && insane.mime.guess ? (n) => insane.mime.guess(n) : null);
   for (const a of linuxApps) {
-    if (a.kind === 'linux' && mimes.some((m) => appOpens(a.mimeTypes, m))) out.push({ id: a.id, desktopId: a.desktopId, label: a.name, run: () => lord.apps.launchWith(a.desktopId, e.path) });
+    if (a.kind === 'linux' && mimes.some((m) => appOpens(a.mimeTypes, m))) out.push({ id: a.id, desktopId: a.desktopId, label: a.name, run: () => insane.apps.launchWith(a.desktopId, e.path) });
   }
   // the default app for this type (Settings → Default Apps, ~/.config/mimeapps.list) goes first,
   // marked

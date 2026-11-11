@@ -9,9 +9,9 @@ in=${1:-tests/th-break.txt}
 mkdir -p build
 cc -O2 -o build/thbrk-libthai tests/thbrk_libthai.c -lthai || exit 1
 make -s build/thbrk-test || exit 1
-build/thbrk-test < "$in" > build/thbrk-lordos.txt
+build/thbrk-test < "$in" > build/thbrk-insaneos.txt
 build/thbrk-libthai < "$in" > build/thbrk-ref.txt
-python3 - build/thbrk-lordos.txt build/thbrk-ref.txt <<'PY'
+python3 - build/thbrk-insaneos.txt build/thbrk-ref.txt <<'PY'
 import re, sys
 th = lambda c: '฀' <= c <= '๿'
 def norm(l):
@@ -28,7 +28,7 @@ b = open(sys.argv[2], encoding='utf-8').read().splitlines()
 same = 0
 for x, y in zip(a, b):
     if norm(x) == norm(y): same += 1
-    else: print('lordos :', norm(x)); print('libthai:', norm(y))
+    else: print('insaneos :', norm(x)); print('libthai:', norm(y))
 print(f'{same}/{len(b)} identical to libthai')
 sys.exit(0 if same == len(b) else 1)
 PY

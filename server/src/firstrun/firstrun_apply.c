@@ -1,9 +1,9 @@
-/* firstrun_apply.c — lordos-firstrun: applies lordos-firstrun.txt once, as root, on the first boot of
- * a Insane OS Raspberry Pi image (called by /usr/lib/lordos/rpi/firstboot). See docs/IMAGER.md.
+/* firstrun_apply.c — insaneos-firstrun: applies insaneos-firstrun.txt once, as root, on the first boot of
+ * a Insane OS Raspberry Pi image (called by /usr/lib/insaneos/rpi/firstboot). See docs/IMAGER.md.
  *
- *   lordos-firstrun check <file>                         parse only; prints "ok" or the reason
- *   lordos-firstrun apply <file> [--root DIR --boot DIR] parse, apply, shred the file
- *   lordos-firstrun shred <file>                         overwrite and delete
+ *   insaneos-firstrun check <file>                         parse only; prints "ok" or the reason
+ *   insaneos-firstrun apply <file> [--root DIR --boot DIR] parse, apply, shred the file
+ *   insaneos-firstrun shred <file>                         overwrite and delete
  *
  * Rules (the same as the admin helper's, docs/ARCHITECTURE.md):
  *   - the file is parsed by fr_parse() first; if anything is wrong, nothing is applied (exit 1);
@@ -56,7 +56,7 @@ static int TEST;                                /* --root given */
 static void say(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    fputs("lordos-firstrun: ", stdout);
+    fputs("insaneos-firstrun: ", stdout);
     vprintf(fmt, ap);
     fputc('\n', stdout);
     fflush(stdout);
@@ -80,12 +80,12 @@ static int mkdirs(const char *path, mode_t mode) {
     return 0;
 }
 
-/* Atomic write: <path>.lordos-new, fsync, chmod/chown, rename. Refuses to follow a symlink at path. */
+/* Atomic write: <path>.insaneos-new, fsync, chmod/chown, rename. Refuses to follow a symlink at path. */
 static int write_file(const char *path, const void *data, size_t n, mode_t mode, uid_t uid, gid_t gid) {
     char tmp[PATH_MAX];
     struct stat st;
     if (!lstat(path, &st) && S_ISLNK(st.st_mode)) { say("refusing to replace the symlink %s", path); return -1; }
-    pathf(tmp, sizeof tmp, "%s.lordos-new", path);
+    pathf(tmp, sizeof tmp, "%s.insaneos-new", path);
     unlink(tmp);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, mode);
     if (fd < 0) return -1;
@@ -258,7 +258,7 @@ static void apply_locale(const FirstRun *fr) {
             rp(lt, sizeof lt, "/etc/localtime");
             pathf(target, sizeof target, "/usr/share/zoneinfo/%s", fr->timezone);
             char tmp[PATH_MAX];
-            pathf(tmp, sizeof tmp, "%s.lordos-new", lt);
+            pathf(tmp, sizeof tmp, "%s.insaneos-new", lt);
             unlink(tmp);
             if (symlink(target, tmp) || rename(tmp, lt)) say("could not set /etc/localtime");
             rp(tzf, sizeof tzf, "/etc/timezone");
@@ -320,7 +320,7 @@ static void apply_wifi_country(const FirstRun *fr) {
 static void apply_wifi(const FirstRun *fr) {
     if (!fr->has_wifi) return;
     char dir[PATH_MAX], hex[72], p[PATH_MAX], ssid_j[160], ssid_s[33], meta[320], key[96];
-    rp(dir, sizeof dir, "/etc/lordos/net/wifi");
+    rp(dir, sizeof dir, "/etc/insaneos/net/wifi");
     if (mkdirs(dir, 0755)) { say("could not create %s", dir); return; }
     for (size_t i = 0; i < fr->ssid_len; i++) snprintf(hex + 2 * i, 3, "%02x", fr->ssid[i]);
     memcpy(ssid_s, fr->ssid, fr->ssid_len);
@@ -329,7 +329,7 @@ static void apply_wifi(const FirstRun *fr) {
     pathf(meta, sizeof meta, "{\"ssid\":%s,\"security\":\"%s\"%s}\n", ssid_j, fr->has_psk ? "psk" : "open", fr->hidden ? ",\"hidden\":true" : "");
     pathf(p, sizeof p, "%s/%s.json", dir, hex);
     int ok = write_str(p, meta, 0644) == 0;
-    /* the derived key (psk=, lord-netd's net/wifi.c), never the password */
+    /* the derived key (psk=, insane-netd's net/wifi.c), never the password */
     int kl = snprintf(key, sizeof key, "%s%s\n", fr->has_psk ? "psk=" : "pass=", fr->has_psk ? fr->psk : "");
     pathf(p, sizeof p, "%s/%s.key", dir, hex);
     ok = ok && write_file(p, key, (size_t)kl, 0600, 0, 0) == 0;
@@ -337,11 +337,11 @@ static void apply_wifi(const FirstRun *fr) {
     say(ok ? "Wi-Fi network saved (%s%s)" : "could not save the Wi-Fi network", fr->has_psk ? "WPA2" : "open", fr->hidden ? ", hidden" : "");
 }
 
-/* ~/.config/lordos/settings.json: language, keyboard, appearance and updates (sdk/settings.js) */
+/* ~/.config/insaneos/settings.json: language, keyboard, appearance and updates (sdk/settings.js) */
 static void user_settings(const FirstRun *fr, const char *home, uid_t uid, gid_t gid) {
     char d1[PATH_MAX], d2[PATH_MAX], p[PATH_MAX];
     pathf(d1, sizeof d1, "%s%s/.config", ROOT, home);
-    pathf(d2, sizeof d2, "%s/lordos", d1);
+    pathf(d2, sizeof d2, "%s/insaneos", d1);
     if ((mkdir(d1, 0755) && errno != EEXIST) || (mkdir(d2, 0755) && errno != EEXIST)) return;
     if (chown(d1, uid, gid) || chown(d2, uid, gid)) { /* keep going: the files get the right owner */ }
     char j[2048], v[128];
@@ -426,12 +426,12 @@ static int apply_user(const FirstRun *fr) {
     homedirs_create(h, uid, gid, locale_of(fr->has_lang ? fr->lang : "en"));
     user_settings(fr, home, uid, gid);
     user_ssh_keys(fr, home, uid, gid);
-    /* automatic login (lord-sessiond reads AUTOLOGIN=; empty = the login screen) */
+    /* automatic login (insane-sessiond reads AUTOLOGIN=; empty = the login screen) */
     char conf[PATH_MAX], txt[96];
-    rp(conf, sizeof conf, "/etc/lordos");
+    rp(conf, sizeof conf, "/etc/insaneos");
     mkdirs(conf, 0755);
-    rp(conf, sizeof conf, "/etc/lordos/session.conf");
-    pathf(txt, sizeof txt, "# Set by lordos-firstrun (Insane OS Imager); Settings → Users changes it.\nAUTOLOGIN=%s\n", fr->autologin ? fr->user : "");
+    rp(conf, sizeof conf, "/etc/insaneos/session.conf");
+    pathf(txt, sizeof txt, "# Set by insaneos-firstrun (Insane OS Imager); Settings → Users changes it.\nAUTOLOGIN=%s\n", fr->autologin ? fr->user : "");
     write_str(conf, txt, 0644);
     say("user %s created (administrator)%s", fr->user, fr->autologin ? ", logs in automatically" : "");
     return 0;
@@ -456,7 +456,7 @@ static void apply_ssh(const FirstRun *fr) {
     char sshd[PATH_MAX], d[PATH_MAX], p[PATH_MAX];
     rp(sshd, sizeof sshd, "/usr/sbin/sshd");
     rp(d, sizeof d, "/etc/ssh/sshd_config.d");
-    pathf(p, sizeof p, "%s/05-lordos-keys-only.conf", d);
+    pathf(p, sizeof p, "%s/05-insaneos-keys-only.conf", d);
     if (fr->ssh == FR_SSH_OFF) {
         unlink(p);
         if (!access(sshd, X_OK)) systemctl("disable", "ssh.service");
@@ -477,8 +477,8 @@ static void apply_ssh(const FirstRun *fr) {
 static void apply_remote(const FirstRun *fr) {
     if (!fr->has_remote) return;
     char d[PATH_MAX], p[PATH_MAX];
-    rp(d, sizeof d, "/etc/lordos/remote");
-    rp(p, sizeof p, "/etc/lordos/remote/config");
+    rp(d, sizeof d, "/etc/insaneos/remote");
+    rp(p, sizeof p, "/etc/insaneos/remote/config");
     if (!fr->remote) {
         if (!unlink(p)) say("remote desktop: off");
         return;
@@ -514,7 +514,7 @@ static void config_block(const char *body) {
     size_t len;
     char *b = read_small(p, 1 << 20, &len);
     if (!b) { say("no config.txt: clock settings not written"); return; }
-    static const char BEGIN[] = "# >>> lordos-firstrun (Insane OS Imager) >>>", END[] = "# <<< lordos-firstrun <<<";
+    static const char BEGIN[] = "# >>> insaneos-firstrun (Insane OS Imager) >>>", END[] = "# <<< insaneos-firstrun <<<";
     size_t cap = len + strlen(body) + 512, o = 0;
     char *out = malloc(cap);
     if (!out) { free(b); return; }
@@ -535,17 +535,17 @@ static void config_block(const char *body) {
 
 static void fand_profile(const char *profile) {
     char p[PATH_MAX], d[PATH_MAX], j[200];
-    rp(d, sizeof d, "/etc/lordos");
+    rp(d, sizeof d, "/etc/insaneos");
     mkdirs(d, 0755);
-    rp(p, sizeof p, "/etc/lordos/fan.json");
-    /* the same file lord-fand writes (docs/FANS.md); it reads it when it starts */
+    rp(p, sizeof p, "/etc/insaneos/fan.json");
+    /* the same file insane-fand writes (docs/FANS.md); it reads it when it starts */
     pathf(j, sizeof j, "{\"version\":1,\"profile\":\"%s\",\"hyst\":3,\"custom\":[[55,30],[60,55],[65,100]],\"force\":\"off\",\"forceUntil\":0}\n", profile);
     if (write_str(p, j, 0644)) { say("could not write fan.json"); return; }
     if (TEST) return;
-    /* lord-fand may already be running (it starts in sysinit): tell it too (root is an administrator) */
+    /* insane-fand may already be running (it starts in sysinit): tell it too (root is an administrator) */
     int s = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
     struct sockaddr_un a = { .sun_family = AF_UNIX };
-    pathf(a.sun_path, sizeof a.sun_path, "/run/lordos/fand.sock");
+    pathf(a.sun_path, sizeof a.sun_path, "/run/insaneos/fand.sock");
     if (s >= 0 && !connect(s, (struct sockaddr *)&a, sizeof a)) {
         char line[64];
         int n = snprintf(line, sizeof line, "PROFILE %s\n", profile);
@@ -563,7 +563,7 @@ static void apply_cooling(const FirstRun *fr) {
     /* CPU governor: performance holds the top clock (only with a fan); the rest keep the kernel's */
     char tf[PATH_MAX], td[PATH_MAX];
     rp(td, sizeof td, "/etc/tmpfiles.d");
-    rp(tf, sizeof tf, "/etc/tmpfiles.d/lordos-cpu-governor.conf");
+    rp(tf, sizeof tf, "/etc/tmpfiles.d/insaneos-cpu-governor.conf");
     if (fan && perf == FR_PERF_PERFORMANCE) {
         mkdirs(td, 0755);
         write_str(tf, "# Insane OS Imager: performance profile (docs/IMAGER.md). Delete this file to go back to the default.\n"
@@ -612,7 +612,7 @@ static int fr_shred(const char *path) {
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        fprintf(stderr, "usage: lordos-firstrun check|apply|shred <file> [--root DIR --boot DIR]\n");
+        fprintf(stderr, "usage: insaneos-firstrun check|apply|shred <file> [--root DIR --boot DIR]\n");
         return 1;
     }
     const char *cmd = argv[1], *file = argv[2];

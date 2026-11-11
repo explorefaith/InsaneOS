@@ -1,12 +1,12 @@
 /* ical.h — iCalendar (RFC 5545) and the shared content-line syntax of vCard (RFC 6350) for
- * lord-maild: calendars, reminders (VTODO) and invitations (iTIP, RFC 5546).
+ * insane-maild: calendars, reminders (VTODO) and invitations (iTIP, RFC 5546).
  *
  * The parser is bounded (line count, nesting, property count) and never reads outside the input.
  * Times are kept as Unix seconds (UTC). An all-day value keeps its civil date (YYYYMMDD) so it
  * never shifts with the time zone. TZID values are resolved with the system tz database
  * (/usr/share/zoneinfo, through our TZif reader); non-IANA zone names (as some calendar servers send) are mapped. */
-#ifndef LORD_MAIL_ICAL_H
-#define LORD_MAIL_ICAL_H
+#ifndef INSANE_MAIL_ICAL_H
+#define INSANE_MAIL_ICAL_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -92,7 +92,7 @@ typedef struct {
     int due_allday;
     int priority;               /* 0 none, 1 high … 9 low */
     int64_t completed;          /* 0 = not completed */
-    int flagged;                /* X-LORDOS-FLAGGED / X-APPLE-FLAGGED? (local extension) */
+    int flagged;                /* X-INSANEOS-FLAGGED / X-APPLE-FLAGGED? (local extension) */
     char parent_uid[256];       /* RELATED-TO (subtasks) */
 } IcEvent;
 

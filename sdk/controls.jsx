@@ -1,7 +1,7 @@
 // controls.jsx — shared building blocks for the layout of Insane OS apps: toolbar buttons
 // with tooltips, toolbars, a "more" menu button, a search field, empty states and grouped
 // ("inset") forms. The spacing and type scale they follow is in docs/DESIGN.md.
-import { View, Text, addListener } from '@lordos/runtime';
+import { View, Text, addListener } from '@insaneos/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { useTheme, popupBg } from './theme.js';
 import { TextInput, useAppWindow } from './components.jsx';
@@ -18,7 +18,7 @@ export const controlSize = { regular: 28, small: 22, toolbar: 44, radius: 7, rad
 // Is a point on the trailing half of the window? Tooltips and menus open toward the inside.
 function nearEnd(winId, node) {
   try {
-    const [x, , w] = lord.getLayout(node.id);
+    const [x, , w] = insane.getLayout(node.id);
     const f = wm.get(winId);
     const mid = f ? f.x + f.w / 2 : 640;
     const end = x + w / 2 > mid;
@@ -127,7 +127,7 @@ export function MenuButton({ icon = '⋯', label, title, items, small, onOpenCha
   useEffect(() => {
     if (!open) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, h] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, h] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + h; };
       if (!inside(menu.current) && !inside(btn.current)) setOpen(false);
     });
   }, [open]);
@@ -140,7 +140,7 @@ export function MenuButton({ icon = '⋯', label, title, items, small, onOpenCha
         : <ToolbarButton icon={icon} label={label} title={open ? null : title} small={small} active={open} onClick={() => setOpen((o) => !o)} />}
       {open && (
         <Overlay anchor={btn}>
-          <View ref={menu} style={{ position: 'absolute', top: (trigger ? lord.getLayout(btn.current.id)[3] : small ? controlSize.small : controlSize.regular) + 4, [end ? 'right' : 'left']: 0,
+          <View ref={menu} style={{ position: 'absolute', top: (trigger ? insane.getLayout(btn.current.id)[3] : small ? controlSize.small : controlSize.regular) + 4, [end ? 'right' : 'left']: 0,
             minWidth, paddingVertical: 5, paddingHorizontal: 5, borderRadius: t.menuRadius, backgroundColor: popupBg(t),
             border: `1px solid ${t.separator}`, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
             {items.map((it, i) => (it === '-' ? <View key={`s${i}`} style={{ height: 1, marginVertical: 4, marginHorizontal: 6, backgroundColor: t.separator }} />

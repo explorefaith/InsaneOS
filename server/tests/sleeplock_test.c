@@ -58,7 +58,7 @@ void hw_emit(const char *kind, const char *json) {
     if (strcmp(kind, "idle")) return;
     idle_events++;
     snprintf(last_idle, sizeof last_idle, "%s", json);
-    if (strstr(json, "\"suspend\"") && theme_locks) sleeplock_lock_sent();   /* lord.session.lock() */
+    if (strstr(json, "\"suspend\"") && theme_locks) sleeplock_lock_sent();   /* insane.session.lock() */
 }
 
 /* logind answers Inhibit with the read end of a pipe; the test keeps the write end to see it closed */

@@ -1,7 +1,7 @@
 // smart.js — disk health through smartmontools (Disks app, Monitor; docs/SYSTEM.md, "SMART with
 // smartmontools", and docs/MONITOR.md, "Disk temperature and health").
 //
-//   smart.installed()                 is /usr/sbin/smartctl there (lord.disks.tools().smartctl)
+//   smart.installed()                 is /usr/sbin/smartctl there (insane.disks.tools().smartctl)
 //   await smart.install(onLog)        installs Debian's smartmontools with the package engine
 //                                     (pkg-install, an administrator; as Settings → Sharing does for SSH)
 //   await smart.info(disk)            the full model (smart-info: smartctl -j -x), sdk/smartparse.js
@@ -24,7 +24,7 @@ export const SUMMARY_MS = 5 * 60 * 1000;      // the Monitor asks a disk at most
 export const smartSummaries = createStore({});
 export const useSmartSummaries = () => useStore(smartSummaries);
 
-const hasDisksApi = () => typeof lord !== 'undefined' && !!lord.disks;
+const hasDisksApi = () => typeof insane !== 'undefined' && !!insane.disks;
 const smartable = (name) => /^(sd[a-z]{1,3}|hd[a-z]{1,3}|nvme\d{1,3}n\d{1,3})$/.test(name || '');
 
 // The helper sends the JSON in pieces; OK says "<lines> <smartctl exit status>".
@@ -40,7 +40,7 @@ function runJson(action, arg) {
 
 export const smart = {
   smartable,
-  installed: () => { try { return hasDisksApi() && !!lord.disks.tools().smartctl; } catch (e) { return false; } },
+  installed: () => { try { return hasDisksApi() && !!insane.disks.tools().smartctl; } catch (e) { return false; } },
   install(onLog) {
     const go = () => admin.run('pkg-install', SMART_PACKAGE, onLog);
     return go().catch((e) => {
@@ -55,7 +55,7 @@ export const smart = {
     return m;
   }),
   abort: (name) => runJson('smart-abort', name),
-  // disk: an entry of lord.disks.list() or of a Monitor sample ({ name, rota|rotational }).
+  // disk: an entry of insane.disks.list() or of a Monitor sample ({ name, rota|rotational }).
   // awake: it had I/O lately (a spinning disk that rests is never asked by our own reader).
   async refresh(disk, { awake = false, force = false } = {}) {
     const name = disk?.name;

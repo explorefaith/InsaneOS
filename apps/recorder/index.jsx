@@ -1,12 +1,12 @@
 // Voice Recorder: voice memos (our own design, in the style of desktop recorders).
 //
-// Records the microphone through PipeWire: the stream belongs to lord-server (after the
-// permission) and lord-media writes the WAV. Recordings live in ~/Music/Recordings, with a
-// waveform, play, rename, trim and export to Opus, MP3 or WAV (lord-media, with FFmpeg).
+// Records the microphone through PipeWire: the stream belongs to insane-server (after the
+// permission) and insane-media writes the WAV. Recordings live in ~/Music/Recordings, with a
+// waveform, play, rename, trim and export to Opus, MP3 or WAV (insane-media, with FFmpeg).
 import {
   View, Text, Image, ScrollView, Button, TextInput, Segmented, Hairline, EmptyState, useTheme, useKeyboard, typeScale,
   t as tr, media, usePlayer, userDirs, fs, mediaFormatTime, formatDate, formatTime, addListener, useSound, microphones, defaultSource,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const APP = 'recorder';
@@ -69,7 +69,7 @@ function useBoxWidth(ref, initial) {
   const [w, setW] = useState(initial);
   useEffect(() => {
     if (!ref.current) return;
-    const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+    const lw = Math.round(insane.getLayout(ref.current.id)[2]);
     if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
   });
   return w;
@@ -137,7 +137,7 @@ export default function Recorder() {
   useEffect(() => {
     const offMove = addListener('pointermove', (e) => {
       if (!drag.current || !waveBox.current) return;
-      const [lx, , w] = lord.getLayout(waveBox.current.id);
+      const [lx, , w] = insane.getLayout(waveBox.current.id);
       const f = Math.max(0, Math.min(1, (e.x - lx) / w));
       setTrim((t) => { const n = [...(t || [0, 1])]; n[drag.current.edge] = f; if (n[0] > n[1]) n.reverse(); return n; });
     });
@@ -239,7 +239,7 @@ export default function Recorder() {
             </View>
             <View ref={waveBox} style={{ width: W, height: WAVE_H, borderRadius: 10, backgroundColor: th.hover, border: `1px solid ${th.separator}`, justifyContent: 'center', direction: 'ltr', overflow: 'hidden' }}
               onMouseDown={(e) => {
-                const [lx, , w] = lord.getLayout(waveBox.current.id);
+                const [lx, , w] = insane.getLayout(waveBox.current.id);
                 const f = (e.x - lx) / w;
                 if (!trim) { if (playId && wave) media.control(playId, 'seek', f * wave.duration); return; }
                 drag.current = { edge: Math.abs(f - trim[0]) < Math.abs(f - trim[1]) ? 0 : 1 };

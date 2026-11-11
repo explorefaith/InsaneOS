@@ -1,11 +1,11 @@
 // Fonts — font viewer and manager: installed fonts by family, a sample with text and
 // sizes of your choice, a character table by block and information; install a .ttf/.otf for the
-// user (~/.local/share/fonts) and remove it. Fonts are opened in the confined lord-doc
+// user (~/.local/share/fonts) and remove it. Fonts are opened in the confined insane-doc
 // helper (FreeType), so a broken or malicious font does not affect the desktop.
 import {
   View, Text, TextInput, Slider, Button, Segmented, useTheme, useAppWindow, useKeyboard, wm, fs, clipboard, DocImage, releaseImage,
   fontInfo, fontSample, fontGrid, formatBytes, t as tr, SidebarItem, SectionTitle, SearchField, GroupBox, FormRow, EmptyState,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BLOCKS } from './blocks.js';
 
@@ -26,7 +26,7 @@ const FONT_EXT = /\.(ttf|otf|ttc|otc)$/i;
 
 function loadFonts(rescan) {
   let list = [];
-  try { list = lord.fonts.list({ rescan }); } catch (e) { list = []; }
+  try { list = insane.fonts.list({ rescan }); } catch (e) { list = []; }
   const fams = new Map();
   for (const f of list) {
     if (!f.path) continue;
@@ -104,7 +104,7 @@ function CharMap({ font, ranges, th }) {
         </View>
         <View style={{ direction: 'ltr' }} onMouseDown={(ev) => {
           if (!img || !gridRef.current) return;
-          const [gx, gy] = lord.getLayout(gridRef.current.id);
+          const [gx, gy] = insane.getLayout(gridRef.current.id);
           const i = Math.floor((ev.y - gy) / CELL) * COLS + Math.floor((ev.x - gx) / CELL);
           if (i >= 0 && i < cps.length && img.data.present?.[i]) setPick(cps[i]);
         }}>
@@ -142,7 +142,7 @@ export default function Fonts() {
   const [file, setFile] = useState(() => (args?.path && FONT_EXT.test(args.path) ? args.path : null));
   useEffect(() => { if (args?.path && args?.nonce && FONT_EXT.test(args.path)) setFile(args.path); }, [args?.nonce]);
   useEffect(() => { if (!msg) return undefined; const id = setTimeout(() => setMsg(null), 4000); return () => clearTimeout(id); }, [msg]);
-  useEffect(() => { const id = setInterval(() => { if (pane.current) { const w = lord.getLayout(pane.current.id)[2] - 48; if (Math.abs(w - width) > 8) setWidth(w); } }, 300); return () => clearInterval(id); }, [width]);
+  useEffect(() => { const id = setInterval(() => { if (pane.current) { const w = insane.getLayout(pane.current.id)[2] - 48; if (Math.abs(w - width) > 8) setWidth(w); } }, 300); return () => clearInterval(id); }, [width]);
 
   const visible = fams.filter((f) => (coll === 'all' || (coll === 'user' && f.user) || (coll === 'mono' && f.mono) || (coll === 'color' && f.color))
     && (!q || f.family.toLowerCase().includes(q.toLowerCase())));

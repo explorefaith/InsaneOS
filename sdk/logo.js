@@ -1,18 +1,18 @@
 // logo.js — the Insane OS logo (docs/brand/README.md).
 //
-//   <InsaneLogo size={64} />            the app icon: the crown on the violet rounded square (About,
+//   <InsaneLogo size={64} />            the app icon: the apple on the violet rounded square (About,
 //                                       Settings → General, Monitor, the theme menu in other themes)
-//   <InsaneGlyph size={16} color={c} /> the flat one-colour crown, for a menu bar; it follows the
+//   <InsaneGlyph size={16} color={c} /> the flat one-colour apple, for a menu bar; it follows the
 //                                       light or dark ink of `color` (the UI can't tint a PNG)
 //   <InsaneWordmark size={28} />        "Insane OS" as live text in the brand face (fontFamily 'brand':
 //                                       Plus Jakarta Sans, 'Insane OS' ExtraBold), with the
-//                                       crown in front unless crown={false}. Navy on light, white on
+//                                       apple in front unless apple={false}. Navy on light, white on
 //                                       dark (or `color`). Always left to right, also in RTL.
 //
 // The images are renders of assets/brand/*.svg in assets/icons/ (tools/gen-brand.py). The icon picks
 // the smallest render at least as big as it is drawn (twice as big above 32); 16 and 32 come from the pixel-grid variant.
 import { createElement as h } from 'react';
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { useTheme } from './theme.js';
 
 const ICON_SIZES = [16, 32, 64, 128, 256, 512, 1024];
@@ -24,7 +24,7 @@ export function InsaneLogo({ size: s = 64 }) {
       width: s, height: s, borderRadius: s * 0.22,
       boxShadow: s > 24 ? `0 ${s * 0.04}px ${s * 0.12}px rgba(0,0,0,0.3)` : 'none',
     },
-  }, h(Image, { src: `asset:icons/lordos-icon-${px}.png`, style: { width: s, height: s } }));
+  }, h(Image, { src: `asset:icons/insaneos-icon-${px}.png`, style: { width: s, height: s } }));
 }
 
 // light ink (a dark bar) → the light glyph; anything else → the dark one
@@ -37,12 +37,12 @@ function isLight(color) {
 
 export function InsaneGlyph({ size: s = 16, color = '#1d1d1f' }) {
   const tone = isLight(color) ? 'light' : 'dark';
-  return h(Image, { src: `asset:icons/lordos-glyph-${tone}-${s <= 16 ? 16 : 32}.png`, style: { width: s, height: s } });
+  return h(Image, { src: `asset:icons/insaneos-glyph-${tone}-${s <= 16 ? 16 : 32}.png`, style: { width: s, height: s } });
 }
 
-// size = the font size. The crown is 1.6 times the cap height and sits 0.27 em before the text, as
+// size = the font size. The apple is 1.6 times the cap height and sits 0.27 em before the text, as
 // in assets/brand/logo-horizontal-*.svg; its PNG has 13 % of empty margin above and 7 % at the sides.
-export function InsaneWordmark({ size: s = 28, color, crown = true }) {
+export function InsaneWordmark({ size: s = 28, color, apple = true }) {
   const t = useTheme();
   const ink = color || (t.mode === 'light' ? '#12122A' : '#ffffff');
   const box = Math.round(s * 1.49);
@@ -50,7 +50,7 @@ export function InsaneWordmark({ size: s = 28, color, crown = true }) {
   // the d–O gap of the outlined SVG (measured on VM 118 at 17 and 26 px)
   const text = (str, weight, ml) => h(Text, { style: { fontFamily: 'brand', fontWeight: weight, fontSize: s, color: ink, whiteSpace: 'nowrap', marginLeft: ml } }, str);
   return h(View, { style: { flexDirection: 'row', alignItems: 'center', direction: 'ltr' } },
-    crown ? h(Image, { src: `asset:icons/lordos-crown${box > 256 ? '-512' : ''}.png`,
+    apple ? h(Image, { src: `asset:icons/insaneos-apple${box > 256 ? '-512' : ''}.png`,
       style: { width: box, height: box, marginLeft: -box * 0.07, marginRight: s * 0.27 - box * 0.07 } }) : null,
     text('Insane OS', 800, 0));
 }

@@ -1,6 +1,6 @@
 // markdown.jsx — our own <Markdown source />: renders markdown with Insane OS nodes.
 //
-//   <Markdown source={text} base="/home/lord/Notes/x" width={420}
+//   <Markdown source={text} base="/home/insane/Notes/x" width={420}
 //     onToggleTask={(line) => …} onLink={(url) => …} onHeadingRef={(id, node) => …} />
 //   fitWidth (optional): width is the exact width of the column (lays list items out at it)
 //   markdownHeadings(text) → [{ level, text, id, line }]   (for a table of contents)
@@ -12,7 +12,7 @@
 // The engine has no runs with different styles inside a single <Text>: a paragraph is a
 // row with flexWrap and one <Text> per word (the space sticks to the word), so it breaks lines
 // between words and each word carries its own style.
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { useTheme } from './theme.js';
 
 // ---- blocks ----
@@ -153,7 +153,7 @@ function Inline({ text, size, color, weight = 400, width, base, onLink, emoji, m
     if (sg.image) {
       const src = /^[a-z]+:/i.test(sg.image) ? null : join(base || '', sg.image);
       if (!src) { out.push(<Text key={`i${si}`} style={{ fontSize: size, color: t.textDim }}>{`[${sg.alt || sg.image}]`}</Text>); return; }
-      const nat = typeof lord.image !== 'undefined' ? lord.image.size(src) : null;
+      const nat = typeof insane.image !== 'undefined' ? insane.image.size(src) : null;
       const max = Math.max(40, (width || 400) - 8);
       const w = nat ? Math.min(nat.width, max) : max;
       const h = nat ? Math.round(w * nat.height / Math.max(1, nat.width)) : Math.round(w * 0.6);

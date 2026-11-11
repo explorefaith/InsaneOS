@@ -2,7 +2,7 @@
 // state means on screen, what the New machine sheet accepts, and where a point of the window falls on the guest's
 // picture. No engine calls here, so server/tests/vm_model_test.mjs runs it under node.
 
-// lord-vm's states and reasons (server/src/vm/vmproto.h, VS_* and VR_*) → what the app shows. `tone`: 'run' (green),
+// insane-vm's states and reasons (server/src/vm/vmproto.h, VS_* and VR_*) → what the app shows. `tone`: 'run' (green),
 // 'pause' (amber), 'off' (gray), 'busy' (accent), 'bad' (red). The text key is under `machines.state.*`, and the
 // reason, when it's worth saying, under `machines.why.*`.
 const BAD_REASONS = ['qemu-failed', 'qemu-signal', 'out-of-memory', 'start-failed', 'guest-panic', 'supervisor-lost', 'forced', 'resume-failed'];
@@ -15,7 +15,7 @@ export function stateView(state, reason) {
     case 'stopping': return { key: r === 'suspended' ? 'suspending' : 'stopping', tone: 'busy', active: true, why: null };
     case 'crashed': return { key: 'crashed', tone: 'bad', active: false, why: r === 'none' ? 'qemu-failed' : r };
     default:
-      // a machine whose supervisor died is shown as off, with the reason: lord-vm recovers it at the next start
+      // a machine whose supervisor died is shown as off, with the reason: insane-vm recovers it at the next start
       if (r === 'supervisor-lost') return { key: 'recovered', tone: 'bad', active: false, why: r };
       // its memory is in suspend.state: the next start resumes where it was (6.1)
       if (r === 'suspended') return { key: 'suspended', tone: 'pause', active: false, why: null };
@@ -46,7 +46,7 @@ export const LIMITS = { vcpusMax: 64, memMin: 256, memMax: 1024 * 1024, diskMin:
 
 const utf8Len = (s) => { let n = 0; for (const ch of s) { const c = ch.codePointAt(0); n += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4; } return n; };
 
-// defaults for this computer (lord.vm.host()): its own architecture, the recommended vCPUs (all but one, at most 4 —
+// defaults for this computer (insane.vm.host()): its own architecture, the recommended vCPUs (all but one, at most 4 —
 // a Pi 5 gets 3), 2 GB or what fits, 20 GB of disk
 export function defaultsFor(host) {
   const arch = host?.arch || 'amd64';
@@ -57,7 +57,7 @@ export function defaultsFor(host) {
 }
 
 // The sheet's draft → { ok, errors: { field: key }, warnings: [key], emulated }. Error and warning keys are under
-// `machines.new.err.*` / `machines.new.warn.*`; lord-vm checks everything again.
+// `machines.new.err.*` / `machines.new.warn.*`; insane-vm checks everything again.
 export function validateDraft(d, host, names = []) {
   const errors = {}, warnings = [];
   const name = (d.name || '').trim();
@@ -94,7 +94,7 @@ export function budgetCheck(list, m, host) {
   return { ok: running === 0 || running + need <= total, need, free: Math.max(0, total - running) };
 }
 
-// what lord.vm.create takes
+// what insane.vm.create takes
 export function createRequest(d) {
   const r = { name: d.name.trim(), arch: d.arch, vcpus: d.vcpus, memoryMb: d.memoryMb, diskGb: d.diskGb, network: d.network === 'isolated' ? 'isolated' : 'shared' };
   if (d.source === 'iso') r.iso = d.path; else r.import = d.path;
@@ -103,7 +103,7 @@ export function createRequest(d) {
   return r;
 }
 
-// the packages Machines still needs for the architectures in use (lord.vm.host().missing), as one list
+// the packages Machines still needs for the architectures in use (insane.vm.host().missing), as one list
 export function missingFor(host, arches) {
   const out = [];
   for (const a of arches) for (const p of (host?.missing?.[a] || '').split(' ').filter(Boolean)) if (!out.includes(p)) out.push(p);
@@ -137,7 +137,7 @@ export function guestSize(box, last) {
   return [w, h];
 }
 
-// the display's refresh rate for VD_RATE: lord.display.list() modes (Hz, or mHz from some drivers), 60 by default
+// the display's refresh rate for VD_RATE: insane.display.list() modes (Hz, or mHz from some drivers), 60 by default
 export function refreshRate(displays) {
   let best = 0;
   for (const d of Array.isArray(displays) ? displays : []) {
@@ -163,15 +163,15 @@ export const CTRL_ALT_DEL = [29, 56, 111];
 // the window's title: "<name> — <state>"
 export const windowTitle = (name, stateText) => (stateText ? `${name} — ${stateText}` : name);
 
-// a folder name for display, from the machine's dir (".../Machines/Debian.lordvm" → "Debian")
-export const folderOf = (dir) => (dir || '').split('/').pop().replace(/\.lordvm$/, '');
+// a folder name for display, from the machine's dir (".../Machines/Debian.insanevm" → "Debian")
+export const folderOf = (dir) => (dir || '').split('/').pop().replace(/\.insanevm$/, '');
 
 // ---- the Control Center (Main) ----
 
 // Systems recognized from an ISO's volume label or a file's name: an id for the card's mark, the name shown. Our own
 // marks (ui.jsx OsMark), never a project's logo.
 const SYSTEMS = [
-  ['lordos', /lordos/i, 'Insane OS'], ['debian', /debian|\bd-i\b/i, 'Debian'], ['ubuntu', /ubuntu|kubuntu|xubuntu|lubuntu/i, 'Ubuntu'],
+  ['insaneos', /insaneos/i, 'Insane OS'], ['debian', /debian|\bd-i\b/i, 'Debian'], ['ubuntu', /ubuntu|kubuntu|xubuntu|lubuntu/i, 'Ubuntu'],
   ['fedora', /fedora/i, 'Fedora'], ['mint', /\bmint\b|linuxmint/i, 'Mint'], ['arch', /\barch(linux)?\b|archlinux/i, 'Arch'],
   ['alpine', /alpine/i, 'Alpine'], ['opensuse', /suse/i, 'openSUSE'], ['kali', /kali/i, 'Kali'], ['rocky', /rocky/i, 'Rocky'],
   ['alma', /alma/i, 'Alma'], ['centos', /centos/i, 'CentOS'], ['freebsd', /freebsd/i, 'FreeBSD'], ['raspios', /raspios|raspberry/i, 'Pi OS'],
@@ -230,7 +230,7 @@ export function profileOf(m, host, saved) {
   return '';
 }
 
-// Card numbers from two samples of lord.vm.stats(dir) (cgroup counters): CPU % of the machine's vCPUs, memory in
+// Card numbers from two samples of insane.vm.stats(dir) (cgroup counters): CPU % of the machine's vCPUs, memory in
 // bytes, disk activity since the last sample. null when the machine isn't running or there's only one sample.
 export function usage(prev, cur, vcpus) {
   if (!cur || !(cur.at > 0) || !(cur.cpuUsec >= 0)) return null;
@@ -258,7 +258,7 @@ export function summaryOf(list, usages, host) {
   };
 }
 
-// What a card says it's doing: lord-vm's state, a saved session, or running with no window of this app (Keep Running,
+// What a card says it's doing: insane-vm's state, a saved session, or running with no window of this app (Keep Running,
 // Start Without Window). `windowed`: a window of this app shows it.
 export function doingOf(m, windowed = true) {
   const v = stateView(m?.state, m?.reason);
@@ -314,7 +314,7 @@ export const thumbSrc = (dir, mtime) => (dir && mtime ? `${dir}/thumb.png#${Math
 
 // ---- the guest agent (6.17) ----
 
-// lord-vm's capability bits (vmproto.h VAC_*) → the popover's list: what works now, and what doesn't and why
+// insane-vm's capability bits (vmproto.h VAC_*) → the popover's list: what works now, and what doesn't and why
 export const AGENT_CAPS = { shutdown: 1, time: 2, exec: 4, files: 8, journal: 16, clipboard: 32, awake: 64 };
 export function agentLines(agent, cfg) {
   const caps = agent?.caps || 0, on = agent?.state === 'connected';
@@ -359,10 +359,10 @@ export const snapSize = (s) => (s?.memory && s.vmstate > 0 ? s.vmstate : 0);
 
 // ---- clones (6.3) ----
 
-// How lord-vm will copy the disk, from lord.vm.cloneInfo: 'reflink' (shared until changed), 'linked' (ext4: a frozen
+// How insane-vm will copy the disk, from insane.vm.cloneInfo: 'reflink' (shared until changed), 'linked' (ext4: a frozen
 // base and an overlay for each), 'copy' (a full copy), or 'blocked' (a Clone of a machine with a saved session, which
 // holds its identity). fromSnapshot: a Clone of one snapshot is always converted.
-// a Clone's name inside the guest (6.3): one DNS label, as lord-vm's vm_hostname_valid and vm_hostname_from_name
+// a Clone's name inside the guest (6.3): one DNS label, as insane-vm's vm_hostname_valid and vm_hostname_from_name
 export const hostnameValid = (h) => typeof h === 'string' && h.length >= 1 && h.length <= 63 && /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(h);
 export function hostnameFrom(name) {
   const base = String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 63).replace(/-+$/, '');
@@ -380,7 +380,7 @@ export function cloneMethod(info, kind, fromSnapshot = false) {
 
 // ---- the Storage window (6.16) ----
 
-// lord.vm.storage() → the list's rows: each machine, its clones under it (app.json cloneOf), then the shared bases.
+// insane.vm.storage() → the list's rows: each machine, its clones under it (app.json cloneOf), then the shared bases.
 // { key, name, level, size, frees, machine } or { key, base: true, path, size, users, trash, names }
 export function storageRows(st) {
   const ms = [...(st?.machines || [])].map((m) => ({ ...m, savedBytes: m.state }));
@@ -438,7 +438,7 @@ export function resolutions(screenW, screenH, cur) {
 }
 
 // ---- importing a machine of another virtualization app (6.22) ----
-// The plan is lord-vm --import-plan's JSON (the last line that is an object); null when there's none yet.
+// The plan is insane-vm --import-plan's JSON (the last line that is an object); null when there's none yet.
 export function parsePlan(out) {
   const lines = String(out || '').split('\n').filter((l) => l.startsWith('{'));
   for (let i = lines.length - 1; i >= 0; i--) { try { const p = JSON.parse(lines[i]); if (p && 'blockers' in p) return p; } catch (e) { /* not this one */ } }
@@ -471,5 +471,5 @@ export function planNotes(plan) {
   const codes = (plan?.notes || []).map((n) => n.code);
   return PLAN_NOTE_ORDER.filter((c) => codes.includes(c));
 }
-// what stops the import: { code, text } in the order lord-vm found them
+// what stops the import: { code, text } in the order insane-vm found them
 export const planBlockers = (plan) => (plan?.blockers || []).map((b) => ({ code: b.code, text: b.text || '' }));

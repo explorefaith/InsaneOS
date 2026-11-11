@@ -1,7 +1,7 @@
-/* hw.h — glue for Settings' hardware modules in lord-server's main loop: displays, uevents,
+/* hw.h — glue for Settings' hardware modules in insane-server's main loop: displays, uevents,
  * the system bus (Bluetooth, power profiles, timedated) and batteries. See docs/SETTINGS.md. */
-#ifndef LORD_HW_H
-#define LORD_HW_H
+#ifndef INSANE_HW_H
+#define INSANE_HW_H
 
 #include <poll.h>
 #include "display.h"

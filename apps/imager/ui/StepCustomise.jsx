@@ -1,7 +1,7 @@
-// Step 4 — customise the first boot (Raspberry Pi only): what goes into lordos-firstrun.txt. Every
+// Step 4 — customise the first boot (Raspberry Pi only): what goes into insaneos-firstrun.txt. Every
 // field is checked with the board's own rules (core/validate.js = server/src/firstrun/firstrun.c).
 // Secrets stay in memory until the write starts; then only a hash and a derived key are kept.
-import { View, Text, Button, ScrollView, useTheme, useLocale, typeScale, spacing, tOptional } from '@lordos/sdk';
+import { View, Text, Button, ScrollView, useTheme, useLocale, typeScale, spacing, tOptional } from '@insaneos/sdk';
 import { useState } from 'react';
 import { platform } from '../platform.js';
 import { app, set, setCfg, setSecrets } from '../state.js';
@@ -265,7 +265,7 @@ function Remote({ s }) {
       <View style={{ gap: 8, opacity: noUser ? 0.5 : 1 }}>
         <Text style={{ fontSize: typeScale.headline, fontWeight: 600, color: t.text }}>{tr('imager.remote.desktop')}</Text>
         <Group footer={tr('imager.remote.desktopFooter')}>
-          <SwitchRow id="rdp" label={tr('imager.remote.desktopOn')} detail={tr('imager.remote.desktopHint', { host: c.hostname || 'lordos-pi' })} on={c.remote}
+          <SwitchRow id="rdp" label={tr('imager.remote.desktopOn')} detail={tr('imager.remote.desktopHint', { host: c.hostname || 'insaneos-pi' })} on={c.remote}
             onChange={(remote) => !noUser && setCfg({ remote })} disabled={noUser} />
         </Group>
       </View>

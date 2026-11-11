@@ -20,7 +20,7 @@ eq('unknown keys are dropped', Object.keys(menuBarPrefs({ menuBar: { foo: false 
 eq('patch', menuBarPatch({ mode: 'dark', menuBar: { osk: false } }, 'keyboard', false), { menuBar: { osk: false, keyboard: false } });
 eq('patch from nothing', menuBarPatch({}, 'ccWifi', false), { menuBar: { ccWifi: false } });
 eq('patch unknown key', menuBarPatch({}, 'nope', false), {});
-// the crown is Cleaner's own key, shared with Cleaner → Settings
+// the apple is Cleaner's own key, shared with Cleaner → Settings
 eq('cleaner patch', menuBarPatch({ cleaner: { lastScan: 1 } }, 'cleaner', false), { cleaner: { lastScan: 1, menuItem: false } });
 eq('cleaner shown by default', cleanerItemShown({}), true);
 eq('cleaner hidden', cleanerItemShown({ cleaner: { menuItem: false } }), false);

@@ -1,37 +1,37 @@
-/* sessiond.c — lord-sessiond: the Insane OS session manager (docs/SESSIONS.md).
+/* sessiond.c — insane-sessiond: the Insane OS session manager (docs/SESSIONS.md).
  *
- * lordos.service starts it as root at boot, replacing the old autostart. It acts as
+ * insaneos.service starts it as root at boot, replacing the old autostart. It acts as
  * our own "display manager":
  *   - the monitor (monitor.c): lends the video card and the input to the session being shown
  *     (the session draws directly, with GPU if available);
- *   - the login screen: a lord-server --greeter (theme themes/greeter) running as the
- *     system user lordos-greeter; its requests (log in, restart, shut down) arrive here and
+ *   - the login screen: a insane-server --greeter (theme themes/greeter) running as the
+ *     system user insaneos-greeter; its requests (log in, restart, shut down) arrive here and
  *     passwords are verified here, against /etc/shadow;
- *   - the sessions: one lord-server --headless per user, which stays alive in the background
+ *   - the sessions: one insane-server --headless per user, which stays alive in the background
  *     when another user is using the monitor (fast user switching) and looks the same from the
  *     monitor and from the browser (sess.c);
  *   - the LAN remote desktop (conn.c), only if enabled in Settings → Sharing:
  *     one child per connection that drops root as soon as it knows whose session it is.
  *
- *   /etc/lordos/session.conf         AUTOLOGIN=user (empty or missing line: login screen)
- *   /etc/lordos/remote/config        enabled=0|1, port=5673, allow=all|group, net=lan|list|any, insecure_dev=0,
+ *   /etc/insaneos/session.conf         AUTOLOGIN=user (empty or missing line: login screen)
+ *   /etc/insaneos/remote/config        enabled=0|1, port=5673, allow=all|group, net=lan|list|any, insecure_dev=0,
  *                                    stun=, turn=, turn_user=, turn_key=, turn_transport=udp|tcp|tls, turn_fp= (0644)
- *   /etc/lordos/remote/access        manual "allow <cidr>" / "block <cidr>" lists (root 0600, admin actions)
- *   /var/lib/lordos/remote/blocklist sources blocked after failed logins (root 0600, survives restarts)
- *   /var/lib/lordos/remote/requests  "unblock <cidr>" lines from the admin helper (read on SIGHUP)
- *   /etc/lordos/remote/cert.pem      self-signed certificate (created when remote is turned on)
- *   /etc/lordos/remote/key.pem       its key (0600)
- *   /etc/lordos/remote/fingerprint   SHA-256 fingerprint of the certificate (shown by Settings)
- *   /run/lordos/status.json          sessions, who is on the monitor and who is connected (Settings)
+ *   /etc/insaneos/remote/access        manual "allow <cidr>" / "block <cidr>" lists (root 0600, admin actions)
+ *   /var/lib/insaneos/remote/blocklist sources blocked after failed logins (root 0600, survives restarts)
+ *   /var/lib/insaneos/remote/requests  "unblock <cidr>" lines from the admin helper (read on SIGHUP)
+ *   /etc/insaneos/remote/cert.pem      self-signed certificate (created when remote is turned on)
+ *   /etc/insaneos/remote/key.pem       its key (0600)
+ *   /etc/insaneos/remote/fingerprint   SHA-256 fingerprint of the certificate (shown by Settings)
+ *   /run/insaneos/status.json          sessions, who is on the monitor and who is connected (Settings)
  *
  * SIGHUP rereads the configuration (turns remote on or off without touching the sessions).
- * It's the only Insane OS program that links OpenSSL (TLS): lord-server doesn't. */
+ * It's the only Insane OS program that links OpenSSL (TLS): insane-server doesn't. */
 #include "sessiond.h"
 #include "rtcwire.h"
 #include "../sec/cgroup.h"
 #include "proto.h"
 #include "rsec.h"
-#include "lord_version.h"           /* build/gen: version, channel and build (Makefile) */
+#include "insane_version.h"           /* build/gen: version, channel and build (Makefile) */
 #include "../bench/boottest.h"
 
 #include <ctype.h>
@@ -86,8 +86,8 @@ static int path_ok(const char *p) { struct stat st; return stat(p, &st) == 0; }
 /* snprintf that, if it doesn't fit, leaves the destination empty (truncated paths are useless) */
 #define SP(dst, ...) do { int r_ = snprintf(dst, sizeof dst, __VA_ARGS__); if (r_ < 0 || (size_t)r_ >= sizeof dst) dst[0] = 0; } while (0)
 
-/* Paths of lord-server and of the data: next to this binary (installed: /usr/lib/lordos/bin,
- * data in /usr/lib/lordos; development: server/build, data at the repository root). */
+/* Paths of insane-server and of the data: next to this binary (installed: /usr/lib/insaneos/bin,
+ * data in /usr/lib/insaneos; development: server/build, data at the repository root). */
 static void find_paths(void) {
     char exe[PATH_MAX];
     ssize_t n = readlink("/proc/self/exe", exe, sizeof exe - 1);
@@ -95,7 +95,7 @@ static void find_paths(void) {
     exe[n] = 0;
     char *slash = strrchr(exe, '/');
     if (slash) *slash = 0;
-    SP(rd_conf.server, "%s/lord-server", exe);
+    SP(rd_conf.server, "%s/insane-server", exe);
     char root[PATH_MAX], probe[PATH_MAX + 32];
     SP(root, "%s/..", exe);
     SP(probe, "%s/themes", root);
@@ -167,7 +167,7 @@ static void load_config(void) {
 /* Self-signed P-256 certificate for 10 years (CN = host name). */
 static int ensure_cert(void) {
     if (path_ok(RD_CONF_DIR "/cert.pem") && path_ok(RD_CONF_DIR "/key.pem")) return 0;
-    mkdir("/etc/lordos", 0755);
+    mkdir("/etc/insaneos", 0755);
     mkdir(RD_CONF_DIR, 0755);
     EVP_PKEY *key = EVP_EC_gen("P-256");
     X509 *x = X509_new();
@@ -184,7 +184,7 @@ static int ensure_cert(void) {
     X509_gmtime_adj(X509_getm_notBefore(x), -3600);
     X509_gmtime_adj(X509_getm_notAfter(x), 10L * 365 * 24 * 3600);
     X509_set_pubkey(x, key);
-    char host[256] = "lordos";
+    char host[256] = "insaneos";
     gethostname(host, sizeof host - 1);
     X509_NAME *name = X509_get_subject_name(x);
     X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (const unsigned char *)"Insane OS", -1, -1, 0);
@@ -209,7 +209,7 @@ static int ensure_cert(void) {
     if (ok) ok = !rename(RD_CONF_DIR "/key.pem.new", RD_CONF_DIR "/key.pem") && !rename(RD_CONF_DIR "/cert.pem.new", RD_CONF_DIR "/cert.pem");
     X509_free(x);
     EVP_PKEY_free(key);
-    fprintf(stderr, "lord-sessiond: new certificate for %s\n", host);
+    fprintf(stderr, "insane-sessiond: new certificate for %s\n", host);
     return ok ? 0 : -1;
 }
 
@@ -342,7 +342,7 @@ static void write_status(void) {
     rd_unlock();
     /* failed sign-ins: only for the admin action remote-failures (root 0600), never in status.json */
     Str fl = { 0 };
-    sput(&fl, "# lord-sessiond: recent failed remote sign-ins (key count first last user)\n");
+    sput(&fl, "# insane-sessiond: recent failed remote sign-ins (key count first last user)\n");
     rd_lock();
     for (int i = 0; i < RD_FAILLOG; i++) {
         RdFailLog *x = &rd_shared->faillog[i];
@@ -386,7 +386,7 @@ static int is_admin(const struct passwd *pw) {
     return 0;
 }
 
-/* "#rrggbb" of the avatar (/var/lib/lordos/users/<u>.json), validated */
+/* "#rrggbb" of the avatar (/var/lib/insaneos/users/<u>.json), validated */
 static void avatar_color(const char *user, char out[8]) {
     out[0] = 0;
     char p[128], buf[512];
@@ -425,7 +425,7 @@ static char greeter_mode[8] = "login", greeter_user[33];
  * left until sleep. The login screen keeps those deadlines, since the session no longer has the monitor.
  * Only for "lock". */
 static int greeter_dark, greeter_off_s, greeter_sleep_s, greeter_sleep_left_s;
-/* The login screen costs a lord-server (about 50 MB of its own memory, measured in a VM) and isn't
+/* The login screen costs a insane-server (about 50 MB of its own memory, measured in a VM) and isn't
  * needed while a session is on the monitor: it is stopped this long after a session takes the monitor,
  * and started again for a lock, a user switch or a log out (sd_greeter_get starts it on demand). */
 #define GREETER_LINGER_S 10
@@ -435,7 +435,7 @@ static int left_on_purpose;             /* the monitor was just taken from the s
 
 /* The last user whose session was shown on the monitor: the login screen preselects it. Kept in
  * SD_LAST_USER (root's, 0644) so it survives a reboot; only a valid user name is read back. */
-#define SD_LAST_USER "/var/lib/lordos/last-user"
+#define SD_LAST_USER "/var/lib/insaneos/last-user"
 static char last_user[33];
 
 static void load_last_user(void) {
@@ -454,7 +454,7 @@ static void load_last_user(void) {
 static void save_last_user(const char *user) {
     if (!sd_valid_username(user) || !strcmp(user, last_user)) return;
     snprintf(last_user, sizeof last_user, "%.32s", user);
-    mkdir("/var/lib/lordos", 0755);
+    mkdir("/var/lib/insaneos", 0755);
     unlink(SD_LAST_USER ".new");
     int fd = open(SD_LAST_USER ".new", O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0644);
     if (fd < 0) return;
@@ -467,7 +467,7 @@ static void save_last_user(const char *user) {
 /* The main display last chosen in the session shown on the monitor, by connector ("HDMI-A-1", "DP-2"):
  * the login screen opens there (sd_main_display), so a dark first connector doesn't leave it blind.
  * Kept in SD_MAIN_DISPLAY (root's, 0644); only [A-Za-z0-9-], up to 31 characters, is accepted or read back. */
-#define SD_MAIN_DISPLAY "/var/lib/lordos/main-display"
+#define SD_MAIN_DISPLAY "/var/lib/insaneos/main-display"
 
 static int valid_connector(const char *c) {
     size_t n = strlen(c);
@@ -486,16 +486,16 @@ static void load_main_display(void) {
     if (n <= 0) return;
     buf[n] = 0;
     buf[strcspn(buf, "\n")] = 0;
-    if (valid_connector(buf)) snprintf(sd_main_display, sizeof sd_main_display, "LORD_MAIN_DISPLAY=%s", buf);
+    if (valid_connector(buf)) snprintf(sd_main_display, sizeof sd_main_display, "INSANE_MAIN_DISPLAY=%s", buf);
 }
 
 static void save_main_display(const char *conn) {
     char env[sizeof sd_main_display];
     if (!valid_connector(conn)) return;
-    snprintf(env, sizeof env, "LORD_MAIN_DISPLAY=%s", conn);
+    snprintf(env, sizeof env, "INSANE_MAIN_DISPLAY=%s", conn);
     if (!strcmp(env, sd_main_display)) return;
     memcpy(sd_main_display, env, sizeof env);
-    mkdir("/var/lib/lordos", 0755);
+    mkdir("/var/lib/insaneos", 0755);
     unlink(SD_MAIN_DISPLAY ".new");
     int fd = open(SD_MAIN_DISPLAY ".new", O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0644);
     if (fd < 0) return;
@@ -514,7 +514,7 @@ static void greeter_reply_hello(void) {
     Str s = { 0 };
     sput(&s, "{\"t\":\"hello\",\"mode\":\"%s\",\"user\":\"%s\",\"last\":\"%s\",\"host\":\"", greeter_mode, greeter_user,
          last_user);
-    char host[128] = "lordos";
+    char host[128] = "insaneos";
     gethostname(host, sizeof host - 1);
     sput_esc(&s, host, 64);
     char layouts[96], variants[96], lang[48];
@@ -764,7 +764,7 @@ static void set_shown(char k, const char *user) {
 /* Boot splash hand-off (docs/SESSIONS.md, "Boot splash"). Until the first session frame of this boot
  * is on the monitor, the screen shows the boot splash (or the console): the session keeps it there
  * instead of a black first frame (RP_DISPLAY_KEEP) and says when its frame is up (RP_SHOWN). Then
- * SD_FIRST_FRAME is created and lordos-splash-quit.service ends Plymouth. Only before that first
+ * SD_FIRST_FRAME is created and insaneos-splash-quit.service ends Plymouth. Only before that first
  * frame: later the screen may hold another user's session, which must never stay visible. */
 static int splash_up(void) {
     struct stat st;
@@ -772,7 +772,7 @@ static int splash_up(void) {
 }
 
 /* Every boot's time to the first frame, kept across reboots to compare boots and versions:
- * /var/lib/lordos/boot-times.jsonl (root's, 0644), one JSON object a line, the last BOOT_TIMES_MAX.
+ * /var/lib/insaneos/boot-times.jsonl (root's, 0644), one JSON object a line, the last BOOT_TIMES_MAX.
  * Only values Insane OS produces itself: no user or host names. About Insane OS shows this boot's line
  * (js_sys.c, matched by bootId). */
 #define BOOT_TIMES SD_STATE_DIR "/boot-times.jsonl"
@@ -790,7 +790,7 @@ static void record_boot_time(double secs, const char *what, int test_k, int test
     char line[400], test[48] = "";
     if (test_k > 0) snprintf(test, sizeof test, ",\"test\":%d,\"testOf\":%d", test_k, test_n);     /* a boot time test's boot */
     snprintf(line, sizeof line, "{\"bootId\":\"%s\",\"at\":%lld,\"seconds\":%.3f,\"shown\":\"%s\",\"version\":\"%s%s%s\",\"build\":\"%s\",\"kernel\":\"%s\"%s}\n",
-             id, (long long)time(NULL), secs, what, LORD_VERSION, LORD_CHANNEL[0] ? "-" : "", LORD_CHANNEL, LORD_BUILD, rel, test);
+             id, (long long)time(NULL), secs, what, INSANE_VERSION, INSANE_CHANNEL[0] ? "-" : "", INSANE_CHANNEL, INSANE_BUILD, rel, test);
     /* the older lines, at most BOOT_TIMES_MAX - 1, then this one; written whole and renamed */
     static char old[BOOT_TIMES_MAX * 400];
     size_t n = 0;
@@ -829,7 +829,7 @@ static void first_frame(void) {
     double secs = bt.tv_sec + bt.tv_nsec / 1e9;
     const char *what = !has_monitor ? "none" : shown == 'u' ? "session" : "login";   /* autologin, login screen, no monitor */
     sd_log("first frame on the monitor %.3f s after the kernel started (Insane OS %s%s%s, build %s, %s): the boot splash can go",
-           secs, LORD_VERSION, LORD_CHANNEL[0] ? "-" : "", LORD_CHANNEL, LORD_BUILD, what);
+           secs, INSANE_VERSION, INSANE_CHANNEL[0] ? "-" : "", INSANE_CHANNEL, INSANE_BUILD, what);
     /* InsaneBench's boot time test: this boot's number, and another restart if any are left */
     BootTest b, after;
     struct stat bst;
@@ -934,7 +934,7 @@ static void from_worker(void) {
     if (!strncmp(buf, "greeter-in ", 11) && shown == 'g') sd_mon_greeter(buf + 11);
 }
 
-/* Restart or shut down from the session on the monitor (0.8.1: the crown menu, the Classic start
+/* Restart or shut down from the session on the monitor (0.8.1: the apple menu, the Classic start
  * menu; docs/SESSIONS.md, "Restart and Shut Down from a session"). Only "reboot" or "poweroff",
  * through the same closed path as the login screen. Policy, decided here as root: the user on the
  * monitor may do it alone; while other users have sessions open, only an administrator (sudo,
@@ -1264,7 +1264,7 @@ static void save_lockout(void) {
     char *t = malloc(RL_MAX * 128 + 256);
     if (!t) return;
     int n = rl_format(&copy, rd_now(), t, RL_MAX * 128 + 256);
-    mkdir("/var/lib/lordos", 0755);
+    mkdir("/var/lib/insaneos", 0755);
     mkdir(RL_FILE_DIR, 0700);
     struct stat st;
     if (n < 0 || lstat(RL_FILE_DIR, &st) || !S_ISDIR(st.st_mode) || st.st_uid != 0) { free(t); return; }
@@ -1350,11 +1350,11 @@ static void deliver_notices(void) {
 }
 
 /* ---- login screen processes ----
- * The login screen keeps no state of its own. lordos.service uses KillMode=process so that the
- * sessions survive a restart, which also left the greeter running after its lord-sessiond had
+ * The login screen keeps no state of its own. insaneos.service uses KillMode=process so that the
+ * sessions survive a restart, which also left the greeter running after its insane-sessiond had
  * stopped (systemd: "remains running after unit stopped"): after a package upgrade it kept the
- * old binary, and one the new lord-sessiond couldn't reach stayed for good. Every process of the
- * greeter's system user is stopped when lord-sessiond stops, and any left over (a crash) when it
+ * old binary, and one the new insane-sessiond couldn't reach stayed for good. Every process of the
+ * greeter's system user is stopped when insane-sessiond stops, and any left over (a crash) when it
  * starts; the next login screen is started on demand. */
 static int proc_real_uid(long pid, uid_t *uid) {
     char p[64], line[128];
@@ -1408,11 +1408,11 @@ int main(int argc, char **argv) {
     int no_monitor = 0;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--no-monitor")) no_monitor = 1;   /* remote desktop only (testing) */
-        else { fprintf(stderr, "usage: lord-sessiond [--no-monitor]\n"); return 2; }
+        else { fprintf(stderr, "usage: insane-sessiond [--no-monitor]\n"); return 2; }
     }
-    if (geteuid() != 0) { fprintf(stderr, "lord-sessiond: must run as root (lordos.service)\n"); return 1; }
+    if (geteuid() != 0) { fprintf(stderr, "insane-sessiond: must run as root (insaneos.service)\n"); return 1; }
     char prefix[64];
-    snprintf(prefix, sizeof prefix, "lord-sessiond[%d]", (int)getpid());
+    snprintf(prefix, sizeof prefix, "insane-sessiond[%d]", (int)getpid());
     sd_log_prefix(prefix);
     signal(SIGPIPE, SIG_IGN);
     struct sigaction sa = { .sa_handler = on_term };
@@ -1425,7 +1425,7 @@ int main(int argc, char **argv) {
     load_last_user();
     load_main_display();
     stop_greeters("left over from before this start");
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     /* delegated cgroup (Delegate=yes): sessiond moves into the "supervisor" leaf and each session gets
      * its own subtree (cgroup_delegate_session in sess.c). Without delegation it works as before. */
     if (!cgroup_service_init()) {
@@ -1458,35 +1458,35 @@ int main(int argc, char **argv) {
                 snprintf(rd_shared->sessions[i].user, sizeof rd_shared->sessions[i].user, "%s", pw->pw_name);
                 break;
             }
-            /* it keeps the environment it started with: LORD_GPU or LORD_SW_CURSOR set since then reach it only
+            /* it keeps the environment it started with: INSANE_GPU or INSANE_SW_CURSOR set since then reach it only
              * after logging out (KillMode=process keeps sessions across a restart of the service; #57) */
             sd_log("%s's session is still open (it keeps the GPU settings it started with until it logs out)", pw->pw_name);
         }
         close(fd);
     }
 
-    /* session GPU: lordos.gpu=0 on the kernel command line (safe mode) or the service's LORD_GPU;
+    /* session GPU: insaneos.gpu=0 on the kernel command line (safe mode) or the service's INSANE_GPU;
      * otherwise each session uses it while it's on the monitor */
     {
         char cmd[2048] = "";
         FILE *f = fopen("/proc/cmdline", "r");
         if (f) { if (!fgets(cmd, sizeof cmd, f)) cmd[0] = 0; fclose(f); }
-        const char *g = getenv("LORD_GPU");
-        if (strstr(cmd, "lordos.gpu=0")) snprintf(sd_gpu_env, sizeof sd_gpu_env, "LORD_GPU=0");
-        else if (g && (!strcmp(g, "0") || !strcmp(g, "1"))) snprintf(sd_gpu_env, sizeof sd_gpu_env, "LORD_GPU=%s", g);
+        const char *g = getenv("INSANE_GPU");
+        if (strstr(cmd, "insaneos.gpu=0")) snprintf(sd_gpu_env, sizeof sd_gpu_env, "INSANE_GPU=0");
+        else if (g && (!strcmp(g, "0") || !strcmp(g, "1"))) snprintf(sd_gpu_env, sizeof sd_gpu_env, "INSANE_GPU=%s", g);
         /* the GPU without its cursor plane, for a driver that draws that plane wrong (#57) */
-        const char *swc = getenv("LORD_SW_CURSOR");
-        if (strstr(cmd, "lordos.swcursor=1") || (swc && !strcmp(swc, "1"))) snprintf(sd_cursor_env, sizeof sd_cursor_env, "LORD_SW_CURSOR=1");
+        const char *swc = getenv("INSANE_SW_CURSOR");
+        if (strstr(cmd, "insaneos.swcursor=1") || (swc && !strcmp(swc, "1"))) snprintf(sd_cursor_env, sizeof sd_cursor_env, "INSANE_SW_CURSOR=1");
         /* key latency trace for this boot (docs/TROUBLESHOOTING.md): only root can ask for it, from the
          * boot menu or the service; timings only, see keylag.h */
-        const char *k = getenv("LORD_INPUT_DEBUG");
-        for (const char *p = cmd; (p = strstr(p, "lordos.inputdebug=1")) != NULL; p++)
+        const char *k = getenv("INSANE_INPUT_DEBUG");
+        for (const char *p = cmd; (p = strstr(p, "insaneos.inputdebug=1")) != NULL; p++)
             if ((p == cmd || p[-1] == ' ') && (p[19] == 0 || p[19] == ' ' || p[19] == '\n')) sd_input_debug = 1;
         if (k && !strcmp(k, "1")) sd_input_debug = 1;
-        if (sd_input_debug) sd_log("key latency trace on for user sessions (lordos.inputdebug=1)");
+        if (sd_input_debug) sd_log("key latency trace on for user sessions (insaneos.inputdebug=1)");
         /* GPU switches that are off by default, for a measurement: only root sets the service's environment,
          * and the login screen never gets them (docs/GPU.md) */
-        static const char *const tune[SD_TUNE_N] = { "LORD_GPU_SCISSOR", "LORD_GPU_DRAG", "LORD_PIPELINE", "LORD_GPU_VERIFY" };
+        static const char *const tune[SD_TUNE_N] = { "INSANE_GPU_SCISSOR", "INSANE_GPU_DRAG", "INSANE_PIPELINE", "INSANE_GPU_VERIFY" };
         for (int i = 0; i < SD_TUNE_N; i++) {
             const char *v = getenv(tune[i]);
             if (v && strlen(v) < 10) {
@@ -1498,7 +1498,7 @@ int main(int argc, char **argv) {
     sd_log("sessions with %s%s%s%s%s", rd_conf.server, sd_gpu_env[0] ? ", " : "", sd_gpu_env, sd_cursor_env[0] ? ", " : "", sd_cursor_env);
     int wk[2];
     if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, wk) == 0) { wk_r = wk[0]; wk_w = wk[1]; }
-    /* the network belongs to the system: lord-netd brings it up before the greeter (netsup.c) */
+    /* the network belongs to the system: insane-netd brings it up before the greeter (netsup.c) */
     sd_netd_start();
     has_monitor = !no_monitor && sd_mon_open() == 0;
     if (has_monitor) boot_monitor();
@@ -1529,7 +1529,7 @@ int main(int argc, char **argv) {
         pid_t pid;
         int st;
         while ((pid = waitpid(-1, &st, WNOHANG)) > 0) {
-            if (sd_netd_reaped(pid, st)) continue;     /* lord-netd (netsup.c) */
+            if (sd_netd_reaped(pid, st)) continue;     /* insane-netd (netsup.c) */
             if (sd_cgroup_reaped(pid, st)) continue;   /* cgroup placement service (cgsup.c) */
             if (pid == worker_pid) {
                 worker_pid = -1;
@@ -1572,7 +1572,7 @@ int main(int argc, char **argv) {
     save_lockout();
     if (has_monitor) sd_mon_close();
     if (worker_pid > 0) kill(worker_pid, SIGTERM);
-    stop_greeters("lord-sessiond is stopping");
+    stop_greeters("insane-sessiond is stopping");
     listening = 0;
     rd_lock();
     rd_shared->monitor[0] = 0;

@@ -1,5 +1,5 @@
 /* gpustat_test.c — Monitor → GPU's reader (src/monitor/gpustat.c): fdinfo of amdgpu, i915, xe and v3d clients,
- * pp_dpm levels, lord-say's note, maps lines, and a fake machine (an RX 580-like card with its hwmon, a process with
+ * pp_dpm levels, insane-say's note, maps lines, and a fake machine (an RX 580-like card with its hwmon, a process with
  * a client shared by two fds, an AI helper, a virtual machine, the installed APIs) and hostile values. */
 #include "../src/monitor/gpustat.h"
 
@@ -108,12 +108,12 @@ static void test_small(void) {
     gpu_dpm_parse("garbage\nS: 19Mhz *\n0: 99999999Mhz *\n", &cur, &max);
     CHECK(cur == -1 && max == -1);
     GpuSay s;
-    CHECK(!gpu_say_parse("lord-say 1 vulkan hd es speak\n", &s) && !strcmp(s.backend, "vulkan") && !strcmp(s.quality, "hd") && !strcmp(s.lang, "es"));
-    CHECK(!gpu_say_parse("lord-say 1 cpu standard en save", &s) && !strcmp(s.mode, "save"));
-    CHECK(gpu_say_parse("lord-say 1 cuda hd es speak\n", &s));
-    CHECK(gpu_say_parse("lord-say 1 cpu hd ES speak\n", &s));
-    CHECK(gpu_say_parse("lord-say 1 cpu hd es speak\nmore", &s));
-    CHECK(gpu_say_parse("lord-say 2 cpu hd es speak\n", &s));
+    CHECK(!gpu_say_parse("insane-say 1 vulkan hd es speak\n", &s) && !strcmp(s.backend, "vulkan") && !strcmp(s.quality, "hd") && !strcmp(s.lang, "es"));
+    CHECK(!gpu_say_parse("insane-say 1 cpu standard en save", &s) && !strcmp(s.mode, "save"));
+    CHECK(gpu_say_parse("insane-say 1 cuda hd es speak\n", &s));
+    CHECK(gpu_say_parse("insane-say 1 cpu hd ES speak\n", &s));
+    CHECK(gpu_say_parse("insane-say 1 cpu hd es speak\nmore", &s));
+    CHECK(gpu_say_parse("insane-say 2 cpu hd es speak\n", &s));
     char libs[8][64];
     const char *maps =
         "7f1c2a000000-7f1c2a100000 r-xp 00000000 08:02 1234 /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so\n"
@@ -185,10 +185,10 @@ static void fake_machine(void) {
     put("proc/4242/fdinfo/8", "drm-driver:\tamdgpu\ndrm-client-id:\t300\ndrm-pdev:\t0000:01:00.0\ndrm-engine-gfx:\t5 ns\n");
     /* a process with no GPU */
     put("proc/4300/stat", "4300 (bash) S 1 4300 4300 0 -1 0 0 0 0 0 1 1 0 0 20 0 1 0 50 1000 100 0\n");
-    /* the voice: lord-say with its note, lord-tts, a virtual machine */
-    put("proc/4400/stat", "4400 (lord-say) S 1 4400 4400 0 -1 0 0 0 0 0 1 1 0 0 20 0 1 0 60 1000 100 0\n");
-    put("proc/4401/stat", "4401 (lord-tts) R 4400 4400 4400 0 -1 0 0 0 0 0 1 1 0 0 20 0 1 0 61 1000 100 0\n");
-    put("home/.cache/lordos/say/4400", "lord-say 1 vulkan hd es speak\n");
+    /* the voice: insane-say with its note, insane-tts, a virtual machine */
+    put("proc/4400/stat", "4400 (insane-say) S 1 4400 4400 0 -1 0 0 0 0 0 1 1 0 0 20 0 1 0 60 1000 100 0\n");
+    put("proc/4401/stat", "4401 (insane-tts) R 4400 4400 4400 0 -1 0 0 0 0 0 1 1 0 0 20 0 1 0 61 1000 100 0\n");
+    put("home/.cache/insaneos/say/4400", "insane-say 1 vulkan hd es speak\n");
     put("proc/4500/stat", "4500 (qemu-system-x86) S 1 4500 4500 0 -1 0 0 0 0 0 400 100 0 0 20 0 4 0 70 1000 2048 0\n");
     /* the installed APIs */
     put("usr/share/vulkan/icd.d/radeon_icd.json", "{\"ICD\":{\"api_version\":\"1.4.305\",\"library_path\":\"libvulkan_radeon.so\"},\"file_format_version\":\"1.0.0\"}");
@@ -230,7 +230,7 @@ static void test_machine(void) {
     const char *c217 = strstr(j, "\"id\":217");
     CHECK(c217 && !strstr(c217 + 1, "\"id\":217") && strstr(j, "\"id\":300"));
     CHECK(!strstr(j, "\"pid\":4300"));                      /* no GPU: not listed */
-    CHECK(strstr(j, "\"name\":\"lord-tts\",\"state\":\"R\",\"own\":true"));
+    CHECK(strstr(j, "\"name\":\"insane-tts\",\"state\":\"R\",\"own\":true"));
     CHECK(strstr(j, "\"say\":[{\"pid\":4400,\"state\":\"S\",\"backend\":\"vulkan\",\"quality\":\"hd\",\"lang\":\"es\",\"mode\":\"speak\"}]"));
     CHECK(strstr(j, "\"vms\":[{\"pid\":4500,\"ticks\":500,"));
     CHECK(strstr(j, "{\"file\":\"radeon_icd.json\",\"lib\":\"libvulkan_radeon.so\",\"api\":\"1.4.305\"}"));
@@ -241,8 +241,8 @@ static void test_machine(void) {
     CHECK(strstr(j, "libgallium-25.0.7-2+deb13u1.so") && strstr(j, "libcuda.so.1"));
     CHECK(strstr(j, "\"nvidia\":\"NVRM version: NVIDIA UNIX x86_64 Kernel Module  550.54.14"));
     free(j);
-    /* a note that isn't lord-say's own format, or isn't a regular file, is ignored */
-    put("home/.cache/lordos/say/4400", "lord-say 1 vulkan hd es speak; rm -rf /\n");
+    /* a note that isn't insane-say's own format, or isn't a regular file, is ignored */
+    put("home/.cache/insaneos/say/4400", "insane-say 1 vulkan hd es speak; rm -rf /\n");
     j = gpu_json(root, ids, (unsigned)getuid(), 0, home);
     CHECK(j && strstr(j, "\"say\":[]"));
     free(j);

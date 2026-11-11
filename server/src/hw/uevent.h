@@ -1,8 +1,8 @@
 /* uevent.h — kernel uevents (NETLINK_KOBJECT_UEVENT) for Settings: DRM connector changes
  * (hotplugged displays), power_supply (battery, charger) and backlight. One socket in the main
  * loop's poll: nothing is polled. Receiving kernel uevents needs no privileges. */
-#ifndef LORD_HW_UEVENT_H
-#define LORD_HW_UEVENT_H
+#ifndef INSANE_HW_UEVENT_H
+#define INSANE_HW_UEVENT_H
 
 enum { UEV_DRM = 1, UEV_POWER = 2, UEV_BACKLIGHT = 4 };
 

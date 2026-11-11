@@ -1,4 +1,4 @@
-/* hiss_test.c — the hiss measure lord-tts uses to make a noisy sentence again (src/tts/hiss.c). */
+/* hiss_test.c — the hiss measure insane-tts uses to make a noisy sentence again (src/tts/hiss.c). */
 #include "tts/hiss.h"
 
 #include <math.h>

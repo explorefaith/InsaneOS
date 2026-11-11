@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 #define SGDISK    "/usr/sbin/sgdisk"
-#define RUNDIR    "/run/lordos-install"
+#define RUNDIR    "/run/insaneos-install"
 #define ESP_LIST  RUNDIR "/esp-list"
 
 /* blkid's TYPE of one partition, probed on the device itself (not the cache); "" when none. */

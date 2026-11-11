@@ -1,0 +1,15 @@
+[Unit]
+Description=InsaneOS on Raspberry Pi: on-board Bluetooth (%I) SCO routing
+Documentation=file:///usr/share/doc/insaneos/README.md
+# started by udev (90-insaneos-rpi-bt.rules) when a UART Bluetooth controller appears; before
+# bluetoothd, which then powers the controller (BlueZ's AutoEnable; the user's session turns it off
+# again if that was their last choice in Settings, docs/SETTINGS.md)
+Before=bluetooth.service
+After=sys-subsystem-bluetooth-devices-%i.device
+BindsTo=sys-subsystem-bluetooth-devices-%i.device
+ConditionPathExists=/usr/lib/insaneos/rpi/bt-uart
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/insaneos/rpi/bt-uart %I
+RemainAfterExit=yes

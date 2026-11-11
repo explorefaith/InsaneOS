@@ -1,13 +1,13 @@
 /* admin.h — Insane OS privileged helper (see admin.c). */
-#ifndef LORD_ADMIN_H
-#define LORD_ADMIN_H
+#ifndef INSANE_ADMIN_H
+#define INSANE_ADMIN_H
 
 #include <stddef.h>
 #include <sys/types.h>
 
 #define ADMIN_ARG_MAX 65536             /* argument of an action (may have several lines) */
 
-/* ---- server side (lord-server, without root) ---- */
+/* ---- server side (insane-server, without root) ---- */
 
 /* Called as root, before dropping privileges. user = the session user. */
 int  admin_start(const char *user);
@@ -19,7 +19,7 @@ int  admin_known(const char *action);                 /* is it in the closed lis
 int  admin_send(const char *action, const char *arg, size_t len);
 void admin_dispatch(void (*fn)(int id, const char *kind, const char *text));
 
-/* ---- lord-netd (root, started by lord-sessiond): the system network; see admin.c, docs/NETWORK.md ---- */
+/* ---- insane-netd (root, started by insane-sessiond): the system network; see admin.c, docs/NETWORK.md ---- */
 int  admin_netd_serve(void);                          /* returns only on error */
 
 /* ---- helper side (root): for modules that add actions ---- */

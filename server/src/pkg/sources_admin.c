@@ -2,8 +2,8 @@
  * docs/UPDATES.md "Mirrored apps (catalog)"). Administrators only:
  *
  *   pkg-source-add <id>      the catalog entry <id> (source type "apt", delivery "direct") becomes
- *                            /etc/apt/sources.list.d/lordos-<id>.sources and its vendor key
- *                            /usr/share/keyrings/lordos-<id>.asc
+ *                            /etc/apt/sources.list.d/insaneos-<id>.sources and its vendor key
+ *                            /usr/share/keyrings/insaneos-<id>.asc
  *   pkg-source-remove <id>   removes both
  *
  * A vendor whose package adds a one-line .list unless one already names its repository (Spotify)
@@ -17,11 +17,11 @@
  * instead, the key dearmored when the name ends in .gpg, so the package's own write changes nothing.
  *
  * Nothing comes from the caller but the id: the repository, suite, components, architectures and key
- * come from the catalog the lordos package ships (<Insane OS dir>/apt/catalog.json and apt/keys/, root's,
+ * come from the catalog the insaneos package ships (<Insane OS dir>/apt/catalog.json and apt/keys/, root's,
  * not writable by others), every field is checked against a strict character set, the key file must
  * hold a primary key with exactly the catalog's fingerprint, and the files are fixed text written
  * whole and renamed. The engine then verifies that repository's InRelease with that key only (its
- * Signed-By), over HTTPS (lord-tls). */
+ * Signed-By), over HTTPS (insane-tls). */
 #include "pkg.h"
 #include "pgp.h"
 #include "../sec/json.h"
@@ -40,8 +40,8 @@
 #define KEYRINGS    "/usr/share/keyrings"
 #define CATALOG_MAX (512 * 1024)
 
-/* <Insane OS dir> (the folder that holds bin/lord-server) */
-static int lordos_dir(char *out, size_t cap) {
+/* <Insane OS dir> (the folder that holds bin/insane-server) */
+static int insaneos_dir(char *out, size_t cap) {
     char exe[PATH_MAX];
     ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
     if (k <= 0) return -1;
@@ -121,7 +121,7 @@ static int parse_fpr(const char *s, uint8_t out[20]) {
 
 static int write_atomic(const char *path, const char *data, size_t n) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos", path);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
     if (fd < 0) return -1;
     int ok = write(fd, data, n) == (ssize_t)n && !fchmod(fd, 0644);
@@ -142,19 +142,19 @@ static int good_keyname(const char *s) {
     return 1;
 }
 
-/* the paths of id's .sources and keyring: the vendor's names from the catalog, else lordos-<id> */
+/* the paths of id's .sources and keyring: the vendor's names from the catalog, else insaneos-<id> */
 static void repo_paths(const char *id, const Repo *r, char *spath, size_t scap, char *kpath, size_t kcap) {
     if (r && r->sname[0]) {
         snprintf(spath, scap, SOURCES_DIR "/%s.sources", r->sname);
         snprintf(kpath, kcap, KEYRINGS "/%s", r->kname);
     } else {
-        snprintf(spath, scap, SOURCES_DIR "/lordos-%s.sources", id);
-        snprintf(kpath, kcap, KEYRINGS "/lordos-%s.asc", id);
+        snprintf(spath, scap, SOURCES_DIR "/insaneos-%s.sources", id);
+        snprintf(kpath, kcap, KEYRINGS "/insaneos-%s.asc", id);
     }
 }
 static int find_repo(const char *id, Repo *r) {
     char dir[PATH_MAX], path[PATH_MAX];
-    if (lordos_dir(dir, sizeof dir)) { admin_err("pkg.catalogMissing", NULL); return -1; }
+    if (insaneos_dir(dir, sizeof dir)) { admin_err("pkg.catalogMissing", NULL); return -1; }
     size_t len;
     char *text = (size_t)snprintf(path, sizeof path, "%s/apt/catalog.json", dir) < sizeof path ? read_root_file(path, CATALOG_MAX, &len) : NULL;
     if (!text) { admin_err("pkg.catalogMissing", NULL); return -1; }
@@ -190,7 +190,7 @@ static int find_repo(const char *id, Repo *r) {
     const char *oo = json_str(src, "optout");
     if (oo) {
         size_t on = strlen(oo);
-        int ok = on > 5 && on < sizeof r->optout && !strcmp(oo + on - 5, ".list") && strncmp(oo, "lordos", 6) && islower((unsigned char)oo[0]);
+        int ok = on > 5 && on < sizeof r->optout && !strcmp(oo + on - 5, ".list") && strncmp(oo, "insaneos", 6) && islower((unsigned char)oo[0]);
         for (size_t i = 0; ok && i < on; i++) if (!islower((unsigned char)oo[i]) && !isdigit((unsigned char)oo[i]) && !strchr(".-_", oo[i])) ok = 0;
         if (!ok) { admin_err("pkg.catalogBad", NULL); goto out; }
         snprintf(r->optout, sizeof r->optout, "%s", oo);
@@ -198,7 +198,7 @@ static int find_repo(const char *id, Repo *r) {
     const JVal *files = json_get(src, "files");
     if (files) {
         const char *sn = json_str(files, "sources"), *kn = json_str(files, "keyring");
-        if (!good_id(sn) || !good_keyname(kn) || !strncmp(sn, "lordos", 6)) { admin_err("pkg.catalogBad", NULL); goto out; }
+        if (!good_id(sn) || !good_keyname(kn) || !strncmp(sn, "insaneos", 6)) { admin_err("pkg.catalogBad", NULL); goto out; }
         snprintf(r->sname, sizeof r->sname, "%s", sn);
         snprintf(r->kname, sizeof r->kname, "%s", kn);
     }

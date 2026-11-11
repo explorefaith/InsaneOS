@@ -6,9 +6,9 @@
  * apps in assets/sysapps — is listed with its size and SHA-256 in <root>/code-manifest.json, and
  * that file is signed with the Insane OS release key (Ed25519) in <root>/code-manifest.sig (base64 of
  * the 64-byte signature over the exact bytes of the manifest). <root> is the folder that holds
- * assets/ and themes/ (/usr/lib/lordos when installed).
+ * assets/ and themes/ (/usr/lib/insaneos when installed).
  *
- * lord-server checks the signature once per process, with the public key compiled in, and the hash
+ * insane-server checks the signature once per process, with the public key compiled in, and the hash
  * of every file before it runs it: codesig_load() reads the file from one descriptor (opened under
  * <root>, never following a link out of it), hashes exactly the bytes it read and returns those same
  * bytes, so what is checked is what runs (no TOCTOU).
@@ -17,18 +17,18 @@
  *   VERIFIED     signed manifest, signature good: only listed files with the right hash load.
  *   DEVELOPMENT  unsigned manifest (or none) in a development build: hashes are still checked when
  *                there is a manifest; About shows "Development build". A release build
- *                (make RELEASE=1, LORD_CODE_RELEASE) never accepts this state.
+ *                (make RELEASE=1, INSANE_CODE_RELEASE) never accepts this state.
  *   INVALID      bad signature, broken manifest, or an unsigned/missing one in a release build:
  *                nothing loads and the session shows the recovery screen. */
-#ifndef LORD_SEC_CODESIG_H
-#define LORD_SEC_CODESIG_H
+#ifndef INSANE_SEC_CODESIG_H
+#define INSANE_SEC_CODESIG_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 #define CODE_MANIFEST     "code-manifest.json"
 #define CODE_SIGNATURE    "code-manifest.sig"
-#define CODE_KIND         "lordos-system-code"
+#define CODE_KIND         "insaneos-system-code"
 #define CODE_MANIFEST_MAX (1u << 20)        /* bytes */
 #define CODE_FILES_MAX    4096
 #define CODE_FILE_MAX     (64u << 20)       /* one bundle */
@@ -53,7 +53,7 @@ typedef struct {
 
 /* Parses and checks a manifest. sig/siglen: the text of code-manifest.sig, or NULL when there is none
  * (then signed_ok = 0). With a signature, it must verify with pub over json[0..len). 0 on success;
- * err gets the reason. Strict: format 1, kind "lordos-system-code", relative paths of
+ * err gets the reason. Strict: format 1, kind "insaneos-system-code", relative paths of
  * [A-Za-z0-9._+-/] without "." or ".." parts, strictly sorted, sizes ≤ CODE_FILE_MAX, 64 lowercase
  * hex digits, at most CODE_FILES_MAX files. */
 int  codesig_parse(const char *json, size_t len, const char *sig, size_t siglen, const uint8_t pub[32],
@@ -90,7 +90,7 @@ typedef struct { char path[CODE_PATH_MAX + 1]; char reason[96]; int reported; } 
 int codesig_refused_count(void);
 CodeRefusal *codesig_refused(int i);
 
-/* The Insane OS release key (tools/release/lordos-release.pub.pem), raw 32 bytes. */
+/* The Insane OS release key (tools/release/insaneos-release.pub.pem), raw 32 bytes. */
 extern const uint8_t codesig_release_key[32];
 /* The key this build trusts: the release key, or a test build's CODE_PUBKEY. */
 const uint8_t *codesig_key(void);

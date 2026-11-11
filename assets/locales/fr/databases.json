@@ -5,7 +5,7 @@
   "quickHint": "Se connecte une fois ; elle est gardée dans Récents, pas dans les favoris",
   "favorites": "FAVORIS",
   "recent": "RÉCENTS",
-  "unavailable": "L’assistant de bases de données (lord-sql) n’est pas installé sur ce système : Bases de données ne peut pas encore se connecter. Les favoris et l’importation fonctionnent toujours.",
+  "unavailable": "L’assistant de bases de données (insane-sql) n’est pas installé sur ce système : Bases de données ne peut pas encore se connecter. Les favoris et l’importation fonctionnent toujours.",
   "later": "Arrive dans une prochaine version de Bases de données.",
   "loading": "Chargement…",
   "cancel": "Annuler",
@@ -432,7 +432,7 @@
     "one": "{count} entrée depuis la connexion à {time} · le journal reste en mémoire et est effacé à la déconnexion",
     "other": "{count} entrées depuis la connexion à {time} · le journal reste en mémoire et est effacé à la déconnexion"
   },
-  "err.unavailable": "L’assistant de bases de données (lord-sql) n’est pas installé ou ne peut pas démarrer.",
+  "err.unavailable": "L’assistant de bases de données (insane-sql) n’est pas installé ou ne peut pas démarrer.",
   "err.notfound": "Ce favori n’est plus enregistré. Enregistrez-le de nouveau et connectez-vous.",
   "err.dns": "Le nom du serveur est introuvable. {message}",
   "err.connect": "Le serveur n’a pas accepté la connexion : vérifiez l’hôte, le port et le réseau. {message}",

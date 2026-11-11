@@ -10,31 +10,31 @@
     "size": 50122
    },
    {
-    "name": "lordos-0.8.3-rpi5-arm64.img.xz",
+    "name": "insaneos-0.8.3-rpi5-arm64.img.xz",
     "size": 558119764
    },
    {
-    "name": "lordos-live-0.8.3-amd64.iso",
+    "name": "insaneos-live-0.8.3-amd64.iso",
     "size": 1051269120
    },
    {
-    "name": "lordos-release.pub.pem",
+    "name": "insaneos-release.pub.pem",
     "size": 113
    },
    {
-    "name": "lordos_0.8.3_amd64.deb",
+    "name": "insaneos_0.8.3_amd64.deb",
     "size": 10878096
    },
    {
-    "name": "lordos_0.8.3_amd64.spdx.json",
+    "name": "insaneos_0.8.3_amd64.spdx.json",
     "size": 59222
    },
    {
-    "name": "lordos_0.8.3_arm64.deb",
+    "name": "insaneos_0.8.3_arm64.deb",
     "size": 10615196
    },
    {
-    "name": "lordos_0.8.3_arm64.spdx.json",
+    "name": "insaneos_0.8.3_arm64.spdx.json",
     "size": 57102
    },
    {
@@ -58,31 +58,31 @@
     "size": 50122
    },
    {
-    "name": "lordos-0.8.2-rpi5-arm64.img.xz",
+    "name": "insaneos-0.8.2-rpi5-arm64.img.xz",
     "size": 554020004
    },
    {
-    "name": "lordos-live-0.8.2-amd64.iso",
+    "name": "insaneos-live-0.8.2-amd64.iso",
     "size": 1047648256
    },
    {
-    "name": "lordos-release.pub.pem",
+    "name": "insaneos-release.pub.pem",
     "size": 113
    },
    {
-    "name": "lordos_0.8.2_amd64.deb",
+    "name": "insaneos_0.8.2_amd64.deb",
     "size": 10803348
    },
    {
-    "name": "lordos_0.8.2_amd64.spdx.json",
+    "name": "insaneos_0.8.2_amd64.spdx.json",
     "size": 58609
    },
    {
-    "name": "lordos_0.8.2_arm64.deb",
+    "name": "insaneos_0.8.2_arm64.deb",
     "size": 10536780
    },
    {
-    "name": "lordos_0.8.2_arm64.spdx.json",
+    "name": "insaneos_0.8.2_arm64.spdx.json",
     "size": 56126
    },
    {
@@ -106,31 +106,31 @@
     "size": 50122
    },
    {
-    "name": "lordos-0.8.1-rpi5-arm64.img.xz",
+    "name": "insaneos-0.8.1-rpi5-arm64.img.xz",
     "size": 550845932
    },
    {
-    "name": "lordos-live-0.8.1-amd64.iso",
+    "name": "insaneos-live-0.8.1-amd64.iso",
     "size": 1043156992
    },
    {
-    "name": "lordos-release.pub.pem",
+    "name": "insaneos-release.pub.pem",
     "size": 113
    },
    {
-    "name": "lordos_0.8.1_amd64.deb",
+    "name": "insaneos_0.8.1_amd64.deb",
     "size": 6331840
    },
    {
-    "name": "lordos_0.8.1_amd64.spdx.json",
+    "name": "insaneos_0.8.1_amd64.spdx.json",
     "size": 58609
    },
    {
-    "name": "lordos_0.8.1_arm64.deb",
+    "name": "insaneos_0.8.1_arm64.deb",
     "size": 6073936
    },
    {
-    "name": "lordos_0.8.1_arm64.spdx.json",
+    "name": "insaneos_0.8.1_arm64.spdx.json",
     "size": 56126
    },
    {
@@ -154,31 +154,31 @@
     "size": 48422
    },
    {
-    "name": "lordos-0.8.0-rpi5-arm64.img.xz",
+    "name": "insaneos-0.8.0-rpi5-arm64.img.xz",
     "size": 532884784
    },
    {
-    "name": "lordos-live-0.8.0-amd64.iso",
+    "name": "insaneos-live-0.8.0-amd64.iso",
     "size": 1041377280
    },
    {
-    "name": "lordos-release.pub.pem",
+    "name": "insaneos-release.pub.pem",
     "size": 113
    },
    {
-    "name": "lordos_0.8.0_amd64.deb",
+    "name": "insaneos_0.8.0_amd64.deb",
     "size": 6267748
    },
    {
-    "name": "lordos_0.8.0_amd64.spdx.json",
+    "name": "insaneos_0.8.0_amd64.spdx.json",
     "size": 58604
    },
    {
-    "name": "lordos_0.8.0_arm64.deb",
+    "name": "insaneos_0.8.0_arm64.deb",
     "size": 6011900
    },
    {
-    "name": "lordos_0.8.0_arm64.spdx.json",
+    "name": "insaneos_0.8.0_arm64.spdx.json",
     "size": 56121
    },
    {

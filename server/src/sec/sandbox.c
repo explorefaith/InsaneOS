@@ -1,6 +1,6 @@
 /* sandbox.c — sandbox for .lpk apps (see sandbox.h and docs/PRIVACY.md).
  *
- * Network decision: lord-server runs without root, so it can't create a network namespace
+ * Network decision: insane-server runs without root, so it can't create a network namespace
  * (unshare(CLONE_NEWNET) requires CAP_SYS_ADMIN). Instead, an app without the `network` permission
  * stays in the machine's netns but can't open network sockets: seccomp rejects
  * socket(AF_INET/AF_INET6/AF_PACKET) and Landlock (ABI ≥ 4) denies it TCP bind/connect. The
@@ -45,7 +45,7 @@
 #  endif
 #endif
 
-void sandbox_scope_name(const char *id, char *out, size_t n) { snprintf(out, n, "app-lordos-lpk-%s.scope", id); }
+void sandbox_scope_name(const char *id, char *out, size_t n) { snprintf(out, n, "app-insaneos-lpk-%s.scope", id); }
 
 /* ---- no_new_privs and capabilities ---- */
 
@@ -70,11 +70,11 @@ static int drop_caps(void) {
 static int ll_create(struct landlock_ruleset_attr *a, size_t n) { return (int)syscall(SYS_landlock_create_ruleset, a, n, 0U); }
 static int ll_add(int fd, enum landlock_rule_type t, const void *attr) { return (int)syscall(SYS_landlock_add_rule, fd, t, attr, 0U); }
 static int ll_enforce(int fd) { return (int)syscall(SYS_landlock_restrict_self, fd, 0U); }
-/* The kernel's Landlock ABI. LORD_SANDBOX_MAX_ABI (tests only) can lower it, never raise it: the
+/* The kernel's Landlock ABI. INSANE_SANDBOX_MAX_ABI (tests only) can lower it, never raise it: the
  * only effect is that restricted apps refuse to start. */
 static int ll_abi(void) {
     int abi = (int)syscall(SYS_landlock_create_ruleset, NULL, 0U, LANDLOCK_CREATE_RULESET_VERSION);
-    const char *cap = getenv("LORD_SANDBOX_MAX_ABI");
+    const char *cap = getenv("INSANE_SANDBOX_MAX_ABI");
     if (cap && *cap >= '0' && *cap <= '9' && atoi(cap) < abi) abi = atoi(cap);
     return abi;
 }
@@ -88,7 +88,7 @@ static int ll_path(int rs, const char *path, uint64_t allow) {
     return r;
 }
 
-/* Rule on a folder that's already open (an fd from lord-server). */
+/* Rule on a folder that's already open (an fd from insane-server). */
 static int ll_fd(int rs, int fd, uint64_t allow) {
     struct landlock_path_beneath_attr pb = { .allowed_access = allow, .parent_fd = fd };
     return ll_add(rs, LANDLOCK_RULE_PATH_BENEATH, &pb);
@@ -408,7 +408,7 @@ int sandbox_files_isolate(const SandboxFilesCfg *cfg) {
     struct stat vt;
     if (!stat("/var/tmp", &vt)) bad |= mount("tmpfs", "/var/tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1777");
     bad |= mount("proc", "/proc", "proc", MS_NOSUID | MS_NODEV | MS_NOEXEC, NULL);
-    /* /dev stays (GPU, sound, camera: lord-netperm decides those), but not the session's shared
+    /* /dev stays (GPU, sound, camera: insane-netperm decides those), but not the session's shared
      * memory nor its terminals (keystrokes of a sudo password, TIOCSTI) */
     if (!stat("/dev/shm", &vt)) bad |= mount("tmpfs", "/dev/shm", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1777");
     bad |= mount("devpts", "/dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");

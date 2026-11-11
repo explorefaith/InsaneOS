@@ -1,26 +1,26 @@
-/* vmagent.h — org.lordos.agent, Machines' own channel into a guest (docs/VIRTUALIZATION.md 6.8, 6.17, 7.1.1), and
- * the bits lord-vm needs to talk to qemu-guest-agent.
+/* vmagent.h — org.insaneos.agent, Machines' own channel into a guest (docs/VIRTUALIZATION.md 6.8, 6.17, 7.1.1), and
+ * the bits insane-vm needs to talk to qemu-guest-agent.
  *
- * A virtio-serial port named org.lordos.agent: no network, no port, no VNC; lordos-guest (tools/guest) holds the guest's
+ * A virtio-serial port named org.insaneos.agent: no network, no port, no VNC; insaneos-guest (tools/guest) holds the guest's
  * end as the person signed in at the guest's display. Frames, both ways:
  *
  *   u32 length (little endian, of the payload)  u16 kind  u16 channel  payload
  *
  * At most AG_FRAME_MAX bytes of payload; anything longer, or a stream that doesn't parse, is dropped whole (the guest
- * is untrusted: lord-vm parses this inside its own sandbox, never lord-server). Kinds a side doesn't know are skipped,
+ * is untrusted: insane-vm parses this inside its own sandbox, never insane-server). Kinds a side doesn't know are skipped,
  * so either side can grow.
- *   AGK_HELLO  guest → host  "lordos-guest <version> <capability>…" (text); the host answers with its own hello
+ *   AGK_HELLO  guest → host  "insaneos-guest <version> <capability>…" (text); the host answers with its own hello
  *   AGK_CLIP   both ways     the clipboard's text, UTF-8; only in the directions the machine allows (machine.json)
  *   AGK_CLIPX  both ways     the clipboard in up to three forms at once (capability "clipx" in both hellos): parts of
  *                            u8 form (AGF_TEXT, AGF_HTML, AGF_PNG), u32 length (little endian), bytes; each form at most
  *                            once. Text and HTML are UTF-8 of at most AG_TEXT_MAX; a PNG at most AG_PNG_MAX bytes and
- *                            AG_PNG_DIM pixels a side. lord-vm checks the PNG's header and sanitizes the HTML (only
+ *                            AG_PNG_DIM pixels a side. insane-vm checks the PNG's header and sanitizes the HTML (only
  *                            formatting tags and attributes stay, no scripts, styles that load anything, events or
- *                            links other than http, https and mailto) before anything goes on; lord-server re-encodes
- *                            the picture in lord-media's sandbox.
+ *                            links other than http, https and mailto) before anything goes on; insane-server re-encodes
+ *                            the picture in insane-media's sandbox.
  * The host never asks the guest to run anything over this channel, and the guest can't ask the host for anything. */
-#ifndef LORD_VM_AGENT_H
-#define LORD_VM_AGENT_H
+#ifndef INSANE_VM_AGENT_H
+#define INSANE_VM_AGENT_H
 
 #include <stddef.h>
 #include <stdint.h>

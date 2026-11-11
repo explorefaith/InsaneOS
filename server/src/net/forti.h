@@ -1,7 +1,7 @@
 /* forti.h — reading openfortivpn's output and the single sign-on reply (pure functions, no I/O;
  * tests/forti_test.c). vpnproc.c drives openfortivpn with them. */
-#ifndef LORD_NET_FORTI_H
-#define LORD_NET_FORTI_H
+#ifndef INSANE_NET_FORTI_H
+#define INSANE_NET_FORTI_H
 
 #include <stddef.h>
 

@@ -1,6 +1,6 @@
 /* ui.h — Insane OS interface engine: node tree, styles, layout, painting. */
-#ifndef LORD_UI_H
-#define LORD_UI_H
+#ifndef INSANE_UI_H
+#define INSANE_UI_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -68,7 +68,7 @@ typedef struct StyleExt {
         uint8_t ok, rtl, plain;     /* resolved for this style and direction; uniform border and radius */
     } r;
 } StyleExt;
-#define STYLE_EXT_VALUES offsetof(StyleExt, r)   /* what lord.setStyle compares */
+#define STYLE_EXT_VALUES offsetof(StyleExt, r)   /* what insane.setStyle compares */
 
 enum { SIDE_START = 4, SIDE_END = 5 };
 #define ES_BW(i)      (1u << (i))           /* border width of side i (0..5) */
@@ -141,9 +141,9 @@ typedef struct {
     DamageList dlist;               /* the same damage as separate rectangles (damage_add) */
     Box dlast;                      /* ui.damage as damage_add left it: if it differs, it was set directly */
     double damage_px;               /* pixels repainted in the last frame */
-    int quit_requested;             /* lord.quit() */
+    int quit_requested;             /* insane.quit() */
     uint8_t rtl;                    /* interface direction (Arabic, Hebrew… language) */
-    char theme_request[1024];       /* lord.themes.use(): bundle to load */
+    char theme_request[1024];       /* insane.themes.use(): bundle to load */
     char theme_failed[1024];        /* last bundle that failed to load */
 } Ui;
 
@@ -161,7 +161,7 @@ void  node_detach(Node *c);
 void  node_set_text(Node *n, const char *s);
 void  node_invalidate(Node *n);
 void  node_moved(Node *n);          /* only left/top changed (window drag): no repaint of its content */
-/* after a style change (lord.setStyle): before = the style, ext_before = its StyleExt values (NULL
+/* after a style change (insane.setStyle): before = the style, ext_before = its StyleExt values (NULL
  * if it had none) before the change; places, remeasures or repaints only what the change needs */
 void  node_restyled(Node *n, const Style *before, const StyleExt *ext_before);
 int   node_gather_text(const Node *n, char *buf, int size);
@@ -224,7 +224,7 @@ int   text_init(const char *font_dir);
 /* For InsaneBench's helper, which opens no files: one interface font already in memory (it must stay there) */
 int   text_init_mem(const unsigned char *data, size_t size);
 /* Weight + TEXT_MONO picks the monospaced font (JetBrains Mono) in text_measure/text_draw and in
- * lord.measureText: this way the font travels with the weight without changing the signatures. */
+ * insane.measureText: this way the font travels with the weight without changing the signatures. */
 #define TEXT_MONO 1000.0f
 /* Weight + TEXT_BRAND: the brand face of the Insane OS wordmark (Plus Jakarta Sans, docs/brand/README.md). */
 #define TEXT_BRAND 2000.0f
@@ -293,7 +293,7 @@ int   paint_damage_rects(Box *out, int max);
 /* damage gathered over several frames (a display whose flip was pending): the blur rule again,
  * on the tree as it is now (paint.c, main.c paint_out) */
 void  paint_damage_settle(DamageList *l);
-extern int paint_multi_damage;      /* 1: several rectangles (LORD_DAMAGE=multi, tests); 0 by default */
+extern int paint_multi_damage;      /* 1: several rectangles (INSANE_DAMAGE=multi, tests); 0 by default */
 extern int paint_tf_nocache;        /* tests: a reference paint that neither reads nor fills the
                                      * transformed subtrees' raster cache (engine-test) */
 void  paint_root(Canvas *c, Node *root);
@@ -316,7 +316,7 @@ void  paint_below_stats(BelowStats *s);    /* builds (whole, part) and switched 
  * is below there, with the CPU's arithmetic. Only on frames that use that copy and only when nothing
  * else would paint there (see paint.c); 1 if it was taken (the scene's g->w is then stale and only
  * g->strip were painted), 0 if the whole clip was painted as paint_root_clear(c, root, 0) does.
- * paint_gdrag_done: the GPU got g's textures (the dirty rectangles start again). LORD_GPU_VERIFY=N: every
+ * paint_gdrag_done: the GPU got g's textures (the dirty rectangles start again). INSANE_GPU_VERIFY=N: every
  * N-th taken frame also paints g->w on the CPU into g->ref, for the GPU to compare. */
 struct GpuDrag;
 int   paint_root_gdrag(Canvas *c, Node *root, struct GpuDrag *g);

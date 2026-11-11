@@ -1,11 +1,11 @@
-/* bpfsys.h — the bare minimum of the bpf() syscall for lord-netperm: maps, loading programs,
+/* bpfsys.h — the bare minimum of the bpf() syscall for insane-netperm: maps, loading programs,
  * attaching them to a cgroup with a bpf_link and reading a ring buffer (BPF_MAP_TYPE_RINGBUF).
  * No libbpf or bcc.
  *
  * The programs come precompiled inside the binary (build/gen/np_bpf.h, which bpf2c builds from
  * clang's .o): a program is never read from a file at run time. */
-#ifndef LORD_NP_BPFSYS_H
-#define LORD_NP_BPFSYS_H
+#ifndef INSANE_NP_BPFSYS_H
+#define INSANE_NP_BPFSYS_H
 
 #include <stddef.h>
 #include <stdint.h>

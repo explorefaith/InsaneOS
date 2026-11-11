@@ -1,6 +1,6 @@
 /* kms.h — video output straight to the kernel (DRM/KMS), without libdrm. */
-#ifndef LORD_KMS_H
-#define LORD_KMS_H
+#ifndef INSANE_KMS_H
+#define INSANE_KMS_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -35,7 +35,7 @@ typedef struct {
     uint32_t *cursor_map;
     uint64_t cursor_size;
     int cursor_ok, cursor_visible;
-    int borrowed;       /* the fd came from lord-sessiond (it handles master and the previous mode) */
+    int borrowed;       /* the fd came from insane-sessiond (it handles master and the previous mode) */
     /* boot splash hand-off (kms_attach with keep): no modeset until the first real frame, so the
      * splash stays up instead of a black frame. presented: a frame of ours is on the screen. */
     int modeset_pending, presented;
@@ -49,7 +49,7 @@ typedef struct {
 } Kms;
 
 int  kms_open(Kms *k, const char *path);
-/* With a card fd passed by lord-sessiond (already master): same setup as kms_open. keep: what
+/* With a card fd passed by insane-sessiond (already master): same setup as kms_open. keep: what
  * the screen shows (the boot splash) stays until the first kms_flip/kms_set_fb/kms_flip_fb. */
 int  kms_attach(Kms *k, int fd, int keep);
 void kms_close(Kms *k);

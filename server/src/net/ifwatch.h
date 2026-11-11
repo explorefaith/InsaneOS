@@ -1,6 +1,6 @@
-/* ifwatch.h — which interfaces lord-netd still has to bring up (issue #8; see ifwatch.c). */
-#ifndef LORD_IFWATCH_H
-#define LORD_IFWATCH_H
+/* ifwatch.h — which interfaces insane-netd still has to bring up (issue #8; see ifwatch.c). */
+#ifndef INSANE_IFWATCH_H
+#define INSANE_IFWATCH_H
 
 #define IFW_MAX      64
 #define IFW_WAIT_MS  30000      /* a device udev never finishes naming is brought up anyway */
@@ -22,7 +22,7 @@ typedef struct {
 typedef struct { int index, done, boot, fails; long first_ms, next_ms; char name[16]; } IfSeen;
 typedef struct { IfSeen v[IFW_MAX]; int n; } IfTable;
 
-/* One pass over the interfaces there are now. booting: those seen in this pass were there when lord-netd
+/* One pass over the interfaces there are now. booting: those seen in this pass were there when insane-netd
  * started. *applied counts the ones brought up. Returns how many are still waiting. */
 int ifwatch_step(IfTable *t, const IfNow *now, int n, const IfOps *o, long ms, int booting, int *applied);
 

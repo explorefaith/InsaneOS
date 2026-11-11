@@ -1,6 +1,6 @@
 /* vimport.h — import and export passwords from other managers (see docs/PASSWORDS.md,
- * "Import and export"). Runs inside lord-vault (confined, no network): the file arrives as
- * bytes already read from an fd opened by lord-server. Everything built (strings, attachments) goes in
+ * "Import and export"). Runs inside insane-vault (confined, no network): the file arrives as
+ * bytes already read from an fd opened by insane-server. Everything built (strings, attachments) goes in
  * the secrets arena (smem.h) and imp_free wipes it.
  *
  * Formats:
@@ -12,8 +12,8 @@
  *     Title,URL,Username,Password,Notes,OTPAuth CSV of other password managers.
  *   - Insane OS own CSV (the one exp_csv writes).
  * The parsers are robust against broken or malicious files ("fuzz-ish" tests in tests/). */
-#ifndef LORD_VAULT_VIMPORT_H
-#define LORD_VAULT_VIMPORT_H
+#ifndef INSANE_VAULT_VIMPORT_H
+#define INSANE_VAULT_VIMPORT_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -27,7 +27,7 @@ enum {
     IMP_CHROME_CSV,        /* name,url,username,password[,note] */
     IMP_FIREFOX_CSV,       /* "url","username","password","httpRealm","formActionOrigin","guid","timeCreated","timeLastUsed","timePasswordChanged" */
     IMP_APPLE_CSV,         /* Title,URL,Username,Password,Notes,OTPAuth */
-    IMP_LORD_CSV,          /* category,title,username,password,url,notes,totp,tags,favorite,fields,urls,kind,created,modified (exp_csv) */
+    IMP_INSANE_CSV,          /* category,title,username,password,url,notes,totp,tags,favorite,fields,urls,kind,created,modified (exp_csv) */
 };
 
 /* Extra field type (matches the vault's: vmodel.h) */
@@ -66,7 +66,7 @@ int  imp_parse(int kind, const uint8_t *data, size_t len, const char *password,
                const uint8_t *keyfile, size_t kflen, ImpList *l);
 void imp_free(ImpList *l);           /* wipes and frees everything (including l->v) */
 
-/* Insane OS own CSV (IMP_LORD_CSV), with header; entries as in ImpList. *out in smem. */
+/* Insane OS own CSV (IMP_INSANE_CSV), with header; entries as in ImpList. *out in smem. */
 int  exp_csv(const ImpList *l, char **out, size_t *outlen);
 
 /* Shared utilities */

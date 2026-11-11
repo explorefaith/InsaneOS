@@ -1,10 +1,10 @@
 /* facts.h — what System Information's Checks tab reads about the running session (docs/BENCHMARK.md,
- * "Checks: configured versus effective"), without root: lord-server's own ids from /proc/self/status,
+ * "Checks: configured versus effective"), without root: insane-server's own ids from /proc/self/status,
  * its cgroup and who owns it, the app scopes beside it, and whether anything listens on a TCP port
  * (/proc/net/tcp and tcp6, which list every socket of the network namespace). `root` prefixes every
  * path ("" for this machine), as in sysreport.h. */
-#ifndef LORD_SYSREPORT_FACTS_H
-#define LORD_SYSREPORT_FACTS_H
+#ifndef INSANE_SYSREPORT_FACTS_H
+#define INSANE_SYSREPORT_FACTS_H
 
 typedef struct {
     int uid, euid;                      /* -1 unknown */

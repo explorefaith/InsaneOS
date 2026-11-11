@@ -1,12 +1,12 @@
 #!/bin/bash
 # netperm_cut.sh — open connections are cut when a rule changes to deny (docs/FIREWALL.md,
 # "Existing connections are cut"). Run it in the test VM as the session user (passwordless sudo),
-# with lord-sessiond and lord-netperm running:
+# with insane-sessiond and insane-netperm running:
 #
 #   bash server/tests/netperm_cut.sh [lan-host]
 #
-# Like netperm_integration.sh it builds an app scope by hand, writes ~/.config/lordos/firewall.json
-# (restored at the end) and asks lord-netperm to reload. Inside the scope it starts long downloads
+# Like netperm_integration.sh it builds an app scope by hand, writes ~/.config/insaneos/firewall.json
+# (restored at the end) and asks insane-netperm to reload. Inside the scope it starts long downloads
 # (TCP, and QUIC with curl --http3-only when the network allows UDP 443) and an idle TCP session to
 # the SSH port of lan-host, then changes the rules and measures how fast the traffic stops and what
 # the app sees. Then the rule goes back to allow and a new connection must work at once.
@@ -18,17 +18,17 @@ QUIC_URL=${QUIC_URL:-"https://www.cloudflare.com/?n=[1-200]"}   # any HTTP/3 sit
 ISO_DIR=https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
 OTHER_URL=${OTHER_URL:-$ISO_DIR$(curl -s --max-time 8 "$ISO_DIR" | grep -o 'debian-[0-9.]*-amd64-netinst.iso' | head -1)}
 U=$(id -u)
-SESS=/sys/fs/cgroup/system.slice/lordos.service/lordos-session-$U
-SC=$SESS/app-lordos-npcut.scope
-FW=~/.config/lordos/firewall.json
+SESS=/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-$U
+SC=$SESS/app-insaneos-npcut.scope
+FW=~/.config/insaneos/firewall.json
 APP=desktop:npcut
 T=$(mktemp -d)
 pass=0; fail=0
 ok()  { pass=$((pass+1)); echo "  ok:   $*"; }
 bad() { fail=$((fail+1)); echo "  BAD:  $*"; }
 [ -d "$SESS" ] || { echo "no Insane OS session for uid $U ($SESS)"; exit 2; }
-[ -S /run/lordos/netperm.sock ] || { echo "lord-netperm is not running"; exit 2; }
-mkdir -p ~/.config/lordos
+[ -S /run/insaneos/netperm.sock ] || { echo "insane-netperm is not running"; exit 2; }
+mkdir -p ~/.config/insaneos
 HAD=0
 [ -f "$FW" ] && { cp "$FW" "$T/fw.backup"; HAD=1; }
 # ends everything still running in the scope (cgroup.kill) and the background jobs
@@ -45,7 +45,7 @@ trap cleanup EXIT
 sudo mkdir -p "$SC"
 
 reload() {
-    python3 -c 'import socket,struct,time;s=socket.socket(socket.AF_UNIX);s.connect("/run/lordos/netperm.sock");s.sendall(struct.pack("<IB",1,1));time.sleep(0.05);s.close()'
+    python3 -c 'import socket,struct,time;s=socket.socket(socket.AF_UNIX);s.connect("/run/insaneos/netperm.sock");s.sendall(struct.pack("<IB",1,1));time.sleep(0.05);s.close()'
 }
 rules() { echo "$1" > "$FW"; reload; }
 R0='{"v":1,"mode":"silent","trusted":[],"restricted":{},"rules":[]}'
@@ -98,7 +98,7 @@ idle_result() { local i; for i in $(seq 1 ${2:-30}); do [ "$(wc -l < "$T/$1.out"
 counts() {   # allowed denied blocked of the app, from one COUNTS message
     python3 - "$APP" <<'PY'
 import socket, struct, sys, json, time
-s = socket.socket(socket.AF_UNIX); s.connect("/run/lordos/netperm.sock"); s.settimeout(3)
+s = socket.socket(socket.AF_UNIX); s.connect("/run/insaneos/netperm.sock"); s.settimeout(3)
 buf = b""; end = time.time() + 3
 while time.time() < end:
     try: d = s.recv(1 << 20)

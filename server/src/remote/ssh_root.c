@@ -4,9 +4,9 @@
  * /etc/shadow, users_check_password):
  *
  *   ssh-root <off|key|password>\n<admin password>
- *        off: no file (the shipped 10-lordos.conf keeps PermitRootLogin no); key: PermitRootLogin
+ *        off: no file (the shipped 10-insaneos.conf keeps PermitRootLogin no); key: PermitRootLogin
  *        prohibit-password (public keys only); password: PermitRootLogin yes. Written as
- *        /etc/ssh/sshd_config.d/05-lordos-root.conf: sshd keeps the first value it reads, and 05 comes
+ *        /etc/ssh/sshd_config.d/05-insaneos-root.conf: sshd keeps the first value it reads, and 05 comes
  *        before Insane OS's 10. Checked with sshd -t, then the running server reloads.
  *   ssh-root-key add\n<admin password>\n<public key line>
  *   ssh-root-key remove\n<admin password>\n<SHA256:fingerprint>
@@ -39,7 +39,7 @@
 #define SYSTEMCTL   "/usr/bin/systemctl"
 #define SSH_UNIT    "/usr/lib/systemd/system/ssh.service"
 #define DROPIN_DIR  "/etc/ssh/sshd_config.d"
-#define ROOT_DROPIN DROPIN_DIR "/05-lordos-root.conf"
+#define ROOT_DROPIN DROPIN_DIR "/05-insaneos-root.conf"
 #define ROOT_SSH    "/root/.ssh"
 #define ROOT_KEYS   ROOT_SSH "/authorized_keys"
 #define KEYS_MAX    (256 * 1024)
@@ -178,7 +178,7 @@ static int fields(char *s, char **f, int max) {
 
 static int write_atomic(const char *path, const char *data, size_t n, mode_t mode) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos", path);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, mode);
     if (fd < 0) return -1;
     int ok = (!n || write(fd, data, n) == (ssize_t)n) && !fchmod(fd, mode) && !fchown(fd, 0, 0);

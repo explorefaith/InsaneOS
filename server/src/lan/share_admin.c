@@ -9,7 +9,7 @@
  * option: no option string to inject into, no program, no shell, no argv. The password arrives on
  * the helper's own channel (the UI sends it with { quiet: true }), goes to one fsconfig() and is wiped; it
  * never reaches a command line, a file or a log. Options are fixed: nosuid, nodev, the session
- * user's uid and gid for SMB, soft mounts with short timeouts (lord.fs reads on the interface's
+ * user's uid and gid for SMB, soft mounts with short timeouts (insane.fs reads on the interface's
  * thread, so a server that went away holds it for that long), SMB 2 or later only.
  * The mount goes only under /media/<user>, like disks, and only a cifs or nfs mount there comes off
  * through share-unmount. */

@@ -1,8 +1,8 @@
 /* json.h — small, strict JSON reader (RFC 8259) for the files Insane OS verifies in C:
  * contenido.json and firma.json of .lpk packages, the signed catalog and the saved permissions
  * (see docs/SIGNING.md and docs/PRIVACY.md). Everything lives in a single memory block. */
-#ifndef LORD_SEC_JSON_H
-#define LORD_SEC_JSON_H
+#ifndef INSANE_SEC_JSON_H
+#define INSANE_SEC_JSON_H
 
 #include <stddef.h>
 
@@ -26,7 +26,7 @@ typedef struct {
 /* 0 on success. Rejects: text that isn't JSON, more than max_depth levels (32), duplicate keys, \u0000
  * and trailing garbage. err (optional) gets the reason and the position. */
 int  json_parse(const char *text, size_t len, JDoc *doc, char *err, size_t errlen);
-/* Same, with another nesting limit: for trusted-but-deep JSON such as lord-maild's message view,
+/* Same, with another nesting limit: for trusted-but-deep JSON such as insane-maild's message view,
  * whose HTML tree nests up to 2 * HTML_MAX_DEPTH levels (see src/mail/html.h). The parser recurses
  * once per level, so keep max_depth modest (a few hundred at most). */
 int  json_parse_depth(const char *text, size_t len, JDoc *doc, char *err, size_t errlen, int max_depth);

@@ -1,7 +1,7 @@
 // Table Info (the approved mock): the table's engine, row format, encoding, collation, dates and next auto-increment
 // value; its size (rows, average row, data, indexes, free space, with a bar); its comment; its CREATE syntax, in color,
 // with Copy.
-import { View, Text, ScrollView, clipboard, t as tr } from '@lordos/sdk';
+import { View, Text, ScrollView, clipboard, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { usePal, Btn, Note, CodeBlock, MONO } from './ui.jsx';
 import { run1 } from './conn.js';

@@ -1,22 +1,22 @@
 // Settings → Network: interfaces, Wi-Fi and VPN (our own WireGuard, OpenVPN). Reads the state without root
-// (lord.net, netlink) and makes changes through the administration helper (net-* actions). See docs/NETWORK.md.
+// (insane.net, netlink) and makes changes through the administration helper (net-* actions). See docs/NETWORK.md.
 import {
   View, Text, useTheme, useLocale, Button, Toggle, Segmented, TextInput,
   admin, fs, formatBytes, keyring, AutofillButton, spacing, typeScale, errorText, statusText,
   ToolbarButton, MenuButton, openUrl, FilePicker, Layer, useAppWindow, wm,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, ValueRow, FieldRow, Badge, Note, Message, Actions, StatusDot, tint } from './ui.jsx';
 import { pemBlock, PEM_CERT, PEM_KEY, formFromConfig, configLines, fingerprint } from './vpnform.js';
 
 // VPN interfaces (WireGuard, OpenVPN, IPsec, PPTP, OpenConnect, Fortinet): shown under VPN.
 const isVpnIf = (i) => ['wireguard', 'tun', 'xfrm', 'ppp'].includes(i.type) || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name);
-const has = () => typeof lord.net !== 'undefined';
+const has = () => typeof insane.net !== 'undefined';
 
 // Reread when the kernel notifies (link/addr/route), and every 2 s for the traffic.
 let netGen = 0;
 const netSubs = new Set();
-globalThis.__lordNet = () => { netGen++; for (const fn of netSubs) fn(netGen); };
+globalThis.__insaneNet = () => { netGen++; for (const fn of netSubs) fn(netGen); };
 function useNet(intervalMs = 2000) {
   const [, setG] = useState(0);
   useEffect(() => {
@@ -25,7 +25,7 @@ function useNet(intervalMs = 2000) {
     const id = setInterval(() => setG((g) => g + 1), intervalMs);
     return () => { netSubs.delete(fn); clearInterval(id); };
   }, []);
-  return has() ? { ifs: lord.net.interfaces(), routes: lord.net.routes(), dns: lord.net.dns() } : { ifs: [], routes: [], dns: { servers: [] } };
+  return has() ? { ifs: insane.net.interfaces(), routes: insane.net.routes(), dns: insane.net.dns() } : { ifs: [], routes: [], dns: { servers: [] } };
 }
 
 // Notices from the network processes (DHCP, Wi-Fi, VPN) to show status. The tokens are English and
@@ -41,7 +41,7 @@ admin.onEvent((text) => {
   for (const fn of eventSubs) fn(text);
 });
 
-// Fortinet: the two things lord-netd may ask the person while connecting (server/src/net/vpnproc.c).
+// Fortinet: the two things insane-netd may ask the person while connecting (server/src/net/vpnproc.c).
 //   net vpn <name> sso <url>              single sign-on: open the organization's sign-in page and wait
 //   net vpn <name> untrusted-cert {json}  the server's certificate couldn't be verified: trust it?
 // Kept here (not in a page's state) so they survive switching pages. Only the session that asked to
@@ -96,7 +96,7 @@ function InterfacePage({ name, net }) {
   const { t: tr } = useLocale();
   const i = net.ifs.find((x) => x.name === name);
   const [msg, setMsg] = useState(null);
-  const saved = has() ? lord.net.config(name) : null;
+  const saved = has() ? insane.net.config(name) : null;
   const [form, setForm] = useState(null);
   useEffect(() => { setMsg(null); setForm(null); }, [name]);
   if (!i) return <Note>{tr('network.gone', { name })}</Note>;
@@ -151,7 +151,7 @@ function InterfacePage({ name, net }) {
             {f.method === 'static' && <FieldRow label="DNS"><TextInput value={f.dns} onChange={(dns) => setForm({ ...f, dns })} placeholder="1.1.1.1 9.9.9.9" style={field} /></FieldRow>}
           </Section>
           <Actions>
-            {i.managed === 'lordos' && isAdmin && saved && <Button label={tr('network.unmanage')} onClick={() => run(setMsg, 'net-unmanage', name)} />}
+            {i.managed === 'insaneos' && isAdmin && saved && <Button label={tr('network.unmanage')} onClick={() => run(setMsg, 'net-unmanage', name)} />}
             <Button primary label={tr('network.apply')} disabled={!isAdmin} onClick={() => isAdmin && apply()} />
           </Actions>
         </View>
@@ -174,7 +174,7 @@ function WifiPage({ net }) {
   const [pick, setPick] = useState(null);
   const [pass, setPass] = useState('');
   const [msg, setMsg] = useState(null);
-  const known = has() ? lord.net.wifiKnown() : [];
+  const known = has() ? insane.net.wifiKnown() : [];
   const cur = net.ifs.find((i) => i.name === dev);
   const scan = () => {
     if (!dev) return;
@@ -308,7 +308,7 @@ function TrashGlyph({ color }) {
 function VpnImport({ onDone, edit }) {
   const t = useTheme();
   const { t: tr } = useLocale();
-  const types = has() && lord.net.vpnTypes ? lord.net.vpnTypes() : FILE_TYPES.map((type) => ({ type, available: true }));
+  const types = has() && insane.net.vpnTypes ? insane.net.vpnTypes() : FILE_TYPES.map((type) => ({ type, available: true }));
   const [type, setType] = useState(edit ? edit.type : null);
   const [files] = useState(findVpnFiles);
   const [file, setFile] = useState(null);
@@ -328,7 +328,7 @@ function VpnImport({ onDone, edit }) {
   };
   const kept = (k) => edit && edit.secrets.includes(k) && !(k === 'key-password' && form.cert);   // a saved secret the form doesn't show: kept if left empty
   // Client certificate: the certificate and its private key, PEM (one file with both, or two files).
-  // Read here and sent to lord-netd, which keeps root-only copies (0600) for openfortivpn.
+  // Read here and sent to insane-netd, which keeps root-only copies (0600) for openfortivpn.
   const pickedCertFiles = (paths) => {
     setPicking(false);
     const list = [].concat(paths).filter(Boolean);
@@ -388,7 +388,7 @@ function VpnImport({ onDone, edit }) {
     let config;
     const vpnName = edit ? edit.name : cleanName(name || (file ? file.name : type));
     if (FILE_TYPES.includes(type)) {
-      try { config = type === 'openvpn' ? lord.net.prepareOvpn(`${fs.home()}/${file.rel}`) : fs.read(file.rel); } catch (e) { setMsg({ ok: false, text: e.message }); return; }
+      try { config = type === 'openvpn' ? insane.net.prepareOvpn(`${fs.home()}/${file.rel}`) : fs.read(file.rel); } catch (e) { setMsg({ ok: false, text: e.message }); return; }
     } else {
       const fields = FORM[type].filter(([k, , , show]) => !show || show(form));
       const missing = fields.find(([k, , , , , optional]) => !optional && !kept(k) && !String(form[k] || '').trim());
@@ -508,7 +508,7 @@ function CertPrompt({ cert, onTrust, onCancel }) {
   );
 }
 
-// Single sign-on: the sign-in page is open in the browser; lord-netd waits for it (SSO_MINUTES).
+// Single sign-on: the sign-in page is open in the browser; insane-netd waits for it (SSO_MINUTES).
 function SsoWait({ sso, onCancel }) {
   const t = useTheme();
   const { t: tr } = useLocale();
@@ -542,7 +542,7 @@ function VpnPage({ net }) {
   const [status, setStatus] = useState({});
   const [auth, setAuth] = useState(null);         // { name, user, pass }
   const [, setTick] = useState(0);
-  const list = has() ? lord.net.vpnList() : [];
+  const list = has() ? insane.net.vpnList() : [];
   const refresh = () => {
     const st = {};
     admin.run('net-vpn-status', '', (line) => { try { const j = JSON.parse(line); st[j.name] = j; } catch (e) { /* text */ } }, { quiet: true })

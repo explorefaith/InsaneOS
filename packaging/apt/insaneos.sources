@@ -1,0 +1,8 @@
+# InsaneOS updates: the signed InsaneOS package repository (docs/UPDATES.md).
+# Store → Updates and apt both read this file. The insaneos package adds it when it is missing
+# and removes it with the package; to stop InsaneOS updates, add the line "Enabled: no".
+Types: deb
+URIs: https://insaneos.org/apt
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/insaneos-archive-keyring.gpg

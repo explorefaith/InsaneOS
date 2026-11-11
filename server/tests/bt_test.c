@@ -53,7 +53,7 @@ static void managed_body(DBuf *b) {
     dw_struct(b); dw_str(b, "org.bluez.Adapter1");
     size_t p1 = dw_arr_begin(b, 8);
     prop_s(b, "Address", "00:AA:01:00:00:00");
-    prop_s(b, "Alias", "lordos-notes");
+    prop_s(b, "Alias", "insaneos-notes");
     prop_b(b, "Powered", 1);
     prop_b(b, "Discoverable", 0);
     prop_b(b, "Discovering", 1);
@@ -120,7 +120,7 @@ int main(void) {
     CHECK(bt_parse_managed(m, &msg) == 0);
     dbus_msg_free(&msg);
     CHECK(m->nadapters == 1);
-    CHECK(!strcmp(m->adapters[0].address, "00:AA:01:00:00:00") && !strcmp(m->adapters[0].alias, "lordos-notes"));
+    CHECK(!strcmp(m->adapters[0].address, "00:AA:01:00:00:00") && !strcmp(m->adapters[0].alias, "insaneos-notes"));
     CHECK(m->adapters[0].powered && !m->adapters[0].discoverable && m->adapters[0].discovering);
     CHECK(m->ndevices == 2);
     BtDevice *d = &m->devices[0];

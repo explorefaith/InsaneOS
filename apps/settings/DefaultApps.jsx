@@ -1,8 +1,8 @@
 // Settings → Default Apps: browser, mail, music, video, images, PDF, text editor, terminal and calendar, from
 // Insane OS's own apps and the installed Linux apps (.desktop with MimeType). Saved in
 // ~/.config/mimeapps.list (and ~/.config/xdg-terminals.list), so Files' "Open With", double
-// clicks, lord.apps.launchWith and Linux apps (xdg-open) agree. See docs/SETTINGS.md.
-import { View, Text, useTheme, useLocale, useLauncherApps, DEFAULT_CATEGORIES, defaultInfo, setDefaultFor, resetDefaultFor, candidatesFor } from '@lordos/sdk';
+// clicks, insane.apps.launchWith and Linux apps (xdg-open) agree. See docs/SETTINGS.md.
+import { View, Text, useTheme, useLocale, useLauncherApps, DEFAULT_CATEGORIES, defaultInfo, setDefaultFor, resetDefaultFor, candidatesFor } from '@insaneos/sdk';
 import { useState } from 'react';
 import { GroupBox, SettingRow, PopUp, Note, Stack, Badge } from './ui.jsx';
 

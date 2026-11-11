@@ -1,10 +1,10 @@
 /* procctl.h — one process of the Monitor's Processes tab (see docs/MONITOR.md, "Process
  * actions"): the protected list, a signal that cannot reach a reused PID, and the details that
- * Get Info shows. Used by lord-server (the user's own processes) and by the root helper's
+ * Get Info shows. Used by insane-server (the user's own processes) and by the root helper's
  * proc-signal / proc-info actions (proc_admin.c, administrators only). Read-only /proc access and
  * one syscall (pidfd_send_signal); nothing is executed. */
-#ifndef LORD_PROCCTL_H
-#define LORD_PROCCTL_H
+#ifndef INSANE_PROCCTL_H
+#define INSANE_PROCCTL_H
 
 #include "monpriv.h"
 
@@ -26,10 +26,10 @@ int proc_stat_read(int pid, ProcStat *s);
 /* Why a process may not be stopped from the Monitor, or NULL if it may:
  *   "init"     PID 1 (and anything below it)
  *   "kernel"   a kernel thread
- *   "session"  the session's own lord-server (session_pid)
- *   "system"   another part of Insane OS or the desktop: lord-sessiond, lord-netperm, lord-netd,
- *              lord-fand, the helpers (lord-vault, lord-maild, lord-doc, lord-media), the root
- *              helper, any lord-server that is not an isolated app (`--app`), PipeWire,
+ *   "session"  the session's own insane-server (session_pid)
+ *   "system"   another part of Insane OS or the desktop: insane-sessiond, insane-netperm, insane-netd,
+ *              insane-fand, the helpers (insane-vault, insane-maild, insane-doc, insane-media), the root
+ *              helper, any insane-server that is not an isolated app (`--app`), PipeWire,
  *              WirePlumber and the systemd managers.
  * exe may be "" (unreadable); argv1 is the process's second argument or NULL. */
 const char *proc_protect_reason(int pid, unsigned flags, const char *comm, const char *exe, const char *argv1, int session_pid);

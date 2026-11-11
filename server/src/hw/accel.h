@@ -12,8 +12,8 @@
  *     a slow bus never stalls the main loop;
  *   - pure parts (tests/accel_test.c): the mount matrix parser, the orientation from one reading with
  *     hysteresis, and the debounce. */
-#ifndef LORD_HW_ACCEL_H
-#define LORD_HW_ACCEL_H
+#ifndef INSANE_HW_ACCEL_H
+#define INSANE_HW_ACCEL_H
 
 #define ACCEL_PERIOD_MS 400         /* one reading every 0.4 s while automatic rotation is on */
 #define ACCEL_SETTLE_MS 900         /* a new orientation must hold this long before the screen turns */

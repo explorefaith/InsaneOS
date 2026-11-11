@@ -1,5 +1,5 @@
 #!/bin/sh
-# mkdeb-diskformats.sh — builds lordos-disk-formats_<version>_<arch>.deb, the Store's "Disk Formats" item: what lets
+# mkdeb-diskformats.sh — builds insaneos-disk-formats_<version>_<arch>.deb, the Store's "Disk Formats" item: what lets
 # Files and Disks mount and format NTFS, exFAT, FAT, HFS+ and APFS volumes. All of it is free software; the name is
 # Commercial because the formats are. The marker file is what disk-mount checks (disk/disk_admin.c).
 #   tools/iso/mkdeb-diskformats.sh <output folder>     (needs dpkg-deb)
@@ -14,28 +14,28 @@ SUGGESTS=
 [ "$ARCH" = amd64 ] && SUGGESTS="Suggests: apfs-dkms, linux-headers-amd64"
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
-mkdir -p "$T/DEBIAN" "$T/usr/lib/lordos" "$T/usr/share/doc/lordos-disk-formats"
-echo "1" > "$T/usr/lib/lordos/disk-formats.enabled"
+mkdir -p "$T/DEBIAN" "$T/usr/lib/insaneos" "$T/usr/share/doc/insaneos-disk-formats"
+echo "1" > "$T/usr/lib/insaneos/disk-formats.enabled"
 # where the driver can be added later: the Store, Files and disk-mount read this instead of guessing the architecture
-[ "$ARCH" = amd64 ] && echo "1" > "$T/usr/lib/lordos/disk-formats.apfs"
-cat > "$T/usr/share/doc/lordos-disk-formats/copyright" <<C
+[ "$ARCH" = amd64 ] && echo "1" > "$T/usr/lib/insaneos/disk-formats.apfs"
+cat > "$T/usr/share/doc/insaneos-disk-formats/copyright" <<C
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Files: *
 License: MIT
  See the Insane OS repository. This package holds a marker file and depends on the drivers.
 C
 cat > "$T/DEBIAN/control" <<C
-Package: lordos-disk-formats
+Package: insaneos-disk-formats
 Version: $V
 Architecture: $ARCH
-Maintainer: Insane OS <lord.basex@gmail.com>
+Maintainer: Insane OS <insane.basex@gmail.com>
 Section: admin
 Priority: optional
-Depends: lordos, $DEPS
+Depends: insaneos, $DEPS
 Description: disk formats for Insane OS Files and Disks
  Mounts and formats NTFS, exFAT, FAT and HFS+ volumes on the desktop; APFS with
  the optional apfs-dkms driver.
 C
 [ -z "$SUGGESTS" ] || sed -i "/^Depends:/a $SUGGESTS" "$T/DEBIAN/control"
-dpkg-deb --root-owner-group --build "$T" "$OUTDIR/lordos-disk-formats_${V}_$ARCH.deb" >/dev/null
-echo "$OUTDIR/lordos-disk-formats_${V}_$ARCH.deb"
+dpkg-deb --root-owner-group --build "$T" "$OUTDIR/insaneos-disk-formats_${V}_$ARCH.deb" >/dev/null
+echo "$OUTDIR/insaneos-disk-formats_${V}_$ARCH.deb"

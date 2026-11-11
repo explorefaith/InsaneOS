@@ -1,12 +1,12 @@
 /* tcapture.h — Save to Passwords from the Terminal (0.8.8.6, docs/PASSWORDS.md, AGENTS.md): what the user types
  * while the program on a session asks for a password is kept here, in locked memory, until the program accepts
- * it; the Terminal then offers to save it, and the value goes from here to lord-vault on the private channel
+ * it; the Terminal then offers to save it, and the value goes from here to insane-vault on the private channel
  * (termfill.c) without passing through JS. Rejected, abandoned, declined or after SAVE_OFFER_MS: wiped.
  *
  * This file is the state machine and the parsing, with no pty and no Session (build/term-capture-test checks
  * it): term.c feeds it the prompt's state, the keys and the output; tsecret.c says what program asks. */
-#ifndef LORD_TERM_TCAPTURE_H
-#define LORD_TERM_TCAPTURE_H
+#ifndef INSANE_TERM_TCAPTURE_H
+#define INSANE_TERM_TCAPTURE_H
 
 #include <stddef.h>
 #include <stdint.h>

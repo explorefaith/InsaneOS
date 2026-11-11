@@ -6,10 +6,10 @@
 // this process (textfocus.js), a Linux app (zwp_text_input_v3, sdk/wayland.js) and an isolated app (a
 // broker hint, sdk/privacy.js). A hint from an app is only obeyed for the window in front.
 //
-// Keys go through lord.input.tap, which exists only in this process and the login screen's, down the
+// Keys go through insane.input.tap, which exists only in this process and the login screen's, down the
 // same path as a physical key. Nothing here keeps what is typed, offers suggestions or remembers
 // keys; the panel is `protected`, so it is black in screenshots, recordings and remote desktop.
-import { addListener, displayFor, mainDisplay, onCommit, shellHasKeyboard } from '@lordos/runtime';
+import { addListener, displayFor, mainDisplay, onCommit, shellHasKeyboard } from '@insaneos/runtime';
 import { createStore } from './store.js';
 import { settings } from './settings.js';
 import { keyboard } from './keyboard.js';
@@ -21,8 +21,8 @@ import { TOP_GAP, caretOnScreen, fallbackLabels, panelSize, planAvoid } from './
 const CLOSED = { visible: false, dock: 'bottom', page: 0, shift: 0, box: null };
 export const oskState = createStore({ ...CLOSED, hasKeyboard: true, labels: null });
 
-const native = () => typeof lord !== 'undefined' && !!lord.input?.tap;
-const hasKeyboard = () => (native() ? lord.input.hasKeyboard() : true);
+const native = () => typeof insane !== 'undefined' && !!insane.input?.tap;
+const hasKeyboard = () => (native() ? insane.input.hasKeyboard() : true);
 
 let linux = null;           // { id, y, h, fw, fh }: a Linux app's field, window coordinates (oskmodel.js)
 let appField = null;        // the same for an isolated app's field
@@ -41,7 +41,7 @@ const fieldActive = () => textFieldActive() || !!remoteField();
 
 const refreshLabels = () => {
   let labels = null;
-  try { labels = native() ? lord.input.keyLabels() : null; } catch (e) { /* server without it */ }
+  try { labels = native() ? insane.input.keyLabels() : null; } catch (e) { /* server without it */ }
   oskState.set((s) => ({ ...s, labels: labels || fallbackLabels() }));
 };
 
@@ -133,8 +133,8 @@ export const osk = {
   // A key of the panel. Shift for one key lets go after it; a level comes from the layout.
   press(k) {
     if (!native()) return;
-    lord.input.tap(k.code, k.level || 0);
-    if (k.after) lord.input.tap(k.after, 0);
+    insane.input.tap(k.code, k.level || 0);
+    if (k.after) insane.input.tap(k.after, 0);
     if (oskState.get().shift === 1) oskState.set((s) => ({ ...s, shift: 0 }));
     setTimeout(avoid, 60);                 // the caret may have moved to another line
   },
@@ -160,7 +160,7 @@ export function startOsk() {
   if (!native()) return;
   oskState.set((s) => ({ ...s, hasKeyboard: hasKeyboard() }));
   refreshLabels();
-  globalThis.__lordKeyboards = (present) => {
+  globalThis.__insaneKeyboards = (present) => {
     oskState.set((s) => ({ ...s, hasKeyboard: !!present }));
   };
   onTextField(fieldChanged);

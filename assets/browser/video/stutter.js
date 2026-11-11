@@ -5,11 +5,11 @@
 // stuttering: with "Lower quality automatically" (autoLower, off by default) the quality goes one
 // step down by itself and a short notice says so; otherwise a small notice offers to do it. The
 // notice can be dismissed, and then it doesn't come back in this tab. Nothing leaves the browser.
-/* global lordosVideo */
+/* global insaneosVideo */
 (() => {
-  if (window.__lordosStutter) return;
-  window.__lordosStutter = true;
-  const api = lordosVideo.api;
+  if (window.__insaneosStutter) return;
+  window.__insaneosStutter = true;
+  const api = insaneosVideo.api;
   const msg = (k, subs) => api.i18n.getMessage(k, subs) || k;
 
   const SAMPLE_MS = 2000;
@@ -21,10 +21,10 @@
 
   // The policy, also for page.js: which codecs to hold back (it runs in the page's world, which can't
   // read the extension's storage). A change made while the page is open counts from the next video.
-  let policy = lordosVideo.normalize(null);
-  const load = () => lordosVideo.read().then((p) => {
+  let policy = insaneosVideo.normalize(null);
+  const load = () => insaneosVideo.read().then((p) => {
     policy = p;
-    document.dispatchEvent(new CustomEvent('lordos-video-codecs', { detail: lordosVideo.blocked(p).join(',') }));
+    document.dispatchEvent(new CustomEvent('insaneos-video-codecs', { detail: insaneosVideo.blocked(p).join(',') }));
   });
   load();
   api.storage.onChanged.addListener((_c, area) => { if (area === 'managed') load(); });
@@ -50,10 +50,10 @@
 
   function lowerOnce() {
     return new Promise((resolve) => {
-      const done = (e) => { document.removeEventListener('lordos-video-lowered', done); clearTimeout(t); resolve(typeof e?.detail === 'string' ? e.detail : ''); };
+      const done = (e) => { document.removeEventListener('insaneos-video-lowered', done); clearTimeout(t); resolve(typeof e?.detail === 'string' ? e.detail : ''); };
       const t = setTimeout(done, 1500);
-      document.addEventListener('lordos-video-lowered', done);
-      document.dispatchEvent(new CustomEvent('lordos-video-lower'));
+      document.addEventListener('insaneos-video-lowered', done);
+      document.dispatchEvent(new CustomEvent('insaneos-video-lower'));
     });
   }
 

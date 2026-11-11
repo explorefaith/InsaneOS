@@ -2,7 +2,7 @@
 // the status glyph of a file, an account's usage ring and badge, and the space bar. Drawn as pixels
 // (cloudglyphs.js), in the mocks' colors, the secondary ones from the theme.
 import { createElement as h } from 'react';
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { useTheme } from './theme.js';
 import { glyphPixels, ringPixels } from './cloudglyphs.js';
 import { statusGlyph, STATUS_COLOR } from './cloudmodel.js';

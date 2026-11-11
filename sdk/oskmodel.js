@@ -1,9 +1,9 @@
 // oskmodel.js — the on-screen keyboard's logic with nothing on screen (server/tests/osk_model_test.mjs).
 //
 // The layout is not data of our own: rows are lists of Linux key codes, and what each key shows comes
-// from the active XKB layout (lord.input.keyLabels, server/src/keyboard.c), so the keyboard follows it
+// from the active XKB layout (insane.input.keyLabels, server/src/keyboard.c), so the keyboard follows it
 // like a physical one. `labels` = { altgr, keys: { code: [plain, shift, altgr, altgr + shift] } }.
-// A key here is { code, level, label } ready for lord.input.tap(code, level); level 1 is Shift, 2 AltGr.
+// A key here is { code, level, label } ready for insane.input.tap(code, level); level 1 is Shift, 2 AltGr.
 
 export const KEY = { BACKSPACE: 14, TAB: 15, ENTER: 28, ESC: 1, SPACE: 57, UP: 103, LEFT: 105, RIGHT: 106, DOWN: 108, COMMA: 51, DOT: 52 };
 

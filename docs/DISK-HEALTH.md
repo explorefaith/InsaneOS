@@ -16,7 +16,7 @@ card, USB disks).
 - **smartmontools optional**: with Debian's `smartctl` installed, Disks shows the full report (attributes, error log, SCT
   temperature history, self-tests); without it, the own reader gives the basic health (`apps/disks/health.jsx`).
 - **Live temperature without root** from the kernel's hwmon sensors (the `nvme` driver, `drivetemp` for SATA):
-  `lord.monitor`, Monitor → Disks (`apps/monitor/DisksTab.jsx`), with a history graph and alerts.
+  `insane.monitor`, Monitor → Disks (`apps/monitor/DisksTab.jsx`), with a history graph and alerts.
 - **A health light** (OK / Check / Failing) from a cached SMART summary, refreshed at most every 5 minutes per disk, never
   waking a resting disk.
 - **Wear** is already read where the disk reports it (`m.wear.used`), but only shown as one line of the SMART card.
@@ -72,7 +72,7 @@ condition word.
 
 ## 4. History
 
-- One point per disk per day, kept as root in `/var/lib/lordos/disk-health/<serial-hash>.json` (life, written bytes,
+- One point per disk per day, kept as root in `/var/lib/insaneos/disk-health/<serial-hash>.json` (life, written bytes,
   power-on hours, max temperature of the day, errors): about 40 bytes a day, 15 KB a year. Keyed by serial (hashed), so a disk
   moved to another port or another Insane OS computer keeps its history on that computer; never sent anywhere.
 - Disks → the *Life* card shows the curve of life and of written TB over time, and the estimate above.

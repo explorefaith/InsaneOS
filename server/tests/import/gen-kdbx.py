@@ -1,7 +1,7 @@
 # KDBX 4 with pykeepass (other cipher/KDF/key file), same entries as sample.xml.
 from pykeepass import PyKeePass, create_database
 import copy, datetime
-PW = 'lordos-prueba'
+PW = 'insaneos-prueba'
 open('kx-keyfile.key', 'wb').write(bytes(range(64)))
 open('kx-keyfile2.keyx', 'w').write('''<?xml version="1.0" encoding="UTF-8"?>
 <KeyFile>

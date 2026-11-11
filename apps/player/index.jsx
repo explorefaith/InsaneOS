@@ -1,13 +1,13 @@
 // Player: videos and music (in the style of desktop players, with our own design).
 //
-// Decoding belongs to lord-media (sandboxed); here are the library (artist and album from the
+// Decoding belongs to insane-media (sandboxed); here are the library (artist and album from the
 // tags, covers), the queue, shuffle and repeat, the video controls (time bar, volume, .srt and
 // in-stream subtitles, full screen, picture in picture) and what is published for Control Center
 // and the media keys (nowPlaying).
 import {
   View, Text, Image, MediaView, ScrollView, SidebarItem, SectionTitle, Hairline, EmptyState, ToolbarButton, useTheme, useAppWindow, useKeyboard,
   useStore, useWindowState, wm, typeScale, t as tr, errorText, media, usePlayer, nowPlaying, mediaFormatTime, useThumb, fs, addListener, direction,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { library, scan, albumsOf, artistsOf, parseSrt, AUDIO, VIDEO } from './library.js';
 
@@ -85,7 +85,7 @@ function useBoxWidth(ref, initial) {
   const [w, setW] = useState(initial);
   useEffect(() => {
     if (!ref.current) return;
-    const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+    const lw = Math.round(insane.getLayout(ref.current.id)[2]);
     if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
   });
   return w;
@@ -117,7 +117,7 @@ function Bar({ value, onChange, onCommit, height = 4, color, track, style }) {
   const ref = useRef(null), drag = useRef(false), cb = useRef({});
   cb.current = { onChange, onCommit };
   const at = (x) => {
-    const [lx, , w] = lord.getLayout(ref.current.id);
+    const [lx, , w] = insane.getLayout(ref.current.id);
     return Math.max(0, Math.min(1, (x - lx) / (w || 1)));
   };
   useEffect(() => {
@@ -294,7 +294,7 @@ export default function Player() {
   const fullscreen = () => wm.setFullscreen(win.id, win.mode !== 'fullscreen');
   const pip = () => {
     if (win.mode === 'pip') { wm.setPip(win.id, null); return; }
-    const sw = lord.screen.width, sh = lord.screen.height;
+    const sw = insane.screen.width, sh = insane.screen.height;
     const w = 400, hh = Math.round(w * ((p.info?.streams?.find((s) => s.type === 'video')?.height || 9) / (p.info?.streams?.find((s) => s.type === 'video')?.width || 16)));
     wm.setPip(win.id, { x: sw - w - 24, y: sh - hh - 96, w, h: hh });
   };

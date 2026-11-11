@@ -1,5 +1,5 @@
 # media_cpu.py — docs/MEDIA.md, "Measurements".
-# Usage: python3 cpu.py SECONDS — CPU (% of one core) of lord-server and of each lord-media of user lord
+# Usage: python3 cpu.py SECONDS — CPU (% of one core) of insane-server and of each insane-media of user insane
 import os, sys, time
 def procs():
     out = {}
@@ -11,7 +11,7 @@ def procs():
             uid = int([l for l in st.splitlines() if l.startswith('Uid:')][0].split()[1])
             cmd = open(f'/proc/{p}/cmdline').read().replace('\0', ' ')
         except Exception: continue
-        if uid == 1000 and name in ('lord-server', 'lord-media') and '--greeter' not in cmd and '--term-holder' not in cmd:
+        if uid == 1000 and name in ('insane-server', 'insane-media') and '--greeter' not in cmd and '--term-holder' not in cmd:
             out[p] = name
     return out
 def cpu(p):

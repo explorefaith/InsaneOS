@@ -1,6 +1,6 @@
 /* remote_admin.h — root actions of the remote desktop (see remote_admin.c and docs/REMOTE.md). */
-#ifndef LORD_REMOTE_ADMIN_H
-#define LORD_REMOTE_ADMIN_H
+#ifndef INSANE_REMOTE_ADMIN_H
+#define INSANE_REMOTE_ADMIN_H
 
 #include "../admin.h"
 

@@ -1,8 +1,8 @@
 /* pkagent.h — the session's polkit authentication agent (docs/PRIVACY.md, "Authentication for Linux
- * apps"). Part of lord-server, which runs as the session user: it holds no privilege, and the password
+ * apps"). Part of insane-server, which runs as the session user: it holds no privilege, and the password
  * goes only to polkit's setuid helper. JavaScript draws the prompt and can only cancel it. */
-#ifndef LORD_HW_PKAGENT_H
-#define LORD_HW_PKAGENT_H
+#ifndef INSANE_HW_PKAGENT_H
+#define INSANE_HW_PKAGENT_H
 
 #include <poll.h>
 

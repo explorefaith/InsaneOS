@@ -1,5 +1,5 @@
 // wayland.js — ventanas de apps Linux (GTK, Qt, foot…) que se conectan al compositor Wayland
-// de lord-server (server/src/wl). Para el tema son ventanas como las de las apps Insane OS: entran
+// de insane-server (server/src/wl). Para el tema son ventanas como las de las apps Insane OS: entran
 // en el gestor con la app interna 'linux' y su id es 'linux#<superficie>'.
 //
 // Those that ask for server-side decoration (Qt, foot) get the theme's frame; those that draw their
@@ -7,7 +7,7 @@
 // draws only the content. The app may switch while open ('deco'). Moving, resizing and the window
 // menu from the app's own bar arrive as requests from the compositor.
 import { createElement as h } from 'react';
-import { View, Text, Surface, addListener, onShellKeyboard, shellHasKeyboard } from '@lordos/runtime';
+import { View, Text, Surface, addListener, onShellKeyboard, shellHasKeyboard } from '@insaneos/runtime';
 import { windows, wm, registerBuiltinApp, windowChrome, pointerWorkArea, openingArea, getApp, placeLinuxWindow, activeDesktop } from './windows.js';
 import { acceptsAppRequest, keyboardSurface, focusedOn, surfaceState } from './desktopmodel.js';
 import { desktopOfSurface } from './desktops.js';
@@ -66,7 +66,7 @@ addListener('pointermove', (e) => {
 });
 addListener('pointerup', () => { drag = null; });
 
-globalThis.__lordWayland = (sid, type, d = {}) => {
+globalThis.__insaneWayland = (sid, type, d = {}) => {
   const id = idOf(sid);
   const win = wm.get(id);
   switch (type) {
@@ -101,7 +101,7 @@ globalThis.__lordWayland = (sid, type, d = {}) => {
       { const pkg = d.appId ? getApp(d.appId) : null; wm.setTitle(id, pkg && (pkg.package || pkg.isolated) && (!d.title || d.title === d.appId) ? (pkg.isolated ? appName(pkg) : pkg.name) : (d.title || d.appId || null)); }
       // a built-in isolated app that asks for it (manifest "protected": Passwords) is black in captures
       if (d.appId && getApp(d.appId)?.isolated && getApp(d.appId)?.protected) wm.setProtected(id, true);
-      wm.setCloseGuard(id, () => { lord.wayland.close(sid); return false; });   // la app decide cuándo cierra
+      wm.setCloseGuard(id, () => { insane.wayland.close(sid); return false; });   // la app decide cuándo cierra
       if (d.appId && (getApp(d.appId)?.package || getApp(d.appId)?.isolated)) setTimeout(() => applyAppMenus(d.appId), 0);   // menús de la app aislada (ya mapeada)
       break;
     }
@@ -119,7 +119,7 @@ globalThis.__lordWayland = (sid, type, d = {}) => {
       break;
     }
     // desde donde se apretó el botón (la app pide mover recién después de un umbral)
-    // lo sigue lord-server en C (wm.beginMove/beginResize, docs/WINDOWS.md); si no se puede (el tema no
+    // lo sigue insane-server en C (wm.beginMove/beginResize, docs/WINDOWS.md); si no se puede (el tema no
     // marcó el nodo de la ventana), con los eventos del puntero como antes
     // A hidden desktop's window never gets to bring itself forward: these requests come from the app.
     case 'move': if (acceptsAppRequest(win, activeDesktop.get())) { wm.focus(id); if (!wm.beginMove(id)) drag = { id, edges: null, start: { x: d.x, y: d.y, f: wm.frame(wm.get(id)) } }; } break;
@@ -147,25 +147,25 @@ const isTerminalEmulator = (w) => String(linuxAppFor(w.args?.appId || '')?.categ
 let lastFocus = -1;
 const lastState = new Map();
 function sync() {
-  if (typeof lord.wayland === 'undefined') return;
+  if (typeof insane.wayland === 'undefined') return;
   const list = windows.get(), active = activeDesktop.get();
   for (const w of list) {
     const s = surfaceOf(w.id);
     if (!s) continue;
     const st = surfaceState(w, active);
     const key = (st.maximized ? 1 : 0) | (st.iconic ? 2 : 0) | (st.parked ? 4 : 0);
-    if (lastState.get(s) !== key) { lastState.set(s, key); lord.wayland.state(s, st.maximized, false, st.iconic, st.parked); }
+    if (lastState.get(s) !== key) { lastState.set(s, key); insane.wayland.state(s, st.maximized, false, st.iconic, st.parked); }
   }
   // search, the launcher, a sheet or a system prompt is open: the keys are Insane OS's, not the app's
   const f = keyboardSurface(list, active, shellHasKeyboard(), surfaceOf);
-  if (f !== lastFocus) { lastFocus = f; lord.wayland.focus(f, !!f && isTerminalEmulator(focusedOn(list, active))); }
+  if (f !== lastFocus) { lastFocus = f; insane.wayland.focus(f, !!f && isTerminalEmulator(focusedOn(list, active))); }
 }
 windows.subscribe(sync);
 activeDesktop.subscribe(sync);
 if (typeof onShellKeyboard === 'function') onShellKeyboard(() => sync());
 
 export const wayland = {
-  info: () => (typeof lord.wayland !== 'undefined' ? lord.wayland.info() : { socket: '', windows: 0 }),
+  info: () => (typeof insane.wayland !== 'undefined' ? insane.wayland.info() : { socket: '', windows: 0 }),
   isLinuxWindow: (id) => surfaceOf(id) > 0,
 };
 
@@ -181,23 +181,23 @@ locale.subscribe(() => setTimeout(() => {
 
 // Compositor: una app .lpk aislada publicó sus menús por el broker. Se ponen en la ventana de esa
 // app (linux#<superficie> con app_id = su id) para que el tema los muestre en su barra de menú;
-// los clics vuelven a la app por lord.broker.menuClick. Ver docs/PRIVACY.md.
+// los clics vuelven a la app por insane.broker.menuClick. Ver docs/PRIVACY.md.
 function applyAppMenus(app) {
-  if (typeof lord === 'undefined' || !lord.broker || typeof lord.broker.menus !== 'function') return;
+  if (typeof insane === 'undefined' || !insane.broker || typeof insane.broker.menus !== 'function') return;
   const wins = windows.get().filter((w) => surfaceOf(w.id) > 0 && w.args?.appId === app);   // every window of the app
   if (!wins.length) return;
   let raw;
-  try { raw = lord.broker.menus(app); } catch (e) { return; }
+  try { raw = insane.broker.menus(app); } catch (e) { return; }
   const groups = (Array.isArray(raw) ? raw : []).map((g) => ({
     label: g.label,
     items: (g.items || []).map((it) => {
       if (it === '-' || it == null) return '-';
       const row = { label: it.label, hint: it.hint, disabled: !!it.disabled, checked: !!it.checked };
-      if (it.id) row.onClick = () => { try { lord.broker.menuClick(app, it.id); } catch (e) { /* */ } };
-      if (it.submenu) row.submenu = it.submenu.map((s) => (s === '-' ? '-' : { label: s.label, hint: s.hint, disabled: !!s.disabled, checked: !!s.checked, onClick: s.id ? () => lord.broker.menuClick(app, s.id) : undefined }));
+      if (it.id) row.onClick = () => { try { insane.broker.menuClick(app, it.id); } catch (e) { /* */ } };
+      if (it.submenu) row.submenu = it.submenu.map((s) => (s === '-' ? '-' : { label: s.label, hint: s.hint, disabled: !!s.disabled, checked: !!s.checked, onClick: s.id ? () => insane.broker.menuClick(app, s.id) : undefined }));
       return row;
     }),
   }));
   for (const win of wins) wm.setMenus(win.id, groups);
 }
-if (typeof globalThis !== 'undefined') globalThis.__lordApplyAppMenus = applyAppMenus;
+if (typeof globalThis !== 'undefined') globalThis.__insaneApplyAppMenus = applyAppMenus;

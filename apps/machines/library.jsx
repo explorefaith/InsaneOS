@@ -7,7 +7,7 @@ import {
   View, Text, Image, ScrollView, useAppWindow, useStore, admin, fs, wm, windows, revealPath, ConfirmDialog, useSystemInfo, statusText, useSettings, settings,
   Toolbar, ToolbarButton, ToolbarGroup, ToolbarSpacer, MenuButton, SearchField, EmptyState,
   t as tr,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { stateView, actionsFor, missingFor, usage, summaryOf, doingOf, thumbSrc, systemOf, libView, filterMachines, sortMachines } from './model.js';
 import { Assistant } from './assistant.jsx';
@@ -333,7 +333,7 @@ function PiView({ host, list, onBack }) {
 export function Library() {
   const p = usePal();
   const { id: winId } = useAppWindow();
-  const [host, setHost] = useState(() => (has() ? lord.vm.host() : null));
+  const [host, setHost] = useState(() => (has() ? insane.vm.host() : null));
   const [list, setList] = useState([]);
   const [sel, setSel] = useState(null);
   const [page, setPage] = useState('main');          // main, new, requirements, pi
@@ -350,7 +350,7 @@ export function Library() {
   const putView = (patch) => settings.set({ machinesView: { ...libView(settings.get().machinesView), ...patch } });
   const wins = useStore(windows, (ws) => ws.map((w) => w.id).join(' '));
   const prev = useRef({});
-  // lord-vm jobs started from here (start with no window, discard a saved state): followed until they end, so the
+  // insane-vm jobs started from here (start with no window, discard a saved state): followed until they end, so the
   // engine frees them, and a failure is shown
   const jobs = useRef([]);
   const follow = (id, name) => { if (!id) { setError(vmRefusal(tr('machines.cfg.refused'))); return; } jobs.current.push({ id, name }); };
@@ -361,15 +361,15 @@ export function Library() {
   const read = () => {
     if (!has()) return;
     jobs.current = jobs.current.filter((j) => {
-      const r = lord.vm.job(j.id);
+      const r = insane.vm.job(j.id);
       if (!r || !r.done) return !!r;
-      if (!r.ok) setError(`${j.name}: ${r.out.trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || r.out.trim()}`);
+      if (!r.ok) setError(`${j.name}: ${r.out.trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || r.out.trim()}`);
       return false;
     });
-    const ms = lord.vm.list();
+    const ms = insane.vm.list();
     const next = {};
     for (const m of ms) {
-      const s = lord.vm.stats(m.dir) || {};
+      const s = insane.vm.stats(m.dir) || {};
       m.diskBytes = s.diskBytes;
       try { const st = fs.stat(`${m.dir}/thumb.png`); m.thumbTime = st?.mtime || 0; } catch (e) { m.thumbTime = 0; }
       m.meta = readMeta(m.dir);
@@ -380,7 +380,7 @@ export function Library() {
     setList(ms);
     setUsages(next);
   };
-  const refresh = () => { if (has()) { setHost(lord.vm.host()); read(); } };
+  const refresh = () => { if (has()) { setHost(insane.vm.host()); read(); } };
   useEffect(() => {
     wm.setTitle(winId, tr('machines.title'));
     read();
@@ -407,10 +407,10 @@ export function Library() {
   };
   const menuFor = (m) => {
     const a = actionsFor(m.state);
-    const stop = (how) => lord.vm.stop(m.dir, how);
+    const stop = (how) => insane.vm.stop(m.dir, how);
     return [
       a.start ? { label: tr('machines.start'), onClick: () => openMachine(m) } : { label: tr('machines.open'), disabled: !a.open, onClick: () => openMachine(m) },
-      a.start ? { label: tr('machines.cmd.startNoWindow'), onClick: () => follow(lord.vm.startDetached(m.dir), m.name) } : null,
+      a.start ? { label: tr('machines.cmd.startNoWindow'), onClick: () => follow(insane.vm.startDetached(m.dir), m.name) } : null,
       { label: tr('machines.cmd.pause'), disabled: !a.pause, onClick: () => stop('pause') },
       { label: tr('machines.cmd.resume'), disabled: !a.resume, onClick: () => stop('resume') },
       { label: tr('machines.cmd.suspend'), disabled: !a.suspend, onClick: () => stop('suspend') },
@@ -423,13 +423,13 @@ export function Library() {
       { label: tr('machines.cmd.clone'), onClick: () => setCopying(m) },
       { label: tr('machines.cmd.logs'), onClick: () => openLogs(m) },
       { label: tr('machines.cmd.showInFiles'), onClick: () => revealPath(m.dir) },
-      m.iso && a.remove && !m.suspended ? { label: tr('machines.eject'), onClick: () => { setError(lord.vm.eject(m.dir) ? '' : tr('machines.ejectFailed', { name: m.name })); refresh(); } } : null,
+      m.iso && a.remove && !m.suspended ? { label: tr('machines.eject'), onClick: () => { setError(insane.vm.eject(m.dir) ? '' : tr('machines.ejectFailed', { name: m.name })); refresh(); } } : null,
       m.suspended && a.start ? { label: tr('machines.fail.discardState'), destructive: true, onClick: () => setDiscard(m) } : null,
       '-',
       { label: tr('machines.cmd.remove'), destructive: true, disabled: !a.remove, onClick: () => setDel(m) },
     ];
   };
-  const rl = root.current ? lord.getLayout(root.current.id) : [0, 0, 1000, 700];
+  const rl = root.current ? insane.getLayout(root.current.id) : [0, 0, 1000, 700];
   // as many cards as fit at 300 px or more (as Remote Desk), each with the guest's 16:10 picture and its two lines
   const cw = rl[2] - 40;
   const cols = Math.max(1, Math.floor((cw + 14) / (300 + 14)));
@@ -505,7 +505,7 @@ export function Library() {
       {copying ? <CloneSheet m={copying} running={stateView(copying.state, copying.reason).active} onClose={() => setCopying(null)}
         onDone={(out) => { setCopying(null); refresh(); if (out?.dir) setSel(out.dir); }} /> : null}
       {discard ? <ConfirmDialog title={tr('machines.discard.title', { name: discard.name })} detail={tr('machines.discard.detail')} okLabel={tr('machines.fail.discardState')} cancelLabel={tr('machines.cancel')} destructive
-        onOk={() => { const d = discard; setDiscard(null); follow(lord.vm.discardState(d.dir), d.name); }} onCancel={() => setDiscard(null)} /> : null}
+        onOk={() => { const d = discard; setDiscard(null); follow(insane.vm.discardState(d.dir), d.name); }} onCancel={() => setDiscard(null)} /> : null}
       {del ? <ConfirmDialog title={tr('machines.deleteTitle', { name: del.name })} detail={tr('machines.deleteDetail')} okLabel={tr('machines.deleteOk')} cancelLabel={tr('machines.cancel')} destructive
         onOk={() => remove(del)} onCancel={() => setDel(null)} /> : null}
     </View>

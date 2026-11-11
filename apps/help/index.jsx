@@ -1,11 +1,11 @@
 // Help — help articles for every app and feature, with search, and the first-login "Welcome to
 // Insane OS" tour (docs/SYSTEM.md). Articles are markdown in assets/help/<lang>/ (English is the
-// default) and are read by the SDK (sdk/help.js → lord.help). The links settings:<section>,
+// default) and are read by the SDK (sdk/help.js → insane.help). The links settings:<section>,
 // app:<id> and help:<article> open Settings, an app or another article.
 import {
   View, Text, useTheme, useAppWindow, useLocale, t as tr, help, Markdown, ScrollView, SidebarItem, SectionTitle, Button,
   getApp, wm, appName, settings, textDirection, SearchField, EmptyState, Hairline, Lumo, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Width of a box after layout (re-measured on every render).
@@ -14,7 +14,7 @@ function useWidth(ref, initial) {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!ref.current) return;
-      const lw = Math.round(lord.getLayout(ref.current.id)[2]);
+      const lw = Math.round(insane.getLayout(ref.current.id)[2]);
       if (lw > 0 && Math.abs(lw - w) > 2) setW(lw);
     }, 20);
     return () => clearTimeout(id);

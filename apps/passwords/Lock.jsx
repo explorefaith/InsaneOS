@@ -2,7 +2,7 @@
 // FIDO2 security key, password + key file, recovery key) and showing the recovery key to print
 // or save. A centered column (360 px; 440 px for the forms with more choices), the padlock, a
 // 22 px title, a neutral method switch and one primary button (docs/DESIGN.md).
-import { View, Text, useTheme, useStore, Button, TextInput, Segmented, requestPermission, print, fs, t } from '@lordos/sdk';
+import { View, Text, useTheme, useStore, Button, TextInput, Segmented, requestPermission, print, fs, t } from '@insaneos/sdk';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { app, req, refreshStatus, errorText, APP_ID, toast, appMode } from './api.js';
@@ -101,7 +101,7 @@ export function UnlockView() {
       if (method === 'fido') {
         const ok = await requestPermission(APP_ID, 'usb');
         if (!ok) throw Object.assign(new Error('denied'), { code: 'fido-denied' });
-        const a = lord.vault.fidoAttach(APP_ID);
+        const a = insane.vault.fidoAttach(APP_ID);
         if (!a.ok) throw Object.assign(new Error(a.error), { code: a.error });
         if (pin) args.pin = pin;
       }
@@ -188,7 +188,7 @@ export function CreateView() {
       if (method === 'fido') {
         const ok = await requestPermission(APP_ID, 'usb');
         if (!ok) throw Object.assign(new Error('denied'), { code: 'fido-denied' });
-        const a = lord.vault.fidoAttach(APP_ID);
+        const a = insane.vault.fidoAttach(APP_ID);
         if (!a.ok) throw Object.assign(new Error(a.error), { code: a.error });
         if (pin) args.pin = pin;
       }
@@ -244,7 +244,7 @@ export function RecoveryView({ code, onDone }) {
         onPick={(p) => {
           try {
             if (typeof p === 'string') fs.write(p, text);
-            else { const ok = lord.broker.fdWrite(p.fd, text); lord.broker.fdClose(p.fd); if (!ok) throw new Error('write'); }
+            else { const ok = insane.broker.fdWrite(p.fd, text); insane.broker.fdClose(p.fd); if (!ok) throw new Error('write'); }
             toast(t('passwords.recovery.saved'));
           } catch (e) { toast(errorText('file')); }
           setSaving(false);

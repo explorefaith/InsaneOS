@@ -1,7 +1,7 @@
 /* charset_tables.h — generated with tools (Python codecs): 0x80..0xFF of each 8-bit charset → Unicode.
  * 0xFFFD where the charset does not define the byte. Do not edit by hand. */
-#ifndef LORD_MAIL_CHARSET_TABLES_H
-#define LORD_MAIL_CHARSET_TABLES_H
+#ifndef INSANE_MAIL_CHARSET_TABLES_H
+#define INSANE_MAIL_CHARSET_TABLES_H
 #include <stdint.h>
 typedef struct { const char *name; const char *alias; uint16_t hi[128]; } CsTable;
 static const CsTable cs_tables[] = {

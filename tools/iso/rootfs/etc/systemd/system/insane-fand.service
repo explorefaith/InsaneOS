@@ -1,0 +1,54 @@
+[Unit]
+Description=InsaneOS: fan control by temperature (insane-fand)
+Documentation=file:///usr/share/doc/insaneos/README.md
+# early: the fans follow the temperature before anyone logs in
+DefaultDependencies=no
+After=local-fs.target systemd-udevd.service
+Before=insaneos.service shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/insaneos/bin/insane-fand
+# after a stop or a crash the fans go back to the kernel (trip points) or the firmware
+ExecStopPost=/usr/lib/insaneos/bin/insane-fand --restore
+Restart=always
+RestartSec=1
+StandardOutput=journal
+StandardError=journal
+RuntimeDirectory=insaneos
+RuntimeDirectoryPreserve=yes
+ConfigurationDirectory=insaneos
+ConfigurationDirectoryMode=0755
+# root only for sysfs writes: no capabilities beyond reading other users' groups is needed
+CapabilityBoundingSet=
+AmbientCapabilities=
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_UNIX
+IPAddressDeny=any
+ProtectSystem=strict
+ReadWritePaths=/etc/insaneos /run/insaneos
+# the only sysfs files it writes: pwmN/pwmN_enable of fan controllers and the board fan, thermal
+# trip points and the fan's cooling state
+ReadWritePaths=-/sys/devices/platform -/sys/devices/virtual/thermal -/sys/devices/pci0000:00
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @mount @clock @debug @module @reboot @swap @raw-io
+UMask=0022
+
+[Install]
+WantedBy=sysinit.target

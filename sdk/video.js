@@ -3,7 +3,7 @@
 // When the computer can't decode VP9 or AV1 in hardware (most virtual machines, older PCs, the
 // Raspberry Pi 5), video sites that send those codecs make the browser decode them on the CPU and
 // the video stutters. Insane OS then asks the browsers for H.264 instead:
-//   - lord.media.hwDecode() says what the hardware decodes (src/media/hwdec.c, once per boot);
+//   - insane.media.hwDecode() says what the hardware decodes (src/media/hwdec.c, once per boot);
 //   - the closed admin action video-optimize writes the browsers' settings from fixed text
 //     (Chromium: the managed policy of Insane OS's own extension, assets/browser/video; Firefox ESR:
 //     a default pref), at login and whenever the setting changes.
@@ -15,7 +15,7 @@ import { createStore } from './store.js';
 export const VIDEO_DEFAULTS = { mode: 'auto', autoLower: false };
 export const VIDEO_MODES = ['auto', 'always', 'never'];
 
-// What lord.media.hwDecode() answered (null while it is being found out).
+// What insane.media.hwDecode() answered (null while it is being found out).
 export const videoHardware = createStore(null);
 // The last error of video-optimize (a translated message) or ''.
 export const videoError = createStore('');
@@ -58,12 +58,12 @@ function apply() {
 }
 
 export function startVideo() {
-  if (!lord.media?.hwDecode || !lord.admin?.available()) return;
+  if (!insane.media?.hwDecode || !insane.admin?.available()) return;
   let tries = 0;
   const poll = () => {
-    const hw = lord.media.hwDecode();
+    const hw = insane.media.hwDecode();
     if (hw) { videoHardware.set(hw); apply(); return; }
-    if (++tries < 40) setTimeout(poll, 250);       // lord-media answers in well under a second
+    if (++tries < 40) setTimeout(poll, 250);       // insane-media answers in well under a second
   };
   poll();
   settings.subscribe(apply);

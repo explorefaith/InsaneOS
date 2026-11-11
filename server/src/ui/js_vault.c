@@ -1,18 +1,18 @@
-/* js_vault.c — lord.vault: Passwords and the keyring through the confined helper lord-vault (see
+/* js_vault.c — insane.vault: Passwords and the keyring through the confined helper insane-vault (see
  * src/vault/vclient.c and docs/PASSWORDS.md).
  *
- *   lord.vault.available()                     → bool
- *   lord.vault.request(json, { files })        → id; files: [{ path, mode: 'r' | 'w' }]
+ *   insane.vault.available()                     → bool
+ *   insane.vault.request(json, { files })        → id; files: [{ path, mode: 'r' | 'w' }]
  *       'r' = an existing file in the home folder or on one of the user's disks (realpath + roots);
- *       'w' = a NEW file (O_EXCL) in a valid lord.fs destination. lord-server opens them and
- *       passes only the fds to lord-vault, which cannot open paths.
- *   lord.vault.poll()                          → JSON text [{ id, kind: 'rep'|'evt', data }] or null
- *   lord.vault.pending()                       → requests without a reply
- *   lord.vault.lock(why)                       → lock the vault (screen lock, user switch)
- *   lord.vault.fidoDevices()                   → [{ path, name, vid, pid }] (without opening them)
- *   lord.vault.fidoAttach(app)                 → { ok, name } — only with the app's usb permission:
- *       lord-server opens /dev/hidrawN and passes the fd to lord-vault; the app never sees it.
- *   lord.vault.promptDone(prompt, ok)          → answer to Secret Service's unlock prompt
+ *       'w' = a NEW file (O_EXCL) in a valid insane.fs destination. insane-server opens them and
+ *       passes only the fds to insane-vault, which cannot open paths.
+ *   insane.vault.poll()                          → JSON text [{ id, kind: 'rep'|'evt', data }] or null
+ *   insane.vault.pending()                       → requests without a reply
+ *   insane.vault.lock(why)                       → lock the vault (screen lock, user switch)
+ *   insane.vault.fidoDevices()                   → [{ path, name, vid, pid }] (without opening them)
+ *   insane.vault.fidoAttach(app)                 → { ok, name } — only with the app's usb permission:
+ *       insane-server opens /dev/hidrawN and passes the fd to insane-vault; the app never sees it.
+ *   insane.vault.promptDone(prompt, ok)          → answer to Secret Service's unlock prompt
  * Everything is validated here; none of this runs programs or opens caller paths without validating them. */
 #include "js_vault.h"
 #include "js_sys.h"
@@ -175,18 +175,18 @@ static const JSCFunctionListEntry vault_funcs[] = {
     JS_CFUNC_DEF("promptDone", 2, f_prompt_done),
 };
 
-void js_vault_register(JSContext *c, JSValue lord) {
+void js_vault_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, vault_funcs, sizeof vault_funcs / sizeof vault_funcs[0]);
-    JS_SetPropertyStr(c, lord, "vault", o);
+    JS_SetPropertyStr(c, insane, "vault", o);
     vc_start();               /* the keyring and Secret Service run from the start of the session */
 }
 
 /* ================= app mode =================
- * The Passwords app runs as its own sandboxed process (lord-server --app passwords). lord-server
- * gave it a channel of its own to lord-vault (vc_attach_app, env LORD_VAULT_FD): requests and
- * replies, including revealed secrets, travel between the two sandboxed processes only; lord-server
- * never sees them. Same lord.vault API as in the shell, except that files are fds the user picked
+ * The Passwords app runs as its own sandboxed process (insane-server --app passwords). insane-server
+ * gave it a channel of its own to insane-vault (vc_attach_app, env INSANE_VAULT_FD): requests and
+ * replies, including revealed secrets, travel between the two sandboxed processes only; insane-server
+ * never sees them. Same insane.vault API as in the shell, except that files are fds the user picked
  * in the system dialog (powerbox): request(json, { fds: [fd…] }). */
 
 static int app_fd = -1;
@@ -243,7 +243,7 @@ static JSValue fa_poll(JSContext *c, JSValueConst t, int argc, JSValueConst *arg
         VMsg m;
         int r = vw_feed(app_fd, &app_rx, &m, &vw_malloc);
         if (r == 0) break;
-        if (r < 0) {                                     /* lord-vault went away */
+        if (r < 0) {                                     /* insane-vault went away */
             close(app_fd);
             app_fd = -1;
             static const char crash[] = "{\"id\":0,\"kind\":\"evt\",\"data\":{\"ev\":\"crash\"}}";
@@ -311,9 +311,9 @@ static const JSCFunctionListEntry vault_app_funcs[] = {
     JS_CFUNC_DEF("promptDone", 2, fa_noop),
 };
 
-/* ---- lord.keyring of an isolated .lpk app (any app without its own vault channel) ----
- *   lord.keyring.request(op, service, account, label, secret) → JSON text of lord-vault's reply
- *       op: 'get' | 'set' | 'delete' | 'list'. It goes through the broker (BOP_KEYRING); lord-server
+/* ---- insane.keyring of an isolated .lpk app (any app without its own vault channel) ----
+ *   insane.keyring.request(op, service, account, label, secret) → JSON text of insane-vault's reply
+ *       op: 'get' | 'set' | 'delete' | 'list'. It goes through the broker (BOP_KEYRING); insane-server
  *       sets the owner from the verified app id, so the app only reaches its own items (or those
  *       the user agreed to share with it). Errors are thrown as codes (keyring.*, vault.unavailable).
  * The reply buffer may hold a secret: it is wiped once it is a JS string. */
@@ -359,20 +359,20 @@ static JSValue fk_request(JSContext *c, JSValueConst t, int argc, JSValueConst *
 
 static const JSCFunctionListEntry keyring_app_funcs[] = { JS_CFUNC_DEF("request", 5, fk_request) };
 
-void js_vault_register_app(JSContext *c, JSValue lord) {
-    const char *s = getenv("LORD_VAULT_FD");
+void js_vault_register_app(JSContext *c, JSValue insane) {
+    const char *s = getenv("INSANE_VAULT_FD");
     if (!s) {                                            /* a .lpk app: its own keyring items only */
         JSValue k = JS_NewObject(c);
         JS_SetPropertyFunctionList(c, k, keyring_app_funcs, sizeof keyring_app_funcs / sizeof keyring_app_funcs[0]);
-        JS_SetPropertyStr(c, lord, "keyring", k);
+        JS_SetPropertyStr(c, insane, "keyring", k);
         return;
     }
     app_fd = atoi(s);
     if (app_fd <= 2) { app_fd = -1; return; }
     fcntl(app_fd, F_SETFD, FD_CLOEXEC);
-    unsetenv("LORD_VAULT_FD");
+    unsetenv("INSANE_VAULT_FD");
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, vault_app_funcs, sizeof vault_app_funcs / sizeof vault_app_funcs[0]);
     JS_SetPropertyStr(c, o, "appMode", JS_TRUE);
-    JS_SetPropertyStr(c, lord, "vault", o);
+    JS_SetPropertyStr(c, insane, "vault", o);
 }

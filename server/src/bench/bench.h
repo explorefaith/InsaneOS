@@ -1,9 +1,9 @@
-/* bench.h — measurement pieces shared by lordos-testbench (src/testbench) and InsaneBench (0.8.6,
+/* bench.h — measurement pieces shared by insaneos-testbench (src/testbench) and InsaneBench (0.8.6,
  * docs/BENCHMARK.md): the clock, frame-time statistics against a refresh budget, presentation
  * accounting, input-to-screen latency, the GL renderer's kind and the reports' state file. Pure C with
  * libc and libm only: no Wayland, no GL (the GL scene is glscene.h). */
-#ifndef LORD_BENCH_H
-#define LORD_BENCH_H
+#ifndef INSANE_BENCH_H
+#define INSANE_BENCH_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@ const char *bench_gl_kind(const char *renderer);
 
 /* ---- reports ---- */
 void bench_json_str(FILE *o, const char *s);            /* a JSON string, quoted and escaped */
-/* writes $XDG_STATE_HOME/lordos/<name>.json (or ~/.local/state/lordos/<name>.json) whole, renamed into
+/* writes $XDG_STATE_HOME/insaneos/<name>.json (or ~/.local/state/insaneos/<name>.json) whole, renamed into
  * place; name is [a-z0-9-]; 0 or -1 */
 int bench_save(const char *name, void (*write)(FILE *));
 

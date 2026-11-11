@@ -100,7 +100,7 @@
           date: (w, d, m) => `${w} ${d} ${m}`, h12: false },
   };
   const $ = (id) => document.getElementById(id);
-  let lang = (() => { try { return localStorage.getItem('lordos-lang'); } catch (e) { return null; } })() || (navigator.language || 'en').slice(0, 2);
+  let lang = (() => { try { return localStorage.getItem('insaneos-lang'); } catch (e) { return null; } })() || (navigator.language || 'en').slice(0, 2);
   if (!L[lang]) lang = 'en';
   const PAL = [['#5b9cff', '#2f6fe0'], ['#f0915a', '#d0602b'], ['#4cc37a', '#269653'], ['#e0609d', '#b83574'], ['#a77bf3', '#7a4fd6'], ['#4cc4d3', '#2391a3'], ['#f2c14e', '#d0961d']];
   const hash = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.codePointAt(0)) >>> 0; return h; };
@@ -137,7 +137,7 @@
   });
   for (const b of document.querySelectorAll('.pill')) b.addEventListener('click', () => {
     lang = b.dataset.l;
-    try { localStorage.setItem('lordos-lang', lang); } catch (e) { /* no storage */ }
+    try { localStorage.setItem('insaneos-lang', lang); } catch (e) { /* no storage */ }
     apply();
   });
   const ERR = document.documentElement.dataset.e || new URLSearchParams(location.search).get('e') || '';
@@ -157,12 +157,12 @@
       (bad === '5' ? $('user') : $('pass')).focus();
       return;
     }
-    try { sessionStorage.setItem('lordos-user', u); } catch (e) { /* no storage */ }
+    try { sessionStorage.setItem('insaneos-user', u); } catch (e) { /* no storage */ }
     $('go').disabled = true;
   });
   $('host').textContent = location.hostname;
   let prev = '';
-  try { prev = sessionStorage.getItem('lordos-user') || ''; } catch (e) { /* no storage */ }
+  try { prev = sessionStorage.getItem('insaneos-user') || ''; } catch (e) { /* no storage */ }
   if (errCode() && NAME.test(prev)) { $('user').value = prev; $('user').dispatchEvent(new Event('input')); }
   if (location.search) history.replaceState(null, '', '/');     // nothing stays in the address bar
   apply();

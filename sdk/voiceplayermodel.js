@@ -6,7 +6,7 @@
 //       near: the display of the window that reads (else the main one); size: { w, h }
 //   rememberPlace(displays, x, y, size)        → { display, dx, dy } to save after a drag
 //   smoothBands(prev, next, dt)                → the bars' heights 0..1: they rise at once and fall slowly
-//   PLAYER_BARS                                how many bars the wave has (one per band lord-say measures)
+//   PLAYER_BARS                                how many bars the wave has (one per band insane-say measures)
 
 export const PLAYER_BARS = 16;
 const MARGIN = 8;
@@ -41,7 +41,7 @@ export function rememberPlace(displays, x, y, size) {
   return { display: d.name || '', dx: p.x - d.x, dy: p.y - d.y };
 }
 
-// levels: lord.voice.levels()'s 0–255 per band, or null; dt in ms
+// levels: insane.voice.levels()'s 0–255 per band, or null; dt in ms
 export function smoothBands(prev, levels, dt) {
   const fall = Math.min(1, dt / 220);
   const out = [];

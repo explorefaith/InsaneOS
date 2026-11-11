@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""live_helper.py <lord-media> <h264 annex-b file with AUDs> <vp8 ivf file>: lord-media's MK_LIVE by itself, with no session.
+"""live_helper.py <insane-media> <h264 annex-b file with AUDs> <vp8 ivf file>: insane-media's MK_LIVE by itself, with no session.
 
 Real decoding in the real sandbox: pictures reach the frame slots and each ring is what it says; a damaged stream asks for a
 keyframe; lengths out of bounds, an unknown codec, and junk end the stream or are ignored, and never crash the helper."""

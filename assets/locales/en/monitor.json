@@ -83,7 +83,7 @@
     "other": "{count} processes"
   },
   "procFoot": "Showing {shown} of {count} · total CPU {cpu}%",
-  "lordos": "Insane OS",
+  "insaneos": "Insane OS",
   "net.search": "Search apps, addresses or countries",
   "net.apps": {
     "one": "{count} app",

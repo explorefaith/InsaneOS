@@ -1,6 +1,6 @@
 // views.jsx — the four Files views: icons (cards), list (with expandable folders),
 // columns (Miller, with a preview) and gallery.
-import { View, Text, Image, TextInput, ScrollView, EmptyState, useTheme, addListener, direction, formatBytes, typeScale, t as tr, StatusGlyph, StatusBadge } from '@lordos/sdk';
+import { View, Text, Image, TextInput, ScrollView, EmptyState, useTheme, addListener, direction, formatBytes, typeScale, t as tr, StatusGlyph, StatusBadge } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { EntryIcon, TagDots } from './glyphs.jsx';
 import { kindOf, isImage, isTextual } from './kinds.js';
@@ -128,7 +128,7 @@ function Header({ sort, onSort, t, ctx, columns, onColumns, nameW }) {
       const dx = (direction() === 'rtl' ? -1 : 1) * (e.x - o.x);
       if (o.grip) setLive({ columns: resize(o.columns, o.k, o.w + dx) });
       else {
-        const [rx, , rw] = lord.getLayout(row.current.id);
+        const [rx, , rw] = insane.getLayout(row.current.id);
         const from = direction() === 'rtl' ? rx + rw - e.x : e.x - rx;
         const before = dropBefore(o.columns, from - nameW - SIDE_PAD / 2);
         setLive({ columns: moveColumn(o.columns, o.k, before), moving: o.k });
@@ -203,7 +203,7 @@ function ListRows({ items, depth, ctx, t, sort, alt }) {
     );
     if (open) {
       let kids = ctx.kidsOf(e) || [];
-      if (!e.netHost) try { kids = sortEntries((ctx.listOf ? ctx.listOf(e.path) : lord.fs.list(e.path)).filter((x) => ctx.hidden || !x.name.startsWith('.')).map((x) => ({ ...x, path: `${e.path}/${x.name}` })), sort, ctx.sortOpts); } catch (err) { /* no permission */ }
+      if (!e.netHost) try { kids = sortEntries((ctx.listOf ? ctx.listOf(e.path) : insane.fs.list(e.path)).filter((x) => ctx.hidden || !x.name.startsWith('.')).map((x) => ({ ...x, path: `${e.path}/${x.name}` })), sort, ctx.sortOpts); } catch (err) { /* no permission */ }
       rows.push(...ListRows({ items: kids, depth: depth + 1, ctx, t, sort, alt }));
     }
   }
@@ -263,7 +263,7 @@ export function Preview({ e, big = false, name, noRead = false }) {
   useEffect(() => {
     setText(null);
     if (!e || e.dir || e.app || noRead || !isTextual(e) || e.size > 8 * 1024 * 1024) return;
-    try { setText(lord.fs.read(e.path, 'text').slice(0, 65536)); } catch (err) { setText(null); }
+    try { setText(insane.fs.read(e.path, 'text').slice(0, 65536)); } catch (err) { setText(null); }
   }, [e?.path, noRead]);
   if (!e) return null;
   return (

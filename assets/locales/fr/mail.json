@@ -17,7 +17,7 @@
   "flagged": "Avec drapeau",
   "addAccount": "Ajouter un compte",
   "noAccounts": "Ajoutez un compte de messagerie pour commencer. Tout compte IMAP/SMTP convient ; les fournisseurs courants sont configurés pour vous.",
-  "unavailable": "L’assistant de Mail (lord-maild) n’est pas installé.",
+  "unavailable": "L’assistant de Mail (insane-maild) n’est pas installé.",
   "empty": "Aucun message",
   "noSelection": "Aucun message sélectionné",
   "noSubject": "(sans objet)",

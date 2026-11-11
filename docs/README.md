@@ -5,7 +5,7 @@ a display server and Wayland compositor written in C, its own interface engine, 
 This folder documents how it works, how to build it and how to verify it. Start with the
 [paper](PAPER.md) for the big picture, or [ARCHITECTURE.md](ARCHITECTURE.md) for the technical map.
 
-Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS-BRAND.md)
+Website: [insaneos.org](https://insaneos.org) · Brand kit: [INSANEOS-BRAND.md](INSANEOS-BRAND.md)
 
 ## Start here
 
@@ -16,7 +16,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Components, processes, dependencies and platforms |
 | [ROADMAP.md](ROADMAP.md) | Milestones, what is done and what comes next |
 | [DESIGN.md](DESIGN.md) | Design guide for Insane OS apps |
-| [LORDOS-BRAND.md](LORDOS-BRAND.md) | Logo, colours, typography and the Lumo mascot |
+| [INSANEOS-BRAND.md](INSANEOS-BRAND.md) | Logo, colours, typography and the Lumo mascot |
 
 ## Install and build
 
@@ -25,7 +25,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | [ISO.md](ISO.md) | The live and installable ISO for 64-bit PCs: building, booting, final test results |
 | [RASPBERRY.md](RASPBERRY.md) | The Raspberry Pi 5 image, our kernel with Landlock, boot switch files |
 | [IMAGER.md](IMAGER.md) | Insane OS Imager: writing Insane OS to cards and sticks, in Insane OS and on other computers, and the first-run file |
-| [UNATTENDED.md](UNATTENDED.md) | The unattended install: the ISO installs itself from `lordos-auto.conf`, for test machines |
+| [UNATTENDED.md](UNATTENDED.md) | The unattended install: the ISO installs itself from `insaneos-auto.conf`, for test machines |
 | [INSTALL-DEBIAN.md](INSTALL-DEBIAN.md) | Installing Insane OS on an existing Debian 13 with one command |
 | [VM-SETUP.md](VM-SETUP.md) | The development VM, step by step |
 | [UPDATES.md](UPDATES.md) | Updating an installed system in place from the signed APT repository, and migrations |
@@ -73,7 +73,7 @@ Website: [lordos.org](https://lordos.org) · Brand kit: [LORDOS-BRAND.md](LORDOS
 | Document | What it covers |
 |---|---|
 | [NATIVE-APPS.md](NATIVE-APPS.md) | Installable native apps (`.lpk`) |
-| [PACKAGED-APPS.md](PACKAGED-APPS.md) | Native apps a signed `.deb` installs in `/usr/lib/lordos-apps/<id>/`, with one sandboxed companion program (0.8.8) |
+| [PACKAGED-APPS.md](PACKAGED-APPS.md) | Native apps a signed `.deb` installs in `/usr/lib/insaneos-apps/<id>/`, with one sandboxed companion program (0.8.8) |
 | [PACKAGES.md](PACKAGES.md) | Debian packages and the Store: our package engine, HTTPS downloads (0.8.5), the AI and Commercial catalogs |
 | [WASM.md](WASM.md) | WebAssembly apps |
 | [FILES.md](FILES.md) | Files |

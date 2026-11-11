@@ -1,7 +1,7 @@
-// cache.js — pages already rendered by lord-doc, with a memory cap. While the version
+// cache.js — pages already rendered by insane-doc, with a memory cap. While the version
 // at the new zoom arrives, whatever exists for that page is shown (smaller or larger, scaled):
 // so drawing is progressive and there is never a gap.
-import { releaseImage } from '@lordos/sdk';
+import { releaseImage } from '@insaneos/sdk';
 
 const quant = (w) => Math.max(32, Math.round(w / 32) * 32);
 

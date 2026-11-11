@@ -1,14 +1,14 @@
 // capture_layer_scene.mjs — the scene of tests/capture_layer_test.mjs (not run by itself): the SDK's
-// FloatingWindows rendered through runtime/index.js with a stub `lord` that keeps the node tree, the shell
+// FloatingWindows rendered through runtime/index.js with a stub `insane` that keeps the node tree, the shell
 // layers on, a sheet open in the modal layer, Screenshots' selection (a capture window) and a plain
 // fullscreen window. Prints one line per check: "ok <name>" or "FAIL <name> <detail>".
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 import { FloatingWindows } from '../../sdk/components.jsx';
 import { enableShellLayers, Layer, LAYERS } from '../../sdk/layers.js';
 import { wm, windows, registerBuiltinApp } from '../../sdk/windows.js';
 
-const { styles, parents } = globalThis.__lordTest;
+const { styles, parents } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 const check = (name, ok, detail = '') => console.log(ok ? `ok ${name}` : `FAIL ${name} ${detail}`);
@@ -48,19 +48,19 @@ check('the selection is above the sheet', layerOf(ids.shot) > layerOf(ids.sheet)
 // a click outside, a text field that loses focus) hears it
 let outside = 0;
 const off = rt.addListener('pointerdown', () => { outside++; });
-globalThis.__lordEvent('down', ids.shot, 100, 100, 0);
-globalThis.__lordEvent('up', ids.shot, 100, 100, 0);
+globalThis.__insaneEvent('down', ids.shot, 100, 100, 0);
+globalThis.__insaneEvent('up', ids.shot, 100, 100, 0);
 check('a press on the selection reaches it', pressed.length === 1, `got ${pressed.length}`);
 check('a press on the selection is not a click outside', outside === 0, `heard ${outside}`);
-globalThis.__lordEvent('down', ids.film, 100, 100, 0);
-globalThis.__lordEvent('up', ids.film, 100, 100, 0);
+globalThis.__insaneEvent('down', ids.film, 100, 100, 0);
+globalThis.__insaneEvent('up', ids.film, 100, 100, 0);
 check('a press on a plain fullscreen window still is', outside === 1, `heard ${outside}`);
 off();
 
 // Esc is the selection's own (its shortcut ends it): the SDK's «Esc leaves fullscreen» passes it by and
 // takes the plain fullscreen window out instead
-globalThis.__lordKey(1, 1, 'Escape', '', '', 0);
-globalThis.__lordKey(1, 0, 'Escape', '', '', 0);
+globalThis.__insaneKey(1, 1, 'Escape', '', '', 0);
+globalThis.__insaneKey(1, 0, 'Escape', '', '', 0);
 await flush();
 const w = (id) => windows.get().find((x) => x.id === id);
 check('Esc leaves the selection fullscreen', !!w(shot).fullscreen && !!w(shot).capture);

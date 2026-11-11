@@ -1,25 +1,25 @@
 /* boottest.h — InsaneBench's boot time test (docs/BENCHMARK.md, "Boot"): with an administrator's consent,
- * the computer restarts N times in a row (2 to 10) and lord-sessiond records each boot's time to the first
- * frame, marked as part of the test, in /var/lib/lordos/boot-times.jsonl.
+ * the computer restarts N times in a row (2 to 10) and insane-sessiond records each boot's time to the first
+ * frame, marked as part of the test, in /var/lib/insaneos/boot-times.jsonl.
  *
- * The state is one small root-owned file, /var/lib/lordos/boot-test, written only by the admin helper's
- * closed actions `boot-test <n>` and `boot-test-cancel` (hw/hw_admin.c) and by lord-sessiond, always in this
+ * The state is one small root-owned file, /var/lib/insaneos/boot-test, written only by the admin helper's
+ * closed actions `boot-test <n>` and `boot-test-cancel` (hw/hw_admin.c) and by insane-sessiond, always in this
  * fixed format, never with user text:
  *
- *   lordos-boot-test 1
+ *   insaneos-boot-test 1
  *   total <n>
  *   left <boots still to measure, this one included>
  *   at <unix time it was written>
  *
- * At each boot's first frame lord-sessiond asks bt_next() what to do: record this boot as number k of the
+ * At each boot's first frame insane-sessiond asks bt_next() what to do: record this boot as number k of the
  * test and, if more are left, write the file again and restart BT_SETTLE_S seconds later. The test always
  * ends: `left` only goes down, a file older than BT_STALE_S (or from the future) is discarded, a login at
- * the login screen or `boot-test-cancel` removes it, and lord-sessiond checks the file is still there right
- * before restarting. Used by lord-sessiond (remote/sessiond.c), the admin helper and lord.sysinfo.bench. */
-#ifndef LORD_BENCH_BOOTTEST_H
-#define LORD_BENCH_BOOTTEST_H
+ * the login screen or `boot-test-cancel` removes it, and insane-sessiond checks the file is still there right
+ * before restarting. Used by insane-sessiond (remote/sessiond.c), the admin helper and insane.sysinfo.bench. */
+#ifndef INSANE_BENCH_BOOTTEST_H
+#define INSANE_BENCH_BOOTTEST_H
 
-#define BT_PATH     "/var/lib/lordos/boot-test"
+#define BT_PATH     "/var/lib/insaneos/boot-test"
 #define BT_MIN      2
 #define BT_MAX      10
 #define BT_SETTLE_S 30                  /* from the first frame to the next restart: time to cancel */

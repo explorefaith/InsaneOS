@@ -71,7 +71,7 @@ int term_secret_target(Session *s, const char *prompt, TcapTarget *t, char *exe,
 }
 
 /* Whether something is tracing this process (a debugger reading its memory): then no password is captured,
- * filled or saved. lord-server is not dumpable, so only root could; this refuses to help it. */
+ * filled or saved. insane-server is not dumpable, so only root could; this refuses to help it. */
 int term_traced(void) {
     char buf[2048];
     int fd = open("/proc/self/status", O_RDONLY | O_CLOEXEC);

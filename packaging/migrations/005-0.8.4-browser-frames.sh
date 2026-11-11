@@ -6,13 +6,13 @@
 # - /etc/chromium/master_preferences: "custom_chrome_frame": false → true, and the GTK theme
 #   ("extensions": {"theme": {"system_theme": 1}}) when the file sets no "extensions" yet. These are
 #   initial preferences: they only reach Chromium profiles created from now on.
-# - /etc/firefox-esr/lordos.js, if it is still the file the ISO wrote: inTitlebar 0 → 1. A default
+# - /etc/firefox-esr/insaneos.js, if it is still the file the ISO wrote: inTitlebar 0 → 1. A default
 #   pref, so every profile follows it except one whose user changed «Title Bar» (a user_pref, kept).
 #
 # Home folders are never touched: an existing Chromium profile keeps the frame it had; its user
 # switches with a right click on the tab strip → «Use system title bar and borders» off, and
-# Settings → Appearance → Theme → «GTK». LORDOS_MIGRATION_ROOT is for tests only.
-R=${LORDOS_MIGRATION_ROOT:-}
+# Settings → Appearance → Theme → «GTK». INSANEOS_MIGRATION_ROOT is for tests only.
+R=${INSANEOS_MIGRATION_ROOT:-}
 
 CH="$R/etc/chromium/master_preferences"
 if [ -f "$CH" ] && grep -q '"custom_chrome_frame": false' "$CH"; then
@@ -27,7 +27,7 @@ if [ -f "$CH" ] && grep -q '"custom_chrome_frame": false' "$CH"; then
     mv "$t" "$CH"
 fi
 
-FF="$R/etc/firefox-esr/lordos.js"
+FF="$R/etc/firefox-esr/insaneos.js"
 OLD_FF='// Insane OS: Firefox windows use the system frame (the theme frame); change it in
 // Customize Toolbar > Title Bar, or in about:config.
 pref("browser.tabs.inTitlebar", 0);'

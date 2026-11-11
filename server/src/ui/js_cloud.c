@@ -1,10 +1,10 @@
-/* js_cloud.c — lord.cloud: Cloud (cloud/cloud.h, docs/CLOUD.md section 17). JS never reaches rclone: each call here
- * is one of a closed list, with checked arguments, and lord-server's cloud thread is rclone's only client.
+/* js_cloud.c — insane.cloud: Cloud (cloud/cloud.h, docs/CLOUD.md section 17). JS never reaches rclone: each call here
+ * is one of a closed list, with checked arguments, and insane-server's cloud thread is rclone's only client.
  *
- *   available() → bool                      state() → State (also pushed: __lordCloud(state))
+ *   available() → bool                      state() → State (also pushed: __insaneCloud(state))
  *   providers() → { req } → [{ kind, label, description, group, verified, website?, fields: [{ name, label, help, secret, required, default, examples }] }]
  *   answer(state, value) → { req } → { id } | { question } | { error }     (add answers the same way)
- *   emptyTrash(id) / measure(id) / cancelMeasure(id) / delete(paths) → { req } (answers through __lordCloudReply)
+ *   emptyTrash(id) / measure(id) / cancelMeasure(id) / delete(paths) → { req } (answers through __insaneCloudReply)
  *   beginSignIn(kind, name, { clientId, clientSecret }) → { id, url, expiresAt } | { error }
  *   openSignInPage(id) → bool               cancelSignIn(id)
  *   add(kind, name, fields) → { id } | { error, field? }
@@ -13,7 +13,7 @@
  *   retry(id|null)                          an account that isn't connected (keyring locked, offline) tries again
  *   status(paths) → { [path]: { st, pct?, error? } }
  *   keep(paths) / unkeep(paths)             free(paths) → { freed, skipped: [{ path, reason }] }
- *   link(path, expire) / unlink(path) → { req } (the answer comes in __lordCloudReply(req, result)) | { error }
+ *   link(path, expire) / unlink(path) → { req } (the answer comes in __insaneCloudReply(req, result)) | { error }
  *   links(id) → [{ path, url, expires, made }]
  *   pause(id|null) / resume(id|null)        setOptions({ bwUp, bwDown, pauseOnBattery, pauseOnMetered, autoFree, freeBelowGb })
  *   restart()                               logName() → the Logs app's file name of rclone's log */
@@ -366,10 +366,10 @@ static const JSCFunctionListEntry fns[] = {
     JS_CFUNC_DEF("logName", 0, f_logname),
 };
 
-void js_cloud_register(JSContext *c, JSValue lord) {
+void js_cloud_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, fns, sizeof fns / sizeof fns[0]);
-    JS_SetPropertyStr(c, lord, "cloud", o);
+    JS_SetPropertyStr(c, insane, "cloud", o);
     if (js_sys_assets() && js_sys_assets()[0]) cloud_set_assets(js_sys_assets());
 }
 

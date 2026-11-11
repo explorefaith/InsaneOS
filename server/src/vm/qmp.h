@@ -1,8 +1,8 @@
-/* qmp.h — lord-vm's side of QEMU's control socket (QMP): one JSON object per line. QEMU is untrusted: a line is
+/* qmp.h — insane-vm's side of QEMU's control socket (QMP): one JSON object per line. QEMU is untrusted: a line is
  * at most QMP_LINE_MAX bytes and parsed by the strict reader (sec/json.c), and nothing waits on QEMU except the
- * greeting, with a timeout. Replies come back in the order the commands went out, so lord-vm keeps a queue. */
-#ifndef LORD_VM_QMP_H
-#define LORD_VM_QMP_H
+ * greeting, with a timeout. Replies come back in the order the commands went out, so insane-vm keeps a queue. */
+#ifndef INSANE_VM_QMP_H
+#define INSANE_VM_QMP_H
 
 #include "../sec/json.h"
 #include <stddef.h>
@@ -23,7 +23,7 @@ void qmp_close(Qmp *q);
 int  qmp_handshake(Qmp *q, int timeout_ms, char *err, size_t errlen);
 /* sends {"execute": cmd, "arguments": args} (args: a JSON object or NULL) with an optional descriptor. 0 sent */
 int  qmp_command(Qmp *q, const char *cmd, const char *args, int fd);
-/* sends a whole command as it is (development: lord-vm --dev-qmp). 0 sent */
+/* sends a whole command as it is (development: insane-vm --dev-qmp). 0 sent */
 int  qmp_raw(Qmp *q, const char *json);
 /* reads what's there without waiting: 0 ok, -1 QEMU closed the socket */
 int  qmp_fill(Qmp *q);

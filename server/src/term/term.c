@@ -206,7 +206,7 @@ void term_clipboard_wipe(void) {
 }
 
 void term_clipboard_mark(const char *origin, int sensitive) {
-    snprintf(clip_origin, sizeof clip_origin, "%s", origin && origin[0] ? origin : "lordos");
+    snprintf(clip_origin, sizeof clip_origin, "%s", origin && origin[0] ? origin : "insaneos");
     clip_sensitive = sensitive != 0;
 }
 const char *term_clipboard_origin(void) { return clip_origin; }
@@ -318,7 +318,7 @@ void term_close(Session *s) {
 }
 
 /* Theme change: the nodes go away but the shells stay alive; the new theme's Terminal
- * app recovers them with lord.term.list(). */
+ * app recovers them with insane.term.list(). */
 void term_detach_all(void) {
     for (int i = 0; i < TERM_MAX; i++) sessions[i].node = 0;
 }
@@ -340,7 +340,7 @@ static void save_state(Session *s) {
     if (f) {
         fchmod(fileno(f), 0600);
         /* header: version, size, title and directory */
-        fprintf(f, "LORDSTATE 1 %d %d %d\n%s\n%s\n", s->t.cols, s->t.rows, s->tmux, s->t.title, s->t.cwd);
+        fprintf(f, "INSANESTATE 1 %d %d %d\n%s\n%s\n", s->t.cols, s->t.rows, s->tmux, s->t.title, s->t.cwd);
         int ok = fwrite(data, 1, n, f) == n;
         if (fclose(f) == 0 && ok) rename(tmp, path); else unlink(tmp);
     }
@@ -398,7 +398,7 @@ static void adopt(int fd, int ctrl, pid_t pid, const char *key) {
     hold_state_path(key, path, sizeof path);
     size_t len = 0;
     char *st = read_all(path, &len), *body = NULL, *title = NULL, *cwd = NULL;
-    if (st && len > 10 && sscanf(st, "LORDSTATE 1 %d %d %d", &cols, &rows, &tmux) >= 2) {
+    if (st && len > 10 && sscanf(st, "INSANESTATE 1 %d %d %d", &cols, &rows, &tmux) >= 2) {
         title = memchr(st, '\n', len);
         if (title) { *title++ = 0; cwd = memchr(title, '\n', len - (size_t)(title - st)); }
         if (cwd) { *cwd++ = 0; body = memchr(cwd, '\n', len - (size_t)(cwd - st)); }
@@ -794,7 +794,7 @@ int term_replay(Session *s, int index) {
     return s->replay;
 }
 
-/* Session log in ~/.local/share/lordos/terminal (raw output). */
+/* Session log in ~/.local/share/insaneos/terminal (raw output). */
 const char *term_log(Session *s, int on) {
     if (!on) { if (s->log) fclose(s->log); s->log = NULL; return NULL; }
     if (s->log) return s->log_path;
@@ -803,8 +803,8 @@ const char *term_log(Session *s, int on) {
     char dir[400];
     snprintf(dir, sizeof dir, "%s/.local", home); mkdir(dir, 0755);
     snprintf(dir, sizeof dir, "%s/.local/share", home); mkdir(dir, 0755);
-    snprintf(dir, sizeof dir, "%s/.local/share/lordos", home); mkdir(dir, 0755);
-    snprintf(dir, sizeof dir, "%s/.local/share/lordos/terminal", home); mkdir(dir, 0700);
+    snprintf(dir, sizeof dir, "%s/.local/share/insaneos", home); mkdir(dir, 0755);
+    snprintf(dir, sizeof dir, "%s/.local/share/insaneos/terminal", home); mkdir(dir, 0700);
     time_t now = time(NULL);
     struct tm tm;
     localtime_r(&now, &tm);

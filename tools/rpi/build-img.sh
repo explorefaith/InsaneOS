@@ -3,22 +3,22 @@
 # an SD card or an NVMe with Raspberry Pi Imager, dd or balenaEtcher. See docs/RASPBERRY.md.
 #
 # Usage (as root, on Debian 13, from the repository root with the themes already built):
-#   sudo tools/rpi/build-img.sh [work folder]          # default /var/tmp/lordos-rpi
+#   sudo tools/rpi/build-img.sh [work folder]          # default /var/tmp/insaneos-rpi
 #
-# Result: <work>/out/lordos-<version>-rpi5-arm64.img.xz (+ .sha256), lordos_<version>_arm64.deb and
-# lordos-hwdata_<snapshot date>_all.deb (the signed tested-hardware snapshot, which lordos depends on)
+# Result: <work>/out/insaneos-<version>-rpi5-arm64.img.xz (+ .sha256), insaneos_<version>_arm64.deb and
+# insaneos-hwdata_<snapshot date>_all.deb (the signed tested-hardware snapshot, which insaneos depends on)
 #
-# - On an arm64 host (the Pi 5 itself, an ARM server) everything is native. If server/build/lord-server
+# - On an arm64 host (the Pi 5 itself, an ARM server) everything is native. If server/build/insane-server
 #   is already aarch64 (make -C server on the Pi) it is used; otherwise it is built in the build chroot.
 # - On an x86-64 host qemu-user-static is needed (binfmt for aarch64): debootstrap and apt run
-#   emulated, and lord-server is built in a separate arm64 chroot (slow: ~15–30 min the first time).
+#   emulated, and insane-server is built in a separate arm64 chroot (slow: ~15–30 min the first time).
 #
 # Variables: MIRROR (Debian), RPI_MIRROR (Raspberry Pi archive), IMG_EXTRA_MB (free space in the
 # image before it grows on boot, 512), RPI_SSH=1 (SSH server on from the start, for development;
 # otherwise it ships off and the `ssh` switch file turns it on), RPI_KEY_NOCHECK=1 (do not verify
 # the Raspberry Pi archive key fingerprint; not recommended), KERNEL_DEBS (folder with the Insane OS
-# kernel packages from tools/rpi/build-kernel.sh, default /var/tmp/lordos-kernel/out), CODE_CHECK_SERVER
-# (an x86-64 host with an aarch64 server/build: a lord-server built for the host from the same tree,
+# kernel packages from tools/rpi/build-kernel.sh, default /var/tmp/insaneos-kernel/out), CODE_CHECK_SERVER
+# (an x86-64 host with an aarch64 server/build: a insane-server built for the host from the same tree,
 # used only to check the signed system code; docs/SIGNING.md).
 #
 # Kernel: the Insane OS build of the Raspberry Pi kernel (with Landlock, the BPF LSM and BTF) when its
@@ -31,7 +31,7 @@ ROOT=$(pwd)
 [ -f "$ROOT/package.json" ] && [ -d "$ROOT/server" ] && [ -f "$ROOT/tools/iso/mkdeb.sh" ] || {
     echo "build-img.sh: run from the repository root" >&2; exit 1; }
 VERSION=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -1)
-WORK=${1:-/var/tmp/lordos-rpi}
+WORK=${1:-/var/tmp/insaneos-rpi}
 MIRROR=${MIRROR:-http://deb.debian.org/debian}
 RPI_MIRROR=${RPI_MIRROR:-http://archive.raspberrypi.com/debian}
 # Raspberry Pi archive key. It is taken from the raspberrypi-archive-keyring package of the archive
@@ -45,13 +45,13 @@ IMG_EXTRA_MB=${IMG_EXTRA_MB:-512}
 SUITE=trixie
 ARCH=arm64
 CH="$WORK/rootfs"           # the image's system
-BR="$WORK/buildroot"        # arm64 chroot to build lord-server (if needed)
+BR="$WORK/buildroot"        # arm64 chroot to build insane-server (if needed)
 OUT="$WORK/out"
-NAME="lordos-$VERSION-rpi5-arm64"
+NAME="insaneos-$VERSION-rpi5-arm64"
 IMG="$OUT/$NAME.img"
-DEB="$OUT/lordos_${VERSION}_arm64.deb"
+DEB="$OUT/insaneos_${VERSION}_arm64.deb"
 RPI="$ROOT/tools/rpi/rootfs"
-KERNEL_DEBS=${KERNEL_DEBS:-/var/tmp/lordos-kernel/out}
+KERNEL_DEBS=${KERNEL_DEBS:-/var/tmp/insaneos-kernel/out}
 T0=$(date +%s)
 
 for t in debootstrap dpkg-deb sfdisk losetup mkfs.vfat mkfs.ext4 xz curl gpg partx python3; do
@@ -69,9 +69,9 @@ esac
 PKGS_BASE="initramfs-tools systemd-sysv udev kmod dbus dbus-user-session sudo locales tzdata
  iproute2 iputils-ping less nano ca-certificates apt dpkg passwd procps e2fsprogs fdisk dosfstools util-linux
  systemd-timesyncd"
-# command-line tools, the same in the ISO and the Raspberry Pi image (also Recommends of the lordos package)
+# command-line tools, the same in the ISO and the Raspberry Pi image (also Recommends of the insaneos package)
 . "$ROOT/tools/iso/packages-tools.sh"
-PKGS_LORDOS="libwayland-server0 libxkbcommon0 xkb-data pipewire pipewire-pulse pipewire-alsa wireplumber rtkit polkitd pkexec
+PKGS_INSANEOS="libwayland-server0 libxkbcommon0 xkb-data pipewire pipewire-pulse pipewire-alsa wireplumber rtkit polkitd pkexec
  alsa-ucm-conf wpasupplicant openvpn fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji libthai-data
  skkdic rime-data-pinyin-simp fonts-dejavu-core xwayland
  cups avahi-daemon libnss-mdns power-profiles-daemon shared-mime-info gsettings-desktop-schemas
@@ -87,14 +87,14 @@ PKGS_RPI="raspi-firmware firmware-brcm80211 rsync pciutils usbutils wireless-reg
 # Bluetooth (the CYW43455 on a UART, brought up by the kernel; see docs/RASPBERRY.md, "Bluetooth"),
 # all from Debian: BlueZ (bluetoothd, plus hciconfig/hcitool for rpi/bt-uart), the chip's patch
 # (bluez-firmware: brcm/BCM4345C0.hcd), headset audio in PipeWire (libspa-0.2-bluetooth, with the
-# lordos package's WirePlumber drop-in) and rfkill. The same BlueZ packages as the ISO.
+# insaneos package's WirePlumber drop-in) and rfkill. The same BlueZ packages as the ISO.
 PKGS_BT="bluez bluez-firmware libspa-0.2-bluetooth rfkill"
 PKGS_RPI_EXTRA="rpi-eeprom raspi-utils"
 # Kernels: Pi 5 (2712: 16K pages) and Pi 4/400/CM4 (v8: 4K pages). Ours (Landlock) if built,
 # per flavour; otherwise Raspberry Pi's.
 OWN_KDEBS=""; ARCHIVE_K=""; OWN_FLAVOURS=""
 for fl in 2712 v8; do
-    d=$(ls "$KERNEL_DEBS"/linux-image-*-lordos*-rpi-${fl}_*_arm64.deb 2>/dev/null | sort -V | tail -1 || true)
+    d=$(ls "$KERNEL_DEBS"/linux-image-*-insaneos*-rpi-${fl}_*_arm64.deb 2>/dev/null | sort -V | tail -1 || true)
     if [ -n "$d" ]; then OWN_KDEBS="$OWN_KDEBS $d"; OWN_FLAVOURS="$OWN_FLAVOURS $fl"
     else ARCHIVE_K="$ARCHIVE_K linux-image-rpi-$fl"; fi
 done
@@ -105,12 +105,12 @@ PKGS_GPU="libgl1-mesa-dri libegl1 libgles2 libgbm1 mesa-vulkan-drivers mesa-util
 PKGS_APPS="foot featherpad qt6-wayland chromium firefox-esr"
 # the SSH server ships off; the `ssh` switch file on the boot partition (rpi/firstboot) or RPI_SSH=1 turns it on
 PKGS_SSH="openssh-server"
-# the boot splash (the Insane OS Plymouth theme comes in the lordos package; plymouth-label draws the
+# the boot splash (the Insane OS Plymouth theme comes in the insaneos package; plymouth-label draws the
 # password prompt's text for encrypted disks). See docs/RASPBERRY.md, "Boot splash".
 PKGS_SPLASH="plymouth plymouth-label"
-# to build lord-server (only in the build chroot, not in the image)
-# (the same as the ISO's build packages, docs/ISO.md: lord-doc needs Poppler and libarchive, lord-ocr Tesseract, lord-media
-# FFmpeg, lord-netperm's BPF programs clang; without them make silently leaves those parts out)
+# to build insane-server (only in the build chroot, not in the image)
+# (the same as the ISO's build packages, docs/ISO.md: insane-doc needs Poppler and libarchive, insane-ocr Tesseract, insane-media
+# FFmpeg, insane-netperm's BPF programs clang; without them make silently leaves those parts out)
 PKGS_BUILD="build-essential pkg-config libxkbcommon-dev libwayland-dev wayland-protocols libgbm-dev libegl-dev libgles-dev
  libssl-dev libcrypt-dev libsrtp2-dev libusrsctp-dev freerdp3-dev dpkg-dev file clang
  libpoppler-glib-dev libarchive-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libva-dev
@@ -126,7 +126,7 @@ kernel_warning() {
     echo "##########################################################################################" >&2
 }
 for fl in 2712 v8; do
-    case " $OWN_FLAVOURS " in *" $fl "*) echo "   kernel rpi-$fl: Insane OS build ($(basename "$(ls "$KERNEL_DEBS"/linux-image-*-lordos*-rpi-${fl}_*_arm64.deb | sort -V | tail -1)"))" ;;
+    case " $OWN_FLAVOURS " in *" $fl "*) echo "   kernel rpi-$fl: Insane OS build ($(basename "$(ls "$KERNEL_DEBS"/linux-image-*-insaneos*-rpi-${fl}_*_arm64.deb | sort -V | tail -1)"))" ;;
         *) kernel_warning "$fl" ;; esac
 done
 umount_tree() {
@@ -175,17 +175,17 @@ is_aarch64() {      # aarch64 ELF (e_machine = 0xb7)
     [ -f "$1" ] && [ "$(od -An -tx1 -j18 -N2 "$1" | tr -d ' \n')" = "b700" ]
 }
 
-# ---- 1. lord-server and lord-sessiond for arm64, and the package ----
+# ---- 1. insane-server and insane-sessiond for arm64, and the package ----
 [ -f themes/greeter/theme.bundle.js ] || { echo "build-img.sh: themes missing (npm run build on the development machine)" >&2; exit 1; }
-if is_aarch64 server/build/lord-server && is_aarch64 server/build/lord-sessiond; then
-    echo "== lord-server: using server/build (already aarch64)"
-    # mkdeb.sh checks the signed system code with lord-server, which can't run here on x86-64
+if is_aarch64 server/build/insane-server && is_aarch64 server/build/insane-sessiond; then
+    echo "== insane-server: using server/build (already aarch64)"
+    # mkdeb.sh checks the signed system code with insane-server, which can't run here on x86-64
     if [ "$NATIVE" = 0 ] && [ ! -x "${CODE_CHECK_SERVER:-}" ]; then
-        echo "build-img.sh: server/build is aarch64 on an $(uname -m) host: set CODE_CHECK_SERVER to a lord-server built for this host from the same tree" >&2; exit 1
+        echo "build-img.sh: server/build is aarch64 on an $(uname -m) host: set CODE_CHECK_SERVER to a insane-server built for this host from the same tree" >&2; exit 1
     fi
     DEB_ARCH=$ARCH sh tools/iso/mkdeb.sh "$DEB"
 else
-    echo "== lord-server: building in an arm64 chroot ($BR)"
+    echo "== insane-server: building in an arm64 chroot ($BR)"
     # (re)install the build packages when the chroot is new or lacks some (an older chroot without clang or RDP's headers)
     if [ ! -x "$BR/usr/bin/gcc" ] || [ ! -x "$BR/usr/bin/clang" ] || [ ! -d "$BR/usr/include/aarch64-linux-gnu/libavcodec" ] ||
        [ ! -f "$BR/usr/include/freerdp3/freerdp/addin.h" ]; then
@@ -209,29 +209,29 @@ else
     sh "$ROOT/tools/tts/fetch-audiocpp.sh" >> "$WORK/build.log" 2>&1 || { echo "build-img.sh: can't fetch audio.cpp (tools/tts/fetch-audiocpp.sh)" >&2; exit 1; }
     in_root "$BR" sh -c "cd /src/Insane OS && make -C server -j$J GPU=1 RELEASE=${RELEASE:-0} && make -C server build/canvas-test" > "$WORK/build.log" 2>&1 || {
         tail -40 "$WORK/build.log"; exit 1; }
-    is_aarch64 "$BR/src/Insane OS/server/build/lord-server" || { echo "build-img.sh: the binary is not aarch64" >&2; exit 1; }
+    is_aarch64 "$BR/src/Insane OS/server/build/insane-server" || { echo "build-img.sh: the binary is not aarch64" >&2; exit 1; }
     # canvas-test: NEON against C, bit for bit (under qemu it measures nothing, but it checks)
     in_root "$BR" /src/Insane OS/server/build/canvas-test > "$WORK/canvas-test.log" 2>&1 || {
         cat "$WORK/canvas-test.log"; echo "build-img.sh: canvas-test failed (NEON ≠ C); build with NEON=0" >&2; exit 1; }
-    in_root "$BR" sh -c "cd /src/Insane OS && DEB_ARCH=$ARCH REQUIRE_SIGNED_CODE=${REQUIRE_SIGNED_CODE:-0} sh tools/iso/mkdeb.sh /tmp/lordos.deb" >> "$WORK/build.log" 2>&1 || {
+    in_root "$BR" sh -c "cd /src/Insane OS && DEB_ARCH=$ARCH REQUIRE_SIGNED_CODE=${REQUIRE_SIGNED_CODE:-0} sh tools/iso/mkdeb.sh /tmp/insaneos.deb" >> "$WORK/build.log" 2>&1 || {
         tail -20 "$WORK/build.log"; exit 1; }
-    cp "$BR/tmp/lordos.deb" "$DEB"
+    cp "$BR/tmp/insaneos.deb" "$DEB"
     # the package must be complete: the documents and media helpers and the firewall's BPF programs
-    for f in lord-doc lord-media lord-ocr lord-tts; do
-        dpkg-deb -c "$DEB" | grep -q "/usr/lib/lordos/bin/$f\$" || { echo "build-img.sh: $f missing from the package (build packages, see $WORK/build.log)" >&2; exit 1; }
+    for f in insane-doc insane-media insane-ocr insane-tts; do
+        dpkg-deb -c "$DEB" | grep -q "/usr/lib/insaneos/bin/$f\$" || { echo "build-img.sh: $f missing from the package (build packages, see $WORK/build.log)" >&2; exit 1; }
     done
-    [ -s "$BR/src/Insane OS/server/build/gen/np_bpf.h" ] || { echo "build-img.sh: lord-netperm built without its BPF programs (clang)" >&2; exit 1; }
+    [ -s "$BR/src/Insane OS/server/build/gen/np_bpf.h" ] || { echo "build-img.sh: insane-netperm built without its BPF programs (clang)" >&2; exit 1; }
     umount_ch "$BR"
 fi
 # mkdeb.sh (the same as the ISO's) takes the architecture from DEB_ARCH
 echo "   $(basename "$DEB") ($(du -h "$DEB" | cut -f1))"
-# the tested-hardware snapshot lordos depends on: the same Architecture: all package as the ISO's
+# the tested-hardware snapshot insaneos depends on: the same Architecture: all package as the ISO's
 HWDEB=$(sh tools/iso/mkdeb-hwdata.sh "$OUT")
 echo "   $(basename "$HWDEB")"
 # rclone for Cloud (docs/CLOUD.md 3.1): rclone's signed release binary, repackaged by tools/iso/mkdeb-rclone.sh <folder> <arch>; RCLONE_DEB names it,
-# else the newest lordos-rclone_*_<arch>.deb in the output folder
-RCDEB=${RCLONE_DEB:-$(ls "$OUT"/lordos-rclone_*_"$ARCH".deb 2>/dev/null | sort -V | tail -n 1)}
-[ -f "$RCDEB" ] || { echo "no lordos-rclone_<version>_$ARCH.deb: build it with tools/iso/mkdeb-rclone.sh $OUT $ARCH (downloads and checks rclone's signed release), or set RCLONE_DEB" >&2; exit 1; }
+# else the newest insaneos-rclone_*_<arch>.deb in the output folder
+RCDEB=${RCLONE_DEB:-$(ls "$OUT"/insaneos-rclone_*_"$ARCH".deb 2>/dev/null | sort -V | tail -n 1)}
+[ -f "$RCDEB" ] || { echo "no insaneos-rclone_<version>_$ARCH.deb: build it with tools/iso/mkdeb-rclone.sh $OUT $ARCH (downloads and checks rclone's signed release), or set RCLONE_DEB" >&2; exit 1; }
 echo "   $(basename "$RCDEB")"
 
 # ---- 2. the image's system ----
@@ -268,9 +268,9 @@ install -m 644 "$KEY" "$CH/etc/apt/keyrings/raspberrypi.pgp"
 echo "deb [signed-by=/etc/apt/keyrings/raspberrypi.pgp] $RPI_MIRROR $SUITE main" > "$CH/etc/apt/sources.list.d/raspberrypi.list"
 install -m 644 "$RPI/etc/apt/preferences.d/raspberrypi" "$CH/etc/apt/preferences.d/raspberrypi"
 
-echo lordos-pi > "$CH/etc/hostname"
+echo insaneos-pi > "$CH/etc/hostname"
 mkdir -p "$CH/etc/network"; printf 'auto lo\niface lo inet loopback\n' > "$CH/etc/network/interfaces"
-printf '127.0.0.1\tlocalhost\n127.0.1.1\tlordos-pi\n::1\tlocalhost ip6-localhost ip6-loopback\n' > "$CH/etc/hosts"
+printf '127.0.0.1\tlocalhost\n127.0.1.1\tinsaneos-pi\n::1\tlocalhost ip6-localhost ip6-loopback\n' > "$CH/etc/hosts"
 # the Raspberry Pi kernel hooks write to /boot/firmware (here, a regular folder that is later
 # copied to the FAT partition)
 mkdir -p "$CH/boot/firmware"
@@ -279,7 +279,7 @@ mount_ch "$CH"
 echo "== paquetes"
 in_root "$CH" apt-get update -q > "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
 # shellcheck disable=SC2086
-in_root "$CH" apt-get install -y -q --no-install-recommends $PKGS_BASE $PKGS_TOOLS $PKGS_LORDOS $PKGS_RPI $PKGS_BT $ARCHIVE_K $PKGS_GPU $PKGS_APPS $PKGS_SSH $PKGS_SPLASH \
+in_root "$CH" apt-get install -y -q --no-install-recommends $PKGS_BASE $PKGS_TOOLS $PKGS_INSANEOS $PKGS_RPI $PKGS_BT $ARCHIVE_K $PKGS_GPU $PKGS_APPS $PKGS_SSH $PKGS_SPLASH \
     >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
 # the Insane OS kernels (same hooks as Raspberry Pi's: initramfs, raspi-firmware copies kernel_2712.img,
 # device trees and overlays), and an apt pin so the archive kernel of that flavour never replaces them
@@ -293,23 +293,23 @@ if [ -n "$OWN_KDEBS" ]; then
     {
         echo "# Insane OS on Raspberry Pi: the kernel is Insane OS's build of the Raspberry Pi kernel (Landlock, BPF LSM,"
         echo "# tools/rpi/build-kernel.sh, docs/RASPBERRY.md). Raspberry Pi's kernel packages for the same"
-        echo "# board are never installed over it; Insane OS updates ship as new linux-image-*-lordos*-rpi-* packages."
+        echo "# board are never installed over it; Insane OS updates ship as new linux-image-*-insaneos*-rpi-* packages."
         for fl in $OWN_FLAVOURS; do
             echo
             echo "Package: linux-image-rpi-$fl linux-image-*+rpt-rpi-$fl linux-headers-rpi-$fl linux-headers-*+rpt-rpi-$fl"
             echo "Pin: version *"
             echo "Pin-Priority: -1"
         done
-    } > "$CH/etc/apt/preferences.d/lordos-kernel"
+    } > "$CH/etc/apt/preferences.d/insaneos-kernel"
 fi
 # shellcheck disable=SC2086
 in_root "$CH" apt-get install -y -q --no-install-recommends $PKGS_RPI_EXTRA >> "$WORK/apt.log" 2>&1 ||
     echo "   warning: $PKGS_RPI_EXTRA were not installed (see $WORK/apt.log)"
-cp "$DEB" "$CH/tmp/lordos.deb"
-cp "$HWDEB" "$CH/tmp/lordos-hwdata.deb"
-cp "$RCDEB" "$CH/tmp/lordos-rclone.deb"
-in_root "$CH" apt-get install -y -q --no-install-recommends /tmp/lordos-hwdata.deb /tmp/lordos-rclone.deb /tmp/lordos.deb >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
-rm -f "$CH/tmp/lordos.deb" "$CH/tmp/lordos-hwdata.deb" "$CH/tmp/lordos-rclone.deb"
+cp "$DEB" "$CH/tmp/insaneos.deb"
+cp "$HWDEB" "$CH/tmp/insaneos-hwdata.deb"
+cp "$RCDEB" "$CH/tmp/insaneos-rclone.deb"
+in_root "$CH" apt-get install -y -q --no-install-recommends /tmp/insaneos-hwdata.deb /tmp/insaneos-rclone.deb /tmp/insaneos.deb >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
+rm -f "$CH/tmp/insaneos.deb" "$CH/tmp/insaneos-hwdata.deb" "$CH/tmp/insaneos-rclone.deb"
 # the browsers' defaults, the same as the ISO's
 sh "$ROOT/tools/iso/browser-defaults.sh" "$CH"
 
@@ -327,40 +327,40 @@ EOF
 in_root "$CH" locale-gen > /dev/null
 echo 'LANG=en_US.UTF-8' > "$CH/etc/default/locale"     # English by default, like the ISO
 ln -sf /usr/share/zoneinfo/UTC "$CH/etc/localtime"; echo UTC > "$CH/etc/timezone"
-echo 'net.ipv4.ping_group_range = 0 2147483647' > "$CH/etc/sysctl.d/50-lordos-ping.conf"
+echo 'net.ipv4.ping_group_range = 0 2147483647' > "$CH/etc/sysctl.d/50-insaneos-ping.conf"
 
 # setup user (first-boot setup mode, see rpi/firstboot): same as the
-# live user. If lordos-user.txt/userconf.txt is present on first boot, it is deleted right away.
-in_root "$CH" useradd -m -s /bin/bash -c "Insane OS" -G sudo,audio,video,input,render lordos
-in_root "$CH" passwd -d lordos > /dev/null
-printf '# Insane OS on Raspberry Pi: only during setup mode (removed by rpi/firstboot)\nlordos ALL=(ALL) NOPASSWD: ALL\n' > "$CH/etc/sudoers.d/lordos-setup"
-chmod 440 "$CH/etc/sudoers.d/lordos-setup"
-mkdir -p "$CH/var/lib/systemd/linger"; : > "$CH/var/lib/systemd/linger/lordos"
-mkdir -p "$CH/etc/lordos"
-# until first boot nobody logs in automatically; rpi/firstboot decides (login screen or lordos)
-printf '# Raspberry Pi: set by /usr/lib/lordos/rpi/firstboot on first boot.\nAUTOLOGIN=\n' > "$CH/etc/lordos/session.conf"
-in_root "$CH" useradd --system --home-dir /var/lib/lordos-greeter --create-home --shell /usr/sbin/nologin --comment Insane OS lordos-greeter
-in_root "$CH" usermod -aG render,video lordos-greeter
+# live user. If insaneos-user.txt/userconf.txt is present on first boot, it is deleted right away.
+in_root "$CH" useradd -m -s /bin/bash -c "Insane OS" -G sudo,audio,video,input,render insaneos
+in_root "$CH" passwd -d insaneos > /dev/null
+printf '# Insane OS on Raspberry Pi: only during setup mode (removed by rpi/firstboot)\ninsaneos ALL=(ALL) NOPASSWD: ALL\n' > "$CH/etc/sudoers.d/insaneos-setup"
+chmod 440 "$CH/etc/sudoers.d/insaneos-setup"
+mkdir -p "$CH/var/lib/systemd/linger"; : > "$CH/var/lib/systemd/linger/insaneos"
+mkdir -p "$CH/etc/insaneos"
+# until first boot nobody logs in automatically; rpi/firstboot decides (login screen or insaneos)
+printf '# Raspberry Pi: set by /usr/lib/insaneos/rpi/firstboot on first boot.\nAUTOLOGIN=\n' > "$CH/etc/insaneos/session.conf"
+in_root "$CH" useradd --system --home-dir /var/lib/insaneos-greeter --create-home --shell /usr/sbin/nologin --comment Insane OS insaneos-greeter
+in_root "$CH" usermod -aG render,video insaneos-greeter
 in_root "$CH" systemctl --global enable pipewire.socket pipewire-pulse.socket wireplumber.service > /dev/null 2>&1 || true
 
 # first boot and wait for vc4
-install -d "$CH/usr/lib/lordos/rpi" "$CH/etc/systemd/system/lordos.service.d"
-install -m 755 "$RPI/usr/lib/lordos/rpi/firstboot" "$RPI/usr/lib/lordos/rpi/wait-kms" "$CH/usr/lib/lordos/rpi/"
-# the post-flash check (docs/RASPBERRY.md, "After flashing"): sudo /usr/lib/lordos/rpi/verify-board
-install -m 755 "$ROOT/tools/rpi/verify-board.sh" "$CH/usr/lib/lordos/rpi/verify-board"
-install -m 644 "$RPI/etc/systemd/system/lordos-rpi-firstboot.service" "$CH/etc/systemd/system/"
-install -m 644 "$RPI/etc/systemd/system/lordos.service.d/rpi.conf" "$CH/etc/systemd/system/lordos.service.d/"
+install -d "$CH/usr/lib/insaneos/rpi" "$CH/etc/systemd/system/insaneos.service.d"
+install -m 755 "$RPI/usr/lib/insaneos/rpi/firstboot" "$RPI/usr/lib/insaneos/rpi/wait-kms" "$CH/usr/lib/insaneos/rpi/"
+# the post-flash check (docs/RASPBERRY.md, "After flashing"): sudo /usr/lib/insaneos/rpi/verify-board
+install -m 755 "$ROOT/tools/rpi/verify-board.sh" "$CH/usr/lib/insaneos/rpi/verify-board"
+install -m 644 "$RPI/etc/systemd/system/insaneos-rpi-firstboot.service" "$CH/etc/systemd/system/"
+install -m 644 "$RPI/etc/systemd/system/insaneos.service.d/rpi.conf" "$CH/etc/systemd/system/insaneos.service.d/"
 # the on-board Bluetooth: SCO routing helper, started by udev for the UART controller (docs/RASPBERRY.md)
-install -m 755 "$RPI/usr/lib/lordos/rpi/bt-uart" "$CH/usr/lib/lordos/rpi/"
-install -m 644 "$RPI/etc/systemd/system/lordos-rpi-bt@.service" "$CH/etc/systemd/system/"
-install -D -m 644 "$RPI/etc/udev/rules.d/90-lordos-rpi-bt.rules" "$CH/etc/udev/rules.d/90-lordos-rpi-bt.rules"
-mkdir -p "$CH/var/lib/lordos/rpi"
-: > "$CH/var/lib/lordos/rpi/resize-pending"
-: > "$CH/var/lib/lordos/rpi/firstboot-pending"
-in_root "$CH" systemctl enable lordos-rpi-firstboot.service lordos.service > /dev/null
-in_root "$CH" systemctl enable lord-fand.service > /dev/null    # fans by temperature from the first boot (docs/FANS.md)
+install -m 755 "$RPI/usr/lib/insaneos/rpi/bt-uart" "$CH/usr/lib/insaneos/rpi/"
+install -m 644 "$RPI/etc/systemd/system/insaneos-rpi-bt@.service" "$CH/etc/systemd/system/"
+install -D -m 644 "$RPI/etc/udev/rules.d/90-insaneos-rpi-bt.rules" "$CH/etc/udev/rules.d/90-insaneos-rpi-bt.rules"
+mkdir -p "$CH/var/lib/insaneos/rpi"
+: > "$CH/var/lib/insaneos/rpi/resize-pending"
+: > "$CH/var/lib/insaneos/rpi/firstboot-pending"
+in_root "$CH" systemctl enable insaneos-rpi-firstboot.service insaneos.service > /dev/null
+in_root "$CH" systemctl enable insane-fand.service > /dev/null    # fans by temperature from the first boot (docs/FANS.md)
 # per-app network permissions and the device restrictions in the kernel (docs/FIREWALL.md), as on the ISO
-in_root "$CH" systemctl enable lord-netperm.service > /dev/null
+in_root "$CH" systemctl enable insane-netperm.service > /dev/null
 in_root "$CH" systemctl enable bluetooth.service > /dev/null       # bluez's postinst does it too; made sure
 in_root "$CH" systemctl mask getty@tty1.service > /dev/null
 in_root "$CH" systemctl mask systemd-networkd-wait-online.service > /dev/null 2>&1 || true
@@ -377,7 +377,7 @@ for kv in $KV2712 $KV8; do
     if grep -q '^CONFIG_BPF_LSM=y' "$CH/boot/config-$kv" 2>/dev/null && grep -q '^CONFIG_DEBUG_INFO_BTF=y' "$CH/boot/config-$kv"; then
         echo "   kernel $kv: BPF LSM and BTF built in"
     else echo "   WARNING: kernel $kv has no BPF LSM/BTF (\"No Bluetooth\" for Linux apps not enforced on that board)" >&2; fi
-    # sock_diag SOCK_DESTROY (6.18.57-3+lordos, 0.8.4): the firewall closes the connections a new rule denies
+    # sock_diag SOCK_DESTROY (6.18.57-3+insaneos, 0.8.4): the firewall closes the connections a new rule denies
     if grep -q '^CONFIG_INET_DIAG_DESTROY=y' "$CH/boot/config-$kv" 2>/dev/null &&
        [ "$(grep -Ec '^CONFIG_INET_(TCP|UDP)_DIAG=[ym]' "$CH/boot/config-$kv")" = 2 ]; then
         echo "   kernel $kv: sock_diag SOCK_DESTROY built in"
@@ -386,17 +386,17 @@ done
 # boot splash: the Insane OS theme, and vc4 (HDMI) with DRM in the initramfs so Plymouth draws from the
 # first seconds instead of waiting for the root file system. Plymouth's own hook adds the rest of
 # kernel/drivers/gpu/drm (MODULES=most), its plugins, the theme and a font for the password prompt.
-in_root "$CH" plymouth-set-default-theme lordos
+in_root "$CH" plymouth-set-default-theme insaneos
 install -d "$CH/etc/initramfs-tools/conf.d"
 grep -qx vc4 "$CH/etc/initramfs-tools/modules" 2>/dev/null || {
     echo "# Insane OS: the display driver early, for the boot splash (docs/RASPBERRY.md, \"Boot splash\")"
     echo vc4
 } >> "$CH/etc/initramfs-tools/modules"
 printf '# Insane OS: the boot splash needs the DRM drivers in the initramfs (docs/RASPBERRY.md)\nMODULES=most\n' \
-    > "$CH/etc/initramfs-tools/conf.d/lordos-splash.conf"
+    > "$CH/etc/initramfs-tools/conf.d/insaneos-splash.conf"
 in_root "$CH" update-initramfs -u -k all > "$WORK/initramfs.log" 2>&1 || { tail -20 "$WORK/initramfs.log"; exit 1; }
 for kv in $KV2712 $KV8; do
-    in_root "$CH" lsinitramfs "/boot/initrd.img-$kv" 2>/dev/null | grep -q 'plymouth/themes/lordos/lordos.script' ||
+    in_root "$CH" lsinitramfs "/boot/initrd.img-$kv" 2>/dev/null | grep -q 'plymouth/themes/insaneos/insaneos.script' ||
         { echo "build-img.sh: the initramfs of $kv has no Insane OS splash (see $WORK/initramfs.log)" >&2; exit 1; }
 done
 place_kernel() {     # version, kernel name on the FAT, initramfs name
@@ -412,8 +412,8 @@ place_kernel "$KV2712" kernel_2712.img initramfs_2712
 place_kernel "$KV8" kernel8.img initramfs8
 install -m 644 "$RPI/boot/firmware/config.txt" "$CH/boot/firmware/config.txt"
 # case accessories (Settings → Cooling, admin action rpi-case); config.txt includes it
-printf '# lordos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n' > "$CH/boot/firmware/lordos-case.txt"
-install -m 644 "$RPI/boot/firmware/lordos-user.txt.example" "$CH/boot/firmware/lordos-user.txt.example"
+printf '# insaneos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n' > "$CH/boot/firmware/insaneos-case.txt"
+install -m 644 "$RPI/boot/firmware/insaneos-user.txt.example" "$CH/boot/firmware/insaneos-user.txt.example"
 
 rm -f "$CH/usr/sbin/policy-rc.d" "$CH/usr/bin/qemu-aarch64-static"
 in_root "$CH" apt-get clean
@@ -457,14 +457,14 @@ cat > "$WORK/mnt/etc/fstab" <<EOF
 PARTUUID=$PARTUUID_ROOT  /              ext4  defaults,noatime  0 1
 PARTUUID=$PARTUUID_BOOT  /boot/firmware vfat  defaults,umask=0077  0 2
 EOF
-# lordos.gpu=0 (safe mode, everything on the CPU) and lordos.lang=en|pt|fr|it can be added here, as on the ISO.
+# insaneos.gpu=0 (safe mode, everything on the CPU) and insaneos.lang=en|pt|fr|it can be added here, as on the ISO.
 # The boot splash: quiet splash (Plymouth), no serial console for it, no kernel logo or blinking cursor;
 # the console is tty1, where Plymouth draws and where Esc shows the boot messages. Removing "splash"
 # boots in text as before (docs/RASPBERRY.md, "Boot splash").
 # lsm=: the same list as the Insane OS kernel's CONFIG_LSM (Landlock for app isolation, server/src/sec;
-# Yama for ptrace_scope; bpf for lord-netperm's "No Bluetooth" program); those the kernel lacks are
+# Yama for ptrace_scope; bpf for insane-netperm's "No Bluetooth" program); those the kernel lacks are
 # ignored, so the active list is "capability,landlock,yama,bpf".
-printf 'console=serial0,115200 console=tty1 root=PARTUUID=%s rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3 cgroup_enable=memory lsm=landlock,lockdown,yama,integrity,bpf lordos.lang=en\n' \
+printf 'console=serial0,115200 console=tty1 root=PARTUUID=%s rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3 cgroup_enable=memory lsm=landlock,lockdown,yama,integrity,bpf insaneos.lang=en\n' \
     "$PARTUUID_ROOT" > "$WORK/mnt/boot/firmware/cmdline.txt"
 sync
 umount "$WORK/mnt/boot/firmware"

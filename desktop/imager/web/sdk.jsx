@@ -1,4 +1,4 @@
-// sdk.jsx — the few parts of @lordos/sdk the imager's UI uses, for a browser view (the Tauri app's
+// sdk.jsx — the few parts of @insaneos/sdk the imager's UI uses, for a browser view (the Tauri app's
 // window). The shared UI (apps/imager) is built against this module instead of Insane OS's engine:
 // View, Text, Image, ScrollView, TextInput, Button, Toggle, Segmented, SearchField, Lumo,
 // InsaneLogo, useTheme, useLocale, t, tOptional, formatDate, formatNumber, createStore, useStore,
@@ -195,7 +195,7 @@ export function Lumo({ pose = 'confused', size = 96, alt, style }) {
   return h(Image, { src: `asset:mascot/lumo-${p}-256.png`, alt: alt || t(`mascot.${p}`), style: [{ width: size, height: size }, style] });
 }
 export function InsaneLogo({ size = 64 }) {
-  return h(Image, { src: 'asset:icons/lordos-icon-128.png', alt: 'Insane OS', style: { width: size, height: size, borderRadius: size * 0.22, boxShadow: '0 2px 6px rgba(0,0,0,0.3)' } });
+  return h(Image, { src: 'asset:icons/insaneos-icon-128.png', alt: 'Insane OS', style: { width: size, height: size, borderRadius: size * 0.22, boxShadow: '0 2px 6px rgba(0,0,0,0.3)' } });
 }
 
 // ---- keyboard ----

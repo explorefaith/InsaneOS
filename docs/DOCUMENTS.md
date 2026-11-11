@@ -6,11 +6,11 @@ PDFs, archives, fonts and emoji in Insane OS. This document covers:
 - in **Files**, archives and **Quick Preview**;
 - **Fonts**;
 - **Emoji & Symbols**;
-- the sandboxed helper **lord-doc**, which does the heavy lifting for all of the above.
+- the sandboxed helper **insane-doc**, which does the heavy lifting for all of the above.
 
 Printing and scanning are in `PRINTING.md`.
 
-## Screenshots (VM 116, real lord-server)
+## Screenshots (VM 116, real insane-server)
 
 | | |
 |---|---|
@@ -74,12 +74,12 @@ In the style of a classic document viewer:
 
 How it draws:
 
-- Pages are requested from lord-doc only for what's visible, plus the neighbors at lower priority.
+- Pages are requested from insane-doc only for what's visible, plus the neighbors at lower priority.
 - A request that's no longer needed (the page left the view) is canceled before it starts.
 - While a page arrives at the new zoom, whatever version of that page exists is shown, scaled:
   there's never a gap.
 - **Cache** (`apps/pdf/cache.js`): 48 MB of pages and 8 MB of thumbnails per document. On top of
-  that there's a 160 MB cap for all the images lord-server keeps (`doc.c`).
+  that there's a 160 MB cap for all the images insane-server keeps (`doc.c`).
 
 ## Archives in Files
 
@@ -87,7 +87,7 @@ How it draws:
   `.gz`… opens it as a folder (`{ type: 'archive', path, inner }` in `apps/files/archive.js`).
   - The folders inside are browsed just like real ones.
   - Opening or previewing with Space a file from inside extracts **only that one** to
-    `~/.cache/lordos/archives/<id>/` and opens it with its app.
+    `~/.cache/insaneos/archives/<id>/` and opens it with its app.
   - Inside the archive you can't delete, rename or paste.
   - "Extract N items" takes the selection out to a new folder next to the archive.
 - **Extract here:**
@@ -121,7 +121,7 @@ A malicious archive can't write outside the destination folder. There are three 
      link can't serve as a bridge;
    - files are created with `O_EXCL` and never overwrite an existing one;
    - there are caps: 500,000 entries, 64 GB written and 128 MB free on the disk, against "bombs".
-3. **The confinement:** lord-doc runs under Landlock with write access **only** below the
+3. **The confinement:** insane-doc runs under Landlock with write access **only** below the
    destination fd (`rw_dir_fds`), with no network and with seccomp.
 
 Tested in `tests/doc_evil.sh` with the archives from `tests/make_evil_archives.py`:
@@ -146,13 +146,13 @@ formats).
 
 | File | What it shows | Who makes it |
 |---|---|---|
-| PNG/JPEG image | the image | stb_image in lord-server, as before |
-| PDF | the first page and the page count | lord-doc's utility session, already warm |
+| PNG/JPEG image | the image | stb_image in insane-server, as before |
+| PDF | the first page and the page count | insane-doc's utility session, already warm |
 | text and code | the first lines | — |
-| font (`.ttf/.otf/.ttc`) | a sample in several sizes | FreeType in lord-doc |
+| font (`.ttf/.otf/.ttc`) | a sample in several sizes | FreeType in insane-doc |
 | archive | file count, size and the first entries | — |
-| audio and video | a frame or the cover through `media.poster` (`MEDIA.md`); without lord-media, the icon | lord-media |
-| file inside an archive | the same, after extracting only that one to the cache | lord-doc |
+| audio and video | a frame or the cover through `media.poster` (`MEDIA.md`); without insane-media, the icon | insane-media |
+| file inside an archive | the same, after extracting only that one to the cache | insane-doc |
 
 The arrows go to the next one; Space or Esc close it.
 
@@ -169,9 +169,9 @@ The arrows go to the next one; Space or Esc close it.
   copying.
 - **Remove:** only the user's; they go to the Trash.
 
-The samples and the table are drawn by lord-doc with FreeType and cairo. The catalog is the usual
-one, `lord.fonts.list`, which now also carries `path` and `index`. New fonts aren't read in
-lord-server until they're installed.
+The samples and the table are drawn by insane-doc with FreeType and cairo. The catalog is the usual
+one, `insane.fonts.list`, which now also carries `path` and `index`. New fonts aren't read in
+insane-server until they're installed.
 
 ## Emoji & Symbols
 
@@ -186,7 +186,7 @@ lord-server until they're installed.
 - **How it types:** through the **same path as the input method**. The text arrives as a key that
   types that text, just like `ime_commit` in `js.c`, so it works in `TextInput`s, the Editor, Notes
   and the Terminal:
-  - in a focused **Linux app**, it pastes it through the clipboard (`lord.wayland.paste`), like the
+  - in a focused **Linux app**, it pastes it through the clipboard (`insane.wayland.paste`), like the
     clipboard panel;
   - with no focused field, it copies it and says so.
 - **The "Emoji & Symbols" app** (`apps/characters`) is the same in a window, plus the **Unicode
@@ -199,32 +199,32 @@ lord-server until they're installed.
   They're generated by `tools/gen-emoji.mjs` from Unicode emoji-test 15.1 and CLDR 45 (Unicode
   License v3).
 
-## lord-doc: the sandboxed helper
+## insane-doc: the sandboxed helper
 
 ```
-lord-server (no Poppler or libarchive)
+insane-server (no Poppler or libarchive)
   └── doc.c: its own thread with poll() over the helpers; priority queue; deadlines
-        ├── lord-doc  "pdf" session    one open PDF (Viewer, print preview)
-        ├── lord-doc  "arc" session    a listing, an extraction or a compression
-        └── lord-doc  "util" session   long-lived: fonts, PDFs to print, thumbnails, images
+        ├── insane-doc  "pdf" session    one open PDF (Viewer, print preview)
+        ├── insane-doc  "arc" session    a listing, an extraction or a compression
+        └── insane-doc  "util" session   long-lived: fonts, PDFs to print, thumbnails, images
 ```
 
-- **Binary:** `server/build/lord-doc` (`src/doc/helper.c`, `h_pdf.c`, `h_arc.c`, `h_font.c`,
+- **Binary:** `server/build/insane-doc` (`src/doc/helper.c`, `h_pdf.c`, `h_arc.c`, `h_font.c`,
   `h_make.c`).
   - It links Poppler (glib interface) and libarchive, and Poppler brings cairo, FreeType and
     fontconfig.
-  - lord-server links **none** of those libraries.
+  - insane-server links **none** of those libraries.
   - If the `-dev` packages are missing, `make` builds everything else and the documents say the
     helper isn't there.
 - **How it's launched:**
-  - `doc.c` launches it with a **fixed path**: `lord-server`'s own folder + `/lord-doc`;
-  - it must be owned by root or by the same owner as lord-server, and not writable by others;
+  - `doc.c` launches it with a **fixed path**: `insane-server`'s own folder + `/insane-doc`;
+  - it must be owned by root or by the same owner as insane-server, and not writable by others;
   - with no arguments and a minimal environment: HOME, `LANG=C.UTF-8` and the Insane OS fonts folder;
   - the channel is a SOCK_SEQPACKET `socketpair` on fd 3.
-- **Files:** the helper **opens nothing by path**. lord-server validates the path (home folder or
+- **Files:** the helper **opens nothing by path**. insane-server validates the path (home folder or
   the user's mounts; for fonts, also `/usr/share/fonts`) and passes it the fd with SCM_RIGHTS:
   - for reading, the document;
-  - for extracting, the fd of the destination folder (created by lord-server, new except in the
+  - for extracting, the fd of the destination folder (created by insane-server, new except in the
     cache);
   - for saving a copy or a `.zip`, a new file opened with `O_EXCL`.
 - **The confinement** (`sandbox_apply_helper`, the shared module `server/src/sec/sandbox.c`),
@@ -238,20 +238,20 @@ lord-server (no Poppler or libarchive)
     - no `socket`, `connect`, `bind`, `execve` or `ptrace`;
     - `clone` only for threads;
     - the syscalls are in a per-architecture list (x86-64 and ARM64).
-  - **Also:** no capabilities, `no_new_privs`, its own cgroup `lordos-doc.scope` (768 MB/1 GB),
+  - **Also:** no capabilities, `no_new_privs`, its own cgroup `insaneos-doc.scope` (768 MB/1 GB),
     1.5 GB `RLIMIT_AS`, `PR_SET_PDEATHSIG` and no core dumps.
   - **Tested:** `build/doc-test … selftest` and `selftest-arc` try what's forbidden. They can't
     open `~/.ssh` or `~/.bashrc`, write to `/tmp`, open sockets (neither network nor unix, so no
     D-Bus, CUPS or Wayland) or fork. Fonts can be read.
 - **What comes back:**
-  - **JSON:** lord-server validates it with the strict reader in `sec/json.c` before passing it to
+  - **JSON:** insane-server validates it with the strict reader in `sec/json.c` before passing it to
     JS.
-  - **Images:** premultiplied ARGB32, the engine's format, in a memfd. lord-server requires the
+  - **Images:** premultiplied ARGB32, the engine's format, in a memfd. insane-server requires the
     `F_SEAL_SHRINK` seal before mapping it, so a cheating helper can't cause SIGBUS by shrinking
     it.
   - **Built PDFs:** in a sealed memfd (a "blob").
 - **If something fails:**
-  - the compositor **never waits**: results are read with `lord.doc.poll()` only while something
+  - the compositor **never waits**: results are read with `insane.doc.poll()` only while something
     is pending;
   - each request has a deadline (30 s for a page, 60 s to open; search, extract and compress are
     cut off after 60 s without progress). Once it expires, the helper is killed;
@@ -260,7 +260,7 @@ lord-server (no Poppler or libarchive)
 
 ### API
 
-`lord.doc` (`server/src/ui/js_doc.c`) and in the SDK:
+`insane.doc` (`server/src/ui/js_doc.c`) and in the SDK:
 
 | Module | What's there |
 |---|---|
@@ -273,7 +273,7 @@ lord-server (no Poppler or libarchive)
 
 | What | Time |
 |---|---|
-| Launch a lord-doc and confine it | 32 ms |
+| Launch a insane-doc and confine it | 32 ms |
 | Open a 224-page PDF (1.4 MB) with the sizes of all pages | 210 ms (the viewer first asks only for the first one and the rest afterwards, without holding up the first draw) |
 | First page in the viewer, from the double click (135 %, 1070 px wide) | 437–479 ms |
 | Page drawn by Poppler, with the document already open | median 20 ms, between 0.5 and 155 ms depending on the content |
@@ -284,7 +284,7 @@ lord-server (no Poppler or libarchive)
 | Quick Preview of a `.zip` (launches a helper and lists) | 146–310 ms; browsing with the arrows adds Files' redraw (~400 ms) |
 | Extract a 100 MB `.tar.gz` (232 MB, 8,958 files) | 1.59 s (GNU tar: 2.32 s); identical content, except an absolute link that was skipped on purpose |
 | Save a 1.6 MB annotated copy | 34 ms |
-| lord-server RAM | 53.6 MB without documents, 82 MB with the 224-page PDF open at 135 % |
+| insane-server RAM | 53.6 MB without documents, 82 MB with the 224-page PDF open at 135 % |
 | Helpers' RAM | pdf session: 87 MB with that PDF; utility session: 25 MB |
 
 **The 150 ms goal for Quick Preview:**
@@ -296,7 +296,7 @@ lord-server (no Poppler or libarchive)
 The measurements show up in the session log:
 - `js: pdf: … first page in N ms (N pages)`;
 - `js: quick-look: <kind> <name> in N ms` (Quick Preview, from Files);
-- with the file `~/.cache/lordos/doc-trace` (or `LORD_DOC_TRACE=1`), `lord-doc: request N: queue X
+- with the file `~/.cache/insaneos/doc-trace` (or `INSANE_DOC_TRACE=1`), `insane-doc: request N: queue X
   ms, helper Y ms` for each request.
 
 ## Tests
@@ -305,7 +305,7 @@ The measurements show up in the session log:
 make -C server test        # includes build/arcpath-test, build/ipp-test and build/doc-test
 server/build/arcpath-test  # 37/37: names and link targets
 sh tests/doc_evil.sh       # 31/31 (in server/): malicious archives, formats, confinement and annotated copy
-server/build/doc-test server/build/lord-doc pdf file.pdf 900   # open, draw and measure
+server/build/doc-test server/build/insane-doc pdf file.pdf 900   # open, draw and measure
 ```
 
 ## Pending
@@ -325,6 +325,6 @@ server/build/doc-test server/build/lord-doc pdf file.pdf 900   # open, draw and 
   - ZWJ sequences (❤️‍🔥, 👩‍💻) show as their parts, because the text engine doesn't join them yet;
   - in Linux apps it types by pasting, because there's no Wayland `text-input`.
 - **Untested:**
-  - Quick Preview of audio and video with `media.poster` was not measured here (VM 116 had no lord-media
+  - Quick Preview of audio and video with `media.poster` was not measured here (VM 116 had no insane-media
     when this was written; `media.poster` exists now, `MEDIA.md`);
   - printing from Photos (it belongs to the media agent; the API is ready: `print.open({ image })`).

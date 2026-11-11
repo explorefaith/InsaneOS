@@ -139,18 +139,18 @@ static void test_set(void) {
     CHECK(fwl_block_names(l, NULL, 0) == 0);
     CHECK(fwl_check_line("d tracker.example", 17) == 0 && fwl_check_line("d Tracker.example", 17) == -1 && fwl_check_line("n 10.0.0.0/8", 12) == -1);
     /* the compiled file: round trip (repeated lines are fine), and any bad line rejects it */
-    const char *t = "lordos-fwlists 1\nd tracker.example\ns ads.example\nn 203.0.113.0/24\nd tracker.example\nn 2001:db8::/32\n";
+    const char *t = "insaneos-fwlists 1\nd tracker.example\ns ads.example\nn 203.0.113.0/24\nd tracker.example\nn 2001:db8::/32\n";
     size_t n = strlen(t);
     char err[64];
     FwLists *b = fwl_load_text(t, n, err, sizeof err);
     CHECK(b && fwl_domains(b) == 2 && fwl_nets(b) == 2 && fwl_match_name(b, "q.ads.example") && fwl_match_addr(b, 4, ip("203.0.113.1", &fam)));
     fwl_free(b);
-    const char *bad[] = { "", "lordos-fwlists 2\nd a.example\n", "lordos-fwlists 1\nd a.example\nn 10.0.0.0/8\n", "lordos-fwlists 1\nd ../etc\n",
-                          "lordos-fwlists 1\nq a.example\n", "lordos-fwlists 1x\n", NULL };
+    const char *bad[] = { "", "insaneos-fwlists 2\nd a.example\n", "insaneos-fwlists 1\nd a.example\nn 10.0.0.0/8\n", "insaneos-fwlists 1\nd ../etc\n",
+                          "insaneos-fwlists 1\nq a.example\n", "insaneos-fwlists 1x\n", NULL };
     for (int i = 0; bad[i]; i++) CHECK(!fwl_load_text(bad[i], strlen(bad[i]), err, sizeof err));
-    char withnul[] = "lordos-fwlists 1\nd a.example\0\n";
+    char withnul[] = "insaneos-fwlists 1\nd a.example\0\n";
     CHECK(!fwl_load_text(withnul, sizeof withnul - 1, err, sizeof err));
-    b = fwl_load_text("lordos-fwlists 1", 16, err, sizeof err);
+    b = fwl_load_text("insaneos-fwlists 1", 16, err, sizeof err);
     CHECK(b && !fwl_domains(b));
     fwl_free(b);
     fwl_free(l);

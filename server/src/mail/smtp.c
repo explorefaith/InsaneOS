@@ -1,7 +1,7 @@
-/* smtp.c — composing (MIME) and sending (SMTP submission) for lord-maild (see maild.h).
+/* smtp.c — composing (MIME) and sending (SMTP submission) for insane-maild (see maild.h).
  *
  * Messages are built here, never by JS: headers are encoded (RFC 2047/2231), bodies go out as
- * quoted-printable, attachments as base64 read from the fds lord-server opened for the files the
+ * quoted-printable, attachments as base64 read from the fds insane-server opened for the files the
  * user picked. Submission is on 465 (implicit TLS) or 587 (STARTTLS, required), with AUTH PLAIN
  * or LOGIN. One sender thread serves every account, plus the "send later" outbox. */
 #include "maild.h"
@@ -126,9 +126,9 @@ char *compose_message(Account *a, const JVal *m, int *fds, int nfds, size_t *ole
     int natt = nfds;
     char bm[48], ba[48];
     rand_hex(rnd, 12);
-    SNPF(bm, sizeof bm, "=_lordos_m_%s", rnd);
+    SNPF(bm, sizeof bm, "=_insaneos_m_%s", rnd);
     rand_hex(rnd, 12);
-    SNPF(ba, sizeof ba, "=_lordos_a_%s", rnd);
+    SNPF(ba, sizeof ba, "=_insaneos_a_%s", rnd);
     int mixed = natt > 0;
     int alt = (html && *html) || (ics && *ics);
     if (mixed) jb_printf(&b, "Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\nThis is a multi-part message in MIME format.\r\n--%s\r\n", bm, bm);
@@ -216,9 +216,9 @@ int smtp_send(Account *a, const char *from, const char **rcpt, int nrcpt, const 
     if (!c) { free(pw); snprintf(err, ecap, "%s", why); return -1; }
     int r = -1;
     if (smtp_reply(c, text, sizeof text, NULL, 0) != 220) { snprintf(err, ecap, "greeting: %s", text); goto out; }
-    if (smtp_cmd(c, text, sizeof text, "EHLO %s", "lordos") != 250) { snprintf(err, ecap, "EHLO: %s", text); goto out; }
+    if (smtp_cmd(c, text, sizeof text, "EHLO %s", "insaneos") != 250) { snprintf(err, ecap, "EHLO: %s", text); goto out; }
     /* EHLO again to read the capabilities (the first reply already went by) */
-    conn_printf(c, "EHLO lordos\r\n");
+    conn_printf(c, "EHLO insaneos\r\n");
     if (smtp_reply(c, text, sizeof text, caps, sizeof caps) != 250) { snprintf(err, ecap, "EHLO: %s", text); goto out; }
     if (s.sec == SEC_STARTTLS) {
         if (!strcasestr(caps, "STARTTLS")) { snprintf(err, ecap, "no-starttls"); goto out; }
@@ -239,7 +239,7 @@ int smtp_send(Account *a, const char *from, const char **rcpt, int nrcpt, const 
             }
             goto out;
         }
-        conn_printf(c, "EHLO lordos\r\n");
+        conn_printf(c, "EHLO insaneos\r\n");
         if (smtp_reply(c, text, sizeof text, caps, sizeof caps) != 250) { snprintf(err, ecap, "EHLO: %s", text); goto out; }
     }
     /* AUTH PLAIN (or LOGIN) */

@@ -117,7 +117,7 @@ assert.equal(swapButtons(4, true), 1);
 assert.equal(swapButtons(2 | 8, true), 10);
 assert.equal(swapButtons(1, false), 1);
 assert.equal(thumbPath('/home/a', { id: 'd1', shot: 0 }), '');
-assert.equal(thumbPath('/home/a', { id: 'd1', shot: 17 }), '/home/a/.local/share/lordos/remote-desk/thumbs/d1.png#17');
+assert.equal(thumbPath('/home/a', { id: 'd1', shot: 17 }), '/home/a/.local/share/insaneos/remote-desk/thumbs/d1.png#17');
 assert.equal(thumbPath('/home/a', { id: '../x', shot: 17 }), '');
 console.log('remotedesk-test: ok');
 

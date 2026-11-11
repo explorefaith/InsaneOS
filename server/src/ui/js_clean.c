@@ -1,4 +1,4 @@
-/* js_clean.c — lord.clean: Cleaner's native API (docs/CLEANER-ARCHITECTURE.md, clean/clean.h).
+/* js_clean.c — insane.clean: Cleaner's native API (docs/CLEANER-ARCHITECTURE.md, clean/clean.h).
  *
  *   start(kind, opts)             a new scan: 'rules' (the default, no options), 'tree' ({ volume, minSize, exclude, remember, saved }),
  *                                 'dups' or 'images' ({ folders, exclude }). Options only name folders relative to the home
@@ -303,7 +303,7 @@ static JSValue f_empty_trash(JSContext *c, JSValueConst t, int argc, JSValueCons
     return result(c, clean_empty_trash());
 }
 
-void js_clean_register(JSContext *c, JSValue lord) {
+void js_clean_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
 #define F(name, fn, n) JS_SetPropertyStr(c, o, name, JS_NewCFunction(c, fn, name, n))
     F("start", f_start, 0);
@@ -324,5 +324,5 @@ void js_clean_register(JSContext *c, JSValue lord) {
     F("saved", f_saved, 0);
     F("forgetSaved", f_forget_saved, 0);
 #undef F
-    JS_SetPropertyStr(c, lord, "clean", o);
+    JS_SetPropertyStr(c, insane, "clean", o);
 }

@@ -1,8 +1,8 @@
 /* hiss.h — how much hiss a piece of synthesized speech has, and whether a try was cut short. Pocket TTS now and then makes a sentence with a bed of
- * broadband noise under the voice (it depends on the sentence and the seed, not on the backend); lord-tts measures
+ * broadband noise under the voice (it depends on the sentence and the seed, not on the backend); insane-tts measures
  * each sentence and makes it again with another seed when it is noisy (h_tts.c). Pure, tested by tests/hiss_test.c. */
-#ifndef LORD_TTS_HISS_H
-#define LORD_TTS_HISS_H
+#ifndef INSANE_TTS_HISS_H
+#define INSANE_TTS_HISS_H
 
 #include <stddef.h>
 

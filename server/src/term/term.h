@@ -3,9 +3,9 @@
  *
  * Emulation and drawing are in C so that `cat` of large files or `htop` do not
  * go through JavaScript; the Terminal app (React) only handles tabs, panes, profiles
- * and shortcuts, and talks to this module through lord.term.* (ui/js_term.c). */
-#ifndef LORD_TERM_H
-#define LORD_TERM_H
+ * and shortcuts, and talks to this module through insane.term.* (ui/js_term.c). */
+#ifndef INSANE_TERM_H
+#define INSANE_TERM_H
 
 #include <poll.h>
 #include <stdio.h>
@@ -234,7 +234,7 @@ int   vt_in_tmux(const Term *t);
 int   vt_copy_mode(Term *t, int on);
 int   vt_copy_key(Term *t, const char *key, int ctrl, char **yank);
 
-/* hold.c: holders that keep the shells alive if lord-server restarts */
+/* hold.c: holders that keep the shells alive if insane-server restarts */
 int   hold_main(int argc, char **argv);
 int   hold_spawn(int master, pid_t pid, char *key, size_t keylen);
 void  hold_restore(void (*fn)(int fd, int ctrl, pid_t pid, const char *key));
@@ -278,7 +278,7 @@ typedef struct {
     char log_path[512];
     char key[48];               /* holder name (hold.c); "" if it has none */
     int ctrl;                   /* control connection to the holder, -1 = none */
-    int restored;               /* recovered from a previous lord-server */
+    int restored;               /* recovered from a previous insane-server */
     /* tmux -CC */
     int tmux;                   /* this session is the "gateway" of a tmux in control mode */
     char *tlines;               /* protocol lines pending for JS */
@@ -366,7 +366,7 @@ int      term_list(int *ids, int max);
 const char *term_clipboard(void);
 void     term_set_clipboard(const char *s, size_t n);
 unsigned term_clipboard_gen(void);
-/* Where the last copied thing came from ("terminal", "lordos" or a Wayland app's app_id) and
+/* Where the last copied thing came from ("terminal", "insaneos" or a Wayland app's app_id) and
  * whether it is sensitive (password: it does not go to the history). term_set_clipboard sets it to "terminal", 0. */
 void        term_clipboard_mark(const char *origin, int sensitive);
 void        term_clipboard_wipe(void);           /* empties the text, same generation (a newer picture stays) */

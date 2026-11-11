@@ -10,7 +10,7 @@
 //
 // Insane Flow shows it under Window in its menu bar; Insane Classic in each window's Window menu.
 import { windows, wm, getApp, windowTitle, onActiveDesktop } from './windows.js';
-import { screen, displayFor } from '@lordos/runtime';
+import { screen, displayFor } from '@insaneos/runtime';
 import { t } from './i18n.js';
 import { moveToDesktopItems, desktopSuffix } from './desktops.js';
 import { openOverview } from './overview.jsx';

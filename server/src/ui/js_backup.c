@@ -1,6 +1,6 @@
-/* js_backup.c — lord.backup: Backups (see backup/backup.c and docs/SYSTEM.md).
+/* js_backup.c — insane.backup: Backups (see backup/backup.c and docs/SYSTEM.md).
  *
- *   status()                         status (also pushed by itself: __lordBackup(status))
+ *   status()                         status (also pushed by itself: __insaneBackup(status))
  *   config() / configure(obj)        { dest, interval: 'hourly'|'daily'|'weekly'|'manual',
  *                                      pauseOnBattery, exclude: ['rel', …], encrypt }
  *   runNow() / pause(bool) / cancel()
@@ -166,8 +166,8 @@ static const JSCFunctionListEntry fns[] = {
     JS_CFUNC_DEF("lock", 0, f_lock),
 };
 
-void js_backup_register(JSContext *c, JSValue lord) {
+void js_backup_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, fns, sizeof fns / sizeof fns[0]);
-    JS_SetPropertyStr(c, lord, "backup", o);
+    JS_SetPropertyStr(c, insane, "backup", o);
 }

@@ -3,6 +3,7 @@
   "version": "0.8.6",
   "name": "Settings",
   "description": "General, appearance, network, sound, language, keyboard, updates and themes",
+  "glass": true,
   "size": [
     880,
     600

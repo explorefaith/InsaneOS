@@ -16,7 +16,7 @@ export const MAX_BYTES = 512 * 1024;
 export const MAX_DEPTH = 12;
 export const MAX_NODES = 40000;
 export const MAX_ATTACHMENTS = 3;
-export const MARKER = '<!-- lordos-hwreport-check -->';
+export const MARKER = '<!-- insaneos-hwreport-check -->';
 
 // ---- the attachment ----
 
@@ -120,7 +120,7 @@ const PRIVATE = [
   ['ipv6', /\b(?:[0-9a-f]{1,4}:){4,7}[0-9a-f]{1,4}\b/i],
 ];
 const IPV4 = /\b(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}\b/;
-const VERSION_KEYS = new Set(['lordos', 'version', 'kernel', 'osVersion', 'biosVersion', 'biosDate', 'microcode']);
+const VERSION_KEYS = new Set(['insaneos', 'version', 'kernel', 'osVersion', 'biosVersion', 'biosDate', 'microcode']);
 export function privacyScan(v) {
   const found = [];
   (function walk(x, key, path) {
@@ -150,18 +150,18 @@ export function plausibility(rep, { today = new Date().toISOString().slice(0, 10
   const kb = s.memory && s.memory.totalKB;
   if (kb != null && (kb < 256 * 1024 || kb > 64 * 1024 * 1024 * 1024)) flag('memory-size', kb);
   if (rep.createdAt > today) flag('date-future', rep.createdAt);
-  if (s.software && s.software.lordos && !sameVersion(s.software.lordos, rep.lordos)) flag('version-mismatch', `${s.software.lordos} / ${rep.lordos}`);
+  if (s.software && s.software.insaneos && !sameVersion(s.software.insaneos, rep.insaneos)) flag('version-mismatch', `${s.software.insaneos} / ${rep.insaneos}`);
   // the boot medium (0.8.7): a copy to memory only exists in a live session, a link speed only for USB
   const boot = bootInfo(rep);
   if (boot.toRam && rep.live !== true) flag('boot-mismatch', 'toram, installed');
   if (boot.mbps && boot.medium !== 'usb') flag('boot-mismatch', `${boot.mbps} Mbps, ${boot.medium || 'unknown'}`);
   for (const [which, b] of [['bench', rep.bench], ['desktop', rep.desktop]]) {
     if (!b) continue;
-    if (b.lordos && !sameVersion(b.lordos, rep.lordos)) flag('bench-version', `${which}: ${b.lordos}`);
+    if (b.insaneos && !sameVersion(b.insaneos, rep.insaneos)) flag('bench-version', `${which}: ${b.insaneos}`);
     if (b.live === true && rep.live !== true) flag('live-mismatch', which);
     if (b.arch && s.cpu && s.cpu.arch && b.arch !== s.cpu.arch) flag('arch-mismatch', `${which}: ${b.arch} / ${s.cpu.arch}`);
     if (b.cpus && threads && b.cpus !== threads) flag('cpu-mismatch', `${which}: ${b.cpus} / ${threads}`);
-    const refs = REFERENCES.filter((r) => r.lordbench === b.lordbench);
+    const refs = REFERENCES.filter((r) => r.insanebench === b.insanebench);
     for (const [id, m] of Object.entries(b.results || {})) {
       const val = m.value;
       if (!(val > 0)) { if (!(val === 0 && /missed$/.test(id))) flag('not-positive', `${id}=${val}`); continue; }
@@ -218,7 +218,7 @@ function summaryOf(rep) {
   const s = rep.system || {};
   const g = mainGpu(s);
   return {
-    machine: machineLabel(rep), kind: reportKind(rep), lordos: rep.lordos, live: rep.live, boot: bootInfo(rep).medium,
+    machine: machineLabel(rep), kind: reportKind(rep), insaneos: rep.insaneos, live: rep.live, boot: bootInfo(rep).medium,
     cpu: (s.cpu && s.cpu.model) || '', threads: (s.cpu && s.cpu.threads) || 0,
     gpu: g ? `${[g.vendor, g.device].filter(Boolean).join(' ')}${g.driver ? ` (${g.driver})` : ''}` : '',
     compat: (rep.compatibility || []).filter((c) => c.state !== 'absent').map((c) => `${c.id}: ${c.state}`),
@@ -239,7 +239,7 @@ const STATUS_TEXT = {
   valid: '✅ **The report is valid.** Thanks! A maintainer will review it and add it to the tested-hardware catalogue.',
   check: '🔎 **The report is valid, but some numbers look unusual for this hardware.** A maintainer will look at them before it is added to the catalogue.',
   invalid: '❌ **The report could not be accepted as it is.** Please create it again with System Information → Report → Share on GitHub, and attach the `.json` file it saved, unchanged.',
-  missing: '📎 **No report file was found.** Please attach the `lordos-hwreport-….json` file that System Information saved (drag it into the “Report file” box when you edit the issue).',
+  missing: '📎 **No report file was found.** Please attach the `insaneos-hwreport-….json` file that System Information saved (drag it into the “Report file” box when you edit the issue).',
 };
 
 export function commentBody(result, { fileName = '' } = {}) {
@@ -249,7 +249,7 @@ export function commentBody(result, { fileName = '' } = {}) {
     const s = result.summary;
     L.push('| | |', '|---|---|',
       `| Machine | ${code(s.machine)} (${code(s.kind)}) |`,
-      `| Insane OS | ${code(s.lordos)}${s.live ? ' — live session' : ''}${s.boot ? ` — started from ${code(s.boot)}` : ''} |`,
+      `| Insane OS | ${code(s.insaneos)}${s.live ? ' — live session' : ''}${s.boot ? ` — started from ${code(s.boot)}` : ''} |`,
       `| CPU | ${code(s.cpu)}${s.threads ? ` — ${s.threads} threads` : ''} |`,
       `| GPU | ${code(s.gpu)} |`,
       `| Compatibility | ${s.compat.length ? s.compat.slice(0, 12).map(code).join(' ') : '—'} |`,

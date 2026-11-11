@@ -134,7 +134,7 @@ static struct {
     double last_poll;
     char *sample, *procs, *conns, *detail, *dtemps, *volt, *gpu;
     uint64_t sseq, pseq, cseq, dseq, tseq, vseq, gseq;
-    char home[PATH_MAX];                /* lord-say's status notes (gpustat.c) */
+    char home[PATH_MAX];                /* insane-say's status notes (gpustat.c) */
     int watch_disks;                    /* background disk temperatures (notifications), see below */
     int detail_pid;                     /* Get Info: 0 = none */
     unsigned long long detail_start;
@@ -621,7 +621,7 @@ static void publish(char **slot, uint64_t *seq, Buf *b) {
     memset(b, 0, sizeof *b);
 }
 
-/* Publishes the latest disk temperatures (lord.monitor.diskTemps). */
+/* Publishes the latest disk temperatures (insane.monitor.diskTemps). */
 static void publish_temps(void) {
     Buf t = { 0 };
     disk_temps_json(&t);

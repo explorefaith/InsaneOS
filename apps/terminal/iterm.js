@@ -9,7 +9,7 @@
 //
 // Returns { profiles, schemes, keyMap, defaultGuid, warnings }: the caller decides what to
 // keep. What Insane OS doesn't have is reported in `warnings`, never made up.
-import { t as T } from '@lordos/sdk';
+import { t as T } from '@insaneos/sdk';
 import { DEFAULT_PROFILE, newProfileId } from './profiles.js';
 
 // ---- plist XML ----

@@ -3,8 +3,8 @@
  * Its own thread reads /proc and /sys four times per second, only while the app is open
  * and querying it: if nobody asks for a sample for 3 s, the thread goes to sleep (zero cost). The
  * screen thread never reads files: it only copies the latest ready-made JSON. */
-#ifndef LORD_MON_H
-#define LORD_MON_H
+#ifndef INSANE_MON_H
+#define INSANE_MON_H
 
 #include <stdint.h>
 

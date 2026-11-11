@@ -2,9 +2,9 @@
 # build-arm64.sh — builds the arm64 live ISO on an x86-64 host: tools/iso/build.sh takes the architecture
 # from the host, so it runs here inside an arm64 chroot, emulated by qemu-user. See docs/ISO.md.
 #
-#   sudo tools/iso/build-arm64.sh [work folder]     (from the repository root; default /var/tmp/lordos-iso-arm64)
+#   sudo tools/iso/build-arm64.sh [work folder]     (from the repository root; default /var/tmp/insaneos-iso-arm64)
 #
-# BUILD_CHROOT (default /var/tmp/lordos-arm64-br) is an arm64 Debian 13 with the build packages, as
+# BUILD_CHROOT (default /var/tmp/insaneos-arm64-br) is an arm64 Debian 13 with the build packages, as
 # tools/rpi/build-img.sh makes it. It is only read: an overlay in a private mount namespace takes every
 # change, so it stays as it was. The tree's server/build must be for aarch64 or empty; it is compiled
 # with GPU=1 in the chroot. RELEASE=1 and REQUIRE_SIGNED_CODE=1 pass through. On an arm64 host, run
@@ -13,8 +13,8 @@ set -eu
 [ "$(id -u)" = 0 ] || { echo "build-arm64.sh: run as root (sudo)" >&2; exit 1; }
 [ -f package.json ] && [ -d server ] || { echo "build-arm64.sh: run from the repository root" >&2; exit 1; }
 TREE=$(pwd)
-WORK=${1:-/var/tmp/lordos-iso-arm64}
-BR=${BUILD_CHROOT:-/var/tmp/lordos-arm64-br}
+WORK=${1:-/var/tmp/insaneos-iso-arm64}
+BR=${BUILD_CHROOT:-/var/tmp/insaneos-arm64-br}
 [ -x "$BR/usr/bin/gcc" ] || { echo "build-arm64.sh: no arm64 build chroot in $BR" >&2; exit 1; }
 J=${JOBS:-4}
 mkdir -p "$WORK/upper" "$WORK/ofs" "$WORK/merged" "$WORK/iso"

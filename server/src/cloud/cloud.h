@@ -1,19 +1,19 @@
 /* cloud.h — Cloud (docs/CLOUD.md): the person's cloud storage accounts, mounted in ~/Cloud with files on demand.
  *
- * A lord-server thread runs `rclone rcd` (CLOUD_RCLONE) for the session: on a Unix socket in
- * $XDG_RUNTIME_DIR/lordos/cloud (0700), with a random user and password per start given through a memfd
- * (--rc-htpasswd), an in-memory configuration (--config ""), in its own scope (app-lordos-lordos-cloud.scope,
- * firewall app desktop:lordos-cloud). It talks to it only through the closed method table of cloud_pure.h.
+ * A insane-server thread runs `rclone rcd` (CLOUD_RCLONE) for the session: on a Unix socket in
+ * $XDG_RUNTIME_DIR/insaneos/cloud (0700), with a random user and password per start given through a memfd
+ * (--rc-htpasswd), an in-memory configuration (--config ""), in its own scope (app-insaneos-insaneos-cloud.scope,
+ * firewall app desktop:insaneos-cloud). It talks to it only through the closed method table of cloud_pure.h.
  * Secrets (OAuth tokens, passwords, keys) live in the keyring and reach rclone over the socket; the files in
- * ~/.config/lordos/cloud hold none. Changes reach JS through an eventfd (cloud_fd → cloud_dispatch → __lordCloud).
+ * ~/.config/insaneos/cloud hold none. Changes reach JS through an eventfd (cloud_fd → cloud_dispatch → __insaneCloud).
  *
  * Every call returns at once: long work goes to the thread. Results are JSON text in new memory (free it). */
-#ifndef LORD_CLOUD_H
-#define LORD_CLOUD_H
+#ifndef INSANE_CLOUD_H
+#define INSANE_CLOUD_H
 
 #include <stddef.h>
 
-/* where secrets are kept: lord-server uses the keyring (cloud_kr.c); the test harness a file */
+/* where secrets are kept: insane-server uses the keyring (cloud_kr.c); the test harness a file */
 typedef struct {
     int (*get)(const char *id, char **secret);      /* 0 and *secret (malloc), 1 none, -2 locked, -3 no keyring, -1 failed */
     int (*set)(const char *id, const char *label, const char *secret);   /* 0, or as get */
@@ -27,7 +27,7 @@ int   cloud_fd(void);                                           /* -1 if not sta
  * to open in the default browser: open_url(url) → 0 opened */
 void  cloud_dispatch(void (*push)(const char *json), void (*reply)(int req, const char *json), int (*open_url)(const char *url));
 
-int   cloud_available(void);                                    /* lordos-rclone is installed */
+int   cloud_available(void);                                    /* insaneos-rclone is installed */
 char *cloud_state_json(void);
 /* the calls that take a *req: > 0, the answer comes through reply(req, …); otherwise the JSON returned is the answer */
 char *cloud_providers(int *req);                                /* rclone's backends, asked every time (17.2 item 1) */
@@ -54,7 +54,7 @@ char *cloud_status(const char *const *paths, int n);
  * subfolders listed ahead; the account's "listed" in the state goes up when the folder itself was listed again */
 void  cloud_browse(const char *path);
 /* B10: path is a cloud file not on this computer whose account can't be reached now (offline, locked, not running,
- * not mounted): 1, and lord.fs.read fails at once instead of waiting for rclone */
+ * not mounted): 1, and insane.fs.read fails at once instead of waiting for rclone */
 int   cloud_read_would_block(const char *path);
 void  cloud_keep(const char *const *paths, int n, int keep);
 char *cloud_free(const char *const *paths, int n);
@@ -64,6 +64,6 @@ char *cloud_links(const char *id);
 void  cloud_pause(const char *id, int pause);                   /* id NULL: every account */
 char *cloud_set_options(const char *json);                      /* {ok} | {error} */
 void  cloud_restart(void);
-const char *cloud_log_name(void);                               /* ~/.cache/lordos/<this>, shown by Logs */
+const char *cloud_log_name(void);                               /* ~/.cache/insaneos/<this>, shown by Logs */
 
 #endif

@@ -1,4 +1,4 @@
-// lordos.org: the only script on the site (CSP script-src 'self', no inline code).
+// insaneos.org: the only script on the site (CSP script-src 'self', no inline code).
 // Every page works without it; it adds copy buttons, the donation amount, the language
 // suggestion on the English home page, and the gallery filters and viewer.
 (function () {
@@ -16,9 +16,9 @@
   var sb = $('.search-btn');
   if (sb) {
     var openSearch = function () {
-      if (window.__lordSearch) return window.__lordSearch.open();
+      if (window.__insaneSearch) return window.__insaneSearch.open();
       var sc = d.createElement('script'); sc.src = sb.getAttribute('data-src');
-      sc.onload = function () { if (window.__lordSearch) window.__lordSearch.open(); };
+      sc.onload = function () { if (window.__insaneSearch) window.__insaneSearch.open(); };
       d.head.appendChild(sc);
     };
     sb.addEventListener('click', openSearch);
@@ -73,10 +73,10 @@
 
   // Suggest Spanish or Portuguese on the first visit to the English home page. Never redirects.
   var bar = $('#lbar');
-  if (bar && location.pathname === '/' && !store.get('lordos-lang-seen')) {
+  if (bar && location.pathname === '/' && !store.get('insaneos-lang-seen')) {
     var nl = (navigator.language || '').toLowerCase().slice(0, 2);
     var opt = bar.getAttribute('data-' + nl);
-    store.set('lordos-lang-seen', '1');
+    store.set('insaneos-lang-seen', '1');
     if (opt) {
       var o = JSON.parse(opt);
       bar.setAttribute('lang', nl);
@@ -99,7 +99,7 @@
       b.addEventListener('click', function () {
         var m = isDark() ? 'light' : 'dark';
         root.setAttribute('data-theme', m);
-        store.set('lordos-theme', m);
+        store.set('insaneos-theme', m);
         paint();
       });
     });

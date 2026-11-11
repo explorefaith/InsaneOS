@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds the static site for https://lordos.org into web/dist.
+// Builds the static site for https://insaneos.org into web/dist.
 //
 //   node web/build.mjs
 //
@@ -28,22 +28,22 @@ const WEB = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(WEB, '..');
 const DIST = path.join(WEB, 'dist');
 const CACHE = path.join(WEB, '.cache');
-const SITE = 'https://lordos.org';
+const SITE = 'https://insaneos.org';
 const LANGS = ['en', 'es', 'pt'];
 const PAGES = ['home', 'explore', 'raspberry-pi'];   // apps and gallery are one page since 0.8.8.1 (Explore); their old addresses redirect
 const CONTENT = process.env.CONTENT_DIR ? path.resolve(process.env.CONTENT_DIR) : path.join(path.dirname(fileURLToPath(import.meta.url)), 'content');
 // headless Chromium for the paper PDFs: a folder whose node_modules has playwright
 const TOOLS = process.env.WEB_TOOLS || process.env.ICON_DEPS || '';
 const FINGERPRINT = 'c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e';
-const GITHUB = 'https://github.com/lordbasex/Insane OS';
+const GITHUB = 'https://github.com/insaneos/Insane OS';
 // the community forum (r/Insane OS): questions, feedback and every release announced
 const COMMUNITY = 'https://www.reddit.com/r/Insane OS/';
 // the GitHub mark for the header's repository link (the menu has no "GitHub" text link since 0.8.8.1)
 const GH_MARK = '<svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
 // the Insane OS Imager downloads of the current release (package.json's version and channel)
 const PKG = JSON.parse(fs.readFileSync(path.join(REPO, 'package.json'), 'utf8'));
-// a package-only update (0.8.4.1) leaves the live ISO and the Imager on an earlier release: lordos.media
-const CHANNEL = PKG.lordos && PKG.lordos.channel ? '-' + PKG.lordos.channel : '';
+// a package-only update (0.8.4.1) leaves the live ISO and the Imager on an earlier release: insaneos.media
+const CHANNEL = PKG.insaneos && PKG.insaneos.channel ? '-' + PKG.insaneos.channel : '';
 // downloads.json (tools/web/downloads.mjs): for each download, the newest release that carries the file.
 // Refreshed from GitHub on every build (DOWNLOADS_OFFLINE=1 skips that); the committed copy is the fallback.
 const DL_FILE = path.join(REPO, 'web/content/downloads.json');
@@ -53,10 +53,10 @@ if (process.env.DOWNLOADS_OFFLINE !== '1') {
   } catch (e) { console.warn(`[web] downloads.json: GitHub not reachable, using the committed copy (${String(e.stderr || e.message).trim().split('\n').pop()})`); }
 }
 const DL = fs.existsSync(DL_FILE) ? JSON.parse(fs.readFileSync(DL_FILE, 'utf8')).downloads : {};
-const MEDIA_VERSION = (DL['iso-amd64'] && DL['iso-amd64'].version) || (PKG.lordos && PKG.lordos.media) || PKG.version;
+const MEDIA_VERSION = (DL['iso-amd64'] && DL['iso-amd64'].version) || (PKG.insaneos && PKG.insaneos.media) || PKG.version;
 // the Imager is released only when it changes: the newest release that holds its downloads
-const IMAGER_VERSION = (DL['imager-mac'] && DL['imager-mac'].version) || (PKG.lordos && PKG.lordos.imager) || MEDIA_VERSION;
-const IMAGER_DL = `${GITHUB}/releases/download/v${IMAGER_VERSION}${CHANNEL}/lordos_imager_${IMAGER_VERSION}`;
+const IMAGER_VERSION = (DL['imager-mac'] && DL['imager-mac'].version) || (PKG.insaneos && PKG.insaneos.imager) || MEDIA_VERSION;
+const IMAGER_DL = `${GITHUB}/releases/download/v${IMAGER_VERSION}${CHANNEL}/insaneos_imager_${IMAGER_VERSION}`;
 // a direct link to one file (from downloads.json; the release-name pattern if it isn't listed)
 const dlUrl = (kind, fallback) => (DL[kind] && DL[kind].url) || fallback;
 const dlSize = (kind) => { const b = DL[kind] && DL[kind].size; return b ? (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.round(b / 1e6)} MB`) : ''; };
@@ -320,7 +320,7 @@ if (HAS_PAPER && !HAS_PDF) console.warn('[web] paper: set WEB_TOOLS to a folder 
 const prefix = (l) => (l === 'en' ? '/' : `/${l}/`);
 const pageUrl = (l, page) => prefix(l) + (page === 'home' ? '' : page + '/');
 // the blog lives on its own host: one home per language
-const blogUrl = (l) => 'https://blog.lordos.org' + (l === 'en' ? '/' : `/${l}/`);
+const blogUrl = (l) => 'https://blog.insaneos.org' + (l === 'en' ? '/' : `/${l}/`);
 const get = (obj, key) => key.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
 
 function render(tpl, vars, t) {
@@ -505,7 +505,7 @@ function footer(t, page = 'home') {
 <div class="foot-links">
 <a href="${GITHUB}">GitHub</a>
 <a href="${GITHUB}/blob/main/LICENSE">${esc(t.license)}</a>
-<a href="${GITHUB}/blob/main/docs/LORDOS-BRAND.md">${esc(t.brand)}</a>
+<a href="${GITHUB}/blob/main/docs/INSANEOS-BRAND.md">${esc(t.brand)}</a>
 <a href="/licenses/PlusJakartaSans-OFL.txt">${esc(t.fontsNote)}</a>
 </div>
 <p>${esc(t.footer)}</p>
@@ -597,8 +597,8 @@ ${featureList[i] ? `<a class="more" href="${pageUrl(l, 'features/' + featureList
     vmGuide: pageUrl(l, 'virtual-machine'), reqUrl: pageUrl(l, 'requirements'),
     // straight to the files (downloads.json): update-only releases carry no media (#35)
     ...(() => { const d = `${GITHUB}/releases/download/v${MEDIA_VERSION}${CHANNEL}/`;
-      return { isoAmd: dlUrl('iso-amd64', d + `lordos-live-${MEDIA_VERSION}-amd64.iso`), isoArm: dlUrl('iso-arm64', d + `lordos-live-${MEDIA_VERSION}-arm64.iso`),
-        ovaUrl: dlUrl('ova-amd64', d + `lordos-${MEDIA_VERSION}-amd64.ova`), piUrl: dlUrl('rpi5', d + `lordos-${MEDIA_VERSION}-rpi5-arm64.img.xz`),
+      return { isoAmd: dlUrl('iso-amd64', d + `insaneos-live-${MEDIA_VERSION}-amd64.iso`), isoArm: dlUrl('iso-arm64', d + `insaneos-live-${MEDIA_VERSION}-arm64.iso`),
+        ovaUrl: dlUrl('ova-amd64', d + `insaneos-${MEDIA_VERSION}-amd64.ova`), piUrl: dlUrl('rpi5', d + `insaneos-${MEDIA_VERSION}-rpi5-arm64.img.xz`),
         isoSize: dlSize('iso-amd64'), ovaSize: dlSize('ova-amd64'), piSize: dlSize('rpi5'),
         mediaRel: (DL['iso-amd64'] && DL['iso-amd64'].page) || `${GITHUB}/releases/tag/v${MEDIA_VERSION}${CHANNEL}`, mediaVer: MEDIA_VERSION }; })(),
     heroImg: (() => {
@@ -777,14 +777,14 @@ ${shotList.join('\n')}
 </section>` : '';
     const code = (s) => esc(s).replace(/(--share|\breport\b|bench --quick|--full)/g, '<code>$1</code>');
     write(path.join(pageUrl(l, 'raspberry-pi'), 'index.html'), render(tpl.raspberry, { ...common('raspberry-pi', null, 'home'),
-      piUrl: dlUrl('rpi5', `${GITHUB}/releases/download/v${MEDIA_VERSION}${CHANNEL}/lordos-${MEDIA_VERSION}-rpi5-arm64.img.xz`), imagerUrl: HAS_GUIDE ? pageUrl(l, 'imager') : GITHUB + '/blob/main/docs/IMAGER.md',
+      piUrl: dlUrl('rpi5', `${GITHUB}/releases/download/v${MEDIA_VERSION}${CHANNEL}/insaneos-${MEDIA_VERSION}-rpi5-arm64.img.xz`), imagerUrl: HAS_GUIDE ? pageUrl(l, 'imager') : GITHUB + '/blob/main/docs/IMAGER.md',
       fansUrl: GITHUB + '/blob/main/docs/FANS.md#argon-one-v5-case',
       artArgon: aria(PI_ART.argon, P.artArgon), art500: aria(PI_ART.pi500, P.art500), artPi5: aria(PI_ART.pi5, P.artPi5),
-      testedLead: esc(P.testedLead).replace('{cmd}', '<code>lordos-issue</code>'),
+      testedLead: esc(P.testedLead).replace('{cmd}', '<code>insaneos-issue</code>'),
       cards, argonPoints: P.argonPoints.map(([b, x]) => `<li><strong>${esc(b)}</strong> ${esc(x)}</li>`).join('\n'),
       shotsSection,
-      benchSteps: P.benchSteps.map(([h, x], i) => `<li><h3>${esc(h)}</h3><p>${esc(x)}</p>${i === 1 ? '<pre class="pi-pre">lordos-sysreport bench --quick\nlordos-sysreport bench --full --json</pre>' : ''}</li>`).join('\n'),
-      tools: P.tools.map(([c, x]) => `<article class="pi-tool"><h3><code>${esc(c)}</code></h3><p>${c === 'lordos-issue' || c === 'lordos-testbench' ? esc(x) : code(x)}</p></article>`).join('\n'),
+      benchSteps: P.benchSteps.map(([h, x], i) => `<li><h3>${esc(h)}</h3><p>${esc(x)}</p>${i === 1 ? '<pre class="pi-pre">insaneos-sysreport bench --quick\ninsaneos-sysreport bench --full --json</pre>' : ''}</li>`).join('\n'),
+      tools: P.tools.map(([c, x]) => `<article class="pi-tool"><h3><code>${esc(c)}</code></h3><p>${c === 'insaneos-issue' || c === 'insaneos-testbench' ? esc(x) : code(x)}</p></article>`).join('\n'),
       lumo: LUMO.wave || img.lumoWave,
       browseLink: HAS_HW ? `<a class="pi-browse" href="${pageUrl(l, 'hardware')}">${esc(P.shareBrowse)}</a>` : '',
     }, t));
@@ -931,7 +931,7 @@ ${rels.join('\n')}
       authors ? `<span>${esc(t.pages.paper.authors)}: <strong>${esc(authors)}${meta.org ? ` · ${esc(loc(meta.org, l))}` : ''}</strong></span>` : '',
       meta.date ? `<span>${esc(t.pages.paper.date)}: <strong><time datetime="${esc(meta.date)}">${esc(new Date(meta.date + 'T12:00:00Z').toLocaleDateString(l === 'en' ? 'en-US' : l === 'es' ? 'es-AR' : 'pt-BR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }))}</time></strong></span>` : '',
     ].filter(Boolean).join('');
-    const pdf = HAS_PDF ? `<a class="btn btn-primary" href="${pageUrl(l, 'paper')}lordos-paper-${l}.pdf" download><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>${esc(t.pages.paper.pdf)}</a>` : '';
+    const pdf = HAS_PDF ? `<a class="btn btn-primary" href="${pageUrl(l, 'paper')}insaneos-paper-${l}.pdf" download><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>${esc(t.pages.paper.pdf)}</a>` : '';
     write(path.join(pageUrl(l, 'paper'), 'index.html'), render(tpl.paper, {
       ...common('paper', [`${title} · Insane OS`, t.pages.paper.metaDescription], true),
       title: esc(title), subtitle: esc(subtitle), meta: metaLine, pdf, toc, body: bodyHtml,
@@ -951,7 +951,7 @@ ${rels.join('\n')}
       return ps.length ? `<h2>${esc(t.pages.legal.groups[g])}</h2>\n<ul>\n${ps.map((x) => `<li><a href="${pageUrl(l, 'legal/' + x.slug)}"${x.slug === lp.slug ? ' aria-current="page"' : ''}>${esc(loc(x.title, l) || x.slug)}</a></li>`).join('\n')}\n</ul>` : '';
     }).join('\n');
     write(path.join(pageUrl(l, page), 'index.html'), render(tpl.legal, {
-      ...common(page, [`${title} · Insane OS`, loc(lp.description, l) || `${title} — lordos.org`], true),
+      ...common(page, [`${title} · Insane OS`, loc(lp.description, l) || `${title} — insaneos.org`], true),
       title: phOut(esc(phIn(title, 'legal/pages.json'))), updated: esc(fmtDate(updated)), updatedIso: esc(updated), nav, body: bodyHtml, indexUrl: pageUrl(l, 'legal'),
     }, t));
   }
@@ -963,7 +963,7 @@ ${rels.join('\n')}
     const title = loc(gp.title, l) || gp.slug;
     const nav = `<ul>\n${guidePages.map((x) => `<li><a href="${pageUrl(l, x.slug)}"${x.slug === gp.slug ? ' aria-current="page"' : ''}>${esc(loc(x.title, l) || x.slug)}</a></li>`).join('\n')}\n</ul>`;
     write(path.join(pageUrl(l, gp.slug), 'index.html'), render(tpl.guide, {
-      ...common(gp.slug, [`${title} · Insane OS`, loc(gp.description, l) || `${title} — lordos.org`], true),
+      ...common(gp.slug, [`${title} · Insane OS`, loc(gp.description, l) || `${title} — insaneos.org`], true),
       title: esc(title), lead: esc(loc(gp.description, l) || ''), nav, body: bodyHtml,
     }, t));
   }
@@ -1109,7 +1109,7 @@ write('favicon-512.png', read(r('docs/brand/favicon/favicon-512.png')));
 write('apple-touch-icon.png', read(r('docs/brand/favicon/apple-touch-icon-180.png')));
 write('social-card.png', read(r('docs/brand/png/social-card-1200x630.png')));
 if (fs.existsSync(DL_FILE)) write('downloads.json', fs.readFileSync(DL_FILE));
-write('lordos-release.pub.pem', read(r('tools/release/lordos-release.pub.pem')));
+write('insaneos-release.pub.pem', read(r('tools/release/insaneos-release.pub.pem')));
 // install.sh is published from the last commit, never from uncommitted edits in the working tree
 let installSh = read(r('tools/install/install.sh'));
 try {
@@ -1188,7 +1188,7 @@ if (HAS_PDF) {
     await page.emulateMedia({ media: 'print', colorScheme: 'light' });
     const title = await page.title();
     await page.pdf({
-      path: path.join(DIST, pageUrl(l, 'paper'), `lordos-paper-${l}.pdf`), format: 'A4', printBackground: true,
+      path: path.join(DIST, pageUrl(l, 'paper'), `insaneos-paper-${l}.pdf`), format: 'A4', printBackground: true,
       margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' }, displayHeaderFooter: true,
       headerTemplate: '<span></span>',
       footerTemplate: `<div style="width:100%;font:9px sans-serif;color:#777;padding:0 16mm;display:flex;justify-content:space-between"><span>${esc(title)}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,

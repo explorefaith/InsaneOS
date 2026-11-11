@@ -1,9 +1,9 @@
-/* js_term.h — lord.term.* (terminals) and lord.clipboard. */
-#ifndef LORD_JS_TERM_H
-#define LORD_JS_TERM_H
+/* js_term.h — insane.term.* (terminals) and insane.clipboard. */
+#ifndef INSANE_JS_TERM_H
+#define INSANE_JS_TERM_H
 
 #include "quickjs.h"
 
-void js_term_register(JSContext *c, JSValue lord);
+void js_term_register(JSContext *c, JSValue insane);
 
 #endif

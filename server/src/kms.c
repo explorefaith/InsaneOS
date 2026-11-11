@@ -389,7 +389,7 @@ void kms_close(Kms *k) {
         r.count_connectors = 1;
         xioctl(k->fd, DRM_IOCTL_MODE_SETCRTC, &r);
     }
-    /* borrowed (kms_attach): the next one to show puts up its frame; lord-sessiond handles
+    /* borrowed (kms_attach): the next one to show puts up its frame; insane-sessiond handles
      * master. The dumb buffers are destroyed after another one took the screen. */
     if (k->shared && k->crtc_id) {             /* a second display: its CRTC stops scanning out */
         struct drm_mode_crtc off = { .crtc_id = k->crtc_id };

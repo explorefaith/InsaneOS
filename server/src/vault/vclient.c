@@ -1,4 +1,4 @@
-/* vclient.c — lord-server talks to lord-vault (see vclient.h). */
+/* vclient.c — insane-server talks to insane-vault (see vclient.h). */
 #include "vclient.h"
 #include "vwire.h"
 #include "fidodev.h"
@@ -35,10 +35,10 @@ static int inflight;
 static Ev *qhead, *qtail;
 static char helper[PATH_MAX];
 static int helper_ok = -1;
-static char *pending_pass;              /* session password that arrived before lord-vault was running */
+static char *pending_pass;              /* session password that arrived before insane-vault was running */
 
 /* Private requests (the broker's keyring op, src/sec/brokerkr.c): their replies go to their own
- * queue, read by lord-server's C code (vc_take_private), never to the JS queue (vc_poll). */
+ * queue, read by insane-server's C code (vc_take_private), never to the JS queue (vc_poll). */
 #define VC_PRIV_MAX 64
 static uint32_t priv_ids[VC_PRIV_MAX];
 static int npriv;
@@ -61,7 +61,7 @@ int vc_available(void) {
             char *sl = strrchr(self, '/');
             if (sl) {
                 *sl = 0;
-                snprintf(helper, sizeof helper, "%.*s/lord-vault", (int)(sizeof helper - 16), self);
+                snprintf(helper, sizeof helper, "%.*s/insane-vault", (int)(sizeof helper - 16), self);
                 struct stat st;
                 /* owned by the user or root, and nobody else can replace it */
                 if (stat(helper, &st) == 0 && S_ISREG(st.st_mode) && (st.st_mode & S_IXUSR) && !(st.st_mode & S_IWOTH) &&
@@ -72,7 +72,7 @@ int vc_available(void) {
     return helper_ok;
 }
 
-/* Blocking private requests from a lord-server thread (Cloud's keyring items, src/cloud/cloud_kr.c): the reader
+/* Blocking private requests from a insane-server thread (Cloud's keyring items, src/cloud/cloud_kr.c): the reader
  * thread hands the reply straight to the waiting thread. One abandoned after its time keeps its slot until the
  * reply comes, which is then wiped: it never reaches a queue. */
 #define VC_WAIT_MAX 8
@@ -112,7 +112,7 @@ static void push(uint32_t id, uint32_t kind, char *json, size_t len) {
     if (priv) priv_wake();
 }
 
-/* lord-server's own C code told of lord-vault's events (Cloud: the keyring was unlocked); they still reach JS too */
+/* insane-server's own C code told of insane-vault's events (Cloud: the keyring was unlocked); they still reach JS too */
 static void (*event_hook)(const char *json, size_t len);
 void vc_set_event_hook(void (*fn)(const char *json, size_t len)) { event_hook = fn; }
 
@@ -154,7 +154,7 @@ static void *read_loop(void *arg) {
     return NULL;
 }
 
-/* the session bus socket (unauthenticated: lord-vault does that) */
+/* the session bus socket (unauthenticated: insane-vault does that) */
 static int connect_bus(void) {
     const char *a = getenv("DBUS_SESSION_BUS_ADDRESS");
     struct sockaddr_un sa = { .sun_family = AF_UNIX };
@@ -189,7 +189,7 @@ static int connect_bus(void) {
 
 static int is_greeter(void) {
     struct passwd *pw = getpwuid(getuid());
-    return pw && !strcmp(pw->pw_name, "lordos-greeter");
+    return pw && !strcmp(pw->pw_name, "insaneos-greeter");
 }
 
 static int ctl(const char *json, int *fds, int nfds);
@@ -205,7 +205,7 @@ int vc_start(void) {
     const char *home = getenv("HOME");
     if (!home) return -1;
     char dir[PATH_MAX];
-    const char *parts[] = { ".local", ".local/share", ".local/share/lordos", ".local/share/lordos/vault" };
+    const char *parts[] = { ".local", ".local/share", ".local/share/insaneos", ".local/share/insaneos/vault" };
     for (int i = 0; i < 4; i++) { snprintf(dir, sizeof dir, "%s/%s", home, parts[i]); mkdir(dir, 0700); }
     int dfd = open(dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
     if (dfd < 0) return -1;
@@ -230,9 +230,9 @@ int vc_start(void) {
     snprintf(henv, sizeof henv, "HOME=%s", home);
     envp[ne++] = henv;
     envp[ne++] = "LANG=C.UTF-8";
-    if (getenv("LORD_VAULT_DEBUG")) envp[ne++] = "LORD_VAULT_DEBUG=1";
+    if (getenv("INSANE_VAULT_DEBUG")) envp[ne++] = "INSANE_VAULT_DEBUG=1";
     envp[ne] = NULL;
-    char *argv[] = { "lord-vault", NULL };
+    char *argv[] = { "insane-vault", NULL };
     pid_t p;
     int r = posix_spawn(&p, helper, &fa, &at, argv, envp);
     posix_spawn_file_actions_destroy(&fa);
@@ -250,7 +250,7 @@ int vc_start(void) {
     sock = sv[0];
     pthread_mutex_unlock(&mu);
     if (pthread_create(&reader, NULL, read_loop, (void *)(intptr_t)sv[0]) == 0) { pthread_detach(reader); reader_on = 1; }
-    fprintf(stderr, "lord-server: lord-vault started (pid %d)\n", (int)p);
+    fprintf(stderr, "insane-server: insane-vault started (pid %d)\n", (int)p);
     if (pending_pass) {
         vc_session_password(pending_pass);
         explicit_bzero(pending_pass, strlen(pending_pass));
@@ -425,7 +425,7 @@ static void json_escape(char *out, size_t n, const char *s) {
 void vc_session_password(const char *pass) {
     if (!pass || !pass[0]) return;
     if (vc_start()) {
-        /* it could not be launched yet (lord-server is just starting): saved for when it is running */
+        /* it could not be launched yet (insane-server is just starting): saved for when it is running */
         if (!pending_pass && vc_available() && !is_greeter()) pending_pass = strdup(pass);
         return;
     }

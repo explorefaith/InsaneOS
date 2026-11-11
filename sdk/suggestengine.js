@@ -1,7 +1,7 @@
 // suggestengine.js — the rules of the Store's "Suggested for your computer" (pure functions, no
-// `lord`, tested by server/tests/suggest_engine_test.mjs). The rules are data:
-// assets/store/suggestions.json; the hardware facts come from lord.hwinfo.scan() (hw/hwscan.c) and
-// the package state from lord.pkg.info(). See docs/PACKAGES.md, "Suggested for your computer".
+// `insane`, tested by server/tests/suggest_engine_test.mjs). The rules are data:
+// assets/store/suggestions.json; the hardware facts come from insane.hwinfo.scan() (hw/hwscan.c) and
+// the package state from insane.pkg.info(). See docs/PACKAGES.md, "Suggested for your computer".
 //
 //   evaluate(data, facts, { info, dismissed, check })  → [Suggestion], most useful first
 //   firmwareFromLog(lines)                              → [{ file, driver }] from hw-firmware-missing's LOG lines
@@ -168,8 +168,8 @@ function firmwareSuggestions(data, facts, info, check) {
 
 const ORDER = { setup: 0, install: 0, unavailable: 1, installed: 2 };
 
-// Every suggestion for these facts. info(name) → lord.pkg.info(name) (null: not in the index);
-// check(names) → whether an install plan can be made (lord.pkg.plan(...).ok), optional.
+// Every suggestion for these facts. info(name) → insane.pkg.info(name) (null: not in the index);
+// check(names) → whether an install plan can be made (insane.pkg.plan(...).ok), optional.
 export function evaluate(data, facts, { info = () => null, dismissed = [], check = null } = {}) {
   if (!data || !facts) return [];
   const no = new Set(arr(dismissed));

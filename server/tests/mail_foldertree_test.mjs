@@ -5,7 +5,7 @@ import { folderTree, toggleCollapsed } from '../../apps/mail/foldertree.js';
 const F = (name, special = '', delim = '.', extra = {}) => ({ name, display: delim && name.includes(delim) ? name.slice(name.lastIndexOf(delim) + 1) : name, special, delim, noselect: false, ...extra });
 const show = (tree) => tree.map(({ f, depth }) => `${'  '.repeat(depth)}${f.special || f.display}`);
 
-// Dovecot/Courier style: everything under "INBOX.", specials first (as lord-maild sorts them)
+// Dovecot/Courier style: everything under "INBOX.", specials first (as insane-maild sorts them)
 const dot = [
   F('INBOX', 'inbox'), F('INBOX.Drafts', 'drafts'), F('INBOX.Sent', 'sent'), F('INBOX.Junk', 'junk'), F('INBOX.Trash', 'trash'),
   F('INBOX.Work'), F('INBOX.Family'), F('INBOX.Work.Clients'), F('INBOX.Work.Clients.Acme'), F('INBOX.Trash.Old'), F('INBOX.Sent Messages'),

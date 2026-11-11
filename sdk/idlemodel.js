@@ -3,7 +3,7 @@
 // docs/SETTINGS.md). Closing the lid or pressing the power button puts the computer to sleep through
 // logind: the display turns off then too, so the same setting applies.
 //
-//   lockBeforeSleep(delay)        Immediately: lock before the computer sleeps (lord-server holds the
+//   lockBeforeSleep(delay)        Immediately: lock before the computer sleeps (insane-server holds the
 //                                 sleep until the screen is taken, hw/sleeplock.c)
 //   lockAfterWake(delay, slept)   a longer delay: lock on waking when the computer slept (plus the time
 //                                 the screen had already been off) at least that long

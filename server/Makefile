@@ -1,4 +1,4 @@
-# lord-server — libc + kernel headers + libxkbcommon + libwayland-server + vendored QuickJS and stb.
+# insane-server — libc + kernel headers + libxkbcommon + libwayland-server + vendored QuickJS and stb.
 # No libdrm, libinput, X11 or WebKit; the Wayland compositor (src/wl) and the terminal (src/term) are our own.
 CC      ?= cc
 CFLAGS  ?= -O2 -g
@@ -14,7 +14,7 @@ ARCH ?= $(shell $(CC) -dumpmachine 2>/dev/null | cut -d- -f1)
 ifeq ($(ARCH),aarch64)
 NEON ?= 1
 ifeq ($(NEON),1)
-CPPFLAGS += -DLORD_NEON
+CPPFLAGS += -DINSANE_NEON
 endif
 endif
 
@@ -35,10 +35,10 @@ WL_GEN  += $(foreach p,$(WL_MORE),build/gen/$(notdir $(p))-protocol.h)
 WL_OBJ  += $(foreach p,$(WL_MORE),build/gen/$(notdir $(p))-protocol.o)
 
 # GPU compositing (src/gpu): Mesa (GBM + EGL + GLES2) if its -dev packages are present; otherwise (or with
-# GPU=0) it's built without GPU and lord-server always composites on the CPU. See docs/GPU.md.
+# GPU=0) it's built without GPU and insane-server always composites on the CPU. See docs/GPU.md.
 GPU ?= $(shell pkg-config --exists gbm egl glesv2 2>/dev/null && echo 1 || echo 0)
 ifeq ($(GPU),1)
-CPPFLAGS += -DLORD_GPU $(shell pkg-config --cflags gbm egl glesv2)
+CPPFLAGS += -DINSANE_GPU $(shell pkg-config --cflags gbm egl glesv2)
 LDLIBS   += $(shell pkg-config --libs gbm egl glesv2)
 endif
 
@@ -51,10 +51,10 @@ QJS_OBJ := $(patsubst %,build/qjs/%.o,quickjs libregexp libunicode cutils dtoa)
 # .lpk app isolation, permissions and signing (src/sec, see docs/PRIVACY.md and docs/SIGNING.md)
 # Monitor: metrics, connections and the country of an IP (src/monitor, see docs/MONITOR.md)
 MON_SRC := src/monitor/mon.c src/monitor/disktemp.c src/monitor/voltage.c src/monitor/gpustat.c src/monitor/nethist.c src/monitor/netrec.c src/monitor/conn.c src/monitor/procctl.c src/monitor/proc_admin.c src/monitor/mmdb.c src/monitor/map.c src/ui/js_monitor.c
-# Media (src/media, docs/MEDIA.md): only the lord-server side. Only lord-media links FFmpeg.
+# Media (src/media, docs/MEDIA.md): only the insane-server side. Only insane-media links FFmpeg.
 MEDIA_SRC := src/media/media.c src/media/hwdec.c src/media/mview.c src/media/capture.c src/media/annot.c src/media/imgops.c src/media/maudio.c src/media/mpulse.c src/media/proto.c src/media/mstream.c src/media/mcursor.c src/ui/js_media.c
 SEC_SRC := src/sec/json.c src/sec/sign.c src/sec/pkgstate.c src/sec/perms.c src/sec/cgroup.c src/sec/sandbox.c src/sec/brokersrv.c src/sec/brokercam.c src/sec/brokerkr.c src/sec/brokermail.c src/sec/restrict.c src/sec/appid.c src/sec/pwguard.c src/sec/codesig.c src/sec/pkgapp.c src/sec/statusitem.c src/sec/brokerclip.c
-# App mode: lord-server --app <id> runs an .lpk app as an isolated Wayland client (src/app)
+# App mode: insane-server --app <id> runs an .lpk app as an isolated Wayland client (src/app)
 APP_SRC := src/app/appclient.c src/app/appspawn.c src/app/companion.c src/app/probe.c src/ui/js_broker.c src/ui/js_brokercam.c src/ui/js_brokermail.c src/app/apphost_bc.c
 SRC := src/hw/wallpaper_admin.c src/hw/wallpaper_find.c src/hw/wallpaper_image.c src/main.c src/fpipe.c src/kms.c src/gpu/gpu.c src/gpu/gscissor.c src/input.c src/canvas.c src/par.c src/admin.c src/install/install.c src/install/freepart.c src/install/freespace.c src/install/manual.c src/install/manualpart.c src/apps.c src/lpk.c src/fsops.c src/fsasync.c src/remote/mirror.c src/remote/share.c src/remote/sharewire.c src/remote/sharegrant.c src/remote/sgrant_admin.c src/ui/js_share.c src/remote/remote_admin.c src/remote/ipnet.c src/remote/rtcwire.c src/remote/ssh_admin.c src/remote/ssh_root.c src/users/users_admin.c src/users/admin_rescue.c src/users/homedirs.c src/keyboard.c src/keylag.c src/ime.c src/wl/wl.c src/wl/keygrab.c src/wl/x11wire.c src/wl/xwm.c src/wl/xwayland.c src/osk.c \
        src/ui/node.c src/ui/style.c src/ui/layout.c src/ui/transform.c src/ui/text.c src/ui/image.c \
@@ -64,7 +64,7 @@ SRC := src/hw/wallpaper_admin.c src/hw/wallpaper_find.c src/hw/wallpaper_image.c
        src/net/nl.c src/net/crypto.c src/net/state.c src/net/sys.c src/net/dhcp.c src/net/wifi.c src/net/wg.c src/net/ovpn.c src/net/vpn.c src/net/forti.c src/net/vici.c src/net/ipsec.c src/net/vpnproc.c src/net/actions.c src/net/ifwatch.c src/net/wake.c \
        src/pkg/crypto.c src/pkg/pgp.c src/pkg/xz.c src/pkg/deb.c src/pkg/idx.c src/pkg/pin.c src/pkg/status.c src/pkg/resolve.c src/pkg/match.c src/pkg/http.c src/pkg/pkg.c src/pkg/sources_admin.c src/ui/js_pkg.c src/ui/js_sec.c \
        $(SEC_SRC) $(APP_SRC) $(MON_SRC) $(MEDIA_SRC)
-# Documents and printing (M9): lord-doc helper sessions and our own IPP/mDNS/eSCL client
+# Documents and printing (M9): insane-doc helper sessions and our own IPP/mDNS/eSCL client
 # (src/doc, src/print; see docs/DOCUMENTS.md and docs/PRINTING.md). No Poppler or libarchive here.
 DOC_SRC := src/doc/doc.c src/doc/wire.c src/ui/js_doc.c src/print/ipp.c src/print/phttp.c src/print/mdns.c src/print/cups.c \
            src/print/escl.c src/print/print.c src/ui/js_print.c
@@ -76,7 +76,7 @@ OBJ := $(SRC:src/%.c=build/obj/%.o)
 HDR := $(wildcard src/*.h src/gpu/*.h src/ui/*.h src/term/*.h src/wl/*.h src/wasm/*.h src/sound/*.h src/pkg/*.h src/net/*.h src/install/*.h src/remote/*.h src/users/*.h src/sec/*.h src/monitor/*.h src/media/*.h src/app/*.h src/doc/*.h src/print/*.h) $(WL_GEN) $(APP_CLIENT_HDR)
 HDR += $(wildcard src/fw/*.h)
 # Touchpad and touchscreens: our own driver (src/tp, no libinput), gestures and touches for the
-# Wayland apps (src/wl/wl_input.c) and lord.input (src/ui/js_input.c). See docs/TRACKPAD.md.
+# Wayland apps (src/wl/wl_input.c) and insane.input (src/ui/js_input.c). See docs/TRACKPAD.md.
 TP_SRC := src/tp/tp.c src/tp/tp_route.c src/wl/wl_input.c src/wl/wl_textinput.c src/ui/js_input.c
 SRC += $(TP_SRC)
 # Window management: dragging in C, a layer for the window being moved and our own cursors (docs/WINDOWS.md).
@@ -87,10 +87,10 @@ WM_SRC := src/cursor.c src/shake.c src/ui/grab.c src/ui/js_wm.c src/ui/portal.c 
 SRC += $(WM_SRC)
 # Clock and Help (docs/SYSTEM.md): time zones with our own TZif reader, and the help articles
 CLOCK_SRC := src/ui/tzif.c src/ui/js_help.c
-# reading text aloud: lord-server starts lord-say (mk/tts.mk builds it and lord-tts)
+# reading text aloud: insane-server starts insane-say (mk/tts.mk builds it and insane-tts)
 CLOCK_SRC += src/tts/speak.c src/ui/js_voice.c
 SRC += $(CLOCK_SRC)
-# Logs (docs/SYSTEM.md): our own systemd journal reader, the logs-system action and lord.logs
+# Logs (docs/SYSTEM.md): our own systemd journal reader, the logs-system action and insane.logs
 LOGS_SRC := src/logs/journal.c src/logs/logs_admin.c src/ui/js_logs.c
 SRC += $(LOGS_SRC)
 HDR += $(wildcard src/logs/*.h)
@@ -104,14 +104,14 @@ build/obj/backup/%.o: CPPFLAGS += -isystem ../third_party/monocypher
 DISK_SRC := src/disk/disk.c src/disk/smart.c src/disk/smartctl.c src/disk/disk_admin.c src/disk/smartctl_admin.c src/ui/js_disk.c
 SRC += $(DISK_SRC)
 HDR += $(wildcard src/disk/*.h)
-# LordOS Imager (docs/IMAGER.md): the imager-* actions (verified image → removable disk, downloads
-# as the user) and lordos-firstrun, the Raspberry Pi first-run file applier (src/firstrun)
+# InsaneOS Imager (docs/IMAGER.md): the imager-* actions (verified image → removable disk, downloads
+# as the user) and insaneos-firstrun, the Raspberry Pi first-run file applier (src/firstrun)
 IMAGER_SRC := src/imager/imgverify.c src/imager/imager_admin.c src/ui/js_imager.c
 SRC += $(IMAGER_SRC)
 HDR += $(wildcard src/imager/*.h)
 FIRSTRUN_SRC := src/firstrun/firstrun.c src/firstrun/firstrun_apply.c src/users/homedirs.c
-ALL += build/lordos-firstrun
-build/lordos-firstrun: $(FIRSTRUN_SRC) src/firstrun/firstrun.h src/users/homedirs.h
+ALL += build/insaneos-firstrun
+build/insaneos-firstrun: $(FIRSTRUN_SRC) src/firstrun/firstrun.h src/users/homedirs.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ $(FIRSTRUN_SRC)
 test: build/firstrun-test build/firstrun-fuzz build/imager-test
@@ -147,36 +147,36 @@ OBJ := $(SRC:src/%.c=build/obj/%.o)
 HDR += $(wildcard src/tp/*.h)
 
 .PHONY: all clean test test-full drag-golden
-# lord-sessiond: sessions, login screen and remote desktop (docs/SESSIONS.md). It's the
+# insane-sessiond: sessions, login screen and remote desktop (docs/SESSIONS.md). It's the
 # only one that links OpenSSL (TLS), and with it libsrtp2 and usrsctp (the remote desktop's WebRTC);
-# without libssl-dev, only lord-server is built.
+# without libssl-dev, only insane-server is built.
 SESSIOND ?= $(shell pkg-config --exists openssl 2>/dev/null && echo 1 || echo 0)
-ALL += build/lord-server
+ALL += build/insane-server
 ifeq ($(SESSIOND),1)
-ALL += build/lord-sessiond
+ALL += build/insane-sessiond
 endif
-# lord-media: the media helper (docs/MEDIA.md). It's the only one that links FFmpeg (and libva);
-# lord-server never does. If FFmpeg's -dev packages are missing, everything else is built without it.
+# insane-media: the media helper (docs/MEDIA.md). It's the only one that links FFmpeg (and libva);
+# insane-server never does. If FFmpeg's -dev packages are missing, everything else is built without it.
 MEDIA ?= $(shell pkg-config --exists libavcodec libavformat libavutil libswscale libswresample 2>/dev/null && echo 1 || echo 0)
 ifeq ($(MEDIA),1)
-ALL += build/lord-media
+ALL += build/insane-media
 endif
-# lord-doc: the document helper (docs/DOCUMENTS.md). It's the only one that links Poppler and
-# libarchive (and cairo, FreeType and fontconfig, which come with Poppler); lord-server never does.
+# insane-doc: the document helper (docs/DOCUMENTS.md). It's the only one that links Poppler and
+# libarchive (and cairo, FreeType and fontconfig, which come with Poppler); insane-server never does.
 DOCHELPER ?= $(shell pkg-config --exists poppler-glib libarchive cairo-pdf cairo-ft freetype2 fontconfig 2>/dev/null && echo 1 || echo 0)
 ifeq ($(DOCHELPER),1)
-ALL += build/lord-doc
+ALL += build/insane-doc
 endif
-# lord-ocr: the text in a picture (Screenshots), lord-doc's helper loop with Tesseract only (src/doc/h_ocr.c). It's the
+# insane-ocr: the text in a picture (Screenshots), insane-doc's helper loop with Tesseract only (src/doc/h_ocr.c). It's the
 # only one that links libtesseract (and Leptonica, libarchive, libcurl and libgomp, which come with it).
 OCRHELPER ?= $(shell pkg-config --exists tesseract 2>/dev/null && echo 1 || echo 0)
 ifeq ($(OCRHELPER),1)
-ALL += build/lord-ocr
+ALL += build/insane-ocr
 endif
-# lord-claude-status: Claude Code's status line command when the Terminal is connected to it (src/term/claudebridge.c):
+# insane-claude-status: Claude Code's status line command when the Terminal is connected to it (src/term/claudebridge.c):
 # keeps Claude Code's status JSON for the Terminal's footer and runs the user's own status line. No libraries.
-ALL += build/lord-claude-status
-# lord-netperm (src/netperm, docs/FIREWALL.md step 2): the root service that applies per-app network
+ALL += build/insane-claude-status
+# insane-netperm (src/netperm, docs/FIREWALL.md step 2): the root service that applies per-app network
 # permissions with cgroup BPF programs. The programs are compiled with clang -target bpf (BPF=1,
 # if clang is available) and go inside the binary (build/bpf2c → build/gen/np_bpf.h). Without clang it still
 # builds and the service warns that it has no BPF. No libbpf or bcc.
@@ -184,7 +184,7 @@ ALL += build/lord-claude-status
 BPF ?= $(shell command -v clang >/dev/null 2>&1 && echo 1 || echo 0)
 NP_SRC := src/netperm/netperm.c src/netperm/bpfsys.c src/netperm/npcompile.c src/netperm/npdns.c src/netperm/npdiag.c \
           src/fw/rules.c src/fw/dnsmap.c src/fw/fwmap.c src/fw/fwlists.c src/sec/json.c
-ALL += build/lord-netperm
+ALL += build/insane-netperm
 ifeq ($(BPF),1)
 NP_GEN := build/gen/np_bpf.h
 NP_CPP := -DNP_HAVE_BPF
@@ -198,7 +198,7 @@ build/np.bpf.o: src/netperm/np.bpf.c src/netperm/np_shared.h
 build/gen/np_bpf.h: build/np.bpf.o build/bpf2c
 	@mkdir -p build/gen
 	build/bpf2c $< $@
-build/lord-netperm: $(NP_SRC) $(wildcard src/netperm/*.h) $(wildcard src/fw/*.h) src/sec/json.h $(NP_GEN)
+build/insane-netperm: $(NP_SRC) $(wildcard src/netperm/*.h) $(wildcard src/fw/*.h) src/sec/json.h $(NP_GEN)
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(NP_CPP) $(CFLAGS) $(WARN) -std=c11 -o $@ $(NP_SRC)
 # tests/npverify_test.c: the BTF reader, and (as root) every program through the kernel verifier
@@ -214,12 +214,12 @@ build/npcompile-test: tests/npcompile_test.c src/netperm/npcompile.c src/netperm
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/npcompile_test.c src/netperm/npcompile.c src/netperm/npdns.c src/fw/rules.c src/fw/dnsmap.c src/fw/fwmap.c src/sec/json.c
 	./$@ || { rm -f $@; exit 1; }
-# lord-fand (src/fan, docs/FANS.md): the root service that drives the fans by temperature. libc
+# insane-fand (src/fan, docs/FANS.md): the root service that drives the fans by temperature. libc
 # only; it executes nothing and has no network. tests/fan_test.c: curves, fan.json, requests and a
 # fake sysfs (run by tests/run_suites.sh).
 FAN_SRC := src/fan/fancurve.c src/fan/fanhw.c src/sec/json.c
-ALL += build/lord-fand
-build/lord-fand: src/fan/fand.c $(FAN_SRC) $(wildcard src/fan/*.h) src/sec/json.h
+ALL += build/insane-fand
+build/insane-fand: src/fan/fand.c $(FAN_SRC) $(wildcard src/fan/*.h) src/sec/json.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ src/fan/fand.c $(FAN_SRC)
 test: build/ptrlock-test
@@ -245,15 +245,15 @@ build/manual-test: tests/manual_test.c src/install/manual.c src/install/freespac
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/manual_test.c src/install/manual.c src/install/freespace.c
 	./$@ || { rm -f $@; exit 1; }
-# the unattended install (src/install/autoinstall.c, docs/UNATTENDED.md): lordos-auto.conf's reader and checks
+# the unattended install (src/install/autoinstall.c, docs/UNATTENDED.md): insaneos-auto.conf's reader and checks
 test: build/autoinstall-test
 AUTOINSTALL_SRC := src/install/autoinstall.c src/install/install.c $(INSTALL_DISK_SRC) src/users/homedirs.c
 build/autoinstall-test: tests/autoinstall_test.c $(AUTOINSTALL_SRC) $(INSTALL_DISK_HDR)
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/autoinstall_test.c src/install/install.c $(INSTALL_DISK_SRC) src/users/homedirs.c -lcrypt
 	./$@ || { rm -f $@; exit 1; }
-ALL += build/lord-autoinstall
-build/lord-autoinstall: $(AUTOINSTALL_SRC) $(INSTALL_DISK_HDR) src/admin.h
+ALL += build/insane-autoinstall
+build/insane-autoinstall: $(AUTOINSTALL_SRC) $(INSTALL_DISK_HDR) src/admin.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ $(AUTOINSTALL_SRC) -lcrypt
 build/freepart-cli: tests/freepart_cli.c src/install/freepart.c src/install/freespace.c src/install/freepart.h src/install/freespace.h
@@ -282,10 +282,10 @@ all: $(ALL)
 # Most suites run inside their own build rule (`./$@ || ...`). The ones below are only built here; once
 # every prerequisite of `test` is done, tests/run_suites.sh runs them (a few seconds) and fails if any
 # fails; a suite whose tool or data isn't installed says "skipped: needs X". `make test-full` adds the
-# helpers (lord-media, lord-doc), the sandbox (Landlock kernel) and the HarfBuzz comparison.
-test: build/lord-claude-status build/vt-dump build/vt-keys-test build/shake-test build/term-secret-test build/term-capture-test build/shape-test build/bidi-test build/ime-test build/thbrk-test build/sound-test build/wasm-test build/net-test build/wasm-js-test build/pkg-test build/fsops-test build/fsasync-test build/sign-test build/mmdb-test build/canvas-test build/arcpath-test build/ipp-test build/tp-test build/media-test build/imgops-test
+# helpers (insane-media, insane-doc), the sandbox (Landlock kernel) and the HarfBuzz comparison.
+test: build/insane-claude-status build/vt-dump build/vt-keys-test build/shake-test build/term-secret-test build/term-capture-test build/shape-test build/bidi-test build/ime-test build/thbrk-test build/sound-test build/wasm-test build/net-test build/wasm-js-test build/pkg-test build/fsops-test build/fsasync-test build/sign-test build/mmdb-test build/canvas-test build/arcpath-test build/ipp-test build/tp-test build/media-test build/imgops-test
 	@sh tests/run_suites.sh
-test-full: test build/sandbox-test build/doc-test $(filter build/lord-media build/lord-doc build/lord-ocr build/lord-tts,$(ALL))
+test-full: test build/sandbox-test build/doc-test $(filter build/insane-media build/insane-doc build/insane-ocr build/insane-tts,$(ALL))
 	@sh tests/run_suites.sh full
 SHAPE_SRC := src/ui/otf.c src/ui/shape.c src/ui/shape_indic.c src/ui/shape_syl.c src/ui/shape_khmer.c src/ui/shape_myanmar.c src/ui/shape_use.c src/ui/unicode.c
 build/shape-test: tests/shape_test.c $(SHAPE_SRC) $(HDR)
@@ -312,13 +312,13 @@ build/pkgstate-test: tests/pkgstate_test.c src/sec/pkgstate.c src/sec/sign.c src
 build/sandbox-test: tests/sandbox_test.c src/sec/sandbox.c src/sec/cgroup.c src/sec/sandbox.h src/sec/cgroup.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -D_GNU_SOURCE -o $@ tests/sandbox_test.c src/sec/sandbox.c src/sec/cgroup.c -lpthread
 build/sign-test: tests/sign_test.c src/sec/json.c src/sec/sign.c src/lpk.c src/pkg/crypto.c build/obj/ui/stb.o $(wildcard src/sec/*.h) src/lpk.h src/pkg/crypto.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DLORD_SIGN_TEST -o $@ tests/sign_test.c src/sec/json.c src/sec/sign.c src/lpk.c src/pkg/crypto.c build/obj/ui/stb.o -lm
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DINSANE_SIGN_TEST -o $@ tests/sign_test.c src/sec/json.c src/sec/sign.c src/lpk.c src/pkg/crypto.c build/obj/ui/stb.o -lm
 # Verified system code: manifest parser, signature, per-file check, reading under the root (docs/SIGNING.md)
 test: build/codesig-test
 build/codesig-test: tests/codesig_test.c src/sec/codesig.c src/sec/json.c src/pkg/crypto.c src/sec/codesig.h src/sec/json.h src/pkg/crypto.h build/gen/codesig_build.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/codesig_test.c src/sec/codesig.c src/sec/json.c src/pkg/crypto.c -lpthread
-	./$@ ../tools/release/lordos-release.pub.pem || { rm -f $@; exit 1; }
+	./$@ ../tools/release/insaneos-release.pub.pem || { rm -f $@; exit 1; }
 # Clock time zones: TZif and POSIX rules against glibc (docs/SYSTEM.md)
 # tests/xwm_test.c: the X11 wire helpers of the window manager (src/wl/x11wire.c, docs/WAYLAND.md)
 test: build/inputkind-test
@@ -385,13 +385,13 @@ build/share-fuzz: tests/share_fuzz.c $(SHARE_SEC_SRC) $(SHARE_SEC_HDR)
 test: build/pkgapp-test
 PKGAPP_TEST_SRC := src/sec/pkgapp.c src/sec/sign.c src/sec/statusitem.c src/sec/json.c src/lpk.c src/pkg/crypto.c
 build/pkgapp-test: tests/pkgapp_test.c $(PKGAPP_TEST_SRC) build/obj/ui/stb.o $(wildcard src/sec/*.h) src/lpk.h src/pkg/crypto.h
-	$(CC) $(CPPFLAGS) -Isrc $(CFLAGS) $(WARN) -std=c11 -DLORD_SIGN_TEST -o $@ tests/pkgapp_test.c $(PKGAPP_TEST_SRC) build/obj/ui/stb.o -lm
+	$(CC) $(CPPFLAGS) -Isrc $(CFLAGS) $(WARN) -std=c11 -DINSANE_SIGN_TEST -o $@ tests/pkgapp_test.c $(PKGAPP_TEST_SRC) build/obj/ui/stb.o -lm
 	./$@
-# not part of any install: lord-server taking its official key and third app root from the environment, for
+# not part of any install: insane-server taking its official key and third app root from the environment, for
 # tests/companion_e2e.sh. Only sign.c and pkgapp.c differ.
 build/obj-pkgtest/%.o: src/sec/%.c $(HDR)
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DLORD_PKGAPP_TEST -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DINSANE_PKGAPP_TEST -c -o $@ $<
 
 # not part of make test: drives a real session on a test machine (tests/share_e2e.sh)
 build/share-client: tests/share_client.c src/remote/sharewire.c $(SHARE_SEC_HDR)
@@ -420,7 +420,7 @@ build/brokerclip-test: tests/brokerclip_test.c src/sec/brokerclip.c src/sec/brok
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/brokerclip_test.c src/sec/brokerclip.c -lm
 	./$@ || { rm -f $@; exit 1; }
-# lord-maild for the isolated system apps (src/sec/brokermail.c): who may ask what, files, Mail-only verbs
+# insane-maild for the isolated system apps (src/sec/brokermail.c): who may ask what, files, Mail-only verbs
 test: build/brokermail-test
 build/brokermail-test: tests/brokermail_test.c src/sec/brokermail.c src/sec/json.c $(wildcard src/sec/*.h src/mail/*.h)
 	@mkdir -p build
@@ -498,7 +498,7 @@ build/dnsmap-test: tests/dnsmap_test.c src/fw/dnsmap.c src/fw/rules.c src/fw/fwm
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/dnsmap_test.c src/fw/dnsmap.c src/fw/rules.c src/fw/fwmap.c src/sec/json.c
 	./$@ || { rm -f $@; exit 1; }
 # backup engine: snapshots, hard links, restore, retention, interruptions, exclusions, encryption
-build/lord-server: build/obj/vault/monocypher.o
+build/insane-server: build/obj/vault/monocypher.o
 test: build/backup-test
 build/backup-test: tests/backup_test.c src/backup/engine.c src/backup/crypt.c src/fsops.c src/backup/engine.h src/backup/crypt.h src/fsops.h build/obj/vault/monocypher.o
 	@mkdir -p build
@@ -525,7 +525,7 @@ build/voltage-test: tests/voltage_test.c src/monitor/voltage.c src/monitor/volta
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -D_GNU_SOURCE -o $@ tests/voltage_test.c src/monitor/voltage.c src/hw/rpifw.c
 	./$@ || { rm -f $@; exit 1; }
-# Monitor → GPU (src/monitor/gpustat.c): fdinfo, pp_dpm, lord-say's note and maps lines; cards, clients and the
+# Monitor → GPU (src/monitor/gpustat.c): fdinfo, pp_dpm, insane-say's note and maps lines; cards, clients and the
 # installed APIs on a fake tree; hostile values
 test: build/gpustat-test
 build/gpustat-test: tests/gpustat_test.c src/monitor/gpustat.c src/monitor/gpustat.h src/sysreport/ids.c src/sec/json.c
@@ -550,7 +550,7 @@ test: build/engine-test
 build/engine-test: tests/engine_test.c $(ENGINE_SRC) src/outputs.c src/bench/lbinput.c build/obj/ui/stb.o $(HDR) tests/drag_golden_cpu.txt tests/drag_golden_gpu.txt
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/engine_test.c $(ENGINE_SRC) src/outputs.c src/bench/lbinput.c build/obj/ui/stb.o -lm -lpthread
 	./$@ || { rm -f $@; exit 1; }
-# the frame pipeline's decisions (src/fpipe.c, docs/GPU.md "The frame pipeline"): LORD_PIPELINE, the auto
+# the frame pipeline's decisions (src/fpipe.c, docs/GPU.md "The frame pipeline"): INSANE_PIPELINE, the auto
 # mode, what a display does next, when input waits, and a display on a vblank grid with and without it
 test: build/fpipe-test
 build/fpipe-test: tests/fpipe_test.c src/fpipe.c src/fpipe.h
@@ -565,10 +565,10 @@ drag-golden: tests/engine_test.c $(ENGINE_SRC) src/outputs.c src/bench/lbinput.c
 	./build/engine-golden drag-golden
 build/canvas-test: tests/canvas_test.c src/canvas.c src/canvas.h
 	@mkdir -p build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DLORD_CANVAS_TEST -o $@ tests/canvas_test.c src/canvas.c -lm
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DINSANE_CANVAS_TEST -o $@ tests/canvas_test.c src/canvas.c -lm
 build/fsops-test: tests/fsops_test.c src/fsops.c src/fsops.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/fsops_test.c src/fsops.c -lpthread
-# lord.fs's Async calls (Files on Cloud and network folders): a slow file system never holds the caller (0.8.8.7)
+# insane.fs's Async calls (Files on Cloud and network folders): a slow file system never holds the caller (0.8.8.7)
 build/fsasync-test: tests/fsasync_test.c src/fsasync.c src/fsasync.h src/fsops.c src/fsops.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -DFSASYNC_TEST -o $@ tests/fsasync_test.c src/fsasync.c src/fsops.c -lpthread
 # touchpad driver (src/tp): gestures of the simulated touchpad (../tests/touchpad-sim) → what's recognized
@@ -629,7 +629,7 @@ build/clip-offers: tests/clip_offers.c $(CLIENT_GEN)
 build/seat-cycle: tests/seat_cycle.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/seat_cycle.c
-# a lock as lord-sessiond takes it, and the login screen shown after it (tests/lock_e2e.sh, issue #36); never installed
+# a lock as insane-sessiond takes it, and the login screen shown after it (tests/lock_e2e.sh, issue #36); never installed
 build/lock-seat: tests/lock_seat.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/lock_seat.c
@@ -653,14 +653,14 @@ MEDIA_PKGS += libva libva-drm
 MEDIA_CPPFLAGS := -DLM_VAAPI
 endif
 LM_SRC := $(wildcard src/media/helper/*.c) src/media/proto.c src/sec/sandbox.c src/sec/cgroup.c
-build/lord-media: $(LM_SRC) $(wildcard src/media/helper/*.h) src/media/proto.h src/media/aring.h src/sec/sandbox.h src/sec/cgroup.h
+build/insane-media: $(LM_SRC) $(wildcard src/media/helper/*.h) src/media/proto.h src/media/aring.h src/sec/sandbox.h src/sec/cgroup.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(MEDIA_CPPFLAGS) $(shell pkg-config --cflags $(MEDIA_PKGS)) $(CFLAGS) $(WARN) -std=c11 -o $@ $(LM_SRC) \
 	    $(shell pkg-config --libs $(MEDIA_PKGS)) -lpthread -lm
-# lord-media with a decoder that fails after 30 frames (HWFALL=2: frames that can't be read back), to run the way
+# insane-media with a decoder that fails after 30 frames (HWFALL=2: frames that can't be read back), to run the way
 # out of it where there is no hardware (LM_HWFALL_TEST, docs/MEDIA.md); a test tool, never installed
 HWFALL ?= 1
-build/lord-media-hwfall: $(LM_SRC) $(wildcard src/media/helper/*.h) src/media/proto.h src/media/aring.h src/sec/sandbox.h src/sec/cgroup.h
+build/insane-media-hwfall: $(LM_SRC) $(wildcard src/media/helper/*.h) src/media/proto.h src/media/aring.h src/sec/sandbox.h src/sec/cgroup.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(MEDIA_CPPFLAGS) -DLM_HWFALL_TEST=$(HWFALL) $(shell pkg-config --cflags $(MEDIA_PKGS)) $(CFLAGS) $(WARN) -std=c11 -o $@ $(LM_SRC) \
 	    $(shell pkg-config --libs $(MEDIA_PKGS)) -lpthread -lm
@@ -680,9 +680,9 @@ build/term-secret-test: tests/term_secret_test.c src/term/tsecret.c src/term/tca
 	./$@ || { rm -f $@; exit 1; }
 
 # what Claude Code needs to draw where it is: the parser cut anywhere, the grid at every scale, the pty's size,
-# one lord-server per held session (tests/term_resize_test.c)
+# one insane-server per held session (tests/term_resize_test.c)
 test: build/term-resize-test
-build/term-resize-test: tests/term_resize_test.c src/term/hold.c src/term/pty.c src/term/term.h build/obj/term/vt.o build/obj/ui/stb.o build/gen/lord_version.h
+build/term-resize-test: tests/term_resize_test.c src/term/hold.c src/term/pty.c src/term/term.h build/obj/term/vt.o build/obj/ui/stb.o build/gen/insane_version.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/term_resize_test.c src/term/hold.c src/term/pty.c build/obj/term/vt.o build/obj/ui/stb.o $(LDLIBS)
 	./$@ || { rm -f $@; exit 1; }
 
@@ -731,7 +731,7 @@ $(foreach p,$(WL_MORE),$(eval $(call wl_proto,$(p))))
 build/gen/%.o: build/gen/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -w -c -o $@ $<
 
-build/lord-server: $(OBJ) build/obj/ui/stb.o $(QJS_OBJ) $(WL_OBJ)
+build/insane-server: $(OBJ) build/obj/ui/stb.o $(QJS_OBJ) $(WL_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 SESSIOND_OBJ := build/obj/remote/sessiond.o build/obj/remote/sess.o build/obj/remote/monitor.o build/obj/remote/conn.o \
@@ -739,11 +739,11 @@ SESSIOND_OBJ := build/obj/remote/sessiond.o build/obj/remote/sess.o build/obj/re
                 build/obj/remote/rsec.o build/obj/remote/ipnet.o build/obj/remote/lockout.o build/obj/remote/rtcwire.o build/obj/remote/rtc.o \
                 build/obj/bench/boottest.o
 # The remote desktop shows the screen only over WebRTC (docs/REMOTE.md, "Video (WebRTC)"): our own peer in
-# the bridge, on Debian's libsrtp2 and usrsctp (and OpenSSL's DTLS). lord-sessiond can't be built without
+# the bridge, on Debian's libsrtp2 and usrsctp (and OpenSSL's DTLS). insane-sessiond can't be built without
 # them (libsrtp2-dev, libusrsctp-dev).
 ifeq ($(SESSIOND),1)
 ifneq ($(shell pkg-config --exists libsrtp2 usrsctp 2>/dev/null && echo 1),1)
-$(error lord-sessiond needs libsrtp2 and usrsctp for the remote desktop: apt-get install libsrtp2-dev libusrsctp-dev (or SESSIOND=0))
+$(error insane-sessiond needs libsrtp2 and usrsctp for the remote desktop: apt-get install libsrtp2-dev libusrsctp-dev (or SESSIOND=0))
 endif
 SESSIOND_LIBS := $(shell pkg-config --libs libsrtp2 usrsctp)
 build/obj/remote/rtc.o: CPPFLAGS += $(shell pkg-config --cflags libsrtp2 usrsctp)
@@ -757,25 +757,25 @@ build/ssh-root-test: tests/ssh_root_test.c src/remote/ssh_root.c src/remote/ssh_
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/ssh_root_test.c src/remote/ssh_root.c src/pkg/crypto.c
 	./$@ || { rm -f $@; exit 1; }
-build/lord-sessiond: $(SESSIOND_OBJ)
+build/insane-sessiond: $(SESSIOND_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(shell pkg-config --libs openssl) $(SESSIOND_LIBS) -lcrypt -lpthread
 
-# Version, channel and build of LordOS, shown in About and Settings → General (lord.version and
-# lord.system.info()). Version and channel come from ../package.json ("version" and "lordos": {"channel"}),
+# Version, channel and build of InsaneOS, shown in About and Settings → General (insane.version and
+# insane.system.info()). Version and channel come from ../package.json ("version" and "insaneos": {"channel"}),
 # the only place to set them; the build is the date (SOURCE_DATE_EPOCH if set) and the git commit, or
-# LORD_BUILD=... The header is rewritten only when its contents change.
-LORD_VERSION := $(shell sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' ../package.json 2>/dev/null | head -1 | tr -cd 'A-Za-z0-9.+~-')
-LORD_CHANNEL := $(shell sed -n 's/.*"channel": *"\([^"]*\)".*/\1/p' ../package.json 2>/dev/null | head -1 | tr -cd 'a-z0-9-')
-LORD_BUILD ?= $(shell d=$$(date -u -d "@$${SOURCE_DATE_EPOCH:-$$(date +%s)}" +%Y%m%d 2>/dev/null || date -u +%Y%m%d); \
+# INSANE_BUILD=... The header is rewritten only when its contents change.
+INSANE_VERSION := $(shell sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' ../package.json 2>/dev/null | head -1 | tr -cd 'A-Za-z0-9.+~-')
+INSANE_CHANNEL := $(shell sed -n 's/.*"channel": *"\([^"]*\)".*/\1/p' ../package.json 2>/dev/null | head -1 | tr -cd 'a-z0-9-')
+INSANE_BUILD ?= $(shell d=$$(date -u -d "@$${SOURCE_DATE_EPOCH:-$$(date +%s)}" +%Y%m%d 2>/dev/null || date -u +%Y%m%d); \
                       c=$$(git -C .. rev-parse --short=8 HEAD 2>/dev/null); echo "$$d$${c:+.$$c}")
-build/gen/lord_version.h: FORCE
+build/gen/insane_version.h: FORCE
 	@mkdir -p build/gen
-	@printf '#define LORD_VERSION "%s"\n#define LORD_CHANNEL "%s"\n#define LORD_BUILD "%s"\n' \
-	    '$(or $(LORD_VERSION),0.0.0)' '$(LORD_CHANNEL)' '$(shell printf %s '$(LORD_BUILD)' | tr -cd 'A-Za-z0-9.+~-')' > $@.new
+	@printf '#define INSANE_VERSION "%s"\n#define INSANE_CHANNEL "%s"\n#define INSANE_BUILD "%s"\n' \
+	    '$(or $(INSANE_VERSION),0.0.0)' '$(INSANE_CHANNEL)' '$(shell printf %s '$(INSANE_BUILD)' | tr -cd 'A-Za-z0-9.+~-')' > $@.new
 	@if cmp -s $@.new $@; then rm -f $@.new; else mv $@.new $@; fi
-build/obj/ui/js.o build/obj/ui/js_sys.o build/obj/ui/js_hw.o build/obj/term/pty.o build/obj/remote/sessiond.o: build/gen/lord_version.h
+build/obj/ui/js.o build/obj/ui/js_sys.o build/obj/ui/js_hw.o build/obj/term/pty.o build/obj/remote/sessiond.o: build/gen/insane_version.h
 # Verified system code (src/sec/codesig.c, docs/SIGNING.md "Verified system code"). RELEASE=1: a
-# release build, which only runs a manifest signed with the LordOS release key (no development mode).
+# release build, which only runs a manifest signed with the InsaneOS release key (no development mode).
 # CODE_PUBKEY=<64 hex>: a TEST build that trusts a throwaway key instead of the release key (VM tests
 # only; never for a release, and refused together with RELEASE=1).
 RELEASE ?= 0
@@ -785,7 +785,7 @@ $(error CODE_PUBKEY is for test builds only, not with RELEASE=1)
 endif
 build/gen/codesig_build.h: FORCE
 	@mkdir -p build/gen
-	@{ [ '$(RELEASE)' = 1 ] && echo '#define LORD_CODE_RELEASE 1'; 	   k=$$(printf %s '$(CODE_PUBKEY)' | tr -cd '0-9a-f'); [ -n "$$k" ] && printf '#define LORD_CODE_PUBKEY_HEX "%s"\n' "$$k"; true; } > $@.new
+	@{ [ '$(RELEASE)' = 1 ] && echo '#define INSANE_CODE_RELEASE 1'; 	   k=$$(printf %s '$(CODE_PUBKEY)' | tr -cd '0-9a-f'); [ -n "$$k" ] && printf '#define INSANE_CODE_PUBKEY_HEX "%s"\n' "$$k"; true; } > $@.new
 	@if cmp -s $@.new $@; then rm -f $@.new; else mv $@.new $@; fi
 build/obj/sec/codesig.o: build/gen/codesig_build.h
 .PHONY: FORCE
@@ -821,14 +821,14 @@ LD_PKGS := poppler-glib libarchive cairo-pdf cairo-ft freetype2 fontconfig
 build/obj/doc/h_stb.o: src/doc/h_stb.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -w -c -o $@ $<
-build/lord-doc: $(LD_SRC) build/obj/doc/h_stb.o $(wildcard src/doc/*.h) src/sec/sandbox.h src/sec/cgroup.h src/sec/json.h
+build/insane-doc: $(LD_SRC) build/obj/doc/h_stb.o $(wildcard src/doc/*.h) src/sec/sandbox.h src/sec/cgroup.h src/sec/json.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 $(shell pkg-config --cflags $(LD_PKGS)) -o $@ $(LD_SRC) build/obj/doc/h_stb.o $(shell pkg-config --libs $(LD_PKGS)) -lm
-build/lord-claude-status: src/term/claudebridge.c src/sec/json.c src/sec/json.h
+build/insane-claude-status: src/term/claudebridge.c src/sec/json.c src/sec/json.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ src/term/claudebridge.c src/sec/json.c
 LO_SRC := src/doc/helper.c src/doc/h_ocr.c src/doc/wire.c src/sec/json.c src/sec/sandbox.c src/sec/cgroup.c
-build/lord-ocr: $(LO_SRC) $(wildcard src/doc/*.h) src/sec/sandbox.h src/sec/cgroup.h src/sec/json.h
-	$(CC) $(CPPFLAGS) -DLORD_HELPER_OCR $(CFLAGS) $(WARN) -std=c11 $(shell pkg-config --cflags tesseract) -o $@ $(LO_SRC) $(shell pkg-config --libs tesseract) -lm
+build/insane-ocr: $(LO_SRC) $(wildcard src/doc/*.h) src/sec/sandbox.h src/sec/cgroup.h src/sec/json.h
+	$(CC) $(CPPFLAGS) -DINSANE_HELPER_OCR $(CFLAGS) $(WARN) -std=c11 $(shell pkg-config --cflags tesseract) -o $@ $(LO_SRC) $(shell pkg-config --libs tesseract) -lm
 # rules for extracting without leaving the folder (tests/arcpath_test.c)
 build/arcpath-test: tests/arcpath_test.c src/doc/arcpath.c src/doc/arcpath.h
 	@mkdir -p build
@@ -845,32 +845,32 @@ build/netconn-test: tests/netconn_test.c $(NETCONN_SRC) src/sec/json.c src/sec/n
 build/ipp-test: tests/ipp_test.c src/print/ipp.c src/print/mdns.c src/print/cups.c src/print/phttp.c src/doc/wire.c src/sec/json.c $(NETCONN_SRC) $(wildcard src/print/*.h)
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/ipp_test.c src/print/ipp.c src/print/mdns.c src/print/cups.c src/print/phttp.c src/doc/wire.c src/sec/json.c $(NETCONN_SRC) -lpthread
-# lord-doc end to end: malicious archives, PDF and the lockdown (needs build/lord-doc)
+# insane-doc end to end: malicious archives, PDF and the lockdown (needs build/insane-doc)
 build/doc-test: tests/doc_test.c src/doc/wire.c src/sec/json.c $(wildcard src/doc/*.h)
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/doc_test.c src/doc/wire.c src/sec/json.c
 
 # Passwords and the system keyring (docs/PASSWORDS.md): rules in mk/vault*.mk
 include $(sort $(wildcard mk/*.mk))
-# after the includes: everything build/lord-server links
+# after the includes: everything build/insane-server links
 PKGTEST_OBJ := $(filter-out build/obj/sec/sign.o build/obj/sec/pkgapp.o,$(sort $(OBJ) build/obj/ui/stb.o $(QJS_OBJ) $(WL_OBJ) build/obj/vault/monocypher.o \
                $(CLEAN_SRV_OBJ) $(LB_SRV_OBJ) $(LAN_SRV_OBJ) $(VM_SRV_OBJ) $(HW_OBJ) $(VC_OBJ) $(MAILC_OBJ) build/obj/outputs.o))
-build/lord-server-pkgtest: $(PKGTEST_OBJ) build/obj-pkgtest/sign.o build/obj-pkgtest/pkgapp.o
+build/insane-server-pkgtest: $(PKGTEST_OBJ) build/obj-pkgtest/sign.o build/obj-pkgtest/pkgapp.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-# lord-netd (docs/NETWORK.md, "The network belongs to the system"): admin.c with LORD_NETD (net-* actions
-# only) plus networking and the package engine (net-vpn-enable). libc only; lord-sessiond runs it.
-all: build/lord-netd
+# insane-netd (docs/NETWORK.md, "The network belongs to the system"): admin.c with INSANE_NETD (net-* actions
+# only) plus networking and the package engine (net-vpn-enable). libc only; insane-sessiond runs it.
+all: build/insane-netd
 # net/sleepbus.c listens for logind's PrepareForSleep with our own D-Bus client (vault/dbus.c, libc only).
 NETD_OBJ := build/obj/netd/admin.o build/obj/netd/netd.o $(NET_SRC:src/%.c=build/obj/%.o) $(PKG_SRC:src/%.c=build/obj/%.o) build/obj/sec/cgroup.o build/obj/ui/stb.o \
             build/obj/net/sleepbus.o build/obj/vault/dbus.o
 build/obj/netd/admin.o: src/admin.c $(HDR)
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) -DLORD_NETD $(CFLAGS) $(WARN) -std=c11 -c -o $@ $<
+	$(CC) $(CPPFLAGS) -DINSANE_NETD $(CFLAGS) $(WARN) -std=c11 -c -o $@ $<
 build/obj/netd/netd.o: src/net/netd.c src/admin.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -c -o $@ $<
-build/lord-netd: $(NETD_OBJ)
+build/insane-netd: $(NETD_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ -lm -lpthread
 
 # SMART parsers (ATA and NVMe) of the Disks app: hand-built data, healthy/warning/failing

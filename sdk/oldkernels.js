@@ -1,5 +1,5 @@
 // oldkernels.js — which installed kernels Cleaner may offer to remove (docs/CLEANER.md). Only the choice lives here:
-// removing goes through the package engine, with lord.pkg.plan shown first and the admin helper's pkg-remove, as the
+// removing goes through the package engine, with insane.pkg.plan shown first and the admin helper's pkg-remove, as the
 // Store does. Kept: the running kernel, the newest, and the newest one below the running kernel as a way back. Only
 // packages of the running kernel's own flavour are looked at, and with no running kernel to compare nothing is offered.
 
@@ -18,7 +18,7 @@ function cmp(a, b) {
   return 0;
 }
 
-// installed: lord.pkg.installed(); release: the running kernel's release. The packages that may go, oldest first.
+// installed: insane.pkg.installed(); release: the running kernel's release. The packages that may go, oldest first.
 export function oldKernels(installed, release) {
   const run = parts(`linux-image-${release || ''}`);
   if (!run) return [];

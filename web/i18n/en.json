@@ -114,7 +114,7 @@
   "altLumoCelebrate": "Lumo celebrating with confetti",
   "lumoKicker": "Meet Lumo",
   "lumoTitle": "The guardian of Insane OS",
-  "lumoText": "Lumo is a small celestial fox with white fur and violet highlights. Its crown and cape stand for protection, freedom and control, and it shows up when something needs your attention.",
+  "lumoText": "Lumo is a small celestial fox with white fur and violet highlights. Its apple and cape stand for protection, freedom and control, and it shows up when something needs your attention.",
   "altLumoWave": "Lumo waving hello",
   "altLumoShield": "Lumo holding a shield",
   "aboutTitle": "Made by iPERFEX",
@@ -330,19 +330,19 @@
     "toolsLead": "They come with Insane OS, work over SSH too, and never send anything on their own.",
     "tools": [
       [
-        "lordos-fetch",
-        "The crown and a one-screen summary: version, board, kernel, display, CPU, GPU, memory, disk and isolation. --share hides your user and computer names for a screenshot."
+        "insaneos-fetch",
+        "The apple and a one-screen summary: version, board, kernel, display, CPU, GPU, memory, disk and isolation. --share hides your user and computer names for a screenshot."
       ],
       [
-        "lordos-issue",
+        "insaneos-issue",
         "A complete report for a bug or a hardware test: devices, drivers, displays, signed code, failed services and this boot's errors. Names and addresses are replaced; it only reads, and saves a file you check before posting."
       ],
       [
-        "lordos-sysreport",
+        "insaneos-sysreport",
         "System Information from a terminal: report for the hardware, and bench --quick or --full for InsaneBench, the same measurements as the app, also as JSON."
       ],
       [
-        "lordos-testbench",
+        "insaneos-testbench",
         "A test card in a window: frames a second and frame times, every key lit as you press it, the mouse and its wheel, and what the display server reports. Handy to check a new keyboard, mouse or screen."
       ]
     ],

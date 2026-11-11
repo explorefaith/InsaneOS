@@ -2,22 +2,22 @@
 //
 //   codeStatus() → { state: 'verified' | 'development' | 'invalid' | 'unchecked', signed, release,
 //                    version, files, ms, reason, refused: [{ path, reason }] }
-//   reportRefusedCode()   one notification for each Insane OS component that lord-server refused to load
+//   reportRefusedCode()   one notification for each Insane OS component that insane-server refused to load
 //                         because it no longer matches the signed manifest (called by startShell)
 //
-// lord-server does the checking (server/src/sec/codesig.c); this only shows the result.
+// insane-server does the checking (server/src/sec/codesig.c); this only shows the result.
 import { notify } from './notify.js';
 import { t } from './i18n.js';
 import { wm } from './windows.js';
 
 export function codeStatus() {
-  try { if (typeof lord.code?.status === 'function') return lord.code.status(); } catch (e) { /* app mode */ }
+  try { if (typeof insane.code?.status === 'function') return insane.code.status(); } catch (e) { /* app mode */ }
   return { state: 'unchecked', signed: false, release: false, version: '', files: 0, ms: 0, reason: '', refused: [] };
 }
 
 export function reportRefusedCode() {
-  if (typeof lord.code?.takeRefused !== 'function') return;
-  const list = lord.code.takeRefused();
+  if (typeof insane.code?.takeRefused !== 'function') return;
+  const list = insane.code.takeRefused();
   if (!list.length) return;
   console.warn(`code: not loaded (modified): ${list.map((r) => `${r.path} (${r.reason})`).join(', ')}`);
   notify({

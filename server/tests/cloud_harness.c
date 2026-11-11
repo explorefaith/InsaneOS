@@ -1,6 +1,6 @@
-/* cloud_harness.c — lord-server's cloud code (src/cloud) on its own, for tests/cloud_integration.sh: the same thread,
+/* cloud_harness.c — insane-server's cloud code (src/cloud) on its own, for tests/cloud_integration.sh: the same thread,
  * rclone daemon, accounts and files on demand, with the keyring replaced by files in $HOME/.harness-keyring (0600)
- * and the browser by a line on stdout. Built with CLOUD_TEST: LORDOS_CLOUD_RCLONE names the rclone binary.
+ * and the browser by a line on stdout. Built with CLOUD_TEST: INSANEOS_CLOUD_RCLONE names the rclone binary.
  *
  * One command per line on stdin, one line of JSON per command on stdout:
  *   lock | unlock (the keyring stand-in) | retry ID|all | state | providers | add KIND NAME FIELDS-JSON | answer STATE VALUE | trash ID | measure ID | delete PATH | remove ID [discard] | rename ID NAME | status PATH | free PATH
@@ -81,7 +81,7 @@ static void later(char *r, int req) {
 
 int main(void) {
     setvbuf(stdout, NULL, _IOLBF, 0);
-    if (getenv("LORDOS_ASSETS")) cloud_set_assets(getenv("LORDOS_ASSETS"));
+    if (getenv("INSANEOS_ASSETS")) cloud_set_assets(getenv("INSANEOS_ASSETS"));
     if (cloud_start(getenv("HOME"), &ks)) { printf("{\"error\":\"start\"}\n"); return 1; }
     char *line = NULL;
     size_t cap = 0;

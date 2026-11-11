@@ -1,23 +1,23 @@
 // classic_startmenu_power_scene.mjs — the scene of tests/classic_startmenu_power_test.mjs (not run by
 // itself): the Insane Classic start menu (themes/classic/components/StartMenu.jsx) rendered through
-// runtime/index.js and the real SDK with the shell's layers on, over a stub `lord` (the bundle's banner).
-// It opens the power menu and clicks a row the way lord-server sends a click (down, then up on the same
+// runtime/index.js and the real SDK with the shell's layers on, over a stub `insane` (the bundle's banner).
+// It opens the power menu and clicks a row the way insane-server sends a click (down, then up on the same
 // node). Prints one line per check: "ok <name>" or "FAIL <name> <detail>".
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 import { enableShellLayers } from '../../sdk/layers.js';
 import { StartMenu } from '../../themes/classic/components/StartMenu.jsx';
 import { makeTheme } from '../../themes/classic/tokens.js';
 
-const { styles, texts, parents, calls } = globalThis.__lordTest;
+const { styles, texts, parents, calls } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 const check = (name, got, want) => console.log(got === want ? `ok ${name}` : `FAIL ${name} got ${got}, want ${want}`);
 const click = async (id) => {
-  globalThis.__lordEvent('down', id, 10, 10, 0); await flush();
-  globalThis.__lordEvent('up', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('down', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('up', id, 10, 10, 0); await flush();
 };
-// the <Text> that shows s now (lord-server hits it, not its raw text node; the newest one: a raw node
+// the <Text> that shows s now (insane-server hits it, not its raw text node; the newest one: a raw node
 // of a closed menu is not destroyed here)
 const textNode = (s) => { let r = 0; for (const [id, v] of texts) if (v === s) r = parents.get(id) || 0; return r; };
 // the power button: the 40 × 40 rounded square at the end of the footer
@@ -46,12 +46,12 @@ for (const [label, call] of [['shell.menu.lock', 'lock'], ['shell.menu.switchUse
   const row = textNode(label);
   check(`${call}: the power menu shows the row`, !!row, true);
   await click(row);
-  check(`${call}: the click on the row reaches lord.session.${call}`, calls.join(','), call);
+  check(`${call}: the click on the row reaches insane.session.${call}`, calls.join(','), call);
   check(`${call}: the start menu closes once`, closes, 1);
 }
 // a press outside the start menu and its power menu still closes both
 open = true; closes = 0; rerender(); await flush();
 await click(powerButton());
-globalThis.__lordEvent('down', 999999, 5, 5, 0); await flush();
+globalThis.__insaneEvent('down', 999999, 5, 5, 0); await flush();
 check('a press outside closes the start menu', closes, 1);
 process.exit(0);

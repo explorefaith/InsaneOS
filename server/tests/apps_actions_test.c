@@ -34,14 +34,14 @@ static int appeared(const char *path) {
 }
 
 int main(void) {
-    char home[] = "/tmp/lord-actions-XXXXXX";
+    char home[] = "/tmp/insane-actions-XXXXXX";
     if (!mkdtemp(home)) { perror("mkdtemp"); return 1; }
     setenv("HOME", home, 1);
-    unsetenv("LORDOS_SESSIOND");
+    unsetenv("INSANEOS_SESSIOND");
     char path[512];
     const char *dirs[] = { "%s/.local", "%s/.local/share", "%s/.local/share/applications", NULL };
     for (int i = 0; dirs[i]; i++) { snprintf(path, sizeof path, dirs[i], home); mkdir(path, 0700); }
-    snprintf(path, sizeof path, "%s/.local/share/applications/lord-demo.desktop", home);
+    snprintf(path, sizeof path, "%s/.local/share/applications/insane-demo.desktop", home);
     FILE *f = fopen(path, "w");
     if (!f) { perror(path); return 1; }
     fprintf(f,
@@ -58,27 +58,27 @@ int main(void) {
     restrict_set_store(fw_store_new());
 
     AppAction acts[APPS_MAX_ACTIONS];
-    int k = apps_actions("lord-demo", "en", acts, APPS_MAX_ACTIONS);
+    int k = apps_actions("insane-demo", "en", acts, APPS_MAX_ACTIONS);
     CHECK("two valid listed actions", k == 2);
     CHECK("first is new-window", k > 0 && !strcmp(acts[0].name, "new-window") && !strcmp(acts[0].label, "New Window"));
     CHECK("second is private, unescaped", k > 1 && !strcmp(acts[1].name, "private") && !strcmp(acts[1].label, "Private Window"));
-    k = apps_actions("lord-demo", "es-AR", acts, APPS_MAX_ACTIONS);
+    k = apps_actions("insane-demo", "es-AR", acts, APPS_MAX_ACTIONS);
     CHECK("translated label", k > 0 && !strcmp(acts[0].label, "Nueva ventana"));
-    CHECK("max is honoured", apps_actions("lord-demo", "en", acts, 1) == 1);
-    CHECK("unknown app: none", apps_actions("lord-nope", "en", acts, APPS_MAX_ACTIONS) == 0);
-    CHECK("invalid id: none", apps_actions("../lord-demo", "en", acts, APPS_MAX_ACTIONS) == 0);
+    CHECK("max is honoured", apps_actions("insane-demo", "en", acts, 1) == 1);
+    CHECK("unknown app: none", apps_actions("insane-nope", "en", acts, APPS_MAX_ACTIONS) == 0);
+    CHECK("invalid id: none", apps_actions("../insane-demo", "en", acts, APPS_MAX_ACTIONS) == 0);
 
-    CHECK("unlisted action refused", apps_launch_action("lord-demo", "unlisted") != 0);
-    CHECK("invalid action name refused", apps_launch_action("lord-demo", "bad_name") != 0);
-    CHECK("action without Exec refused", apps_launch_action("lord-demo", "noexec") != 0);
-    CHECK("action without Name refused", apps_launch_action("lord-demo", "nolabel") != 0);
-    CHECK("path-like action refused", apps_launch_action("lord-demo", "../new-window") != 0);
-    CHECK("empty action refused", apps_launch_action("lord-demo", "") != 0);
-    CHECK("NULL action refused", apps_launch_action("lord-demo", NULL) != 0);
-    CHECK("unknown app refused", apps_launch_action("lord-nope", "private") != 0);
+    CHECK("unlisted action refused", apps_launch_action("insane-demo", "unlisted") != 0);
+    CHECK("invalid action name refused", apps_launch_action("insane-demo", "bad_name") != 0);
+    CHECK("action without Exec refused", apps_launch_action("insane-demo", "noexec") != 0);
+    CHECK("action without Name refused", apps_launch_action("insane-demo", "nolabel") != 0);
+    CHECK("path-like action refused", apps_launch_action("insane-demo", "../new-window") != 0);
+    CHECK("empty action refused", apps_launch_action("insane-demo", "") != 0);
+    CHECK("NULL action refused", apps_launch_action("insane-demo", NULL) != 0);
+    CHECK("unknown app refused", apps_launch_action("insane-nope", "private") != 0);
     CHECK("action on a path id refused", apps_launch_action("../x", "private") != 0);
 
-    CHECK("listed action launches", apps_launch_action("lord-demo", "private") == 0);
+    CHECK("listed action launches", apps_launch_action("insane-demo", "private") == 0);
     snprintf(path, sizeof path, "%s/act-private", home);
     CHECK("it ran that action's Exec", appeared(path));
     snprintf(path, sizeof path, "%s/main", home);
@@ -87,23 +87,23 @@ int main(void) {
     CHECK("the unlisted action never ran", access(path, F_OK) != 0);
     snprintf(path, sizeof path, "%s/act-bad", home);
     CHECK("the badly named action never ran", access(path, F_OK) != 0);
-    CHECK("plain launch still works", apps_launch("lord-demo") == 0);
+    CHECK("plain launch still works", apps_launch("insane-demo") == 0);
     snprintf(path, sizeof path, "%s/main", home);
     CHECK("main Exec ran", appeared(path));
 
-    /* a package that names its file freely ("Lord Spaced App.desktop"): listed as Lord-Spaced-App,
+    /* a package that names its file freely ("Insane Spaced App.desktop"): listed as Insane-Spaced-App,
      * launched from its real file (0.8.5) */
-    snprintf(path, sizeof path, "%s/.local/share/applications/Lord Spaced App.desktop", home);
+    snprintf(path, sizeof path, "%s/.local/share/applications/Insane Spaced App.desktop", home);
     f = fopen(path, "w");
     if (f) { fprintf(f, "[Desktop Entry]\nType=Application\nName=Spaced\nExec=/usr/bin/touch %s/spaced\n", home); fclose(f); }
     const DesktopApp *list;
     int na = apps_list("en", &list), found = 0;
-    for (int i = 0; i < na; i++) if (!strcmp(list[i].id, "Lord-Spaced-App")) found = 1;
+    for (int i = 0; i < na; i++) if (!strcmp(list[i].id, "Insane-Spaced-App")) found = 1;
     CHECK("a file name with spaces is listed, its id sanitized", found);
-    CHECK("it launches", apps_launch("Lord-Spaced-App") == 0);
+    CHECK("it launches", apps_launch("Insane-Spaced-App") == 0);
     snprintf(path, sizeof path, "%s/spaced", home);
     CHECK("its Exec ran", appeared(path));
-    CHECK("the raw name with spaces is not an id", apps_launch("Lord Spaced App") != 0);
+    CHECK("the raw name with spaces is not an id", apps_launch("Insane Spaced App") != 0);
 
     char cmd[600];
     snprintf(cmd, sizeof cmd, "rm -rf '%s'", home);

@@ -2,7 +2,7 @@
 // never the text. TextInput (components.jsx) and custom fields through the input method (ime.js)
 // report here; the on-screen keyboard listens (osk.js). In an isolated app's process there is no
 // keyboard: the hint goes to the session through the broker, which checks nothing else can come of it.
-import { onCommit, onScreenChange } from '@lordos/runtime';
+import { onCommit, onScreenChange } from '@insaneos/runtime';
 
 const sources = { input: null, ime: null };    // a function → the caret, or null without focus
 const subs = new Set();
@@ -13,7 +13,7 @@ export const textFieldCaret = () => {
 };
 export function onTextField(fn) { subs.add(fn); return () => subs.delete(fn); }
 
-const inApp = () => typeof lord !== 'undefined' && typeof lord.appId === 'string' && !!lord.broker?.textFocus;
+const inApp = () => typeof insane !== 'undefined' && typeof insane.appId === 'string' && !!insane.broker?.textFocus;
 let sent = '';
 let timer = 0;
 function tellSession(again = true) {
@@ -24,7 +24,7 @@ function tellSession(again = true) {
     const c = textFieldCaret();
     const on = textFieldActive(), y = c ? Math.round(c.y) : -1, h = c ? Math.round(c.h) : 0;
     const now = `${on}|${y}|${h}`;
-    if (now !== sent) { sent = now; lord.broker.textFocus(on, y, h); }
+    if (now !== sent) { sent = now; insane.broker.textFocus(on, y, h); }
     // a field focused while its window opens has no place yet: once more, after the layout settles
     if (again) setTimeout(() => tellSession(false), 250);
   }, 30);

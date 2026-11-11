@@ -7,9 +7,9 @@
  * on every sample. For other users' sockets only how many there are is counted.
  *
  * (0.8.5) Each socket's cgroup comes too (INET_DIAG_CGROUP_ID): a socket made in one of the session's
- * scopes is that app's, whoever holds it now (lord-server holds the ones Mail's connector made, a
+ * scopes is that app's, whoever holds it now (insane-server holds the ones Mail's connector made, a
  * program in the Terminal is the Terminal's), so the list says "scope": the app's firewall id, the
- * same lord-netperm counts it under ("cgApp").
+ * same insane-netperm counts it under ("cgApp").
  *
  * The country comes from the local database (mmdb.c). No address leaves the machine. */
 #include "monpriv.h"
@@ -291,7 +291,7 @@ static const char *const TCP_STATE[] = { "", "ESTABLISHED", "SYN_SENT", "SYN_REC
 /* Name and executable of a pid (small per-sample cache). */
 /* ---- cgroup id → app (the session's scopes, rescanned every 5 s) ---- */
 
-/* sub: the machine's id for a running machine's scope (lordos:machines) and its leaves (qemu, passt) */
+/* sub: the machine's id for a running machine's scope (insaneos:machines) and its leaves (qemu, passt) */
 static struct { uint64_t id; char app[FW_APP_MAX]; char sub[40]; } scopes[256];
 static int nscopes;
 static double scopes_t;
@@ -310,7 +310,7 @@ static void scopes_scan(void) {
     if (mon_now_ms() - scopes_t < 5000 && scopes_t) return;
     scopes_t = mon_now_ms();
     nscopes = 0;
-    const char *self = cgroup_self();                   /* ".../lordos-session-<uid>/server" */
+    const char *self = cgroup_self();                   /* ".../insaneos-session-<uid>/server" */
     char dir[PATH_MAX];
     if (!self[0] || (size_t)snprintf(dir, sizeof dir, "/sys/fs/cgroup%s", self) >= sizeof dir) return;
     char *sl = strrchr(dir, '/');
@@ -322,8 +322,8 @@ static void scopes_scan(void) {
     while (d && (e = readdir(d)) && nscopes < 256) {
         if (e->d_type != DT_DIR || e->d_name[0] == '.') continue;
         char app[FW_APP_MAX], sub[40] = "";
-        if (!strcmp(e->d_name, "server")) snprintf(app, sizeof app, "lordos");
-        else if (fw_scope_app(e->d_name, app, sizeof app)) continue;      /* the same names as lord-netperm's */
+        if (!strcmp(e->d_name, "server")) snprintf(app, sizeof app, "insaneos");
+        else if (fw_scope_app(e->d_name, app, sizeof app)) continue;      /* the same names as insane-netperm's */
         uint64_t id = cg_id(dfd, e->d_name);
         if (!id) continue;
         int vm = !fw_vm_scope(e->d_name, sub, sizeof sub);
@@ -331,7 +331,7 @@ static void scopes_scan(void) {
         snprintf(scopes[nscopes].app, sizeof scopes[nscopes].app, "%s", app);
         snprintf(scopes[nscopes].sub, sizeof scopes[nscopes].sub, "%s", sub);
         nscopes++;
-        /* (0.8.8.6) a machine's scope may hold leaves (lordvm.c: qemu, passt, supervisor), and a socket
+        /* (0.8.8.6) a machine's scope may hold leaves (insanevm.c: qemu, passt, supervisor), and a socket
          * carries its leaf's id: the leaves are the machine's too */
         if (!vm) continue;
         int sfd = openat(dfd, e->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
@@ -351,8 +351,8 @@ static void scopes_scan(void) {
     }
     if (d) closedir(d);
     if (dfd >= 0) close(dfd);
-    /* the remote desktop's bridge: forked by lord-sessiond after the sign-in, it runs as the user in
-     * lordos.service's root-owned `supervisor` group and isn't dumpable, so its sockets can't be traced to
+    /* the remote desktop's bridge: forked by insane-sessiond after the sign-in, it runs as the user in
+     * insaneos.service's root-owned `supervisor` group and isn't dumpable, so its sockets can't be traced to
      * a pid; a socket of the user's in that group can only be the bridge's (its WebRTC UDP ports) */
     char *up = strrchr(dir, '/');
     if (up && nscopes < 256) {

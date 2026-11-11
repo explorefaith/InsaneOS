@@ -1,6 +1,6 @@
 // validate.js — the Insane OS Imager's checks, the same rules as the first-run parser on the board
 // (server/src/firstrun/firstrun.c, docs/IMAGER.md). Shared by the native app and the desktop app;
-// plain JavaScript, no lord.* and no DOM. Each check returns null when the value is fine, or the
+// plain JavaScript, no insane.* and no DOM. Each check returns null when the value is fine, or the
 // i18n key (imager.err.*) of the problem.
 
 // UTF-8 bytes of a string (QuickJS has no TextEncoder)
@@ -29,13 +29,13 @@ export function hostname(s) {
 export function suggestHostname(name, device = 'pi') {
   const base = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-  return base ? `${base}-${device}`.slice(0, 63).replace(/-+$/, '') : `lordos-${device}`;
+  return base ? `${base}-${device}`.slice(0, 63).replace(/-+$/, '') : `insaneos-${device}`;
 }
 
 export const RESERVED_USERS = ['root', 'daemon', 'bin', 'sys', 'sync', 'games', 'man', 'lp', 'mail', 'news', 'uucp', 'proxy',
-  'www-data', 'backup', 'list', 'irc', 'nobody', 'lordos', 'lordos-greeter', 'messagebus', 'polkitd', 'sshd', 'pipewire',
+  'www-data', 'backup', 'list', 'irc', 'nobody', 'insaneos', 'insaneos-greeter', 'messagebus', 'polkitd', 'sshd', 'pipewire',
   'sudo', 'admin', 'wheel', 'users', 'staff', 'adm', 'disk', 'audio', 'video', 'input', 'render', 'plugdev', 'netdev',
-  'bluetooth', 'avahi', '_apt', 'lordos-remote', 'operator', 'shadow', 'utmp', 'tty', 'kmem', 'dialout', 'cdrom'];
+  'bluetooth', 'avahi', '_apt', 'insaneos-remote', 'operator', 'shadow', 'utmp', 'tty', 'kmem', 'dialout', 'cdrom'];
 
 export function username(s) {
   if (!s) return 'imager.err.userEmpty';
@@ -68,7 +68,7 @@ export function password(p, confirm) {
   return null;
 }
 
-const COMMON = ['password', '12345678', '123456789', 'qwertyui', 'iloveyou', 'raspberry', 'lordos', 'admin123', 'contrasena',
+const COMMON = ['password', '12345678', '123456789', 'qwertyui', 'iloveyou', 'raspberry', 'insaneos', 'admin123', 'contrasena',
   'contraseña', 'senha123', 'letmein1', 'welcome1', '11111111', '00000000', 'abc12345', 'password1'];
 // 0 very weak … 4 strong, with the reasons to show
 export function strength(p) {

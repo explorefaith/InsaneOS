@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea or an improvement for LordOS.
+description: Suggest an idea or an improvement for InsaneOS.
 labels: ["enhancement"]
 body:
   - type: markdown

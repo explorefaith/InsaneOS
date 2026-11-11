@@ -3,7 +3,7 @@
 // Share Link sheet, Get Info's cloud part, the header's transfers pill and the offline dialog. Built from the
 // approved mocks (Files, FilesMenu, ShareLink, GetInfo, States).
 import { View, Text, Button, Segmented, useTheme, useCloud, cloud, cloudModel as M, clipboard, toast, openUrl, formatBytes, formatDate, formatTime, spacing, typeScale, t as tr,
-  CloudGlyph, StatusGlyph, UsageRing, addListener, Toggle, errorText, tOptional, cloudState } from '@lordos/sdk';
+  CloudGlyph, StatusGlyph, UsageRing, addListener, Toggle, errorText, tOptional, cloudState } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SideItem, SideTitle } from '../../sdk/fileparts.jsx';
 import { EntryIcon } from './glyphs.jsx';

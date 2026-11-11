@@ -5,7 +5,7 @@
   "quickHint": "Conecta uma vez; fica em Recentes, não nos favoritos",
   "favorites": "FAVORITOS",
   "recent": "RECENTES",
-  "unavailable": "O ajudante de bancos de dados (lord-sql) não está instalado neste sistema, então Bancos de dados ainda não consegue se conectar. Os favoritos e a importação continuam funcionando.",
+  "unavailable": "O ajudante de bancos de dados (insane-sql) não está instalado neste sistema, então Bancos de dados ainda não consegue se conectar. Os favoritos e a importação continuam funcionando.",
   "later": "Chega em uma versão futura de Bancos de dados.",
   "loading": "Carregando…",
   "cancel": "Cancelar",
@@ -432,7 +432,7 @@
     "one": "{count} entrada desde a conexão às {time} · o registro fica na memória e é apagado ao desconectar",
     "other": "{count} entradas desde a conexão às {time} · o registro fica na memória e é apagado ao desconectar"
   },
-  "err.unavailable": "O ajudante de bancos de dados (lord-sql) não está instalado ou não consegue iniciar.",
+  "err.unavailable": "O ajudante de bancos de dados (insane-sql) não está instalado ou não consegue iniciar.",
   "err.notfound": "Esse favorito não está mais salvo. Salve-o de novo e conecte.",
   "err.dns": "O nome do servidor não foi encontrado. {message}",
   "err.connect": "O servidor não aceitou a conexão: verifique o host, a porta e a rede. {message}",

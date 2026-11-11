@@ -1,15 +1,15 @@
 /* sharegrant.h — the grants of the screen-sharing API: which app may share the screen (screen-share) and
- * take input (remote-input). Root writes the file, /var/lib/lordos/share/<uid>.json, through the share-grant
- * action; lord-server only reads it: permisos.json can be edited by any unsandboxed process of the user, and
+ * take input (remote-input). Root writes the file, /var/lib/insaneos/share/<uid>.json, through the share-grant
+ * action; insane-server only reads it: permisos.json can be edited by any unsandboxed process of the user, and
  * this permission is the one worth stealing (docs/SCREEN-SHARING.md). No I/O here but the two functions at
  * the end, so tests/share_test.c and tests/share_fuzz.c cover the parser. */
-#ifndef LORD_REMOTE_SHAREGRANT_H
-#define LORD_REMOTE_SHAREGRANT_H
+#ifndef INSANE_REMOTE_SHAREGRANT_H
+#define INSANE_REMOTE_SHAREGRANT_H
 
 #include <stddef.h>
 #include <sys/types.h>
 
-#define SG_DIR "/var/lib/lordos/share"
+#define SG_DIR "/var/lib/insaneos/share"
 #define SG_MAX 128                      /* entries in a file */
 #define SG_ID_MAX 128                   /* FW_APP_MAX */
 #define SG_EXE_MAX 256

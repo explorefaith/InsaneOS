@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // mkdeb-voice.mjs — builds the voice packages (docs/VOICE.md, phase 3) from Kyutai's files, for the signed APT
 // repository (tools/release/apt-repo.sh). Every package is Architecture: all and installs under
-// /usr/share/lordos/voice, where `say` looks (server/src/tts/say.c):
+// /usr/share/insaneos/voice, where `say` looks (server/src/tts/say.c):
 //
-//   lordos-voice-<lang>            models/<lang>/standard.gguf                          (audio.cpp's Q8_0 GGUF)
-//   lordos-voice-<lang>-hd         models/<lang>/hd/{model.safetensors,tokenizer.model} (Kyutai's 24-layer model)
-//   lordos-voice-<lang>-<voice>    models/<lang>/embeddings/<voice>.safetensors         Depends: lordos-voice-<lang>
-//   lordos-voice-<lang>-<voice>-hd models/<lang>/hd/embeddings/<voice>.safetensors      Depends: lordos-voice-<lang>-hd
-//   lordos-voice-previews          previews/<lang>/<voice>.wav, a recorded sample of each voice (make-previews.sh)
+//   insaneos-voice-<lang>            models/<lang>/standard.gguf                          (audio.cpp's Q8_0 GGUF)
+//   insaneos-voice-<lang>-hd         models/<lang>/hd/{model.safetensors,tokenizer.model} (Kyutai's 24-layer model)
+//   insaneos-voice-<lang>-<voice>    models/<lang>/embeddings/<voice>.safetensors         Depends: insaneos-voice-<lang>
+//   insaneos-voice-<lang>-<voice>-hd models/<lang>/hd/embeddings/<voice>.safetensors      Depends: insaneos-voice-<lang>-hd
+//   insaneos-voice-previews          previews/<lang>/<voice>.wav, a recorded sample of each voice (make-previews.sh)
 //
 //   node tools/voice/mkdeb-voice.mjs <source folder> <output folder> <version>
 //
@@ -34,7 +34,7 @@ if (!src || !out || !/^\d{4}\.\d{2}\.\d{2}(\.\d{1,2})?$/.test(version || '')) {
 fs.mkdirSync(out, { recursive: true });
 const [y, m, d] = version.split('.').map(Number);
 const epoch = Math.floor(Date.UTC(y, m - 1, d) / 1000);
-const DEST = 'usr/share/lordos/voice';
+const DEST = 'usr/share/insaneos/voice';
 
 const LANG_NAMES = { es: 'Spanish', en: 'English', pt: 'Portuguese' };
 const SOURCE_NAMES = {
@@ -52,7 +52,7 @@ function copyright(extra) {
   return `Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Pocket TTS
 Source: https://huggingface.co/kyutai/pocket-tts
-Comment: Packaged by Insane OS (https://lordos.org). ${PROHIBITED.replace(/\n /g, ' ')}
+Comment: Packaged by Insane OS (https://insaneos.org). ${PROHIBITED.replace(/\n /g, ' ')}
 
 Files: *
 Copyright: Kyutai
@@ -69,7 +69,7 @@ function need(file) {
 
 // one package: files [[source, path under DEST]], its control fields; returns the .deb's path
 function build(name, { depends, description, long, files, extraCopyright }) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'lordos-voice-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'insaneos-voice-'));
   try {
     for (const [from, to] of files) {
       const dst = path.join(root, DEST, to);
@@ -84,8 +84,8 @@ function build(name, { depends, description, long, files, extraCopyright }) {
     fs.mkdirSync(path.join(root, 'DEBIAN'));
     fs.writeFileSync(path.join(root, 'DEBIAN/control'), [
       `Package: ${name}`, `Version: ${version}`, 'Architecture: all', 'Section: sound', 'Priority: optional',
-      'Maintainer: Insane OS <lordos@lordos.org>', `Installed-Size: ${size}`, depends ? `Depends: ${depends}` : null,
-      'Homepage: https://lordos.org', `Description: ${description}`, ...long.split('\n').map((l) => ` ${l || '.'}`),
+      'Maintainer: Insane OS <insaneos@insaneos.org>', `Installed-Size: ${size}`, depends ? `Depends: ${depends}` : null,
+      'Homepage: https://insaneos.org', `Description: ${description}`, ...long.split('\n').map((l) => ` ${l || '.'}`),
     ].filter(Boolean).join('\n') + '\n');
     // every directory 755, every time the version's date
     for (const p of walk(root)) { if (fs.statSync(p).isDirectory()) fs.chmodSync(p, 0o755); fs.utimesSync(p, epoch, epoch); }
@@ -111,12 +111,12 @@ for (const L of VOICE_LANGS) {
   const lang = L.id, name = LANG_NAMES[lang];
   made.push(build(modelPackage(lang, false), {
     description: `${name} voice model for reading aloud (standard)`,
-    long: `Kyutai's Pocket TTS model for ${name}, as a Q8_0 GGUF (audio.cpp), for Insane OS's \`say\` and Read Aloud.\nFast on any processor. Voices come in their own packages (lordos-voice-${lang}-<voice>).`,
+    long: `Kyutai's Pocket TTS model for ${name}, as a Q8_0 GGUF (audio.cpp), for Insane OS's \`say\` and Read Aloud.\nFast on any processor. Voices come in their own packages (insaneos-voice-${lang}-<voice>).`,
     files: [[path.join(src, lang, 'standard.gguf'), `models/${lang}/standard.gguf`]],
   }));
   made.push(build(modelPackage(lang, true), {
     description: `${name} voice model for reading aloud (HD)`,
-    long: `Kyutai's 24-layer Pocket TTS model for ${name} (${L.hd}): more natural speech, about real time\non a recent processor. Voices come in their own packages (lordos-voice-${lang}-<voice>-hd).`,
+    long: `Kyutai's 24-layer Pocket TTS model for ${name} (${L.hd}): more natural speech, about real time\non a recent processor. Voices come in their own packages (insaneos-voice-${lang}-<voice>-hd).`,
     files: [[path.join(src, lang, 'hd/model.safetensors'), `models/${lang}/hd/model.safetensors`],
       [path.join(src, lang, 'hd/tokenizer.model'), `models/${lang}/hd/tokenizer.model`]],
   }));

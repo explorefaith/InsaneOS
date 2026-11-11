@@ -3,8 +3,8 @@
  * the cpufreq governor read from sysfs. Changing it as the user goes through the daemon (its
  * polkit policy allows active sessions); if that is refused the theme falls back to the closed
  * admin action power-profile (hw/hw_admin.c). */
-#ifndef LORD_HW_PPD_H
-#define LORD_HW_PPD_H
+#ifndef INSANE_HW_PPD_H
+#define INSANE_HW_PPD_H
 
 typedef void (*PpdEvent)(const char *kind, const char *json);
 

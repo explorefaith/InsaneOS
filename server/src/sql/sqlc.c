@@ -33,7 +33,7 @@
 typedef struct {
     int used, conn;
     int ready;                      /* the open succeeded */
-    int sock;                       /* channel to lord-sql, -1 before it runs */
+    int sock;                       /* channel to insane-sql, -1 before it runs */
     pid_t pid;
     int open_req;                   /* the open's request id until it is answered */
     int busy;                       /* the request in flight, 0 if none */
@@ -54,7 +54,7 @@ static double now_ms(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &
 const char *sql_favorites_path(void) {
     if (!fav_path[0]) {
         const char *h = getenv("HOME");
-        snprintf(fav_path, sizeof fav_path, "%s/.config/lordos/databases/favorites.json", h ? h : "/nonexistent");
+        snprintf(fav_path, sizeof fav_path, "%s/.config/insaneos/databases/favorites.json", h ? h : "/nonexistent");
     }
     return fav_path;
 }
@@ -71,11 +71,11 @@ int sql_available(void) {
         size_t sn = strlen(self);
         if (sn + 10 > sizeof helper) return -1;
         memcpy(helper, self, sn);
-        memcpy(helper + sn, "/lord-sql", 10);
+        memcpy(helper + sn, "/insane-sql", 10);
     }
     struct stat st, me;
     if (stat(helper, &st) || !S_ISREG(st.st_mode) || !(st.st_mode & S_IXUSR)) return -1;
-    /* owned by root or by lord-server's owner, and not writable by anyone else */
+    /* owned by root or by insane-server's owner, and not writable by anyone else */
     if (stat("/proc/self/exe", &me) || (st.st_uid != 0 && st.st_uid != me.st_uid) || (st.st_mode & 022)) return -1;
     return 0;
 }
@@ -287,7 +287,7 @@ char *sql_favorites_read(size_t *len) {
 int sql_favorites_save(const char *j, size_t len) {
     char why[96];
     if (!sql_favorites_valid(j, len, why, sizeof why)) {
-        fprintf(stderr, "lord-server: favorites.json refused: %s\n", why);
+        fprintf(stderr, "insane-server: favorites.json refused: %s\n", why);
         return 1;
     }
     const char *path = sql_favorites_path();
@@ -355,7 +355,7 @@ void sql_items_free(SqlItem *items, int n) {
 /* ---- connecting ---- */
 
 int sql_socket_ok(const char *real, const char *runtime_dir) {
-    static const char *const deny[] = { "/run/user", "/run/dbus", "/run/systemd", "/run/lordos", "/run/udev",
+    static const char *const deny[] = { "/run/user", "/run/dbus", "/run/systemd", "/run/insaneos", "/run/udev",
                                         "/var/run", "/tmp/.X11-unix", "/tmp/.ICE-unix", "/proc", "/sys", "/dev", NULL };
     if (!real || real[0] != '/') return 0;
     for (int i = 0; deny[i]; i++) {
@@ -397,7 +397,7 @@ static int connect_tcp(const char *host, int port, const char **why) {
     int fd = -1;
     for (struct addrinfo *a = res; a && fd < 0; a = a->ai_next) {
         /* made and connected by the sql connector, so the firewall counts and decides it as
-         * lordos:sql (sec/netconn.h); a denied connection fails with EPERM */
+         * insaneos:sql (sec/netconn.h); a denied connection fails with EPERM */
         fd = netconn_socket(NC_SQL, a->ai_family, SOCK_STREAM, a->ai_addr, a->ai_addrlen);
         if (fd < 0) continue;
         struct pollfd p = { fd, POLLOUT, 0 };
@@ -487,7 +487,7 @@ static char *read_big(int fd, size_t *len) {
 }
 
 /* {"conn":N, + the helper's object */
-/* The helper's reply with lord-server's own conn in front. The reply must be one JSON object with no
+/* The helper's reply with insane-server's own conn in front. The reply must be one JSON object with no
  * "conn" of its own: a compromised helper must not name another connection (JSON.parse keeps the
  * last of two equal keys). */
 static char *with_conn(int conn, const char *data, size_t len, size_t *out_len) {
@@ -511,7 +511,7 @@ static char *with_conn(int conn, const char *data, size_t len, size_t *out_len) 
     return b;
 }
 
-/* the cert event: lord-server's own conn and fav, the helper's strings checked */
+/* the cert event: insane-server's own conn and fav, the helper's strings checked */
 static void push_cert(Slot *s, const char *json, size_t len) {
     JDoc d;
     if (!json || json_parse(json, len, &d, NULL, 0)) return;
@@ -588,7 +588,7 @@ static void *conn_thread(void *arg) {
         posix_spawn_file_actions_init(&fa);
         posix_spawn_file_actions_adddup2(&fa, a, 3);
         posix_spawn_file_actions_adddup2(&fa, b, 4);
-        posix_spawn_file_actions_addclosefrom_np(&fa, 5);     /* nothing else of lord-server's reaches it */
+        posix_spawn_file_actions_addclosefrom_np(&fa, 5);     /* nothing else of insane-server's reaches it */
         posix_spawnattr_t at;
         posix_spawnattr_init(&at);
         sigset_t none, all;
@@ -598,7 +598,7 @@ static void *conn_thread(void *arg) {
         posix_spawnattr_setsigdefault(&at, &all);
         posix_spawnattr_setflags(&at, POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETSIGDEF);
         char *envp[] = { "LANG=C.UTF-8", NULL };
-        char *argv[] = { "lord-sql", NULL };
+        char *argv[] = { "insane-sql", NULL };
         int e = a >= 0 && b >= 0 ? posix_spawn(&pid, helper, &fa, &at, argv, envp) : -1;
         posix_spawn_file_actions_destroy(&fa);
         posix_spawnattr_destroy(&at);
@@ -622,7 +622,7 @@ static void *conn_thread(void *arg) {
     }
     for (int i = 0; i < nfiles; i++) close(files[i]);
     int req = j->req;
-    job_free(j);                     /* the password is gone from lord-server from here on */
+    job_free(j);                     /* the password is gone from insane-server from here on */
     if (fail) {
         pthread_mutex_lock(&mu);
         if (s->open_req == req) { s->open_req = 0; push_err(req, s->closing ? "closed" : fail, detail); }

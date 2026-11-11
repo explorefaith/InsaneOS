@@ -1,5 +1,5 @@
 #!/bin/sh
-# cloud_providers_check.sh — the "Check This Account" steps (docs/CLOUD.md 19) run by lord-server's cloud code
+# cloud_providers_check.sh — the "Check This Account" steps (docs/CLOUD.md 19) run by insane-server's cloud code
 # (build/cloud-harness) against local stand-ins of three providers, to mark them verified in assets/cloud/providers.json:
 #
 #   webdav  rclone serve webdav on loopback, a user and password
@@ -8,7 +8,7 @@
 #
 #   sh tests/cloud_providers_check.sh <build dir> <rclone binary> [webdav] [sftp] [s3]
 #
-# Each kind: add the account, wait for its mount, then the check: about, list the root, make a .lordos-check-<random>
+# Each kind: add the account, wait for its mount, then the check: about, list the root, make a .insaneos-check-<random>
 # folder (inside the first bucket for object storage), write 1 MiB of random bytes, wait until it went up (going up →
 # on this computer, 2 min at most) and is on the server, Free Up Space, read it back with the same hash, a link if the
 # provider has them, delete the file and the folder and wait until the server has neither. Then remove the account
@@ -34,7 +34,7 @@ cleanup() {
     [ -n "${HP:-}" ] && kill "$HP" 2>/dev/null
     [ -n "${SRV:-}" ] && kill "$SRV" 2>/dev/null
     for m in "$T"/home/Cloud/*; do [ -d "$m" ] && fusermount3 -u -z "$m" 2>/dev/null; done
-    pkill -f "$T/run/lordos/cloud/rc.sock" 2>/dev/null
+    pkill -f "$T/run/insaneos/cloud/rc.sock" 2>/dev/null
     [ -n "$SUSER" ] && { sudo -n pkill -u "$SUSER"; sleep 1; sudo -n userdel -r "$SUSER" 2>/dev/null; }
     sleep 0.5
     rm -rf "$T"
@@ -44,7 +44,7 @@ trap cleanup EXIT INT TERM
 H=$T/home R=$T/run
 mkdir -p "$H" "$R" && chmod 700 "$R"
 mkfifo "$T/in" "$T/out"
-env -i HOME="$H" XDG_RUNTIME_DIR="$R" PATH=/usr/bin:/bin LORDOS_CLOUD_RCLONE="$RC" "$B/cloud-harness" <"$T/in" >"$T/out" 2>"$T/harness.log" &
+env -i HOME="$H" XDG_RUNTIME_DIR="$R" PATH=/usr/bin:/bin INSANEOS_CLOUD_RCLONE="$RC" "$B/cloud-harness" <"$T/in" >"$T/out" 2>"$T/harness.log" &
 HP=$!
 exec 3>"$T/in" 4<"$T/out"
 cmd() { printf "%s\n" "$*" >&3; while IFS= read -r L <&4; do case $L in '{"opened"'*) continue ;; esac; break; done; printf '%s' "$L"; }
@@ -72,7 +72,7 @@ check_account() {         # KIND NAME FIELDS SERVERDIR (where the cloud keeps th
     base=$M sbase=$srv
     if [ "$kind" = s3 ]; then b=$(ls "$M" | head -1); base=$M/$b sbase=$srv/$b; fi
     rnd=$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')
-    D=$base/.lordos-check-$rnd SD=$sbase/.lordos-check-$rnd
+    D=$base/.insaneos-check-$rnd SD=$sbase/.insaneos-check-$rnd
     step "$kind: make the check folder" mkdir "$D"
     head -c 1048576 /dev/urandom >"$T/check.bin"
     want=$(sha256sum <"$T/check.bin" | cut -c1-64)
@@ -87,9 +87,9 @@ check_account() {         # KIND NAME FIELDS SERVERDIR (where the cloud keeps th
     if has "$(cmd state)" '"linksSupported":true'; then
         r=$(cmd link "$D/check.bin" 1d)
         if has "$r" '"url"'; then ok "$kind: make a link"; cmd unlink "$D/check.bin" >/dev/null
-        # rclone serve s3 answers with an http:// link, and lord-server keeps only https links (cloud_url_ok)
+        # rclone serve s3 answers with an http:// link, and insane-server keeps only https links (cloud_url_ok)
         elif [ "$kind" = s3 ] && has "$r" 'cloud.linkFailed'; then ok "$kind: links" "skipped (the stand-in's links are http://, Insane OS keeps https only)"
-        else bad "$kind: make a link" "$r"; grep -i link "$H/.cache/lordos/cloud.log" 2>/dev/null | tail -2 | cut -c1-300; fi
+        else bad "$kind: make a link" "$r"; grep -i link "$H/.cache/insaneos/cloud.log" 2>/dev/null | tail -2 | cut -c1-300; fi
     else ok "$kind: links" "skipped (the provider has none)"; fi
     step "$kind: delete the file and the folder" sh -c "rm '$D/check.bin' && rmdir '$D'"
     gone() { [ ! -e "$SD" ]; }
@@ -111,7 +111,7 @@ for kind in $KINDS; do
         kill "$SRV"; SRV='' ;;
     sftp)
         if ! sudo -n true 2>/dev/null; then echo "  skip  sftp (needs sudo without a password for a throwaway user)"; continue; fi
-        SUSER=lordchk$(head -c 3 /dev/urandom | od -An -tx1 | tr -d ' \n')
+        SUSER=insanechk$(head -c 3 /dev/urandom | od -An -tx1 | tr -d ' \n')
         sudo -n useradd -m -s /bin/sh "$SUSER" || { bad "sftp: throwaway user"; continue; }
         ssh-keygen -q -t ed25519 -N '' -f "$T/key" -C cloudcheck
         SH=$(getent passwd "$SUSER" | cut -d: -f6)

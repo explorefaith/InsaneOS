@@ -18,7 +18,7 @@ anything.
 
 - With **your own user** you see and control the same session that is on the monitor.
 - With **another user**, that person gets their own desktop, at the same time.
-- In Settings you choose who can log in (everyone or only the `lordos-remote` group) and see who is
+- In Settings you choose who can log in (everyone or only the `insaneos-remote` group) and see who is
   connected, with a button to disconnect them.
 
 It works before anyone has logged in on the computer. Failed attempts wait longer each time.

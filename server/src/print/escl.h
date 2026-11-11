@@ -1,7 +1,7 @@
 /* escl.h — our own eSCL client («driverless» scanners, AirScan) over HTTP on the local network.
  * No SANE. Only LAN IPv4 addresses and HTTP (no TLS: _uscans is not supported). */
-#ifndef LORD_PRINT_ESCL_H
-#define LORD_PRINT_ESCL_H
+#ifndef INSANE_PRINT_ESCL_H
+#define INSANE_PRINT_ESCL_H
 
 #include "../doc/wire.h"
 #include "../sec/json.h"

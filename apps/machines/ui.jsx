@@ -1,13 +1,13 @@
 // Pieces the Machines windows share: the state dot, the system marks, the three lights, bars, a context menu and the
 // surfaces of the Control Center (docs/VIRTUALIZATION.md, "The app"; the approved mocks, Main and Toolbar).
-import { View, Text, Overlay, screen, addListener, useTheme, errorText, t as tr } from '@lordos/sdk';
+import { View, Text, Overlay, screen, addListener, useTheme, errorText, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 export const TONE = { run: '#30d158', pause: '#ff9f0a', off: '#8e8e93', busy: '#0a84ff', bad: '#ff453a' };
-export const has = () => typeof lord !== 'undefined' && !!lord.vm;
-// why lord.vm refused a start or a change (it returned 0), or the fallback text: a writable shared folder that holds a
+export const has = () => typeof insane !== 'undefined' && !!insane.vm;
+// why insane.vm refused a start or a change (it returned 0), or the fallback text: a writable shared folder that holds a
 // protected file (vm.shareProtected) is said as such
-export const vmRefusal = (fallback) => { const r = lord.vm.refusal ? lord.vm.refusal() : null; return r ? errorText(r) : fallback; };
+export const vmRefusal = (fallback) => { const r = insane.vm.refusal ? insane.vm.refusal() : null; return r ? errorText(r) : fallback; };
 export const gb = (mb) => (mb >= 1024 ? `${Math.round((mb / 1024) * 10) / 10} GB` : `${mb} MB`);
 export const bytes = (b) => (b >= 1e12 ? `${Math.round(b / 1e11) / 10} TB` : b >= 1e9 ? `${Math.round(b / 1e8) / 10} GB` : `${Math.round(b / 1e6)} MB`);
 export const gib = (b) => `${Math.round((b / 1073741824) * 10) / 10}`;
@@ -35,7 +35,7 @@ export function StateDot({ tone, size = 8 }) { return <View style={{ width: size
 
 // Our own marks for the systems we recognize: a colored rounded tile with a letter, never a project's logo.
 const MARKS = {
-  lordos: ['#5aa9ff', '#1f5fbf', 'L'], debian: ['#e0668c', '#8c2146', 'D'], ubuntu: ['#f28a55', '#a83a1a', 'U'], fedora: ['#6a8fd8', '#2b4478', 'F'],
+  insaneos: ['#5aa9ff', '#1f5fbf', 'L'], debian: ['#e0668c', '#8c2146', 'D'], ubuntu: ['#f28a55', '#a83a1a', 'U'], fedora: ['#6a8fd8', '#2b4478', 'F'],
   mint: ['#8bd17c', '#3c7a32', 'M'], arch: ['#5fb4e0', '#1d6a91', 'A'], alpine: ['#4fa3c7', '#1a4f6a', 'A'], opensuse: ['#7fcf6a', '#2f6b25', 'S'],
   kali: ['#5b7fd6', '#22305a', 'K'], rocky: ['#4fc6a0', '#1f6a52', 'R'], alma: ['#e2b04a', '#8a5a14', 'A'], centos: ['#b07ad6', '#5a2d7a', 'C'],
   freebsd: ['#e05a5a', '#7a1f1f', 'B'], raspios: ['#d6567a', '#7a1f3a', 'P'], other: ['#8a93a6', '#3b4252', '▣'],
@@ -120,7 +120,7 @@ export function IconMenuBtn({ glyph, icon, label, items, disabled, on, color, si
   const ref = useRef(null);
   const show = () => {
     if (!ref.current) return;
-    const [x] = lord.getLayout(ref.current.id);
+    const [x] = insane.getLayout(ref.current.id);
     setEnd(x > screen.width / 2);
     setOpen(true);
   };
@@ -191,7 +191,7 @@ export function PopMenu({ x, y, items, onClose, width = 220 }) {
     const a = addListener('pointerdown', (e) => {
       const n = ref.current;
       if (!n) return;
-      const [lx, ly, w, h] = lord.getLayout(n.id);
+      const [lx, ly, w, h] = insane.getLayout(n.id);
       if (e.x < lx || e.x > lx + w || e.y < ly || e.y > ly + h) onClose();
     });
     const b = addListener('keydown', (e) => { if (e.key === 'Escape') onClose(); });
@@ -226,7 +226,7 @@ export function MenuBtn({ label, items, primary, disabled }) {
   const ref = useRef(null);
   const show = () => {
     if (!ref.current) return;
-    const [x] = lord.getLayout(ref.current.id);
+    const [x] = insane.getLayout(ref.current.id);
     setEnd(x > screen.width / 2);
     setOpen(true);
   };

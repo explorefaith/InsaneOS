@@ -2,7 +2,7 @@
 // result compares with the reference machines (×N of each, never one score), the three verdicts
 // (performance, compatibility, stability), the desktop run's verdict against the refresh budget, and what
 // changed against the previous result. Pure
-// functions over the result JSON lord.sysinfo.bench writes (server/src/bench/lbrun.c); tested in
+// functions over the result JSON insane.sysinfo.bench writes (server/src/bench/lbrun.c); tested in
 // server/tests/sysinfo_perf_test.mjs.
 import { REFERENCES } from './references.js';
 
@@ -21,7 +21,7 @@ export const DESKTOP_CATEGORIES = [
   { id: 'compositor', ids: ['comp.fps', 'comp.p50', 'comp.p99', 'comp.missed', 'comp.in50', 'comp.in99'] },
   { id: 'desktop', ids: ['desk.fps', 'desk.p50', 'desk.p99', 'desk.missed', 'desk.in50', 'desk.in99', 'desk.work'] },
 ];
-// the helper-sandbox self-test lord-bench makes after locking itself in (server/src/bench/lbproto.h, LB_SBX_*):
+// the helper-sandbox self-test insane-bench makes after locking itself in (server/src/bench/lbproto.h, LB_SBX_*):
 // every one of these must be refused
 export const SANDBOX_TRIES = ['helperSocket', 'helperInet', 'helperExec', 'helperFork', 'helperNewFile', 'helperRead'];
 // the tries only Landlock refuses, and its bit in the sandbox mask (server/src/sec/sandbox.h, SB_LANDLOCK_FS)
@@ -34,7 +34,7 @@ export const INPUT_WARN_FRAMES = 3;     // pointer-to-screen p99 above this many
 export { REFERENCES };
 
 // the measurements that time Insane OS's own engine code (layout, paint, shaping) with the machine: a reference
-// value of one carries the Insane OS version it was measured with ("lordos"), and is used only for a result of that
+// value of one carries the Insane OS version it was measured with ("insaneos"), and is used only for a result of that
 // same version, so an engine change (or a new interface font) never shows up as a faster or slower machine
 export const ENGINE_IDS = ['cpu.ui.1', 'cpu.ui.n', 'cpu.shape.1', 'cpu.shape.n'];
 
@@ -43,7 +43,7 @@ export const ENGINE_IDS = ['cpu.ui.1', 'cpu.ui.n', 'cpu.shape.1', 'cpu.shape.n']
 export function ratio(res, ref, id) {
   const a = res && res.results && res.results[id], b = ref && ref.results && ref.results[id];
   if (!a || !b || !(a.value > 0) || !(b.value > 0)) return null;
-  if (b.lordos != null && b.lordos !== res.lordos) return null;
+  if (b.insaneos != null && b.insaneos !== res.insaneos) return null;
   return a.lowerBetter ? b.value / a.value : a.value / b.value;
 }
 
@@ -59,7 +59,7 @@ export function categoryRatios(res, ref) {
 
 // the references a result can be compared with: the same InsaneBench version
 export function comparableReferences(res) {
-  return REFERENCES.filter((r) => res && r.lordbench === res.lordbench);
+  return REFERENCES.filter((r) => res && r.insanebench === res.insanebench);
 }
 
 // ---- verdicts ----
@@ -170,7 +170,7 @@ export function conditionDiffs(a, b) {
   if (!a || !b) return [];
   const pick = (r) => ({
     power: r.before && r.before.power, governor: r.before && r.before.governor, profile: r.before && r.before.platformProfile,
-    gpuKind: r.gpuKind, storage: r.storage && r.storage.kind, threads: r.threads, live: r.live, lordos: r.lordos, kernel: r.kernel,
+    gpuKind: r.gpuKind, storage: r.storage && r.storage.kind, threads: r.threads, live: r.live, insaneos: r.insaneos, kernel: r.kernel,
     composition: r.session && r.session.composition,
   });
   const x = pick(a), y = pick(b);
@@ -180,7 +180,7 @@ export function conditionDiffs(a, b) {
 // change against the previous result, per measurement (+ is better), only with the same InsaneBench
 // version and mode
 export function changes(now, prev) {
-  if (!now || !prev || now.lordbench !== prev.lordbench || now.mode !== prev.mode) return null;
+  if (!now || !prev || now.insanebench !== prev.insanebench || now.mode !== prev.mode) return null;
   const out = {};
   for (const id of Object.keys(now.results || {})) {
     const r = ratio(now, prev, id);
@@ -205,7 +205,7 @@ export function refreshBudget(res) {
 export function fileName(at, taken) {
   const d = new Date((at || 0) * 1000);
   const p = (n) => String(n).padStart(2, '0');
-  const base = `lordbench-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  const base = `insanebench-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   for (let i = 1; i < 100; i++) {
     const name = i === 1 ? `${base}.json` : `${base}-${i}.json`;
     if (!taken(name)) return name;

@@ -1,6 +1,6 @@
 // fileglyphs.jsx — file icons, for Files and the system file dialog: folder, document by kind (with
 // the extension) and image thumbnails. Drawn with nodes (no images), except the thumbnails.
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { useThumb } from './media.js';
 import { kindOf, extOf, isImage, KIND_COLOR } from './filekinds.js';
 
@@ -70,7 +70,7 @@ export function EntryIcon({ e, size, dark, thumb = true }) {
       </View>
     );
   }
-  // media (M9): video thumbnails, covers and formats stb cannot read (WebP, HEIC, AVIF), through lord-media
+  // media (M9): video thumbnails, covers and formats stb cannot read (WebP, HEIC, AVIF), through insane-media
   if (thumb && size >= 32 && (kind === 'video' || kind === 'audio' || (kind === 'image' && !isImage(e) && !/\.svg$/i.test(e.name)))) {
     return <MediaThumb e={e} size={size} kind={kind} dark={dark} />;
   }

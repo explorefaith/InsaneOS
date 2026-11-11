@@ -1,6 +1,6 @@
-/* share.c — the public screen-sharing API, in lord-server (docs/SCREEN-SHARING.md).
+/* share.c — the public screen-sharing API, in insane-server (docs/SCREEN-SHARING.md).
  *
- * A separate door: $XDG_RUNTIME_DIR/lordos/share.sock (0600), with its own table and parser (sharewire.c).
+ * A separate door: $XDG_RUNTIME_DIR/insaneos/share.sock (0600), with its own table and parser (sharewire.c).
  * It shares with remote.sock only the composed frame, the session's encoder and the media and input formats.
  * Everything here runs on the main loop, so one request is decided before the next is read.
  *
@@ -11,8 +11,8 @@
  *  - no frame leaves until the shell says the indicator is on screen;
  *  - the session's lock state lives here and is set synchronously, in the call that locks, before the next
  *    frame is composed: frames, sound, the cursor and the clipboard stop, what is still queued is thrown away,
- *    and input is dropped. It clears only when lord-sessiond lends the monitor back, which needs the password;
- *  - the login screen's lord-server never calls share_start, so there is no socket to connect to. */
+ *    and input is dropped. It clears only when insane-sessiond lends the monitor back, which needs the password;
+ *  - the login screen's insane-server never calls share_start, so there is no socket to connect to. */
 #include "share.h"
 #include "sharegrant.h"
 #include "sharewire.h"
@@ -59,7 +59,7 @@ typedef struct {
     int pidfd;
     char id[SG_ID_MAX], exe[SG_EXE_MAX];
     int flags, granted, codec, hz, hear, awake, need_key, cur_x, cur_y, cur_mode;
-    int companion, may_input;           /* connected by lord-server at spawn; manifest declares remote-input */
+    int companion, may_input;           /* connected by insane-server at spawn; manifest declares remote-input */
     unsigned kbps, clip_gen, token;
     double since;
     SwKeyLimit keys;
@@ -178,7 +178,7 @@ static pid_t pid_of_pidfd(int fd) {
 
 /* Who is at the other end, now: its scope and program. Asked at connection and again at each start. */
 static int identify(Conn *c) {
-    if (c->companion) return 0;         /* lord-server made this connection for this app */
+    if (c->companion) return 0;         /* insane-server made this connection for this app */
     pid_t pid = pid_of_pidfd(c->pidfd);
     char id[SG_ID_MAX], lnk[64], exe[SG_EXE_MAX];
     if (pid <= 0 || appid_of_pid((unsigned)pid, id, sizeof id) != 0 || !sg_id_valid(id)) return -1;
@@ -442,7 +442,7 @@ int share_start(const ShareHost *host) {
     const char *rt = getenv("XDG_RUNTIME_DIR");
     if (!rt) return -1;
     char dir[200];
-    snprintf(dir, sizeof dir, "%s/lordos", rt);
+    snprintf(dir, sizeof dir, "%s/insaneos", rt);
     struct stat st;
     if (lstat(dir, &st) || !S_ISDIR(st.st_mode) || st.st_uid != getuid() || (st.st_mode & 077)) return -1;
     snprintf(sock_path, sizeof sock_path, "%s/share.sock", dir);
@@ -540,7 +540,7 @@ void share_dispatch(const struct pollfd *p, int n) {
 
 void share_session(ShareSession what) {
     if (lfd < 0) return;
-    if (what == SHARE_S_SHOWN) {        /* lent by lord-sessiond: the person signed in, or the session just began */
+    if (what == SHARE_S_SHOWN) {        /* lent by insane-sessiond: the person signed in, or the session just began */
         session = 0;
         return;
     }

@@ -4,8 +4,8 @@
  * read-only action `hw-memory-modules` (hw/hw_admin.c) and only these fields leave it: slot, bank,
  * size, type, speed, configured speed and manufacturer. Serial numbers, asset tags and part numbers
  * are never read. The parser takes untrusted bytes: every offset and string index is checked. */
-#ifndef LORD_SYSREPORT_SMBIOS_H
-#define LORD_SYSREPORT_SMBIOS_H
+#ifndef INSANE_SYSREPORT_SMBIOS_H
+#define INSANE_SYSREPORT_SMBIOS_H
 
 #include <stddef.h>
 #include <stdint.h>

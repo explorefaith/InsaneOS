@@ -1,6 +1,6 @@
 /* monpriv.h — internal monitor pieces shared by mon.c and conn.c. */
-#ifndef LORD_MONPRIV_H
-#define LORD_MONPRIV_H
+#ifndef INSANE_MONPRIV_H
+#define INSANE_MONPRIV_H
 
 #include "mmdb.h"
 

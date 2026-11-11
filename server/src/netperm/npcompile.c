@@ -191,11 +191,11 @@ int np_compile_app(FwStore *s, const char *app, uint32_t idx, DnsMap *names, con
     if (load_rules(s, app, &R)) return -1;
     NpApp *a = &out->app;
     a->idx = idx;
-    /* network, and for apps outside lord-server also the device ones (camera, USB, Bluetooth).
-     * "lordos" is lord-server itself: it opens the camera and the FIDO key for the apps after
+    /* network, and for apps outside insane-server also the device ones (camera, USB, Bluetooth).
+     * "insaneos" is insane-server itself: it opens the camera and the FIDO key for the apps after
      * their permission and restriction checks (js_media.c, the broker), so the kernel doesn't
      * take its devices away. */
-    uint32_t keep = NP_R_NET_MASK | (strcmp(app, "lordos") ? NP_R_DEV_MASK : 0);
+    uint32_t keep = NP_R_NET_MASK | (strcmp(app, "insaneos") ? NP_R_DEV_MASK : 0);
     a->flags = fw_restricted(s, app) & keep;
     a->trusted = (np_u8)(fw_is_trusted(s, app) != 0);
     a->mode = fw_mode(s) == FW_MODE_OFF ? NP_M_OFF : fw_mode(s) == FW_MODE_DENY ? NP_M_DENY : NP_M_SILENT;

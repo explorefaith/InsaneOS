@@ -20,13 +20,13 @@ The ways to open it: the keyboard button next to the clock (`OskStatus`, in the 
 Menu Bar (Taskbar in Insane Classic) → On-screen keyboard turns it off, issue #58), the shortcut ❖⌃K, and
 **Show Keyboard** in Settings → Keyboard. It stays open until it's closed with one of those or its hide button.
 
-The login and lock screens are another user's session (`lordos-greeter`): there it opens only with the keyboard
+The login and lock screens are another user's session (`insaneos-greeter`): there it opens only with the keyboard
 button next to the language, which is always there, so someone with no physical keyboard can still log in.
 
 ### Is a keyboard attached?
 
-`lord.input.hasKeyboard()` answers from the devices `lord-server` has really opened (`input.c`,
-`server/src/osk.c`, the fds `lord-sessiond` lends it), and a change arrives as `__lordKeyboards(present)`
+`insane.input.hasKeyboard()` answers from the devices `insane-server` has really opened (`input.c`,
+`server/src/osk.c`, the fds `insane-sessiond` lends it), and a change arrives as `__insaneKeyboards(present)`
 with no polling. Neither plugging a keyboard in nor unplugging it opens or closes the panel.
 
 - A keyboard is a device with all the letters, space, Enter, Backspace and Shift. Power buttons, media
@@ -43,19 +43,19 @@ tells them apart. Use Always, or the menu bar button, on such a machine.
 | Where the field is | How it is known |
 |---|---|
 | Insane OS: `TextInput`, and custom fields that use `ime.attach` (Notes, Terminal, Text Editor) | `sdk/textfocus.js` |
-| Isolated apps (`lord-server --app`: Mail, Passwords…) | the `BOP_TEXT_FOCUS` broker hint, obeyed only for the window in front |
+| Isolated apps (`insane-server --app`: Mail, Passwords…) | the `BOP_TEXT_FOCUS` broker hint, obeyed only for the window in front |
 | Linux apps that use `zwp_text_input_v3` (GTK, Qt) | `server/src/wl/wl_textinput.c` → `textinput` event |
 | Linux apps that don't (X11 apps; Chromium by default) | not known: **the menu bar button opens it** and the keys work the same |
 
 ## How a key is typed
 
 Rows are lists of Linux key codes (`sdk/oskmodel.js`). What each key shows comes from the active XKB
-layout (`lord.input.keyLabels()`, from scratch states in `keyboard.c`), so Latin American shows `ñ` and
+layout (`insane.input.keyLabels()`, from scratch states in `keyboard.c`), so Latin American shows `ñ` and
 its dead acute, Brazilian `ç`, Dvorak its own order and Arabic its letters. The symbol pages find each
 symbol in the layout (`keyFor`) and offer only what it can type, through Shift or AltGr; a symbol that
 exists only as a dead key is that key and then space.
 
-`lord.input.tap(code, level)` queues a key; the main loop (`js_input_flush`) presses and releases it
+`insane.input.tap(code, level)` queues a key; the main loop (`js_input_flush`) presses and releases it
 through `js_key`, the same path as a physical key. So layouts, dead keys, compose and input methods
 (`ime.c`) work as usual, and from there the key goes to the focused field or `wl_key`, which sends it
 only to the client with the keyboard: a Wayland app, an X11 app through Xwayland, or an isolated app.
@@ -95,17 +95,17 @@ the active layout types, and the text goes to the field, which handles its own d
 
 ## Security and privacy
 
-- **No new way to run anything.** `lord.input.tap` takes one key from a closed list (`osk_key_allowed`):
+- **No new way to run anything.** `insane.input.tap` takes one key from a closed list (`osk_key_allowed`):
   letters, digits, punctuation, Tab, Esc, Enter, Backspace, arrows. Never Ctrl, Alt, Super, function or
   system keys; Shift and AltGr come only from a level, and AltGr only if the layout has a third level
   (otherwise Right Alt is plain Alt). A tap can't be a shortcut, and Super, which starts Insane OS's
   shortcuts, can't be pressed at all. Modifiers are pressed and released with the key, so none stays down.
 - **Same routing as a physical key.** Keys go only to the focused client, as `wl_send_paste` does.
-- **Never reachable by isolated apps.** `lord.input` exists only in the theme's and the login screen's
-  context (`session_context`); an isolated app has the broker's `lord`. Its one call, `BOP_TEXT_FOCUS`,
+- **Never reachable by isolated apps.** `insane.input` exists only in the theme's and the login screen's
+  context (`session_context`); an isolated app has the broker's `insane`. Its one call, `BOP_TEXT_FOCUS`,
   carries a boolean and a position (validated in `brokersrv.c`): it can show the keyboard for the window
   in front and nothing else, and it carries no text.
-- **The login screen** keeps its rules: its JS only sends the password to `lord-sessiond`, which verifies it.
+- **The login screen** keeps its rules: its JS only sends the password to `insane-sessiond`, which verifies it.
 - **Typed text is not kept.** The queue holds a key code until the next pass of the main loop and clears
   it; nothing logs a key, there are no suggestions, no history and no learning. `OskStatus` and the panel
   know only which page and Shift state they show.

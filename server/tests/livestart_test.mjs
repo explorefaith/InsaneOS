@@ -36,18 +36,18 @@ const entries = [...build.matchAll(/^menuentry "([^"]*)" \{\n\s*linux ([^\n]*)\n
 const check = entries.filter((m) => m[1].startsWith('Check this computer'));
 eq('one entry for it', check.length, 1);
 const words = (check[0] ? check[0][2] : '').split(/\s+/);
-eq('it asks for the check', words.includes('lordos.check=1'), true);
+eq('it asks for the check', words.includes('insaneos.check=1'), true);
 eq('it boots the live system', words.includes('boot=live'), true);
-eq('no other entry asks for it', entries.filter((m) => m[2].includes('lordos.check')).length, 1);
+eq('no other entry asks for it', entries.filter((m) => m[2].includes('insaneos.check')).length, 1);
 eq('it is not the default entry', entries[0] && entries[0][1].startsWith('Insane OS'), true);
 
-const theme = fs.readFileSync(path.join(root, 'tools/iso/grub/lordos/theme.txt'), 'utf8');
+const theme = fs.readFileSync(path.join(root, 'tools/iso/grub/insaneos/theme.txt'), 'utf8');
 const num = (k) => Number(new RegExp(`^\\s*${k} = (\\d+)\\s*$`, 'm').exec(theme)?.[1]);
 const menu = theme.slice(theme.indexOf('+ boot_menu'));
 const height = Number(/height = (\d+)/.exec(menu)[1]);
 // GRUB's own count (gui_list.c, get_num_shown_items): padding on both ends, and the selection band's top
 // and bottom edges are taken from the height too. PNG height: bytes 20–23 of the header.
-const edge = (f) => fs.readFileSync(path.join(root, 'tools/iso/grub/lordos', f)).readUInt32BE(20);
+const edge = (f) => fs.readFileSync(path.join(root, 'tools/iso/grub/insaneos', f)).readUInt32BE(20);
 const fit = Math.floor((height + num('item_spacing') - 2 * num('item_padding') - edge('select_n.png') - edge('select_s.png')) / (num('item_height') + num('item_spacing')));
 eq('the theme shows every entry', fit >= entries.length, true);
 

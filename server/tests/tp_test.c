@@ -8,7 +8,7 @@
  *   build/tp-test --replay F.ev   replays a recording (tpsim record/dump) and shows what came out
  *   build/tp-test --dump NAME     prints one of the bcm5974 sequences below as text (for
  *                                 tpsim play-file --bcm5974, which replays it through uinput)
- *   build/tp-test --live DEV SECS opens DEV as lord-server does (tp_open), grabs it, reads it for
+ *   build/tp-test --live DEV SECS opens DEV as insane-server does (tp_open), grabs it, reads it for
  *                                 SECS seconds and prints what the driver made of it; DEV can be
  *                                 the name of a device about to appear (it's grabbed on arrival) */
 #include "../src/tp/tp.h"
@@ -56,7 +56,7 @@ static double ns_now(void) {
     return t.tv_sec * 1e9 + t.tv_nsec;
 }
 
-/* the lord-server loop: timers run between events */
+/* the insane-server loop: timers run between events */
 static void ticks_until(double t) {
     for (;;) {
         double w = tp_timeout(last_tick);
@@ -863,7 +863,7 @@ static int replay(const char *path) {
 }
 
 /* Waits for a new /dev/input/eventN called name and grabs it at once, before a session on the
- * monitor (lord-sessiond hotplug) takes it: the replayed gestures must not reach a desktop. */
+ * monitor (insane-sessiond hotplug) takes it: the replayed gestures must not reach a desktop. */
 static int wait_device(const char *name, char *path, size_t size) {
     int in = inotify_init1(IN_CLOEXEC);
     if (in < 0 || inotify_add_watch(in, "/dev/input", IN_CREATE | IN_ATTRIB) < 0) { perror("inotify"); return -1; }
@@ -892,7 +892,7 @@ static int wait_device(const char *name, char *path, size_t size) {
     return -1;
 }
 
-/* A real (or uinput) device, opened like lord-server does: a path, or the name of a device that is
+/* A real (or uinput) device, opened like insane-server does: a path, or the name of a device that is
  * about to appear (tpsim play-file --bcm5974: "bcm5974"). */
 static int live(const char *what, double secs) {
     char path[64];

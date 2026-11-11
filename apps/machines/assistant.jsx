@@ -6,10 +6,10 @@
 // downloads it (vm-image-get, which keeps it only with that hash) before the machine is made from it.
 // Migrate from another app opens the import plan (migrate.jsx).
 // Install without questions (the mock "Unattended", step 3 "Set up"): for a card whose catalog entry says how, the
-// account, password, computer name, time zone and keyboard become the installer's answer file (lord-vm --unattended,
-// vmunattend.h); the password goes to lord-server, which keeps only its hash. A card may install from another image
+// account, password, computer name, time zone and keyboard become the installer's answer file (insane-vm --unattended,
+// vmunattend.h); the password goes to insane-server, which keeps only its hash. A card may install from another image
 // of its maker's (Ubuntu's server image, Fedora's network installer), resolved like the card's own.
-import { View, Text, TextInput, FilePicker, Toggle, admin, fs, t as tr } from '@lordos/sdk';
+import { View, Text, TextInput, FilePicker, Toggle, admin, fs, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import CATALOG from '../../assets/machines/systems.json';
 import { systemsFor, entryOf, listingNames, newest, pickImage, versionIn, progressOf, resumedOf, unattendedOf, checkSetup, hostnameFor, userFor } from './catalog.js';
@@ -64,8 +64,8 @@ export function Assistant({ host, mode, names, onClose, onCreated, onConfigure, 
   const pickSeq = useRef(0);
   // Install without questions: { on, user, password, hostname, timezone, keymap }; alt: the image it boots when that
   // isn't the card's own ({ id, phase, image, err })
-  const hd = (typeof lord !== 'undefined' && lord.vm?.hostDefaults?.()) || { timezone: 'UTC', keymap: 'us', locale: 'en_US.UTF-8' };
-  const [un, setUn] = useState({ on: true, user: userFor(typeof lord !== 'undefined' && lord.fs?.home ? lord.fs.home() : ''), password: '', hostname: '', timezone: hd.timezone, keymap: hd.keymap });
+  const hd = (typeof insane !== 'undefined' && insane.vm?.hostDefaults?.()) || { timezone: 'UTC', keymap: 'us', locale: 'en_US.UTF-8' };
+  const [un, setUn] = useState({ on: true, user: userFor(typeof insane !== 'undefined' && insane.fs?.home ? insane.fs.home() : ''), password: '', hostname: '', timezone: hd.timezone, keymap: hd.keymap });
   const [alt, setAlt] = useState(null);
   const altSeq = useRef(0);
   const cancelled = useRef(false);
@@ -82,7 +82,7 @@ export function Assistant({ host, mode, names, onClose, onCreated, onConfigure, 
   const chose = (pth) => {
     setPath(pth);
     const file = pth.split('/').pop();
-    const label = source === 'iso' ? (lord.vm.isoInfo(pth)?.label || '') : '';
+    const label = source === 'iso' ? (insane.vm.isoInfo(pth)?.label || '') : '';
     const s = systemOf(label, file);
     const vv = versionOf(label) || versionOf(file);
     setSys(s); setVer(vv);
@@ -145,14 +145,14 @@ export function Assistant({ host, mode, names, onClose, onCreated, onConfigure, 
   useEffect(() => {
     if (!job) return undefined;
     const timer = setInterval(() => {
-      const r = lord.vm.job(job);
+      const r = insane.vm.job(job);
       if (!r || !r.done) return;
       setJob(0);
       if (r.ok) {
         writeMeta(r.dir, { os: sys.id, osName: [sys.name, ver].filter(Boolean).join(' '), profile });
-        const m = lord.vm.list().find((x) => x.dir === r.dir);
+        const m = insane.vm.list().find((x) => x.dir === r.dir);
         if (customize) onConfigure(m || null); else onCreated(m || null);
-      } else setFail(r.out.trim().split('\n').filter((l) => l.startsWith('lord-vm:')).pop()?.replace(/^lord-vm:\s*/, '') || r.out.trim() || '?');
+      } else setFail(r.out.trim().split('\n').filter((l) => l.startsWith('insane-vm:')).pop()?.replace(/^insane-vm:\s*/, '') || r.out.trim() || '?');
     }, 300);
     return () => clearInterval(timer);
   }, [job]);
@@ -182,7 +182,7 @@ export function Assistant({ host, mode, names, onClose, onCreated, onConfigure, 
       req.unattended = { kind: uo.kind, user: un.user, password: un.password, fullname: '', hostname: un.hostname, timezone: un.timezone,
         keymap: un.keymap, variant: '', locale: hd.locale || 'en_US.UTF-8', release: uo.release, kernel: uo.kernel, initrd: uo.initrd, append: uo.append, desktop: true };
     }
-    const id = lord.vm.create(req);
+    const id = insane.vm.create(req);
     if (req.unattended) { req.unattended.password = ''; setUn((u) => ({ ...u, password: '' })); }
     if (!id) { setFail(tr('machines.new.refused')); setStep(4); return; }
     setJob(id);
@@ -330,7 +330,7 @@ export function Assistant({ host, mode, names, onClose, onCreated, onConfigure, 
       [tr('machines.as.r.disk'), source === 'iso' || downloading ? tr('machines.as.r.diskNew', { n: size.diskGb }) : tr('machines.as.r.diskCopy', { n: size.diskGb })],
       [tr('machines.as.r.profile'), tr(`machines.as.profile.${profile}`)],
       [tr('machines.as.r.network'), tr(`machines.cfg.net.${size.network}`)],
-      [tr('machines.as.r.where'), `~/Machines/${name}.lordvm`],
+      [tr('machines.as.r.where'), `~/Machines/${name}.insanevm`],
     ];
     body = <>
       <View style={{ borderRadius: 12, backgroundColor: p.card }}>

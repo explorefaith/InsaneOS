@@ -1,6 +1,6 @@
 ## Quién administra este sitio
 
-lordos.org es el sitio de **Insane OS**, una distribución GNU/Linux libre basada en Debian, con un entorno de escritorio propio.
+insaneos.org es el sitio de **Insane OS**, una distribución GNU/Linux libre basada en Debian, con un entorno de escritorio propio.
 
 - **Proyecto:** Insane OS, del grupo iPERFEX
 - **Autores:** Pablo Miranda y Federico Pereira
@@ -19,7 +19,7 @@ Escribimos el contenido de este sitio con cuidado, pero no podemos garantizar qu
 
 ## Derechos de autor
 
-Los textos, las imágenes y el código de este sitio son parte del proyecto Insane OS y, salvo que se indique otra cosa, se publican bajo la [licencia MIT](https://github.com/lordbasex/Insane OS/blob/main/LICENSE). El nombre Insane OS, el logo de la corona y Lumo están cubiertos por la [Política de marca](/legal/trademark/).
+Los textos, las imágenes y el código de este sitio son parte del proyecto Insane OS y, salvo que se indique otra cosa, se publican bajo la [licencia MIT](https://github.com/insaneos/Insane OS/blob/main/LICENSE). El nombre Insane OS, el logo de la corona y Lumo están cubiertos por la [Política de marca](/legal/trademark/).
 
 ## Otras páginas legales
 

@@ -2,7 +2,7 @@ This page explains which Insane OS versions receive fixes, how updates reach you
 
 ## Current status: beta
 
-Insane OS **0.8.0 beta** is the first public release (0.7.0 was never published). What each release contains is in its notes on [GitHub Releases](https://github.com/lordbasex/Insane OS/releases). Beta releases can change behaviour, settings and file formats between versions, and they are not meant for critical work. See the [Terms of use](/legal/terms/).
+Insane OS **0.8.0 beta** is the first public release (0.7.0 was never published). What each release contains is in its notes on [GitHub Releases](https://github.com/insaneos/Insane OS/releases). Beta releases can change behaviour, settings and file formats between versions, and they are not meant for critical work. See the [Terms of use](/legal/terms/).
 
 ## Which versions get fixes
 
@@ -13,7 +13,7 @@ Until 1.0, **only the latest beta release** receives fixes, including security f
 Insane OS has two kinds of updates:
 
 - **The Debian base.** The kernel, drivers, libraries and every Debian package get their updates, including security updates from `security.debian.org`, from Debian. Install them from the Store's Updates tab (or Settings → Updates), or with `apt` in the Terminal. These keep coming as long as Debian supports Debian 13.
-- **Insane OS itself.** New Insane OS versions are published on [GitHub Releases](https://github.com/lordbasex/Insane OS/releases) as a `.deb` package, a PC ISO and a Raspberry Pi 5 image, each signed (see the [Code signing](/legal/code-signing/) page). On Debian, running the one-line installer again (`curl -fsSL https://lordos.org/install.sh | sh`) upgrades Insane OS; you can also install a downloaded `.deb` from the Store. A built-in updater for Insane OS itself is not available yet.
+- **Insane OS itself.** New Insane OS versions are published on [GitHub Releases](https://github.com/insaneos/Insane OS/releases) as a `.deb` package, a PC ISO and a Raspberry Pi 5 image, each signed (see the [Code signing](/legal/code-signing/) page). On Debian, running the one-line installer again (`curl -fsSL https://insaneos.org/install.sh | sh`) upgrades Insane OS; you can also install a downloaded `.deb` from the Store. A built-in updater for Insane OS itself is not available yet.
 
 Insane OS never checks for or downloads updates on its own: you decide when.
 
@@ -27,7 +27,7 @@ This is our plan, not a promise, and it may change before 1.0:
 
 ## End-of-support announcements
 
-Before a version stops receiving fixes, we will announce it on lordos.org and on GitHub, with the date and the version to upgrade to.
+Before a version stops receiving fixes, we will announce it on insaneos.org and on GitHub, with the date and the version to upgrade to.
 
 ## Contact
 

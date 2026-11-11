@@ -1,11 +1,11 @@
-/* js_print.c — lord.print: printers (CUPS over IPP on its local socket, our own client) and
+/* js_print.c — insane.print: printers (CUPS over IPP on its local socket, our own client) and
  * eSCL scanners on the network (see server/src/print and docs/PRINTING.md). All asynchronous: each
  * function returns an id and the result arrives with poll() → [{ id, kind, ok, data }].
  *
  *   printers()                       CUPS printers and the default one
  *   jobs()                           unfinished jobs (from all users)
  *   cancel(job)
- *   submit(printer, source, options)     source: a lord.doc blob (built PDF) or the path of a
+ *   submit(printer, source, options)     source: a insane.doc blob (built PDF) or the path of a
  *                                    PDF; options { name, copies, pages, sides, color, media, orientation }
  *   add(name, uri, info, location)   driverless printing (IPP Everywhere) printer
  *   remove(name), setDefault(name)
@@ -210,8 +210,8 @@ static const JSCFunctionListEntry print_funcs[] = {
     JS_CFUNC_DEF("hasCups", 0, f_cups),
 };
 
-void js_print_register(JSContext *c, JSValue lord) {
+void js_print_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, print_funcs, sizeof print_funcs / sizeof print_funcs[0]);
-    JS_SetPropertyStr(c, lord, "print", o);
+    JS_SetPropertyStr(c, insane, "print", o);
 }

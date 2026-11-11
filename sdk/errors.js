@@ -12,8 +12,8 @@
 // Text that is not a code line, or a code without a translation, is shown as is (the output of a
 // program, an older server). Two parameters are special: `errno` (ENOENT…) becomes its
 // translated description (errors.errno.ENOENT) and `reason` is a nested code line.
-// Errors thrown by lord.* (server/src/ui/js_err.h) already carry a translated message, `code`
-// and `params`, through globalThis.__lordErrorText.
+// Errors thrown by insane.* (server/src/ui/js_err.h) already carry a translated message, `code`
+// and `params`, through globalThis.__insaneErrorText.
 import { tOptional } from './i18n.js';
 
 const CODE_RE = /^([a-z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9]+)+)(?= |$)/;
@@ -64,5 +64,5 @@ export function codeError(line) {
   return e;
 }
 
-// For lord.* exceptions (js_err.h): the message in the user's language, or null to keep the line.
-globalThis.__lordErrorText = (code, params) => translate('errors', code, params || {}) ?? null;
+// For insane.* exceptions (js_err.h): the message in the user's language, or null to keep the line.
+globalThis.__insaneErrorText = (code, params) => translate('errors', code, params || {}) ?? null;

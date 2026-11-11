@@ -1,11 +1,11 @@
-/* maudio.c — media audio in lord-server (see aring.h and docs/MEDIA.md).
+/* maudio.c — media audio in insane-server (see aring.h and docs/MEDIA.md).
  *
- * Playback: lord-media writes PCM into a shared-memory ring that lord-server creates;
+ * Playback: insane-media writes PCM into a shared-memory ring that insane-server creates;
  * here we own the PipeWire stream and, when PipeWire asks for bytes (REQUEST), they're copied from the
  * ring, without waiting for anyone. After each GET_PLAYBACK_LATENCY reply, which byte is being heard
- * and when is written to the ring (seqlock): the video clock in lord-media.
- * Recording: the capture stream belongs to lord-server (after the microphone permission) and it's
- * written into a ring that lord-media reads. That way lord-media never has the PipeWire socket. */
+ * and when is written to the ring (seqlock): the video clock in insane-media.
+ * Recording: the capture stream belongs to insane-server (after the microphone permission) and it's
+ * written into a ring that insane-media reads. That way insane-media never has the PipeWire socket. */
 #include "media_int.h"
 #include "aring.h"
 #include "mpulse.h"
@@ -43,7 +43,7 @@ static double now_ms(void) {
 
 static int make_ring(MAudio *a, int channels, uint32_t size) {
     size_t len = ar_bytes(size);
-    int fd = memfd_create("lordos-audio", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-audio", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)len) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { close(fd); return -1; }
     void *m = mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -70,7 +70,7 @@ static void on_mic(void *ud, const uint8_t *d, size_t n) {
 static int start(MAudio *a) {
     a->started = 1;
     int fd = media_pulse_fd();
-    if (fd < 0 || lmp_connect(&a->pa, fd, a->app, "org.lordos.Media")) {
+    if (fd < 0 || lmp_connect(&a->pa, fd, a->app, "org.insaneos.Media")) {
         fprintf(stderr, "media: no PipeWire to %s\n", a->rec ? "record" : "play");
         a->pa.failed = 1;
         return -1;

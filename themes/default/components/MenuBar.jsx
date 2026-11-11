@@ -4,7 +4,7 @@
 // <MenuBars> draws one full bar per display (0.8.8.6; Settings → Desktop & Dock → Menu Bar → "Show the menu bar on
 // every display", on by default): the app's menus are lit on the focused window's display and dimmed on the others,
 // where a click lights that bar and opens the menu there. sdk/menubarmodel.js decides which bar is lit.
-import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut } from '@lordos/sdk';
+import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut } from '@insaneos/sdk';
 import { useState, useRef, useEffect } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -14,7 +14,7 @@ const format = (d) => menuClock(d);
 // one timer for every bar's clock: N displays, one setInterval (sdk/ticker.js)
 const clockTicker = sharedTicker(format, 1000);
 // the [x, width] of a bar item (global), for the panel it opens to sit under it
-const itemAt = (ref) => { try { const [x, , w] = lord.getLayout(ref.current.id); return [x, w]; } catch (e) { return null; } };
+const itemAt = (ref) => { try { const [x, , w] = insane.getLayout(ref.current.id); return [x, w]; } catch (e) { return null; } };
 
 function BarItem({ t, children, onClick, active, anchorRef }) {
   const [hover, setHover] = useState(false);
@@ -53,18 +53,18 @@ function BellGlyph({ color, dot }) {
   );
 }
 
-// A small CPU / temperature readout in the bar (Settings can't turn it off yet; lord.monitor
+// A small CPU / temperature readout in the bar (Settings can't turn it off yet; insane.monitor
 // samples every few seconds only while this is mounted, so the cost is a JSON parse per tick).
 const statsTicker = sharedTicker(() => Date.now(), 4000);
 function StatsItem({ t }) {
   const tickNow = useStore(statsTicker);
   const stats = useRef({ cpu: null, temp: null });
   useEffect(() => {
-    try { lord.monitor?.start?.(); } catch { /* not available */ }
+    try { insane.monitor?.start?.(); } catch { /* not available */ }
   }, []);
-  if (typeof lord !== 'undefined' && lord.monitor) {
+  if (typeof insane !== 'undefined' && insane.monitor) {
     try {
-      const smp = lord.monitor.sample();
+      const smp = insane.monitor.sample();
       if (smp) {
         const cpu = Array.isArray(smp.cpu) ? smp.cpu[smp.cpu.length - 1] : smp.cpu;
         if (cpu != null && isFinite(cpu)) stats.current.cpu = Math.round(cpu * 100);
@@ -109,7 +109,7 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
   // Menu position: below the item that opened it (from its right edge in Arabic/Hebrew).
   const anchorX = (ref) => {
     if (!ref?.current) return direction() === 'rtl' ? area.x + area.w - 6 : area.x + 6;
-    const [x, , w] = lord.getLayout(ref.current.id);
+    const [x, , w] = insane.getLayout(ref.current.id);
     return direction() === 'rtl' ? x + w : x;
   };
   const toggle = (name, ref) => {

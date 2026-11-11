@@ -1,5 +1,5 @@
 // Camera: webcam preview (V4L2), photos and videos (our own design, in the style of desktop camera
-// apps). lord-server opens the device after the camera permission; lord-media (sandboxed) reads
+// apps). insane-server opens the device after the camera permission; insane-media (sandboxed) reads
 // and encodes it. Photos and videos go to ~/Pictures/Camera.
 //
 // The window is always dark, like a viewfinder: the controls below the preview don't follow the
@@ -7,7 +7,7 @@
 import {
   View, Text, Image, MediaView, Toggle, useTheme, useKeyboard, wm,
   t as tr, errorText, media, usePlayer, useThumb, userDirs, fs, mediaFormatTime, useSettings,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const APP = 'camera';

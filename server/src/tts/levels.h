@@ -1,8 +1,8 @@
 /* levels.h — how loud each band of a piece of speech is, for the wave the desktop draws while it reads aloud
- * (docs/VOICE.md, the player). lord-say measures each SAY_LEVEL_MS of audio as it plays it and writes the bands to
- * lord-server (speak.c). Pure, tested by tests/levels_test.c. */
-#ifndef LORD_TTS_LEVELS_H
-#define LORD_TTS_LEVELS_H
+ * (docs/VOICE.md, the player). insane-say measures each SAY_LEVEL_MS of audio as it plays it and writes the bands to
+ * insane-server (speak.c). Pure, tested by tests/levels_test.c. */
+#ifndef INSANE_TTS_LEVELS_H
+#define INSANE_TTS_LEVELS_H
 
 #include <stddef.h>
 #include <stdint.h>

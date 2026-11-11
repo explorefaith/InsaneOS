@@ -2,7 +2,7 @@
 
 Eight Settings pages laid out like the system settings of popular desktop systems, with the hardware side in
 `server/src/hw/` (C, libc only) and the session side in `sdk/hardware.jsx`, `sdk/defaults.js` and
-`sdk/notify.js`. Tested on VM 118 (`lordos-notes`) with `lord-sessiond`, virtio-gpu and a virtual
+`sdk/notify.js`. Tested on VM 118 (`insaneos-notes`) with `insane-sessiond`, virtio-gpu and a virtual
 Bluetooth controller (`btvirt`). Screenshots: `docs/settings-*.png`.
 
 Screenshots, dark and light: Displays (`settings-displays-dark.png`, `-light.png`), Bluetooth
@@ -25,7 +25,7 @@ pairing, Sound with a Bluetooth headset, a Linux app's notification and Files' "
 | Mouse & Trackpad (0.8.8: always shown) | with Keyboard | `apps/settings/Trackpad.jsx`: since 0.8.8.4 one section per device: Pointer (size), Mouse (speed, natural scrolling, primary button) and Trackpad (its rows apply when there is one); see `TRACKPAD.md` |
 | Default Apps | with Keyboard and Mouse & Trackpad | `apps/settings/DefaultApps.jsx`, `sdk/defaults.js`, `hw/defaults.c`, `hw/mimeapps.c` |
 | Energy (Battery) | with Privacy | `apps/settings/Power.jsx`, `hw/power.c`, `hw/ppd.c` |
-| Cooling | after Energy | `apps/settings/Cooling.jsx`, `sdk/cooling.jsx`, `ui/js_fan.c` → `lord-fand` (`server/src/fan/`); see `FANS.md` |
+| Cooling | after Energy | `apps/settings/Cooling.jsx`, `sdk/cooling.jsx`, `ui/js_fan.c` → `insane-fand` (`server/src/fan/`); see `FANS.md` |
 | Board firmware | after Cooling, only on a Raspberry Pi 5 (BCM2712: Pi 5, Pi 500, CM5) | `apps/settings/Firmware.jsx`, `hw/hw_admin.c` (`rpi-eeprom-status`, `rpi-eeprom-update`) |
 
 Shared pieces: `apps/settings/ui.jsx` (a row with a hint, a pop-up button, the page header) on top of
@@ -38,9 +38,9 @@ the time fields keep `direction: 'ltr'`.
 
 ```
  apps/settings/*.jsx ── sdk/hardware.jsx (stores, Night Light timer, idle, system dialogs)
-        │                    ▲ __lordHw(kind, data): "display" "idle" "power" "bt" "bt-prompt"
+        │                    ▲ __insaneHw(kind, data): "display" "idle" "power" "bt" "bt-prompt"
         ▼                    │  "bt-result" "ppd" "ppd-result" "timedate" "notify" "notify-close"
- lord.display / power / bt / mime / timedate / notifyd   (server/src/ui/js_hw.c, validated)
+ insane.display / power / bt / mime / timedate / notifyd   (server/src/ui/js_hw.c, validated)
         │
         ▼
  server/src/hw/   display.c ─ kms.c (modeset, gamma LUT, DPMS)        uevent.c (netlink: drm,
@@ -55,7 +55,7 @@ the time fields keep `direction: 'ltr'`.
            rpi-eeprom-status (read-only), rpi-eeprom-update, boot-test, boot-test-cancel (InsaneBench's
            boot time test, docs/BENCHMARK.md)
 
- Cooling: lord.fan (ui/js_fan.c) ── /run/lordos/fand.sock ── lord-fand (root service, src/fan)
+ Cooling: insane.fan (ui/js_fan.c) ── /run/insaneos/fand.sock ── insane-fand (root service, src/fan)
 ```
 
 Nothing polls. Hotplugged displays, batteries and chargers arrive as kernel uevents (one
@@ -72,7 +72,7 @@ timer that sleeps until the next change (30 s steps only during the 30-minute fa
   timing) and `hw/modes.c` computes exact refresh rates (`clock·1000/(htotal·vtotal)`, interlace
   and double-scan aware), the list of resolutions (largest first, highest rate per size) and the
   best mode for a size and rate (progressive before interlaced; ties go to the preferred mode).
-- **Applying.** `lord.display.apply(conn, w, h, mHz, rotation, scale)` changes that display's live
+- **Applying.** `insane.display.apply(conn, w, h, mHz, rotation, scale)` changes that display's live
   configuration and `main.c` applies the whole display plan between frames (never with a page flip
   pending): the GPU path stops, heads are modeset, opened or closed (`outputs_apply`, see
   `DISPLAYS.md`), the session takes the new logical space (work areas, windows and Wayland outputs
@@ -84,7 +84,7 @@ timer that sleeps until the next change (30 s steps only during the 30-minute fa
 
   ![Keep these display settings](settings-displays-revert.png)
   ![The same in light mode](settings-displays-revert-light.png)
-- **Saved per display.** "Keep" writes `~/.config/lordos/displays.json`:
+- **Saved per display.** "Keep" writes `~/.config/insaneos/displays.json`:
 
   ```json
   { "main": "RHT-1234-QEMU_Monitor", "mirror": false, "captureAll": false,
@@ -97,7 +97,7 @@ timer that sleeps until the next change (30 s steps only during the 30-minute fa
   connected monitors with the same identity get the connector appended. `scale` is in percent (0 =
   follow the recommended one; files with 1 or 2 are read as 100 and 200 %); `x`, `y` place the display
   relative to the main one. `kms.c` asks `display_pick()` (registered with `kms_set_picker`) every
-  time `lord-sessiond` lends the monitor to the session, so the main display's saved mode is used
+  time `insane-sessiond` lends the monitor to the session, so the main display's saved mode is used
   from the first frame; the other displays open right after. The greeter always uses the preferred
   mode.
 - **Main display.** "Use as Main Display" moves the Dock (and the menu bar, when it is not on every display) to another display (no
@@ -121,8 +121,8 @@ timer that sleeps until the next change (30 s steps only during the 30-minute fa
   added to the rotation chosen in the menu (which says where "up" is when the device is held
   normally), without the "Keep these display settings?" countdown, and is never saved. The switch is
   saved at once as `"autoRotate"` in `displays.json`; unset, it is on when the SMBIOS chassis type
-  is a tablet, convertible or detachable (30, 31, 32). `lord.display.setAutoRotate(on)`;
-  `lord.display.list()` has `accelerometer`, `autoRotate` and, per output, `rotation` (the chosen
+  is a tablet, convertible or detachable (30, 31, 32). `insane.display.setAutoRotate(on)`;
+  `insane.display.list()` has `accelerometer`, `autoRotate` and, per output, `rotation` (the chosen
   one) and `autoRotation` (what the accelerometer adds). `build/accel-test --live` prints what the
   machine's sensor reads and the rotation it gives.
 
@@ -206,7 +206,7 @@ and signals dispatched to handlers.
     device paired with other tools) becomes trusted when the user connects it or when our agent
     lets it use a service, which it already did for any paired device (`bt_should_trust`, tested
     in `build/bt-test`).
-  - *The input device appears late.* The mouse's evdev node shows up when it connects; lord-sessiond
+  - *The input device appears late.* The mouse's evdev node shows up when it connects; insane-sessiond
     watches `/dev/input` (inotify) and hands the new device to whoever is on the monitor, the login
     screen or a session (`remote/monitor.c`, `RP_INPUT_ADD`). The Magic Mouse is driven by the
     kernel's `hid-magicmouse` and is read as a relative mouse (it reports no `BTN_TOOL_FINGER`, so
@@ -225,10 +225,10 @@ and signals dispatched to handlers.
   (`sdk/btpowermodel.js`, tested by `tests/bt_power_model_test.mjs`). A soft rfkill block (the
   laptop's airplane key, the Imager's "Bluetooth off") is kept across boots by systemd-rfkill and
   lifted with `bt-unblock`.
-- **Pairing agent.** lord-server exports `org.bluez.Agent1` at `/org/lordos/BluetoothAgent` with
+- **Pairing agent.** insane-server exports `org.bluez.Agent1` at `/org/insaneos/BluetoothAgent` with
   the `KeyboardDisplay` capability and becomes the default agent. PIN, passkey, numeric comparison
   and authorization requests are drawn by the system (`BluetoothPrompt`, outside any app) and
-  answered with `lord.bt.answer`; PINs are 1–16 alphanumerics and passkeys 0–999999, validated in C.
+  answered with `insane.bt.answer`; PINs are 1–16 alphanumerics and passkeys 0–999999, validated in C.
   Calls to the agent from anyone but bluetoothd are refused. A device that went through pairing may
   use its services without asking again.
 
@@ -236,8 +236,8 @@ and signals dispatched to handlers.
 - **Audio.** Headphones and speakers become PipeWire devices through WirePlumber's BlueZ monitor
   (Debian `libspa-0.2-bluetooth`) and appear in Settings → Sound. WirePlumber 0.5 only enables
   Bluetooth for a user whose session is active **on a logind seat**; sessions started by
-  `lord-sessiond` are not logind sessions, so Insane OS needs this drop-in
-  (`/etc/wireplumber/wireplumber.conf.d/lordos-bluez.conf` on the ISO):
+  `insane-sessiond` are not logind sessions, so Insane OS needs this drop-in
+  (`/etc/wireplumber/wireplumber.conf.d/insaneos-bluez.conf` on the ISO):
 
   ```
   wireplumber.profiles = {
@@ -278,15 +278,15 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
   daemon, writes the cpufreq governor (`performance`, `schedutil`/`ondemand`, `powersave`) and the
   energy/performance preference of every policy.
 - **Display off, lock, sleep.** Seconds of inactivity (keyboard, mouse, touchpad, remote input),
-  different on battery and on power. lord-server keeps the deadlines (`display_timeout` in the
+  different on battery and on power. insane-server keeps the deadlines (`display_timeout` in the
   poll timeout): screen off is the connector's DPMS (`kms_dpms`; nothing is drawn while it is off),
-  "require password" locks the session through `lord-sessiond` N seconds after the screen goes off,
+  "require password" locks the session through `insane-sessiond` N seconds after the screen goes off,
   and sleep runs the closed action `power-suspend` (`systemctl suspend`). A locked session no longer
   has the monitor, so its lock message (`{"a":"lock","dark","off","sleep","sleepLeft"}`, from
   `display_idle_state`) hands the deadlines to the login screen: when the screen was already off
-  (`dark`) the login screen keeps it off (`lord.display.blank()`) until a key, the mouse or the
+  (`dark`) the login screen keeps it off (`insane.display.blank()`) until a key, the mouse or the
   trackpad; it turns the screen off again after the same `off` time, and when the sleep time is up
-  (`sleepLeft` after the lock, then `sleep` after the last input) it asks `lord-sessiond` to suspend
+  (`sleepLeft` after the lock, then `sleep` after the last input) it asks `insane-sessiond` to suspend
   (`{t:'power', a:'suspend'}`, the login screen having no admin helper). If sleep comes before the lock
   deadline, the session locks first. Sleep choices: 10, 15, 20, 30 min, 1, 2 and 3 h on the power
   adapter; 5, 10, 15, 30 min, 1, 2 and 3 h on battery. The VM is never put to
@@ -296,12 +296,12 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
   **The lock and the computer's sleep** (0.8.8.4, issue #36): closing the lid, the power or sleep
   button and every sleep timer end in systemd-logind's sleep, and the idle deadlines run on
   `CLOCK_MONOTONIC`, which stops while the computer sleeps, so "require password" never fired for
-  them. A session that `lord-sessiond` shows takes a logind "delay" sleep inhibitor
+  them. A session that `insane-sessiond` shows takes a logind "delay" sleep inhibitor
   (`Inhibit("sleep", "Insane OS", …, "delay")`, allowed to anyone by logind's polkit policy) on the system
   bus (`hw/sleeplock.c`; `hw/sysbus.c` negotiates fds for it, `vault/dbus.c` accepts them only on such a
   connection and only in replies) and listens for `PrepareForSleep`, believed only from logind's own
   connection. On `PrepareForSleep(true)` the theme hears idle `{stage:"suspend"}` and, with
-  "Immediately" (`lockDelay` 0), locks (`sdk/idlemodel.js`); the inhibitor is kept until `lord-sessiond`
+  "Immediately" (`lockDelay` 0), locks (`sdk/idlemodel.js`); the inhibitor is kept until `insane-sessiond`
   takes the monitor (`RP_UNDISPLAY`) or 4 s pass (logind's own limit is 5 s), so the computer sleeps,
   and wakes, without the desktop on the screen. Without a lock (Never, a delay) it is let go at once.
   After waking, `{stage:"resume", slept}` (seconds asleep plus the time the display was already off)
@@ -309,14 +309,14 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
   arrives when the lock is already due no longer cancels it (`display_input`: the lock goes first).
   Tested by `build/sleeplock-test`, `build/dbus-test` (fds), `tests/idle_model_test.mjs` and, end to end,
   `tests/lock_e2e.sh idle|sleep` on VM 116: a real session and login screen, `build/lock-seat` playing
-  `lord-sessiond`'s monitor part and `tests/fake_logind.py` playing logind on a private bus. That VM's
+  `insane-sessiond`'s monitor part and `tests/fake_logind.py` playing logind on a private bus. That VM's
   one card belongs to its running desktop and Debian's kernel has no `vkms`, so the run was headless,
-  with the development-only `LORD_IDLE_HEADLESS=1` (the idle deadlines of a session without a monitor,
-  its frame in memory standing for the screen; `lord-sessiond` never sets it). A real lid on a laptop
+  with the development-only `INSANE_IDLE_HEADLESS=1` (the idle deadlines of a session without a monitor,
+  its frame in memory standing for the screen; `insane-sessiond` never sets it). A real lid on a laptop
   hasn't been tried.
 - **Power button and lid.** What systemd-logind does (sleep, hibernate, shut down, do nothing). The
   admin action `power-buttons <power> <lid> <lid-on-ac>` writes
-  `/etc/systemd/logind.conf.d/lordos.conf` (a short list of values, validated) and runs
+  `/etc/systemd/logind.conf.d/insaneos.conf` (a short list of values, validated) and runs
   `systemctl reload systemd-logind`. Insane OS never grabs the ACPI power button (only keyboards, mice
   and tablets are grabbed), so logind sees it. Lid rows only show with a battery.
 
@@ -324,13 +324,13 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
 
 ![Cooling](fans-settings.png)
 
-Fans by temperature, from the first boot, by the root service `lord-fand` (all the details in
+Fans by temperature, from the first boot, by the root service `insane-fand` (all the details in
 `FANS.md`). The page draws the detected hardware (the fan turns with the real duty and the fins warm
 with the temperature), the profile (System, Quiet, Balanced, Performance, Always on, Custom), the
 curve with its hysteresis bands and the live point (the custom curve's points are dragged on it),
 **Heavy work** (full speed for 30 min, 1 h, 2 h or until turned off) and, on a Raspberry Pi 5, the
 **Case** (`rpi-case`). Without controllable fans it says so ("No controllable fans", or "Fans
-managed by the firmware" with their RPM). Only administrators change anything: `lord-fand` checks
+managed by the firmware" with their RPM). Only administrators change anything: `insane-fand` checks
 the peer and reports `canChange`. Monitor has the same view read-only, with a history and a
 "Full speed for 30 min" button.
 
@@ -342,7 +342,7 @@ the peer and reports `canChange`. Monitor has the same view read-only, with a hi
 | An update is available | Updated: restart to finish | After the restart |
 
 Insane OS's own page for the bootloader in the board's EEPROM, instead of `raspi-config`. It is in the
-sidebar only on a BCM2712 board (`lord.system.info().board === 'pi5'`, from the device tree's
+sidebar only on a BCM2712 board (`insane.system.info().board === 'pi5'`, from the device tree's
 `compatible` list: Raspberry Pi 5, Pi 500, Compute Module 5). It shows:
 
 - the **status**: *Up to date*, *Update available*, or *Update ready: restart to finish*;
@@ -434,7 +434,7 @@ that day, or the chosen app (Thunderbird…) as it starts.
 
 - Saved in `~/.config/mimeapps.list` (freedesktop spec: the `[Default Applications]` line is
   replaced and the app goes first in `[Added Associations]`, as GLib does; every other line is
-  kept), so `xdg-open` and GNOME/KDE apps agree. Insane OS apps are written as `lordos-<app>.desktop`.
+  kept), so `xdg-open` and GNOME/KDE apps agree. Insane OS apps are written as `insaneos-<app>.desktop`.
   The terminal goes in `~/.config/xdg-terminals.list`.
 - Lookup follows the spec's order (`$XDG_CONFIG_HOME`, `/etc/xdg`, `~/.local/share/applications`,
   `/usr/local/share/applications`, `/usr/share/applications`, `defaults.list`), with the user's
@@ -448,7 +448,7 @@ that day, or the chosen app (Thunderbird…) as it starts.
   The order:
   1. `[Default Applications]` of the files above, file by file and entry by entry, skipping entries
      that are not installed: the user's own files first (an *explicit* choice; there a
-     `lordos-<app>.desktop` counts too, and the theme opens it), then what the system marks as
+     `insaneos-<app>.desktop` counts too, and the theme opens it), then what the system marks as
      default (`/etc/xdg/mimeapps.list`, `/usr/local/share/applications/mimeapps.list`,
      `/usr/share/applications/mimeapps.list`, `defaults.list`);
   2. their `[Added Associations]`, in the same file order;
@@ -460,22 +460,22 @@ that day, or the chosen app (Thunderbird…) as it starts.
   No MIME subclasses or aliases are followed (`text/html` does not match an app that only lists
   `application/xhtml+xml`). No app → nothing opens, as before. No path or argument was added:
   the folders are the launcher's, the file still goes through `launchWith`'s checks.
-- **The JS side.** `lord.mime.resolve(mime)` returns `{ id, explicit, source }` (`source`:
+- **The JS side.** `insane.mime.resolve(mime)` returns `{ id, explicit, source }` (`source`:
   `user`, `system` for a system default or added association, `declared` for the first app that
-  declares the type) or `null`; `lord.mime.unset(mime)` removes the user's line for that type
+  declares the type) or `null`; `insane.mime.unset(mime)` removes the user's line for that type
   from `[Default Applications]` and `[Added Associations]` of `~/.config/mimeapps.list` (as
-  GLib's reset does; `[Removed Associations]` and every other line are kept). `lord.mime.get`
+  GLib's reset does; `[Removed Associations]` and every other line are kept). `insane.mime.get`
   still returns the first `[Default Applications]` entry without checking it is installed.
 - **What Settings shows.** A category the user never chose shows **Automatic (<app>)**: the
   system's default if there is one, else Insane OS's own app for the category (Photos, Player, PDF
   Viewer, Text Editor, Mail), else the first installed app that declares the type (the web
   browser on a fresh account). Choosing an app writes it as before; an explicit choice can go
-  back with **Automatic**, which calls `lord.mime.unset` for every type of the category. The
+  back with **Automatic**, which calls `insane.mime.unset` for every type of the category. The
   terminal is unchanged (`~/.config/xdg-terminals.list`).
 - **Files** lists the default app first in "Open With", marked "(default)", and double-click opens
   it (`defaultOpenerId`: the user's choice or the system's default if installed, else the
   category's Insane OS app, else the first declaring app; on a fresh account an `.html` file now
-  opens in the installed browser instead of the Text Editor). **`lord.apps.launchWith('', path)`**
+  opens in the installed browser instead of the Text Editor). **`insane.apps.launchWith('', path)`**
   opens a file with the default Linux app for its type, the automatic one included (the same
   rules as `launchWith`: a real path in the home or `/media/$USER`, one argument, no shell); it
   returns false when the default is a Insane OS app, which the theme opens itself, or when no
@@ -497,7 +497,7 @@ that day, or the chosen app (Thunderbird…) as it starts.
 ## Appearance: «Browsers: tabs in the title bar»
 
 Not a hardware page, but its native side lives here too: `hw/brframe.c`, exposed as
-`lord.browserFrame.apply(on, 'all'|'chromium'|'firefox')`, `.state()`, `.tidy()` and
+`insane.browserFrame.apply(on, 'all'|'chromium'|'firefox')`, `.state()`, `.tidy()` and
 `.chromiumRunning()` in `ui/js_hw.c`; the page is `apps/settings/BrowserFrame.jsx` (strings in
 `settings.json`, `browserTabs.*`) and the logic `sdk/browserframe.js`. It writes one preference in the
 user's own Chromium, Brave (0.8.8.4) and Firefox profiles; see `WAYLAND.md`, "The switch in Settings".
@@ -525,11 +525,11 @@ All in `server/src/hw/hw_admin.c`, in the `actions` table through `HW_ADMIN_ACTI
 | `keyboard-light` | `<led> <value>` | anyone | writes `/sys/class/leds/<name>/brightness`, only for a `*::kbd_backlight` under `/sys/devices` (`0..max`) |
 | `power-profile` | `performance` \| `balanced` \| `power-saver` | anyone | `/usr/bin/powerprofilesctl set`, or the cpufreq governor and EPP |
 | `power-suspend` | — | anyone | `/usr/bin/systemctl suspend` |
-| `power-buttons` | `<power> <lid> <lid-on-ac>` (`suspend`, `hibernate`, `poweroff`, `ignore`) | admin | generates `/etc/systemd/logind.conf.d/lordos.conf`, `systemctl reload systemd-logind` |
+| `power-buttons` | `<power> <lid> <lid-on-ac>` (`suspend`, `hibernate`, `poweroff`, `ignore`) | admin | generates `/etc/systemd/logind.conf.d/insaneos.conf`, `systemctl reload systemd-logind` |
 | `time-ntp` | `on` \| `off` | admin | `/usr/bin/timedatectl set-ntp` |
 | `time-set` | `YYYY-MM-DD HH:MM:SS` | admin | `/usr/bin/timedatectl set-time` |
 | `bt-unblock` | — | anyone | rfkill "unblock all Bluetooth" on `/dev/rfkill` |
-| `rpi-case` | `none` \| `argon-one-v5` | admin | Raspberry Pi 5 only: writes `/boot/firmware/lordos-case.txt` (fixed text, included from `config.txt`; see `FANS.md`) |
+| `rpi-case` | `none` \| `argon-one-v5` | admin | Raspberry Pi 5 only: writes `/boot/firmware/insaneos-case.txt` (fixed text, included from `config.txt`; see `FANS.md`) |
 | `rpi-pmic` | — | anyone | BCM2712 boards only, read-only: `/usr/bin/vcgencmd pmic_read_adc`, parsed strictly, and the under-voltage lines of the kernel log counted; `OK uv <count> <last_s> <RAIL>=<uV>,<uA> ...` (Monitor → Voltage, `docs/MONITOR.md`) |
 | `rpi-eeprom-status` | — | anyone | BCM2712 boards only, read-only: `/usr/bin/rpi-eeprom-update` (no options), report parsed strictly; `OK <uptodate\|available\|pending> <current> <latest> <release>` (see "Board firmware") |
 | `rpi-eeprom-update` | — | admin | BCM2712 boards only: `/usr/bin/rpi-eeprom-update -A bootloader`, then the same report; the update is finished by the next restart |

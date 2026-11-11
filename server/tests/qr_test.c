@@ -120,7 +120,7 @@ int main(void) {
         check(same, what);
     }
     {
-        const char *base = "lordos contrasenas qr prueba ";
+        const char *base = "insaneos contrasenas qr prueba ";
         static uint8_t txt[3000];
         for (int i = 0; i < 3000; i++) txt[i] = (uint8_t)base[i % 29];
         for (size_t k = 0; k < sizeof BIG / sizeof BIG[0]; k++) {
@@ -177,7 +177,7 @@ int main(void) {
 
     /* ---- 3. error correction (version 1-H: 17 correction codewords, up to 8 words) ---- */
     {
-        const char *msg = "LORDOS-2FA";
+        const char *msg = "INSANEOS-2FA";
         int good = 0, bad_fail = 0, bad_wrong = 0;
         for (int it = 0; it < 60; it++) {
             qr_encode((const uint8_t *)msg, strlen(msg), QR_ECC_H, M, &s);
@@ -206,8 +206,8 @@ int main(void) {
     /* ---- 4. real images ---- */
     {
         struct { const char *file, *want; } real[] = {
-            { "tests/qr/wifi.png", "WIFI:T:WPA;S:Casa Lord;P:clave-segura-123;;" },
-            { "tests/qr/otpauth.png", "otpauth://totp/Insane OS:lord@example.org?secret=JBSWY3DPEHPK3PXP&issuer=Insane OS&algorithm=SHA1&digits=6&period=30" },
+            { "tests/qr/wifi.png", "WIFI:T:WPA;S:Casa Insane;P:clave-segura-123;;" },
+            { "tests/qr/otpauth.png", "otpauth://totp/Insane OS:insane@example.org?secret=JBSWY3DPEHPK3PXP&issuer=Insane OS&algorithm=SHA1&digits=6&period=30" },
             { "tests/qr/url-v11.png", "https://example.org/contrasenas/una/ruta/bastante/larga/para/llegar/a/la/version/diez?con=parametros&y=mas&valores=1234567890" },
             { "tests/qr/captura.png", "otpauth://totp/Banco:ana?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=Banco" },
         };
@@ -261,7 +261,7 @@ int main(void) {
 
     /* ---- timings ---- */
     {
-        const char *wifi = "WIFI:T:WPA;S:Casa Lord;P:clave-segura-123;;";
+        const char *wifi = "WIFI:T:WPA;S:Casa Insane;P:clave-segura-123;;";
         double t0 = now();
         for (int i = 0; i < 1000; i++) qr_encode((const uint8_t *)wifi, strlen(wifi), QR_ECC_M, M, &s);
         printf("time: generating the QR of a Wi-Fi network: %.3f ms\n", (now() - t0));

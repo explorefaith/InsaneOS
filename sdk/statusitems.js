@@ -11,7 +11,7 @@
 // display (Insane Flow's menu bar, a Classic taskbar at the top) and above it when the bar is at the bottom (the Classic
 // taskbar's default), aligned to the button's edge on the side away from the display's nearer edge.
 import { createElement as h } from 'react';
-import { View, displayAt } from '@lordos/runtime';
+import { View, displayAt } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { panelPlacement } from './statusplace.js';
 
@@ -35,7 +35,7 @@ export function StatusItems({ color, height = 22 }) {
 export function statusPanelAt(button, gap = 4) {
   const n = button && typeof button === 'object' && 'current' in button ? button.current : button;
   let box = null;
-  try { box = n ? lord.getLayout(n.id) : null; } catch (e) { box = null; }
+  try { box = n ? insane.getLayout(n.id) : null; } catch (e) { box = null; }
   if (!box) return { position: 'absolute', top: 26, right: 0 };
   return panelPlacement(box, displayAt(box[0] + box[2] / 2, box[1] + box[3] / 2), gap);
 }

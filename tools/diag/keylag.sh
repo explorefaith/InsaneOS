@@ -7,25 +7,25 @@
 #
 # 1. It prints what matters for input latency: version, GPU or CPU composition, virtual machine,
 #    guest tools, the boot flags, and whether Chromium has complained about the compositor.
-# 2. If the session was started with the key latency trace (boot menu: add lordos.inputdebug=1 to
+# 2. If the session was started with the key latency trace (boot menu: add insaneos.inputdebug=1 to
 #    the kernel line, Insane OS 0.8.1 or later), it asks you to type in the slow app for a few
 #    seconds and prints, per stage, p50/p95/max in ms after the kernel's evdev timestamp:
-#    lord-server read it (rx), the app got it (flush), the app answered (commit) and the frame with
+#    insane-server read it (rx), the app got it (flush), the app answered (commit) and the frame with
 #    it was on screen (shown). The trace has timings only: no key, character or modifier.
 # 3. It says which stage is slow and what to try.
 set -u
 export LC_ALL=C          # decimal points in awk and printf
 SECS=${1:-30}
 RT=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
-TRACE=$RT/lordos-keylag.log
-LOGDIR=$HOME/.cache/lordos
+TRACE=$RT/insaneos-keylag.log
+LOGDIR=$HOME/.cache/insaneos
 SLOG=$LOGDIR/session.log
 ALOG=$LOGDIR/apps.log
 
 say() { printf '%s\n' "$*"; }
 
 say "== Insane OS key latency check"
-ver=$(dpkg-query -W -f '${Version}' lordos 2>/dev/null || echo "?")
+ver=$(dpkg-query -W -f '${Version}' insaneos 2>/dev/null || echo "?")
 virt=$(systemd-detect-virt 2>/dev/null || echo "?")
 cmd=$(cat /proc/cmdline)
 comp="unknown"
@@ -42,8 +42,8 @@ say "version:        $ver"
 say "virtualization: $virt"
 say "composition:    $comp"
 say "guest tools:    $tools"
-case " $cmd " in *" lordos.gpu=0 "*) say "boot flag:      lordos.gpu=0 (CPU composition forced)";; esac
-case " $cmd " in *" lordos.inputdebug=1 "*) say "boot flag:      lordos.inputdebug=1 (key latency trace)";; esac
+case " $cmd " in *" insaneos.gpu=0 "*) say "boot flag:      insaneos.gpu=0 (CPU composition forced)";; esac
+case " $cmd " in *" insaneos.inputdebug=1 "*) say "boot flag:      insaneos.inputdebug=1 (key latency trace)";; esac
 buggy=0
 [ -r "$ALOG" ] && buggy=$(grep -c "buggy presentation feedback" "$ALOG" 2>/dev/null)
 say "Chromium:       \"buggy presentation feedback\" $buggy time(s) in this session's app log"
@@ -54,10 +54,10 @@ if ! grep -q "keylag: key latency trace on" "$SLOG" 2>/dev/null; then
     if [ "$buggy" -gt 0 ] && [ "${comp#GPU}" != "$comp" ]; then
         say "-> Chromium's warning on the GPU path is the presentation bug fixed in Insane OS 0.8.1: a Linux"
         say "   app's new frame was only shown when something else on the screen changed (up to ~1 s late)."
-        say "   To confirm on this build in 2 minutes: reboot, press 'e' in the boot menu, add lordos.gpu=0"
+        say "   To confirm on this build in 2 minutes: reboot, press 'e' in the boot menu, add insaneos.gpu=0"
         say "   at the end of the 'linux' line, Ctrl+X, then type in Chromium. If the delay is gone, that was it."
     fi
-    say "With Insane OS 0.8.1 or later: add lordos.inputdebug=1 the same way (one boot only) and run this again."
+    say "With Insane OS 0.8.1 or later: add insaneos.inputdebug=1 the same way (one boot only) and run this again."
     exit 0
 fi
 
@@ -89,7 +89,7 @@ say ""
 say "$n key presses (ms after the kernel event)    p50     p95     max"
 for f in rx flush commit shown; do
     case $f in
-        rx) label="lord-server read the key        (rx)";;
+        rx) label="insane-server read the key        (rx)";;
         flush) label="the app received it         (flush)";;
         commit) label="the app drew its answer    (commit)";;
         shown) label="that frame was on screen    (shown)";;
@@ -104,12 +104,12 @@ say ""
 say "key presses arriving less than 15 ms after the previous one: $clump %"
 say ""
 if [ "$rx" -gt 30 ]; then
-    say "-> lord-server is slow to read keys (busy main loop). Note what is open and report it with this output."
+    say "-> insane-server is slow to read keys (busy main loop). Note what is open and report it with this output."
 elif [ "$((co - fl))" -gt 50 ]; then
     say "-> The app itself is slow to answer (commit - flush). Try it with fewer tabs or without the video."
 elif [ "$((sh - co))" -gt 50 ]; then
     say "-> Frames reach the screen late (shown - commit): compositor presentation. Report it with this output;"
-    say "   meanwhile boot with lordos.gpu=0 (CPU composition)."
+    say "   meanwhile boot with insaneos.gpu=0 (CPU composition)."
 elif [ "$sh" -le 40 ] && [ "$clump" -ge 20 ]; then
     say "-> Inside the guest every stage is fast, but keys arrive in clumps: the delay is before the guest"
     say "   kernel, in the hypervisor. On VMware try: 'Accelerate 3D graphics' off, fewer vCPUs, or in the"

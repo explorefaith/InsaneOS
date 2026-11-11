@@ -2,7 +2,7 @@
 // server/tests/motion_model_test.mjs). Hardware only: a moving wallpaper needs the GPU composing the session and
 // hardware decoding of the file's format. There is no software mode: anything else shows the still poster.
 
-// Which formats this machine can play. hw is lord.media.hwDecode(); composition lord.media.composition().
+// Which formats this machine can play. hw is insane.media.hwDecode(); composition insane.media.composition().
 export function motionCodecs(hw, composition) {
   if (composition !== 'gpu' || !hw || hw.virtualGpu) return [];
   const out = [];

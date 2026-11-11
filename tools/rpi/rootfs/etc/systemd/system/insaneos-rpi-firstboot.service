@@ -1,0 +1,16 @@
+[Unit]
+Description=InsaneOS on Raspberry Pi: first boot (grow the partition, user) and setup mode
+Documentation=file:///usr/share/doc/insaneos/README.md
+DefaultDependencies=no
+After=local-fs.target systemd-remount-fs.service
+Before=insaneos.service systemd-user-sessions.service
+ConditionPathExists=/usr/lib/insaneos/rpi/firstboot
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/insaneos/rpi/firstboot
+RemainAfterExit=yes
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target

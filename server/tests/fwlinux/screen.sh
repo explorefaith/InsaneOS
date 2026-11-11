@@ -10,7 +10,7 @@
 #   - no screen-cast portal is installed that could hand a PipeWire screen stream to an app
 #     (xdg-desktop-portal with a ScreenCast backend);
 #   - no PipeWire node is a screen source;
-#   - a restricted app can't read the framebuffer device (/dev/fb*, lord-netperm's cgroup/dev).
+#   - a restricted app can't read the framebuffer device (/dev/fb*, insane-netperm's cgroup/dev).
 #
 #   bash server/tests/fwlinux/screen.sh     (after make -C server build/wl-globals)
 . "$(dirname "$0")/lib.sh"
@@ -33,7 +33,7 @@ command -v /usr/libexec/xdg-desktop-portal >/dev/null 2>&1 || [ -x /usr/libexec/
 [ -z "$portal" ] && ok "no screen-cast portal backend installed (xdg-desktop-portal: $([ $pp = 1 ] && echo present || echo absent))" || bad "screen-cast portal backends: $portal"
 n=$(pw-dump 2>/dev/null | grep -c -E '"media.class": "Video/Source"|"media.role": "Screen"' || true)
 [ "${n:-0}" = 0 ] && ok "no PipeWire video or screen source node" || echo "  note: $n PipeWire video nodes (cameras; screens only come from a portal)"
-if [ -S /run/lordos/netperm.sock ] && ls /dev/fb* >/dev/null 2>&1; then
+if [ -S /run/insaneos/netperm.sock ] && ls /dev/fb* >/dev/null 2>&1; then
     FB=$(ls /dev/fb* | head -1)
     SC=$(scope fwscreen)
     restrict desktop:fwscreen no-screen

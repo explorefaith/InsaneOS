@@ -83,12 +83,12 @@ const A = H('a'), B = H('b'), D = H('d');
 const infos = { [A]: { id: 'debian', arch: 'amd64', file: 'debian-13.7.0-amd64-netinst.iso', size: 790626304 }, [B]: { id: 'kali', arch: 'amd64', file: 'kali-linux-2026.3-installer-amd64.iso' } };
 const entries = [{ name: `${A}.iso`, size: 790626304 }, { name: `${A}.json`, size: 90 }, { name: `${B}.iso.part`, size: 1000 }, { name: `${B}.json`, size: 90 },
   { name: `${D}.iso`, size: 5 }, { name: 'x.iso', size: 9 }, { name: `${H('e')}.iso`, size: 7, link: true }, { name: `${H('f')}.iso`, dir: true }, { name: `${A}.lock`, size: 0 }];
-const ms = [{ name: 'Deb', dir: '/h/Deb.lordvm', iso: `${IMAGES_DIR}/${A}.iso`, state: 'running' }, { name: 'Deb 2', dir: '/h/Deb 2.lordvm', iso: `${IMAGES_DIR}/${A}.iso`, state: 'stopped' },
-  { name: 'Other', dir: '/h/O.lordvm', iso: '/home/x/other.iso', state: 'running' }];
+const ms = [{ name: 'Deb', dir: '/h/Deb.insanevm', iso: `${IMAGES_DIR}/${A}.iso`, state: 'running' }, { name: 'Deb 2', dir: '/h/Deb 2.insanevm', iso: `${IMAGES_DIR}/${A}.iso`, state: 'stopped' },
+  { name: 'Other', dir: '/h/O.insanevm', iso: '/home/x/other.iso', state: 'running' }];
 const imgs = downloadedImages(CAT, entries, (sha) => { if (!infos[sha]) throw new Error('none'); return infos[sha]; }, ms);
 eq('images: which', imgs.map((x) => [x.sha[0], x.partial, x.size]), [['a', false, 790626304], ['b', true, 1000], ['d', false, 5]]);
 eq('images: labels', imgs.map((x) => [x.label, x.arch, x.id]), [['Debian 13.7', 'amd64', 'debian'], ['Kali 2026.3', 'amd64', 'kali'], ['', '', 'other']]);
-eq('images: users and running', [imgs[0].users, imgs[0].dirs, imgs[0].running, imgs[1].users], [['Deb', 'Deb 2'], ['/h/Deb.lordvm', '/h/Deb 2.lordvm'], ['Deb'], []]);
+eq('images: users and running', [imgs[0].users, imgs[0].dirs, imgs[0].running, imgs[1].users], [['Deb', 'Deb 2'], ['/h/Deb.insanevm', '/h/Deb 2.insanevm'], ['Deb'], []]);
 eq('images: a part next to its image', downloadedImages(CAT, [{ name: `${A}.iso.part`, size: 3 }, { name: `${A}.iso`, size: 9 }], () => null, []).map((x) => [x.partial, x.size]), [[false, 9]]);
 eq('images: a bad info file', downloadedImages(CAT, [{ name: `${A}.iso`, size: 9 }], () => ({ id: 'debian', arch: 'x', file: '../../etc' }), [])[0].file, '');
 const st = { total: 1000, free: 100, machines: [{ total: 300 }], bases: [], isos: 250, trash: 10 };

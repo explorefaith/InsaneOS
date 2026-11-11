@@ -9,10 +9,10 @@
  *     files (the %f %u… codes are removed) and it does not go through a shell: argv is built per the
  *     specification and run with execv;
  *   - terminal apps (Terminal=true) are neither listed nor launched;
- *   - JS cannot create .desktop files: lord.fs is read-only and Insane OS app packages are installed
- *     in another folder (~/.local/share/lordos/apps), so a command cannot be
+ *   - JS cannot create .desktop files: insane.fs is read-only and Insane OS app packages are installed
+ *     in another folder (~/.local/share/insaneos/apps), so a command cannot be
  *     invented from the UI.
- * App output goes to ~/.cache/lordos/apps.log (trimmed when it exceeds 1 MB).
+ * App output goes to ~/.cache/insaneos/apps.log (trimmed when it exceeds 1 MB).
  *
  * An app the owner restricted with "no access to your files" (Settings → Privacy, firewall id
  * desktop:<id>, sec/restrict.h) starts under Landlock (sandbox_apply_files): only its own config,
@@ -280,9 +280,9 @@ static void find_icon(const char *name, char *out, size_t n) {
     int w = snprintf(out, n, "/usr/share/pixmaps/%s.png", name);
     if (w > 0 && (size_t)w < n && is_png(out)) return;
     /* last resort: the 64 px AppStream PNG downloaded by the package engine
-     * (/var/lib/lordos/pkg/icons/64/<package>_<icon>.png): useful for apps that only ship SVG */
+     * (/var/lib/insaneos/pkg/icons/64/<package>_<icon>.png): useful for apps that only ship SVG */
     out[0] = 0;
-    DIR *d = opendir("/var/lib/lordos/pkg/icons/64");
+    DIR *d = opendir("/var/lib/insaneos/pkg/icons/64");
     if (!d) return;
     char want[300];
     snprintf(want, sizeof want, "_%s.png", name);
@@ -291,7 +291,7 @@ static void find_icon(const char *name, char *out, size_t n) {
     while ((e = readdir(d))) {
         size_t l = strlen(e->d_name);
         if (l > wl && !strcmp(e->d_name + l - wl, want)) {
-            w = snprintf(out, n, "/var/lib/lordos/pkg/icons/64/%s", e->d_name);
+            w = snprintf(out, n, "/var/lib/insaneos/pkg/icons/64/%s", e->d_name);
             if (w > 0 && (size_t)w < n && is_png(out)) break;
             out[0] = 0;
         }
@@ -302,7 +302,7 @@ static void find_icon(const char *name, char *out, size_t n) {
 /* ---- list ---- */
 
 /* A desktop id the launcher can run: it must also make a valid app scope name
- * ("app-lordos-<id>.scope", cgroup_scope_name_ok: no '+', at most 62 characters, no "..") and
+ * ("app-insaneos-<id>.scope", cgroup_scope_name_ok: no '+', at most 62 characters, no "..") and
  * never one that reads as a .lpk package's scope ("lpk-...": that would be lpk:<rest>'s identity,
  * rules and restrictions). */
 #define APP_ID_MAX 62
@@ -349,7 +349,7 @@ int apps_list(const char *lang, const DesktopApp **out) {
             if (len < 9 || strcmp(de->d_name + len - 8, ".desktop")) continue;
             /* the id is the file name without .desktop, with any character outside [A-Za-z0-9._-] made
              * '-' ("Insane OS Imager.desktop" → "Insane OS-Imager"): packages name their files freely, but the
-             * id also names the app's scope (app-lordos-<id>.scope); the real file is kept in a->file */
+             * id also names the app's scope (app-insaneos-<id>.scope); the real file is kept in a->file */
             char id[160];
             snprintf(id, sizeof id, "%.*s", (int)(len - 8), de->d_name);
             for (char *q = id; *q; q++) if (!isalnum((unsigned char)*q) && !strchr("._-", *q)) *q = '-';
@@ -462,9 +462,9 @@ static void open_log(void) {
     if (!home) return;
     snprintf(path, sizeof path, "%s/.cache", home);
     mkdir(path, 0700);
-    snprintf(path, sizeof path, "%s/.cache/lordos", home);
+    snprintf(path, sizeof path, "%s/.cache/insaneos", home);
     mkdir(path, 0700);
-    snprintf(path, sizeof path, "%s/.cache/lordos/apps.log", home);
+    snprintf(path, sizeof path, "%s/.cache/insaneos/apps.log", home);
     struct stat st;
     int flags = O_WRONLY | O_CREAT | O_APPEND | O_NOFOLLOW;
     if (!lstat(path, &st) && st.st_size > 1024 * 1024) flags |= O_TRUNC;
@@ -504,7 +504,7 @@ static void plan_add(FilesPlan *p, int rw, const char *fmt, const char *a, const
  * the only name used: Exec, StartupWMClass and Name are free text of the .desktop file. */
 static int own_dir_ok(const char *id) {
     /* folders another program reads to run something, or that hold someone else's keys or data */
-    static const char *const deny[] = { "lordos", "ssh", "gnupg", "autostart", "applications", "systemd", "environment.d",
+    static const char *const deny[] = { "insaneos", "ssh", "gnupg", "autostart", "applications", "systemd", "environment.d",
                                         "keyrings", "dconf", "git", "trash", "mime", "fontconfig", "pulse", "pipewire",
                                         "wireplumber", "user-dirs.dirs", "mimeapps.list", "gtk-3.0", "gtk-4.0", "fish",
                                         "bash", "zsh", "nvim", "vim", "emacs", "nano", "mc", "flatpak", "containers",
@@ -518,7 +518,7 @@ static int own_dir_ok(const char *id) {
     size_t n = strlen(id);
     if (!n || n > 100 || id[0] == '.' || id[0] == '-') return 0;
     for (const char *q = id; *q; q++) if (!isalnum((unsigned char)*q) && !strchr("._-+", *q)) return 0;
-    if (!strncasecmp(id, "lordos", 6)) return 0;
+    if (!strncasecmp(id, "insaneos", 6)) return 0;
     for (int i = 0; deny[i]; i++) if (!strcasecmp(id, deny[i])) return 0;
     return 1;
 }
@@ -531,7 +531,7 @@ static int own_dir_ok(const char *id) {
 static const char *const sensitive[] = { "/.ssh", "/.gnupg", "/.config/systemd", "/.local/share/systemd",
                                          "/.local/share/dbus-1", "/.config/environment.d", "/.config/user-tmpfiles.d",
                                          "/.local/bin", "/bin", "/.config/autostart", "/.local/share/applications",
-                                         "/.config/lordos", "/.local/share/lordos", NULL };
+                                         "/.config/insaneos", "/.local/share/insaneos", NULL };
 
 static int path_under(const char *path, const char *dir) {
     size_t n = strlen(dir);
@@ -741,7 +741,7 @@ int apps_launch_with(const char *id, const char *path) {
     char mime[MIME_MAX], def[DESKTOP_ID_MAX];
     if (id && !id[0]) {
         if (defaults_guess(real, mime, sizeof mime) || apps_default_for(mime, def, sizeof def) <= 0) return -1;
-        if (!strncmp(def, "lordos-", 7)) return -1;     /* one of ours: the theme opens it */
+        if (!strncmp(def, "insaneos-", 7)) return -1;     /* one of ours: the theme opens it */
         def[strlen(def) - 8] = 0;                       /* without ".desktop" */
         id = def;
     }
@@ -805,11 +805,11 @@ int apps_default_for(const char *mime, char *out, size_t n) {
     char id[DESKTOP_ID_MAX];
     int r = 0;
     /* 1. [Default Applications], file by file: the first entry that is installed (the user's own
-     *    files first; Insane OS's own "lordos-<app>.desktop" counts only there, the theme opens it) */
+     *    files first; Insane OS's own "insaneos-<app>.desktop" counts only there, the theme opens it) */
     for (int i = 0; i < f.n && !r; i++)
         for (int k = 0; !r && mimeapps_entry(f.text[i], "Default Applications", mime, k, id, sizeof id) == 0; k++) {
             if (defaults_removed(&f, i, mime, id)) continue;
-            if (f.user[i] && !strncmp(id, "lordos-", 7)) r = APPS_DEFAULT_USER;
+            if (f.user[i] && !strncmp(id, "insaneos-", 7)) r = APPS_DEFAULT_USER;
             else if (opens_files(id, mime, 0)) r = f.user[i] ? APPS_DEFAULT_USER : APPS_DEFAULT_LISTED;
         }
     /* 2. [Added Associations], in the same file order */
@@ -905,7 +905,7 @@ static int launch(const char *id, const char *file, const char *action) {
 
     pid_t pid = fork();
     if (pid == 0) {
-        /* orphaned grandchild: it does not remain a child of lord-server */
+        /* orphaned grandchild: it does not remain a child of insane-server */
         setsid();
         if (fork() != 0) _exit(0);
         sigset_t none;
@@ -918,10 +918,10 @@ static int launch(const char *id, const char *file, const char *action) {
         syscall(SYS_close_range, 3, ~0u, 0);
         const char *home = getenv("HOME");
         if (!cwd[0] || chdir(cwd)) { if (home && chdir(home)) {} }
-        /* its own app-lordos-<id>.scope cgroup: the firewall, the Monitor, the PipeWire guard and
+        /* its own app-insaneos-<id>.scope cgroup: the firewall, the Monitor, the PipeWire guard and
          * the notification server know the app only by it. In a Insane OS session a launch that can't
-         * be placed there never runs (it would run as lord-server itself, with none of its rules). */
-        if (app_scope_reserved(id) || (app_scope_enter(id) && getenv("LORDOS_SESSIOND"))) {
+         * be placed there never runs (it would run as insane-server itself, with none of its rules). */
+        if (app_scope_reserved(id) || (app_scope_enter(id) && getenv("INSANEOS_SESSIOND"))) {
             static const char msg[] = "apps: could not place the app in its own scope: not launched\n";
             if (write(2, msg, sizeof msg - 1) < 0) {}
             _exit(126);

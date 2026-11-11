@@ -11,7 +11,7 @@
 import {
   View, Text, Button, useTheme, useLocale, admin, formatBytes, formatNumber, GroupBox, FormRow, spacing, typeScale,
   smart, smartSummaries, prettyAttrName,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const cache = new Map();          // disk → last result (while the app is open)

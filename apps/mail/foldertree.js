@@ -1,5 +1,5 @@
 // foldertree.js — the sidebar's folder tree from the flat IMAP list (no imports: tested with node,
-// server/tests/mail_foldertree_test.mjs). Each folder comes from lord-maild as { name, display, special,
+// server/tests/mail_foldertree_test.mjs). Each folder comes from insane-maild as { name, display, special,
 // delim, noselect } with the special folders first, in their order.
 //
 // - Special folders (Inbox, Drafts, Sent, Archive, Junk, Trash…) are roots, in the server's order,

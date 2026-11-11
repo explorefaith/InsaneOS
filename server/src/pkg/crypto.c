@@ -68,7 +68,7 @@ static void sha256_block_c(uint32_t st[8], const uint8_t *p) {
 /* The CPU's own SHA-256 instructions on aarch64, when it has them (checked once at run time: the
  * ARMv8 cryptography extension of the Raspberry Pi 5's Cortex-A76; the Pi 4 has none). Same results
  * bit for bit: sign_test and codesig_test run the NIST vectors through the path the machine takes,
- * and LORD_SHA256_C=1 forces the C one to compare. x86-64 uses the C code: its SHA extensions are
+ * and INSANE_SHA256_C=1 forces the C one to compare. x86-64 uses the C code: its SHA extensions are
  * not used until they can be tested on such a CPU. */
 typedef void (*Sha256Blocks)(uint32_t st[8], const uint8_t *p, size_t n);
 static void sha256_blocks_c(uint32_t st[8], const uint8_t *p, size_t n) { for (; n; n--, p += 64) sha256_block_c(st, p); }
@@ -106,7 +106,7 @@ static Sha256Blocks sha256_blocks;
 static void sha256_pick(void) {
     sha256_blocks = sha256_blocks_c;
 #ifdef SHA256_HW
-    if (sha256_hw() && !getenv("LORD_SHA256_C")) sha256_blocks = SHA256_HW;     /* LORD_SHA256_C=1: tests */
+    if (sha256_hw() && !getenv("INSANE_SHA256_C")) sha256_blocks = SHA256_HW;     /* INSANE_SHA256_C=1: tests */
 #endif
 }
 static void sha256_block(Sha256 *s, const uint8_t *p) {

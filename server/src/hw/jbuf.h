@@ -1,7 +1,7 @@
 /* jbuf.h — growable buffer for building JSON in src/hw (strings are escaped with
  * sec/json.c's json_quote). On out-of-memory the buffer is marked and later writes are dropped. */
-#ifndef LORD_HW_JBUF_H
-#define LORD_HW_JBUF_H
+#ifndef INSANE_HW_JBUF_H
+#define INSANE_HW_JBUF_H
 
 #include <stddef.h>
 

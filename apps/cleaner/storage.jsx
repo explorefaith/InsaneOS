@@ -1,6 +1,6 @@
 // Storage: a volume's bounded tree, drawn as a squarified treemap in an Image, a folder tree with logical and
 // allocated sizes, and a summary by type. Selecting a rectangle only selects it.
-import { View, Image, cleaner, useAppWindow, useStore, windows, wm, userDirs, t as tr, formatBytes, formatDate, formatNumber, revealPath, typeScale, spacing } from '@lordos/sdk';
+import { View, Image, cleaner, useAppWindow, useStore, windows, wm, userDirs, t as tr, formatBytes, formatDate, formatNumber, revealPath, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useMemo, useState } from 'react';
 import { Label, Glass, GlassButton, Pill, Hero, Bar, Enter, PagedList, usePal } from './ui.jsx';
 

@@ -1,9 +1,9 @@
-/* net_test.c — tests of the network module without lord-server (see docs/NETWORK.md).
+/* net_test.c — tests of the network module without insane-server (see docs/NETWORK.md).
  *
  *   net-test crypto                  X25519 (RFC 7748), WPA PBKDF2 (IEEE 802.11i), base64
- *   net-test state                   what lord.net sees without root (interfaces, routes, DNS, VPN)
+ *   net-test state                   what insane.net sees without root (interfaces, routes, DNS, VPN)
  *   net-test monitor <seconds>       rtnetlink notifications
- *   net-test ovpn-inline <path>      the .ovpn with its files embedded (lord.net.prepareOvpn)
+ *   net-test ovpn-inline <path>      the .ovpn with its files embedded (insane.net.prepareOvpn)
  *   net-test errors                  config errors are code lines (errcode.h), never prose
  *   net-test ifwatch                 an interface gets its saved state once, whenever it appears
  *   net-test wake                    Wi-Fi after waking from sleep: checked, re-associated, turned off and on
@@ -15,9 +15,9 @@
  *   sudo net-test daemons            the tests' resident processes
  *
  * Replaces the helper's functions (admin_say, admin_daemon_*...) with its own: the
- * resident processes stay in the background, with their output in /run/lordos/test/<name>.log,
+ * resident processes stay in the background, with their output in /run/insaneos/test/<name>.log,
  * so one action after another can be run from the command line. */
-#define LORD_NET_ACTIONS
+#define INSANE_NET_ACTIONS
 #include "net/net.h"
 #include "net/netpriv.h"
 #include "net/vpn.h"
@@ -39,7 +39,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define TEST_DIR "/run/lordos/test"
+#define TEST_DIR "/run/insaneos/test"
 
 /* ---- helper replacement ---- */
 
@@ -121,7 +121,7 @@ int admin_daemon_running(const char *name) {
 }
 
 static int daemonize(const char *name) {
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     mkdir(TEST_DIR, 0755);
     char pp[128], lp[128];
     paths(name, pp, lp);

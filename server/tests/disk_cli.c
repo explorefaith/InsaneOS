@@ -1,7 +1,7 @@
 /* disk_cli.c — runs a disk-* action like the helper does, for manual testing on the VM (not part of
  * `make test`: it needs root and real devices). See docs/SYSTEM.md, "Disks".
  *
- *   build/disk-cli list                         the list lord.disks.list() sees
+ *   build/disk-cli list                         the list insane.disks.list() sees
  *   build/disk-cli system <disk>                is it the system disk?
  *   sudo build/disk-cli [-u user] [-n] <action> '<arg with \n>'
  *        -n: as a user who is not an administrator
@@ -73,7 +73,7 @@ static void unescape(char *s) {
 }
 
 int main(int argc, char **argv) {
-    prctl(PR_SET_NAME, "lord-admin");      /* like the helper (disk-cancel checks it) */
+    prctl(PR_SET_NAME, "insane-admin");      /* like the helper (disk-cancel checks it) */
     const char *user = getenv("SUDO_USER");
     int admin = 1, i = 1;
     for (; i < argc && argv[i][0] == '-'; i++) {

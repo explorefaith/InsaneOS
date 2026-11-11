@@ -6,7 +6,7 @@
 // move, a badge for an account that needs the person or for changes waiting. Everything comes from the pushed
 // state (cloud.js), so the item has no timer of its own. Its panel opens toward the middle of the screen (#29).
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, addListener } from '@lordos/runtime';
+import { View, Text, addListener } from '@insaneos/runtime';
 import { useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme, popupBg } from './theme.js';
@@ -78,7 +78,7 @@ function Panel({ st, onClose }) {
       h(Text, { style: { width: 54, fontSize: 12, color: th.textDim, textAlign: 'end' } }, t(r.ago.key, r.ago.vars))))) : null,
     h(View, { style: { flexDirection: 'row', gap: 8, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 14, borderTopWidth: 1, borderTopColor: th.separator } },
       h(Btn, { label: t(paused ? 'cloud.resumeAll' : 'cloud.pauseAll'), onClick: () => (paused ? cloud.resume(null) : cloud.pause(null)) }),
-      h(Btn, { label: t('cloud.showInFiles'), onClick: () => { onClose(); openFiles(first ? first.mount : `${(lord.fs && lord.fs.home()) || ''}/Cloud`); } }),
+      h(Btn, { label: t('cloud.showInFiles'), onClick: () => { onClose(); openFiles(first ? first.mount : `${(insane.fs && insane.fs.home()) || ''}/Cloud`); } }),
       h(Btn, { label: t('cloud.settingsMenu'), onClick: () => { onClose(); openSettings(); } })));
 }
 
@@ -90,7 +90,7 @@ function CloudItem({ height, color }) {
   useEffect(() => {
     if (!open) return undefined;
     return addListener('pointerdown', (e) => {
-      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = lord.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
+      const inside = (n) => { if (!n) return false; const [x, y, w, hh] = insane.getLayout(n.id); return e.x >= x && e.x <= x + w && e.y >= y && e.y <= y + hh; };
       if (!inside(panel.current) && !inside(btn.current)) setOpen(false);
     });
   }, [open]);
@@ -134,10 +134,10 @@ let started = false;
 export function startCloud() {
   if (started) return;
   started = true;
-  // development only: the stand-in for lord.cloud (cloudmock.js)
+  // development only: the stand-in for insane.cloud (cloudmock.js)
   try {
     const dev = settings.get().cloudDevMock;
-    if (typeof lord !== 'undefined' && !lord.cloud && (dev === true || ['states', 'providersFail', 'locked', 'crashed'].includes(dev))) installCloudMock(lord.fs.home(), dev === true ? '' : dev);
+    if (typeof insane !== 'undefined' && !insane.cloud && (dev === true || ['states', 'providersFail', 'locked', 'crashed'].includes(dev))) installCloudMock(insane.fs.home(), dev === true ? '' : dev);
   } catch (e) { console.log(`cloud mock: ${e}`); }
   let prev = cloudState.get();
   cloudState.subscribe(() => {

@@ -66,11 +66,11 @@ static void catalog(const char *extra) {
     char j[1024], sig[400], p[512];
     snprintf(j, sizeof j, "{\"format\":1,\"serial\":%d,\"authors\":[{\"key\":\"%s\",\"name\":\"Author\"}]%s}", 7, akey, extra);
     sig_make_detached(official, j, strlen(j), sig, sizeof sig);
-    snprintf(p, sizeof p, "%s/.local/share/lordos/catalog/catalog.json", root);
+    snprintf(p, sizeof p, "%s/.local/share/insaneos/catalog/catalog.json", root);
     FILE *f = fopen(p, "w");
     fputs(j, f);
     fclose(f);
-    snprintf(p, sizeof p, "%s/.local/share/lordos/catalog/catalog.sig", root);
+    snprintf(p, sizeof p, "%s/.local/share/insaneos/catalog/catalog.sig", root);
     f = fopen(p, "w");
     fputs(sig, f);
     fclose(f);
@@ -219,7 +219,7 @@ static void test_status(void) {
 int main(void) {
     snprintf(root, sizeof root, "/tmp/pkgapp-test-%d", (int)getpid());
     char c[400], apps[160];
-    snprintf(c, sizeof c, "umask 022; mkdir -p %s/.local/share/lordos/catalog %s/apps", root, root);
+    snprintf(c, sizeof c, "umask 022; mkdir -p %s/.local/share/insaneos/catalog %s/apps", root, root);
     if (system(c)) return 2;
     snprintf(apps, sizeof apps, "%s/apps", root);
     snprintf(app, sizeof app, "%s/test-app", apps);

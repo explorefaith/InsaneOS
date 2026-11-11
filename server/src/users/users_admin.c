@@ -9,13 +9,13 @@
  *   user-avatar    name \n color (#rrggbb or empty) \n image ("" unchanged, "-" remove, or a path
  *                  in the requester's home folder; PNG or JPEG up to 4 MB)
  *                  (your own: anyone; someone else's: only an administrator)
- *   user-autologin name or empty                       (/etc/lordos/session.conf)
+ *   user-autologin name or empty                       (/etc/insaneos/session.conf)
  *   admin-rescue-status                                (anyone, read-only: LOG users.rescueState state=<word>)
  *   admin-rescue   root password                       (anyone, only while nobody is an administrator)
  *
  * Root-side validation: names [a-z_][a-z0-9_-]*, only people's accounts (uid 1000 to
  * 59999), never your own account when deleting nor the last administrator. Passwords go through
- * chpasswd's standard input, never in argv. Avatars live in /var/lib/lordos/users
+ * chpasswd's standard input, never in argv. Avatars live in /var/lib/insaneos/users
  * (read by the login screen, which can't get into home folders). */
 #include "users_admin.h"
 #include "admin_rescue.h"
@@ -37,11 +37,11 @@
 #include <syslog.h>
 #include <unistd.h>
 
-#define USERS_DIR "/var/lib/lordos/users"
-#define SESSION_CONF "/etc/lordos/session.conf"
+#define USERS_DIR "/var/lib/insaneos/users"
+#define SESSION_CONF "/etc/insaneos/session.conf"
 #define ADMIN_GROUP "sudo"
 #define SUDO_BIN "/usr/bin/sudo"
-#define RUN_DIR "/run/lordos"
+#define RUN_DIR "/run/insaneos"
 #define RESCUE_LOCK RUN_DIR "/admin-rescue.lock"
 #define RESCUE_FAIL_DELAY 2             /* seconds, with the lock held: one try at a time, machine-wide */
 /* Printers (M9, docs/PRINTING.md): CUPS lets the lpadmin group administer printers. Insane OS
@@ -154,7 +154,7 @@ int users_check_password(const char *user, const char *pass) {
 
 static int write_file(const char *path, const void *data, size_t n, mode_t mode) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos", path);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, mode);
     if (fd < 0) return -1;
     int ok = write(fd, data, n) == (ssize_t)n;
@@ -176,7 +176,7 @@ static void autologin_get(char *out, size_t n) {
 }
 
 static int autologin_set(const char *user) {
-    mkdir("/etc/lordos", 0755);
+    mkdir("/etc/insaneos", 0755);
     char text[256];
     snprintf(text, sizeof text, "# Written by Insane OS (Settings → Users). See docs/SESSIONS.md\n"
              "# AUTOLOGIN=user logs in automatically at boot; empty: login screen\nAUTOLOGIN=%s\n", user);
@@ -197,18 +197,18 @@ static void prepare_home(const struct passwd *pw) {
     if (homedirs_create(pw->pw_dir, pw->pw_uid, pw->pw_gid, lang)) admin_log("users.homedirsWarning", NULL);
     snprintf(path, sizeof path, "%s/.config", pw->pw_dir);
     if (!mkdir(path, 0755) && chown(path, pw->pw_uid, pw->pw_gid)) { /* carry on */ }
-    snprintf(path, sizeof path, "%s/.config/lordos", pw->pw_dir);
+    snprintf(path, sizeof path, "%s/.config/insaneos", pw->pw_dir);
     if (!mkdir(path, 0755) && chown(path, pw->pw_uid, pw->pw_gid)) { /* carry on */ }
     char text[96];
     snprintf(path, sizeof path, "%s/.config/locale.conf", pw->pw_dir);
     snprintf(text, sizeof text, "LANG=%s\n", lang);
     if (!write_file(path, text, strlen(text), 0644) && chown(path, pw->pw_uid, pw->pw_gid)) { /* carry on */ }
-    snprintf(path, sizeof path, "%s/.config/lordos/settings.json", pw->pw_dir);
+    snprintf(path, sizeof path, "%s/.config/insaneos/settings.json", pw->pw_dir);
     /* UI language: the system's if there's a catalog (es, en, pt); otherwise English */
     const char *ui = homedirs_ui_lang(lang);
     snprintf(text, sizeof text, "{\n  \"language\": \"%s\"\n}\n", ui);
     if (!write_file(path, text, strlen(text), 0644) && chown(path, pw->pw_uid, pw->pw_gid)) { /* carry on */ }
-    snprintf(path, sizeof path, "%s/.config/lordos/.dirs", pw->pw_dir);
+    snprintf(path, sizeof path, "%s/.config/insaneos/.dirs", pw->pw_dir);
     if (!write_file(path, "", 0, 0644) && chown(path, pw->pw_uid, pw->pw_gid)) { /* carry on */ }
 }
 
@@ -229,9 +229,9 @@ void users_act_add(const AdminReq *r, const char *arg, size_t len) {
             if (adm) { const char *const g[] = { "/usr/sbin/usermod", "--append", "--groups", ADMIN_GROUP, name, NULL }; admin_run(g); print_group(name, 1); }
             if (getgrnam("pipewire")) { const char *const g[] = { "/usr/sbin/usermod", "--append", "--groups", "pipewire", name, NULL }; admin_run(g); }   /* real-time sound (docs/SOUND.md) */
             if (getgrnam("plugdev")) { const char *const g[] = { "/usr/sbin/usermod", "--append", "--groups", "plugdev", name, NULL }; admin_run(g); }   /* FIDO2 security keys (docs/PASSWORDS.md) */
-            /* sound card, camera and GPU render node: lord-sessiond sessions have no logind seat, so
+            /* sound card, camera and GPU render node: insane-sessiond sessions have no logind seat, so
              * there are no uaccess ACLs; without these groups a new user only gets a dummy output
-             * (same groups as the installer's first user, minus input, which lord-sessiond lends) */
+             * (same groups as the installer's first user, minus input, which insane-sessiond lends) */
             for (const char *const *gr = (const char *const[]){ "audio", "video", "render", NULL }; *gr; gr++)
                 if (getgrnam(*gr)) { const char *const g[] = { "/usr/sbin/usermod", "--append", "--groups", *gr, name, NULL }; admin_run(g); }
             prepare_home(pw);
@@ -337,7 +337,7 @@ void users_act_avatar(const AdminReq *r, const char *arg, size_t len) {
     if (!person(name) || !ok_color) admin_err("admin.invalidArgument", NULL);
     else if (strcmp(name, r->user) && !r->admin) admin_err("users.avatarNotAllowed", NULL);
     else {
-        mkdir("/var/lib/lordos", 0755);
+        mkdir("/var/lib/insaneos", 0755);
         mkdir(USERS_DIR, 0755);
         char p[128], json[64];
         snprintf(p, sizeof p, USERS_DIR "/%s.json", name);
@@ -427,7 +427,7 @@ void users_act_rescue(const AdminReq *r, const char *arg, size_t len) {
     const char *refused = rescue_refusal(st);
     if (refused) admin_err(refused, NULL);
     else if (!valid_pass(arg) || !users_check_password("root", arg)) {
-        syslog(LOG_AUTHPRIV | LOG_WARNING, "lord-admin: admin-rescue: wrong root password from %s", r->user);
+        syslog(LOG_AUTHPRIV | LOG_WARNING, "insane-admin: admin-rescue: wrong root password from %s", r->user);
         sleep(RESCUE_FAIL_DELAY);
         admin_err("users.rescueWrongPassword", NULL);
     } else {
@@ -435,7 +435,7 @@ void users_act_rescue(const AdminReq *r, const char *arg, size_t len) {
         if (admin_run(a) || !in_group(r->user, ADMIN_GROUP)) admin_err("users.groupFailed", NULL);
         else {
             print_group(r->user, 1);
-            syslog(LOG_AUTHPRIV | LOG_NOTICE, "lord-admin: admin-rescue: %s added to the %s group", r->user, ADMIN_GROUP);
+            syslog(LOG_AUTHPRIV | LOG_NOTICE, "insane-admin: admin-rescue: %s added to the %s group", r->user, ADMIN_GROUP);
             admin_ok("users.rescueDone", "name", r->user, NULL);
         }
     }

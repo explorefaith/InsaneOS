@@ -1,13 +1,13 @@
 // Monitor → GPU (docs/MONITOR.md, "GPU"): each graphics card drawn live (its fans turn with the real fan, the heat
 // line and the load light follow the card), its load, temperature and fan over the last minutes in Cooling's chart,
 // the apps using it (each engine's share and their GPU memory, with the APIs they use), its memory, clocks and power,
-// the APIs installed for it, Insane OS's AI engines, and — for administrators, on amdgpu — its fan by hand (lord-fand).
-// lord.monitor.gpu() is read once per second only while this tab or the Overview is on screen and the window isn't
+// the APIs installed for it, Insane OS's AI engines, and — for administrators, on amdgpu — its fan by hand (insane-fand).
+// insane.monitor.gpu() is read once per second only while this tab or the Overview is on screen and the window isn't
 // minimized; the model is gpumodel.js.
 import {
   View, Text, Segmented, Slider, Toggle, useTheme, useLocale, useStore, createStore, useAppWindow, useWindowHidden, monitor, formatBytes,
   formatNumber, typeScale, useFan, fanControl, GpuArt, scanVoices, voiceConf, VOICE_LANGS, appName, wm,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, Big, Stat, useCardStyle, AppGlyph, isolatedAppOf } from './index.jsx';
 import { Chart } from './Chart.jsx';
@@ -69,7 +69,7 @@ export function gpuLabel(tr, c) {
 }
 
 export function appLabel(tr, item) {
-  if (item.app === 'lordos' || item.self) return tr('monitor.lordos');
+  if (item.app === 'insaneos' || item.self) return tr('monitor.insaneos');
   const iso = isolatedAppOf(item);
   return iso ? appName(iso) : item.appName || item.name;
 }
@@ -176,7 +176,7 @@ function MemoryCard({ card, hist }) {
   );
 }
 
-// The fan by hand (lord-fand's GPUFAN): administrators only, amdgpu only; everyone else sees its state.
+// The fan by hand (insane-fand's GPUFAN): administrators only, amdgpu only; everyone else sees its state.
 function FanControl({ card, gf, canChange }) {
   const t = useTheme();
   const { t: tr } = useLocale();

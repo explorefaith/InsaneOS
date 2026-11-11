@@ -1,4 +1,4 @@
-// backup.js — Backups (lord.backup, see server/src/backup and docs/SYSTEM.md).
+// backup.js — Backups (insane.backup, see server/src/backup and docs/SYSTEM.md).
 //
 //   const st = useBackup()            live status: { state, progress, last, next, dest, … }
 //   backup.config() / backup.configure({ dest, interval, pauseOnBattery, exclude })
@@ -7,8 +7,8 @@
 //   backup.restore(id, rel, { replace, suffix })   ('' = everything; result in status.restore)
 //   backup.unlock(pass, create) / backup.lock()     encrypted backups (result in status.unlock)
 //
-// A lord-server thread at the lowest priority does the copying; the status is pushed
-// (__lordBackup), never polled. When a run fails (or succeeds, if the user asked for it) the
+// A insane-server thread at the lowest priority does the copying; the status is pushed
+// (__insaneBackup), never polled. When a run fails (or succeeds, if the user asked for it) the
 // user is notified with notify(), even with the app closed.
 import { createStore, useStore } from './store.js';
 import { notify } from './notify.js';
@@ -17,8 +17,8 @@ import { errorText } from './errors.js';
 import { formatBytes } from './system.js';
 import { wm } from './windows.js';
 
-const has = () => typeof lord !== 'undefined' && lord.backup;
-const read = () => { try { return has() ? lord.backup.status() : null; } catch (e) { return null; } };
+const has = () => typeof insane !== 'undefined' && insane.backup;
+const read = () => { try { return has() ? insane.backup.status() : null; } catch (e) { return null; } };
 
 export const backupStatus = createStore(read());
 let asked = false;            // "Back Up Now": also notify on success
@@ -48,7 +48,7 @@ function changed(prev, st) {
   }
 }
 
-globalThis.__lordBackup = (st) => {
+globalThis.__insaneBackup = (st) => {
   const prev = backupStatus.get();
   backupStatus.set(st);
   try { changed(prev, st); } catch (e) { console.log(`backup: ${e}`); }
@@ -57,22 +57,22 @@ globalThis.__lordBackup = (st) => {
 export const backup = {
   available: () => !!has(),
   status: read,
-  config: () => (has() ? lord.backup.config() : null),
-  configure: (c) => lord.backup.configure(c),
-  runNow: () => { asked = true; return lord.backup.runNow(); },
-  pause: (on) => lord.backup.pause(!!on),
-  cancel: () => lord.backup.cancel(),
-  list: () => (has() ? lord.backup.list() || [] : []),
-  ls: (id, rel = '') => lord.backup.ls(id, rel),
-  path: (id) => lord.backup.path(id),
+  config: () => (has() ? insane.backup.config() : null),
+  configure: (c) => insane.backup.configure(c),
+  runNow: () => { asked = true; return insane.backup.runNow(); },
+  pause: (on) => insane.backup.pause(!!on),
+  cancel: () => insane.backup.cancel(),
+  list: () => (has() ? insane.backup.list() || [] : []),
+  ls: (id, rel = '') => insane.backup.ls(id, rel),
+  path: (id) => insane.backup.path(id),
   restore: (id, rel, opts = {}) => {
     restoring = true;
-    return lord.backup.restore(id, rel, { suffix: t('backup.restoredSuffix'), ...opts });
+    return insane.backup.restore(id, rel, { suffix: t('backup.restoredSuffix'), ...opts });
   },
-  remove: (id) => lord.backup.remove(id),
+  remove: (id) => insane.backup.remove(id),
   // encryption (Monocypher): the passphrase becomes the key in the backup thread; kept only in memory
-  unlock: (pass, create = false) => lord.backup.unlock(String(pass), !!create),
-  lock: () => lord.backup.lock(),
+  unlock: (pass, create = false) => insane.backup.unlock(String(pass), !!create),
+  lock: () => insane.backup.lock(),
 };
 
 export const useBackup = () => useStore(backupStatus);

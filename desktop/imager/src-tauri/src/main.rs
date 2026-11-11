@@ -1,10 +1,10 @@
-//! LordOS Imager for the desktop (`macos`, `windows`, `linux`): the Tauri shell. The window shows the same React UI as
+//! InsaneOS Imager for the desktop (`macos`, `windows`, `linux`): the Tauri shell. The window shows the same React UI as
 //! the native app (apps/imager, built by desktop/imager/build-web.mjs); its platform module calls
-//! the commands below. Nothing here runs a shell; downloads go only to the LordOS releases on GitHub,
-//! and writing goes through lordos-imager-core. docs/IMAGER.md, "The desktop app".
+//! the commands below. Nothing here runs a shell; downloads go only to the InsaneOS releases on GitHub,
+//! and writing goes through insaneos-imager-core. docs/IMAGER.md, "The desktop app".
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use lordos_imager_core::{drives, secrets, sums, write, Error, RELEASE_KEY};
+use insaneos_imager_core::{drives, secrets, sums, write, Error, RELEASE_KEY};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::fs;
@@ -14,9 +14,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State};
 
-const REPO: &str = "lordbasex/LordOS";
-// The version people see (and compare with LordOS's release tags for "a newer Imager"): ./VERSION, four
-// numbers like LordOS's own (0.8.8.6). Cargo and Tauri only take three, so the crates say 0.8.86.
+const REPO: &str = "insaneos/InsaneOS";
+// The version people see (and compare with InsaneOS's release tags for "a newer Imager"): ./VERSION, four
+// numbers like InsaneOS's own (0.8.8.6). Cargo and Tauri only take three, so the crates say 0.8.86.
 const VERSION: &str = include_str!("../../VERSION").trim_ascii();
 
 struct App {
@@ -29,8 +29,8 @@ type Res<T> = Result<T, Value>;
 fn err(e: Error) -> Value { json!({ "code": e.code, "detail": e.detail }) }
 fn code(c: &'static str, d: impl Into<String>) -> Value { err(Error::new(c, d)) }
 
-fn config_dir() -> PathBuf { dirs::config_dir().unwrap_or_else(std::env::temp_dir).join("LordOS Imager") }
-fn default_cache() -> PathBuf { dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("LordOS Imager") }
+fn config_dir() -> PathBuf { dirs::config_dir().unwrap_or_else(std::env::temp_dir).join("InsaneOS Imager") }
+fn default_cache() -> PathBuf { dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("InsaneOS Imager") }
 
 fn read_json(p: &Path) -> Value { fs::read(p).ok().and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or(Value::Null) }
 fn write_json(p: &Path, v: &Value) -> std::io::Result<()> {
@@ -46,11 +46,11 @@ fn write_json(p: &Path, v: &Value) -> std::io::Result<()> {
 struct Platform { os: &'static str, arch: &'static str, version: &'static str, lang: String, timezone: String, country: String, cache: String,
                   #[serde(rename = "testState")] test_state: Value }
 
-/// Tests and documentation screenshots only: LORDOS_IMAGER_TEST_STATE=<file.json> starts the window
+/// Tests and documentation screenshots only: INSANEOS_IMAGER_TEST_STATE=<file.json> starts the window
 /// at a given step with given choices (and may start the write, but only to a test device: one the
-/// LORDOS_IMAGER_TEST_DEVICES folder rule lists). Never set by the app itself.
+/// INSANEOS_IMAGER_TEST_DEVICES folder rule lists). Never set by the app itself.
 fn test_state() -> Value {
-    let Ok(p) = std::env::var("LORDOS_IMAGER_TEST_STATE") else { return Value::Null };
+    let Ok(p) = std::env::var("INSANEOS_IMAGER_TEST_STATE") else { return Value::Null };
     match fs::metadata(&p) { Ok(m) if m.is_file() && m.len() < 65536 => read_json(Path::new(&p)), _ => Value::Null }
 }
 
@@ -76,10 +76,10 @@ async fn list_drives() -> Res<Vec<drives::Drive>> {
     tauri::async_runtime::spawn_blocking(|| drives::list_polled().map_err(err)).await.map_err(|e| code("imager.listFailed", e.to_string()))?
 }
 
-// ---- releases and downloads (only GitHub's LordOS releases; the signature decides what is trusted) ----
+// ---- releases and downloads (only GitHub's InsaneOS releases; the signature decides what is trusted) ----
 
 fn client() -> Res<reqwest::blocking::Client> {
-    reqwest::blocking::Client::builder().user_agent(format!("LordOS-Imager/{VERSION}")).https_only(true).connect_timeout(std::time::Duration::from_secs(20))
+    reqwest::blocking::Client::builder().user_agent(format!("InsaneOS-Imager/{VERSION}")).https_only(true).connect_timeout(std::time::Duration::from_secs(20))
         .build().map_err(|e| code("imager.fetchNetwork", e.to_string()))
 }
 
@@ -102,7 +102,7 @@ async fn fetch_releases(st: State<'_, App>) -> Res<String> {
 fn cached_releases(st: State<App>) -> Option<String> { fs::read_to_string(st.cache.lock().unwrap().join("releases.json")).ok() }
 
 fn asset_path(st: &App, tag: &str, name: &str) -> Res<PathBuf> {
-    if !lordos_imager_core::valid_tag(tag) || !lordos_imager_core::valid_name(name) { return Err(code("admin.invalidArgument", "")); }
+    if !insaneos_imager_core::valid_tag(tag) || !insaneos_imager_core::valid_name(name) { return Err(code("admin.invalidArgument", "")); }
     Ok(st.cache.lock().unwrap().join(tag).join(name))
 }
 
@@ -239,9 +239,9 @@ async fn write_image(app: AppHandle, st: State<'_, App>, drive: drives::Drive, p
         let d = find_drive(&d)?;
         drives::unmount(&d).map_err(err)?;
         let mut dev = drives::open(&d).map_err(err)?;
-        eprintln!("lordos-imager: writing {} ({} bytes) to {} ({})", img.path.display(), img.raw_size, d.path, d.model);
+        eprintln!("insaneos-imager: writing {} ({} bytes) to {} ({})", img.path.display(), img.raw_size, d.path, d.model);
         let r = write::write_image(&img, &mut dev, d.size, listed, &cancel, |p| { let _ = app.emit("imager-progress", &p); });
-        match &r { Ok(o) => eprintln!("lordos-imager: written and verified, sha256 {}", o.sha256), Err(e) => eprintln!("lordos-imager: write failed: {e}") }
+        match &r { Ok(o) => eprintln!("insaneos-imager: written and verified, sha256 {}", o.sha256), Err(e) => eprintln!("insaneos-imager: write failed: {e}") }
         drop(dev);
         #[cfg(windows)]
         if r.is_err() { drives::release_locks(); }
@@ -252,7 +252,7 @@ async fn write_image(app: AppHandle, st: State<'_, App>, drive: drives::Drive, p
 /// The first-run file onto the card's boot partition (mounted for the user, then unmounted).
 #[tauri::command]
 async fn write_firstrun(drive: drives::Drive, text: String, name: String) -> Res<()> {
-    if name != "lordos-firstrun.txt" || text.len() > 65536 { return Err(code("admin.invalidArgument", "")); }
+    if name != "insaneos-firstrun.txt" || text.len() > 65536 { return Err(code("admin.invalidArgument", "")); }
     tauri::async_runtime::spawn_blocking(move || {
         // the drive as listed now, never the fields the page sent
         let d = find_drive(&drive)?;
@@ -306,7 +306,7 @@ fn clear_cache(st: State<App>) -> Res<()> {
         let n = e.file_name().to_string_lossy().to_string();
         let p = e.path();
         if n == "releases.json" || n.ends_with(".part") { let _ = fs::remove_file(&p); }
-        else if lordos_imager_core::valid_tag(&n) && p.is_dir() {
+        else if insaneos_imager_core::valid_tag(&n) && p.is_dir() {
             for f in fs::read_dir(&p).into_iter().flatten().flatten() { if f.path().is_file() { let _ = fs::remove_file(f.path()); } }
             let _ = fs::remove_dir(&p);
         }
@@ -327,9 +327,9 @@ fn main() {
             load_options, save_options, load_profiles, save_profiles, cache_size, clear_cache
         ])
         .setup(|app| {
-            if let Some(w) = app.get_webview_window("main") { let _ = w.set_title("LordOS Imager"); }
+            if let Some(w) = app.get_webview_window("main") { let _ = w.set_title("InsaneOS Imager"); }
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("LordOS Imager");
+        .expect("InsaneOS Imager");
 }

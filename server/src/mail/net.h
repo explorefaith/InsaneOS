@@ -1,8 +1,8 @@
-/* net.h — buffered connections with TLS for lord-maild (OpenSSL: lord-maild and lord-sessiond are
+/* net.h — buffered connections with TLS for insane-maild (OpenSSL: insane-maild and insane-sessiond are
  * the only binaries that link it, see docs/ARCHITECTURE.md).
  *
- * lord-maild never opens sockets itself (its seccomp profile forbids socket/connect): it asks
- * lord-server for a connection to host:port, lord-server checks that the endpoint belongs to a
+ * insane-maild never opens sockets itself (its seccomp profile forbids socket/connect): it asks
+ * insane-server for a connection to host:port, insane-server checks that the endpoint belongs to a
  * configured account and hands over an already connected TCP socket (SCM_RIGHTS). This file runs
  * TLS on top of that socket.
  *
@@ -10,8 +10,8 @@
  * sandbox) and the host name. A bad certificate is never accepted silently: the handshake fails
  * with the certificate's details, and only a fingerprint the user explicitly trusted in Mail
  * (stored in the account) lets that exact certificate through. */
-#ifndef LORD_MAIL_NET_H
-#define LORD_MAIL_NET_H
+#ifndef INSANE_MAIL_NET_H
+#define INSANE_MAIL_NET_H
 
 #include <stddef.h>
 #include <stdint.h>

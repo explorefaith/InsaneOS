@@ -136,7 +136,7 @@ int media_needs_cpu(void) { return rec != NULL; }
 
 int media_memfd_from_pixels(const uint32_t *px, int w, int h) {
     size_t n = (size_t)w * h * 4;
-    int fd = memfd_create("lordos-capture", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-capture", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0) return -1;
     if (ftruncate(fd, (off_t)n)) { close(fd); return -1; }
     void *m = mmap(NULL, n, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -274,7 +274,7 @@ int media_screenrec_start(MediaSrc *s, int fps) {
     media_capture_size(&W, &H);
     int slots = 3;
     size_t n = (size_t)W * H * 4 * slots;
-    int fd = memfd_create("lordos-screen", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-screen", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0 || ftruncate(fd, (off_t)n) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { if (fd >= 0) close(fd); return -1; }
     void *m = mmap(NULL, n, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (m == MAP_FAILED) { close(fd); return -1; }
@@ -304,7 +304,7 @@ int media_framerec_start(MediaSrc *s, int W, int H, int fps) {
     if (W < 16 || H < 16 || W > 8192 || H > 8192) return -1;
     int slots = 3;
     size_t n = (size_t)W * H * 4 * slots;
-    int fd = memfd_create("lordos-frames", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insaneos-frames", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0 || ftruncate(fd, (off_t)n) || fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL)) { if (fd >= 0) close(fd); return -1; }
     void *m = mmap(NULL, n, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (m == MAP_FAILED) { close(fd); return -1; }

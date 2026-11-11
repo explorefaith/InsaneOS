@@ -1,14 +1,14 @@
 // remotedirs.js — the listings Files shows of folders on slow file systems (a Cloud account, a Connect to Server or
 // SMB/NFS share), read off the interface's thread (fs.listAsync, server/src/fsasync.c) and kept between visits.
 //
-// Until 0.8.8.6 Files listed every folder with lord.fs.list on lord-server's only thread: deleting a file in an iCloud
+// Until 0.8.8.6 Files listed every folder with insane.fs.list on insane-server's only thread: deleting a file in an iCloud
 // folder, or going back to its parent, froze the whole desktop until rclone answered. Here:
 //   - get(dir) answers at once with what is known ({ entries, error, busy }) and lists the folder in the background
 //     the first time; a folder seen before shows its last listing while a new one comes (going back is instant);
 //   - refresh(dir) asks for a new listing; asked while one runs, one more follows it (never two at once per folder);
 //   - hide(paths) takes items off the shown listing at once while they are being deleted or moved to the Trash, and
 //     settle(paths) lists their folders again when that ends: they come back only if they are still there.
-// Pure logic (no React, no lord.*): `list(dir)` returns a Promise of entries, `onChange()` is called when an answer
+// Pure logic (no React, no insane.*): `list(dir)` returns a Promise of entries, `onChange()` is called when an answer
 // arrives. tests: server/tests/files_remote_test.mjs.
 
 const parentOf = (p) => { const i = p.lastIndexOf('/'); return i > 0 ? p.slice(0, i) : '/'; };

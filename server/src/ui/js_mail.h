@@ -1,9 +1,9 @@
-/* js_mail.h — lord.mail: Mail, Calendar, Contacts and Reminders via lord-maild (see js_mail.c). */
-#ifndef LORD_JS_MAIL_H
-#define LORD_JS_MAIL_H
+/* js_mail.h — insane.mail: Mail, Calendar, Contacts and Reminders via insane-maild (see js_mail.c). */
+#ifndef INSANE_JS_MAIL_H
+#define INSANE_JS_MAIL_H
 
 #include "quickjs.h"
 
-void js_mail_register(JSContext *c, JSValue lord);
+void js_mail_register(JSContext *c, JSValue insane);
 
 #endif

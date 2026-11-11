@@ -1,7 +1,7 @@
 // policy.js — reads the settings Insane OS writes for this extension (docs/VIDEO.md).
 //
 // Insane OS writes them as the browser's managed policy for this extension (Chromium:
-// /etc/chromium/policies/managed/lordos-video.json, "3rdparty" → "extensions" → this id), so the
+// /etc/chromium/policies/managed/insaneos-video.json, "3rdparty" → "extensions" → this id), so the
 // extension never touches the network or the user's files and nothing is reported anywhere.
 //
 //   mode       "auto" (default): hold back only the codecs this computer can't decode in hardware
@@ -12,7 +12,7 @@
 //
 // Without a policy (another distribution, or Insane OS hasn't written it yet) nothing is held back.
 /* global chrome, browser */
-var lordosVideo = (() => {
+var insaneosVideo = (() => {
   const api = typeof browser !== 'undefined' ? browser : chrome;
   const DEFAULTS = { mode: 'auto', autoLower: false, hwVp9: true, hwAv1: true, managed: false };
 

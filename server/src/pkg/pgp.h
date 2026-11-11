@@ -1,8 +1,8 @@
 /* pgp.h — what's needed from OpenPGP (RFC 4880) to verify a repository's InRelease:
  * binary or armored keyrings (.gpg/.pgp/.asc), v4 RSA or EdDSA (Ed25519) signatures with SHA-256 or
  * SHA-512, cleartext-signed messages and detached signatures (the makers' checksum lists Machines downloads). Our own code (no gpgv or sqv). */
-#ifndef LORD_PKG_PGP_H
-#define LORD_PKG_PGP_H
+#ifndef INSANE_PKG_PGP_H
+#define INSANE_PKG_PGP_H
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,4 +1,4 @@
-/* lanhelper.c — lord-lan: reads what the local network answers, for Files → Network (see lanproto.h
+/* lanhelper.c — insane-lan: reads what the local network answers, for Files → Network (see lanproto.h
  * and docs/FILES.md). No sockets of its own and no files: sandbox_apply_helper before anything is
  * read. Everything that comes in is untrusted; a hostile machine on the LAN can at most bring this
  * process down. */
@@ -360,11 +360,11 @@ int main(void) {
     setrlimit(RLIMIT_CORE, &nocore);
     signal(SIGPIPE, SIG_IGN);
     struct stat st;
-    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "lord-lan: started by lord-server only\n"); return 2; }
+    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "insane-lan: started by insane-server only\n"); return 2; }
     cache = calloc(1, sizeof *cache);
     if (!cache) return 3;
     SandboxHelperCfg cfg = {
-        .name = "lordos-lan",            /* cgroup scope lordos-lan.scope (lord-sessiond creates it) */
+        .name = "insaneos-lan",            /* cgroup scope insaneos-lan.scope (insane-sessiond creates it) */
         .ro_paths = NULL,
         .extra_syscalls = (int[]){ -1 },
         .allow_ioctl_classes = 0,
@@ -384,7 +384,7 @@ int main(void) {
         case LQ_MDNS: if (m.json) mdns_in(m.json, m.len); break;
         case LQ_MDNS_END: mdns_end(m.h.id); break;
         case LQ_SMB: {
-            /* the address only names the server in the protocol's own paths; lord-server sends it */
+            /* the address only names the server in the protocol's own paths; insane-server sends it */
             char ip[16] = "";
             if (fd >= 0 && m.json && m.len < sizeof ip) { memcpy(ip, m.json, m.len); ip[m.len] = 0; smb_job(m.h.id, ip, fd); }
             else fail(m.h.id, "bad-request");

@@ -72,9 +72,9 @@
         {
           "id": "server",
           "label": {
-            "en": "lord-server",
-            "es": "lord-server",
-            "pt": "lord-server"
+            "en": "insane-server",
+            "es": "insane-server",
+            "pt": "insane-server"
           },
           "sub": {
             "en": "Builds the plan and checks each object again",
@@ -86,9 +86,9 @@
         {
           "id": "helper",
           "label": {
-            "en": "lord-clean",
-            "es": "lord-clean",
-            "pt": "lord-clean"
+            "en": "insane-clean",
+            "es": "insane-clean",
+            "pt": "insane-clean"
           },
           "sub": {
             "en": "Sandboxed; reads only",
@@ -142,9 +142,9 @@
         }
       ],
       "caption": {
-        "en": "A scan only reads. The plan and its execution stay in lord-server.",
-        "es": "Un análisis solo lee. El plan y su ejecución quedan en lord-server.",
-        "pt": "Uma análise só lê. O plano e sua execução ficam no lord-server."
+        "en": "A scan only reads. The plan and its execution stay in insane-server.",
+        "es": "Un análisis solo lee. El plan y su ejecución quedan en insane-server.",
+        "pt": "Uma análise só lê. O plano e sua execução ficam no insane-server."
       }
     }
   ],

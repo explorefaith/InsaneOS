@@ -1,25 +1,25 @@
 // app-host.js — the «host» that runs inside the process of an isolated .lpk app
-// (lord-server --app <id>, see server/src/app/appclient.c). It brings React, the runtime and the SDK
-// (with the broker's `lord` object, whose fs/clipboard/perms are checked by lord-server), loads the
-// package's app.js and draws it. The app uses `@lordos/sdk` as always.
+// (insane-server --app <id>, see server/src/app/appclient.c). It brings React, the runtime and the SDK
+// (with the broker's `insane` object, whose fs/clipboard/perms are checked by insane-server), loads the
+// package's app.js and draws it. The app uses `@insaneos/sdk` as always.
 //
-// Theme, language and direction (RTL) come from lord-server: the state at startup
-// (lord.broker.state()) and then live (__lordBrokerEvent), so the app looks like the rest of the
+// Theme, language and direction (RTL) come from insane-server: the state at startup
+// (insane.broker.state()) and then live (__insaneBrokerEvent), so the app looks like the rest of the
 // desktop and changes with it (light/dark mode, accent, wallpaper, language).
 //
 // Several windows: the app's windows live in the SDK's window store of THIS process (wm.open with
 // the app's own id, wm.close, wm.setTitle…). Each one is rendered as a child of the React root and
-// becomes its own Wayland toplevel (lord.appWindows, one surface per window), so the theme frames
+// becomes its own Wayland toplevel (insane.appWindows, one surface per window), so the theme frames
 // it, the Dock groups it under the app and the compositor routes focus and input to it.
 import * as React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
-import * as runtime from '@lordos/runtime';
-import * as sdk from '@lordos/sdk';
+import * as runtime from '@insaneos/runtime';
+import * as sdk from '@insaneos/sdk';
 
-// Shared modules the app asks for with globalThis.__lordos.require (as in the theme).
-const shared = { react: React, 'react/jsx-runtime': jsxRuntime, '@lordos/runtime': runtime, '@lordos/sdk': sdk };
-globalThis.__lordos = globalThis.__lordos || {};
-globalThis.__lordos.require = (name) => {
+// Shared modules the app asks for with globalThis.__insaneos.require (as in the theme).
+const shared = { react: React, 'react/jsx-runtime': jsxRuntime, '@insaneos/runtime': runtime, '@insaneos/sdk': sdk };
+globalThis.__insaneos = globalThis.__insaneos || {};
+globalThis.__insaneos.require = (name) => {
   if (!(name in shared)) throw new Error(`module not available: ${name}`);
   return shared[name];
 };
@@ -45,17 +45,17 @@ function applyState(st) {
   applyLocale(st.locale);
 }
 
-applyState(lord.broker.state());          // current session state, before the first frame
+applyState(insane.broker.state());          // current session state, before the first frame
 
 // ---- the app's windows ----
-const APP = lord.appId;
-const AW = lord.appWindows;              // undefined with an older lord-server: one window
+const APP = insane.appId;
+const AW = insane.appWindows;              // undefined with an older insane-server: one window
 const keys = new Map([[APP, 0]]);        // window id → surface key in C (0 = main window)
 const idOfKey = (key) => { for (const [id, k] of keys) if (k === key) return id; return null; };
 
 function readManifest() {
   try {
-    const b = new Uint8Array(lord.apps.packageFile(APP, 'manifest.json'));
+    const b = new Uint8Array(insane.apps.packageFile(APP, 'manifest.json'));
     let s = '';
     for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
     return JSON.parse(decodeURIComponent(escape(s)));
@@ -65,13 +65,13 @@ const manifest = readManifest();
 
 let mod = null;
 function AppMain() {
-  if (!mod) mod = lord.loadApp();         // evaluates app.js once → { default, Icon }
+  if (!mod) mod = insane.loadApp();         // evaluates app.js once → { default, Icon }
   if (!mod || typeof mod.default !== 'function') return h(runtime.Text, { style: { color: '#fff', padding: 20 } }, 'The app does not export a component');
   return h(mod.default);
 }
 sdk.registerBuiltinApp({ id: APP, name: APP, builtin: true, size: Array.isArray(manifest.size) ? manifest.size : [640, 420], Component: AppMain });
 wm.open(APP);                             // the main window (surface key 0, created in C)
-// a packaged app's companion starts with it. In a home .lpk the same manifest is ignored: lord-server says no.
+// a packaged app's companion starts with it. In a home .lpk the same manifest is ignored: insane-server says no.
 if (manifest.companion) setTimeout(() => { sdk.companion.start(manifest); }, 0);
 
 // keep the C toplevels in step with the window store (open, close, title)
@@ -96,13 +96,13 @@ function attach(id, inst) {
   if (AW && inst && k != null) AW.attach(k, inst.id);
 }
 
-globalThis.__lordBrokerEvent = (kind, data) => {
+globalThis.__insaneBrokerEvent = (kind, data) => {
   if (kind === 'theme' && data) tokens.set(data);
   else if (kind === 'locale') applyLocale(data);
   else if (kind === 'state') applyState(data);
   else if (kind === 'revoke' && data && data.perm) {
     // the user revoked a permission: turn the indicator off and tell the app
-    try { sdk.markDeviceUse(lord.appId, data.perm, false); } catch (e) { /* */ }
+    try { sdk.markDeviceUse(insane.appId, data.perm, false); } catch (e) { /* */ }
     try { for (const fn of revokeListeners) fn(data.perm); } catch (e) { console.error('revoke listener:', e?.message || e); }
   }
   else if (kind === 'menu' && data && data.item) { try { sdk.appMenuClick(data.item); } catch (e) { /* */ } }
@@ -115,7 +115,7 @@ globalThis.__lordBrokerEvent = (kind, data) => {
   }
   else if (kind === 'window' && data && data.new) wm.open(APP, { new: true });   // Dock → «New window»
   else if (kind === 'open' && data && data.args && typeof data.args === 'object') {
-    // the session opened this app with args (sdk/packages.js isolatedApp → lord.broker.openArgs):
+    // the session opened this app with args (sdk/packages.js isolatedApp → insane.broker.openArgs):
     // a notification's "Open", the Dock's "New message", a link from another system app
     const args = data.args;
     if (data.new || Object.keys(args).length) wm.open(APP, data.new ? { new: true, args } : { args });
@@ -129,7 +129,7 @@ globalThis.__lordBrokerEvent = (kind, data) => {
   }
 };
 const revokeListeners = new Set();
-globalThis.__lordOnRevoke = (fn) => { revokeListeners.add(fn); return () => revokeListeners.delete(fn); };
+globalThis.__insaneOnRevoke = (fn) => { revokeListeners.add(fn); return () => revokeListeners.delete(fn); };
 
 function Root() {
   const tk = useStore(tokens);

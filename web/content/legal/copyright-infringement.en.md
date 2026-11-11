@@ -1,4 +1,4 @@
-We respect the rights of authors, and we expect everyone who contributes to Insane OS to do the same. If you believe that something on lordos.org, in a Insane OS release or in the Insane OS repository infringes your copyright, tell us and we will look at it.
+We respect the rights of authors, and we expect everyone who contributes to Insane OS to do the same. If you believe that something on insaneos.org, in a Insane OS release or in the Insane OS repository infringes your copyright, tell us and we will look at it.
 
 ## The law that applies
 
@@ -9,7 +9,7 @@ Insane OS is run from Argentina by iPERFEX (Pablo Miranda and Federico Pereira),
 Write to us through [our contact form](https://www.iperfex.com/contacto/?lang=en) with **"Copyright"** in the subject, and include:
 
 1. **The work:** what you believe is being infringed (for example a picture, a text, a font or a piece of code), and proof or a clear statement that you own it or act for the owner.
-2. **The material:** exactly what infringes it and where it is: the URL on lordos.org, the release and file name, or the path in the repository.
+2. **The material:** exactly what infringes it and where it is: the URL on insaneos.org, the release and file name, or the path in the repository.
 3. **Your contact details:** your name, and an email address and country where we can reach you.
 4. **Good faith:** a statement that you believe in good faith that the use is not authorised by the owner, its representative or the law.
 5. **Accuracy:** a statement that the information in your notice is accurate and that you are the owner or authorised to act for them.

@@ -2,8 +2,8 @@
  * output and the raw GPT, choosing the region, aligning it, refusing, and proving afterwards that
  * nothing but one new table entry changed. No I/O here: tests/freespace_test.c feeds it hostile input.
  * The part that touches a disk is freepart.c. */
-#ifndef LORD_FREESPACE_H
-#define LORD_FREESPACE_H
+#ifndef INSANE_FREESPACE_H
+#define INSANE_FREESPACE_H
 
 #include <stddef.h>
 #include <stdint.h>

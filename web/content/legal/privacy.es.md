@@ -1,4 +1,4 @@
-Insane OS no tiene cuentas, ni publicidad, ni rastreo, ni en el sitio ni en la distribución. Nadie vende, comparte ni guarda tus datos, porque nunca los recolectamos. Esta política tiene dos partes: el **sitio lordos.org** y la **distribución Insane OS** que instalás en tu computadora.
+Insane OS no tiene cuentas, ni publicidad, ni rastreo, ni en el sitio ni en la distribución. Nadie vende, comparte ni guarda tus datos, porque nunca los recolectamos. Esta política tiene dos partes: el **sitio insaneos.org** y la **distribución Insane OS** que instalás en tu computadora.
 
 ## Parte 1: el sitio
 
@@ -8,14 +8,14 @@ El sitio es un conjunto de páginas estáticas. **No usa cookies** y guarda solo
 
 | Clave | Qué contiene | Para qué |
 |---|---|---|
-| `lordos-theme` | `light` o `dark` (nada si usás el automático) | para mostrar el tema que elegiste |
-| `lordos-lang-seen` | `1` | para que la sugerencia "esta página también está en tu idioma" aparezca una sola vez |
+| `insaneos-theme` | `light` o `dark` (nada si usás el automático) | para mostrar el tema que elegiste |
+| `insaneos-lang-seen` | `1` | para que la sugerencia "esta página también está en tu idioma" aparezca una sola vez |
 
 Nunca salen de tu navegador y nosotros no podemos leerlos. Podés borrarlos cuando quieras desde la configuración de datos de sitios de tu navegador. Mirá el [Cookies y estadísticas](/legal/cookies-and-statistics/).
 
 ### Sin estadísticas, sin publicidad, sin código de terceros
 
-El sitio no carga estadísticas de visitas, ni publicidad, ni widgets de redes sociales, ni fuentes o scripts de otros servidores: todo lo que necesita se sirve desde lordos.org.
+El sitio no carga estadísticas de visitas, ni publicidad, ni widgets de redes sociales, ni fuentes o scripts de otros servidores: todo lo que necesita se sirve desde insaneos.org.
 
 ### Registros del servidor
 
@@ -55,7 +55,7 @@ La zona horaria nunca se deduce a partir de la red. Nada de esta tabla llega al 
 
 Estas conexiones se hacen solo después de una acción tuya:
 
-- **Tienda y actualizaciones:** las listas de paquetes y los paquetes vienen de los servidores espejo de Debian que tengas en tus fuentes de apt (`deb.debian.org` y `security.debian.org` por defecto; en la Raspberry Pi, el kernel y el firmware vienen de `archive.raspberrypi.com`). La Tienda los actualiza solo cuando tocás **Buscar actualizaciones** (en la Tienda o en Ajustes → Actualizaciones) o instalás algo, y verifica cada lista con las firmas de Debian. Las actualizaciones de Insane OS vienen de su repositorio firmado en `lordos.org/apt`, que se consulta al mismo tiempo. Desde 0.8.5 ese repositorio también trae el banner destacado de la Tienda (solo se toma de una fuente cuyo índice firmado dice que es de Insane OS, y se controla contra sus hashes) y la lista de apps de Tienda → Inteligencia Artificial; las fuentes `https://` se descargan por HTTPS. Las apps `.lpk` propias de Insane OS se instalan desde archivos que vos elegís; no hay un catálogo de apps `.lpk` en línea.
+- **Tienda y actualizaciones:** las listas de paquetes y los paquetes vienen de los servidores espejo de Debian que tengas en tus fuentes de apt (`deb.debian.org` y `security.debian.org` por defecto; en la Raspberry Pi, el kernel y el firmware vienen de `archive.raspberrypi.com`). La Tienda los actualiza solo cuando tocás **Buscar actualizaciones** (en la Tienda o en Ajustes → Actualizaciones) o instalás algo, y verifica cada lista con las firmas de Debian. Las actualizaciones de Insane OS vienen de su repositorio firmado en `insaneos.org/apt`, que se consulta al mismo tiempo. Desde 0.8.5 ese repositorio también trae el banner destacado de la Tienda (solo se toma de una fuente cuyo índice firmado dice que es de Insane OS, y se controla contra sus hashes) y la lista de apps de Tienda → Inteligencia Artificial; las fuentes `https://` se descargan por HTTPS. Las apps `.lpk` propias de Insane OS se instalan desde archivos que vos elegís; no hay un catálogo de apps `.lpk` en línea.
 - **Apps desde los repositorios de sus fabricantes** (desde 0.8.5): instalar una app de Tienda → Inteligencia Artificial o Tienda → Comerciales cuyo fabricante tiene su propio repositorio primero te dice de quién es el repositorio que agrega y la huella de su clave, y después lo agrega, así que desde ese momento la Tienda y apt también descargan las listas de paquetes de ese fabricante. Quitar la app quita ese repositorio, salvo que lo use otra app instalada. A qué se conecta la app misma depende de su fabricante.
 - **Paquetes de idioma:** agregar un idioma en Ajustes puede instalar sus diccionarios y fuentes desde los mismos servidores espejo de Debian.
 - **Impresoras y escáneres:** Ajustes → Impresoras y escáneres le pregunta a la red local (mDNS) qué impresoras y escáneres hay, y habla solo con direcciones locales.
@@ -67,7 +67,7 @@ Estas conexiones se hacen solo después de una acción tuya:
 - **Wi-Fi, Bluetooth y VPN:** solo las redes, los dispositivos y los servidores VPN que elijas.
 - **El escritorio remoto** está **desactivado** por defecto (puerto 5673 cerrado). Solo escucha después de que lo activás en Ajustes → Compartir. En la Raspberry Pi, el escritorio remoto y el servidor SSH también quedan desactivados salvo que pongas un archivo interruptor `remote-desktop` o `ssh` en la partición de arranque.
 - **Navegadores web y otras apps:** Firefox ESR, Chromium y cualquier app de Linux que instales son programas aparte, de sus propios proyectos. Hacen las conexiones que permita su configuración, según sus propias políticas de privacidad. Las apps `.lpk` aisladas llegan a la red solo si les das el permiso, y el firewall por app muestra y controla a qué se conecta cada una.
-- **El script de instalación para Debian** (`curl -fsSL https://lordos.org/install.sh | sh`) se conecta solo a `api.github.com` (para encontrar la última versión), a `github.com` (para descargarla junto con su firma) y a tus servidores espejo de apt. No envía telemetría.
+- **El script de instalación para Debian** (`curl -fsSL https://insaneos.org/install.sh | sh`) se conecta solo a `api.github.com` (para encontrar la última versión), a `github.com` (para descargarla junto con su firma) y a tus servidores espejo de apt. No envía telemetría.
 
 ### Lo que queda en tu computadora
 

@@ -18,7 +18,7 @@
   "cooling.noneWarnTitle": "Sin refrigeración la placa se frena sola",
   "cooling.overclock": "Overclock suave",
   "cooling.overclockHint": "2,6 GHz en lugar de 2,4 GHz, sin más voltaje. Solo con ventilador.",
-  "cooling.overclockWarn": "Si la placa no arranca, abrí la partición de arranque de la tarjeta en otra computadora y borrá el bloque lordos-firstrun de config.txt.",
+  "cooling.overclockWarn": "Si la placa no arranca, abrí la partición de arranque de la tarjeta en otra computadora y borrá el bloque insaneos-firstrun de config.txt.",
   "cooling.overclockWarnTitle": "No todas las placas son estables con overclock",
   "cooling.p.balanced": "Equilibrado",
   "cooling.p.balancedHint": "El ventilador arranca a 55 °C y acelera con la temperatura. El predeterminado.",

@@ -4,8 +4,8 @@
  * with kana). The fonts in src/bench/fonts are subset to exactly these characters by
  * tools/gen-lbfonts.py, which reads this file: change a paragraph and run it again. Plain UTF-8 literals,
  * one per line, no escapes; they are data, not interface text (i18n-ok). */
-#ifndef LORD_BENCH_LBTEXT_H
-#define LORD_BENCH_LBTEXT_H
+#ifndef INSANE_BENCH_LBTEXT_H
+#define INSANE_BENCH_LBTEXT_H
 
 enum { LB_PARA_LATIN, LB_PARA_ARABIC, LB_PARA_DEVANAGARI, LB_PARA_THAI, LB_PARA_CJK, LB_PARA_COUNT };
 

@@ -1,15 +1,15 @@
-/* mailc.h — lord-server's side of lord-maild (see proto.h and docs/MAIL.md).
+/* mailc.h — insane-server's side of insane-maild (see proto.h and docs/MAIL.md).
  *
- * One lord-maild per session, started on first use with a fixed path (next to this binary), no
+ * One insane-maild per session, started on first use with a fixed path (next to this binary), no
  * arguments and a minimal environment. A thread of ours talks to it, so the compositor never
- * waits: results and events queue up and JS reads them with mail_poll() (lord.mail.poll).
+ * waits: results and events queue up and JS reads them with mail_poll() (insane.mail.poll).
  *
- * This side also owns the network policy: lord-maild cannot open sockets, and asks us for a
+ * This side also owns the network policy: insane-maild cannot open sockets, and asks us for a
  * connection to host:port. We connect only to the servers of the configured accounts (read from
- * ~/.config/lordos/mail/accounts.json, which only lord.mail.saveConfig can write) and, for ten
+ * ~/.config/insaneos/mail/accounts.json, which only insane.mail.saveConfig can write) and, for ten
  * minutes, to the image hosts of a message whose remote images the user chose to load. */
-#ifndef LORD_MAIL_MAILC_H
-#define LORD_MAIL_MAILC_H
+#ifndef INSANE_MAIL_MAILC_H
+#define INSANE_MAIL_MAILC_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -22,23 +22,23 @@ int   mail_start(void);                     /* 0 if running (starts it if needed
 int   mail_request(const char *json, size_t len, int *fds, int nfds);
 char *mail_poll(void);                      /* JSON array of events (malloc) or NULL */
 int   mail_pending(void);
-/* Re-reads the accounts file, rebuilds the allowed endpoints and tells lord-maild. */
+/* Re-reads the accounts file, rebuilds the allowed endpoints and tells insane-maild. */
 void  mail_reload_config(void);
 /* Validates (JSON object, ≤ MAIL_CONFIG_MAX, no "password"/"secret" in an account) and writes the
  * accounts file (0600, atomic), then reloads it. 0, 1 if refused, 2 if it could not be written. */
 int   mail_save_config(const char *json, size_t len);
 /* Remote images of one message: allow these http(s) hosts for a while. */
 void  mail_allow_hosts(const char *const *urls, int n, int seconds);
-const char *mail_config_path(void);         /* ~/.config/lordos/mail/accounts.json */
-const char *mail_cache_path(void);          /* ~/.local/share/lordos/mail */
+const char *mail_config_path(void);         /* ~/.config/insaneos/mail/accounts.json */
+const char *mail_cache_path(void);          /* ~/.local/share/insaneos/mail */
 
-/* Decoded images (ARGB32 premultiplied) returned by lord-maild. */
+/* Decoded images (ARGB32 premultiplied) returned by insane-maild. */
 const uint32_t *mail_image_lock(int handle, int *w, int *h);
 void  mail_image_unlock(void);
 void  mail_image_release(int handle);
 
 /* ---- isolated system apps (Mail, Calendar, Contacts, Reminders in their own process) ----
- * Each app process that uses lord-maild through the broker (sec/brokermail.c) is an "owner":
+ * Each app process that uses insane-maild through the broker (sec/brokermail.c) is an "owner":
  * replies to its requests and its decoded images belong to it alone, and broadcast events reach it
  * according to its mask: MAIL_EV_ALL (Mail) or MAIL_EV_PIM (only pim-changed/ready; no senders or
  * subjects for Calendar, Contacts and Reminders). Owner 0 is the session's JavaScript. */
@@ -55,7 +55,7 @@ int   mail_image_fd(int owner, int handle, int *w, int *h);
 void  mail_image_release_as(int owner, int handle);
 
 /* Appends one event {"id","type","data"} to a queue (used by the reader thread; public for the
- * test). data is lord-maild's JSON: re-validated (nesting up to HTML_JSON_DEPTH and more), replaced
+ * test). data is insane-maild's JSON: re-validated (nesting up to HTML_JSON_DEPTH and more), replaced
  * by {"error":"bad-json","detail":…} if it isn't JSON, and by {"error":"too-big"} if the queue
  * would pass its size limit; the queue always stays valid JSON. */
 void  mail_ev_append(JBuf *dst, int id, const char *type, const char *data, size_t dlen);

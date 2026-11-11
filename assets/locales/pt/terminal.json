@@ -375,7 +375,7 @@
   "claude.costDetail": "cerca de ${cost} (preço de tabela)",
   "claude.ask": "Mostrar nesta barra o contexto e os limites do plano do Claude Code (5 horas e semana)?",
   "claude.askDisconnect": "Parar de mostrar nesta barra o contexto e os limites do Claude Code?",
-  "claude.detail": "O Insane OS adiciona o lord-claude-status antes do comando da sua status line em {file}; o que sua status line mostra não muda. O arquivo anterior fica como settings.json.lordos-backup.",
+  "claude.detail": "O Insane OS adiciona o insane-claude-status antes do comando da sua status line em {file}; o que sua status line mostra não muda. O arquivo anterior fica como settings.json.insaneos-backup.",
   "claude.detailDisconnect": "O comando da sua status line em {file} volta a ser como era.",
   "claude.connectButton": "Conectar",
   "claude.disconnect": "Desconectar",

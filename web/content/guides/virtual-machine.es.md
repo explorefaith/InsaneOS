@@ -1,4 +1,4 @@
-Insane OS viene como una máquina virtual lista para amd64: `lordos-<versión>-amd64.ova`. Ya está instalada, así que no hay instalador: la abrís en tu hipervisor, la arrancás y creás tu cuenta.
+Insane OS viene como una máquina virtual lista para amd64: `insaneos-<versión>-amd64.ova`. Ya está instalada, así que no hay instalador: la abrís en tu hipervisor, la arrancás y creás tu cuenta.
 
 ## Qué necesitás
 
@@ -11,7 +11,7 @@ Todos los números de cada imagen están en [Requisitos del sistema](/es/require
 
 ## 1. Descargala y comprobala
 
-Descargá `lordos-<versión>-amd64.ova`, `SHA256SUMS` y `SHA256SUMS.sig` de la [última versión](https://github.com/lordbasex/Insane OS/releases). En la carpeta con los archivos:
+Descargá `insaneos-<versión>-amd64.ova`, `SHA256SUMS` y `SHA256SUMS.sig` de la [última versión](https://github.com/insaneos/Insane OS/releases). En la carpeta con los archivos:
 
 ```sh
 shasum -a 256 -c SHA256SUMS --ignore-missing
@@ -78,4 +78,4 @@ Con la máquina apagada, en su configuración:
 - **Pantalla negra o ventana chica:** revisá el controlador de pantalla (arriba) y dale a la máquina al menos 4 GB de memoria.
 - **Va lenta:** fijate que tenga 4 CPU o más y que la virtualización por hardware esté activada en el firmware de la computadora.
 
-Para reportar un error, corré `lordos-issue` en la Terminal de la máquina y adjuntá el archivo que escribe al [issue](https://github.com/lordbasex/Insane OS/issues).
+Para reportar un error, corré `insaneos-issue` en la Terminal de la máquina y adjuntá el archivo que escribe al [issue](https://github.com/insaneos/Insane OS/issues).

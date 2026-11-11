@@ -5,7 +5,7 @@
 import {
   View, Text, useTheme, useLocale, useSettings, Toggle, Segmented, Button, useStore, permsRev, packages, getApp, appName, useLauncherApps,
   notifyPrefs, appNotifyPrefs, setAppNotifyPrefs, dndActive, notify, direction,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useState } from 'react';
 import { GroupBox, SettingRow, PopUp, Note, Stack, TimeField } from './ui.jsx';
 

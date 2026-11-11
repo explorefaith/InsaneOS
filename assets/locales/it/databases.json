@@ -5,7 +5,7 @@
   "quickHint": "Si connette una volta; resta in Recenti, non nei preferiti",
   "favorites": "PREFERITI",
   "recent": "RECENTI",
-  "unavailable": "L’assistente dei database (lord-sql) non è installato su questo sistema, quindi Database non può ancora connettersi. I preferiti e l’importazione funzionano comunque.",
+  "unavailable": "L’assistente dei database (insane-sql) non è installato su questo sistema, quindi Database non può ancora connettersi. I preferiti e l’importazione funzionano comunque.",
   "later": "Arriva in una prossima versione di Database.",
   "loading": "Caricamento…",
   "cancel": "Annulla",
@@ -432,7 +432,7 @@
     "one": "{count} voce dalla connessione alle {time} · il registro resta in memoria e si cancella alla disconnessione",
     "other": "{count} voci dalla connessione alle {time} · il registro resta in memoria e si cancella alla disconnessione"
   },
-  "err.unavailable": "L’assistente dei database (lord-sql) non è installato o non riesce ad avviarsi.",
+  "err.unavailable": "L’assistente dei database (insane-sql) non è installato o non riesce ad avviarsi.",
   "err.notfound": "Quel preferito non è più salvato. Salvalo di nuovo e connettiti.",
   "err.dns": "Il nome del server non è stato trovato. {message}",
   "err.connect": "Il server non ha accettato la connessione: controlla l’host, la porta e la rete. {message}",

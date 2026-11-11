@@ -6,7 +6,7 @@
  *   - real KDBX vaults (gen-kdbx.sh/gen-kdbx.py on VM 116): kx3-aeskdf.kdbx (KeePassXC
  *     2.7.10, KDBX 3.1, AES-256 + AES-KDF, Salsa20 inner stream) and kx4-*.kdbx (pykeepass 4.2.0,
  *     KDBX 4.0: AES/Argon2d, ChaCha20/Argon2id + binary key file, AES/Argon2id + XML 2.0
- *     key file, ChaCha20/AES-KDF). The password for all of them is "lordos-prueba".
+ *     key file, ChaCha20/AES-KDF). The password for all of them is "insaneos-prueba".
  * Also: round trip of our own CSV, KDBX with a wrong password, tampered and truncated, and
  * thousands of mutations (cuts and changed bytes) of each sample, with ASan/UBSan if the
  * compiler has them. Measures the 10,000-entry CSV and unlocking each KDBX. */
@@ -22,7 +22,7 @@
 #include <time.h>
 
 #define DIR "tests/import/"
-#define PW "lordos-prueba"
+#define PW "insaneos-prueba"
 
 static int fails, total;
 static void check(int ok, const char *what) { total++; if (!ok) { fails++; printf("FAIL: %s\n", what); } }
@@ -172,7 +172,7 @@ static void test_roundtrip(void) {
     char *csv = NULL;
     size_t n = 0;
     check(exp_csv(&a, &csv, &n) == 0, "export our own CSV");
-    check(imp_detect((uint8_t *)csv, n, NULL) == IMP_LORD_CSV, "detect our own CSV");
+    check(imp_detect((uint8_t *)csv, n, NULL) == IMP_INSANE_CSV, "detect our own CSV");
     check(imp_parse(0, (uint8_t *)csv, n, NULL, NULL, 0, &b) == 0 && b.n == a.n, "read our own CSV back");
     int same = 1;
     for (int i = 0; i < a.n && i < b.n; i++) {
@@ -365,7 +365,7 @@ static void fuzz(void) {
                 kdbx_keyfile_key(d, len, k);
             }
             ImpList l;
-            for (int kind = 0; kind <= (kdbx ? 0 : IMP_LORD_CSV); kind += (kdbx ? 1 : 1)) {
+            for (int kind = 0; kind <= (kdbx ? 0 : IMP_INSANE_CSV); kind += (kdbx ? 1 : 1)) {
                 if (kind == IMP_KDBX && !kdbx) continue;
                 int r = imp_parse(kind, d, len, PW, NULL, 0, &l);
                 runs++;

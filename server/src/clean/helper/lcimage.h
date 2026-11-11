@@ -1,6 +1,6 @@
 /* lcimage.h — see lcimage.c. */
-#ifndef LORD_CLEAN_IMAGE_H
-#define LORD_CLEAN_IMAGE_H
+#ifndef INSANE_CLEAN_IMAGE_H
+#define INSANE_CLEAN_IMAGE_H
 
 #include <stdint.h>
 

@@ -1,4 +1,4 @@
-/* js.c — embedded QuickJS. Exposes the global `lord` object (create/modify nodes) and
+/* js.c — embedded QuickJS. Exposes the global `insane` object (create/modify nodes) and
  * provides setTimeout, requestAnimationFrame, console and performance, which React needs. */
 #include "../app/apphost_bc.h"
 #include <unistd.h>
@@ -42,7 +42,7 @@
 #include "../sec/codesig.h"
 #include "ui.h"
 #include "../term/term.h"
-#include "lord_version.h"           /* build/gen: version, channel and build (Makefile) */
+#include "insane_version.h"           /* build/gen: version, channel and build (Makefile) */
 
 #include <libgen.h>
 #include <stdio.h>
@@ -91,7 +91,7 @@ static Node *arg_node(JSContext *c, JSValueConst v) {
     return node_get(id);
 }
 
-/* ---- native functions: lord.* ---- */
+/* ---- native functions: insane.* ---- */
 
 static JSValue f_create_node(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -229,7 +229,7 @@ static JSValue f_set_prop(JSContext *c, JSValueConst this_val, int argc, JSValue
         if (s) s->node = n->id;
         node_invalidate(n);
     } else if (n && key && !strcmp(key, "media") && n->type == NODE_MEDIA) {
-        int32_t id = 0;                     /* lord.media source (video, photo, screenshot, camera) */
+        int32_t id = 0;                     /* insane.media source (video, photo, screenshot, camera) */
         if (JS_IsNumber(argv[2])) JS_ToInt32(c, &id, argv[2]);
         js_media_node(n, id);
         node_invalidate(n);
@@ -321,7 +321,7 @@ static JSValue f_stats(JSContext *c, JSValueConst this_val, int argc, JSValueCon
     return o;
 }
 
-static const JSCFunctionListEntry lord_funcs[] = {
+static const JSCFunctionListEntry insane_funcs[] = {
     JS_CFUNC_DEF("createNode", 1, f_create_node),
     JS_CFUNC_DEF("setText", 2, f_set_text),
     JS_CFUNC_DEF("setStyle", 3, f_set_style),
@@ -369,7 +369,7 @@ static JSValue call_global(const char *name, int argc, JSValueConst *argv) {
 /* The globals called on every pass of the main loop: their atoms are made once per runtime (the
  * function is still looked up on each call, so the recovery screen's replacements are the ones run) */
 enum { HOT_TICK, HOT_WANTS_FRAME, HOT_FRAME, HOT_N };
-static const char *const hot_name[HOT_N] = { "__lordTick", "__lordWantsFrame", "__lordFrame" };
+static const char *const hot_name[HOT_N] = { "__insaneTick", "__insaneWantsFrame", "__insaneFrame" };
 static JSAtom hot_atom[HOT_N];
 static JSRuntime *hot_rt;
 
@@ -395,7 +395,7 @@ static char *load_code(const char *path, size_t *len, int *refused) {
     return src;
 }
 
-/* A new context with the whole `lord` object of a session (or of the login screen). */
+/* A new context with the whole `insane` object of a session (or of the login screen). */
 static void session_context(void) {
     rt = JS_NewRuntime();
     JS_SetMemoryLimit(rt, 256u << 20);
@@ -403,46 +403,46 @@ static void session_context(void) {
     ctx = JS_NewContext(rt);
 
     JSValue g = JS_GetGlobalObject(ctx);
-    JSValue lord = JS_NewObject(ctx);
-    JS_SetPropertyFunctionList(ctx, lord, lord_funcs, sizeof lord_funcs / sizeof lord_funcs[0]);
+    JSValue insane = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, insane, insane_funcs, sizeof insane_funcs / sizeof insane_funcs[0]);
     JSValue screen = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, screen, "width", JS_NewFloat64(ctx, ui.width));
     JS_SetPropertyStr(ctx, screen, "height", JS_NewFloat64(ctx, ui.height));
     set_screen_displays(screen);
-    JS_SetPropertyStr(ctx, lord, "screen", screen);
-    JS_SetPropertyStr(ctx, lord, "version", JS_NewString(ctx, LORD_VERSION));
+    JS_SetPropertyStr(ctx, insane, "screen", screen);
+    JS_SetPropertyStr(ctx, insane, "version", JS_NewString(ctx, INSANE_VERSION));
     js_sys_init();
-    js_sys_register(ctx, lord);
-    js_term_register(ctx, lord);
-    js_pkg_register(ctx, lord);
-    js_sound_register(ctx, lord);
+    js_sys_register(ctx, insane);
+    js_term_register(ctx, insane);
+    js_pkg_register(ctx, insane);
+    js_sound_register(ctx, insane);
     js_wasm_register(ctx, g);           /* the WebAssembly global (our own interpreter, src/wasm) */
-    js_net_register(ctx, lord);
-    js_monitor_register(ctx, lord, js_sys_assets());   /* lord.monitor (app Monitor) */
-    js_sec_register(ctx, lord);        /* lord.perms, lord.sign and lord.code (privacy, signing, verified code) */
-    js_media_register(ctx, lord);      /* lord.media (video, photos, screenshots, camera, recorder) */
-    js_doc_register(ctx, lord);        /* lord.doc: PDF, archives and fonts through the lord-doc helper */
-    js_print_register(ctx, lord);      /* lord.print: CUPS over IPP and eSCL scanners */
-    js_vault_register(ctx, lord);      /* lord.vault: Passwords and the keyring through the lord-vault helper */
-    js_mail_register(ctx, lord);       /* lord.mail: Mail, Calendar, Contacts, Reminders via lord-maild (docs/MAIL.md) */
-    js_sql_register(ctx, lord);        /* lord.sql: Databases (MySQL / MariaDB) via lord-sql (docs/DATABASES.md) */
-    js_termconf_register(ctx, lord);   /* lord.termconf: the Terminal's configuration file (docs/TERMINAL.md) */
-    js_wm_register(ctx, lord);         /* lord.wm: moving and resizing windows in C (grab.c) */
-    js_input_register(ctx, lord);      /* lord.input: touchpads and touchscreens (tp/) */
-    js_fw_register(ctx, lord);         /* lord.fw: per-app network permissions (lord-netperm, docs/FIREWALL.md) */
-    js_disk_register(ctx, lord);       /* lord.disks: disks and partitions (Disks app) */
-    js_imager_register(ctx, lord);     /* lord.imager: Insane OS Imager (docs/IMAGER.md) */
-    js_backup_register(ctx, lord);     /* lord.backup: Backups (backup/) */
-    js_cloud_register(ctx, lord);      /* lord.cloud: Cloud (cloud/, docs/CLOUD.md) */
-    js_rdesk_register(ctx, lord);      /* lord.rdesk: the RDP and VNC apps */
-    js_vm_register(ctx, lord);         /* lord.vm: Machines (vm/, docs/VIRTUALIZATION.md) */
-    js_lan_register(ctx, lord);        /* lord.lan: Files → Network (lan/, docs/FILES.md) */
-    js_clean_register(ctx, lord);      /* lord.clean: Cleaner (clean/, docs/CLEANER-ARCHITECTURE.md) */
-    js_logs_register(ctx, lord);       /* lord.logs: journal and Insane OS logs (Logs app) */
-    js_help_register(ctx, lord);       /* lord.help (Help) and lord.time.zoneOffset (Clock, tzif.c) */
-    js_hw_register(ctx, lord);         /* lord.display/power/bt/mime/timedate (Settings, src/hw) */
-    js_voice_register(ctx, lord);      /* lord.voice: reading text aloud through lord-say (tts/speak.c, docs/VOICE.md) */
-    JS_SetPropertyStr(ctx, g, "lord", lord);
+    js_net_register(ctx, insane);
+    js_monitor_register(ctx, insane, js_sys_assets());   /* insane.monitor (app Monitor) */
+    js_sec_register(ctx, insane);        /* insane.perms, insane.sign and insane.code (privacy, signing, verified code) */
+    js_media_register(ctx, insane);      /* insane.media (video, photos, screenshots, camera, recorder) */
+    js_doc_register(ctx, insane);        /* insane.doc: PDF, archives and fonts through the insane-doc helper */
+    js_print_register(ctx, insane);      /* insane.print: CUPS over IPP and eSCL scanners */
+    js_vault_register(ctx, insane);      /* insane.vault: Passwords and the keyring through the insane-vault helper */
+    js_mail_register(ctx, insane);       /* insane.mail: Mail, Calendar, Contacts, Reminders via insane-maild (docs/MAIL.md) */
+    js_sql_register(ctx, insane);        /* insane.sql: Databases (MySQL / MariaDB) via insane-sql (docs/DATABASES.md) */
+    js_termconf_register(ctx, insane);   /* insane.termconf: the Terminal's configuration file (docs/TERMINAL.md) */
+    js_wm_register(ctx, insane);         /* insane.wm: moving and resizing windows in C (grab.c) */
+    js_input_register(ctx, insane);      /* insane.input: touchpads and touchscreens (tp/) */
+    js_fw_register(ctx, insane);         /* insane.fw: per-app network permissions (insane-netperm, docs/FIREWALL.md) */
+    js_disk_register(ctx, insane);       /* insane.disks: disks and partitions (Disks app) */
+    js_imager_register(ctx, insane);     /* insane.imager: Insane OS Imager (docs/IMAGER.md) */
+    js_backup_register(ctx, insane);     /* insane.backup: Backups (backup/) */
+    js_cloud_register(ctx, insane);      /* insane.cloud: Cloud (cloud/, docs/CLOUD.md) */
+    js_rdesk_register(ctx, insane);      /* insane.rdesk: the RDP and VNC apps */
+    js_vm_register(ctx, insane);         /* insane.vm: Machines (vm/, docs/VIRTUALIZATION.md) */
+    js_lan_register(ctx, insane);        /* insane.lan: Files → Network (lan/, docs/FILES.md) */
+    js_clean_register(ctx, insane);      /* insane.clean: Cleaner (clean/, docs/CLEANER-ARCHITECTURE.md) */
+    js_logs_register(ctx, insane);       /* insane.logs: journal and Insane OS logs (Logs app) */
+    js_help_register(ctx, insane);       /* insane.help (Help) and insane.time.zoneOffset (Clock, tzif.c) */
+    js_hw_register(ctx, insane);         /* insane.display/power/bt/mime/timedate (Settings, src/hw) */
+    js_voice_register(ctx, insane);      /* insane.voice: reading text aloud through insane-say (tts/speak.c, docs/VOICE.md) */
+    JS_SetPropertyStr(ctx, g, "insane", insane);
     JS_FreeValue(ctx, g);
 }
 
@@ -466,36 +466,36 @@ int js_init(const char *bundle_path) {
 }
 
 /* ---- the recovery screen ----
- * When the theme (or the login screen, or an isolated app's code) was refused, lord-server shows
+ * When the theme (or the login screen, or an isolated app's code) was refused, insane-server shows
  * this instead of a blank screen. It is compiled into the binary, so it is as trusted as
- * lord-server itself. Texts: the "shell" catalog (code.recovery.*) when it can be read, English
+ * insane-server itself. Texts: the "shell" catalog (code.recovery.*) when it can be read, English
  * otherwise. */
 static const char recovery_js[] =
     "(function(){\n"
-    "const R = globalThis.__lordRecovery || {};\n"
+    "const R = globalThis.__insaneRecovery || {};\n"
     "const EN = {\n"
     "  'code.recovery.title': 'This Insane OS component was modified and was not loaded',\n"
     "  'code.recovery.session': 'Insane OS checks its own code before running it. A part of the desktop no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
     "  'code.recovery.greeter': 'Insane OS checks its own code before running it. The login screen no longer matches the signed copy, so it was not started. Your files were not touched.',\n"
     "  'code.recovery.app': 'Insane OS checks its own code before running it. This app no longer matches the signed copy, so it was not started.',\n"
-    "  'code.recovery.fix': 'To repair it, reinstall Insane OS: sudo apt install --reinstall lordos',\n"
+    "  'code.recovery.fix': 'To repair it, reinstall Insane OS: sudo apt install --reinstall insaneos',\n"
     "  'code.recovery.details': 'Not loaded:',\n"
     "  'code.recovery.logout': 'Log Out',\n"
     "};\n"
     "let cat = {};\n"
     "let lang = R.lang || 'en';\n"
-    "try { const s = lord.settings && lord.settings.load && lord.settings.load(); const o = typeof s === 'string' ? JSON.parse(s) : s;\n"
+    "try { const s = insane.settings && insane.settings.load && insane.settings.load(); const o = typeof s === 'string' ? JSON.parse(s) : s;\n"
     "  if (o && typeof o.language === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]+)?$/.test(o.language)) lang = o.language; } catch (e) { /* no settings */ }\n"
-    "try { const l = String(lang); const txt = lord.locale && lord.locale.catalog && (lord.locale.catalog(l, 'shell') || lord.locale.catalog(l.split('-')[0], 'shell'));\n"
+    "try { const l = String(lang); const txt = insane.locale && insane.locale.catalog && (insane.locale.catalog(l, 'shell') || insane.locale.catalog(l.split('-')[0], 'shell'));\n"
     "  if (txt) cat = JSON.parse(txt); } catch (e) { cat = {}; }\n"
     "const t = k => (typeof cat[k] === 'string' && cat[k]) || EN[k];\n"
-    "const W = (lord.screen && lord.screen.width) || 800, H = (lord.screen && lord.screen.height) || 600;\n"
+    "const W = (insane.screen && insane.screen.width) || 800, H = (insane.screen && insane.screen.height) || 600;\n"
     "/* colors are ARGB numbers, as runtime/style.js sends them */\n"
-    "const view = (style, parent) => { const id = lord.createNode('view'); for (const k in style) lord.setStyle(id, k, style[k]); if (parent) lord.appendChild(parent, id); return id; };\n"
+    "const view = (style, parent) => { const id = insane.createNode('view'); for (const k in style) insane.setStyle(id, k, style[k]); if (parent) insane.appendChild(parent, id); return id; };\n"
     "let lastRaw = 0;\n"
-    "const text = (s, style, parent) => { const id = lord.createNode('text'); for (const k in style) lord.setStyle(id, k, style[k]);\n"
-    "  const raw = lord.createNode('raw'); lord.setText(raw, s); lord.appendChild(id, raw); lastRaw = raw; lord.appendChild(parent, id); return id; };\n"
-    "const ds = (lord.screen && lord.screen.displays) || [];\n"
+    "const text = (s, style, parent) => { const id = insane.createNode('text'); for (const k in style) insane.setStyle(id, k, style[k]);\n"
+    "  const raw = insane.createNode('raw'); insane.setText(raw, s); insane.appendChild(id, raw); lastRaw = raw; insane.appendChild(parent, id); return id; };\n"
+    "const ds = (insane.screen && insane.screen.displays) || [];\n"
     "const d = ds.find(x => x && x.main) || ds[0] || { x: 0, y: 0, w: W, h: H };\n"
     "const app = R.kind === 'app';   /* an app window: fill it; a session: the main display */\n"
     "const root = view(app ? { flex: 1, backgroundColor: 0xff1c1c1e } : { width: W, height: H, backgroundColor: 0xff1c1c1e });\n"
@@ -512,16 +512,16 @@ static const char recovery_js[] =
     "  for (const p of list) text(p, { color: 0xff98989d, fontSize: 12, fontFamily: 'monospace', direction: 'ltr', textAlign: 'start' }, card); }\n"
     "text(t('code.recovery.fix'), { color: 0xffd1d1d6, fontSize: 13, lineHeight: 19, textAlign: 'start' }, card);\n"
     "let btn = 0; const hits = new Set();\n"
-    "if (R.kind === 'session' && typeof lord.quit === 'function') {\n"
+    "if (R.kind === 'session' && typeof insane.quit === 'function') {\n"
     "  btn = view({ alignSelf: 'flex-end', paddingTop: 6, paddingBottom: 6, paddingLeft: 16, paddingRight: 16, borderRadius: 7, backgroundColor: 0xff0a84ff, cursor: 'pointer' }, card);\n"
     "  hits.add(btn); hits.add(text(t('code.recovery.logout'), { color: 0xffffffff, fontSize: 13, fontWeight: 600 }, btn)); hits.add(lastRaw);\n"
     "}\n"
-    "globalThis.__lordEvent = (type, id) => { if (type === 'up' && hits.has(id)) lord.quit(); };\n"
-    "globalThis.__lordKey = () => {};\n"
-    "lord.setRoot(root);\n"
+    "globalThis.__insaneEvent = (type, id) => { if (type === 'up' && hits.has(id)) insane.quit(); };\n"
+    "globalThis.__insaneKey = () => {};\n"
+    "insane.setRoot(root);\n"
     "})();\n";
 
-/* Fills __lordRecovery = { kind, lang, refused: [paths] } and runs the recovery screen: in a fresh
+/* Fills __insaneRecovery = { kind, lang, refused: [paths] } and runs the recovery screen: in a fresh
  * context (with the prelude), or in place over a running one (an isolated app whose own code was
  * refused after its host started), where the old timers and frames are stopped first. */
 static int run_recovery(const char *kind, int inplace) {
@@ -536,9 +536,9 @@ static int run_recovery(const char *kind, int inplace) {
     JS_SetPropertyStr(ctx, o, "kind", JS_NewString(ctx, kind));
     JS_SetPropertyStr(ctx, o, "lang", JS_NewString(ctx, l));
     JS_SetPropertyStr(ctx, o, "refused", arr);
-    JS_SetPropertyStr(ctx, g, "__lordRecovery", o);
+    JS_SetPropertyStr(ctx, g, "__insaneRecovery", o);
     JS_FreeValue(ctx, g);
-    static const char stop[] = "globalThis.__lordTick = () => -1; globalThis.__lordWantsFrame = () => false; globalThis.__lordFrame = () => {};";
+    static const char stop[] = "globalThis.__insaneTick = () => -1; globalThis.__insaneWantsFrame = () => false; globalThis.__insaneFrame = () => {};";
     int r = inplace ? eval(stop, sizeof stop - 1, "<recovery>") : eval(prelude, sizeof prelude - 1, "<prelude>");
     if (!r) r = eval(recovery_js, sizeof recovery_js - 1, "<recovery>");
     fprintf(stderr, "js: recovery screen (%s): %d component(s) refused\n", kind, codesig_refused_count());
@@ -550,8 +550,8 @@ int js_init_recovery(int greeter) {
     return run_recovery(greeter ? "greeter" : "session", 0);
 }
 
-/* "App mode" (lord-server --app <id>): the same JS engine, but the `lord` object only has the
- * drawing primitives (local) plus the broker (fs/clipboard/perms through lord-server, which checks
+/* "App mode" (insane-server --app <id>): the same JS engine, but the `insane` object only has the
+ * drawing primitives (local) plus the broker (fs/clipboard/perms through insane-server, which checks
  * the permissions). Loads the "app host" (React + SDK + the app), see app/appclient.c. */
 static void app_context(const char *app_id) {
     rt = JS_NewRuntime();
@@ -559,18 +559,18 @@ static void app_context(const char *app_id) {
     JS_SetMaxStackSize(rt, 4u << 20);
     ctx = JS_NewContext(rt);
     JSValue g = JS_GetGlobalObject(ctx);
-    JSValue lord = JS_NewObject(ctx);
-    JS_SetPropertyFunctionList(ctx, lord, lord_funcs, sizeof lord_funcs / sizeof lord_funcs[0]);
+    JSValue insane = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, insane, insane_funcs, sizeof insane_funcs / sizeof insane_funcs[0]);
     JSValue screen = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, screen, "width", JS_NewFloat64(ctx, ui.width));
     JS_SetPropertyStr(ctx, screen, "height", JS_NewFloat64(ctx, ui.height));
-    JS_SetPropertyStr(ctx, lord, "screen", screen);
-    JS_SetPropertyStr(ctx, lord, "version", JS_NewString(ctx, LORD_VERSION));
-    js_broker_register(ctx, lord, app_id);         /* fs/clipboard/perms through the broker + appId */
-    js_vault_register_app(ctx, lord);              /* Passwords only: its own channel to lord-vault */
-    js_sys_register_app(ctx, lord);                /* lord.text (language, direction) and lord.image */
+    JS_SetPropertyStr(ctx, insane, "screen", screen);
+    JS_SetPropertyStr(ctx, insane, "version", JS_NewString(ctx, INSANE_VERSION));
+    js_broker_register(ctx, insane, app_id);         /* fs/clipboard/perms through the broker + appId */
+    js_vault_register_app(ctx, insane);              /* Passwords only: its own channel to insane-vault */
+    js_sys_register_app(ctx, insane);                /* insane.text (language, direction) and insane.image */
     js_wasm_register(ctx, g);                      /* WebAssembly for the app's loadWasm */
-    JS_SetPropertyStr(ctx, g, "lord", lord);
+    JS_SetPropertyStr(ctx, g, "insane", insane);
     JS_FreeValue(ctx, g);
 }
 
@@ -578,7 +578,7 @@ int js_init_app(const char *host_bundle, const char *app_id) {
     char dir[1024];
     snprintf(dir, sizeof dir, "%s", host_bundle);
     snprintf(ui.theme_dir, sizeof ui.theme_dir, "%s", dirname(dir));
-    /* the app host as bytecode lord-server compiled for this session (app/apphost_bc.c) */
+    /* the app host as bytecode insane-server compiled for this session (app/apphost_bc.c) */
     const char *bcs = getenv(APPHOST_BC_ENV);
     int bcfd = bcs ? atoi(bcs) : -1, bcok = 0, how = -1;
     unsetenv(APPHOST_BC_ENV);
@@ -617,7 +617,7 @@ int js_app_recovery(void) {
 }
 
 void js_shutdown(void) {
-    media_shutdown();                   /* the lord-media helpers belong to this context */
+    media_shutdown();                   /* the insane-media helpers belong to this context */
     if (ctx) js_wasm_shutdown(ctx);
     if (ctx && hot_rt == rt) for (int i = 0; i < HOT_N; i++) JS_FreeAtom(ctx, hot_atom[i]);
     hot_rt = NULL;
@@ -655,7 +655,7 @@ void js_pointer(const char *type, int target, float x, float y, int button) {
         JS_NewString(ctx, type), JS_NewInt32(ctx, target),
         JS_NewFloat64(ctx, x), JS_NewFloat64(ctx, y), JS_NewInt32(ctx, button),
     };
-    JS_FreeValue(ctx, call_global("__lordEvent", 5, args));
+    JS_FreeValue(ctx, call_global("__insaneEvent", 5, args));
     JS_FreeValue(ctx, args[0]);
     drain_jobs();
 }
@@ -666,13 +666,13 @@ void js_gesture(const char *kind, const char *phase, int target, float x, float 
         JS_NewString(ctx, kind), JS_NewString(ctx, phase), JS_NewInt32(ctx, target), JS_NewFloat64(ctx, x), JS_NewFloat64(ctx, y),
         JS_NewFloat64(ctx, a), JS_NewFloat64(ctx, b), JS_NewFloat64(ctx, c), JS_NewFloat64(ctx, d),
     };
-    JS_FreeValue(ctx, call_global("__lordGesture", 9, args));
+    JS_FreeValue(ctx, call_global("__insaneGesture", 9, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
 }
 
-/* Input method state → __lordIme({engine, preedit, candidates, selected, converting}). */
+/* Input method state → __insaneIme({engine, preedit, candidates, selected, converting}). */
 static void ime_event(void) {
     const ImeState *st = ime_state();
     JSValue o = JS_NewObject(ctx), list = JS_NewArray(ctx);
@@ -691,7 +691,7 @@ static void ime_event(void) {
         JS_SetPropertyUint32(ctx, parts, 2, JS_NewString(ctx, st->preedit + e));
         JS_SetPropertyStr(ctx, o, "segments", parts);
     }
-    JS_FreeValue(ctx, call_global("__lordIme", 1, (JSValueConst *)&o));
+    JS_FreeValue(ctx, call_global("__insaneIme", 1, (JSValueConst *)&o));
     JS_FreeValue(ctx, o);
 }
 
@@ -699,11 +699,11 @@ static void ime_event(void) {
 static void ime_commit(const char *text) {
     JSValueConst args[6] = { JS_NewInt32(ctx, 0), JS_NewInt32(ctx, 1), JS_NewString(ctx, text),
                              JS_NewString(ctx, text), JS_NewString(ctx, ""), JS_NewInt32(ctx, 0) };
-    JS_FreeValue(ctx, call_global("__lordKey", 6, args));
+    JS_FreeValue(ctx, call_global("__insaneKey", 6, args));
     for (int i = 2; i < 5; i++) JS_FreeValue(ctx, args[i]);
 }
 
-/* Key → __lordKey(code, value, key, text, base, flags). With libxkbcommon (keyboard.c)
+/* Key → __insaneKey(code, value, key, text, base, flags). With libxkbcommon (keyboard.c)
  * C does the translation; if no layout is loaded, only code and value. If there is an
  * active input method (ime.c) and a focused text field, the key goes through it first. */
 void js_key(int code, int value) {
@@ -711,7 +711,7 @@ void js_key(int code, int value) {
     kb_key(code, value, &k);
     if (!kb_ready()) {
         JSValueConst args[2] = { JS_NewInt32(ctx, code), JS_NewInt32(ctx, value) };
-        JS_FreeValue(ctx, call_global("__lordKey", 2, args));
+        JS_FreeValue(ctx, call_global("__insaneKey", 2, args));
         drain_jobs();
         return;
     }
@@ -727,24 +727,24 @@ void js_key(int code, int value) {
     int flags = k.shift | k.ctrl << 1 | k.alt << 2 | k.altgr << 3 | k.meta << 4 | k.caps << 5 | k.dead << 6 | (to_app == 2) << 7;
     JSValueConst args[6] = { JS_NewInt32(ctx, code), JS_NewInt32(ctx, value), JS_NewString(ctx, k.key),
                              JS_NewString(ctx, k.chr), JS_NewString(ctx, k.base), JS_NewInt32(ctx, flags) };
-    JS_FreeValue(ctx, call_global("__lordKey", 6, args));
+    JS_FreeValue(ctx, call_global("__insaneKey", 6, args));
     for (int i = 2; i < 5; i++) JS_FreeValue(ctx, args[i]);
     drain_jobs();
 }
 
-/* A keyboard was plugged in, removed, or typed for the first time → __lordKeyboards(present). */
+/* A keyboard was plugged in, removed, or typed for the first time → __insaneKeyboards(present). */
 void js_keyboards_event(int present) {
     if (!ctx) return;
     JSValueConst arg = JS_NewBool(ctx, present);
-    JS_FreeValue(ctx, call_global("__lordKeyboards", 1, &arg));
+    JS_FreeValue(ctx, call_global("__insaneKeyboards", 1, &arg));
     drain_jobs();
 }
 
-/* Media (media/) → __lordMedia(id, type, JSON data). */
+/* Media (media/) → __insaneMedia(id, type, JSON data). */
 void js_media_event(int id, const char *type, const char *json) {
     if (!ctx) return;
     JSValueConst args[3] = { JS_NewInt32(ctx, id), JS_NewString(ctx, type), JS_ParseJSON(ctx, json, strlen(json), "<media>") };
-    JS_FreeValue(ctx, call_global("__lordMedia", 3, args));
+    JS_FreeValue(ctx, call_global("__insaneMedia", 3, args));
     JS_FreeValue(ctx, args[1]);
     JS_FreeValue(ctx, args[2]);
     drain_jobs();
@@ -753,44 +753,44 @@ void js_media_event(int id, const char *type, const char *json) {
 /* The main loop ended (logout, or a signal): the session's last word (sdk/sessionrestore.jsx). */
 void js_before_exit(void) {
     if (!ctx) return;
-    JS_FreeValue(ctx, call_global("__lordBeforeExit", 0, NULL));
+    JS_FreeValue(ctx, call_global("__insaneBeforeExit", 0, NULL));
     drain_jobs();
 }
 
-/* Wayland app windows (wl/wl.c) → __lordWayland(id, type, JSON data). */
+/* Wayland app windows (wl/wl.c) → __insaneWayland(id, type, JSON data). */
 void js_wl_event(int id, const char *type, const char *json) {
     if (!ctx) return;
     JSValueConst args[3] = { JS_NewInt32(ctx, id), JS_NewString(ctx, type), JS_ParseJSON(ctx, json, strlen(json), "<wayland>") };
-    JS_FreeValue(ctx, call_global("__lordWayland", 3, args));
+    JS_FreeValue(ctx, call_global("__insaneWayland", 3, args));
     JS_FreeValue(ctx, args[1]);
     JS_FreeValue(ctx, args[2]);
     drain_jobs();
 }
 
-/* Sound (sound/snd.c): "state" with the full state, "peak" with the meter → __lordSound(type, data). */
+/* Sound (sound/snd.c): "state" with the full state, "peak" with the meter → __insaneSound(type, data). */
 void js_sound_event(const char *type, const char *json) {
     if (!ctx) return;
     JSValueConst args[2] = { JS_NewString(ctx, type), JS_ParseJSON(ctx, json, strlen(json), "<sound>") };
-    JS_FreeValue(ctx, call_global("__lordSound", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneSound", 2, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
 }
 
-/* Backups (backup/backup.c): the status changed → __lordBackup(status). */
+/* Backups (backup/backup.c): the status changed → __insaneBackup(status). */
 void js_backup_event(const char *json) {
     if (!ctx) return;
     JSValueConst arg = JS_ParseJSON(ctx, json, strlen(json), "<backup>");
-    JS_FreeValue(ctx, call_global("__lordBackup", 1, &arg));
+    JS_FreeValue(ctx, call_global("__insaneBackup", 1, &arg));
     JS_FreeValue(ctx, arg);
     drain_jobs();
 }
 
-/* Cloud (cloud/cloud.c): the state changed → __lordCloud(state); a link answer → __lordCloudReply(req, result). */
+/* Cloud (cloud/cloud.c): the state changed → __insaneCloud(state); a link answer → __insaneCloudReply(req, result). */
 void js_cloud_event(const char *json) {
     if (!ctx) return;
     JSValueConst arg = JS_ParseJSON(ctx, json, strlen(json), "<cloud>");
-    JS_FreeValue(ctx, call_global("__lordCloud", 1, &arg));
+    JS_FreeValue(ctx, call_global("__insaneCloud", 1, &arg));
     JS_FreeValue(ctx, arg);
     drain_jobs();
 }
@@ -798,12 +798,12 @@ void js_cloud_event(const char *json) {
 void js_cloud_reply(int req, const char *json) {
     if (!ctx) return;
     JSValueConst args[2] = { JS_NewInt32(ctx, req), JS_ParseJSON(ctx, json, strlen(json), "<cloud>") };
-    JS_FreeValue(ctx, call_global("__lordCloudReply", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneCloudReply", 2, args));
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
 }
 
-/* lord.fs.*Async (fsasync.c): a finished request → __lordFsReply(req, answer). */
+/* insane.fs.*Async (fsasync.c): a finished request → __insaneFsReply(req, answer). */
 static void fs_reply(void *ud, int req, const char *json) {
     (void)ud;
     if (!ctx) return;
@@ -813,7 +813,7 @@ static void fs_reply(void *ud, int req, const char *json) {
         JS_FreeValue(ctx, JS_GetException(ctx));
         args[1] = JS_ParseJSON(ctx, bad, sizeof bad - 1, "<fs>");
     }
-    JS_FreeValue(ctx, call_global("__lordFsReply", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneFsReply", 2, args));
     JS_FreeValue(ctx, args[1]);
 }
 
@@ -821,12 +821,12 @@ void js_fs_dispatch(void) {
     if (fsasync_dispatch(fs_reply, NULL)) drain_jobs();
 }
 
-/* Network (net/state.c): something changed in links, addresses or routes → __lordNet("link"|"addr"|"route"). */
-/* Disks (disk/disk.c): something was mounted, unmounted, plugged in or changed → __lordDisks(what). */
+/* Network (net/state.c): something changed in links, addresses or routes → __insaneNet("link"|"addr"|"route"). */
+/* Disks (disk/disk.c): something was mounted, unmounted, plugged in or changed → __insaneDisks(what). */
 void js_disk_event(const char *what) {
     if (!ctx) return;
     JSValueConst arg = JS_NewString(ctx, what);
-    JS_FreeValue(ctx, call_global("__lordDisks", 1, &arg));
+    JS_FreeValue(ctx, call_global("__insaneDisks", 1, &arg));
     JS_FreeValue(ctx, arg);
     drain_jobs();
 }
@@ -834,30 +834,30 @@ void js_disk_event(const char *what) {
 void js_net_event(const char *what) {
     if (!ctx) return;
     JSValueConst arg = JS_NewString(ctx, what);
-    JS_FreeValue(ctx, call_global("__lordNet", 1, &arg));
+    JS_FreeValue(ctx, call_global("__insaneNet", 1, &arg));
     JS_FreeValue(ctx, arg);
     drain_jobs();
 }
 
-/* Terminal events (title, directory, bell, exit...) → __lordTerm(id, type, data). */
+/* Terminal events (title, directory, bell, exit...) → __insaneTerm(id, type, data). */
 /* Logs (js_logs.c): "result" (id of a finished query), "journal" or "file" (name)
- * → __lordLogs(type, id, name). */
+ * → __insaneLogs(type, id, name). */
 void js_logs_event(const char *kind, int id, const char *name) {
     if (!ctx) return;
     JSValueConst args[3] = { JS_NewString(ctx, kind), JS_NewInt32(ctx, id), JS_NewString(ctx, name) };
-    JS_FreeValue(ctx, call_global("__lordLogs", 3, args));
+    JS_FreeValue(ctx, call_global("__insaneLogs", 3, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[2]);
     drain_jobs();
 }
 
 /* Settings' hardware modules (src/hw): "display", "idle", "power", "bt", "bt-prompt", "bt-result",
- * "ppd", "ppd-result", "timedate" → __lordHw(kind, data). */
+ * "ppd", "ppd-result", "timedate" → __insaneHw(kind, data). */
 void js_hw_event(const char *kind, const char *json) {
     if (!ctx) return;
     JSValueConst args[2] = { JS_NewString(ctx, kind), JS_ParseJSON(ctx, json, strlen(json), "<hw>") };
     if (JS_IsException(args[1])) { JS_FreeValue(ctx, JS_GetException(ctx)); args[1] = JS_NULL; }
-    JS_FreeValue(ctx, call_global("__lordHw", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneHw", 2, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
@@ -867,7 +867,7 @@ void js_hw_event(const char *kind, const char *json) {
 void js_admin_event(int id, const char *kind, const char *text) {
     if (!ctx) return;
     JSValueConst args[3] = { JS_NewInt32(ctx, id), JS_NewString(ctx, kind), JS_NewString(ctx, text) };
-    JS_FreeValue(ctx, call_global("__lordAdmin", 3, args));
+    JS_FreeValue(ctx, call_global("__insaneAdmin", 3, args));
     JS_FreeValue(ctx, args[1]);
     JS_FreeValue(ctx, args[2]);
     drain_jobs();
@@ -881,7 +881,7 @@ void js_clipboard_poll(void) {
     if (!ctx || (g == seen_text && gi == seen_img)) return;
     seen_text = g;
     seen_img = gi;
-    JS_FreeValue(ctx, call_global("__lordClipboard", 0, NULL));
+    JS_FreeValue(ctx, call_global("__insaneClipboard", 0, NULL));
     drain_jobs();
 }
 
@@ -889,66 +889,66 @@ void js_clipboard_poll(void) {
 void js_remote_event(const char *json) {
     if (!ctx) return;
     JSValueConst args[1] = { JS_NewString(ctx, json) };
-    JS_FreeValue(ctx, call_global("__lordRemote", 1, args));
+    JS_FreeValue(ctx, call_global("__insaneRemote", 1, args));
     JS_FreeValue(ctx, args[0]);
     drain_jobs();
 }
 
-/* The screen-sharing API (remote/share.c): its prompt and indicator → __lordShare(json), sdk/share.js. */
+/* The screen-sharing API (remote/share.c): its prompt and indicator → __insaneShare(json), sdk/share.js. */
 void js_share_event(const char *json) {
     if (!ctx) return;
     JSValueConst args[1] = { JS_NewString(ctx, json) };
-    JS_FreeValue(ctx, call_global("__lordShare", 1, args));
+    JS_FreeValue(ctx, call_global("__insaneShare", 1, args));
     JS_FreeValue(ctx, args[0]);
     drain_jobs();
 }
 
-/* Remote desktop: lord-sessiond's notice for the user on the monitor (RP_NOTICE, e.g. a source blocked
- * after failed logins) → __lordRemoteNotice(object). sdk/remote.js shows it as a notification. */
+/* Remote desktop: insane-sessiond's notice for the user on the monitor (RP_NOTICE, e.g. a source blocked
+ * after failed logins) → __insaneRemoteNotice(object). sdk/remote.js shows it as a notification. */
 void js_remote_notice(const char *json) {
     if (!ctx) return;
     JSValue v = JS_ParseJSON(ctx, json, strlen(json), "<remote-notice>");
     if (JS_IsException(v)) { JS_FreeValue(ctx, JS_GetException(ctx)); return; }
     JSValueConst args[1] = { v };
-    JS_FreeValue(ctx, call_global("__lordRemoteNotice", 1, args));
+    JS_FreeValue(ctx, call_global("__insaneRemoteNotice", 1, args));
     JS_FreeValue(ctx, v);
     drain_jobs();
 }
 
 /* Broker of isolated .lpk apps: "prompt" (ask for a permission) or "device" (indicator) →
- * __lordBroker(kind, json). The theme handles it in sdk/privacy.js. */
+ * __insaneBroker(kind, json). The theme handles it in sdk/privacy.js. */
 void js_broker_event(const char *kind, const char *json) {
     if (!ctx) return;
     JSValueConst args[2] = { JS_NewString(ctx, kind), JS_ParseJSON(ctx, json, strlen(json), "<broker>") };
-    JS_FreeValue(ctx, call_global("__lordBroker", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneBroker", 2, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
 }
 
-/* Process of an isolated app: events lord-server sends through the broker (theme, language…) →
- * __lordBrokerEvent(type, data). See runtime/app-host.js. */
+/* Process of an isolated app: events insane-server sends through the broker (theme, language…) →
+ * __insaneBrokerEvent(type, data). See runtime/app-host.js. */
 void js_broker_app_event(const char *kind, const char *json, size_t len) {
     if (!ctx) return;
     JSValueConst args[2] = { JS_NewString(ctx, kind), JS_ParseJSON(ctx, json, len, "<broker>") };
     if (JS_IsException(args[1])) { JS_FreeValue(ctx, JS_GetException(ctx)); args[1] = JS_NULL; }
-    JS_FreeValue(ctx, call_global("__lordBrokerEvent", 2, args));
+    JS_FreeValue(ctx, call_global("__insaneBrokerEvent", 2, args));
     JS_FreeValue(ctx, args[0]);
     JS_FreeValue(ctx, args[1]);
     drain_jobs();
 }
 
-/* Login screen (greeter theme): notices and responses from lord-sessiond. */
+/* Login screen (greeter theme): notices and responses from insane-sessiond. */
 void js_greeter_event(const char *json) {
     if (!ctx) return;
     JSValueConst args[1] = { JS_NewString(ctx, json) };
-    JS_FreeValue(ctx, call_global("__lordGreeter", 1, args));
+    JS_FreeValue(ctx, call_global("__insaneGreeter", 1, args));
     JS_FreeValue(ctx, args[0]);
     drain_jobs();
 }
 
-/* The screen changed size: lord.screen is updated and the theme is notified (__lordScreen). */
-/* The displays (docs/DISPLAYS.md): main.c keeps the JSON; lord.screen.displays and .mirror. */
+/* The screen changed size: insane.screen is updated and the theme is notified (__insaneScreen). */
+/* The displays (docs/DISPLAYS.md): main.c keeps the JSON; insane.screen.displays and .mirror. */
 static char displays_json[4096] = "{\"mirror\":false,\"displays\":[]}";
 void js_set_displays(const char *json) { snprintf(displays_json, sizeof displays_json, "%s", json); }
 static void set_screen_displays(JSValue screen) {
@@ -962,24 +962,24 @@ static void set_screen_displays(JSValue screen) {
 void js_screen_resized(void) {
     if (!ctx) return;
     JSValue g = JS_GetGlobalObject(ctx);
-    JSValue lord = JS_GetPropertyStr(ctx, g, "lord");
-    JSValue screen = JS_GetPropertyStr(ctx, lord, "screen");
+    JSValue insane = JS_GetPropertyStr(ctx, g, "insane");
+    JSValue screen = JS_GetPropertyStr(ctx, insane, "screen");
     if (JS_IsObject(screen)) {
         JS_SetPropertyStr(ctx, screen, "width", JS_NewFloat64(ctx, ui.width));
         JS_SetPropertyStr(ctx, screen, "height", JS_NewFloat64(ctx, ui.height));
         set_screen_displays(screen);
     }
     JS_FreeValue(ctx, screen);
-    JS_FreeValue(ctx, lord);
+    JS_FreeValue(ctx, insane);
     JS_FreeValue(ctx, g);
-    JS_FreeValue(ctx, call_global("__lordScreen", 0, NULL));
+    JS_FreeValue(ctx, call_global("__insaneScreen", 0, NULL));
     drain_jobs();
 }
 
 void js_term_event(int id, const char *type, const char *data) {
     if (!ctx) return;
     JSValueConst args[3] = { JS_NewInt32(ctx, id), JS_NewString(ctx, type), JS_NewString(ctx, data) };
-    JS_FreeValue(ctx, call_global("__lordTerm", 3, args));
+    JS_FreeValue(ctx, call_global("__insaneTerm", 3, args));
     JS_FreeValue(ctx, args[1]);
     JS_FreeValue(ctx, args[2]);
     drain_jobs();

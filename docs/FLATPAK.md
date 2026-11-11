@@ -25,10 +25,10 @@ Nothing here has been run on a VM. No compatibility with any Flathub app is clai
 - **Flatpak stays optional.** The Debian `flatpak` package is installed only when the user turns
   Flathub on in the Store, through the existing package engine (`pkg-install`, without Recommends),
   like Chrome or Spotify. Insane OS never links libflatpak, libostree or bubblewrap. Its own isolation
-  stays its own code: the root-owned app scope, `lord-netperm`'s kernel programs and the launcher's
+  stays its own code: the root-owned app scope, `insane-netperm`'s kernel programs and the launcher's
   view. Flatpak's sandbox (bubblewrap) is an extra layer inside it, never the only one.
 - **Identity:** a Flatpak app is started only by Insane OS's launcher, in a root-owned
-  `app-lordos-fp-<id>.scope`, which the firewall, the Monitor, the PipeWire guard and the
+  `app-insaneos-fp-<id>.scope`, which the firewall, the Monitor, the PipeWire guard and the
   notification server read as the app `flatpak:<id>`. `flatpak run` can't move itself out (its
   transient-scope call needs `/run/user/<uid>/systemd/private`, which the launcher's view doesn't
   contain; the call failing is not fatal in Flatpak). No identity is ever taken from a unit name
@@ -43,11 +43,11 @@ Nothing here has been run on a VM. No compatibility with any Flathub app is clai
   0.8.6; a Insane OS portal is a later phase with its own review.
 - **Installing:** per user (`flatpak --user`), no root and no new admin action. The Flathub remote
   comes from a `.flatpakrepo` file Insane OS ships (its GPG key pinned), the catalog is Flathub's
-  signed appstream data that `flatpak` itself verifies, and every `flatpak` command lord-server runs
-  is one of a closed list, run in its own firewall component `lordos:flathub`.
+  signed appstream data that `flatpak` itself verifies, and every `flatpak` command insane-server runs
+  is one of a closed list, run in its own firewall component `insaneos:flathub`.
 - **Seven approvals are needed** (see "Exceptions to approve"): the Flatpak launch path, the
   `flatpak:<id>` identity and scope name, the closed list of `flatpak` management commands with
-  network, the dependency-policy wording, masking two Flatpak services, the `lord.fs` deny list,
+  network, the dependency-policy wording, masking two Flatpak services, the `insane.fs` deny list,
   and a sandboxed parser for the catalog.
 
 The largest limits, said up front: apps that start sub-sandboxes through Flatpak's portal (most
@@ -78,7 +78,7 @@ The `flatpak` package also installs (file list from packages.debian.org):
 
 Insane OS's package engine installs Recommends only when asked (`pkg-install … --recommends`,
 [PACKAGES.md](PACKAGES.md)), so turning Flathub on would not pull `xdg-desktop-portal` in. That
-matters: lord-server already owns `org.freedesktop.portal.Desktop` on the session bus for the
+matters: insane-server already owns `org.freedesktop.portal.Desktop` on the session bus for the
 Settings portal (`server/src/ui/portal.c`), and `tests/fwlinux/screen.sh` depends on no screen-cast
 portal being installed.
 
@@ -94,8 +94,8 @@ portal being installed.
   really depends on it".
 - **Checked (Insane OS).** The user manager has PID 1 do that move, which only checks the uid
   ([FIREWALL.md](FIREWALL.md), "Escape via `systemd-run --user`"). So a `flatpak run` started inside
-  `app-lordos-<id>.scope` would leave it for `user@<uid>.service/app.slice/…`. There
-  `lord-netperm` finds no app scope and applies the per-user union: restriction-only, so not a
+  `app-insaneos-<id>.scope` would leave it for `user@<uid>.service/app.slice/…`. There
+  `insane-netperm` finds no app scope and applies the per-user union: restriction-only, so not a
   hole, but the app loses its own rules, its counters in the Monitor and its device restrictions,
   and its traffic isn't attributed.
 - **Checked (flatpak-portal.c).** `flatpak-portal` (D-Bus activated, under `user@`) runs
@@ -103,7 +103,7 @@ portal being installed.
   same way, whatever Insane OS does with the parent.
 - **Checked (flatpak-run.c).** bubblewrap is started with `--unshare-user --disable-userns` (when
   unprivileged) and `--unshare-pid`. A process's cgroup doesn't change across namespaces, so
-  `lord-netperm`'s programs (`bpf_get_current_ancestor_cgroup_id`) and `sec/appid.c` find a
+  `insane-netperm`'s programs (`bpf_get_current_ancestor_cgroup_id`) and `sec/appid.c` find a
   Flatpak app by its scope exactly as they find a Linux app, as long as it stays in it.
 
 ### Options
@@ -116,7 +116,7 @@ process another app's rules and take it out of the union. Two such attempts were
 (`docs/SECURITY-REVIEW-0.8.0.md` #15 and #37).
 
 **B. Start Flatpak apps in a root-owned Insane OS scope, in a view without the systemd user socket.**
-The launcher's child enters `app-lordos-fp-<id>.scope` through `lord-sessiond`'s placement service
+The launcher's child enters `app-insaneos-fp-<id>.scope` through `insane-sessiond`'s placement service
 (as every Linux app does today), then builds a view with Insane OS's own code
 (`sandbox_files_isolate`: user, mount, PID and IPC namespaces) whose runtime folder contains only
 the sockets Flatpak is meant to use, never `systemd/`. `flatpak run`'s transient-scope call fails,
@@ -128,15 +128,15 @@ Linux apps); bubblewrap then nests its own user namespace inside Insane OS's (al
 `$XDG_RUNTIME_DIR/.flatpak/<id>` state (shared `/tmp` between instances, `flatpak ps`) isn't seen
 from outside, unless the launcher binds a per-app folder into the view (open question 4).
 
-**C. Let Flatpak move the app, then have root move it back.** A new request to `lord-sessiond`'s
-placement service ("reclaim this pid into that scope"), checked against the pid lord-server
+**C. Let Flatpak move the app, then have root move it back.** A new request to `insane-sessiond`'s
+placement service ("reclaim this pid into that scope"), checked against the pid insane-server
 started. *Rejected:* `AGENTS.md` says not to add requests to that service or place arbitrary
 pids, and the app runs under `user@` until it is moved back.
 
-**Recommendation: B.** The firewall id is `flatpak:<id>`; `fw_app_canon`, `lord-netperm`'s scope
+**Recommendation: B.** The firewall id is `flatpak:<id>`; `fw_app_canon`, `insane-netperm`'s scope
 scan (`netperm.c`), `sec/appid.c`, the PipeWire guard (`sec/pwguard.c`), the Monitor
-(`ui/js_monitor.c`) and `sec/restrict.c` learn the `app-lordos-fp-` prefix the way they learned
-`app-lordos-lpk-`. The launcher's `valid_id` already refuses desktop ids starting with `lpk-`; it
+(`ui/js_monitor.c`) and `sec/restrict.c` learn the `app-insaneos-fp-` prefix the way they learned
+`app-insaneos-lpk-`. The launcher's `valid_id` already refuses desktop ids starting with `lpk-`; it
 would refuse `fp-` too, so no `.desktop` can take a Flatpak app's identity.
 
 The view (Design) for a Flatpak app:
@@ -174,7 +174,7 @@ not read for this review): the first thing to test.
   --branch=… --arch=… --command=… [--file-forwarding] <id> [@@ %f @@]`.
 - **Checked.** Insane OS's launcher (`server/src/apps.c`) lists `.desktop` files only from
   `~/.local/share/applications` and `/usr/share/applications`, runs their `Exec` without a shell,
-  and refuses files written from JS (`lord.fs` denies those folders). The user's export folder is
+  and refuses files written from JS (`insane.fs` denies those folders). The user's export folder is
   in the home folder: anything running as the user can write a file there with any `Exec`.
 - **Checked (flatpak-run.c, `forward_file`).** `--file-forwarding` hands a file to the app through
   the document portal (`org.freedesktop.portal.Documents`, a FUSE file system). Without it,
@@ -185,11 +185,11 @@ not read for this review): the first thing to test.
 
 **A. Add the two export folders to the launcher's list and run their `Exec` lines.** Smallest
 change. *Rejected:* a third and fourth folder whose `Exec` is run as is, one of them user-writable
-and unknown to `lord.fs`'s deny list; the command line would be whatever the file says, so Insane OS's
+and unknown to `insane.fs`'s deny list; the command line would be whatever the file says, so Insane OS's
 arguments (identity, restrictions, never-granted permissions) couldn't be guaranteed.
 
 **B. A Flatpak launch path that takes only an app id and builds the command line in C.**
-`lord.apps.launchFlatpak(id)` and `lord.apps.launchFlatpakWith(id, path)` (names to settle). The
+`insane.apps.launchFlatpak(id)` and `insane.apps.launchFlatpakWith(id, path)` (names to settle). The
 id must:
 
 - pass Flatpak's own name rules (at least three dot-separated elements of `[A-Za-z0-9_-]`, not
@@ -259,8 +259,8 @@ Whatever the app declares, the launcher always adds:
 | `--nosocket=session-bus` | the unfiltered bus reaches the systemd user manager (`systemd-run --user`) and the session helper |
 | `--no-talk-name=org.freedesktop.Flatpak` | `flatpak-spawn --host`: any command, unsandboxed, outside the scope |
 | `--no-talk-name=org.freedesktop.systemd1` | units and transient scopes outside the scope |
-| no `--own-name` of a name lord-server serves (`org.freedesktop.Notifications`, `org.freedesktop.portal.Desktop`) | impersonating Insane OS's services |
-| `--nofilesystem` (hide) for `~/.config/lordos`, `~/.local/share/lordos`, `~/.cache/lordos`, `~/.local/share/applications`, `~/.config/autostart`, `~/.config/systemd`, `~/.config/environment.d`, `~/.local/bin` | the folders `fsops_protected()` and the launcher's grant rules keep from every app: rules, permissions, launchers, autostart, units |
+| no `--own-name` of a name insane-server serves (`org.freedesktop.Notifications`, `org.freedesktop.portal.Desktop`) | impersonating Insane OS's services |
+| `--nofilesystem` (hide) for `~/.config/insaneos`, `~/.local/share/insaneos`, `~/.cache/insaneos`, `~/.local/share/applications`, `~/.config/autostart`, `~/.config/systemd`, `~/.config/environment.d`, `~/.local/bin` | the folders `fsops_protected()` and the launcher's grant rules keep from every app: rules, permissions, launchers, autostart, units |
 | `--filesystem=<file>:ro` for `~/.bashrc`, `~/.profile`, `~/.bash_profile`, `~/.zshrc` (those that exist) | shell startup files run outside any sandbox at the next login |
 
 `org.freedesktop.portal.Flatpak` (sub-sandboxes) can't be refused reliably by an option, so in
@@ -279,7 +279,7 @@ adds it as well, as defence in depth (the kernel path is the boundary, not bubbl
 
 | Restriction | Enforced by (unchanged Insane OS code) | Also added to `flatpak run` |
 |---|---|---|
-| network rules, no-internet, no-LAN, no-network | `lord-netperm` cgroup programs on the scope | `--unshare=network` for no-network |
+| network rules, no-internet, no-LAN, no-network | `insane-netperm` cgroup programs on the scope | `--unshare=network` for no-network |
 | no camera | `cgroup/dev` (V4L2) + PipeWire guard | — |
 | no USB | `cgroup/dev` | `--nodevice=usb` |
 | no Bluetooth | `cgroup/lsm_socket_create` | `--disallow=bluetooth` |
@@ -308,23 +308,23 @@ way. To measure on the VM (test 9).
 
 ### Portals
 
-Insane OS runs no `xdg-desktop-portal`; lord-server serves `org.freedesktop.portal.Settings` itself.
+Insane OS runs no `xdg-desktop-portal`; insane-server serves `org.freedesktop.portal.Settings` itself.
 
 **A. Install `xdg-desktop-portal` and write a Insane OS backend** (`org.freedesktop.impl.portal.*`:
 FileChooser, Screenshot, ScreenCast, Camera…). The frontend identifies Flatpak apps (from
 `/.flatpak-info` of the caller), keeps the permission store and runs the document portal.
 *Trade-offs:* a large GLib daemon under `user@` (outside any Insane OS scope) that decides app
-identity and brokers files; it wants the `org.freedesktop.portal.Desktop` name lord-server holds
+identity and brokers files; it wants the `org.freedesktop.portal.Desktop` name insane-server holds
 (the Settings portal would move to a backend); its ScreenCast and Camera frontends hand out
 PipeWire streams, which would break the "no Linux app can copy the screen" claim the moment a
 backend exists.
 
-**B. Serve the needed frontend interfaces in lord-server, on the name it already owns.**
+**B. Serve the needed frontend interfaces in insane-server, on the name it already owns.**
 FileChooser (Insane OS's own dialog, `fs.openFile`-style), OpenURI, Notification, Inhibit, next to
 Settings. The caller is identified as notifyd does it today: the bus's
 `GetConnectionUnixProcessID`, then that pid's cgroup (the proxy's scope), never a file the app can
 write. ScreenCast, Screenshot and Camera are not offered. *Trade-offs:* a new D-Bus surface in
-lord-server with untrusted callers; FileChooser for a sandboxed app needs a way to expose the
+insane-server with untrusted callers; FileChooser for a sandboxed app needs a way to expose the
 chosen file after start, which is the document portal's FUSE file system (Debian's
 `xdg-document-portal` is part of the `xdg-desktop-portal` package) or a Insane OS equivalent.
 
@@ -380,7 +380,7 @@ FileChooser).
 
 ### Options
 
-**A. lord-server runs `flatpak --user` for a closed list of commands, in its own firewall
+**A. insane-server runs `flatpak --user` for a closed list of commands, in its own firewall
 component.** Flatpak does the network, TLS, OSTree and signature checks itself (libostree +
 GPGME). Insane OS controls which commands run, their arguments, their scope and what it reads back.
 *Trade-offs:* a third-party program doing network and parsing as the user, not inside
@@ -402,7 +402,7 @@ minimal environment, stdin `/dev/null`, output to a log or parsed strictly):
 
 | Command | Arguments from the UI |
 |---|---|
-| `remote-add --if-not-exists --from flathub /usr/share/lordos/flatpak/flathub.flatpakrepo` | none (the file ships in the `lordos` package, root-owned) |
+| `remote-add --if-not-exists --from flathub /usr/share/insaneos/flatpak/flathub.flatpakrepo` | none (the file ships in the `insaneos` package, root-owned) |
 | `update --appstream flathub` | none |
 | `remote-info --show-metadata flathub <ref>` | a ref |
 | `install flathub <ref>` | a ref |
@@ -413,16 +413,16 @@ minimal environment, stdin `/dev/null`, output to a log or parsed strictly):
 A ref is validated in C: `app/<id>/<native arch>/<branch>`, the id as in Problem 2, the branch
 `[A-Za-z0-9._-]{1,64}`. Runtimes are never named by the UI; Flatpak resolves them.
 
-Each command is started like a connector: lord-server forks, the child enters a root-owned
-`lordos-net-flathub.scope` (the firewall component `lordos:flathub`, added to
+Each command is started like a connector: insane-server forks, the child enters a root-owned
+`insaneos-net-flathub.scope` (the firewall component `insaneos:flathub`, added to
 `fw_component_scope`'s fixed list) and execs `/usr/bin/flatpak`. In the Monitor its traffic is
 "Flathub", with its own rules, and blocking it says that no Flatpak update arrives meanwhile (as
-`lordos:store`). Downloads of `extra-data` (proprietary apps that fetch from their vendor during
+`insaneos:store`). Downloads of `extra-data` (proprietary apps that fetch from their vendor during
 install) go through the same scope.
 
 **The pinned key.** The `.flatpakrepo` shipped by Insane OS holds Flathub's key above. Because the
 key expires on 2027-06-14 and Flathub can roll it through `xa.gpg-keys`, Insane OS also ships a new
-`.flatpakrepo` in a `lordos` update when Flathub publishes one, with a migration that runs
+`.flatpakrepo` in a `insaneos` update when Flathub publishes one, with a migration that runs
 `remote-modify --gpg-import` for users who have the remote (a per-user `MIGRATIONS` entry in
 `sdk/settings.js`; never by hand). Whether to accept key updates delivered by the summary or only
 Insane OS's is open question 6.
@@ -434,11 +434,11 @@ neither verified nor free software. Offering `verified_floss` as a setting is op
 
 After `update --appstream flathub`, the signature-checked appstream data sits in
 `~/.local/share/flatpak/appstream/flathub/<arch>/active/` (`appstream.xml`, icons in
-`icons/64x64` and `icons/128x128`; exact file names **Unverified**). lord-server doesn't parse it
+`icons/64x64` and `icons/128x128`; exact file names **Unverified**). insane-server doesn't parse it
 (a 10+ MB XML file from the network): a sandboxed helper does, with `sandbox_apply_helper`, the
 file given as an fd, returning a compact index in a sealed memfd (id, name and summary in the
 user's language, categories, licence, `flathub::verification::verified`, content rating, icon
-file name, sizes), which lord-server validates again before the Store reads it. Which helper
+file name, sizes), which insane-server validates again before the Store reads it. Which helper
 (a new mode of an existing one, or a small new binary) is open question 5; the rule is the same as
 for every decoder. The website's API is never used.
 
@@ -461,11 +461,11 @@ libseccomp for isolation", and `.lpk` isolation must stay Insane OS's own code. 
 allowing Flatpak as an **app source**:
 
 1. Insane OS doesn't link it: no libflatpak, libostree or bubblewrap code in any Insane OS binary.
-   lord-server only executes `/usr/bin/flatpak` with fixed argv (E1, E3).
+   insane-server only executes `/usr/bin/flatpak` with fixed argv (E1, E3).
 2. It isn't installed by default; it arrives as a Debian package the user chooses in the Store,
    like the Commercial apps, and the page says what it adds (about the size: **Unverified**,
    measured in test 1; Flathub runtimes add hundreds of MB each).
-3. Insane OS's boundaries for a Flatpak app are Insane OS's: the root-owned scope, `lord-netperm`'s
+3. Insane OS's boundaries for a Flatpak app are Insane OS's: the root-owned scope, `insane-netperm`'s
    programs, the PipeWire guard, notifyd and the launcher's view. If bubblewrap failed open, the app
    would still be held by every Insane OS restriction the owner set, exactly like an unsandboxed Linux
    app. Flatpak's sandbox adds to that; Insane OS's guarantees don't depend on it.
@@ -484,7 +484,7 @@ the mask makes that explicit).
 Each needs the maintainer's approval before code, in the same way as the existing launcher and
 network exceptions:
 
-- **E1. The Flatpak launch path** (Problem 2, option B). `lord.apps.launchFlatpak(id)` /
+- **E1. The Flatpak launch path** (Problem 2, option B). `insane.apps.launchFlatpak(id)` /
   `launchFlatpakWith(id, path)`: only a validated id of an installed Flatpak app (user or system
   installation), only `/usr/bin/flatpak` (root-owned, not writable by others), argv built in C
   from a fixed set (`run`, `--arch`, `--branch` read from the installation, Insane OS's restriction and
@@ -492,29 +492,29 @@ network exceptions:
   or the user's mounts with its `--filesystem` grant). Never an `Exec` line from an export, never
   caller arguments, no shell. The child enters its scope and builds the view (E2) before exec;
   failing either, it doesn't launch.
-- **E2. The identity `flatpak:<id>` and the scope name `app-lordos-fp-<id>.scope`**, created by the
+- **E2. The identity `flatpak:<id>` and the scope name `app-insaneos-fp-<id>.scope`**, created by the
   existing placement request (no new request type), and a launcher view variant that keeps the
   session bus socket (for unrestricted Flatpak apps only) and never contains `systemd/`. Desktop
   ids starting with `fp-` are refused.
 - **E3. The closed list of `flatpak --user` management commands with network** (Problem 4,
-  option A) in `lordos-net-flathub.scope` (`lordos:flathub`): the table above and nothing else; refs
+  option A) in `insaneos-net-flathub.scope` (`insaneos:flathub`): the table above and nothing else; refs
   validated in C; no URL, remote name, key, file or option from the UI. Flatpak's own TLS and
   signature checks are not relaxed by any option (no `--no-gpg-verify`, no `--from` other than the
   shipped file).
 - **E4. Dependency policy wording.** "Flatpak (and with it bubblewrap, OSTree and
   xdg-dbus-proxy) may be installed from the Store as an app source and is run only through E1 and
   E3; it is never linked, never installed by default and never used for Insane OS's own isolation."
-- **E5. Masking Flatpak's services**: the `lordos` package ships `/etc/systemd/system/
+- **E5. Masking Flatpak's services**: the `insaneos` package ships `/etc/systemd/system/
   flatpak-system-helper.service` and `/etc/systemd/user/flatpak-portal.service` as links to
   `/dev/null` (harmless while Flatpak isn't installed). This is a packaging change with a
   migration (`packaging/migrations/`), not an admin action.
-- **E6. `lord.fs` deny list**: `~/.local/share/flatpak` (installations, the trusted key ring,
+- **E6. `insane.fs` deny list**: `~/.local/share/flatpak` (installations, the trusted key ring,
   override files and exports) is added to `fsops_protected()`, since the system reads it to launch
   and install.
 - **E7. A sandboxed parser for Flathub's appstream data** (`sandbox_apply_helper`, file as an fd,
-  sealed memfd back, validated again in lord-server), whichever binary hosts it.
+  sealed memfd back, validated again in insane-server), whichever binary hosts it.
 
-Not requested now: **E8**, lord-server serving more `org.freedesktop.portal.*` interfaces (portal
+Not requested now: **E8**, insane-server serving more `org.freedesktop.portal.*` interfaces (portal
 option B), which gets its own review in a later phase.
 
 ## Device restrictions, the session bus and `no-files` (Design, summary)
@@ -543,7 +543,7 @@ option B), which gets its own review in a later phase.
 3. Install, uninstall, update for user installations; Flathub in Store → Installed and Updates.
 4. The launch path (E1) with the scope and view (E2), the never-granted table, Insane OS's restrictions
    mapped as above; Dock, search, launcher grid and "Open with".
-5. Firewall, Monitor, Settings → Privacy for `flatpak:<id>` and `lordos:flathub`.
+5. Firewall, Monitor, Settings → Privacy for `flatpak:<id>` and `insaneos:flathub`.
 6. The test plan below, with a list of apps actually tried and how they behaved: only those are
    named on the website and in the paper.
 
@@ -570,18 +570,18 @@ claimed; packages installed for it go into `VM-SETUP.md`.
    `xdg-desktop-portal` was not installed and `screen.sh`'s portal check still passes; the two masked
    units show as masked.
 2. `remote-add` from the shipped file: the remote's key fingerprint equals the pinned one;
-   `update --appstream` runs in `lordos-net-flathub.scope` (its row in Monitor → Network); blocking
-   `lordos:flathub` makes it fail with a firewall denial.
+   `update --appstream` runs in `insaneos-net-flathub.scope` (its row in Monitor → Network); blocking
+   `insaneos:flathub` makes it fail with a firewall denial.
 3. Bubblewrap under Insane OS's view: `flatpak run` of a small app (e.g. a GTK 4 app from Flathub)
    inside the view with scoping-only Landlock starts; the same with `sandbox_apply_files` fails (to
    confirm the reasoning in Problem 1).
 4. Identity: after launch, `/proc/<pid>/cgroup` of the app, its `xdg-dbus-proxy` and its children
-   is `…/app-lordos-fp-<id>.scope`; `flatpak run --verbose` logs the failed transient scope; nothing
+   is `…/app-insaneos-fp-<id>.scope`; `flatpak run --verbose` logs the failed transient scope; nothing
    appears under `user@<uid>.service/app.slice/app-flatpak-*`.
 5. Firewall: "no internet" on `flatpak:<id>` blocks the app's connections (`denied out tcp …`),
    per-domain rules apply, the Monitor shows its bytes; an escape attempt from inside the app
    (`systemd-run --user`, `flatpak-spawn --host`, `gdbus call` to `org.freedesktop.systemd1`) fails.
-6. Never-granted: an app declaring `home` can't read `~/.config/lordos/firewall.json`, can't write
+6. Never-granted: an app declaring `home` can't read `~/.config/insaneos/firewall.json`, can't write
    `~/.local/share/applications` or `~/.config/autostart`, and sees `~/.bashrc` read-only; an app
    declaring `host` likewise. A user override file granting `session-bus` has no effect.
 7. no-files: the app sees only `~/.var/app/<id>`; `/media/$USER` and other homes aren't visible;
@@ -614,7 +614,7 @@ claimed; packages installed for it go into `VM-SETUP.md`.
    honour the declaration and show it in the Store?
 4. **Per-app runtime state.** Bind a persistent per-app `$XDG_RUNTIME_DIR/.flatpak/<id>` into the
    view (shared `/tmp` between an app's instances, `flatpak ps`), or keep it private per launch?
-5. **Which binary parses appstream** (E7): a mode of `lord-doc` (which already decodes untrusted
+5. **Which binary parses appstream** (E7): a mode of `insane-doc` (which already decodes untrusted
    files), or a small new helper?
 6. **Key roll-over.** Accept Flathub's key updates delivered in its signed summary (`xa.gpg-keys`,
    Flatpak's default behaviour), or pin strictly to the key Insane OS ships and update it only in

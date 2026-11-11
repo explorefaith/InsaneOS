@@ -1,7 +1,7 @@
 // capture_layer_test.mjs — (0.8.8.6) Screenshots' area selection (❖⇧4) over an open sheet: the selection
 // window goes to the capture layer, above the modal layer and every other one, a press on it is not a
 // click outside for what is open under it, and Esc stays the selection's. Bundles
-// tests/capture_layer_scene.mjs with esbuild (as the theme is built) over a stub `lord` that keeps the
+// tests/capture_layer_scene.mjs with esbuild (as the theme is built) over a stub `insane` that keeps the
 // node tree, runs it, and reads its checks. Needs node and the repository's node_modules (esbuild, react,
 // react-reconciler).
 import { createRequire } from 'node:module';
@@ -18,8 +18,8 @@ let esbuild = null;
 for (const p of nodePaths) { try { esbuild = createRequire(path.join(p, 'x.js'))('esbuild'); break; } catch (e) { /* next */ } }
 if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 
-// A stub lord: nodes, their styles and their parents; any other native call is a no-op.
-const MOCK = `globalThis.__lordTest = (() => {
+// A stub insane: nodes, their styles and their parents; any other native call is a no-op.
+const MOCK = `globalThis.__insaneTest = (() => {
   const styles = new Map(), parents = new Map();
   let nextId = 1;
   const base = {
@@ -35,17 +35,17 @@ const MOCK = `globalThis.__lordTest = (() => {
     settings: { load: () => '{}' },
   };
   const noop = () => undefined;
-  globalThis.lord = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
+  globalThis.insane = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
   return { styles, parents };
 })();`;
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-capture-layer-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-capture-layer-'));
 let bad = 0, n = 0;
 try {
   const out = await esbuild.build({
     entryPoints: [path.join(here, 'capture_layer_scene.mjs')], bundle: true, write: false, format: 'esm',
     platform: 'node', target: 'es2022', nodePaths, logLevel: 'error', jsx: 'automatic',
-    alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js') }, define: { 'process.env.NODE_ENV': '"production"' },
+    alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js') }, define: { 'process.env.NODE_ENV': '"production"' },
     banner: { js: MOCK },
   });
   const file = path.join(dir, 'scene.mjs');

@@ -47,23 +47,23 @@
         {
           "id": "server",
           "label": {
-            "en": "lord-server",
-            "es": "lord-server",
-            "pt": "lord-server"
+            "en": "insane-server",
+            "es": "insane-server",
+            "pt": "insane-server"
           },
           "sub": {
-            "en": "Starts lord-say with fixed arguments; draws the player",
-            "es": "Arranca lord-say con argumentos fijos; dibuja el reproductor",
-            "pt": "Inicia o lord-say com argumentos fixos; desenha o reprodutor"
+            "en": "Starts insane-say with fixed arguments; draws the player",
+            "es": "Arranca insane-say con argumentos fijos; dibuja el reproductor",
+            "pt": "Inicia o insane-say com argumentos fixos; desenha o reprodutor"
           },
           "tone": "ours"
         },
         {
           "id": "say",
           "label": {
-            "en": "lord-say",
-            "es": "lord-say",
-            "pt": "lord-say"
+            "en": "insane-say",
+            "es": "insane-say",
+            "pt": "insane-say"
           },
           "sub": {
             "en": "Splits sentences, plays them; no speech code",
@@ -75,9 +75,9 @@
         {
           "id": "tts",
           "label": {
-            "en": "lord-tts",
-            "es": "lord-tts",
-            "pt": "lord-tts"
+            "en": "insane-tts",
+            "es": "insane-tts",
+            "pt": "insane-tts"
           },
           "sub": {
             "en": "Sandboxed: no network, no sockets, no exec",
@@ -135,25 +135,25 @@
     {
       "path": "server/src/doc/h_tts.c",
       "what": {
-        "en": "lord-tts, the sandboxed engine",
-        "es": "lord-tts, el motor aislado",
-        "pt": "lord-tts, o motor em sandbox"
+        "en": "insane-tts, the sandboxed engine",
+        "es": "insane-tts, el motor aislado",
+        "pt": "insane-tts, o motor em sandbox"
       }
     },
     {
       "path": "server/src/tts/speak.c",
       "what": {
-        "en": "How lord-server starts lord-say",
-        "es": "Cómo lord-server arranca lord-say",
-        "pt": "Como o lord-server inicia o lord-say"
+        "en": "How insane-server starts insane-say",
+        "es": "Cómo insane-server arranca insane-say",
+        "pt": "Como o insane-server inicia o insane-say"
       }
     },
     {
       "path": "server/src/ui/js_voice.c",
       "what": {
-        "en": "The lord.voice API",
-        "es": "La API lord.voice",
-        "pt": "A API lord.voice"
+        "en": "The insane.voice API",
+        "es": "La API insane.voice",
+        "pt": "A API insane.voice"
       }
     },
     {

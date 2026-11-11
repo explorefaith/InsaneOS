@@ -1,6 +1,6 @@
 # Releasing Insane OS
 
-How a Insane OS version goes from `main` to a [GitHub release](https://github.com/lordbasex/Insane OS/releases).
+How a Insane OS version goes from `main` to a [GitHub release](https://github.com/insaneos/Insane OS/releases).
 The releases page is the project's public changelog: every release is documented in full, from
 [CHANGELOG.md](../CHANGELOG.md).
 
@@ -10,10 +10,10 @@ The releases page is the project's public changelog: every release is documented
 - The CHANGELOG version and the git tag carry the pre-release suffix: `0.8.0-beta`, tag
   `v0.8.0-beta`.
 - `package.json` carries the version without the suffix (`"version": "0.8.0"`) and the channel
-  separately (`"lordos": {"channel": "beta"}`; empty for a stable release). The file names use
-  that version: `lordos_0.8.0_amd64.deb`, `lordos-live-0.8.0-amd64.iso`,
-  `lordos-0.8.0-rpi5-arm64.img.xz`, since 0.8.7 `lordos-live-0.8.7-arm64.iso` and, since 0.8.8,
-  `lordos-0.8.8-amd64.ova`.
+  separately (`"insaneos": {"channel": "beta"}`; empty for a stable release). The file names use
+  that version: `insaneos_0.8.0_amd64.deb`, `insaneos-live-0.8.0-amd64.iso`,
+  `insaneos-0.8.0-rpi5-arm64.img.xz`, since 0.8.7 `insaneos-live-0.8.7-arm64.iso` and, since 0.8.8,
+  `insaneos-0.8.8-amd64.ova`.
 - **An update of a published version** that only fixes it or completes it (no features planned for
   the next version) adds a fourth number: `0.8.4.1-beta` after `0.8.4-beta`, package `0.8.4.1`. dpkg
   sorts it after `0.8.4` and before `0.8.5`, so Store → Updates and apt offer it like any version.
@@ -42,28 +42,28 @@ The releases page is the project's public changelog: every release is documented
    add a new empty `## [Unreleased]` above it, and update the link references at the bottom:
 
    ```
-   [Unreleased]: https://github.com/lordbasex/Insane OS/compare/v<version>...HEAD
-   [<version>]: https://github.com/lordbasex/Insane OS/compare/v<previous>...v<version>
+   [Unreleased]: https://github.com/insaneos/Insane OS/compare/v<version>...HEAD
+   [<version>]: https://github.com/insaneos/Insane OS/compare/v<previous>...v<version>
    ```
 
-   Also bump `package.json` (`version`, `lordos.channel`) and commit both.
+   Also bump `package.json` (`version`, `insaneos.channel`) and commit both.
 2. **Tag.** `git tag -a v<version> -m "Insane OS <version>"` on that commit, and push the tag.
 3. **Sign the system code, then build** from the tag.
    - On the maintainer's machine (where the release key lives): `npm run build`, then
      `tools/release/sign-code.sh`. It regenerates `code-manifest.json` (the SHA-256 of every theme
      bundle, the app host and the system apps) and writes `code-manifest.sig` with the release key,
-     checked against `tools/release/lordos-release.pub.pem` ([SIGNING.md](SIGNING.md), "Verified system
+     checked against `tools/release/insaneos-release.pub.pem` ([SIGNING.md](SIGNING.md), "Verified system
      code"). The bundles are the same for every architecture: one signature serves all the images.
      (0.8.7) Also `tools/release/sign-hwsnapshot.sh`: the tested-hardware snapshot
-     (`assets/hwreport/snapshot.json.sig`, same key and format), which ships in its own package, `lordos-hwdata`
+     (`assets/hwreport/snapshot.json.sig`, same key and format), which ships in its own package, `insaneos-hwdata`
      (below); `REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb-hwdata.sh` refuses an unsigned one or one whose signature
-     doesn't verify with `lordos-release.pub.pem`.
-   - Send the tree, with both files, to the build VMs (never the key). Build lord-server as a release:
+     doesn't verify with `insaneos-release.pub.pem`.
+   - Send the tree, with both files, to the build VMs (never the key). Build insane-server as a release:
      `make -C server RELEASE=1` (it only runs code signed with the release key, with no development
      mode).
    - Build the ISO on the build VM (`sudo REQUIRE_SIGNED_CODE=1 tools/iso/build.sh`, [ISO.md](ISO.md)),
      then, in the same folder, the OVA from that ISO's system (0.8.8; `sudo tools/iso/build-ova.sh`, needs `qemu-utils` and
-     `libarchive13t64`; it writes `lordos-<version>-amd64.ova` and its `.sha256` next to the ISO. It has no signature of its
+     `libarchive13t64`; it writes `insaneos-<version>-amd64.ova` and its `.sha256` next to the ISO. It has no signature of its
      own: `SHA256SUMS` covers it. Check it with `VBoxManage import`, and with `ovftool`, which reads it like VMware does),
      the arm64 ISO (0.8.7; `sudo RELEASE=1 REQUIRE_SIGNED_CODE=1 tools/iso/build-arm64.sh`, in a copy of the same
      signed tree, because it compiles `server/build` for aarch64),
@@ -71,59 +71,59 @@ The releases page is the project's public changelog: every release is documented
      `web/lib/imager-guide.mjs`, and to README's downloads; they stay amd64 until the file exists)
      the Raspberry Pi 5 image (`sudo RELEASE=1 REQUIRE_SIGNED_CODE=1 tools/rpi/build-img.sh`,
      [RASPBERRY.md](RASPBERRY.md)) and the `.deb` for amd64 and arm64
-     (`REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb.sh`), plus (0.8.7) `lordos-disk-formats_<version>_<arch>.deb` on each architecture (`tools/iso/mkdeb-diskformats.sh <folder>`, the Store's Disk Formats item, published with `lordos` and never inside the images),
-     and the one `lordos-hwdata_<date>_all.deb` for both
+     (`REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb.sh`), plus (0.8.7) `insaneos-disk-formats_<version>_<arch>.deb` on each architecture (`tools/iso/mkdeb-diskformats.sh <folder>`, the Store's Disk Formats item, published with `insaneos` and never inside the images),
+     and the one `insaneos-hwdata_<date>_all.deb` for both
      (`REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb-hwdata.sh <folder>`; the ISO and image builds make it too and install
-     it with `lordos`, which depends on it). The package is reproducible: built again from the same snapshot and
+     it with `insaneos`, which depends on it). The package is reproducible: built again from the same snapshot and
      signature on another VM it has the same bytes. `mkdeb.sh` puts `code-manifest.json` and
-     `code-manifest.sig` in `/usr/lib/lordos/` and runs `lord-server --check-code` on the staged tree:
+     `code-manifest.sig` in `/usr/lib/insaneos/` and runs `insane-server --check-code` on the staged tree:
      the package is not built if a bundle changed after signing or the signature is missing. A bundle
      rebuilt after signing means signing again. An update with a fourth number may ship without a
      new ISO (0.8.4.1 did: the 0.8.4 ISO stayed the current one, see [ISO.md](ISO.md)).
    - Copy them, and `tools/install/install.sh` as `install.sh`, into one release folder (with
-     `lordos-hwdata_<date>_all.deb`: `install.sh` installs it from the release together with `lordos`, since a
+     `insaneos-hwdata_<date>_all.deb`: `install.sh` installs it from the release together with `insaneos`, since a
      Debian system has no Insane OS repository yet).
-4. **SBOM.** On each build VM, `tools/release/make-sbom.sh lordos_<v>_<arch>.deb`, and put the
+4. **SBOM.** On each build VM, `tools/release/make-sbom.sh insaneos_<v>_<arch>.deb`, and put the
    `.spdx.json` files in the release folder ([COMPLIANCE.md](COMPLIANCE.md)).
 5. **Sign.** On the maintainer's machine, `tools/release/sign-release.sh <release-dir>`: it writes
    `SHA256SUMS` and `SHA256SUMS.sig` and checks them against the public key
-   ([SIGNING.md](SIGNING.md), "Release files"). Then copy `tools/release/lordos-release.pub.pem`
+   ([SIGNING.md](SIGNING.md), "Release files"). Then copy `tools/release/insaneos-release.pub.pem`
    into the folder too (it is not covered by `SHA256SUMS`: it is checked by its fingerprint).
 6. **Release notes.** `tools/release/release-notes.sh <version> > notes.md` prints the
    changelog section for that version (relative links made absolute for the tag, hard-wrapped
    lines joined, its "Verifying" part replaced by the footer) plus a fixed footer: the downloads
-   table, the verification steps and links to lordos.org, the paper, the docs and the security
+   table, the verification steps and links to insaneos.org, the paper, the docs and the security
    page. Read it once before publishing.
 7. **The APT repository** (what installed systems update from; [UPDATES.md](UPDATES.md)). On the
    maintainer's Mac, where the archive key lives (never on a VM):
 
    ```sh
    # staging first: the same .debs, the notes from this version's CHANGELOG section
-   tools/release/apt-repo.sh build staging <release-dir>/lordos-hwdata_<date>_all.deb <release-dir>/lordos-disk-formats_<file-version>_amd64.deb <release-dir>/lordos-disk-formats_<file-version>_arm64.deb <release-dir>/lordos_<file-version>_amd64.deb <release-dir>/lordos_<file-version>_arm64.deb
+   tools/release/apt-repo.sh build staging <release-dir>/insaneos-hwdata_<date>_all.deb <release-dir>/insaneos-disk-formats_<file-version>_amd64.deb <release-dir>/insaneos-disk-formats_<file-version>_arm64.deb <release-dir>/insaneos_<file-version>_amd64.deb <release-dir>/insaneos_<file-version>_arm64.deb
    tools/release/apt-repo.sh publish staging
    tools/release/apt-repo.sh verify staging        # https and http, signature, every index hash
    ```
 
-   On a clean VM with the previous release installed, point a copy of `lordos.sources` at
-   `https://lordos.org/apt-staging` (or a `file:` copy of the tree) and check: `sudo apt update`
+   On a clean VM with the previous release installed, point a copy of `insaneos.sources` at
+   `https://insaneos.org/apt-staging` (or a `file:` copy of the tree) and check: `sudo apt update`
    is clean, Store → Updates shows "Insane OS <version> is available" with these notes, Update installs
-   it, the migrations run (`ls /var/lib/lordos/migrations`), the user's settings are untouched,
+   it, the migrations run (`ls /var/lib/insaneos/migrations`), the user's settings are untouched,
    "Restart required" appears and the system comes back after the restart; a second `apt install
-   --reinstall lordos` runs no migration again. On the Raspberry Pi, `apt-get update` against
+   --reinstall insaneos` runs no migration again. On the Raspberry Pi, `apt-get update` against
    staging in a temporary `Dir::State::Lists` (no change to the board) validates the arm64 index.
    Then the same for the live repository:
 
    ```sh
-   tools/release/apt-repo.sh build live <release-dir>/lordos-hwdata_<date>_all.deb <release-dir>/lordos-disk-formats_<file-version>_amd64.deb <release-dir>/lordos-disk-formats_<file-version>_arm64.deb <release-dir>/lordos_<file-version>_amd64.deb <release-dir>/lordos_<file-version>_arm64.deb
+   tools/release/apt-repo.sh build live <release-dir>/insaneos-hwdata_<date>_all.deb <release-dir>/insaneos-disk-formats_<file-version>_amd64.deb <release-dir>/insaneos-disk-formats_<file-version>_arm64.deb <release-dir>/insaneos_<file-version>_amd64.deb <release-dir>/insaneos_<file-version>_arm64.deb
    tools/release/apt-repo.sh publish live
    tools/release/apt-repo.sh verify live
    ```
 
    A version is never re-uploaded with other contents (the script refuses); a fix is a new version.
-   (0.8.7) The script also refuses a `lordos` that depends on `lordos-hwdata` while the pool has none, and a
-   `lordos-hwdata` whose snapshot signature doesn't verify with `lordos-release.pub.pem`. When the snapshot didn't
-   change since it was last published, passing the same `lordos-hwdata` again is fine (same bytes).
-   `verify live` must pass **before** any release whose package carries `lordos.sources` is
+   (0.8.7) The script also refuses a `insaneos` that depends on `insaneos-hwdata` while the pool has none, and a
+   `insaneos-hwdata` whose snapshot signature doesn't verify with `insaneos-release.pub.pem`. When the snapshot didn't
+   change since it was last published, passing the same `insaneos-hwdata` again is fine (same bytes).
+   `verify live` must pass **before** any release whose package carries `insaneos.sources` is
    published: otherwise `apt update` fails on every system that installs it. A change between
    versions that is not just new files (a unit to enable, a renamed setting, a config to convert)
    is a migration in `packaging/migrations/` or `sdk/settings.js` ([UPDATES.md](UPDATES.md),
@@ -143,7 +143,7 @@ The releases page is the project's public changelog: every release is documented
    (`install.sh`) finds betas too: `releases/latest` skips pre-releases, so it falls back to the
    newest release of any kind ([INSTALL-DEBIAN.md](INSTALL-DEBIAN.md)).
 10. **Check:** download from the release page and run the verification commands from the notes;
-   run `curl -fsSL https://lordos.org/install.sh | sh` on a clean Debian 13; update the website if
+   run `curl -fsSL https://insaneos.org/install.sh | sh` on a clean Debian 13; update the website if
    it names the current version.
 
 ## The labels of hardware reports
@@ -156,7 +156,7 @@ that already exists, so it can be run again. `server/tests/hwreport_test.mjs` fa
 
 <!-- hardware labels -->
 ```sh
-R=lordbasex/Insane OS
+R=insaneos/Insane OS
 for l in hardware-report \
     report:valid report:check report:invalid report:missing \
     kind:vm kind:board kind:laptop kind:server kind:desktop \
@@ -168,7 +168,7 @@ for l in hardware-report \
 done
 ```
 
-Check with `gh label list --repo lordbasex/Insane OS --limit 100`. Done for 0.8.7: 33 labels created.
+Check with `gh label list --repo insaneos/Insane OS --limit 100`. Done for 0.8.7: 33 labels created.
 with a fake fetch), never on a real issue, because workflows for `issues` events run from the default branch.
 
 ## Voice packages
@@ -178,7 +178,7 @@ packages, `Architecture: all`, published only when they change (a new Kyutai mod
 
 ```sh
 tools/voice/fetch-voices.sh <dir>             # Kyutai's files, SHA-256 checked (needs a Hugging Face read token)
-tools/voice/make-previews.sh <dir>            # the recorded samples, with server/build/lord-say and lord-tts
+tools/voice/make-previews.sh <dir>            # the recorded samples, with server/build/insane-say and insane-tts
 node tools/voice/mkdeb-voice.mjs <dir> <out> <YYYY.MM.DD>
 tools/release/apt-repo.sh build staging <out>/*.deb      # then live, as for any package
 ```
@@ -186,7 +186,7 @@ tools/release/apt-repo.sh build staging <out>/*.deb      # then live, as for any
 ## A newer hardware snapshot between releases
 
 (0.8.7; [BENCHMARK.md](BENCHMARK.md), "Newer snapshots between releases".) System Information's Compatibility panel
-reads the tested-hardware snapshot from the `lordos-hwdata` package, so newly accepted reports reach installed
+reads the tested-hardware snapshot from the `insaneos-hwdata` package, so newly accepted reports reach installed
 systems without a Insane OS release: the daily update check notices one available update and Store → Updates →
 *Update all* installs it; the panel reads the files again the next time it opens, with no restart. Everything
 runs on the maintainer's Mac except building the `.deb` (it needs `dpkg-deb`: a build VM, or a `debian:trixie`
@@ -200,17 +200,17 @@ container):
    makes `YYYY.MM.DD.1`, sorted after the plain date.
 3. **Build** from that tree (the two files travel; the key doesn't):
    `REQUIRE_SIGNED_CODE=1 [HWDATA_SERIAL=N] tools/iso/mkdeb-hwdata.sh <folder>` prints
-   `<folder>/lordos-hwdata_<version>_all.deb`. It refuses a missing or non-verifying signature and any snapshot
+   `<folder>/insaneos-hwdata_<version>_all.deb`. It refuses a missing or non-verifying signature and any snapshot
    format other than 1.
 4. **Staging, then live** (only the new package; the pool keeps everything already published):
 
    ```sh
-   tools/release/apt-repo.sh build staging <folder>/lordos-hwdata_<version>_all.deb
+   tools/release/apt-repo.sh build staging <folder>/insaneos-hwdata_<version>_all.deb
    tools/release/apt-repo.sh publish staging
    tools/release/apt-repo.sh verify staging
-   # on a test VM pointed at apt-staging: Store → Check for updates lists lordos-hwdata, Update all installs it,
+   # on a test VM pointed at apt-staging: Store → Check for updates lists insaneos-hwdata, Update all installs it,
    # and System Information → Compatibility shows the new date in its footer
-   tools/release/apt-repo.sh build live <folder>/lordos-hwdata_<version>_all.deb
+   tools/release/apt-repo.sh build live <folder>/insaneos-hwdata_<version>_all.deb
    tools/release/apt-repo.sh publish live
    tools/release/apt-repo.sh verify live
    ```
@@ -220,10 +220,10 @@ container):
    its release folder (step 3 of the release), unchanged if no report arrived since.
 
 Nothing new runs on the systems: the package engine checks `InRelease` and the file's SHA-256 as for any update,
-and `lord-server` checks the snapshot's own signature before System Information sees it. A snapshot can only go
+and `insane-server` checks the snapshot's own signature before System Information sees it. A snapshot can only go
 forward: going back to an older one is a downgrade, which the engine never does on its own. **The format rule:**
-while any supported `lordos` reads snapshot format 1, `lordos-hwdata` carries format 1 (`mkdeb-hwdata.sh`
-refuses any other); a format 2 needs `Breaks: lordos (<< <first version that reads it>)` in that script first.
+while any supported `insaneos` reads snapshot format 1, `insaneos-hwdata` carries format 1 (`mkdeb-hwdata.sh`
+refuses any other); a format 2 needs `Breaks: insaneos (<< <first version that reads it>)` in that script first.
 
 A release that is pulled after publishing stays in the changelog, marked `[YANKED]`, with a line
 saying why.

@@ -1,4 +1,4 @@
-/* vmsandbox.c — Landlock and seccomp around QEMU and lord-vm (see vmsandbox.h). */
+/* vmsandbox.c — Landlock and seccomp around QEMU and insane-vm (see vmsandbox.h). */
 #include "vmsandbox.h"
 #include "vmproto.h"
 
@@ -102,7 +102,7 @@ static int qemu_filter(struct sock_filter *f, int cap) {
     EMIT(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, VM_AUDIT_ARCH, 1, 0));
     EMIT(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
     LDNR();
-    /* socket: never (its sockets are the ones lord-vm passed) */
+    /* socket: never (its sockets are the ones insane-vm passed) */
     EMIT(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SYS_socket, 0, 1));
     RET_ERR(EACCES);
     /* clone: no new namespaces. [0]jeq [1]ld flags [2]and [3]jeq 0 → ok [4]EPERM [5]ALLOW */

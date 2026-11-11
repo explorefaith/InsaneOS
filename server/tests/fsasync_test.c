@@ -1,6 +1,6 @@
-/* fsasync_test.c — lord.fs's Async calls (fsasync.c) on a temporary home folder.
+/* fsasync_test.c — insane.fs's Async calls (fsasync.c) on a temporary home folder.
  *
- * The 0.8.8.7 bug: Files called lord.fs.list / stat / trash on the interface's thread, so a Cloud folder (rclone FUSE)
+ * The 0.8.8.7 bug: Files called insane.fs.list / stat / trash on the interface's thread, so a Cloud folder (rclone FUSE)
  * that took seconds to answer froze the whole desktop. A test hook stands in for the slow file system (it holds a request
  * on its worker until the test lets it go, as rclone holds a FUSE call while it asks the provider), and the test checks:
  *   - submitting never waits for the file system (a "slow" request is held, the call returns at once);
@@ -97,8 +97,8 @@ int main(void) {
     put("slow2/c.txt", "!");
     put("fast/del.txt", "bye");
     snprintf(p, sizeof p, "%s/.config", H); mkdir(p, 0755);
-    snprintf(p, sizeof p, "%s/.config/lordos", H); mkdir(p, 0755);
-    put(".config/lordos/settings.json", "{}");
+    snprintf(p, sizeof p, "%s/.config/insaneos", H); mkdir(p, 0755);
+    put(".config/insaneos/settings.json", "{}");
     CHECK(fsasync_fd() == -1);                      /* nothing is created before the first request */
 
     /* 1. a slow folder: the call returns at once, and the worker is held */
@@ -135,19 +135,19 @@ int main(void) {
     j = wait_for(fr, 3000);
     CHECK(has(j, "\"total\":") && has(j, "\"free\":"));
 
-    /* 3. the checks are lord.fs's own */
+    /* 3. the checks are insane.fs's own */
     int r = submit(FSA_LIST, "/proc/self");
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.systemFolder\""));
     r = submit(FSA_LIST, "missing-folder");
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.outsideHome\""));
     r = submit(FSA_TRASH, "/etc/hostname");                    /* outside the writable roots */
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.outsideHome\""));
-    r = submit(FSA_TRASH, ".config/lordos/settings.json");     /* the deny list (fsops_protected) */
+    r = submit(FSA_TRASH, ".config/insaneos/settings.json");     /* the deny list (fsops_protected) */
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.protected\""));
-    CHECK(exists(".config/lordos/settings.json"));
-    r = submit(FSA_TRASH, ".config/lordos");                   /* a parent of a protected path */
+    CHECK(exists(".config/insaneos/settings.json"));
+    r = submit(FSA_TRASH, ".config/insaneos");                   /* a parent of a protected path */
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.protected\""));
-    CHECK(exists(".config/lordos/settings.json"));
+    CHECK(exists(".config/insaneos/settings.json"));
     char err[256] = "";
     CHECK(fsasync_submit(99, H, err, sizeof err) < 0 && !strncmp(err, "sys.badArgument", 15));
     CHECK(fsasync_submit(FSA_LIST, "", err, sizeof err) < 0);
@@ -159,11 +159,11 @@ int main(void) {
     CHECK(exists(".local/share/Trash/files/del.txt"));
     CHECK(exists(".local/share/Trash/info/del.txt.trashinfo"));
 
-    /* new folder and rename, off the thread, with lord.fs.mkdir / rename's checks */
+    /* new folder and rename, off the thread, with insane.fs.mkdir / rename's checks */
     r = submit(FSA_MKDIR, "fast/New folder");
     CHECK(has(wait_for(r, 3000), "\"ok\":true"));
     CHECK(exists("fast/New folder"));
-    r = submit(FSA_MKDIR, ".config/lordos/settings.json");
+    r = submit(FSA_MKDIR, ".config/insaneos/settings.json");
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.protected\""));
     char from[512], to[512];
     snprintf(from, sizeof from, "%s/fast/New folder", H);
@@ -175,7 +175,7 @@ int main(void) {
     snprintf(to, sizeof to, "%s/fast/Photos", H);
     r = fsasync_submit2(FSA_RENAME, from, to, err, sizeof err);   /* never over an existing name */
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.exists"));
-    snprintf(to, sizeof to, "%s/.config/lordos/settings.json", H);
+    snprintf(to, sizeof to, "%s/.config/insaneos/settings.json", H);
     r = fsasync_submit2(FSA_RENAME, from, to, err, sizeof err);   /* nor onto a protected one */
     CHECK(has(wait_for(r, 3000), "\"error\":\"fs.protected"));
     snprintf(to, sizeof to, "/tmp/fsasync-escape-%d", (int)getpid());

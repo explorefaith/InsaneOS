@@ -7,10 +7,10 @@
 //   desktopSwipe(dir)                       a registerGestureActions action
 //
 // The animation: the windows arriving slide a little and fade in, on their cached raster, by setting
-// the transform of each one's node (lord.setStyle: no React render per frame). A short timer loop runs
+// the transform of each one's node (insane.setStyle: no React render per frame). A short timer loop runs
 // only during a switch, and none at all with Reduce motion.
 import { createElement as h } from 'react';
-import { View, Text, mainDisplay } from '@lordos/runtime';
+import { View, Text, mainDisplay } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { t, direction } from './i18n.js';
 import { settings } from './settings.js';
@@ -167,8 +167,8 @@ function showHud() {
 // While it runs: the windows' start offset, read once by WindowShell. Null when idle.
 export const desktopFx = createStore(null);
 let fxTimer = 0;
-// lord.setStyle takes native properties: a CSS transform only exists in React styles (runtime/style.js)
-const style = (node, k, v) => { try { lord.setStyle(node, k, v); } catch (e) { /* closed meanwhile */ } };
+// insane.setStyle takes native properties: a CSS transform only exists in React styles (runtime/style.js)
+const style = (node, k, v) => { try { insane.setStyle(node, k, v); } catch (e) { /* closed meanwhile */ } };
 
 function endFx(nodes) {
   clearTimeout(fxTimer);
@@ -178,7 +178,7 @@ function endFx(nodes) {
 }
 function animate(step) {
   endFx([]);
-  if (settings.get().reduceMotion || overviewShowing.get() || typeof lord === 'undefined') return;
+  if (settings.get().reduceMotion || overviewShowing.get() || typeof insane === 'undefined') return;
   const dx = step * FX_SLIDE * (direction() === 'rtl' ? -1 : 1);
   const t0 = Date.now();
   desktopFx.set({ transform: `translate(${dx}px, 0px)`, opacity: 0 });

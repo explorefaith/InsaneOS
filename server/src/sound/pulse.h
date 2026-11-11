@@ -1,7 +1,7 @@
 /* pulse.h — serialization of the PulseAudio native protocol ("tagstruct" and packets), the one
  * pipewire-pulse speaks. No libpulse: only what snd.c uses. See docs/SOUND.md. */
-#ifndef LORD_PULSE_H
-#define LORD_PULSE_H
+#ifndef INSANE_PULSE_H
+#define INSANE_PULSE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -64,7 +64,7 @@ void ts_u32(TsOut *t, uint32_t v);
 void ts_u8(TsOut *t, uint8_t v);
 void ts_u64(TsOut *t, uint64_t v);      /* 'U' (usec) */
 void ts_bool(TsOut *t, int v);
-void ts_timeval(TsOut *t, uint32_t sec, uint32_t usec);   /* 'T' (latency, lord-media) */
+void ts_timeval(TsOut *t, uint32_t sec, uint32_t usec);   /* 'T' (latency, insane-media) */
 void ts_str(TsOut *t, const char *s);   /* NULL → 'N' */
 void ts_arb(TsOut *t, const void *p, uint32_t n);
 void ts_ss(TsOut *t, uint8_t format, uint8_t channels, uint32_t rate);

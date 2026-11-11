@@ -1,11 +1,11 @@
-/* js_sql.c — lord.sql: the Databases app's MySQL and MariaDB connections through the sandboxed
- * helper lord-sql (server/src/sql, docs/DATABASES.md). Here we only pass requests on and read the
- * favorites file; the protocol, TLS and authentication run in lord-sql, and sql/sqlc.c resolves
+/* js_sql.c — insane.sql: the Databases app's MySQL and MariaDB connections through the sandboxed
+ * helper insane-sql (server/src/sql, docs/DATABASES.md). Here we only pass requests on and read the
+ * favorites file; the protocol, TLS and authentication run in insane-sql, and sql/sqlc.c resolves
  * and connects the favorite's server (never a host from JS). Everything is asynchronous:
  * request() returns an id and the answer arrives through poll(). Not in the broker: isolated
- * .lpk apps get no lord.sql.
+ * .lpk apps get no insane.sql.
  *
- *   available()            is lord-sql installed?
+ *   available()            is insane-sql installed?
  *   favorites()            the favorites file as JSON text (the empty one when missing)
  *   saveFavorites(json)    validates and writes it (0600, atomic); throws on a bad file
  *   request(json)          → request id, or -1; json is {"op": open|query|use|ping|close, …}
@@ -33,8 +33,8 @@ static JSValue f_favorites(JSContext *c, JSValueConst t, int argc, JSValueConst 
     return v;
 }
 
-/* The favorites file names the servers lord-server connects to and the certificates the user
- * trusted: JS cannot write it through lord.fs (fsops_protected), only here, validated. */
+/* The favorites file names the servers insane-server connects to and the certificates the user
+ * trusted: JS cannot write it through insane.fs (fsops_protected), only here, validated. */
 static JSValue f_save_favorites(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     size_t len = 0;
@@ -67,7 +67,7 @@ static JSValue f_poll(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
         JSValue o = JS_NewObject(c);
         JS_SetPropertyStr(c, o, "id", JS_NewInt32(c, items[i].id));
         JS_SetPropertyStr(c, o, "type", JS_NewString(c, types[items[i].type < 3 ? items[i].type : 1]));
-        /* lord-sql's JSON is checked here: a helper that sent something else gives an error */
+        /* insane-sql's JSON is checked here: a helper that sent something else gives an error */
         JSValue d = JS_ParseJSON(c, items[i].data, items[i].len, "<sql>");
         if (JS_IsException(d)) {
             JS_FreeValue(c, JS_GetException(c));
@@ -89,8 +89,8 @@ static const JSCFunctionListEntry sql_funcs[] = {
     JS_CFUNC_DEF("poll", 0, f_poll),
 };
 
-void js_sql_register(JSContext *c, JSValue lord) {
+void js_sql_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, sql_funcs, sizeof sql_funcs / sizeof sql_funcs[0]);
-    JS_SetPropertyStr(c, lord, "sql", o);
+    JS_SetPropertyStr(c, insane, "sql", o);
 }

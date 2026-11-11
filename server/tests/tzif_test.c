@@ -88,7 +88,7 @@ static void against_glibc(void) {
     static const char *zones[] = {
         "UTC", "Europe/Madrid", "Europe/London", "Europe/Moscow", "America/Argentina/Buenos_Aires", "America/New_York",
         "America/Los_Angeles", "America/Sao_Paulo", "America/Santiago", "America/Mexico_City", "Asia/Tokyo", "Asia/Kolkata",
-        "Asia/Kathmandu", "Asia/Tehran", "Australia/Sydney", "Australia/Lord_Howe", "Pacific/Auckland", "Pacific/Chatham",
+        "Asia/Kathmandu", "Asia/Tehran", "Australia/Sydney", "Australia/Insane_Howe", "Pacific/Auckland", "Pacific/Chatham",
         "Africa/Casablanca", "Asia/Gaza", "America/St_Johns", "Pacific/Kiritimati", "Atlantic/Azores", "Europe/Dublin",
     };
     FILE *probe = fopen("/usr/share/zoneinfo/Europe/Madrid", "r");

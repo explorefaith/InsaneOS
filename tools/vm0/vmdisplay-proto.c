@@ -1,5 +1,5 @@
 /*
- * vmdisplay-proto: Phase 0 prototype of lord-vmdisplay (docs/VIRTUALIZATION.md section 3.2).
+ * vmdisplay-proto: Phase 0 prototype of insane-vmdisplay (docs/VIRTUALIZATION.md section 3.2).
  *
  * Build: cc -O2 -Wall -Wextra -o vmdisplay-proto vmdisplay-proto.c -I../../third_party/stb $(pkg-config --cflags --libs libsystemd) -lm
  *

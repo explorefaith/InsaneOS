@@ -8,11 +8,11 @@ the media and input formats. Code: `server/src/remote/share.c`, `sharewire.c` (f
 
 ## Who may connect
 
-`$XDG_RUNTIME_DIR/lordos/share.sock`, 0600, created only by a user session. **The login screen's `lord-server` doesn't create it.**
+`$XDG_RUNTIME_DIR/insaneos/share.sock`, 0600, created only by a user session. **The login screen's `insane-server` doesn't create it.**
 The app's id comes from the peer's root-owned scope, read through `SO_PEERPIDFD` so a dead pid can't be reused, and is read again at
 each start. A process in no app scope gets `no_identity` and is closed: Terminal programs, `systemd-run --user`, anything the launcher
 didn't start. A kernel without `SO_PEERPIDFD` gets the same answer. A package's id is never taken from a socket: its process can't make one, and a Linux app
-whose scope reads `lpk-<x>` gets `no_identity`. A packaged app's companion doesn't use the socket: lord-server connects it at start and hands it fd 4, tied to `lpk:<id>`, only if
+whose scope reads `lpk-<x>` gets `no_identity`. A packaged app's companion doesn't use the socket: insane-server connects it at start and hands it fd 4, tied to `lpk:<id>`, only if
 the manifest declares `screen-share`; asking for input or the clipboard without `remote-input` in the manifest gets `denied` ([PACKAGED-APPS.md](PACKAGED-APPS.md)).
 
 ## Messages
@@ -40,9 +40,9 @@ Reasons: 1 `no_identity`, 2 `denied`, 3 `no_person`, 4 `no_indicator`, 5 `busy`,
 
 ## Consent
 
-Two permissions, `screen-share` and `remote-input`, in `/var/lib/lordos/share/<uid>.json`: root's, 0640, group the user's. The closed
+Two permissions, `screen-share` and `remote-input`, in `/var/lib/insaneos/share/<uid>.json`: root's, 0640, group the user's. The closed
 actions `share-grant <id> <perm> allow|deny|ask [exe]` and `share-forget <id>` write it, for the session user only; they are reachable only
-from `lord-server`, and `lord.admin` exists only in the shell's context. `lord-server` reads the file and accepts it only if root owns it and
+from `insane-server`, and `insane.admin` exists only in the shell's context. `insane-server` reads the file and accepts it only if root owns it and
 neither group nor others can write it. A damaged file grants nothing.
 
 A Linux app's grant is tied to its program: another path asks again. A path may hold letters, digits and `/._-+@~`, with no `..`; a program
@@ -68,8 +68,8 @@ synchronously in the call that changes it, before another frame is composed:
 | Lock | `mirror_session` | `SHARE_END {locked}` |
 | Switch user | `mirror_session` | `SHARE_END {away}` |
 | The monitor leaves (`RP_UNDISPLAY`) | `mirror.c` | `away`, or stays `locked` |
-| `lord-sessiond`'s seat connection ends | `mirror.c` | `away`, or stays `locked` |
-| The monitor is lent (`RP_DISPLAY`) | `mirror.c` | clears: lord-sessiond lends it only after sign-in |
+| `insane-sessiond`'s seat connection ends | `mirror.c` | `away`, or stays `locked` |
+| The monitor is lent (`RP_DISPLAY`) | `mirror.c` | clears: insane-sessiond lends it only after sign-in |
 
 While the state is set: what is queued for the client is thrown away except the rest of a message already on its way, the encoder stops, no
 frame, sound, cursor or clipboard goes, input is dropped, and every `SHARE_START` is refused with that reason. Held keys and buttons are
@@ -112,14 +112,14 @@ On VM 116 (amd64, 2026-11-01), against isolated headless sessions with a test cl
   `SHARE_LOCK` (no frame, input not reaching the session, starts refused, encoder stopped); `RP_UNDISPLAY` and the seat ending; the unlock by
   `RP_DISPLAY`, with a dummy device; every row of the one-door rule against a root connection acting as the bridge; revoking (about 600 ms);
   12 keyframe requests on a still screen gave 3 keyframes; system surfaces, with the search open; the clipboard's start; malformed messages and
-  200 connections of random bytes; the socket removed at exit; no `lord-media` zombie.
+  200 connections of random bytes; the socket removed at exit; no `insane-media` zombie.
 - `share-test`, 313 checks (a key repeated as presses goes once, #44); `share-fuzz`, 200,000 iterations under ASan and UBSan; `share_model_test.mjs`. The hour of 3 s requests (122 keyframes) is
   simulated, not live.
 - `remote.sock`: a process of the same user is closed at once, root is served, and a client that connects as root and then drops to the user
-  stays connected, which is the bridge's order. The real `lord-sessiond` was not run.
+  stays connected, which is the bridge's order. The real `insane-sessiond` was not run.
 
 **Not tested:** the system prompt and its answer (a headless session has no person to ask); a real monitor, a real lock screen and a real
-`lord-sessiond`; the real bridge and page with `RP_BUSY`, and a browser on 5673 before and after; ⌃⌥⇧Esc; a click on the badge's Stop; protected
+`insane-sessiond`; the real bridge and page with `RP_BUSY`, and a browser on 5673 before and after; ⌃⌥⇧Esc; a click on the badge's Stop; protected
 windows; sensitive clipboard items; sound; `SHARE_TEXT` reaching a field; `FW_R_NO_SCREEN`; several displays; the GPU path; a badge under an
 `xdg_popup`. Settings and Monitor additions were built, not looked at.
 

@@ -1,4 +1,4 @@
-/* mcursor_test.c — a Machines guest's pointer made ready for lord-server's cursor (src/media/mcursor.c):
+/* mcursor_test.c — a Machines guest's pointer made ready for insane-server's cursor (src/media/mcursor.c):
  * premultiplied, cut to what shows, the hotspot kept, scaled with the picture and never above the cursor plane. */
 #include "../src/media/mcursor.h"
 

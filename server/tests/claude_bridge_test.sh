@@ -1,14 +1,14 @@
 #!/bin/sh
-# claude_bridge_test.sh — lord-claude-status (src/term/claudebridge.c): keeps Claude Code's status JSON for the
-# Terminal's footer and passes the same input to the user's own status line. Needs build/lord-claude-status.
+# claude_bridge_test.sh — insane-claude-status (src/term/claudebridge.c): keeps Claude Code's status JSON for the
+# Terminal's footer and passes the same input to the user's own status line. Needs build/insane-claude-status.
 cd "$(dirname "$0")/.." || exit 2
-B=$PWD/build/lord-claude-status
+B=$PWD/build/insane-claude-status
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 fails=0
 check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fails=$((fails + 1)); fi; }
 J='{"session_id":"e9be29c2-84cd-4d07-b0e2-348c94977132","model":{"display_name":"Opus 5.5"},"context_window":{"used_percentage":24},"rate_limits":{"five_hour":{"used_percentage":37,"resets_at":1794110000}}}'
-D="$T/h1/.cache/lordos/claude"
+D="$T/h1/.cache/insaneos/claude"
 mkdir -p "$T/h1"
 out=$(printf '%s' "$J" | HOME="$T/h1" LANG=es_AR.UTF-8 "$B")
 check "no command: Insane OS's own status line" '[ "$out" = "Opus 5.5 | ctx 24% | 5h 37%" ]'
@@ -37,13 +37,13 @@ mkdir -p "$T/h2"
 printf '{"session_id":"../../evil"}' | HOME="$T/h2" "$B" >/dev/null
 printf '{"session_id":"a/b"}' | HOME="$T/h2" "$B" >/dev/null
 printf 'not json' | HOME="$T/h2" "$B" >/dev/null
-check "bad session ids and bad JSON are not kept" '[ ! -e "$T/h2/.cache/lordos/claude" ] || [ -z "$(ls -A "$T/h2/.cache/lordos/claude")" ]'
+check "bad session ids and bad JSON are not kept" '[ ! -e "$T/h2/.cache/insaneos/claude" ] || [ -z "$(ls -A "$T/h2/.cache/insaneos/claude")" ]'
 check "nothing written outside the folder" '[ ! -e "$T/evil.json" ] && [ ! -e "$T/h2/evil.json" ]'
-mkdir -p "$T/h3/.cache/lordos" "$T/elsewhere"
-ln -s "$T/elsewhere" "$T/h3/.cache/lordos/claude"
+mkdir -p "$T/h3/.cache/insaneos" "$T/elsewhere"
+ln -s "$T/elsewhere" "$T/h3/.cache/insaneos/claude"
 printf '%s' "$J" | HOME="$T/h3" "$B" >/dev/null
 check "a link in place of the folder is not followed" '[ -z "$(ls -A "$T/elsewhere")" ]'
-mkdir -p "$T/h1/.cache/lordos/claude" && touch -d '10 days ago' "$D/old-session.json"
+mkdir -p "$T/h1/.cache/insaneos/claude" && touch -d '10 days ago' "$D/old-session.json"
 printf '%s' "$J" | HOME="$T/h1" "$B" >/dev/null
 check "snapshots older than a week are removed" '[ ! -e "$D/old-session.json" ]'
 head -c 2000000 /dev/zero | tr '\0' a | HOME="$T/h1" "$B" sh -c 'exit 0'

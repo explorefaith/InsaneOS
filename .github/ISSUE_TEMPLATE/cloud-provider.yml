@@ -1,5 +1,5 @@
 name: Cloud provider
-description: Tell us whether a cloud storage provider works in LordOS's Cloud, so we can mark it verified.
+description: Tell us whether a cloud storage provider works in InsaneOS's Cloud, so we can mark it verified.
 title: "Cloud provider: "
 labels: ["cloud-provider"]
 body:
@@ -37,8 +37,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: LordOS version
-      description: Open the About LordOS app and copy the version (for example "0.8.8.5 · Beta").
+      label: InsaneOS version
+      description: Open the About InsaneOS app and copy the version (for example "0.8.8.5 · Beta").
       placeholder: 0.8.8.5 · Beta
     validations:
       required: true

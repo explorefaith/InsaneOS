@@ -11,7 +11,7 @@ runs the A/B demonstration of docs/IMMUTABLE.md over the serial console:
 
 Usage (on the build host, Debian 13 with qemu-system-x86 and ovmf, as root: the work folder is
 root's and the demo re-publishes the update folder with build.sh):
-  sudo tools/immutable/demo.py [work folder]   # default /var/tmp/lordos-immutable
+  sudo tools/immutable/demo.py [work folder]   # default /var/tmp/insaneos-immutable
 It never touches the built disk.raw: it boots a copy. The transcript goes to <work>/demo/transcript.txt.
 The update server is a local HTTP server on the build host (the guest sees it at 10.0.2.2).
 """
@@ -26,12 +26,12 @@ import sys
 import threading
 import time
 
-WORK = sys.argv[1] if len(sys.argv) > 1 else "/var/tmp/lordos-immutable"
+WORK = sys.argv[1] if len(sys.argv) > 1 else "/var/tmp/insaneos-immutable"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(WORK, "out")
 DEMO = os.path.join(WORK, "demo")
 PORT = 8642
-PROMPT = re.compile(rb"root@lordos-immutable:[^#]*# $")
+PROMPT = re.compile(rb"root@insaneos-immutable:[^#]*# $")
 ANSI = re.compile(rb"\x1b\[[0-9;=?]*[A-Za-z]|\x1b[()][A-Z0-9]|\r")
 
 os.makedirs(DEMO, exist_ok=True)
@@ -141,51 +141,51 @@ def main():
     try:
         note("1. first boot of the factory image")
         g.login()
-        for c in ["cat /usr/lib/lordos/immutable/VERSION",
-                  "/usr/lib/lordos/immutable/update --status",
+        for c in ["cat /usr/lib/insaneos/immutable/VERSION",
+                  "/usr/lib/insaneos/immutable/update --status",
                   "ls /efi > /dev/null; findmnt -lno TARGET,SOURCE,FSTYPE,OPTIONS | grep -E '^(/|/usr|/efi) ' | cut -c1-110",
                   "veritysetup status usr | sed -n '1,4p;/root hash/p'",
                   "touch /usr/bin/evil; echo exit=$?",
-                  "echo 'kept across updates' > /etc/lordos-demo.conf; mkdir -p /home/demo && echo 'my file' > /home/demo/notes.txt; echo ok",
-                  "systemctl is-active lordos-health systemd-bless-boot; echo"]:
+                  "echo 'kept across updates' > /etc/insaneos-demo.conf; mkdir -p /home/demo && echo 'my file' > /home/demo/notes.txt; echo ok",
+                  "systemctl is-active insaneos-health systemd-bless-boot; echo"]:
             g.run(c)
 
         note("2. signed update to version 2 (into slot B)")
-        g.run(f"/usr/lib/lordos/immutable/update {url}")
-        g.run("/usr/lib/lordos/immutable/update --status")
+        g.run(f"/usr/lib/insaneos/immutable/update {url}")
+        g.run("/usr/lib/insaneos/immutable/update --status")
         g.reboot()
         g.login()
         note("booted after the update")
-        for c in ["cat /usr/lib/lordos/immutable/VERSION",
-                  "cat /etc/lordos-demo.conf /home/demo/notes.txt",
-                  "systemctl is-active lordos-health systemd-bless-boot; journalctl -b -u systemd-bless-boot -o cat | tail -3",
-                  "/usr/lib/lordos/immutable/update --status"]:
+        for c in ["cat /usr/lib/insaneos/immutable/VERSION",
+                  "cat /etc/insaneos-demo.conf /home/demo/notes.txt",
+                  "systemctl is-active insaneos-health systemd-bless-boot; journalctl -b -u systemd-bless-boot -o cat | tail -3",
+                  "/usr/lib/insaneos/immutable/update --status"]:
             g.run(c)
 
         note("3. a broken release: version 3 (fails its health check) into slot A")
         publish(1, 2, 3)
-        g.run(f"/usr/lib/lordos/immutable/update {url}")
-        g.run("/usr/lib/lordos/immutable/update --status")
+        g.run(f"/usr/lib/insaneos/immutable/update {url}")
+        g.run("/usr/lib/insaneos/immutable/update --status")
         g.reboot()
         for attempt in (1, 2, 3):
-            g.expect(rb"lordos: this version failed its health check", 240)
+            g.expect(rb"insaneos: this version failed its health check", 240)
             note(f"version 3 failed its health check (attempt {attempt}); the system restarts itself")
             g.expect(rb"Command line: usrhash=", 120)
         g.login(300)
         note("booted on its own after the failed attempts")
-        for c in ["cat /usr/lib/lordos/immutable/VERSION",
-                  "/usr/lib/lordos/immutable/update --status",
-                  "cat /etc/lordos-demo.conf /home/demo/notes.txt",
-                  "journalctl -b -1 -u lordos-health -o cat --no-pager | grep health-check",
+        for c in ["cat /usr/lib/insaneos/immutable/VERSION",
+                  "/usr/lib/insaneos/immutable/update --status",
+                  "cat /etc/insaneos-demo.conf /home/demo/notes.txt",
+                  "journalctl -b -1 -u insaneos-health -o cat --no-pager | grep health-check",
                   "journalctl --list-boots --no-pager | tail -5",
-                  f"/usr/lib/lordos/immutable/update {url}"]:
+                  f"/usr/lib/insaneos/immutable/update {url}"]:
             g.run(c)
 
         note("3b. a hostile mirror: SHA256SUMS changed on the server (a version 9 added) without the key")
         sums = os.path.join(OUT, "updates", "SHA256SUMS")
-        subprocess.run(["sudo", "sh", "-c", f"echo '{'0' * 64}  lordos_9.efi' >> {sums}"], check=True)
-        g.run(f"/usr/lib/lordos/immutable/update {url}; echo exit=$?")
-        g.run("/usr/lib/lordos/immutable/update --status")
+        subprocess.run(["sudo", "sh", "-c", f"echo '{'0' * 64}  insaneos_9.efi' >> {sums}"], check=True)
+        g.run(f"/usr/lib/insaneos/immutable/update {url}; echo exit=$?")
+        g.run("/usr/lib/insaneos/immutable/update --status")
         publish(1, 2, 3)
 
         note("4. tampering: corrupt 8 MiB of the running /usr slot's blocks underneath dm-verity")

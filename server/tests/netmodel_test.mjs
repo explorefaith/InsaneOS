@@ -38,9 +38,9 @@ const flows = [
   F({ name: 'video.example', addr: '203.0.113.6', port: 443, proto: 'tcp', rx: 50, tx: 50, last: 10 }),
   F({ name: 'ads.example', addr: '198.51.100.1', port: 443, rx: 10, tx: 10, denied: 2, listed: 'ads', last: 40 }),
   F({ addr: '192.0.2.44', port: 8080, rx: 5, tx: 5, cc: 'AR' }),
-  F({ app: 'lordos:mail', appName: 'Mail', name: 'imap.example', addr: '192.0.2.10', port: 993, rx: 700, tx: 300, cc: 'AR', last: 50 }),
-  F({ app: 'lordos:terminal', appName: 'Terminal', name: null, addr: '10.0.0.5', port: 22, dir: 'out', rx: 1, tx: 1, scope: 'lan', cc: '' }),
-  F({ app: 'lordos:terminal', appName: 'Terminal', addr: '192.168.1.20', port: 8000, dir: 'in', rx: 3, tx: 3, scope: 'lan', cc: '' }),
+  F({ app: 'insaneos:mail', appName: 'Mail', name: 'imap.example', addr: '192.0.2.10', port: 993, rx: 700, tx: 300, cc: 'AR', last: 50 }),
+  F({ app: 'insaneos:terminal', appName: 'Terminal', name: null, addr: '10.0.0.5', port: 22, dir: 'out', rx: 1, tx: 1, scope: 'lan', cc: '' }),
+  F({ app: 'insaneos:terminal', appName: 'Terminal', addr: '192.168.1.20', port: 8000, dir: 'in', rx: 3, tx: 3, scope: 'lan', cc: '' }),
 ];
 
 const tree = sortTree(groupFlows(flows, 'app'), 'most');
@@ -68,7 +68,7 @@ eq('sort conns', sortTree(groupFlows(flows, 'app'), 'conns').map((x) => x.label)
 const only = (f, q = {}, ctx = {}) => filterFlows(flows, f, q, ctx).length;
 eq('direction', [only({ dir: 'in' }), only({ dir: 'out' }), only({})], [1, 7, 8]);
 eq('protocol', [only({ proto: 'udp' }), only({ proto: 'tcp' })], [2, 6]);
-eq('status', [only({ status: 'denied' }), only({ status: 'allowed' }), only({ status: 'rules' }, {}, { hasRule: (f) => f.app === 'lordos:mail' })], [1, 7, 1]);
+eq('status', [only({ status: 'denied' }), only({ status: 'allowed' }), only({ status: 'rules' }, {}, { hasRule: (f) => f.app === 'insaneos:mail' })], [1, 7, 1]);
 eq('search: app chip', only({}, parseSearch('app:mail')), 1);
 eq('search: app + domain chips combine', only({}, parseSearch('app:firefox domain:example')), 4);
 eq('search: a parent domain covers its names', only({}, parseSearch('domain:example')), 5);
@@ -87,10 +87,10 @@ eq('view defaults', normView(null), { group: 'app', dir: 'all', proto: 'all', st
 eq('view keeps only known values', normView({ group: 'port', dir: 'sideways', sort: 'least', x: 1 }), { group: 'port', dir: 'all', proto: 'all', status: 'all', sort: 'least' });
 
 // ---- (0.8.8.6) whose connection it is: a running machine's guest is Machines' ----
-const guest = { cgApp: 'lordos:machines', cgSub: 'vm-1', pid: -1, name: '', exe: '', self: false };
-eq('a guest connection is Machines\'', connAppKey(guest), 'lordos:machines');
-eq('the scope wins over the process', connAppKey({ cgApp: 'lordos:mail', self: true, name: 'lord-server' }), 'lordos:mail');
-eq('lord-server itself', connAppKey({ cgApp: '', self: true, name: 'lord-server' }), 'lordos');
+const guest = { cgApp: 'insaneos:machines', cgSub: 'vm-1', pid: -1, name: '', exe: '', self: false };
+eq('a guest connection is Machines\'', connAppKey(guest), 'insaneos:machines');
+eq('the scope wins over the process', connAppKey({ cgApp: 'insaneos:mail', self: true, name: 'insane-server' }), 'insaneos:mail');
+eq('insane-server itself', connAppKey({ cgApp: '', self: true, name: 'insane-server' }), 'insaneos');
 eq('no scope: the executable', connAppKey({ cgApp: '', exe: '/usr/bin/curl', name: 'curl' }), '/usr/bin/curl');
 eq('nothing known', connAppKey({ cgApp: '', pid: -1, name: '', exe: '' }), '?');
 eq('Machines row with the machines by name', machinesLabel('Machines', new Set(['vm-2', 'vm-1', 'vm-1']), { 'vm-1': 'Ubuntu 24.04', 'vm-2': 'Debian 13' }),

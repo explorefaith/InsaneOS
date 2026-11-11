@@ -6,7 +6,7 @@
 //
 //   BASE                      the keys every theme shares
 //   useShortcuts({ grabs, table, onSuperTap, appsPaste })  a theme's own: its table, which fixed list
-//                             of keys lord-server keeps from apps ('flow' or 'classic',
+//                             of keys insane-server keeps from apps ('flow' or 'classic',
 //                             server/src/wl/keygrab.c), what ❖ pressed alone does and whether ❖V
 //                             belongs to the apps
 //   addShortcuts(entries)     a module's own (Screenshots, the Terminal's drop-down window);
@@ -20,7 +20,7 @@
 // keeps it out of the list while it returns false.
 // Letters follow the keyboard layout; other keys their position, in every layout.
 import { useEffect, useRef } from 'react';
-import { setKeyFilter } from '@lordos/runtime';
+import { setKeyFilter } from '@insaneos/runtime';
 import { createStore } from './store.js';
 import { t } from './i18n.js';
 import { keyboard } from './keyboard.js';
@@ -66,8 +66,8 @@ function parseCombo(combo) {
 
 // ---- the base every theme shares ----
 
-const lockScreen = () => { if (typeof lord.session !== 'undefined' && lord.session.managed()) lord.session.lock(); };
-const canLock = () => typeof lord.session !== 'undefined' && lord.session.managed();
+const lockScreen = () => { if (typeof insane.session !== 'undefined' && insane.session.managed()) insane.session.lock(); };
+const canLock = () => typeof insane.session !== 'undefined' && insane.session.managed();
 const toggleSearch = () => spotlight.toggle();
 const nextKeyboard = () => keyboard.next();
 const severalKeyboards = () => keyboard.configured().length > 1;
@@ -173,7 +173,7 @@ export function resetShortcuts() {
   setKeyFilter(filter);
   changed();
 }
-function setGrabs(name) { if (typeof lord.wayland !== 'undefined') lord.wayland.grabKeys(name); }
+function setGrabs(name) { if (typeof insane.wayland !== 'undefined') insane.wayland.grabKeys(name); }
 
 // A theme's shortcuts. The table is read when the grabs change: `run` should be stable or go through a ref.
 export function useShortcuts({ grabs = '', table = [], onSuperTap: tap = null, appsPaste: paste = false }) {

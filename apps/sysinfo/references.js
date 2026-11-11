@@ -1,13 +1,13 @@
 // InsaneBench's reference machines (docs/BENCHMARK.md, "Results without one magic number"): a result is
 // shown as "×N" of each one measured with the same InsaneBench version. Every entry is a real Full run,
-// copied from the lordbench.json it wrote, with the machine described in sysinfo.perf.ref.<id>. A measurement
+// copied from the insanebench.json it wrote, with the machine described in sysinfo.perf.ref.<id>. A measurement
 // added to InsaneBench after a reference's run is listed in its notMeasured until that machine is measured again.
 // Planned: a modest x86 PC; it is added when it has been measured.
 export const REFERENCES = [
   {
     // VM 116 on Proxmox VE: 8 vCPU (host CPU, Xeon Silver 4108 at 1.8 GHz), 4 GB, virtio disk, no
     // GPU passthrough (Mesa llvmpipe); Insane OS 0.8.6 in development, 2026-10-27, Full with 30 s sustained
-    id: 'vm', lordbench: 1, mode: 'full',
+    id: 'vm', insanebench: 1, mode: 'full',
     results: {
       'cpu.sha256.1': { value: 165.951 }, 'cpu.sha256.n': { value: 984.265 },
       'cpu.matmul.1': { value: 3.31858 }, 'cpu.matmul.n': { value: 19.9376 },
@@ -27,15 +27,15 @@ export const REFERENCES = [
       // sustained or storage part; its other measurements were within 4 % of the ones above). They time Insane OS's
       // engine too, so each carries the Insane OS version the run reported and is compared only with results of that
       // version (perf.js ENGINE_IDS): measure them again for every release
-      'cpu.ui.1': { value: 36.9702, lordos: '0.8.5-beta' }, 'cpu.ui.n': { value: 39.9302, lordos: '0.8.5-beta' },
-      'cpu.shape.1': { value: 618.791, lordos: '0.8.5-beta' }, 'cpu.shape.n': { value: 3595.11, lordos: '0.8.5-beta' },
+      'cpu.ui.1': { value: 36.9702, insaneos: '0.8.5-beta' }, 'cpu.ui.n': { value: 39.9302, insaneos: '0.8.5-beta' },
+      'cpu.shape.1': { value: 618.791, insaneos: '0.8.5-beta' }, 'cpu.shape.n': { value: 3595.11, insaneos: '0.8.5-beta' },
     },
   },
   {
-    // Raspberry Pi 5 Model B Rev 1.1, 16 GB, a 32 GB SD card, the Insane OS kernel 6.18.57-lordos.3, the fan on
-    // its header (lord-fand), GPU V3D 7.1; Insane OS 0.8.5 with InsaneBench 1 from the 0.8.6 tree run from a
+    // Raspberry Pi 5 Model B Rev 1.1, 16 GB, a 32 GB SD card, the Insane OS kernel 6.18.57-insaneos.3, the fan on
+    // its header (insane-fand), GPU V3D 7.1; Insane OS 0.8.5 with InsaneBench 1 from the 0.8.6 tree run from a
     // terminal, 2026-10-27, Full with 180 s sustained (55.6 °C at most, no speed lost)
-    id: 'pi5', lordbench: 1, mode: 'full',
+    id: 'pi5', insanebench: 1, mode: 'full',
     results: {
       'cpu.sha256.1': { value: 933.43 }, 'cpu.sha256.n': { value: 3692.78 },
       'cpu.matmul.1': { value: 2.26049 }, 'cpu.matmul.n': { value: 5.98807 },
@@ -55,8 +55,8 @@ export const REFERENCES = [
       // build of main from a terminal, 180 s sustained, ondemand governor, 37.0 -> 49.6 °C, 59 °C at most; a
       // second Full run without the sustained part gave the same within 0.4 %). Compared only with results of the
       // same Insane OS version (perf.js ENGINE_IDS): measure them again for every release
-      'cpu.ui.1': { value: 39.2238, lordos: '0.8.5-beta' }, 'cpu.ui.n': { value: 45.2309, lordos: '0.8.5-beta' },
-      'cpu.shape.1': { value: 628.321, lordos: '0.8.5-beta' }, 'cpu.shape.n': { value: 2514.02, lordos: '0.8.5-beta' },
+      'cpu.ui.1': { value: 39.2238, insaneos: '0.8.5-beta' }, 'cpu.ui.n': { value: 45.2309, insaneos: '0.8.5-beta' },
+      'cpu.shape.1': { value: 628.321, insaneos: '0.8.5-beta' }, 'cpu.shape.n': { value: 2514.02, insaneos: '0.8.5-beta' },
     },
   },
 ];

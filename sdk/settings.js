@@ -1,4 +1,4 @@
-// settings.js — user settings, stored in ~/.config/lordos/settings.json.
+// settings.js — user settings, stored in ~/.config/insaneos/settings.json.
 import { createStore, useStore } from './store.js';
 import { DEFAULT_WALLPAPER } from './wallpapers.js';
 
@@ -6,6 +6,8 @@ const DEFAULTS = {
   mode: 'dark',          // 'dark' | 'light'
   accent: 'azul',
   effects: true,         // transparency with blur
+  glassBlur: 24,          // 0.8.8.8, Settings → Wallpaper → Glass: the panels' backdrop blur radius, 0-64 px
+  glassTransparency: 0.3, // 0.8.8.8, same page: how much the wallpaper shows through, 0 (today's look) … 1 (almost clear)
   reduceMotion: false,   // decorative animations off (Settings → Appearance)
   browserTabsInTitlebar: true,   // 0.8.4, Settings → Appearance: Chromium and Firefox draw their own bar (browserframe.js)
   browserFramePending: false,    // that switch is still waiting for Chromium to quit
@@ -40,7 +42,7 @@ const DEFAULTS = {
 // Per-user settings migrations (docs/UPDATES.md, "Migrations"): when an update changes the shape or
 // meaning of a setting, it appends [schema, (settings) => newSettings] here. Each runs once per user,
 // in order, when the session loads the file; "schema" records the last one applied. The system-wide
-// migrations (as root) are the lordos package's (packaging/migrations).
+// migrations (as root) are the insaneos package's (packaging/migrations).
 export const SETTINGS_SCHEMA = 4;
 // A Terminal key mapping that sends what a US keyboard's key types anyway (keys.js names keys by their
 // US position): on a US keyboard it does nothing, on any other it types the wrong character. The iTerm2
@@ -87,7 +89,7 @@ export function migrateSettings(s) {
 
 function load() {
   try {
-    const txt = lord.settings.load();
+    const txt = insane.settings.load();
     return txt ? migrateSettings({ ...DEFAULTS, ...JSON.parse(txt) }) : { ...DEFAULTS, schema: SETTINGS_SCHEMA };
   } catch (e) {
     console.warn('unreadable settings, using the defaults:', e);
@@ -98,19 +100,19 @@ function load() {
 export const settings = createStore(load());
 // Developer timing (settings.json "debugTiming": true, no UI): opening an app logs how long its
 // first window took (sdk/components.jsx AppHost, sdk/packages.js isolatedApp, docs/PRIVACY.md).
-globalThis.__lordTiming = !!settings.get().debugTiming;
+globalThis.__insaneTiming = !!settings.get().debugTiming;
 
 let pending = 0;
 settings.subscribe(() => {
   clearTimeout(pending);
-  pending = setTimeout(() => lord.settings.save(JSON.stringify(settings.get(), null, 2)), 300);
+  pending = setTimeout(() => insane.settings.save(JSON.stringify(settings.get(), null, 2)), 300);
 });
 
 // Now, not in 300 ms; durable: on the disk before this returns (session restore's marker must survive
 // a power cut). Blocks the frame for that write, so it's only for that.
 export function saveSettingsNow(durable = false) {
   clearTimeout(pending);
-  return lord.settings.save(JSON.stringify(settings.get(), null, 2), durable);
+  return insane.settings.save(JSON.stringify(settings.get(), null, 2), durable);
 }
 
 export function useSettings() {

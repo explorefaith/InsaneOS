@@ -982,7 +982,7 @@ static void handle_call(const DMsg *m) {
 }
 
 int ss_start(int busfd, const SsBackend *be, void *ud) {
-    debug = getenv("LORD_SS_DEBUG") != NULL;
+    debug = getenv("INSANE_SS_DEBUG") != NULL;
     B = be;
     U = ud;
     if (dbus_open(&C, busfd, 5000)) { LOG("could not authenticate with the bus\n"); dbus_close(&C); return -1; }

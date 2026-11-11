@@ -12,8 +12,8 @@
  * so the app carries on as if it had been shown. Only the bus's own answer counts; an error, a
  * process that can't be read or no answer within 3 s also drop it (fail closed). Applies to the
  * next notification. */
-#ifndef LORD_HW_NOTIFYD_H
-#define LORD_HW_NOTIFYD_H
+#ifndef INSANE_HW_NOTIFYD_H
+#define INSANE_HW_NOTIFYD_H
 
 #include <stddef.h>
 #include <stdint.h>

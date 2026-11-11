@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=InsaneOS
+Description=The InsaneOS apple on navy with a calm progress bar
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/insaneos
+ScriptFile=/usr/share/plymouth/themes/insaneos/insaneos.script

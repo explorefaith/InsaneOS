@@ -1,7 +1,7 @@
 // The pieces the Databases screens share (the approved mocks: Main, Structure, Content, Query, Table Info, Console):
 // the palette from the theme's tokens, icons drawn from boxes, the mocks' buttons, check boxes, pop-up fields, form
 // rows, boxes, sheets, the footer bar and its icon buttons.
-import { View, Text, MenuButton, Overlay, addListener, useTheme, t as tr } from '@lordos/sdk';
+import { View, Text, MenuButton, Overlay, addListener, useTheme, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 // surfaces: the theme's tokens, with the mocks' darker bars in dark mode
@@ -323,7 +323,7 @@ export function useSize(ref, initial = { w: 800, h: 500 }) {
     const read = () => {
       if (!ref.current) return;
       try {
-        const [, , w, h] = lord.getLayout(ref.current.id);
+        const [, , w, h] = insane.getLayout(ref.current.id);
         if (Math.abs(w - last.current.w) > 0.5 || Math.abs(h - last.current.h) > 0.5) { last.current = { w, h }; setSize({ w, h }); }
       } catch (e) { /* not laid out yet */ }
     };

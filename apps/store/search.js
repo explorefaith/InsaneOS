@@ -1,5 +1,5 @@
 // search.js — the Store's search rules (0.8.8.4, #37), pure functions with no SDK imports
-// (server/tests/store_search_test.mjs). The same rules as the package engine's lord.pkg.search
+// (server/tests/store_search_test.mjs). The same rules as the package engine's insane.pkg.search
 // (server/src/pkg/match.c): the query is split into words; case and accents don't matter; the words
 // may be written joined or apart ("vs code" finds "vscode", "vscode" finds "VS Code"); an item with
 // every word comes first, ranked by where the words are (the exact name, the name's start, a word's

@@ -7,7 +7,7 @@
 // adapter off again when the user's last choice was off. Once per appearance of the adapter: turned on
 // later by other means, it stays on.
 //
-// state: lord.bt.state(); wantOff: settings.bluetoothOff; done: the adapter path already handled (or null).
+// state: insane.bt.state(); wantOff: settings.bluetoothOff; done: the adapter path already handled (or null).
 // Returns { off: power it off now, done: the new value of done }.
 export function btPowerAction(state, wantOff, done) {
   const a = state && state.available ? state.adapter : null;

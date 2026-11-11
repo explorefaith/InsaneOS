@@ -14,7 +14,7 @@ System and Insane OS logs. Use it to see what happened when something fails.
 - **My logs:** your systemd journal (your apps and services), read with your permissions.
 - **System** and **Kernel:** the system journal. Administrators (sudo group) see it through the
   administration helper, as does anyone in the journal reader group.
-- **Insane OS:** your session logs (`~/.cache/lordos`, like `session.log`).
+- **Insane OS:** your session logs (`~/.cache/insaneos`, like `session.log`).
 
 ## Filter
 

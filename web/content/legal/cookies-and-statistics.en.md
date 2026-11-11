@@ -2,7 +2,7 @@
 
 ## No cookies
 
-lordos.org sets **no cookies**: no session, analytics, advertising or tracking cookies, and none from third parties. That's why the website shows no cookie banner.
+insaneos.org sets **no cookies**: no session, analytics, advertising or tracking cookies, and none from third parties. That's why the website shows no cookie banner.
 
 ## No analytics or statistics
 
@@ -17,10 +17,10 @@ Two small preferences are saved in your browser's `localStorage`, on your device
 
 | Key | Value | Purpose |
 |---|---|---|
-| `lordos-theme` | `light` or `dark` | remembers the theme you chose with the theme button; with automatic, nothing is saved and the site follows your system |
-| `lordos-lang-seen` | `1` | shows the suggestion to read the site in your language only once |
+| `insaneos-theme` | `light` or `dark` | remembers the theme you chose with the theme button; with automatic, nothing is saved and the site follows your system |
+| `insaneos-lang-seen` | `1` | shows the suggestion to read the site in your language only once |
 
-They are never sent to a server, don't identify you and aren't shared with anyone. If your browser blocks storage, the website still works; it just forgets your choices. To remove them, delete the site data for lordos.org in your browser's settings; private windows remove them when you close the window.
+They are never sent to a server, don't identify you and aren't shared with anyone. If your browser blocks storage, the website still works; it just forgets your choices. To remove them, delete the site data for insaneos.org in your browser's settings; private windows remove them when you close the window.
 
 ## Server logs
 
@@ -32,7 +32,7 @@ The release files are hosted on GitHub Releases. GitHub keeps a download counter
 
 ## Donation sites
 
-The donation buttons take you to PayPal or Mercado Pago (and, later, Binance). Those sites set their own cookies under their own policies once you are there. Nothing from them is loaded on lordos.org before you click.
+The donation buttons take you to PayPal or Mercado Pago (and, later, Binance). Those sites set their own cookies under their own policies once you are there. Nothing from them is loaded on insaneos.org before you click.
 
 ## Questions
 

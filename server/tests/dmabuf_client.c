@@ -1,7 +1,7 @@
 /* dmabuf_client.c — app Wayland de prueba que muestra búferes dmabuf (zwp_linux_dmabuf_v1).
  *
  * Los dmabuf salen de /dev/udmabuf (memoria común con forma de dmabuf, lineal XRGB8888): así se
- * prueba el camino de los búferes de GPU de lord-server sin una GPU real (importación EGL,
+ * prueba el camino de los búferes de GPU de insane-server sin una GPU real (importación EGL,
  * scanout directo a pantalla completa y, en el camino por CPU, el mapeo lineal).
  *
  *   dmabuf-client [--fullscreen] [--frames N] [--size AxB]
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
     top = xdg_surface_get_toplevel(xsurf);
     xdg_toplevel_add_listener(top, &top_listener, NULL);
     xdg_toplevel_set_title(top, "dmabuf de prueba");
-    xdg_toplevel_set_app_id(top, "lordos.dmabuf-client");
+    xdg_toplevel_set_app_id(top, "insaneos.dmabuf-client");
     if (want_fs) xdg_toplevel_set_fullscreen(top, NULL);
     if (want_lock && seat && relm && consm) {
         pointer = wl_seat_get_pointer(seat);

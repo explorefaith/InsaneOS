@@ -1,10 +1,10 @@
-/* vm_dev.c — lordvm-dev: plays lord-server's part for Machines (docs/VIRTUALIZATION.md, "Phase 1 implementation"),
- * so the helpers can be driven and tested without the UI. It is also the reference for lord-server's own code:
- * spawn lord-vm with a control socketpair, ask it for the display connection, spawn lord-vmdisplay with it, make
+/* vm_dev.c — insanevm-dev: plays insane-server's part for Machines (docs/VIRTUALIZATION.md, "Phase 1 implementation"),
+ * so the helpers can be driven and tested without the UI. It is also the reference for insane-server's own code:
+ * spawn insane-vm with a control socketpair, ask it for the display connection, spawn insane-vmdisplay with it, make
  * the sealed picture memfd, acknowledge frames, send input.
  *
- *   lordvm-dev run DIR [lord-vm --start options]   starts the machine (lord-vm --control-fd 3 --paused ...)
- *   lordvm-dev attach DIR                          a machine already running (its runtime socket)
+ *   insanevm-dev run DIR [insane-vm --start options]   starts the machine (insane-vm --control-fd 3 --paused ...)
+ *   insanevm-dev attach DIR                          a machine already running (its runtime socket)
  *
  * stdin, one command per line:
  *   png PATH            write the current picture (and print how much of it isn't black)
@@ -16,7 +16,7 @@
  *   noack 0|1           stop acknowledging frames (tests the 250 ms fallback)
  *   wait-frames N [S]   wait until N more frames arrived (at most S seconds, default 30)
  *   quit
- * stdout: one JSON line per event or answer. Binaries are looked for next to this one, or in $LORDVM_BIN. */
+ * stdout: one JSON line per event or answer. Binaries are looked for next to this one, or in $INSANEVM_BIN. */
 #include "vm/vmproto.h"
 
 #include <errno.h>
@@ -67,7 +67,7 @@ static void out(const char *fmt, ...) {
 static long long now_ms(void) { struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts); return (long long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000; }
 
 static void find_bindir(void) {
-    const char *e = getenv("LORDVM_BIN");
+    const char *e = getenv("INSANEVM_BIN");
     if (e) { snprintf(bindir, sizeof bindir, "%s", e); return; }
     ssize_t l = readlink("/proc/self/exe", bindir, sizeof bindir - 1);
     if (l <= 0) { strcpy(bindir, "."); return; }
@@ -80,7 +80,7 @@ static const char *const STATES[] = { "stopped", "starting", "running", "paused"
 
 static void ask(uint16_t type, int a, const char *text) {
     VmMsg m = vm_msg(type, ++seq, a, 0, 0, 0, text);
-    if (vm_send(vm, &m, -1)) out("{\"ev\":\"error\",\"what\":\"can't reach lord-vm\"}");
+    if (vm_send(vm, &m, -1)) out("{\"ev\":\"error\",\"what\":\"can't reach insane-vm\"}");
 }
 
 static void spawn_vmdisplay(int dbus_fd) {
@@ -93,8 +93,8 @@ static void spawn_vmdisplay(int dbus_fd) {
         dup2(b, 4);
         syscall(SYS_close_range, 5, ~0u, 0);
         char bin[PATH_MAX + 32];
-        snprintf(bin, sizeof bin, "%s/lord-vmdisplay", bindir);
-        execl(bin, "lord-vmdisplay", machine_id, (char *)NULL);
+        snprintf(bin, sizeof bin, "%s/insane-vmdisplay", bindir);
+        execl(bin, "insane-vmdisplay", machine_id, (char *)NULL);
         _exit(127);
     }
     close(sv[1]);
@@ -124,9 +124,9 @@ static void from_vm(void) {
         VmMsg m;
         int fd = -1;
         int r = vm_recv(vm, &m, &fd);
-        if (r < 0) { out("{\"ev\":\"lord-vm-gone\"}"); close(vm); vm = -1; return; }
+        if (r < 0) { out("{\"ev\":\"insane-vm-gone\"}"); close(vm); vm = -1; return; }
         if (!r) return;
-        if (!vm_msg_valid(&m, 0)) { if (fd >= 0) close(fd); out("{\"ev\":\"refused\",\"from\":\"lord-vm\",\"type\":%u}", m.type); continue; }
+        if (!vm_msg_valid(&m, 0)) { if (fd >= 0) close(fd); out("{\"ev\":\"refused\",\"from\":\"insane-vm\",\"type\":%u}", m.type); continue; }
         if (m.type == VM_INFO) {
             memcpy(machine_id, m.text, 36);
             machine_id[36] = 0;
@@ -142,7 +142,7 @@ static void from_vm(void) {
             out("{\"ev\":\"display_fd\"}");
             spawn_vmdisplay(fd);
             /* started paused so that the first picture is seen: now let it run */
-            if (vm_state == VS_PAUSED && getenv("LORDVM_DEV_STAY_PAUSED") == NULL) ask(VM_RESUME, 0, NULL);
+            if (vm_state == VS_PAUSED && getenv("INSANEVM_DEV_STAY_PAUSED") == NULL) ask(VM_RESUME, 0, NULL);
         }
         if (fd >= 0 && m.type != VM_DISPLAY_FD) close(fd);
     }
@@ -155,7 +155,7 @@ static void from_vd(void) {
         int r = vd_recv(vd, &m, &fd);
         if (r < 0) { out("{\"ev\":\"vmdisplay-gone\"}"); close(vd); vd = -1; return; }
         if (!r) return;
-        if (!vd_msg_valid(&m, 0)) { if (fd >= 0) close(fd); out("{\"ev\":\"refused\",\"from\":\"lord-vmdisplay\",\"type\":%u}", m.type); continue; }
+        if (!vd_msg_valid(&m, 0)) { if (fd >= 0) close(fd); out("{\"ev\":\"refused\",\"from\":\"insane-vmdisplay\",\"type\":%u}", m.type); continue; }
         switch (m.type) {
         case VD_READY: display_up = 1; out("{\"ev\":\"display_ready\",\"w\":%d,\"h\":%d,\"abs\":%d}", m.a, m.b, m.c); break;
         case VD_SIZE: picture_for(m.a, m.b); break;
@@ -285,7 +285,7 @@ static int connect_runtime(const char *dir) {
     snprintf(machine_id, sizeof machine_id, "%.36s", id + 7);
     const char *rt = getenv("XDG_RUNTIME_DIR");
     char sp[PATH_MAX];
-    snprintf(sp, sizeof sp, "%s/lordos-vm/%s.sock", rt ? rt : "/nonexistent", machine_id);
+    snprintf(sp, sizeof sp, "%s/insaneos-vm/%s.sock", rt ? rt : "/nonexistent", machine_id);
     int fd = socket(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0);
     struct sockaddr_un a = { .sun_family = AF_UNIX };
     if (strlen(sp) >= sizeof a.sun_path) { close(fd); return -1; }
@@ -296,7 +296,7 @@ static int connect_runtime(const char *dir) {
 
 int main(int argc, char **argv) {
     signal(SIGPIPE, SIG_IGN);
-    if (argc < 3 || (strcmp(argv[1], "run") && strcmp(argv[1], "attach"))) { fprintf(stderr, "usage: lordvm-dev run|attach DIR [lord-vm options]\n"); return 2; }
+    if (argc < 3 || (strcmp(argv[1], "run") && strcmp(argv[1], "attach"))) { fprintf(stderr, "usage: insanevm-dev run|attach DIR [insane-vm options]\n"); return 2; }
     find_bindir();
     if (!strcmp(argv[1], "attach")) {
         vm = connect_runtime(argv[2]);
@@ -310,15 +310,15 @@ int main(int argc, char **argv) {
             int c = fcntl(sv[1], F_DUPFD, 3);
             char cfd[16], bin[PATH_MAX + 16];
             snprintf(cfd, sizeof cfd, "%d", c);
-            snprintf(bin, sizeof bin, "%s/lord-vm", bindir);
+            snprintf(bin, sizeof bin, "%s/insane-vm", bindir);
             char *args[72];
             int n = 0;
-            /* LORDVM_SCOPE=1: lord-vm alone in a delegated scope of the user's manager, so it can make nested leaves */
-            if (getenv("LORDVM_SCOPE") && !strcmp(getenv("LORDVM_SCOPE"), "1")) {
+            /* INSANEVM_SCOPE=1: insane-vm alone in a delegated scope of the user's manager, so it can make nested leaves */
+            if (getenv("INSANEVM_SCOPE") && !strcmp(getenv("INSANEVM_SCOPE"), "1")) {
                 args[n++] = "systemd-run"; args[n++] = "--user"; args[n++] = "--scope"; args[n++] = "-q"; args[n++] = "-p"; args[n++] = "Delegate=yes"; args[n++] = "--";
                 args[n++] = bin;
             } else {
-                args[n++] = "lord-vm";
+                args[n++] = "insane-vm";
             } args[n++] = "--start"; args[n++] = argv[2]; args[n++] = "--control-fd"; args[n++] = cfd; args[n++] = "--paused";
             for (int i = 3; i < argc && n < 70; i++) args[n++] = argv[i];
             args[n] = NULL;
@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
         close(sv[1]);
         vm = sv[0];
         vm_pid = p;
-        out("{\"ev\":\"lord-vm\",\"pid\":%d}", (int)p);
+        out("{\"ev\":\"insane-vm\",\"pid\":%d}", (int)p);
     }
     char line[4096];
     size_t ln = 0;
@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
     }
     if (vd >= 0) { vdsend(VD_CLOSE, 0, 0); close(vd); }
     if (vd_pid > 0) waitpid(vd_pid, NULL, 0);
-    if (vm >= 0) close(vm);          /* lord-vm shuts the machine down when its control channel closes */
-    if (vm_pid > 0) { int st; waitpid(vm_pid, &st, 0); out("{\"ev\":\"lord-vm-exit\",\"status\":%d}", WIFEXITED(st) ? WEXITSTATUS(st) : 128 + WTERMSIG(st)); }
+    if (vm >= 0) close(vm);          /* insane-vm shuts the machine down when its control channel closes */
+    if (vm_pid > 0) { int st; waitpid(vm_pid, &st, 0); out("{\"ev\":\"insane-vm-exit\",\"status\":%d}", WIFEXITED(st) ? WEXITSTATUS(st) : 128 + WTERMSIG(st)); }
     return 0;
 }

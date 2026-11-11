@@ -5643,7 +5643,7 @@
     }
   },
   {
-    "file": "docs/polish/store-lordos-after-dark.png",
+    "file": "docs/polish/store-insaneos-after-dark.png",
     "category": "apps",
     "theme": "dark",
     "variant": "normal",
@@ -5654,7 +5654,7 @@
     }
   },
   {
-    "file": "docs/polish/store-lordos-after-light.png",
+    "file": "docs/polish/store-insaneos-after-light.png",
     "category": "apps",
     "theme": "light",
     "variant": "normal",
@@ -5665,7 +5665,7 @@
     }
   },
   {
-    "file": "docs/polish/store-lordos-after-rtl.png",
+    "file": "docs/polish/store-insaneos-after-rtl.png",
     "category": "apps",
     "theme": "dark",
     "variant": "rtl",
@@ -5676,7 +5676,7 @@
     }
   },
   {
-    "file": "docs/polish/store-lordos-after-small.png",
+    "file": "docs/polish/store-insaneos-after-small.png",
     "category": "apps",
     "theme": "dark",
     "variant": "small",
@@ -7590,12 +7590,12 @@
     }
   },
   {
-    "file": "docs/crown-menu.png",
+    "file": "docs/apple-menu.png",
     "category": "desktop",
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "The crown menu with the Store, Recent Items and Force Quit",
+      "en": "The apple menu with the Store, Recent Items and Force Quit",
       "es": "El menú de la corona con la Tienda, Ítems recientes y Forzar salida",
       "pt": "O menu da coroa com a Loja, Itens recentes e Forçar saída"
     }
@@ -7623,14 +7623,14 @@
     }
   },
   {
-    "file": "docs/lordos-fetch.png",
+    "file": "docs/insaneos-fetch.png",
     "category": "apps",
     "theme": "light",
     "variant": "normal",
     "caption": {
-      "en": "lordos-fetch in the Terminal: the crown and a summary of the computer",
-      "es": "lordos-fetch en la Terminal: la corona y un resumen del equipo",
-      "pt": "lordos-fetch no Terminal: a coroa e um resumo do computador"
+      "en": "insaneos-fetch in the Terminal: the apple and a summary of the computer",
+      "es": "insaneos-fetch en la Terminal: la corona y un resumen del equipo",
+      "pt": "insaneos-fetch no Terminal: a coroa e um resumo do computador"
     }
   },
   {

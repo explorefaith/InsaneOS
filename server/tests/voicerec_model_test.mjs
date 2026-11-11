@@ -71,7 +71,7 @@ eq('room: agrees with quietEnough', [roomCheck(hum).quiet, roomCheck(hush).quiet
 eq('room: nothing recorded is silence', roomCheck(new Int16Array(0)), { quiet: true, db: -120 });
 
 // every take gets its own file: checking the room again, or reading a phrase again, must not reuse a name
-// (lord-media refuses to write over a file, and the retry used to fail with no sign)
+// (insane-media refuses to write over a file, and the retry used to fail with no sign)
 const names = new Set();
 for (let k = 1; k <= 20; k++) names.add(takeName('room', 1_700_000_000_000, k));
 eq('takes in one session: all different', names.size, 20);

@@ -1,4 +1,4 @@
-/* gpu.c — lord-server's GPU composition: Mesa's GBM + EGL + GLES2 (approved by the
+/* gpu.c — insane-server's GPU composition: Mesa's GBM + EGL + GLES2 (approved by the
  * user on 2026-10-16; see docs/GPU.md).
  *
  * Modesetting is still our own (kms.c, ioctls without libdrm): GBM is created on the same
@@ -11,8 +11,8 @@
  * buffer goes straight to the primary plane: zero copies (gpu_scanout).
  *
  * By default it only turns on with a real GPU: with a software renderer (llvmpipe,
- * softpipe) our own CPU path is faster. LORD_GPU=1 forces it (tests), LORD_GPU=0
- * turns it off, LORD_GPU_DEBUG=1 reports what it does. Built without Mesa (no -DLORD_GPU) these are stubs. */
+ * softpipe) our own CPU path is faster. INSANE_GPU=1 forces it (tests), INSANE_GPU=0
+ * turns it off, INSANE_GPU_DEBUG=1 reports what it does. Built without Mesa (no -DINSANE_GPU) these are stubs. */
 #include "gpu.h"
 #include "gscissor.h"
 #include "../outputs.h"
@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef LORD_GPU
+#ifndef INSANE_GPU
 
 int  gpu_init(Kms *k) { (void)k; return -1; }
 int  gpu_active(void) { return 0; }
@@ -160,7 +160,7 @@ static struct {
     long frames, scanouts;
     char render_node[64];               /* where Mesa renders (on the Pi 5: v3d, not vc4) */
     unsigned gen;                       /* this context's generation (0 = none) */
-    int scissor;                        /* the buffer-age scissor: LORD_GPU_SCISSOR=1 and EGL_EXT_buffer_age */
+    int scissor;                        /* the buffer-age scissor: INSANE_GPU_SCISSOR=1 and EGL_EXT_buffer_age */
     /* GPU drag, the dragged window composited here (gpu_gdrag_ready): 0 off, 1 on (gdrag_setup, at gpu_init) */
     int gdrag;
     int gdragtout[2];                      /* the output whose pixels each texture holds (-1: none); what it
@@ -477,13 +477,13 @@ void gpu_info(GpuInfo *i) {
 }
 
 int gpu_init(Kms *k) {
-    const char *env = getenv("LORD_GPU");
-    G.debug = getenv("LORD_GPU_DEBUG") != NULL;
-    if (env && !strcmp(env, "0")) { fprintf(stderr, "gpu: off (LORD_GPU=0), CPU composition\n"); last_why = "env-off"; return -1; }
+    const char *env = getenv("INSANE_GPU");
+    G.debug = getenv("INSANE_GPU_DEBUG") != NULL;
+    if (env && !strcmp(env, "0")) { fprintf(stderr, "gpu: off (INSANE_GPU=0), CPU composition\n"); last_why = "env-off"; return -1; }
     G.k = k;
     char drv[64];
     if (!drm_accelerated(k->fd, drv, sizeof drv) && !(env && !strcmp(env, "1"))) {
-        fprintf(stderr, "gpu: the card (%s) has no 3D acceleration: CPU composition (LORD_GPU=1 forces it)\n", drv);
+        fprintf(stderr, "gpu: the card (%s) has no 3D acceleration: CPU composition (INSANE_GPU=1 forces it)\n", drv);
         last_why = "no-3d";
         return -1;
     }
@@ -517,7 +517,7 @@ int gpu_init(Kms *k) {
     snprintf(G.renderer, sizeof G.renderer, "%s", rend ? rend : "?");
     int software = strstr(G.renderer, "llvmpipe") || strstr(G.renderer, "softpipe") || strstr(G.renderer, "swrast");
     if (software && !(env && !strcmp(env, "1"))) {
-        fprintf(stderr, "gpu: the renderer is software (%s): CPU composition (LORD_GPU=1 forces it)\n", G.renderer);
+        fprintf(stderr, "gpu: the renderer is software (%s): CPU composition (INSANE_GPU=1 forces it)\n", G.renderer);
         last_why = "software";
         snprintf(last_renderer, sizeof last_renderer, "%s", G.renderer);
         goto fail;
@@ -526,10 +526,10 @@ int gpu_init(Kms *k) {
     G.have_external = has_ext(gl_exts, "GL_OES_EGL_image_external");
     G.unpack_sub = has_ext(gl_exts, "GL_EXT_unpack_subimage");
     {
-        const char *sc = getenv("LORD_GPU_SCISSOR");
+        const char *sc = getenv("INSANE_GPU_SCISSOR");
         int want = sc && !strcmp(sc, "1");
         G.scissor = want && has_ext(exts, "EGL_EXT_buffer_age");
-        fprintf(stderr, "gpu: buffer-age scissor %s\n", G.scissor ? "on" : want ? "off: no EGL_EXT_buffer_age" : "off (LORD_GPU_SCISSOR=1 turns it on)");
+        fprintf(stderr, "gpu: buffer-age scissor %s\n", G.scissor ? "on" : want ? "off: no EGL_EXT_buffer_age" : "off (INSANE_GPU_SCISSOR=1 turns it on)");
     }
     if (!G.unpack_sub) dbg("no GL_EXT_unpack_subimage: damage is uploaded as whole rows");
     if (make_prog(0, fs_2d) || (G.have_external && make_prog(1, fs_ext))) { fprintf(stderr, "gpu: shaders failed, CPU composition\n"); last_why = "shaders"; goto fail; }
@@ -1084,9 +1084,9 @@ static void gdrag_teardown(void) {
 
 /* GPU drag's program and textures in this context, and the self-test (or its earlier outcome). 1 = on. */
 static int gdrag_setup(void) {
-    const char *e = getenv("LORD_GPU_DRAG");
+    const char *e = getenv("INSANE_GPU_DRAG");
     /* on by default since the Raspberry Pi 5 run of 2026-10-31, where it applies to the whole drag (docs/GPU.md) */
-    if (e && !strcmp(e, "0")) { fprintf(stderr, "gpu: GPU drag off (LORD_GPU_DRAG=0): the dragged window is composed by the CPU\n"); return 0; }
+    if (e && !strcmp(e, "0")) { fprintf(stderr, "gpu: GPU drag off (INSANE_GPU_DRAG=0): the dragged window is composed by the CPU\n"); return 0; }
     GOut *o = G.cur && G.cur->used ? G.cur : &G.out[0];
     if (!o->used || !eglMakeCurrent(G.dpy, o->surf, o->surf, G.ctx)) return 0;
     GLint range[2] = { 0, 0 }, prec = 0;
@@ -1192,7 +1192,7 @@ void gpu_gdrag_stats(long *below_px, long *layer_px, long *quads) {
     gdrag_bpx = gdrag_lpx = gdrag_quads = 0;
 }
 
-/* LORD_GPU_VERIFY: what the quad wrote in w, read back, against the CPU's pixels (RGB: the
+/* INSANE_GPU_VERIFY: what the quad wrote in w, read back, against the CPU's pixels (RGB: the
  * framebuffer has no alpha; a frame painted by the CPU shows "premultiplied over black", its RGB). */
 static void gdrag_verify(GOut *o, const GpuDrag *g) {
     int ww = g->w.x1 - g->w.x0, wh = g->w.y1 - g->w.y0;

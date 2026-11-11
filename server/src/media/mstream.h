@@ -1,7 +1,7 @@
 /* mstream.h — the remote desktop's video, on the session side (see mstream.c, docs/REMOTE.md,
  * "Video (WebRTC)"): one live encoder per codec in use, shared by every viewer of this session. */
-#ifndef LORD_MEDIA_MSTREAM_H
-#define LORD_MEDIA_MSTREAM_H
+#ifndef INSANE_MEDIA_MSTREAM_H
+#define INSANE_MEDIA_MSTREAM_H
 
 #include <stddef.h>
 #include <stdint.h>

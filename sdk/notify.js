@@ -12,7 +12,7 @@
 // action or the × is pressed. Clicking the banner runs the first action.
 // The app passes texts already translated (t()). The history lives in memory only.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { direction, formatTime, appName } from './i18n.js';
@@ -20,7 +20,7 @@ import { getApp, workArea } from './windows.js';
 import { sound } from './sound.js';
 import { settings } from './settings.js';
 import { perms } from './privacy.js';
-import { screen } from '@lordos/runtime';
+import { screen } from '@insaneos/runtime';
 
 const MAX_SHOWN = 4, HISTORY = 50;
 export const notifications = createStore([]);        // on screen, newest first
@@ -65,15 +65,15 @@ function remember(app) {
 }
 
 // Firewall restriction "no notifications" (Settings → Privacy → Apps' network, docs/FIREWALL.md):
-// checked in lord-server's rule store before anything is shown, above the per-app setting. A
-// built-in app is "lordos", an isolated one (.lpk, Passwords) "lpk:<id>". Settings' own system
+// checked in insane-server's rule store before anything is shown, above the per-app setting. A
+// built-in app is "insaneos", an isolated one (.lpk, Passwords) "lpk:<id>". Settings' own system
 // warnings (battery) are exempt; Linux apps ('linux:…') are checked where their D-Bus call arrives.
 function fwNotifyBlocked(app) {
   try {
-    if (typeof lord === 'undefined' || !lord.fw || typeof lord.fw.blocks !== 'function') return false;
+    if (typeof insane === 'undefined' || !insane.fw || typeof insane.fw.blocks !== 'function') return false;
     if (!app || app === 'settings' || app.startsWith('linux:')) return false;
     const a = getApp(app);
-    return !!lord.fw.blocks(a && (a.package || a.isolated) ? `lpk:${app}` : 'lordos', 'no-notifications');
+    return !!insane.fw.blocks(a && (a.package || a.isolated) ? `lpk:${app}` : 'insaneos', 'no-notifications');
   } catch (e) { return false; }
 }
 

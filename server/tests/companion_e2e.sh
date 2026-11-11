@@ -1,10 +1,10 @@
 #!/bin/bash
 # companion_e2e.sh <fixture> — a packaged app and its companion in real, isolated headless sessions (docs/GO-LINK.md). A test
-# machine only, with sudo; not part of make test. From the repository root, after `make -C server build/lord-server-pkgtest
-# build/share-client` and tests/companion/fixture.sh. It runs build/lord-server-pkgtest, which takes its official key and third
+# machine only, with sudo; not part of make test. From the repository root, after `make -C server build/insane-server-pkgtest
+# build/share-client` and tests/companion/fixture.sh. It runs build/insane-server-pkgtest, which takes its official key and third
 # app root from the environment; the root is a root-owned folder here, removed at the end. It never touches a running session.
 F=$(cd "$1" && pwd); ROOT=$PWD; B=$ROOT/server/build; U=$(id -u)
-T=$ROOT/ct; R=$T/rt; H=$T/home; APPS=$T/apps; G=/var/lib/lordos/share/$U.json
+T=$ROOT/ct; R=$T/rt; H=$T/home; APPS=$T/apps; G=/var/lib/insaneos/share/$U.json
 pass=0; fail=0
 ok() { pass=$((pass+1)); echo "ok   $1"; }
 no() { fail=$((fail+1)); echo "FAIL $1"; }
@@ -13,7 +13,7 @@ has() { if grep -q -- "$2" "$3" 2>/dev/null; then ok "$1"; else no "$1: no '$2' 
 hasnt() { if grep -q -- "$2" "$3" 2>/dev/null; then no "$1: '$2' in $3"; else ok "$1"; fi; }
 gone() { if [ ! -e "$2" ]; then ok "$1"; else no "$1: $2 exists"; fi; }
 OFF=$(cat $F/official.hex)
-export LORD_TEST_OFFICIAL=$OFF LORD_TEST_APPS_ROOT=$APPS
+export INSANE_TEST_OFFICIAL=$OFF INSANE_TEST_APPS_ROOT=$APPS
 S=
 stop() { [ -n "$S" ] && kill $S 2>/dev/null; pkill -f '^companion$'; sleep 0.7; S=; }
 cleanup() { stop; sudo rm -rf $T/apps; sudo rm -f $G; rm -rf $T; }
@@ -21,33 +21,33 @@ trap cleanup EXIT
 sudo rm -rf $T; mkdir -p -m700 $T $R; sudo rm -f $G
 
 install() { sudo rm -rf $APPS; sudo mkdir -p $APPS; sudo cp -r $F/pkgtest $APPS/; sudo chown -R root:root $APPS; sudo chmod -R go-w $APPS; }
-catalog() { mkdir -p $H/.local/share/lordos/catalog; cp $F/cat-$1/catalog.json $F/cat-$1/catalog.sig $H/.local/share/lordos/catalog/; }
+catalog() { mkdir -p $H/.local/share/insaneos/catalog; cp $F/cat-$1/catalog.json $F/cat-$1/catalog.sig $H/.local/share/insaneos/catalog/; }
 freshhome() {
-  rm -rf $H; mkdir -p $H/.config/lordos $H/Downloads
+  rm -rf $H; mkdir -p $H/.config/insaneos $H/Downloads
   echo secret > $H/probe-home.txt
-  echo secret > $H/.probe-dot; mkdir -p $H/.probe-hidden $H/Documents $H/.local/share/lordos/appdata/other; echo secret > $H/.probe-hidden/secret
+  echo secret > $H/.probe-dot; mkdir -p $H/.probe-hidden $H/Documents $H/.local/share/insaneos/appdata/other; echo secret > $H/.probe-hidden/secret
   ln -s .probe-hidden/secret $H/link-to-hidden
-  cat > $H/.config/lordos/permisos.json <<X
+  cat > $H/.config/insaneos/permisos.json <<X
 { "version": 1, "apps": { "pkgtest": { "network": { "state": "allow", "when": 1 }, "status-item": { "state": "allow", "when": 1 } } } }
 X
-  echo '{ "loginApps": ["lpk:pkgtest"] }' > $H/.config/lordos/settings.json     # the shell opens it, as Open at Login does
+  echo '{ "loginApps": ["lpk:pkgtest"] }' > $H/.config/insaneos/settings.json     # the shell opens it, as Open at Login does
   catalog ${1:-good}
 }
-grant() { sudo mkdir -p -m755 /var/lib/lordos/share; printf '%s' "$1" | sudo tee $G.t >/dev/null; sudo chown root:$(id -g) $G.t; sudo chmod 640 $G.t; sudo mv $G.t $G; }
+grant() { sudo mkdir -p -m755 /var/lib/insaneos/share; printf '%s' "$1" | sudo tee $G.t >/dev/null; sudo chown root:$(id -g) $G.t; sudo chmod 640 $G.t; sudo mv $G.t $G; }
 
 session() {
-  rm -f $H/.cache/lordos/session.log
-  (cd $ROOT/server && exec env -i HOME=$H XDG_RUNTIME_DIR=$R PATH=$PATH LANG=en_US.UTF-8 LORD_GPU=0 LORD_TEST_OFFICIAL=$OFF LORD_TEST_APPS_ROOT=$APPS \
-    $B/lord-server-pkgtest --headless 1280x800 --theme ../themes/default/theme.bundle.js --fonts ../assets/fonts --shell ../assets/shell > /dev/null 2>&1) &
+  rm -f $H/.cache/insaneos/session.log
+  (cd $ROOT/server && exec env -i HOME=$H XDG_RUNTIME_DIR=$R PATH=$PATH LANG=en_US.UTF-8 INSANE_GPU=0 INSANE_TEST_OFFICIAL=$OFF INSANE_TEST_APPS_ROOT=$APPS \
+    $B/insane-server-pkgtest --headless 1280x800 --theme ../themes/default/theme.bundle.js --fonts ../assets/fonts --shell ../assets/shell > /dev/null 2>&1) &
   S=$!
 }
 wait_for() { local i=0; while [ $i -lt ${2:-120} ] && [ ! -e "$1" ]; do sleep 0.25; i=$((i+1)); done; [ -e "$1" ]; }
 cpid() { pgrep -f '^companion$' | head -1; }
-DATA=$H/.local/share/lordos/appdata/pkgtest; REP=$H/Downloads/companion-report.txt
+DATA=$H/.local/share/insaneos/appdata/pkgtest; REP=$H/Downloads/companion-report.txt
 
-# a direct start, as lord-server does it: fd 3 a SEQPACKET socket. Prints what the app would hear first.
+# a direct start, as insane-server does it: fd 3 a SEQPACKET socket. Prints what the app would hear first.
 direct() {
-  python3 - "$B/lord-server-pkgtest" "$@" <<'X'
+  python3 - "$B/insane-server-pkgtest" "$@" <<'X'
 import os,socket,subprocess,sys
 a,b=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
 c,d=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
@@ -63,7 +63,7 @@ except Exception as e: print('nothing',e)
 a.close(); p.wait(timeout=8)
 X
 }
-dhome() { env HOME=$H LORD_TEST_OFFICIAL=$OFF LORD_TEST_APPS_ROOT=$APPS "$@"; }
+dhome() { env HOME=$H INSANE_TEST_OFFICIAL=$OFF INSANE_TEST_APPS_ROOT=$APPS "$@"; }
 
 echo "== the package, as signed"
 install; freshhome
@@ -88,8 +88,8 @@ if [ -n "$P" ]; then
   is "not root" "$(awk '/^Uid/{print $2}' /proc/$P/status)" $U
   is "one process, no children" "$(pgrep -P $P | wc -l)" 0
 else no "the companion runs"; fi
-hasnt "lord-server didn't log a refusal" 'not started' $H/.cache/lordos/session.log
-hasnt "the shell took the status item without an error" 'TypeError\|ReferenceError' $H/.cache/lordos/session.log
+hasnt "insane-server didn't log a refusal" 'not started' $H/.cache/insaneos/session.log
+hasnt "the shell took the status item without an error" 'TypeError\|ReferenceError' $H/.cache/insaneos/session.log
 
 echo "== it stops with the app"
 A=$(pgrep -x pkgtest | head -1)
@@ -119,7 +119,7 @@ f=open('$APPS/pkgtest/bin/engine','r+b'); f.seek(4096); b=f.read(1); f.seek(4096
 x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*sig.fileModified*) ok "--companion: one byte: refused ($x)";; *) no "one byte: $x";; esac
 gone "nothing of it ran" $REP
 session; sleep 9
-has "the app itself is refused too" "was refused: sig.fileModified" $H/.cache/lordos/session.log
+has "the app itself is refused too" "was refused: sig.fileModified" $H/.cache/insaneos/session.log
 gone "no report" $REP
 is "no companion" "$(cpid)" ""
 stop
@@ -129,7 +129,7 @@ install; freshhome none
 x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*notVerified*) ok "not a Verified author";; *) no "not a Verified author: $x";; esac
 freshhome revoked
 x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*sig.revokedKey*) ok "revoked";; *) no "revoked: $x";; esac
-freshhome; rm -rf $H/.local/share/lordos/catalog
+freshhome; rm -rf $H/.local/share/insaneos/catalog
 x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*notVerified*) ok "no catalog";; *) no "no catalog: $x";; esac
 gone "nothing of it ran" $REP
 
@@ -139,7 +139,7 @@ x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *re
 install; sudo chmod g+w $APPS/pkgtest
 x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*notInstalled*) ok "a group-writable folder: refused";; *) no "group-writable: $x";; esac
 install
-x=$(sudo env HOME=$H LORD_TEST_OFFICIAL=$OFF LORD_TEST_APPS_ROOT=$APPS bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*companion.root*) ok "as root: refused";; *) no "as root: $x";; esac
+x=$(sudo env HOME=$H INSANE_TEST_OFFICIAL=$OFF INSANE_TEST_APPS_ROOT=$APPS bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *refused*companion.root*) ok "as root: refused";; *) no "as root: $x";; esac
 sudo rm -f $T/home/Downloads/companion-report.txt
 
 echo "== a link for Downloads isn't followed"
@@ -148,18 +148,18 @@ x=$(dhome bash -c "$(declare -f direct); B=$B direct pkgtest"); case "$x" in *re
 
 echo "== the same manifest in a home .lpk is ignored"
 sudo rm -rf $APPS; sudo mkdir -p $APPS; sudo chmod 755 $APPS
-freshhome; mkdir -p $H/.local/share/lordos/apps; cp -r $F/pkgtest $H/.local/share/lordos/apps/; chmod -R u+w $H/.local/share/lordos/apps
+freshhome; mkdir -p $H/.local/share/insaneos/apps; cp -r $F/pkgtest $H/.local/share/insaneos/apps/; chmod -R u+w $H/.local/share/insaneos/apps
 session; sleep 5
 is "the home app runs" "$(pgrep -x pkgtest | wc -l)" 1
 is "no companion" "$(cpid)" ""
 gone "no report" $REP
 has "the app heard no" '"refused"' $DATA/msg0.json
 stop
-rm -rf $H/.local/share/lordos/apps
-gone "(clean)" $H/.local/share/lordos/apps
+rm -rf $H/.local/share/insaneos/apps
+gone "(clean)" $H/.local/share/insaneos/apps
 
 echo "== a Linux app whose scope reads as a package gets nothing"
-CGB=/sys/fs/cgroup/system.slice/lordos.service/lordos-session-$U; CG=$CGB/app-lordos-lpk-pkgtest.scope
+CGB=/sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-$U; CG=$CGB/app-insaneos-lpk-pkgtest.scope
 freshhome; session; sleep 3
 if sudo mkdir -p $CG 2>/dev/null; then
   cat > $T/inscope.sh <<X
@@ -168,7 +168,7 @@ echo \$\$ > $CG/cgroup.procs
 exec setpriv --reuid=$U --regid=$(id -g) --init-groups "\$@"
 X
   chmod +x $T/inscope.sh
-  if sudo $T/inscope.sh $B/share-client api $R/lordos/share.sock gone; then ok "lpk scope on the socket: no_identity"; else no "lpk scope on the socket"; fi
+  if sudo $T/inscope.sh $B/share-client api $R/insaneos/share.sock gone; then ok "lpk scope on the socket: no_identity"; else no "lpk scope on the socket"; fi
   sleep 0.3; sudo rmdir $CG
 else echo "skipped: no session cgroup here"; fi
 stop

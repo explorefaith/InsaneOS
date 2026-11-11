@@ -1,18 +1,18 @@
-/* netperm.c — lord-netperm: the root service that enforces per-app network permissions in the
+/* netperm.c — insane-netperm: the root service that enforces per-app network permissions in the
  * kernel (docs/FIREWALL.md, step 2). Closed and minimal:
  *
  *   - no arguments, executes nothing, no network of its own (it creates no AF_INET/AF_INET6
  *     sockets: the systemd service also forbids it with RestrictAddressFamilies);
  *   - loads the BPF programs it carries inside (np.bpf.c → build/gen/np_bpf.h) into the cgroup of
- *     lordos.service, which contains the subtrees of all sessions: the network ones and, with the
+ *     insaneos.service, which contains the subtrees of all sessions: the network ones and, with the
  *     same per-app policy, the device program ("no camera", "no USB") and the Bluetooth socket
  *     program ("no Bluetooth"; it needs the kernel's function list, /sys/kernel/btf/vmlinux);
- *   - reads the rules of each user with a session from ~/.config/lordos/firewall.json (fixed,
+ *   - reads the rules of each user with a session from ~/.config/insaneos/firewall.json (fixed,
  *     validated path) and compiles them into maps (npcompile.c);
  *   - learns names only from the system resolver (npdns.c);
- *   - tells each lord-server about its apps' new connections over /run/lordos/netperm.sock
+ *   - tells each insane-server about its apps' new connections over /run/insaneos/netperm.sock
  *     (npproto.h). The only thing it accepts there is "reload my rules";
- *   - (0.8.5) reads each user's subscribed blocklists (~/.config/lordos/fwlists.txt, the same
+ *   - (0.8.5) reads each user's subscribed blocklists (~/.config/insaneos/fwlists.txt, the same
  *     fixed-path reader) into np_blk4/np_blk6: their networks, and the addresses the resolver gave
  *     for their domains; and counts the essential system services' bytes (np_sysc);
  *   - cuts the connections a rule now denies: the packet filter drops their packets in the
@@ -61,12 +61,12 @@
 #endif
 
 #define CG_ROOT      "/sys/fs/cgroup"
-#define CG_SERVICE   "system.slice/lordos.service"
+#define CG_SERVICE   "system.slice/insaneos.service"
 #define CG_USER      "user.slice"       /* user.slice/user-<uid>.slice/user@<uid>.service */
-#define SVC_LEVEL    2                  /* system.slice/lordos.service */
-#define SCOPE_LEVEL  (SVC_LEVEL + 2)    /* lordos-session-<uid>/<scope> */
+#define SVC_LEVEL    2                  /* system.slice/insaneos.service */
+#define SCOPE_LEVEL  (SVC_LEVEL + 2)    /* insaneos-session-<uid>/<scope> */
 #define USER_LEVEL   3                  /* user.slice/user-<uid>.slice/user@<uid>.service */
-#define NAMES_APP    "lordos"           /* dnsmap key for what the resolver says */
+#define NAMES_APP    "insaneos"           /* dnsmap key for what the resolver says */
 #define MAX_SESS     NP_MAX_SESS
 #define MAX_CLIENTS  64
 #define CLIENT_OUT   (256u << 10)
@@ -143,7 +143,7 @@ static struct {
     int links[16], nlinks;
     int progs[16], nprogs;
     uint32_t attach[16];
-    uint64_t attached_cg;               /* id of the attached lordos.service cgroup */
+    uint64_t attached_cg;               /* id of the attached insaneos.service cgroup */
     int sys_wd;
     BpfRing ring;
     int cgfd;
@@ -165,7 +165,7 @@ static void logf_(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 static void logf_(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    fputs("lord-netperm: ", stderr);
+    fputs("insane-netperm: ", stderr);
     vfprintf(stderr, fmt, ap);
     fputc('\n', stderr);
     va_end(ap);
@@ -179,13 +179,13 @@ static long long mono(void) {
 
 /* ---- reading a user's rules ----------------------------------------------------------------- */
 
-/* ~/.config/lordos/firewall.json without following links: every folder and the file must belong
+/* ~/.config/insaneos/firewall.json without following links: every folder and the file must belong
  * to the user, the file must be regular and at most FW_FILE_MAX. The home folder comes from /etc/passwd. */
 static char *read_user_file(unsigned uid, const char *file, size_t max, size_t *len, char *why, size_t wn) {
     struct passwd *pw = getpwuid(uid);
     if (!pw || pw->pw_dir[0] != '/') { snprintf(why, wn, "user without a home folder"); return NULL; }
     int fd = open(pw->pw_dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
-    const char *const parts[] = { ".config", "lordos", file };
+    const char *const parts[] = { ".config", "insaneos", file };
     struct stat st;
     if (fd < 0 || fstat(fd, &st) || st.st_uid != uid) { snprintf(why, wn, "odd home folder"); if (fd >= 0) close(fd); return NULL; }
     for (int i = 0; i < 3; i++) {
@@ -233,7 +233,7 @@ static void load_rules(Session *s) {
     logf_("uid %u: %zu rules, mode %d", s->uid, fw_rule_count(n), (int)fw_mode(n));
 }
 
-/* (0.8.5) ~/.config/lordos/fwlists.txt, the user's subscribed blocklists compiled by lord-server
+/* (0.8.5) ~/.config/insaneos/fwlists.txt, the user's subscribed blocklists compiled by insane-server
  * (fw/fwlists.h), through the same reader. A file that doesn't validate keeps the previous set. */
 static void load_lists(Session *s) {
     size_t len = 0;
@@ -477,7 +477,7 @@ static void sync_blk(Session *s) {
 
 /* An app without a sandbox, running as the user, can ask its systemd manager
  * (systemd-run --user, scope or service) to move a process into user@<uid>.service, outside
- * lordos.service, where the apps' scopes don't reach. To close that, the same programs are also
+ * insaneos.service, where the apps' scopes don't reach. To close that, the same programs are also
  * attached to each session's user@<uid>.service and, when the process isn't in any app's scope,
  * it falls into np_union[user@]: the strict union (OR of the NP_R_* restrictions) of the user's
  * restricted apps. That way an escaped process is never less restricted than its own policy; it
@@ -546,9 +546,9 @@ static void sync_user_scope(Session *s) {
 /* ---- sessions and scopes --------------------------------------------------------------------- */
 
 static int scope_app(const char *name, char *app) {
-    if (!strcmp(name, "server")) { snprintf(app, FW_APP_MAX, "lordos"); return 0; }
-    /* (0.8.5) Insane OS's own components that use the network: lordos-net-<name>.scope → lordos:<name>;
-     * (0.8.8.6) a running machine's scope → lordos:machines, so several scopes can share one app */
+    if (!strcmp(name, "server")) { snprintf(app, FW_APP_MAX, "insaneos"); return 0; }
+    /* (0.8.5) Insane OS's own components that use the network: insaneos-net-<name>.scope → insaneos:<name>;
+     * (0.8.8.6) a running machine's scope → insaneos:machines, so several scopes can share one app */
     return fw_scope_app(name, app, FW_APP_MAX);
 }
 
@@ -673,7 +673,7 @@ static void scan_all(void) {
     while (d && (e = readdir(d))) {
         unsigned uid;
         char tail;
-        if (e->d_type != DT_DIR || sscanf(e->d_name, "lordos-session-%u%c", &uid, &tail) != 1) continue;
+        if (e->d_type != DT_DIR || sscanf(e->d_name, "insaneos-session-%u%c", &uid, &tail) != 1) continue;
         Session *s = NULL;
         for (int i = 0; i < G.nsess; i++) if (G.sess[i].uid == uid) s = &G.sess[i];
         if (!s) {
@@ -681,7 +681,7 @@ static void scan_all(void) {
             s = &G.sess[G.nsess++];
             memset(s, 0, sizeof *s);
             s->uid = uid;
-            snprintf(s->dir, sizeof s->dir, "lordos-session-%u", uid);
+            snprintf(s->dir, sizeof s->dir, "insaneos-session-%u", uid);
             char path[160];
             snprintf(path, sizeof path, CG_ROOT "/" CG_SERVICE "/%s", s->dir);
             s->wd = inotify_add_watch(G.ifd, path, IN_CREATE | IN_DELETE | IN_ONLYDIR);
@@ -1064,7 +1064,7 @@ static void on_event(void *u, const void *data, uint32_t len) {
     on_net_event(&ev, 0);
 }
 
-/* A connection notice (new, denied or cut) towards the user's lord-server and the journal. */
+/* A connection notice (new, denied or cut) towards the user's insane-server and the journal. */
 static void on_net_event(const NpEvent *evp, int cut) {
     NpEvent ev = *evp;
     Session *s;
@@ -1114,7 +1114,7 @@ static void on_net_event(const NpEvent *evp, int cut) {
  *
  * Name resolution, time and the network service are not apps and can't be blocked, but the Monitor
  * shows their traffic: the accounting programs alone are attached to resolved's and timesyncd's
- * cgroups (lord-netd's leaf, lordos.service/netd, is already under lordos.service), and np_sysc
+ * cgroups (insane-netd's leaf, insaneos.service/netd, is already under insaneos.service), and np_sysc
  * gets an entry for each, keyed by its cgroup id (the programs only add to existing entries). */
 static const struct { const char *id, *parent, *leaf; } SYS[3] = {
     { "system:dns", CG_ROOT "/system.slice", "systemd-resolved.service" },
@@ -1348,7 +1348,7 @@ static void push_counts(void) {
         for (int k = 0; k < s->nsc; k++) {
             Scope *sc = &s->sc[k];
             /* one entry per app: the scopes that share one (each running machine and the Machines
-             * downloads, all lordos:machines) are added together under the first */
+             * downloads, all insaneos:machines) are added together under the first */
             int first = 1;
             for (int p = 0; p < k && first; p++) first = s->sc[p].idx != sc->idx;
             if (!first) continue;
@@ -1496,14 +1496,14 @@ static int bpf_setup(void) {
 #endif
 }
 
-/* Attaches the programs to the lordos.service cgroup. systemd deletes and recreates it every
+/* Attaches the programs to the insaneos.service cgroup. systemd deletes and recreates it every
  * time the service restarts (and it may not exist yet at startup), so this is called at start,
  * on every inotify notice in system.slice and once per second: if the cgroup is a different one
  * (another id), the old links are dropped and attached again. */
 static void attach_service(void) {
     if (!G.bpf_ok) return;
     int dfd = open(CG_ROOT "/system.slice", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
-    uint64_t id = dfd >= 0 ? bpfs_cgroup_id(dfd, "lordos.service") : 0;
+    uint64_t id = dfd >= 0 ? bpfs_cgroup_id(dfd, "insaneos.service") : 0;
     if (dfd >= 0) close(dfd);
     if (id == G.attached_cg) return;
     for (int k = 0; k < G.nlinks; k++) close(G.links[k]);
@@ -1511,7 +1511,7 @@ static void attach_service(void) {
     if (G.cgfd >= 0) close(G.cgfd);
     G.cgfd = -1;
     G.attached_cg = 0;
-    if (!id) { logf_("waiting for lordos.service (its cgroup doesn't exist)"); return; }
+    if (!id) { logf_("waiting for insaneos.service (its cgroup doesn't exist)"); return; }
     G.cgfd = open(CG_ROOT "/" CG_SERVICE, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (G.cgfd < 0) return;
     for (int i = 0; i < G.nprogs; i++) {
@@ -1536,9 +1536,9 @@ static volatile sig_atomic_t quit;
 static void on_term(int s) { (void)s; quit = 1; }
 
 static int listen_sock(void) {
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     struct stat st;
-    if (lstat("/run/lordos", &st) || !S_ISDIR(st.st_mode) || st.st_uid != 0) { logf_("/run/lordos is not a root-owned folder"); return -1; }
+    if (lstat("/run/insaneos", &st) || !S_ISDIR(st.st_mode) || st.st_uid != 0) { logf_("/run/insaneos is not a root-owned folder"); return -1; }
     int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
     if (fd < 0) return -1;
     struct sockaddr_un sa = { .sun_family = AF_UNIX };
@@ -1568,8 +1568,8 @@ static void watch_dns(void) {
 
 int main(int argc, char **argv) {
     (void)argv;
-    if (argc != 1) { fprintf(stderr, "lord-netperm takes no arguments (see docs/FIREWALL.md)\n"); return 2; }
-    if (geteuid() != 0) { fprintf(stderr, "lord-netperm: must run as root (lord-netperm.service)\n"); return 1; }
+    if (argc != 1) { fprintf(stderr, "insane-netperm takes no arguments (see docs/FIREWALL.md)\n"); return 2; }
+    if (geteuid() != 0) { fprintf(stderr, "insane-netperm: must run as root (insane-netperm.service)\n"); return 1; }
     setvbuf(stderr, NULL, _IOLBF, 0);
     signal(SIGPIPE, SIG_IGN);
     struct sigaction sa = { .sa_handler = on_term };
@@ -1617,7 +1617,7 @@ int main(int argc, char **argv) {
             else if (t == 2) {
                 char buf[4096];
                 while (read(G.ifd, buf, sizeof buf) > 0) {}
-                attach_service();                   /* did lordos.service start again? */
+                attach_service();                   /* did insaneos.service start again? */
                 scan_all();                         /* a scope or a session that's new or gone */
             } else if (t == 3) {
                 uint64_t x;

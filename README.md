@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icons/lordos-icon-256.png" alt="Insane OS" width="120">
+  <img src="assets/icons/insaneos-icon-256.png" alt="Insane OS" width="120">
 </p>
 
 <h1 align="center">Insane OS</h1>
@@ -13,7 +13,7 @@ interface engine and native apps — built from scratch, line by line, in C11. N
 desktop stack, no layers you can't read: on top of nothing but libc, libxkbcommon,
 libwayland, vendored QuickJS and stb. The whole display stack is code you can read to the end.
 
-This tree is the Insane OS edition: upstream LordOS 0.8.8.6-dev, rebased with a full rebrand
+This tree is the Insane OS edition: upstream InsaneOS 0.8.8.6-dev, rebased with a full rebrand
 and a long list of engineering changes (see [fix/INSANE-OS-CHANGELOG.md](fix/INSANE-OS-CHANGELOG.md)).
 
 ---
@@ -68,11 +68,11 @@ python3 tools/gen-brand-insane.py
 
 ```sh
 cd fix
-sudo bash upgrade-lordos.sh
+sudo bash upgrade-insaneos.sh
 sudo reboot
 ```
 
-The script backs up everything it replaces to `/var/backups/lordos-fix-<time>/` (with a
+The script backs up everything it replaces to `/var/backups/insaneos-fix-<time>/` (with a
 one-command `REVERT.sh`), builds and installs the compositor and bundles, wires the live
 wallpaper, sets the login background, refreshes the boot splash, and writes a security
 enforcement snapshot. Details: [fix/TEST-CHECKLIST.md](fix/TEST-CHECKLIST.md).
@@ -98,7 +98,7 @@ environmental cgroup refusals in one remote-connect test). See
 
 ## Credits
 
-Built on [LordOS](https://lordos.org) by its authors (upstream readme:
+Built on [InsaneOS](https://insaneos.org) by its authors (upstream readme:
 [docs/UPSTREAM-README.md](docs/UPSTREAM-README.md)), which is built on Debian GNU/Linux.
 The Insane OS edition, rebrand, engineering fixes and features in `fix/` and this tree's
 changes by explorearafat.

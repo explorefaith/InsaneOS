@@ -1,8 +1,8 @@
-// voice.js — reading text aloud (docs/VOICE.md, phase 2): lord.voice starts lord-say, Insane OS's `say`.
+// voice.js — reading text aloud (docs/VOICE.md, phase 2): insane.voice starts insane-say, Insane OS's `say`.
 //
-//   speak(text, voice?, source?)  reads it (source: what the player names, else the window in front), in the language it is written in (lord-say tells); ends any reading before;
+//   speak(text, voice?, source?)  reads it (source: what the player names, else the window in front), in the language it is written in (insane-say tells); ends any reading before;
 //                            voice: one installed (say's -v), else the language's chosen one
-//   previewVoice(lang, voice)  plays a voice's recorded sample (lordos-voice-previews): heard before downloading it
+//   previewVoice(lang, voice)  plays a voice's recorded sample (insaneos-voice-previews): heard before downloading it
 //   tryVoice(lang, voice)    reads the language's sample sentence with an installed voice
 //   stopSpeaking()
 //   pauseSpeaking(on)        freezes the reading where it is, or goes on
@@ -19,7 +19,7 @@
 //   useMenusWithSpeech(wid)  an app's menus, and for a Linux app's window an Edit menu with Speech (its own selection)
 //   voiceSettings()          Settings → AI → Voice: { enabled, shortcut, player, liveSpeech }, all on by default
 //
-// A Linux app's selection is its primary selection: lord-server reads it (lord.voice.speakSelection, holdSelection) and
+// A Linux app's selection is its primary selection: insane-server reads it (insane.voice.speakSelection, holdSelection) and
 // only when that app made it, so JS never sees it. When nothing can be read, a short notice says why (toast).
 import { createStore, useStore } from './store.js';
 import { t, locale } from './i18n.js';
@@ -30,7 +30,7 @@ import { windowAppName } from './apps.js';
 import { userDirs } from './media.js';
 import { voiceLabel, langOf } from './voicecatalog.js';
 
-const api = () => (typeof lord !== 'undefined' && lord.voice) || null;
+const api = () => (typeof insane !== 'undefined' && insane.voice) || null;
 // for a text too short to tell its language (say_language in server/src/tts/saytext.c): the interface's
 const uiLang = () => String(locale.get().lang || '').slice(0, 2);
 const isLinux = (wid) => String(wid || '').startsWith('linux#');
@@ -147,7 +147,7 @@ export function registerSelection(wid, fn) {
   return () => { if (providers.get(wid) === fn) providers.delete(wid); };
 }
 
-// what a Insane OS window has selected; undefined for a Linux app's (lord-server reads it)
+// what a Insane OS window has selected; undefined for a Linux app's (insane-server reads it)
 function selectionOf(wid) {
   const fn = wid && providers.get(wid);
   if (!fn) return undefined;

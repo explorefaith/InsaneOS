@@ -193,7 +193,7 @@ void hw_act_buttons(const AdminReq *r, const char *arg, size_t len) {
     snprintf(text, sizeof text,
              "# Written by Insane OS (Settings → Battery). Changes here are overwritten.\n"
              "[Login]\nHandlePowerKey=%s\nHandleLidSwitch=%s\nHandleLidSwitchExternalPower=%s\n", power, lid, lidac);
-    const char *tmp = "/etc/systemd/logind.conf.d/.lordos.conf.tmp", *dst = "/etc/systemd/logind.conf.d/lordos.conf";
+    const char *tmp = "/etc/systemd/logind.conf.d/.insaneos.conf.tmp", *dst = "/etc/systemd/logind.conf.d/insaneos.conf";
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
     int ok = fd >= 0 && write(fd, text, strlen(text)) == (ssize_t)strlen(text);
     if (fd >= 0) { ok = fsync(fd) == 0 && ok; close(fd); }
@@ -257,15 +257,15 @@ void hw_act_bt_unblock(const AdminReq *r, const char *arg, size_t len) {
 /* ---- Raspberry Pi 5 case accessories (docs/FANS.md, "Argon ONE V5 case") ---- */
 
 /* The cases Insane OS knows. The text is fixed here; the file is included from config.txt
- * ("include lordos-case.txt", tools/rpi). Never user text. */
+ * ("include insaneos-case.txt", tools/rpi). Never user text. */
 const char *hw_rpi_case_text(const char *id) {
     if (!strcmp(id, "none"))
-        return "# lordos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n";
+        return "# insaneos-case.txt: written by Insane OS (Settings, Cooling). No case accessories.\n";
     if (!strcmp(id, "argon-one-v5"))
-        return "# lordos-case.txt: written by Insane OS (Settings, Cooling). Do not edit by hand.\n"
+        return "# insaneos-case.txt: written by Insane OS (Settings, Cooling). Do not edit by hand.\n"
                "# Argon ONE V5 case: its board puts the two front USB 2.0 ports and the audio chip\n"
                "# (USB) on the USB-C controller, which has to work as a host. Its fan is on the fan\n"
-               "# header and is driven by lord-fand: nothing to set for it.\n"
+               "# header and is driven by insane-fand: nothing to set for it.\n"
                "[pi5]\n"
                "dtoverlay=dwc2,dr_mode=host\n"
                "[all]\n";
@@ -274,8 +274,8 @@ const char *hw_rpi_case_text(const char *id) {
 
 /* The boot partition is root's alone: this copy is what Settings reads (js_fan.c). */
 static void case_note(const char *id) {
-    mkdir("/var/lib/lordos", 0755);
-    const char *tmp = "/var/lib/lordos/case.tmp", *dst = "/var/lib/lordos/case";
+    mkdir("/var/lib/insaneos", 0755);
+    const char *tmp = "/var/lib/insaneos/case.tmp", *dst = "/var/lib/insaneos/case";
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
     if (fd < 0) return;
     size_t l = strlen(id);
@@ -297,7 +297,7 @@ void hw_act_rpi_case(const AdminReq *r, const char *arg, size_t len) {
         return;
     }
     /* written next to config.txt: temporary file, then rename (the FAT partition has no links) */
-    const char *tmp = "/boot/firmware/lordos-case.tmp", *dst = "/boot/firmware/lordos-case.txt";
+    const char *tmp = "/boot/firmware/insaneos-case.tmp", *dst = "/boot/firmware/insaneos-case.txt";
     fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
     if (fd < 0) { admin_err("hw.caseFailed", "errno", lerr_errno(errno), NULL); return; }
     size_t l = strlen(text);
@@ -767,7 +767,7 @@ static int write_atomic(const char *path, const char *text) {
         if (n >= 0) { cur[n] = 0; if (!strcmp(cur, text)) return 0; }
     }
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos-tmp", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos-tmp", path);
     fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
     if (fd < 0) return -1;
     int ok = write(fd, text, strlen(text)) == (ssize_t)strlen(text);
@@ -785,13 +785,13 @@ void hw_act_video(const AdminReq *r, const char *arg, size_t len) {
         admin_err("admin.invalidArgument", NULL);
         return;
     }
-    const char *cp = "/etc/chromium/policies/managed/lordos-video.json";
+    const char *cp = "/etc/chromium/policies/managed/insaneos-video.json";
     mkdir("/etc/chromium", 0755);
     mkdir("/etc/chromium/policies", 0755);
     mkdir("/etc/chromium/policies/managed", 0755);
     if (write_atomic(cp, chromium)) { admin_err("sys.writeFailed", "path", cp, NULL); return; }
     struct stat st;
-    const char *fp = "/etc/firefox-esr/lordos-video.js";
+    const char *fp = "/etc/firefox-esr/insaneos-video.js";
     if (stat("/etc/firefox-esr", &st) == 0 && S_ISDIR(st.st_mode) && write_atomic(fp, firefox)) {
         admin_err("sys.writeFailed", "path", fp, NULL);
         return;
@@ -805,8 +805,8 @@ void hw_act_browser_restore(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     char a[8];
     if (arg_copy(arg, len, a, sizeof a) || (strcmp(a, "on") && strcmp(a, "off"))) { admin_err("admin.invalidArgument", NULL); return; }
-    const char *cp = "/etc/chromium/policies/recommended/lordos-session.json";
-    const char *fp = "/etc/firefox-esr/lordos-session.js";
+    const char *cp = "/etc/chromium/policies/recommended/insaneos-session.json";
+    const char *fp = "/etc/firefox-esr/insaneos-session.js";
     if (!strcmp(a, "off")) {
         if ((unlink(cp) && errno != ENOENT) || (unlink(fp) && errno != ENOENT)) { admin_err("sys.writeFailed", "path", cp, NULL); return; }
         admin_say("OK", "%s", a);   /* i18n-ok */
@@ -826,7 +826,7 @@ void hw_act_browser_restore(const AdminReq *r, const char *arg, size_t len) {
 
 /* ---- InsaneBench's boot time test (bench/boottest.h, docs/BENCHMARK.md "Boot") ---- */
 
-/* boot-test <n>: n restarts in a row (BT_MIN..BT_MAX), each boot's time recorded by lord-sessiond. Only
+/* boot-test <n>: n restarts in a row (BT_MIN..BT_MAX), each boot's time recorded by insane-sessiond. Only
  * writes the fixed-format state file; the restart itself is asked by the session as any other (Restart). */
 void hw_act_boot_test(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
@@ -836,7 +836,7 @@ void hw_act_boot_test(const AdminReq *r, const char *arg, size_t len) {
     if (n < BT_MIN || n > BT_MAX) { admin_err("admin.invalidArgument", NULL); return; }
     struct stat st;
     if (!stat("/run/live", &st)) { admin_err("bench.bootTestLive", NULL); return; }   /* nothing survives a restart there */
-    mkdir("/var/lib/lordos", 0755);
+    mkdir("/var/lib/insaneos", 0755);
     BootTest b = { n, n, (long long)time(NULL) };
     if (bt_write(BT_PATH, &b)) { admin_err("bench.bootTestFailed", "errno", lerr_errno(errno), NULL); return; }
     admin_ok("bench.bootTestSet", "n", v, NULL);

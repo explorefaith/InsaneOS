@@ -9,66 +9,66 @@ a server or VPS, and `apt` sees the same repository.
 
 | Piece | Where |
 |---|---|
-| The signed repository | `https://lordos.org/apt`, suite `stable`, component `main`, amd64 and arm64 |
-| Its source on every system | `/etc/apt/sources.list.d/lordos.sources` (deb822, `Signed-By:`) |
-| Its key on every system | `/usr/share/keyrings/lordos-archive-keyring.gpg` (in the `lordos` package) |
+| The signed repository | `https://insaneos.org/apt`, suite `stable`, component `main`, amd64 and arm64 |
+| Its source on every system | `/etc/apt/sources.list.d/insaneos.sources` (deb822, `Signed-By:`) |
+| Its key on every system | `/usr/share/keyrings/insaneos-archive-keyring.gpg` (in the `insaneos` package) |
 | Building, signing and uploading it | `tools/release/apt-repo.sh` (on the maintainer's Mac) |
-| The Store's side | `apps/store/debian.js` (`Updates`), `sdk/updates.js`, `lord.pkg.releaseNotes` and `lord.pkg.rebootRequired` (`server/src/ui/js_pkg.c`) |
+| The Store's side | `apps/store/debian.js` (`Updates`), `sdk/updates.js`, `insane.pkg.releaseNotes` and `insane.pkg.rebootRequired` (`server/src/ui/js_pkg.c`) |
 | Version-to-version changes | `packaging/migrations/` (system, as root) and `MIGRATIONS` in `sdk/settings.js` (each user's settings) |
-| The tested-hardware snapshot (0.8.7) | the `lordos-hwdata` package (`tools/iso/mkdeb-hwdata.sh`), which `lordos` depends on; published with a release or alone between releases (below) |
-| The Store's Disk Formats item (0.8.7) | the `lordos-disk-formats` package (`tools/iso/mkdeb-diskformats.sh`, `FILES.md`, "Disks' file systems") |
+| The tested-hardware snapshot (0.8.7) | the `insaneos-hwdata` package (`tools/iso/mkdeb-hwdata.sh`), which `insaneos` depends on; published with a release or alone between releases (below) |
+| The Store's Disk Formats item (0.8.7) | the `insaneos-disk-formats` package (`tools/iso/mkdeb-diskformats.sh`, `FILES.md`, "Disks' file systems") |
 
 ## The repository
 
 ```
-https://lordos.org/apt/
+https://insaneos.org/apt/
   dists/stable/InRelease               signed (clear-signed Release)
   dists/stable/Release, Release.gpg    the same, with a detached signature
   dists/stable/main/binary-amd64/Packages(.xz, .gz)
   dists/stable/main/binary-arm64/Packages(.xz, .gz)
-  dists/stable/main/notes/ReleaseNotes(.xz)   release notes of each lordos version (below)
-  pool/main/l/lordos/lordos_<version>_<arch>.deb
-  pool/main/l/lordos-hwdata/lordos-hwdata_<YYYY.MM.DD[.N]>_all.deb   (0.8.7) the signed tested-hardware snapshot
-  pool/main/l/lordos-disk-formats/lordos-disk-formats_<version>_<arch>.deb   (0.8.7) the Store's Disk Formats item
-  lordos.sources                       the same file the package installs
-https://lordos.org/keys/lordos-archive-keyring.gpg (.asc)   the public key
-https://lordos.org/apt-staging/        the same layout, for tests before anything goes live
+  dists/stable/main/notes/ReleaseNotes(.xz)   release notes of each insaneos version (below)
+  pool/main/l/insaneos/insaneos_<version>_<arch>.deb
+  pool/main/l/insaneos-hwdata/insaneos-hwdata_<YYYY.MM.DD[.N]>_all.deb   (0.8.7) the signed tested-hardware snapshot
+  pool/main/l/insaneos-disk-formats/insaneos-disk-formats_<version>_<arch>.deb   (0.8.7) the Store's Disk Formats item
+  insaneos.sources                       the same file the package installs
+https://insaneos.org/keys/insaneos-archive-keyring.gpg (.asc)   the public key
+https://insaneos.org/apt-staging/        the same layout, for tests before anything goes live
 ```
 
 - **One suite, `stable`,** with every published release (until 1.0 every release is a beta, and the
   betas are what users run). Origin and Label are `Insane OS`. Test builds go to `apt-staging`, never to
   `apt`. A `beta` suite can be added later for opt-in previews.
 - **The pool only grows.** A published `.deb` is never replaced (`apt-repo.sh` refuses a version that
-  already exists with other contents); the previous versions stay, so `apt install lordos=<version>`
+  already exists with other contents); the previous versions stay, so `apt install insaneos=<version>`
   can go back. Versions follow dpkg's order, so a test build named `0.8.1~staging1` sorts after
   `0.8.0` and before `0.8.1` (checked by `build/pkg-test`).
 - **Built with Debian's tools.** `apt-ftparchive` writes `Packages` and `Release` (in a
   `debian:trixie` container on the Mac, or natively on a Debian host); `gpg` signs on the Mac.
 - **Release notes.** `main/notes/ReleaseNotes` is a deb822 file covered by the signed `Release`:
-  one stanza per lordos version with `Package`, `Version` and `Notes` (the version's section of
+  one stanza per insaneos version with `Package`, `Version` and `Notes` (the version's section of
   [CHANGELOG.md](../CHANGELOG.md) as Markdown, through `tools/release/release-notes.sh` without its
   footer; continuation lines start with a space, ` .` is an empty line). Our package engine downloads
   it in `pkg-update`, checks its SHA-256 against `InRelease` like any index and keeps it in
-  `/var/lib/lordos/pkg/notes`; `lord.pkg.releaseNotes(name, version)` returns the Markdown. `apt`
+  `/var/lib/insaneos/pkg/notes`; `insane.pkg.releaseNotes(name, version)` returns the Markdown. `apt`
   ignores the file.
 
 ### Serving it (CDN)
 
-`lordos.org` is S3 behind CloudFront. Two things the website's defaults do would break APT, so the
+`insaneos.org` is S3 behind CloudFront. Two things the website's defaults do would break APT, so the
 repository paths need their own CloudFront cache behaviors, `apt/*` and `apt-staging/*`:
 
 1. **Plain HTTP must be served, not redirected.** Until 0.8.4 our package engine had no TLS of its
    own and read `https://` sources over `http://`, exactly like `http://deb.debian.org`: what protects
    the files is the signature and the SHA-256 of every file, not the transport. Since 0.8.5 it speaks
-   HTTPS through `lord-tls` ([PACKAGES.md](PACKAGES.md), "HTTPS") and sources written as `https://`
+   HTTPS through `insane-tls` ([PACKAGES.md](PACKAGES.md), "HTTPS") and sources written as `https://`
    stay HTTPS, but systems updating from 0.8.4.1 or older still read the repository over `http://`
    until they have 0.8.5, and `apt` itself uses HTTPS. Viewer protocol policy: **HTTP and HTTPS**
    (`allow-all`).
-2. **No URL rewriting.** The site's `lordos-router` function (viewer request) turns a path without
+2. **No URL rewriting.** The site's `insaneos-router` function (viewer request) turns a path without
    an extension into `<path>/index.html`, and APT's files `InRelease`, `Release` and `Packages` have
    none. The two behaviors have **no function association**.
 
-Everything else is copied from the default behavior: origin `s3-lordos.org`, GET/HEAD, the same
+Everything else is copied from the default behavior: origin `s3-insaneos.org`, GET/HEAD, the same
 cache policy and response headers policy. `keys/*` needs nothing special (HTTPS, files with an
 extension). `tools/web/cdn-apt-behaviors.sh <admin-profile>` makes this change (once, by the
 account's administrator: the deploy profile cannot change the distribution). The website's deploy
@@ -79,23 +79,23 @@ script (`tools/web/deploy.sh`) never touches `apt/`, `apt-staging/` or `keys/`.
 
 | Key | Private part | Public part |
 |---|---|---|
-| **APT archive key** (signs `InRelease`/`Release.gpg`): OpenPGP v4, Ed25519, sign only, `Insane OS Archive Signing Key`, fingerprint `1DDA F390 107D F264 FA8A  0918 3972 CC6D E4DA 2336`, expires 2031-10-18 | the maintainer's Mac only: GnuPG home `~/.config/lordos-release/apt-gnupg` (0700) and an armored export `~/.config/lordos-release/apt-archive-signing.secret.asc` (0600); backup copies of both in `~/.ssh/ssh/lordos-release/`, the same place as the release key's | `packaging/keys/lordos-archive-keyring.gpg` (and `.asc`), installed as `/usr/share/keyrings/lordos-archive-keyring.gpg`, published at `https://lordos.org/keys/` |
-| **Release key** (signs `SHA256SUMS` of a GitHub release; raw Ed25519) | `~/.config/lordos-release/release-ed25519.key.pem` | see [SIGNING.md](SIGNING.md) |
+| **APT archive key** (signs `InRelease`/`Release.gpg`): OpenPGP v4, Ed25519, sign only, `Insane OS Archive Signing Key`, fingerprint `1DDA F390 107D F264 FA8A  0918 3972 CC6D E4DA 2336`, expires 2031-10-18 | the maintainer's Mac only: GnuPG home `~/.config/insaneos-release/apt-gnupg` (0700) and an armored export `~/.config/insaneos-release/apt-archive-signing.secret.asc` (0600); backup copies of both in `~/.ssh/ssh/insaneos-release/`, the same place as the release key's | `packaging/keys/insaneos-archive-keyring.gpg` (and `.asc`), installed as `/usr/share/keyrings/insaneos-archive-keyring.gpg`, published at `https://insaneos.org/keys/` |
+| **Release key** (signs `SHA256SUMS` of a GitHub release; raw Ed25519) | `~/.config/insaneos-release/release-ed25519.key.pem` | see [SIGNING.md](SIGNING.md) |
 
 APT needs OpenPGP, so the repository has its own key instead of reusing the raw Ed25519 release key.
 Neither private key is ever copied to a VM, a build machine, a server or the repository. Keep an
-offline copy of `~/.config/lordos-release/` (the whole folder) as well.
+offline copy of `~/.config/insaneos-release/` (the whole folder) as well.
 
 **Before 2031-10-18**, extend the key's expiry on the Mac (`gpg --quick-set-expire <fingerprint> 5y`
-with `GNUPGHOME=~/.config/lordos-release/apt-gnupg`), export it again into `packaging/keys/` and ship
+with `GNUPGHOME=~/.config/insaneos-release/apt-gnupg`), export it again into `packaging/keys/` and ship
 it in a release some months before the old date: a system that has not updated by then needs
 `install.sh` again. To replace the key, ship the new one in the keyring file next to the old one for
 at least one release before signing with it.
 
 ## How a system gets the repository
 
-- **The `lordos` package** carries the source as `/usr/lib/lordos/apt/lordos.sources`. Its
-  `postinst` copies it to `/etc/apt/sources.list.d/lordos.sources` when that file is missing, and
+- **The `insaneos` package** carries the source as `/usr/lib/insaneos/apt/insaneos.sources`. Its
+  `postinst` copies it to `/etc/apt/sources.list.d/insaneos.sources` when that file is missing, and
   its `postrm` removes it with the package (otherwise `apt update` would fail on a repository whose
   key is gone). It is not a conffile: an administrator's change, such as `Enabled: no` to stop
   Insane OS updates, is kept on every upgrade.
@@ -107,27 +107,27 @@ at least one release before signing with it.
 
   ```sh
   sudo apt update && sudo apt install -y curl
-  curl -fsSL https://lordos.org/install.sh | sh
+  curl -fsSL https://insaneos.org/install.sh | sh
   ```
 
   or add the repository by hand and upgrade with apt (or with Store → Updates afterwards):
 
   ```sh
-  sudo curl -fsSLo /usr/share/keyrings/lordos-archive-keyring.gpg https://lordos.org/keys/lordos-archive-keyring.gpg
-  gpg --show-keys /usr/share/keyrings/lordos-archive-keyring.gpg    # 1DDA F390 107D F264 FA8A  0918 3972 CC6D E4DA 2336
-  sudo curl -fsSLo /etc/apt/sources.list.d/lordos.sources https://lordos.org/apt/lordos.sources
-  sudo apt update && sudo apt install lordos
+  sudo curl -fsSLo /usr/share/keyrings/insaneos-archive-keyring.gpg https://insaneos.org/keys/insaneos-archive-keyring.gpg
+  gpg --show-keys /usr/share/keyrings/insaneos-archive-keyring.gpg    # 1DDA F390 107D F264 FA8A  0918 3972 CC6D E4DA 2336
+  sudo curl -fsSLo /etc/apt/sources.list.d/insaneos.sources https://insaneos.org/apt/insaneos.sources
+  sudo apt update && sudo apt install insaneos
   ```
 
   That file is byte for byte the one the package would write, so the package keeps it as it is.
 
 ```
-# /etc/apt/sources.list.d/lordos.sources
+# /etc/apt/sources.list.d/insaneos.sources
 Types: deb
-URIs: https://lordos.org/apt
+URIs: https://insaneos.org/apt
 Suites: stable
 Components: main
-Signed-By: /usr/share/keyrings/lordos-archive-keyring.gpg
+Signed-By: /usr/share/keyrings/insaneos-archive-keyring.gpg
 ```
 
 ## Store → Updates
@@ -137,7 +137,7 @@ Signed-By: /usr/share/keyrings/lordos-archive-keyring.gpg
 | ![Insane OS update available](store-update-available-light.png) | ![Insane OS update available, dark](store-update-available-dark.png) |
 | "Insane OS <version> is available", with the release notes | The same in dark mode |
 | ![Updating](store-update-progress-light.png) | ![Restart required](store-update-restart-dark.png) |
-| Updating (the plan, then the progress of `pkg-install lordos`) | Installed: "Restart required" |
+| Updating (the plan, then the progress of `pkg-install insaneos`) | Installed: "Restart required" |
 | ![The daily check's notification](store-update-notification-dark.png) | |
 | The daily check found an update and says so once (here a Debian update; after the restart, About shows the new version) | |
 
@@ -146,18 +146,18 @@ Signed-By: /usr/share/keyrings/lordos-archive-keyring.gpg
 
 - **"Check for updates"** runs `pkg-update`: every source's signed `InRelease`, Debian's and
   Insane OS's, then the indexes and the release notes.
-- **"Insane OS <version> is available"** appears when the candidate of the `lordos` package is newer
+- **"Insane OS <version> is available"** appears when the candidate of the `insaneos` package is newer
   than the installed one: the installed version, the download size, **What's new** (the release
   notes, the first lines with "Show all") and **Update**. Update shows the plan first
-  (`lord.pkg.plan({ install: ['lordos'] })`: lordos and any new dependency), then runs
-  `pkg-install lordos` through the administration helper, with the same progress bar as any
+  (`insane.pkg.plan({ install: ['insaneos'] })`: insaneos and any new dependency), then runs
+  `pkg-install insaneos` through the administration helper, with the same progress bar as any
   install. Only administrators (the `sudo` group) can update.
-- **Debian updates** are listed below with "Update all" (`pkg-upgrade`, which also takes lordos if
+- **Debian updates** are listed below with "Update all" (`pkg-upgrade`, which also takes insaneos if
   it is pending).
-- **"Restart required"** appears when an installed update needs it: the running `lord-server` is
-  not the installed `lordos` version, or `/run/reboot-required` exists (the Debian convention: the
-  lordos `postinst` writes it on an upgrade, and its kernel hook
-  `/etc/kernel/postinst.d/zz-lordos-reboot-required` on every new kernel). "Restart Now…" opens the
+- **"Restart required"** appears when an installed update needs it: the running `insane-server` is
+  not the installed `insaneos` version, or `/run/reboot-required` exists (the Debian convention: the
+  insaneos `postinst` writes it on an upgrade, and its kernel hook
+  `/etc/kernel/postinst.d/zz-insaneos-reboot-required` on every new kernel). "Restart Now…" opens the
   session's Restart dialog (with its countdown and the open apps; [SESSIONS.md](SESSIONS.md)) when
   the session can restart; otherwise it says to log out and choose Restart on the login screen.
   "Later" hides it. Nothing restarts on its own: the update replaces the files under the running
@@ -169,13 +169,13 @@ Signed-By: /usr/share/keyrings/lordos-archive-keyring.gpg
   opens Updates. It never installs anything. When nothing changed it costs a few small requests
   (`If-Modified-Since`, 304). Insane OS has no metered-connection setting yet; turning the check off
   is the way to avoid it on a metered link.
-- **The tested-hardware snapshot** (0.8.7, `lordos-hwdata`): a newer one published between releases is an
+- **The tested-hardware snapshot** (0.8.7, `insaneos-hwdata`): a newer one published between releases is an
   ordinary update of that package, listed with the other packages ("Debian updates") as "Tested hardware list" with
   its date in the user's region (`apps/store/syspkg.js`; the package name is not shown) and
   announced by the daily check as "1 update is available"; *Update all* installs it. It needs no restart and no
-  migration: `lord.sysinfo.community()` reads the files again whenever System Information's Compatibility panel
-  asks, and verifies the snapshot's Ed25519 signature before using it. Updating `lordos` from 0.8.5 or 0.8.6
-  brings `lordos-hwdata` in as a new dependency (the plan shows it). See "The tested-hardware snapshot" below.
+  migration: `insane.sysinfo.community()` reads the files again whenever System Information's Compatibility panel
+  asks, and verifies the snapshot's Ed25519 signature before using it. Updating `insaneos` from 0.8.5 or 0.8.6
+  brings `insaneos-hwdata` in as a new dependency (the plan shows it). See "The tested-hardware snapshot" below.
 - **Local repositories.** The engine also reads `file:/path` sources (a copy of the repository on a
   disk or USB stick, for machines without internet), checked the same way.
 
@@ -184,40 +184,40 @@ by `server/src/pkg/pgp.c` (Ed25519 v4, SHA-512) against the keyring named in `Si
 file by its SHA-256, and dpkg installs. `apt` and the Store share dpkg's lock and see the same
 state, so either can be used.
 
-## The tested-hardware snapshot (lordos-hwdata)
+## The tested-hardware snapshot (insaneos-hwdata)
 
 (0.8.7; design and reasons in [BENCHMARK.md](BENCHMARK.md), "Newer snapshots between releases".) System
 Information's Compatibility panel shows what the community confirmed about this machine's devices, from a signed
-snapshot of the accepted hardware reports. The snapshot is not in the `lordos` package but in its own:
+snapshot of the accepted hardware reports. The snapshot is not in the `insaneos` package but in its own:
 
 | | |
 |---|---|
-| Package | `lordos-hwdata`, `Architecture: all`, `Multi-Arch: foreign`, built by `tools/iso/mkdeb-hwdata.sh` |
-| Contents | `/usr/lib/lordos/assets/hwreport/snapshot.json` and `snapshot.json.sig` (Ed25519, release key), its copyright and changelog |
+| Package | `insaneos-hwdata`, `Architecture: all`, `Multi-Arch: foreign`, built by `tools/iso/mkdeb-hwdata.sh` |
+| Contents | `/usr/lib/insaneos/assets/hwreport/snapshot.json` and `snapshot.json.sig` (Ed25519, release key), its copyright and changelog |
 | Version | the snapshot's date (its newest report), `YYYY.MM.DD`, plus `.N` (`HWDATA_SERIAL`) for a second, different snapshot on the same date |
-| Dependency | `lordos` `Depends: lordos-hwdata (>= 2026.10.27)` (any snapshot of format 1) |
+| Dependency | `insaneos` `Depends: insaneos-hwdata (>= 2026.10.27)` (any snapshot of format 1) |
 | Reproducible | file times, the changelog date and the archive times come from the snapshot's date: the same snapshot and signature give the same bytes, so `apt-repo.sh` takes it again unchanged and refuses another one under the same version |
 
-How it gets to a system: the ISO and the Raspberry Pi image install it with `lordos`; `install.sh` takes it from
-the same GitHub release as the `lordos` package (checked against the signed `SHA256SUMS`, as the main package),
+How it gets to a system: the ISO and the Raspberry Pi image install it with `insaneos`; `install.sh` takes it from
+the same GitHub release as the `insaneos` package (checked against the signed `SHA256SUMS`, as the main package),
 or from the folder of a `--deb` file; afterwards it comes from this repository like any update. Publishing a newer
 one alone is in [RELEASING.md](RELEASING.md), "A newer hardware snapshot between releases".
 
-What is checked: `apt-repo.sh` adds a `lordos-hwdata` only if its snapshot verifies with
-`tools/release/lordos-release.pub.pem`, and refuses a `lordos` that depends on it while the pool has none; the
-package engine checks `InRelease` and the file's SHA-256; `lord-server` verifies the snapshot's signature with the
+What is checked: `apt-repo.sh` adds a `insaneos-hwdata` only if its snapshot verifies with
+`tools/release/insaneos-release.pub.pem`, and refuses a `insaneos` that depends on it while the pool has none; the
+package engine checks `InRelease` and the file's SHA-256; `insane-server` verifies the snapshot's signature with the
 key compiled into it before parsing anything (`sysreport/hwsnap.c`). Without the package (removed by hand with
 `dpkg --force-depends`, or a development install) the panel says there is no community data (`state: "missing"`;
 `build/hwsnap-test` checks a missing folder) and everything else works.
 
-Tests (2026-10-29): `build/pkg-test` plans the update of a 0.8.5 system to a `lordos` that depends on
-`lordos-hwdata` (the dependency comes in, at its newest version, both with *Update* and with *Update all*) and a
+Tests (2026-10-29): `build/pkg-test` plans the update of a 0.8.5 system to a `insaneos` that depends on
+`insaneos-hwdata` (the dependency comes in, at its newest version, both with *Update* and with *Update all*) and a
 newer snapshot alone on a 0.8.7 system (one upgrade, nothing else), and checks the date versions' order. Both
 packages were built on VM 116 and checked with `dpkg-deb --info`/`--contents` (no `hwreport` file left in
-`lordos`; the `Depends` line); in a `debian:trixie` container, apt refuses `lordos` alone, installs both, upgrades
-`2026.10.27` to `2026.10.27.2`; `install.sh`'s download and `--deb` paths take the newest `lordos-hwdata` the signed
+`insaneos`; the `Depends` line); in a `debian:trixie` container, apt refuses `insaneos` alone, installs both, upgrades
+`2026.10.27` to `2026.10.27.2`; `install.sh`'s download and `--deb` paths take the newest `insaneos-hwdata` the signed
 `SHA256SUMS` lists, refuse a changed one and refuse to start apt when there is none; `apt-repo.sh build staging`
-(offline, with a throwaway archive key and a throwaway snapshot key) refused `lordos` without `lordos-hwdata`, a
+(offline, with a throwaway archive key and a throwaway snapshot key) refused `insaneos` without `insaneos-hwdata`, a
 snapshot signed with another key, a test key on `live` and the same version with other bytes, accepted the same
 bytes again, indexed the package for amd64 and arm64, and apt on a system with `2026.10.27` saw `2026.10.27.2` as an
 upgrade from the `file:` copy. Not yet run: the end-to-end staging test on a VM (publish to `apt-staging`, see the
@@ -229,38 +229,38 @@ What changes between versions in the installed system (not in the files the pack
 migration. Two kinds:
 
 **System migrations** (root), `packaging/migrations/NNN-<version>-<name>.sh`, installed in
-`/usr/lib/lordos/migrations/` and run by `/usr/lib/lordos/migrate` from the package's `postinst`:
+`/usr/lib/insaneos/migrations/` and run by `/usr/lib/insaneos/migrate` from the package's `postinst`:
 
-- each one runs **once**, in `NNN` order; `/var/lib/lordos/migrations/<name>` records it (the time
+- each one runs **once**, in `NNN` order; `/var/lib/insaneos/migrations/<name>` records it (the time
   it ran). So 0.8.1 → 0.8.2 → 0.8.3 and 0.8.0 → 0.8.3 in one step run the same migrations and end
   in the same state;
-- it gets the version it upgrades from in `LORDOS_OLD_VERSION` (empty on a new install, where
+- it gets the version it upgrades from in `INSANEOS_OLD_VERSION` (empty on a new install, where
   most migrations have nothing to do) and runs under `sh -eu`;
 - it must be **idempotent** and safe without systemd (a chroot building an image), must not touch
   the users' home folders, and must keep what an administrator changed;
-- if one fails, the ones after it don't run, `dpkg` leaves lordos unconfigured and says so, and the
+- if one fails, the ones after it don't run, `dpkg` leaves insaneos unconfigured and says so, and the
   next `dpkg --configure -a` or Store update runs it again.
 
 Today's migrations:
 
 | Migration | What it does |
 |---|---|
-| `001-0.8.1-network-permissions` | Enables `lord-netperm.service` (per-app network permissions) where `lordos.service` is enabled. The ISO, the Pi image and `install.sh` already did; a system set up with `apt` alone had it off. Runs once: disabling it later sticks. |
-| `002-0.8.1-root-ssh-keys` | 0.8.1 adds `PermitRootLogin no` (`/etc/ssh/sshd_config.d/10-lordos.conf`). On an **upgrade** from 0.8.0 with SSH installed and keys in `/root/.ssh/authorized_keys` (a VPS run as root), it writes `09-lordos-root-keys.conf` with `PermitRootLogin prohibit-password`, so root keeps logging in with keys (never passwords) instead of being locked out at the next restart. New installs never get it; delete the file to apply Insane OS's default. |
-| `003-0.8.2-drivetemp` | 0.8.2 ships `/usr/lib/modules-load.d/lordos-drivetemp.conf` (SATA disk temperatures in Monitor → Disks, read at boot). On a running system it loads `drivetemp` once, so the temperatures show without a restart. Does nothing without systemd (an image being built) or where the kernel has no `drivetemp`. |
-| `004-0.8.3-smartd-off` | 0.8.3 ships a drop-in that keeps Debian's smartd (`smartmontools.service`) off unless `/etc/lordos/smartd-enabled` exists ([SYSTEM.md](SYSTEM.md), "smartd"). A condition is only checked at start, so a smartd already running from an earlier smartmontools install is stopped once. Does nothing without systemd, without smartmontools or where an administrator opted in. |
-| `005-0.8.4-browser-frames` | 0.8.4 makes the preinstalled browsers draw their own bar with Insane OS's window buttons (`WAYLAND.md`, "The browsers by default"). Where `/etc/chromium/master_preferences` still has the 0.8.3 ISO's `"custom_chrome_frame": false` it becomes `true` and the GTK theme is added (new Chromium profiles only); where `/etc/firefox-esr/lordos.js` is still exactly the 0.8.3 file it becomes `inTitlebar` 1 (every Firefox profile whose user didn't change «Title Bar»). Anything an administrator changed is kept; home folders are not touched. |
-| `006-0.8.7-greeter-gpu` | 0.8.7 composes the login screen on the GPU: `lordos-greeter` joins `render` and `video`. On a Raspberry Pi it adds FFmpeg to `/etc/apt/preferences.d/raspberrypi`, and the next update brings Raspberry Pi's build ([WALLPAPERS.md](WALLPAPERS.md)) |
+| `001-0.8.1-network-permissions` | Enables `insane-netperm.service` (per-app network permissions) where `insaneos.service` is enabled. The ISO, the Pi image and `install.sh` already did; a system set up with `apt` alone had it off. Runs once: disabling it later sticks. |
+| `002-0.8.1-root-ssh-keys` | 0.8.1 adds `PermitRootLogin no` (`/etc/ssh/sshd_config.d/10-insaneos.conf`). On an **upgrade** from 0.8.0 with SSH installed and keys in `/root/.ssh/authorized_keys` (a VPS run as root), it writes `09-insaneos-root-keys.conf` with `PermitRootLogin prohibit-password`, so root keeps logging in with keys (never passwords) instead of being locked out at the next restart. New installs never get it; delete the file to apply Insane OS's default. |
+| `003-0.8.2-drivetemp` | 0.8.2 ships `/usr/lib/modules-load.d/insaneos-drivetemp.conf` (SATA disk temperatures in Monitor → Disks, read at boot). On a running system it loads `drivetemp` once, so the temperatures show without a restart. Does nothing without systemd (an image being built) or where the kernel has no `drivetemp`. |
+| `004-0.8.3-smartd-off` | 0.8.3 ships a drop-in that keeps Debian's smartd (`smartmontools.service`) off unless `/etc/insaneos/smartd-enabled` exists ([SYSTEM.md](SYSTEM.md), "smartd"). A condition is only checked at start, so a smartd already running from an earlier smartmontools install is stopped once. Does nothing without systemd, without smartmontools or where an administrator opted in. |
+| `005-0.8.4-browser-frames` | 0.8.4 makes the preinstalled browsers draw their own bar with Insane OS's window buttons (`WAYLAND.md`, "The browsers by default"). Where `/etc/chromium/master_preferences` still has the 0.8.3 ISO's `"custom_chrome_frame": false` it becomes `true` and the GTK theme is added (new Chromium profiles only); where `/etc/firefox-esr/insaneos.js` is still exactly the 0.8.3 file it becomes `inTitlebar` 1 (every Firefox profile whose user didn't change «Title Bar»). Anything an administrator changed is kept; home folders are not touched. |
+| `006-0.8.7-greeter-gpu` | 0.8.7 composes the login screen on the GPU: `insaneos-greeter` joins `render` and `video`. On a Raspberry Pi it adds FFmpeg to `/etc/apt/preferences.d/raspberrypi`, and the next update brings Raspberry Pi's build ([WALLPAPERS.md](WALLPAPERS.md)) |
 
 **Settings migrations** (each user), in `sdk/settings.js`: `MIGRATIONS` is a list of
 `[schema, (settings) => newSettings]` applied in order when the session loads
-`~/.config/lordos/settings.json`; the file records the last one in `schema`. 0.8.1 starts recording
+`~/.config/insaneos/settings.json`; the file records the last one in `schema`. 0.8.1 starts recording
 it (schema 1, nothing changes). A setting renamed or reshaped in a release gets an entry here, so a
 user who skips versions still converges.
 
 Things that only need new files (a new unit, a new default config) ship in the package as usual; a
 new unit that must be enabled on upgraded systems needs a migration, since `postinst` only enables
-`lord-fand`.
+`insane-fand`.
 
 ## Raspberry Pi firmware packages
 
@@ -284,7 +284,7 @@ system by Insane OS's packages.
   key from Raspberry Pi's `raspberrypi-archive-keyring` package; the script checks its fingerprint,
   `CF8A 1AF5 02A2 AA2D 763B  AE7E 82B1 2992 7FA3 303E`), checks `main/binary-arm64/Packages.gz`
   against it, and takes a file only when its SHA-256 matches both the index and the pinned line.
-  Verified files are kept in `~/.local/share/lordos-apt/rpi-cache`, so a pinned version can still be
+  Verified files are kept in `~/.local/share/insaneos-apt/rpi-cache`, so a pinned version can still be
   published after Raspberry Pi's archive keeps only a newer one (it keeps one version per package).
   `apt-repo.sh rpi-fetch <target>` only fetches and verifies. A new upstream version is a new line
   in the list, reviewed like code; the pool only grows.
@@ -294,7 +294,7 @@ system by Insane OS's packages.
   are BSD-3-Clause; the bootloader images are under Raspberry Pi's binary licence (redistribution in
   unmodified binary form, for use with Raspberry Pi devices, with the notice: the `.deb` is copied
   as is); `kms++` is MPL-2.0, and its source, Raspberry Pi's `kms++` source package of the pinned
-  version, is published next to the binaries: https://lordos.org/apt/pool/rpi/source/k/kms++/ (the
+  version, is published next to the binaries: https://insaneos.org/apt/pool/rpi/source/k/kms++/ (the
   `.dsc`, `.orig.tar.xz` and `.debian.tar.xz`, pinned in `rpi-mirror.list` with architecture `source`
   and checked against Raspberry Pi's signed `Sources` index; not indexed for `apt source`)
   ([COMPLIANCE.md](COMPLIANCE.md)).
@@ -318,8 +318,8 @@ Insane OS's build recipes in `apt/recipes/`. An app reaches a system in one of t
 
 | Delivery | Apps | How |
 |---|---|---|
-| **direct** | Claude Code (`claude-code`), Claude Desktop (`claude-desktop`), Visual Studio Code (`code`), Cursor (`cursor`); commercial: Google Chrome (`google-chrome-stable`, amd64 and arm64), Microsoft Edge (`microsoft-edge-stable`, amd64), Spotify (`spotify-client`, amd64); third-party apps (0.8.8.4): VSCodium (`codium`, amd64 and arm64), Brave Browser (`brave-browser`, amd64 and arm64); remote access (0.8.8.6): Tailscale (`tailscale`, amd64 and arm64, suite `trixie`) | the vendor has a signed APT repository: the user's system adds it (a deb822 `.sources` with the key pinned in the catalog) and installs and updates from the vendor. Nothing is copied to lordos.org. |
-| **mirror** | `llama.cpp`, `whisper.cpp`, `codex-cli` (built by Insane OS); `goose`, `opencode`, `artcraft-launcher`, `rustdesk` (the vendor's .deb) | no vendor repository: verified on the maintainer's Mac and published in `pool/catalog/` of lordos.org/apt, signed with the Insane OS archive key with everything else. |
+| **direct** | Claude Code (`claude-code`), Claude Desktop (`claude-desktop`), Visual Studio Code (`code`), Cursor (`cursor`); commercial: Google Chrome (`google-chrome-stable`, amd64 and arm64), Microsoft Edge (`microsoft-edge-stable`, amd64), Spotify (`spotify-client`, amd64); third-party apps (0.8.8.4): VSCodium (`codium`, amd64 and arm64), Brave Browser (`brave-browser`, amd64 and arm64); remote access (0.8.8.6): Tailscale (`tailscale`, amd64 and arm64, suite `trixie`) | the vendor has a signed APT repository: the user's system adds it (a deb822 `.sources` with the key pinned in the catalog) and installs and updates from the vendor. Nothing is copied to insaneos.org. |
+| **mirror** | `llama.cpp`, `whisper.cpp`, `codex-cli` (built by Insane OS); `goose`, `opencode`, `artcraft-launcher`, `rustdesk` (the vendor's .deb) | no vendor repository: verified on the maintainer's Mac and published in `pool/catalog/` of insaneos.org/apt, signed with the Insane OS archive key with everything else. |
 
 The flow, on the maintainer's Mac only (like the rest of the repository):
 
@@ -333,7 +333,7 @@ The flow, on the maintainer's Mac only (like the rest of the repository):
    recipes run in `debian:trixie` containers of each architecture (amd64 natively, arm64 under qemu)
    with no network. The results go to `pool/catalog/<letter>/<name>/` and into the `binary-amd64` and
    `binary-arm64` indexes like `pool/main`, then the whole repository is signed as before.
-3. Everything verified or built is kept in `~/.local/share/lordos-apt/catalog-cache`: a version that
+3. Everything verified or built is kept in `~/.local/share/insaneos-apt/catalog-cache`: a version that
    disappears upstream can still be published, and a built package is never rebuilt for the same
    version (the pool is append-only; `apt-repo.sh` refuses a different file with a published name).
 
@@ -377,7 +377,7 @@ cursor 3.27.14, claude-code 2.1.308, goose 1.56.0, opencode 1.19.4; of 2026-10-2
 | `brave-browser` (1.99.55, read on 2026-11-05) | depends on `brave-keyring`. Its postinst installs icons, `defaults.list` entries, the `x-www-browser`/`gnome-www-browser`/`brave-browser` alternatives (priority 201), an AppArmor profile when `/etc/apparmor.d/abi/4.0` exists, and the `chromemgmt` group only when `/etc/default/brave-browser` asks for it; its Chrome-style source and key writer is cut off by an `exit 0` before it runs (Brave's own comment: "Don't add the Chrome repo"), so it writes no source. |
 | `brave-keyring` (1.20) | ships `/usr/share/keyrings/brave-browser-archive-keyring.gpg` (Brave's three release keys: DBF1 A116 … 2003 8257, 47D3 2A74 … 6A73 CD96, B2A3 DCA3 … E4B0 DCA0) and `/etc/sysctl.d/30-brave.conf` (comments only). Its postinst links that keyring into `/etc/apt/trusted.gpg.d/` (trusted for every source) **unless** `/etc/apt/sources.list.d/brave-browser-release.sources` (or `.list`) already uses it as Signed-By, in which case it removes the link; postrm removes the link. |
 | `tailscale` (1.104.5, read on 2026-11-08) | depends on `iptables`; recommends `tailscale-archive-keyring` and `iproute2`. Ships `tailscaled.service`, `tailscale-wait-online.service`, `tailscale-online.target` and the conffile `/etc/default/tailscaled` (`PORT="41641"`, `FLAGS=""`). Its postinst is debhelper's standard one: `deb-systemd-helper` enables `tailscaled.service` on a new install (`was-enabled` is true when there is no earlier state) and `deb-systemd-invoke restart` starts it. It writes no source and no key. prerm stops the daemon; postrm masks the unit on remove and, on purge, deletes `/var/lib/tailscale` (the machine's node key and login). |
-| `tailscale-archive-keyring` (1.35.181) | ships `/usr/share/keyrings/tailscale-archive-keyring.gpg`, byte for byte the key Insane OS pins (2596 A99E … 957F 5868); no maintainer scripts, so nothing is linked into `trusted.gpg.d`. Installed only when recommends are, and unused by Insane OS's `lordos-tailscale.sources`. |
+| `tailscale-archive-keyring` (1.35.181) | ships `/usr/share/keyrings/tailscale-archive-keyring.gpg`, byte for byte the key Insane OS pins (2596 A99E … 957F 5868); no maintainer scripts, so nothing is linked into `trusted.gpg.d`. Installed only when recommends are, and unused by Insane OS's `insaneos-tailscale.sources`. |
 | `rustdesk` (1.5.1, read on 2026-11-08) | depends on GTK 3, `libxdo3`, `libva*`, `gstreamer1.0-pipewire` and other Debian 13 libraries; recommends `libayatana-appindicator3-1`. Its postinst links `/usr/bin/rustdesk`, copies `rustdesk.service` to `/usr/lib/systemd/system/` (a file no package owns) and **always** runs `systemctl enable rustdesk` and `systemctl start rustdesk`: a root daemon, `rustdesk --service`, that starts with the computer. preinst stops it before an upgrade; prerm stops, disables and deletes the unit; purge deletes `/root/.config/rustdesk`. No source, no key, no setuid file. |
 | `opencode` | `/usr/bin/ai.opencode.desktop` through update-alternatives; `chrome-sandbox` made setuid only when unprivileged user namespaces don't work; an AppArmor profile copied to `/etc/apparmor.d/ai.opencode.desktop` when AppArmor is enabled. It ships electron-updater's `app-update.yml` (GitHub releases). |
 
@@ -393,8 +393,8 @@ container on 2026-10-26).
 That is what `pkg-source-add` does (`server/src/pkg/sources_admin.c`): the Store adds the source before
 installing, and an entry with `"files": {"sources": "cursor", "keyring": "anysphere.gpg"}` is written
 under the vendor's own names (the key dearmored because the name ends in `.gpg`) instead of
-`lordos-<id>.sources` and `lordos-<id>.asc`; `pkg-source-remove` removes the same files. Both names
-come only from the root-owned catalog and pass a strict character set (`lordos*` source names are
+`insaneos-<id>.sources` and `insaneos-<id>.asc`; `pkg-source-remove` removes the same files. Both names
+come only from the root-owned catalog and pass a strict character set (`insaneos*` source names are
 refused).
 
 The commercial entries, checked in `debian:trixie` containers on 2026-10-27 with Debian 13's apt (source
@@ -404,7 +404,7 @@ their cron job):
 - **Google Chrome** uses `"files": {"sources": "google-chrome", "keyring": "google-chrome.gpg"}` and the
   URL the package itself writes (`dl.google.com/linux/chrome-stable/deb`): the package replaces the
   file with its own text for the same repository and key, and `apt-get update` is clean. With
-  `lordos-<id>` names and the documented `linux/chrome/deb` URL the system would keep two sources for
+  `insaneos-<id>` names and the documented `linux/chrome/deb` URL the system would keep two sources for
   the same packages (different URLs, so apt doesn't refuse them; both appear in `apt-cache policy`).
 - **Microsoft Edge** is the same with `microsoft-edge` / `microsoft-edge.gpg` and `repos/edge-stable`.
 - **Brave Browser** (0.8.8.4) uses `"files": {"sources": "brave-browser-release", "keyring":
@@ -419,7 +419,7 @@ their cron job):
   source. If Brave starts signing with one of its other two keys, the catalog's key and fingerprint
   change in a reviewed pull request, as for any key rotation.
 - **Spotify** has no `files`: its package writes a `.list` whatever `.sources` exist. With Insane OS's
-  `lordos-spotify.sources` and the package's `spotify.list` apt only warns ("Target Packages … is
+  `insaneos-spotify.sources` and the package's `spotify.list` apt only warns ("Target Packages … is
   configured multiple times") and `apt-get update` succeeds; with an empty `spotify.list` created
   before the install (Spotify's documented opt-out) there is no warning, but `pkg-source-add` doesn't
   write that file yet. Spotify's key goes into `trusted.gpg.d` in both cases.
@@ -435,7 +435,7 @@ their pins on a second download. Neither has been installed on a Insane OS syste
 `apt/keys/tailscale.asc`, 2596 A99E AAB3 3821 893C 0A79 458C A832 957F 5868, Tailscale's own
 `trixie.gpg`). Its `Release` has a `Codename` (`trixie`) and no `Suite`, like Cursor's, so the
 catalog's suite is `trixie` and must change with Insane OS's Debian release, in a reviewed pull request.
-The package writes no source, so the system keeps `lordos-tailscale.sources` and no `files` entry is
+The package writes no source, so the system keeps `insaneos-tailscale.sources` and no `files` entry is
 needed. After installing:
 
 - `tailscaled` is running: its postinst enables and starts it (table above). Nothing in Insane OS
@@ -450,9 +450,9 @@ needed. After installing:
   fd7a:115c:a1e0::/48) are local network for Insane OS (`np_is_lan4`, `np_is_lan6`), so an app with
   "no local network" can't reach tailnet peers and one with "no internet" can, and incoming
   connections from the tailnet to an app's port are decided like LAN ones. Nothing needs to be added
-  to lord-netperm. Not tested yet on a Insane OS system.
+  to insane-netperm. Not tested yet on a Insane OS system.
 - **Name resolution.** Insane OS uses systemd-resolved; `tailscaled` sets MagicDNS through it on its
-  own interface (`tailscale0`), which lord-netd doesn't manage (its VPNs set DNS with `resolvectl`
+  own interface (`tailscale0`), which insane-netd doesn't manage (its VPNs set DNS with `resolvectl`
   on their own interfaces). The network state lists `tailscale0` as a `tun` interface. Not tested yet.
 
 **RustDesk** (`"type": "deb"`, mirrored, 1.5.1, the GitHub release's `rustdesk-1.5.1-x86_64.deb` and
@@ -497,23 +497,23 @@ is drawn with `objectFit: cover` under a shade on the text side). The JSON:
 signed Release. The package engine (`server/src/pkg/pkg.c`, `featured_valid`/`banner_valid`) fetches
 them on each list update only from a source whose signed Release says `Origin: Insane OS`, checks their
 hashes like every index, parses the JSON and the PNG signature, and writes
-`/var/lib/lordos/pkg/featured.json` and `featured.png`; `lord.pkg.featured()` reads them, with no
+`/var/lib/insaneos/pkg/featured.json` and `featured.png`; `insane.pkg.featured()` reads them, with no
 arguments. Without them the Store shows a skeleton until the first list update, and a catalog app
 when the repository publishes no banner. To change it: edit the two files, rebuild and publish the
 repository; machines see it at their next list update.
 
 ## The Raspberry Pi kernel
 
-The Insane OS kernel for the Pi 5 (`linux-image-<version>-lordos-rpi-2712`, from
+The Insane OS kernel for the Pi 5 (`linux-image-<version>-insaneos-rpi-2712`, from
 `tools/rpi/build-kernel.sh`) is **not** in the repository yet: kernel updates on the Pi come with a
 new image for now. Its package installs exactly like Raspberry Pi's own (`raspi-firmware`'s hook
 copies the newest kernel to `kernel_2712.img`), with no `tryboot` fallback, so a broken kernel would
 leave the board unbootable with no way back from the Store. It goes into the repository when the
 image boots new kernels through the firmware's `tryboot` first and keeps the previous one as the
-fallback. The `lordos` package itself updates on the Pi like anywhere else (arm64).
+fallback. The `insaneos` package itself updates on the Pi like anywhere else (arm64).
 
-Since `6.18.57-3+lordos` (0.8.4) each kernel revision is its own release and package
-(`linux-image-6.18.57-lordos.3-rpi-2712`), so a new one installs next to the previous one instead of
+Since `6.18.57-3+insaneos` (0.8.4) each kernel revision is its own release and package
+(`linux-image-6.18.57-insaneos.3-rpi-2712`), so a new one installs next to the previous one instead of
 over it, and the previous one stays bootable from its own folder on `bootfs` (`RASPBERRY.md`,
 "Switching kernels on a board"). That is the package side of the repository path; the automatic
 `tryboot` first boot is still missing, so the kernel stays out of the repository (staging and live)
@@ -521,16 +521,16 @@ for now.
 
 ## Release tests
 
-- **0.8.6 (2026-10-30):** 0.8.5 → 0.8.6 with `apt` against `lordos.org/apt-staging` on a live-session
+- **0.8.6 (2026-10-30):** 0.8.5 → 0.8.6 with `apt` against `insaneos.org/apt-staging` on a live-session
   amd64 VM (no restart is possible there) and on the Raspberry Pi 5 with a restart: no migration ran,
   the settings files are unchanged, and the Pi came back with 0.8.6-beta build 20261030, the first frame
   7.63 s after the kernel, in a release build with signed code. The Store's own package engine and the
   Store → Updates screen were not exercised, and a second reinstall was not run.
 - **0.8.5 (2026-10-27):** 0.8.4.1 → 0.8.5 with `apt` on a VMware machine and 0.8.4 → 0.8.5 with `apt`
   on the Raspberry Pi 5, both tested before the release with the same package built as `0.8.5~rc2`,
-  then a restart; no migration runs (`/var/lib/lordos/migrations` unchanged from 0.8.4) and the
+  then a restart; no migration runs (`/var/lib/insaneos/migrations` unchanged from 0.8.4) and the
   settings are kept. The VMware machine was also updated from 0.8.4.1 to the 0.8.5 package with
-  Insane OS's package engine against `lordos.org/apt-staging` and measured afterwards
+  Insane OS's package engine against `insaneos.org/apt-staging` and measured afterwards
   (`results/0.8.5-beta/vmware-fusion/`, [RESULTS.md](RESULTS.md)).
 - **0.8.4.1 (2026-10-25):** 0.8.4 → 0.8.4.1 from the Store and with `apt` on VM 120 (no migration,
   nothing kept back) and with `apt` on the Raspberry Pi 5; the Raspberry Pi packages of the new
@@ -538,23 +538,23 @@ for now.
   (0.8.4.1 Beta)").
 - **0.8.4 (2026-10-25):** 0.8.3 → 0.8.4 from the Store and with `apt` on VM 120, and with `apt` on the
   Raspberry Pi 5: migration 005 only, the two new libraries (`libsrtp2-1`, `libusrsctp2`) installed
-  as dependencies, settings byte-identical; `apt-get upgrade` keeps `lordos` back (new
+  as dependencies, settings byte-identical; `apt-get upgrade` keeps `insaneos` back (new
   dependencies). A staging package re-published under the same version was refused by the Store's
   size check while the CDN still served the old file: staging is append-only too, and a re-upload
   needs a CloudFront invalidation of its path ([ISO.md](ISO.md), "Release test (0.8.4 Beta)").
 
 ## Tests (2026-10-18)
 
-- **Staging** (`https://lordos.org/apt-staging`, built and signed on the Mac with `apt-repo.sh`):
-  lordos 0.8.0 (amd64, arm64, from the 0.8.0 release, checked against its signed `SHA256SUMS`) and
+- **Staging** (`https://insaneos.org/apt-staging`, built and signed on the Mac with `apt-repo.sh`):
+  insaneos 0.8.0 (amd64, arm64, from the 0.8.0 release, checked against its signed `SHA256SUMS`) and
   test builds `0.8.1~staging*`.
 - **Signatures:** `InRelease` verifies with Insane OS's own code (`build/pkg-test pgp
-  packaging/keys/lordos-archive-keyring.gpg InRelease`: 1 key, 1 valid signature) and with Debian
+  packaging/keys/insaneos-archive-keyring.gpg InRelease`: 1 key, 1 valid signature) and with Debian
   13's `apt` (`sqv`); one changed byte is rejected (`pkg.pgp.badSignature`).
 - **apt, VM 120 (0.8.0 installed from the ISO, user logged in):** the 0.8.0 one-time step, then
-  `apt install lordos`: 0.8.0 → 0.8.1~staging in 29 s with the session open; migration 001
-  applied; `lordos`, `lord-netperm`, `lord-fand` active; `settings.json` byte for byte the same;
-  `/run/reboot-required.pkgs` = `lordos`; after the restart the login screen came back with the new
+  `apt install insaneos`: 0.8.0 → 0.8.1~staging in 29 s with the session open; migration 001
+  applied; `insaneos`, `insane-netperm`, `insane-fand` active; `settings.json` byte for byte the same;
+  `/run/reboot-required.pkgs` = `insaneos`; after the restart the login screen came back with the new
   version. That run found the `PermitRootLogin no` lock-out (the VM is administered as root with a
   key), which migration 002 now prevents.
 - **`install.sh` on an installed Insane OS** (VM 120 back at 0.8.0, session running): with the
@@ -569,15 +569,15 @@ for now.
   the user's settings (and `schema: 1` recorded). **Daily check:** with the lists aged two days,
   five minutes after login the session ran `pkg-update` on its own and showed "1 update is
   available" once (`updates.notified` recorded in `settings.json`). **Second upgrade:** a build with a third
-  migration ran only that one (`old version: 0.8.1~staging3`); `apt install --reinstall lordos` and
-  running `/usr/lib/lordos/migrate` again applied nothing.
-- **Raspberry Pi 5 (arm64, lordos 0.8.0):** `apt-get update` against a copy of staging in a
+  migration ran only that one (`old version: 0.8.1~staging3`); `apt install --reinstall insaneos` and
+  running `/usr/lib/insaneos/migrate` again applied nothing.
+- **Raspberry Pi 5 (arm64, insaneos 0.8.0):** `apt-get update` against a copy of staging in a
   temporary `Dir::State::Lists` (nothing on the board changed; removed afterwards): signature good,
-  `binary-arm64/Packages` read, `lordos 0.8.0 arm64` listed with the right `Filename` and SHA-256.
+  `binary-arm64/Packages` read, `insaneos 0.8.0 arm64` listed with the right `Filename` and SHA-256.
 - `make -C server test` (21 suites passed, 5 skipped for missing tools; `pkg-test` 83/83 with the
   release-notes reader and pre-release version order), `node tools/i18n-check.mjs`, the brand
   check and `shellcheck` on every new script.
-- **Not yet:** the CDN change above, so `https://lordos.org/apt-staging` is uploaded and signed but
+- **Not yet:** the CDN change above, so `https://insaneos.org/apt-staging` is uploaded and signed but
   `InRelease` still answers 404 (the router) and http 301; `apt-repo.sh verify staging` passes
   only after `tools/web/cdn-apt-behaviors.sh` is run by the account administrator. (Done since: the 0.8.2
-  release test updated a 0.8.1 system from `https://lordos.org/apt`, `ISO.md`.)
+  release test updated a 0.8.1 system from `https://insaneos.org/apt`, `ISO.md`.)

@@ -1,4 +1,4 @@
-/* enc.c — PNG for the remote desktop (lord-sessiond's bridge), with vendored stb_image_write: the
+/* enc.c — PNG for the remote desktop (insane-sessiond's bridge), with vendored stb_image_write: the
  * lossless refresh of still areas that goes over the video's data channel, and the apps' cursor images.
  * The screen itself only travels as WebRTC video (docs/REMOTE.md, "Video (WebRTC)"). */
 #define STB_IMAGE_WRITE_IMPLEMENTATION

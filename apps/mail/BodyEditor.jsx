@@ -2,14 +2,14 @@
 // one caret with selection, undo, and markdown shortcuts (Ctrl+B, Ctrl+I, Ctrl+K, lists). It is
 // the editor of the Notes app (apps/notes/NoteEditor.jsx), kept as a copy because apps cannot
 // import each other; the font is monospaced so every width is measured once per character.
-import { View, Text, ime, clipboard, takeTextFocus, releaseTextFocus, textFocusOwner, addListener } from '@lordos/sdk';
+import { View, Text, ime, clipboard, takeTextFocus, releaseTextFocus, textFocusOwner, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const MONO = 1400;
 const charW = new Map();
 const cw = (ch, size) => {
   const k = `${size}:${ch}`;
-  if (!charW.has(k)) charW.set(k, ch === '\t' ? lord.measureText('    ', size, MONO) : lord.measureText(ch, size, MONO) || size * 0.6);
+  if (!charW.has(k)) charW.set(k, ch === '\t' ? insane.measureText('    ', size, MONO) : insane.measureText(ch, size, MONO) || size * 0.6);
   return charW.get(k);
 };
 const WORD = /[\p{L}\p{N}_]/u;
@@ -73,7 +73,7 @@ export function BodyEditor({ value, onChange, size = 14, colors, onPasteImage, e
 
   const readSize = () => {
     if (!area.current) return;
-    const [, , w, h] = lord.getLayout(area.current.id);
+    const [, , w, h] = insane.getLayout(area.current.id);
     if (Math.abs(w - st.current.w) > 0.5 || Math.abs(h - st.current.h) > 0.5) { st.current.w = w; st.current.h = h; setDims({ w, h }); }
   };
   useEffect(() => { readSize(); const id = setInterval(readSize, 400); return () => clearInterval(id); }, []);
@@ -224,7 +224,7 @@ export function BodyEditor({ value, onChange, size = 14, colors, onPasteImage, e
       if (b === 'c') { if (hi > lo) clipboard.set(text.slice(lo, hi)); return undefined; }
       if (b === 'x') { if (hi > lo) { clipboard.set(text.slice(lo, hi)); replace(lo, hi, '', 'edit'); } return undefined; }
       if (b === 'v') {
-        const st2 = lord.clipboard.state ? lord.clipboard.state() : { kind: 'text' };
+        const st2 = insane.clipboard.state ? insane.clipboard.state() : { kind: 'text' };
         if (st2.kind === 'image' && onPasteImage) { const md = onPasteImage(); if (md) insert(`${lo > 0 && text[lo - 1] !== '\n' ? '\n' : ''}${md}\n`, 'edit'); return undefined; }
         const txt = clipboard.get();
         if (txt) insert(txt.replace(/\r\n/g, '\n'), 'edit');
@@ -283,7 +283,7 @@ export function BodyEditor({ value, onChange, size = 14, colors, onPasteImage, e
   st.current.onKey = onKey;
   const caretRect = () => {
     if (!area.current) return null;
-    const [ax, ay] = lord.getLayout(area.current.id);
+    const [ax, ay] = insane.getLayout(area.current.id);
     return { x: ax + padding + xOf(sel.b), y: ay + padding + rowOf(sel.b) * LH - scroll, h: LH };
   };
   st.current.caret = caretRect;
@@ -312,7 +312,7 @@ export function BodyEditor({ value, onChange, size = 14, colors, onPasteImage, e
   const drag = useRef(null);
   const clicks = useRef({ t: 0, n: 0 });
   const posFromEvent = (e) => {
-    const [ax, ay] = lord.getLayout(area.current.id);
+    const [ax, ay] = insane.getLayout(area.current.id);
     return offAt(e.x - ax - padding, e.y - ay - padding + scroll);
   };
   const onMouseDown = (e) => {

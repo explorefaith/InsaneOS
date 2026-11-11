@@ -10,14 +10,14 @@
  *    drm-driver, drm-pdev, drm-client-id, drm-engine-*, drm-engine-capacity-*, drm-cycles-*, drm-total-cycles-*,
  *    drm-memory-*, drm-total-*, drm-resident-*, drm-shared-*). Raw counters only: rates are made in JS
  *    (apps/monitor/gpumodel.js), which also dedupes clients shared between processes.
- *  - /proc/<pid>/stat of every process, for Insane OS's AI helpers (lord-tts, lord-ocr, lord-say) and the virtual
- *    machines (qemu-system-*, the user's own), and lord-say's status note (~/.cache/lordos/say/<pid>, written by
+ *  - /proc/<pid>/stat of every process, for Insane OS's AI helpers (insane-tts, insane-ocr, insane-say) and the virtual
+ *    machines (qemu-system-*, the user's own), and insane-say's status note (~/.cache/insaneos/say/<pid>, written by
  *    say.c: the backend, quality and language it chose).
  *
  * Every file is read with a bounded size and parsed strictly: a value that isn't a clean number in range is left out,
  * never guessed. The roots are parameters so tests can use fake trees. */
-#ifndef LORD_MON_GPUSTAT_H
-#define LORD_MON_GPUSTAT_H
+#ifndef INSANE_MON_GPUSTAT_H
+#define INSANE_MON_GPUSTAT_H
 
 #include <stddef.h>
 
@@ -60,7 +60,7 @@ typedef struct {
     int cur_mhz, max_mhz;               /* i915/xe: the GPU's actual and top frequency, -1 */
 } GpuCard;
 
-/* lord-say's status note: "lord-say 1 <vulkan|cpu> <hd|standard> <language> <speak|save>\n" */
+/* insane-say's status note: "insane-say 1 <vulkan|cpu> <hd|standard> <language> <speak|save>\n" */
 typedef struct { char backend[8], quality[12], lang[8], mode[8]; } GpuSay;
 
 /* Strict unsigned number: 1-20 digits, an optional trailing newline, no overflow. 0 if it is one. */
@@ -80,8 +80,8 @@ int gpu_cards_read(const char *root, const char *pci_ids, GpuCard *out, int max)
 /* The whole picture as malloc'd JSON (NULL without memory):
  *   {"t","mono","hz","cards":[…],"list":[{pid,ppid,name,cmd,exe,self,clients:[…]}],
  *    "ai":[{pid,ppid,name,state,own}],"say":[{pid,state,backend,quality,lang,mode}],"vms":[{pid,ticks,rss}]}
- * root: "" for the real /proc and /sys; uid: the user's (only their processes' fds are read); self: lord-server's pid;
- * home: where lord-say's notes are (NULL: none). */
+ * root: "" for the real /proc and /sys; uid: the user's (only their processes' fds are read); self: insane-server's pid;
+ * home: where insane-say's notes are (NULL: none). */
 char *gpu_json(const char *root, const char *pci_ids, unsigned uid, int self, const char *home);
 
 #endif

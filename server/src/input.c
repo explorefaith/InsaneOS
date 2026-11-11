@@ -79,7 +79,7 @@ int input_open_fds(Input *in, const int *fds, int n) {
     memset(in, 0, sizeof *in);
     for (int i = 0; i < n; i++) {
         fcntl(fds[i], F_SETFL, fcntl(fds[i], F_GETFL) | O_NONBLOCK);
-        add_device(in, fds[i], "(lord-sessiond)");
+        add_device(in, fds[i], "(insane-sessiond)");
     }
     return in->count > 0 ? 0 : -1;
 }

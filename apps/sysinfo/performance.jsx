@@ -1,6 +1,6 @@
 // System Information → Performance (0.8.6, docs/BENCHMARK.md "0.8.6 — InsaneBench"). Quick (about a minute)
-// or Full (storage on a scratch file, a sustained load and every video codec too) runs of the lord-bench
-// helper and of lord-media's video measurement through lord.sysinfo.bench (server/src/bench/lbrun.c), and
+// or Full (storage on a scratch file, a sustained load and every video codec too) runs of the insane-bench
+// helper and of insane-media's video measurement through insane.sysinfo.bench (server/src/bench/lbrun.c), and
 // Desktop impact: the compositor's frame times while a test window moves (scene.jsx), alone and with every
 // core loaded at the lowest priority. While a run goes on this view polls every 500 ms. A peak result is
 // shown by category as "×N" of each reference machine (perf.js, references.js), with the three verdicts;
@@ -9,7 +9,7 @@
 // anywhere; Save writes the JSON to Documents.
 import {
   View, Text, ScrollView, Button, useTheme, useLocale, GroupBox, FormRow, Segmented, formatNumber, spacing, typeScale, fs, userDirs, wm, admin, session,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useState } from 'react';
 import { CATEGORIES, DESKTOP_CATEGORIES, ratio, categoryRatios, comparableReferences, stability, compatibilityVerdict, desktopVerdict, conditionDiffs, changes, sustainedSeries, fileName, piFirmware } from './perf.js';
 import { startScene } from './scene.jsx';
@@ -19,7 +19,7 @@ const VERDICT_COLOR = { pass: '#30d158', warn: '#ff9f0a', fail: '#ff453a', unkno
 const key = (id) => id.replace(/\./g, '_');
 const SUSTAINED_S = 180;
 
-const bench = () => (globalThis.lord && lord.sysinfo && lord.sysinfo.bench) || null;
+const bench = () => (globalThis.insane && insane.sysinfo && insane.sysinfo.bench) || null;
 function readSaved(which) { try { const b = bench(); return b ? b.saved(which) : null; } catch (e) { return null; } }
 
 function fmt(v) {
@@ -133,7 +133,7 @@ function Conditions({ res }) {
     : tr(pf.flags ? 'sysinfo.perf.pi.none' : pf.voltageAlarm ? 'sysinfo.perf.pi.noneVoltage' : 'sysinfo.perf.pi.noneTemp', pfVars);
   return (
     <GroupBox title={tr('sysinfo.perf.conditions')} footer={tr('sysinfo.perf.conditionsFooter')}>
-      <Row label={tr('sysinfo.perf.c.versions')} value={`Insane OS ${res.lordos} · ${tr('sysinfo.perf.kernel', { v: res.kernel })} · InsaneBench ${res.lordbench}`} />
+      <Row label={tr('sysinfo.perf.c.versions')} value={`Insane OS ${res.insaneos} · ${tr('sysinfo.perf.kernel', { v: res.kernel })} · InsaneBench ${res.insanebench}`} />
       <Row label={tr('sysinfo.perf.c.threads')} value={tr('sysinfo.perf.threadsOf', { n: res.threads, cpus: res.cpus })} />
       <Row label={tr('sysinfo.perf.c.quiet')} value={tr(res.quiet && res.quiet.quiet ? 'sysinfo.perf.quietYes' : 'sysinfo.perf.quietNo', { pct: formatNumber((res.quiet && res.quiet.busyPct) || 0, 0), s: formatNumber((res.quiet && res.quiet.waitedS) || 0, 0) })} />
       <Row label={tr('sysinfo.perf.c.temps')} value={[temp(b) && tr('sysinfo.perf.startEnd', { a: temp(b), b: temp(a) || '—' }), trips].filter(Boolean).join(' · ')} />
@@ -148,7 +148,7 @@ function Conditions({ res }) {
   );
 }
 
-// the boot time test (bench/boottest.h): N restarts in a row, each boot's time recorded by lord-sessiond;
+// the boot time test (bench/boottest.h): N restarts in a row, each boot's time recorded by insane-sessiond;
 // started with the boot-test admin action and then the normal Restart (its confirmation included)
 const BOOT_TEST_N = [3, 5, 10];
 function BootTest({ onChange }) {
@@ -289,7 +289,7 @@ export default function Performance({ r }) {
   const fresh = st.result || null;
   const res = fresh && fresh.mode !== 'desktop' ? fresh : running ? null : readSaved(0);
   const dres = fresh && fresh.mode === 'desktop' ? fresh : running ? null : readSaved(2);
-  // the desktop run's scene, while lord-server records frames (comp.* and desk.* steps)
+  // the desktop run's scene, while insane-server records frames (comp.* and desk.* steps)
   const scene = running && st.mode === 'desktop' && /^(comp|desk)\./.test(st.step || '');
   useEffect(() => (scene ? startScene() : undefined), [scene]);
   if (st.state === 'unavailable') return <View style={{ padding: spacing.xl }}><Text style={{ color: t.textDim, textAlign: 'start' }}>{tr('sysinfo.perf.unavailable')}</Text></View>;

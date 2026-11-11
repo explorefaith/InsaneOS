@@ -1,4 +1,4 @@
-Estos términos cubren el sitio lordos.org y los archivos de Insane OS que descargás desde él o desde nuestras versiones en GitHub (la imagen ISO, la imagen para Raspberry Pi, el paquete `.deb` y el script de instalación para Debian). Insane OS es una distribución GNU/Linux libre basada en Debian, con un entorno de escritorio propio, hecha por el grupo iPERFEX (Pablo Miranda y Federico Pereira, Argentina).
+Estos términos cubren el sitio insaneos.org y los archivos de Insane OS que descargás desde él o desde nuestras versiones en GitHub (la imagen ISO, la imagen para Raspberry Pi, el paquete `.deb` y el script de instalación para Debian). Insane OS es una distribución GNU/Linux libre basada en Debian, con un entorno de escritorio propio, hecha por el grupo iPERFEX (Pablo Miranda y Federico Pereira, Argentina).
 
 ## Aceptación
 
@@ -6,7 +6,7 @@ Al usar este sitio o al descargar, instalar o ejecutar Insane OS, aceptás estos
 
 ## Software libre bajo la licencia MIT
 
-El código propio de Insane OS es software libre publicado bajo la [licencia MIT](https://github.com/lordbasex/Insane OS/blob/main/LICENSE). Podés usarlo, copiarlo, modificarlo y redistribuirlo según esa licencia. Lo que podés hacer con el código lo rige la licencia, no estos términos; estos términos solo agregan las reglas para el sitio, las descargas y el nombre Insane OS (mirá la [Política de marca](/legal/trademark/)).
+El código propio de Insane OS es software libre publicado bajo la [licencia MIT](https://github.com/insaneos/Insane OS/blob/main/LICENSE). Podés usarlo, copiarlo, modificarlo y redistribuirlo según esa licencia. Lo que podés hacer con el código lo rige la licencia, no estos términos; estos términos solo agregan las reglas para el sitio, las descargas y el nombre Insane OS (mirá la [Política de marca](/legal/trademark/)).
 
 Insane OS también incluye software de Debian y de otros proyectos, cada uno con su propia licencia. Mirá [Licencias y avisos de código abierto](/legal/licenses/).
 

@@ -184,7 +184,7 @@ static void *js_setup(void) {
     JS_SetMemoryLimit(s->rt, 64 << 20);
     s->c = JS_NewContext(s->rt);
     if (!s->c) { JS_FreeRuntime(s->rt); free(s); return NULL; }
-    JSValue r = JS_Eval(s->c, js_script, sizeof js_script - 1, "<lordbench>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = JS_Eval(s->c, js_script, sizeof js_script - 1, "<insanebench>", JS_EVAL_TYPE_GLOBAL);
     JS_FreeValue(s->c, r);
     JSValue g = JS_GetGlobalObject(s->c);
     s->fn = JS_GetPropertyStr(s->c, g, "work");

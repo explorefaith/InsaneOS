@@ -3,7 +3,7 @@
 Insane OS drives every connected display at once, as one desktop (**extend**) or showing the same
 picture (**mirror**), and draws each display at its own scale — 100 to 300 % in 25 % steps (the recommended one at most 200 %) — with
 text, vectors and images rasterized at the display's real resolution. A 4K panel at 150 % next to
-a 1080p one at 100 % is sharp on both. Tested on VM 118 (`lordos-notes`) with two virtio-gpu heads
+a 1080p one at 100 % is sharp on both. Tested on VM 118 (`insaneos-notes`) with two virtio-gpu heads
 (1280×800 and 2560×1600), on the CPU path and on the GPU path (Mesa llvmpipe forced).
 
 | | |
@@ -17,7 +17,7 @@ a 1080p one at 100 % is sharp on both. Tested on VM 118 (`lordos-notes`) with tw
 | ![terminal](displays-terminal-150.png) | ![rotated](displays-rotated.png) |
 | The Terminal at 150 %: same 105×24 grid, glyphs rasterized at 1.5× | Per-display rotation: the second display at 90° (portrait, 150 %) |
 | ![gpu](displays-gpu.png) | ![unplugged](displays-unplugged.png) |
-| GPU path (llvmpipe, `LORD_GPU=1`): two EGL surfaces on one context, GTK at 150 % | The second display unplugged: its window came back to the main one |
+| GPU path (llvmpipe, `INSANE_GPU=1`): two EGL surfaces on one context, GTK at 150 % | The second display unplugged: its window came back to the main one |
 | ![classic](displays-classic.png) | |
 | The Insane Classic theme: its bar on the main display, the second one is all work area | |
 
@@ -66,20 +66,20 @@ display with most of a window.
 Like macOS's "Arrange Displays", with more than one display (extend mode):
 
 - **Numbers.** Every active display gets a number: the main display is **1**, the others follow in
-  the order `lord.display.list()` gives them (connector order). `displayNumbers(outputs)` in
+  the order `insane.display.list()` gives them (connector order). `displayNumbers(outputs)` in
   `sdk/displaylayout.js` computes them; the arrangement's tiles show the number in a small circle
   next to the name, and the selected display's header shows "Display 2" next to its name. Making
   another display the main one renumbers them (the main one is always 1). No numbers in mirror mode
   or with a single display.
 - **Identify.** Clicking a tile (without dragging it) or the **Identify** button under the
-  arrangement calls `identifyDisplays(ids?)` (`sdk/displaysui.jsx`, exported by `@lordos/sdk`): the
+  arrangement calls `identifyDisplays(ids?)` (`sdk/displaysui.jsx`, exported by `@insaneos/sdk`): the
   number is drawn big (a 120–240 px rounded badge, 30 % of the display's short side) centered on
-  the real display for 1.5 s, fading in (120 ms) and out (the last 450 ms) with `lord.setStyle`
+  the real display for 1.5 s, fading in (120 ms) and out (the last 450 ms) with `insane.setStyle`
   on the overlay's opacity (no React render per frame; no fade with "Reduce motion"). The clicked
   tile flashes (lighter fill, accent ring) for the same time. The badges are `<DisplayIdentify />`,
   mounted by `startShell` in the `notification` layer (`sdk/index.js`, see `LAYERS.md`), so both
   themes get it without code of their own. Each badge sits at its display's global logical
-  rectangle (`lord.screen.displays`, matched by connector), since the desktop is one space across
+  rectangle (`insane.screen.displays`, matched by connector), since the desktop is one space across
   displays; it takes no clicks (`pointerEvents: 'none'`).
 - **Magnetic arrangement.** While a tile is dragged, `snapDisplay(rects, i, x, y, threshold)`
   moves each axis independently to the nearest of these targets within 12 preview px (converted
@@ -95,7 +95,7 @@ Like macOS's "Arrange Displays", with more than one display (extend mode):
   edge kept (clamped so the edges share a pixel), aligned to the start, end or center when within
   the threshold, or slid just past a display that is in the way. Any relative position is allowed:
   side by side, stacked, or offset diagonally as long as edges touch.
-- **lord-server keeps it exactly.** `lord.display.arrange(conn, x, y, true)` (`display_arrange`)
+- **insane-server keeps it exactly.** `insane.display.arrange(conn, x, y, true)` (`display_arrange`)
   checks the position with `out_fits` (the same rule as `placementOk` in the SDK); a fitting
   position is kept as is (`out_snap` with no alignment), anything else is still snapped next to a
   display with the old 24 px alignment. `out_fix`, run on every plan, leaves a valid arrangement
@@ -157,7 +157,7 @@ Like macOS's "Arrange Displays", with more than one display (extend mode):
   frames, keeps `out[0]` (it owns the card's fd), opens a head on a free CRTC for a new display
   (`kms_head_open`), modesets the ones that changed and closes the ones that left. A plan
   identical to the current one does nothing (backlight uevents).
-- **Unplugging**: the theme gets the new `lord.screen.displays`; the SDK moves windows that are no
+- **Unplugging**: the theme gets the new `insane.screen.displays`; the SDK moves windows that are no
   longer on any display to the main one (centered) and keeps the others inside their display's
   work area.
 - **The login screen** follows the same DRM uevents since 0.8.5 (without the system bus), so a monitor
@@ -170,8 +170,8 @@ Like macOS's "Arrange Displays", with more than one display (extend mode):
 
 ## The theme and the SDK
 
-- `lord.screen.displays`: `[{ id, name, connector, x, y, w, h, pw, ph, scale, main }]`, and
-  `lord.screen.mirror`; `__lordScreen` when they change. The runtime exports `displays()`,
+- `insane.screen.displays`: `[{ id, name, connector, x, y, w, h, pw, ph, scale, main }]`, and
+  `insane.screen.mirror`; `__insaneScreen` when they change. The runtime exports `displays()`,
   `mainDisplay()`, `displayAt(x, y)`, `displayFor(rect)` and `mainBox()` (the SDK re-exports them;
   `displays` as `screenDisplays`).
 - `configureWindows({ workArea })` accepts a function `display → rect` (menu bar and Dock margins
@@ -199,7 +199,7 @@ Like macOS's "Arrange Displays", with more than one display (extend mode):
 | `wp_viewporter` | 1 | now also on the CPU path: crop and scale with a bilinear blit (`canvas_blit_scaled`) |
 
 A client's buffer is drawn into its logical box at the display's resolution: 1:1 when it rendered
-at exactly that size (fractional-scale clients), scaled otherwise. lord-server logs how each app
+at exactly that size (fractional-scale clients), scaled otherwise. insane-server logs how each app
 renders, once per change:
 
 ```
@@ -218,7 +218,7 @@ Settings → Displays → "Screenshots and sharing": **main display** (default) 
   coordinates are mapped back through its view.
 - All displays: a capture view of the whole logical space at 100 % is painted only while someone
   watches or records (`Out cap` in `main.c`).
-- Screenshots captures each display on its own whatever this setting says (0.8.8.6): ❖⇧3 saves a file per display and ❖⇧4 selects on any of them, each capture at its display's physical resolution (`media.screenshot(app, { display: id })`, the display's `lord.screen.displays[].id`).
+- Screenshots captures each display on its own whatever this setting says (0.8.8.6): ❖⇧3 saves a file per display and ❖⇧4 selects on any of them, each capture at its display's physical resolution (`media.screenshot(app, { display: id })`, the display's `insane.screen.displays[].id`).
 - A window or area picked in Screenshots is in logical pixels; `apps/screenshots/geometry.js`
   turns it into the capture's pixels (× the main display's scale, from its origin), so at 200 % a
   window comes out whole (tests: `server/tests/screenshots_model_test.mjs`).
@@ -228,8 +228,8 @@ Settings → Displays → "Screenshots and sharing": **main display** (default) 
 
 ## Measurements (VM 118, CPU path, 4 vCPU)
 
-Window drag (the About window, 6 s circles at 125 events/s with a uinput tablet; lord-server's
-`drag:` line). "Work" is lord-server's time per rendered frame (JS of the pointer + layout +
+Window drag (the About window, 6 s circles at 125 events/s with a uinput tablet; insane-server's
+`drag:` line). "Work" is insane-server's time per rendered frame (JS of the pointer + layout +
 paint + present).
 
 | Setup | Work per frame | Paint | Present | Frames/s |
@@ -240,7 +240,7 @@ paint + present).
 | Drag on the 2560×1600 display at **100 %** | 3.16–3.41 ms | 2.17–2.39 ms | 0.43–0.45 ms | 126 |
 | Same window on the 2560×1600 display at **150 %** | 5.09–5.13 ms | 3.93–3.95 ms | 0.70 ms | 142–144 renders |
 | Window spanning 100 % + 150 % | 5.98 ms | 4.52 ms | 0.66 ms | 60 (1.5 s line drag) |
-| GPU path, two displays, llvmpipe (`LORD_GPU=1`) | 28.6 ms | 3.89 ms | 23.9 ms | 33 |
+| GPU path, two displays, llvmpipe (`INSANE_GPU=1`) | 28.6 ms | 3.89 ms | 23.9 ms | 33 |
 
 - With two displays a frame is rendered each time *either* display finishes its flip, so there
   are more (cheaper) renders than pointer moves; CPU per second of dragging went from ~822 ms/s
@@ -260,7 +260,7 @@ virtual monitor: an RFB `SetDesktopSize` to QEMU's VNC server of head 1), `shot-
 ## VM 118 setup for two displays
 
 ```
-qm set 118 --args "-global virtio-vga.max_outputs=2 -vnc unix:/run/lord-vm118-head1.vnc,id=head1,display=vga,head=1"
+qm set 118 --args "-global virtio-vga.max_outputs=2 -vnc unix:/run/insane-vm118-head1.vnc,id=head1,display=vga,head=1"
 ```
 
 (Proxmox has no `vga` option for it; `args` adds the QEMU flags.) The second head starts
@@ -275,7 +275,7 @@ head: `screendump file.ppm vga 1` in `qm monitor 118`.
   CRTCs than connectors are untested.
 - **Mirror with one CRTC driving two connectors** (hardware cloning) is not used: each mirrored
   display has its own CRTC and frame.
-- **Screenshot and recording files** were not produced on VM 118 (its build has no `lord-media`);
+- **Screenshot and recording files** were not produced on VM 118 (its build has no `insane-media`);
   the capture paths ran (the permission prompt appeared on the main display). The remote desktop
   with two displays was not tested with a browser.
 - **Legacy Wayland clients at 125/150/175 %** get `scale = 2` and are downscaled (bilinear): not
@@ -290,14 +290,14 @@ head: `screendump file.ppm vga 1` in `qm monitor 118`.
 
 Dock → Options → Assign To lists the displays when there is more than one: an app assigned to one opens
 its new windows there, wherever the pointer is; "None" follows the pointer. The assignment is kept in
-`settings.appDisplays` by the display's connector (`HDMI-A-1`, `DP-2`, from `lord.screen.displays[].connector`),
+`settings.appDisplays` by the display's connector (`HDMI-A-1`, `DP-2`, from `insane.screen.displays[].connector`),
 not its name, because two monitors of the same model share a name; a value saved by name before still
 works while it names a single display (`sdk/dock.js`, `assignedDisplay`). The sign-in and lock screen
 shows its clock, users and buttons on the main display and its wallpaper on every display
 (`themes/greeter`).
 
 Its main display is the one last chosen in the session shown on the monitor: that session sends the
-connector to `lord-sessiond` (`{"a":"display","main":"DP-2"}`) when it changes, `lord-sessiond` keeps
-it in `/var/lib/lordos/main-display` and starts the login screen with `LORD_MAIN_DISPLAY=<connector>`.
+connector to `insane-sessiond` (`{"a":"display","main":"DP-2"}`) when it changes, `insane-sessiond` keeps
+it in `/var/lib/insaneos/main-display` and starts the login screen with `INSANE_MAIN_DISPLAY=<connector>`.
 If that connector isn't connected, the first connected one is the main display, as before. It goes by
 connector because identical monitors can report the same EDID serial.

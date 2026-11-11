@@ -85,7 +85,7 @@ int netconn_serve_one(const NcReq *r) {
     return fd;
 }
 
-/* ---- lord-server's side ---- */
+/* ---- insane-server's side ---- */
 
 static struct { int fd; pid_t pid; } conn[NC_COUNT] = { { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 } };
 static pthread_mutex_t mu = PTHREAD_MUTEX_INITIALIZER;
@@ -101,11 +101,11 @@ static int spawn(NcComponent c) {
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) return -1;
     char argv0[32];
-    snprintf(argv0, sizeof argv0, "lord-net-%s", NAMES[c]);
+    snprintf(argv0, sizeof argv0, "insane-net-%s", NAMES[c]);
     char envs[2][64];
     char *envp[3];
     int ne = 0;
-    if (getenv("LORDOS_SESSIOND")) { snprintf(envs[ne], sizeof envs[ne], "LORDOS_SESSIOND=1"); envp[ne] = envs[ne]; ne++; }
+    if (getenv("INSANEOS_SESSIOND")) { snprintf(envs[ne], sizeof envs[ne], "INSANEOS_SESSIOND=1"); envp[ne] = envs[ne]; ne++; }
     snprintf(envs[ne], sizeof envs[ne], "LANG=C.UTF-8");
     envp[ne] = envs[ne];
     ne++;
@@ -165,7 +165,7 @@ int netconn_socket(NcComponent comp, int fam, int type, const struct sockaddr *t
     if ((unsigned)comp >= NC_COUNT || netconn_req_make(&r, fam, type, to, tolen)) { errno = EINVAL; return -1; }
     /* outside a Insane OS session there are no scopes to put the sockets in (development, the
      * tests): the socket is made here, as before */
-    if (!getenv("LORDOS_SESSIOND")) {
+    if (!getenv("INSANEOS_SESSIOND")) {
         int fd = netconn_serve_one(&r);
         if (fd < 0) { errno = -fd; return -1; }
         return fd;
@@ -188,12 +188,12 @@ int netconn_socket(NcComponent comp, int fam, int type, const struct sockaddr *t
 /* ---- the connector ---- */
 
 int netconn_main(int argc, char **argv) {
-    if (argc != 3 || !fw_component_ok(argv[2])) { fprintf(stderr, "lord-server --net-connector: unknown component\n"); return 2; }
+    if (argc != 3 || !fw_component_ok(argv[2])) { fprintf(stderr, "insane-server --net-connector: unknown component\n"); return 2; }
     int known = 0;
     for (int i = 0; i < NC_COUNT; i++) known |= !strcmp(argv[2], NAMES[i]);
     if (!known) return 2;
     /* no PR_SET_PDEATHSIG: it fires when the *thread* that forked us ends (a worker thread of
-     * lord-server), not lord-server; the channel closing (recv → 0) is what ends the connector */
+     * insane-server), not insane-server; the channel closing (recv → 0) is what ends the connector */
     prctl(PR_SET_DUMPABLE, 0);
     prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
     signal(SIGPIPE, SIG_IGN);
@@ -201,15 +201,15 @@ int netconn_main(int argc, char **argv) {
     setrlimit(RLIMIT_NOFILE, &nf);
     int type = 0;
     socklen_t tl = sizeof type;
-    if (getsockopt(3, SOL_SOCKET, SO_TYPE, &type, &tl) || type != SOCK_SEQPACKET) { fprintf(stderr, "lord-server --net-connector: started by lord-server only\n"); return 2; }
+    if (getsockopt(3, SOL_SOCKET, SO_TYPE, &type, &tl) || type != SOCK_SEQPACKET) { fprintf(stderr, "insane-server --net-connector: started by insane-server only\n"); return 2; }
     char scope[64];
-    snprintf(scope, sizeof scope, "lordos-net-%s.scope", argv[2]);
+    snprintf(scope, sizeof scope, "insaneos-net-%s.scope", argv[2]);
     CgroupLimits lim = { .mem_high_mb = 0, .mem_max_mb = 64, .cpu_percent = 0 };
-    if (cgroup_enter(scope, &lim) && getenv("LORDOS_SESSIOND")) {
+    if (cgroup_enter(scope, &lim) && getenv("INSANEOS_SESSIOND")) {
         fprintf(stderr, "netconn: could not place the %s connector in %s: its connections are refused\n", argv[2], scope);
-        return 3;                           /* fail closed: lord-server's requests get EPIPE */
+        return 3;                           /* fail closed: insane-server's requests get EPIPE */
     }
-    if (getenv("LORDOS_SESSIOND")) cgroup_settle();   /* lord-netperm sees the scope before the first connect */
+    if (getenv("INSANEOS_SESSIOND")) cgroup_settle();   /* insane-netperm sees the scope before the first connect */
     for (;;) {
         NcReq r;
         ssize_t n = recv(3, &r, sizeof r, 0);

@@ -1,21 +1,21 @@
 // updates.js — updating Insane OS in place (docs/UPDATES.md).
 //
-//   lordosUpdate(lang)   { installed, version, available, size, notes } of the lordos package, or null
-//   lordosUpdateWaiting() true when the last check found a newer lordos package
+//   insaneosUpdate(lang)   { installed, version, available, size, notes } of the insaneos package, or null
+//   insaneosUpdateWaiting() true when the last check found a newer insaneos package
 //   restartNeeded()      null, or { packages: [...] } when an installed update needs a restart
 //   updatePrefs()        { autoCheck } (settings.json "updates"); setUpdatePrefs({ autoCheck })
 //
-// The packages come from the signed Insane OS repository on lordos.org (and Debian's), through our own
-// package engine (lord.pkg, admin.run('pkg-update' | 'pkg-install' | 'pkg-upgrade')). The optional
+// The packages come from the signed Insane OS repository on insaneos.org (and Debian's), through our own
+// package engine (insane.pkg, admin.run('pkg-update' | 'pkg-install' | 'pkg-upgrade')). The optional
 // daily check only downloads the signed lists and notifies; it never installs anything.
 import { settings } from './settings.js';
 import { admin } from './admin.js';
 import { notify } from './notify.js';
 import { t } from './i18n.js';
 import { wm } from './windows.js';
-import { lordosVersion } from './system.js';
+import { insaneosVersion } from './system.js';
 
-const has = () => typeof lord !== 'undefined' && !!lord.pkg && typeof lord.pkg.rebootRequired === 'function';
+const has = () => typeof insane !== 'undefined' && !!insane.pkg && typeof insane.pkg.rebootRequired === 'function';
 
 export const UPDATE_DEFAULTS = { autoCheck: true, notified: '' };
 export const updatePrefs = (s = settings.get()) => ({ ...UPDATE_DEFAULTS, ...(s.updates || {}) });
@@ -23,10 +23,10 @@ export function setUpdatePrefs(patch) {
   settings.set((s) => ({ ...s, updates: { ...updatePrefs(s), ...patch } }));
 }
 
-// The lordos package: what is installed, the newest version offered and its release notes.
-export function lordosUpdate(lang) {
-  if (!has() || !lord.pkg.available()) return null;
-  const info = lord.pkg.info('lordos', { lang });
+// The insaneos package: what is installed, the newest version offered and its release notes.
+export function insaneosUpdate(lang) {
+  if (!has() || !insane.pkg.available()) return null;
+  const info = insane.pkg.info('insaneos', { lang });
   if (!info || !info.installed) return null;
   const offered = (info.versions || []).find((v) => v.version === info.version);
   return {
@@ -34,30 +34,30 @@ export function lordosUpdate(lang) {
     version: info.version,
     available: !!info.upgradable,
     size: offered ? offered.size : info.size,
-    notes: info.upgradable ? lord.pkg.releaseNotes('lordos', info.version) : null,
+    notes: info.upgradable ? insane.pkg.releaseNotes('insaneos', info.version) : null,
   };
 }
 
-// Is a newer lordos package waiting? The signed lists' last check, read when asked: nothing is fetched here.
-export function lordosUpdateWaiting() {
-  if (!has() || !lord.pkg.available()) return false;
-  const info = lord.pkg.info('lordos');
+// Is a newer insaneos package waiting? The signed lists' last check, read when asked: nothing is fetched here.
+export function insaneosUpdateWaiting() {
+  if (!has() || !insane.pkg.available()) return false;
+  const info = insane.pkg.info('insaneos');
   return !!(info && info.installed && info.upgradable);
 }
 
 // A restart is needed when a package asked for one (/run/reboot-required: a new kernel, or the
-// lordos postinst) or when the installed Insane OS is not the one running in this session.
+// insaneos postinst) or when the installed Insane OS is not the one running in this session.
 export function restartNeeded() {
   if (!has()) return null;
-  const asked = lord.pkg.rebootRequired() || null;
+  const asked = insane.pkg.rebootRequired() || null;
   let changed = false;
-  if (lord.pkg.available()) {
-    const installed = lord.pkg.info('lordos')?.installed;
-    const running = lordosVersion().version;
+  if (insane.pkg.available()) {
+    const installed = insane.pkg.info('insaneos')?.installed;
+    const running = insaneosVersion().version;
     changed = !!installed && !!running && installed !== running;
   }
   if (!asked && !changed) return null;
-  const packages = [...new Set([...(asked || []), ...(changed ? ['lordos'] : [])])];
+  const packages = [...new Set([...(asked || []), ...(changed ? ['insaneos'] : [])])];
   return { packages };
 }
 
@@ -72,16 +72,16 @@ function fingerprint(ups) {
 }
 
 function maybeNotify() {
-  const ups = lord.pkg.upgrades();
+  const ups = insane.pkg.upgrades();
   const key = fingerprint(ups);
   if (!key || key === updatePrefs().notified) return;
   setUpdatePrefs({ notified: key });
-  const own = ups.find((u) => u.name === 'lordos');
+  const own = ups.find((u) => u.name === 'insaneos');
   const open = [{ id: 'open', label: t('store.notify.open'), run: () => wm.open('store', { args: { page: 'updates' } }) }];
   notify({
     app: 'store',
-    title: own ? t('store.notify.lordosTitle', { version: own.to }) : t('store.notify.title', { count: ups.length }),
-    body: own ? t('store.notify.lordosBody') : t('store.notify.body'),
+    title: own ? t('store.notify.insaneosTitle', { version: own.to }) : t('store.notify.title', { count: ups.length }),
+    body: own ? t('store.notify.insaneosBody') : t('store.notify.body'),
     actions: open,
   });
 }
@@ -90,9 +90,9 @@ let checking = false;
 function check() {
   // No readable package list (a new install, or an update that changed its format): build it now,
   // even with the daily check off, or the Store shows only the Insane OS catalog until someone checks.
-  const missing = !lord.pkg.available();
+  const missing = !insane.pkg.available();
   if (checking || !admin.available() || (!missing && !updatePrefs().autoCheck)) return;
-  const last = lord.pkg.available() ? lord.pkg.lastUpdate() : 0;
+  const last = insane.pkg.available() ? insane.pkg.lastUpdate() : 0;
   if (Date.now() / 1000 - last < DAY - 600) return;
   checking = true;
   admin.run('pkg-update', '', null, { quiet: true })
@@ -101,6 +101,6 @@ function check() {
 }
 
 // Only in a user's desktop session (not the login screen or an isolated app's process).
-if (has() && typeof lord.admin !== 'undefined' && typeof lord.greeter === 'undefined') {
-  setTimeout(() => { check(); setInterval(check, 3600 * 1000); }, lord.pkg.available() ? 5 * 60 * 1000 : 20 * 1000);
+if (has() && typeof insane.admin !== 'undefined' && typeof insane.greeter === 'undefined') {
+  setTimeout(() => { check(); setInterval(check, 3600 * 1000); }, insane.pkg.available() ? 5 * 60 * 1000 : 20 * 1000);
 }

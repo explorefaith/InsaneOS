@@ -2,18 +2,18 @@
 // restore"). Settings → Session: off, ask, always.
 //
 // A power cut gives no warning and a crash runs nothing, so what is open is saved as it changes, not
-// at the end: a debounced snapshot of the windows store goes to settings.sessionSaved (settings.json, already on lord.fs's deny list; the format is in
+// at the end: a debounced snapshot of the windows store goes to settings.sessionSaved (settings.json, already on insane.fs's deny list; the format is in
 // sessionmodel.js). Its "clean" field is the unclean-exit marker: false while a session runs, true only
-// after a logout, a Restart or Shut Down confirmed here, or a stop that reached __lordBeforeExit.
+// after a logout, a Restart or Shut Down confirmed here, or a stop that reached __insaneBeforeExit.
 //
 // Everything reopens through the paths a Dock click uses (launchDockItem: launchApp → wm.open,
-// lord.apps.launchPackage, lord.apps.launch(desktop id)), so a saved list can't run anything the Dock
+// insane.apps.launchPackage, insane.apps.launch(desktop id)), so a saved list can't run anything the Dock
 // couldn't. A Linux window has no state to give back: the app starts again and its new window takes
 // the saved frame by Dock id, first match wins.
 //
 // Never on a live system, the login screen or in an isolated app's process.
 import { createElement as h, useEffect } from 'react';
-import { View, Text, screen, mainDisplay, addListener } from '@lordos/runtime';
+import { View, Text, screen, mainDisplay, addListener } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { t } from './i18n.js';
 import { useTheme } from './theme.js';
@@ -44,7 +44,7 @@ let frozen = false;        // a logout or a shutdown took the last snapshot: clo
 let timer = 0;
 let lastJson = '';
 
-const allowed = () => typeof lord !== 'undefined' && typeof lord.appId !== 'string' && typeof lord.greeter === 'undefined' && !isLiveSystem();
+const allowed = () => typeof insane !== 'undefined' && typeof insane.appId !== 'string' && typeof insane.greeter === 'undefined' && !isLiveSystem();
 
 // ---- what is open now ----
 
@@ -114,9 +114,9 @@ export function flushSession() {
 export function logOut() {
   flushSession();
   clipboard.beforeLogout();
-  lord.quit();
+  insane.quit();
 }
-// lord-sessiond refused the Restart or Shut Down: the session goes on.
+// insane-sessiond refused the Restart or Shut Down: the session goes on.
 export function resumeSession() {
   if (!armed || !frozen) return;
   frozen = false;
@@ -127,7 +127,7 @@ export function resumeSession() {
 // main.c, once, after the main loop and before the Wayland apps are closed. On a stop from outside
 // (systemctl, the login screen's Restart) the apps may be going down at the same moment, so a shorter
 // list than the saved one doesn't replace it.
-globalThis.__lordBeforeExit = () => {
+globalThis.__insaneBeforeExit = () => {
   if (!armed || frozen || restoreMode() === 'off') return;
   frozen = true;
   const list = hold ? savedList() : snapshot();
@@ -275,7 +275,7 @@ export function RestorePrompt() {
 // own "continue where you left off" as a fixed policy, on or off. It is a machine-wide file.
 let appliedBrowsers = '';
 function applyBrowsers() {
-  if (!lord.admin?.available()) return;
+  if (!insane.admin?.available()) return;
   const arg = restoreBrowsers() && restoreMode() !== 'off' ? 'on' : 'off';
   if (arg === appliedBrowsers) return;
   appliedBrowsers = arg;

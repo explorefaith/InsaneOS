@@ -1,4 +1,4 @@
-/* media_test.c — test of lord-media without lord-server: launches it the same way the server does
+/* media_test.c — test of insane-media without insane-server: launches it the same way the server does
  * (socket on fd 3, no arguments), passes it the files as fds and measures.
  *
  *   build/media-test probe   file
@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 static char payload[MP_PAYLOAD_MAX + 1];
-static const char *helper = "build/lord-media";
+static const char *helper = "build/insane-media";
 
 static double now_ms(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t); return t.tv_sec * 1e3 + t.tv_nsec / 1e6; }
 
@@ -40,8 +40,8 @@ static int spawn(pid_t *pid) {
     *pid = fork();
     if (*pid == 0) {
         dup2(sv[1], 3);
-        char *const argv[] = { "lord-media", NULL };
-        char *env[] = { "LANG=C.UTF-8", getenv("LORD_MEDIA_DEBUG") ? "LORD_MEDIA_DEBUG=1" : NULL, NULL };
+        char *const argv[] = { "insane-media", NULL };
+        char *env[] = { "LANG=C.UTF-8", getenv("INSANE_MEDIA_DEBUG") ? "INSANE_MEDIA_DEBUG=1" : NULL, NULL };
         execve(helper, argv, env);
         _exit(127);
     }
@@ -102,7 +102,7 @@ static int play(const char *in, double secs, int w, int h, int hw, int audio) {
     pid_t pid;
     int s = spawn(&pid);
     int render = hw ? open("/dev/dri/renderD128", O_RDWR | O_CLOEXEC) : -1;
-    /* this process owns the audio, like lord-server (maudio.c): lord-media only fills the ring */
+    /* this process owns the audio, like insane-server (maudio.c): insane-media only fills the ring */
     int aring = -1;
     MAudio *au = audio ? maudio_open(0, "media-test", "media-test", "video", &aring) : NULL;
     int fds[3] = { open_in(in), aring, render };
@@ -177,7 +177,7 @@ static int play(const char *in, double secs, int w, int h, int hw, int audio) {
 }
 
 int main(int argc, char **argv) {
-    if (getenv("LORD_MEDIA")) helper = getenv("LORD_MEDIA");
+    if (getenv("INSANE_MEDIA")) helper = getenv("INSANE_MEDIA");
     if (argc < 3) { fprintf(stderr, "usage: see the comment in tests/media_test.c\n"); return 2; }
     const char *cmd = argv[1], *in = argv[2];
     if (!strcmp(cmd, "sandbox")) return job(MW_SELFTEST, in, NULL, 0, 0, NULL);

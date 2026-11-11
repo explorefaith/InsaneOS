@@ -1,7 +1,7 @@
 // Security.jsx — the security report (weak, reused and old passwords; breached ones from the
 // list of common passwords and, if the user picks one, a local file of known-breached hashes:
 // never over the network) and the view with every 2FA code and its countdown.
-import { View, Text, useTheme, useStore, Button, ScrollView, EmptyState, t } from '@lordos/sdk';
+import { View, Text, useTheme, useStore, Button, ScrollView, EmptyState, t } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { app, req, errorText, toast, copySecret } from './api.js';
 import { allCategories, builtinById } from './templates.js';

@@ -1,13 +1,13 @@
-/* js_share.c — lord.share, the shell's side of the screen-sharing API (remote/share.c, docs/SCREEN-SHARING.md).
- * Only the session's own context has it: an isolated app's process gets the broker's `lord`, without this.
+/* js_share.c — insane.share, the shell's side of the screen-sharing API (remote/share.c, docs/SCREEN-SHARING.md).
+ * Only the session's own context has it: an isolated app's process gets the broker's `insane`, without this.
  *
- *   lord.share.shown(token)    the indicator is on screen: frames may leave
- *   lord.share.hidden()        it no longer is: the share ends
- *   lord.share.answer(token)   the prompt was answered; the root-owned store decides, not this call
- *   lord.share.stop()          the indicator's Stop
- *   lord.share.reload()        the store changed (Settings → Privacy)
- *   lord.share.status()        { app, token, input } of the running share, or null
- *   lord.share.grants()        [{ id, exe, perm, state }] of this user
+ *   insane.share.shown(token)    the indicator is on screen: frames may leave
+ *   insane.share.hidden()        it no longer is: the share ends
+ *   insane.share.answer(token)   the prompt was answered; the root-owned store decides, not this call
+ *   insane.share.stop()          the indicator's Stop
+ *   insane.share.reload()        the store changed (Settings → Privacy)
+ *   insane.share.status()        { app, token, input } of the running share, or null
+ *   insane.share.grants()        [{ id, exe, perm, state }] of this user
  * Changes to the store go through the share-grant admin action. */
 #include "js_share.h"
 #include "../remote/share.h"
@@ -65,8 +65,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("grants", 0, f_grants),
 };
 
-void js_share_register(JSContext *c, JSValue lord) {
+void js_share_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "share", o);
+    JS_SetPropertyStr(c, insane, "share", o);
 }

@@ -7,7 +7,7 @@
 //   registerWidgetType('note', NoteCard)              // NoteCard({ widget }) draws one
 //   setWidgets('note', [{ id, x, y, w, h, pinned }])  // replaces those of that type
 import { createElement as h } from 'react';
-import { View } from '@lordos/runtime';
+import { View } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 
 const types = new Map();

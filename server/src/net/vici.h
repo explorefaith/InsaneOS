@@ -1,6 +1,6 @@
 /* vici.h — our own client for strongSwan's VICI protocol (see vici.c). */
-#ifndef LORD_NET_VICI_H
-#define LORD_NET_VICI_H
+#ifndef INSANE_NET_VICI_H
+#define INSANE_NET_VICI_H
 
 #include <stddef.h>
 #include <stdint.h>

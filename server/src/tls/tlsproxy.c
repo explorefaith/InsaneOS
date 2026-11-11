@@ -1,16 +1,16 @@
-/* tlsproxy.c — lord-tls: TLS for the package engine's downloads (0.8.5; docs/PACKAGES.md, "HTTPS").
+/* tlsproxy.c — insane-tls: TLS for the package engine's downloads (0.8.5; docs/PACKAGES.md, "HTTPS").
  *
- * The package engine's download child (nobody, in lordos-net-store.scope; src/pkg/http.c) connects the
+ * The package engine's download child (nobody, in insaneos-net-store.scope; src/pkg/http.c) connects the
  * TCP socket itself and starts this program with a fixed path, no arguments and an empty environment:
  *   fd 3  the connected TCP socket to the server
  *   fd 4  a socketpair to the download child: first a line "<host>\n", then plain HTTP both ways
- * lord-tls loads the system's CA bundle, applies the helpers' sandbox (no sockets, no exec, no files,
+ * insane-tls loads the system's CA bundle, applies the helpers' sandbox (no sockets, no exec, no files,
  * sandbox_apply_helper; it stays in the caller's scope), does a TLS 1.2+ handshake with SNI, checks the
  * certificate chain and the host name, answers one byte on fd 4 ('1' verified, '0' refused) and then
  * only moves bytes: plaintext from fd 4 is encrypted to fd 3, what arrives on fd 3 is decrypted to fd 4.
  * It never parses HTTP and never decides anything about packages: those are still checked by their
  * signed index (http.c and pkg.c), TLS adds privacy and refuses a server that isn't who it claims.
- * With lord-sessiond, lord-maild and lord-fetch, the only binaries that link OpenSSL. */
+ * With insane-sessiond, insane-maild and insane-fetch, the only binaries that link OpenSSL. */
 #include "../sec/sandbox.h"
 
 #include <openssl/err.h>
@@ -75,7 +75,7 @@ int main(void) {
     signal(SIGPIPE, SIG_IGN);
     struct stat st;
     if (fstat(NET, &st) || !S_ISSOCK(st.st_mode) || fstat(PLAIN, &st) || !S_ISSOCK(st.st_mode)) {
-        fprintf(stderr, "lord-tls: started by the package engine only\n");
+        fprintf(stderr, "insane-tls: started by the package engine only\n");
         return 2;
     }
     char host[254];
@@ -94,7 +94,7 @@ int main(void) {
     if (!have_ca || !s) { write_all(PLAIN, "0", 1); return 3; }
 
     SandboxHelperCfg cfg = {
-        .name = NULL,                     /* stays in the caller's scope (lordos-net-store.scope) */
+        .name = NULL,                     /* stays in the caller's scope (insaneos-net-store.scope) */
         .ro_paths = NULL,
         .extra_syscalls = (int[]){ -1 },
         .allow_ioctl_classes = 0,

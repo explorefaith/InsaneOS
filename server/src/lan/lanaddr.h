@@ -1,7 +1,7 @@
 /* lanaddr.h — which addresses Files → Network may touch, and the arguments of the share-* actions.
  * Pure functions, the same on both sides of the admin helper (tests/lan_test.c). */
-#ifndef LORD_LAN_ADDR_H
-#define LORD_LAN_ADDR_H
+#ifndef INSANE_LAN_ADDR_H
+#define INSANE_LAN_ADDR_H
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,7 +1,7 @@
 /* rfb.h — a small VNC client: RFB 3.8, no auth or VNC auth, Raw, CopyRect and Hextile. Everything read comes from the
  * network and is untrusted (tests/rdesk_test.c). */
-#ifndef LORD_RDESK_RFB_H
-#define LORD_RDESK_RFB_H
+#ifndef INSANE_RDESK_RFB_H
+#define INSANE_RDESK_RFB_H
 
 #include <stddef.h>
 #include <stdint.h>

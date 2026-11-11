@@ -1,6 +1,6 @@
 #!/bin/sh
 # fetch-audiocpp.sh — audio.cpp (Apache-2.0, github.com/0xShug0/audio.cpp) at the one commit Insane OS was tested with,
-# into third_party/audiocpp (ignored by git). Only lord-tts links it (docs/VOICE.md); server/mk/tts.mk builds just its
+# into third_party/audiocpp (ignored by git). Only insane-tts links it (docs/VOICE.md); server/mk/tts.mk builds just its
 # Pocket TTS family, CPU and Vulkan. The commit id fixes the content: a different one is refused.
 # Usage: sh tools/tts/fetch-audiocpp.sh   (network; the image builders run it before make)
 set -eu

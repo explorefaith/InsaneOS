@@ -10,8 +10,8 @@
  *      "att":[{"id","name","size","mime","nonce","mac"}],
  *      "hist":[{"t":…,"title":…,"f":[…]}],"x":{…}}]}
  * Field types: text, hidden, url, date, number, file, totp, email, multiline, pin. */
-#ifndef LORD_VAULT_VMODEL_H
-#define LORD_VAULT_VMODEL_H
+#ifndef INSANE_VAULT_VMODEL_H
+#define INSANE_VAULT_VMODEL_H
 
 #include <stddef.h>
 #include <stdint.h>

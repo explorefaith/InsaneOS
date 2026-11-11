@@ -1,12 +1,12 @@
 /* fancurve.h — fan profiles, curve evaluation with hysteresis, the configuration file and the
- * socket requests of lord-fand (docs/FANS.md). Pure code: no I/O, so it is tested by
+ * socket requests of insane-fand (docs/FANS.md). Pure code: no I/O, so it is tested by
  * tests/fan_test.c.
  *
  * A curve is a list of steps "from T °C, P %", sorted by temperature. Below the first step the fan
  * is off (or at the profile's floor). A step is entered when the temperature reaches it and left
  * only when it falls `hyst` °C below it, so the fan does not flap around a threshold. */
-#ifndef LORD_FAN_CURVE_H
-#define LORD_FAN_CURVE_H
+#ifndef INSANE_FAN_CURVE_H
+#define INSANE_FAN_CURVE_H
 
 #include <stddef.h>
 
@@ -64,7 +64,7 @@ int  fan_gpu_pct(int pct);
 
 void fan_config_default(FanConfig *cfg, int has_board_fan);
 
-/* /etc/lordos/fan.json. The caller fills cfg with fan_config_default() first. Parse: 0 ok; -1 on any
+/* /etc/insaneos/fan.json. The caller fills cfg with fan_config_default() first. Parse: 0 ok; -1 on any
  * error (cfg is left unchanged). Strict: unknown
  * keys, bad types or an invalid curve are refused. */
 int    fan_config_parse(const char *text, size_t len, FanConfig *cfg, char *err, size_t errlen);
@@ -78,7 +78,7 @@ int  fan_curve_parse_text(const char *s, FanCurve *c);
  *   PROFILE auto|quiet|balanced|performance|always|custom
  *   CURVE <t:p,...>          sets the custom curve and selects it
  *   FORCE off|on|<minutes>   minutes 1..FAN_FORCE_MAX_MIN
- *   GPUFAN <n> auto|<pct>    GPU fan n of lord-fand's own scan (0..FANHW_MAX_GPU-1): automatic, or pct 0..100 (the
+ *   GPUFAN <n> auto|<pct>    GPU fan n of insane-fand's own scan (0..FANHW_MAX_GPU-1): automatic, or pct 0..100 (the
  *                            daemon clamps it to FAN_GPU_FLOOR..100) */
 typedef enum { FR_STATUS, FR_PROFILE, FR_CURVE, FR_FORCE, FR_GPUFAN } FanReqType;
 typedef struct {

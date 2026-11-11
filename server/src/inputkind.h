@@ -1,8 +1,8 @@
 /* inputkind.h — what makes an absolute device a pointer. X and Y alone don't: a laptop's motion sensor (applesmc, on
  * Intel MacBooks) and a joystick report them too, and read as a tablet they pull the pointer to the middle of the screen
  * at every sample. A pointer has a button or a touch, and isn't marked as an accelerometer. */
-#ifndef LORD_INPUTKIND_H
-#define LORD_INPUTKIND_H
+#ifndef INSANE_INPUTKIND_H
+#define INSANE_INPUTKIND_H
 #include <linux/input-event-codes.h>
 #include <limits.h>
 

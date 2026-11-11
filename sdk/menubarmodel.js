@@ -22,7 +22,7 @@
 //   insideDisplay(x, y, w, h, display, m)    a menu's top-left corner moved inside one display
 //
 // Everything is on unless the user turned it off, so a settings.json without "menuBar" (every version before
-// 0.8.8.6) shows the bar as it was: no migration. The Cleaner item (the crown) keeps its own key,
+// 0.8.8.6) shows the bar as it was: no migration. The Cleaner item (the apple) keeps its own key,
 // cleaner.menuItem, which Cleaner → Settings already writes; the Settings row writes the same key.
 export const MENUBAR_DEFAULTS = {
   keyboard: true,       // the keyboard layout (FR, ES…): one click goes to the next layout
@@ -42,7 +42,7 @@ export function menuBarPrefs(s) {
   return p;
 }
 
-// The Cleaner item (the crown): on unless Cleaner → Settings (or Settings → Desktop & Dock) turned it off.
+// The Cleaner item (the apple): on unless Cleaner → Settings (or Settings → Desktop & Dock) turned it off.
 export const cleanerItemShown = (s) => ((s && s.cleaner) || {}).menuItem !== false;
 
 // A shallow patch for settings.set: only "menuBar" (or "cleaner") changes, every other choice in it is kept.

@@ -39,7 +39,7 @@ static void lang(const char *what, const char *in, const char *fallback, const c
 }
 
 int main(void) {
-    clean("colors out", "\x1b[1;32mlordbasex\x1b[0m@host:~$ ls", "lordbasex@host:~$ ls");
+    clean("colors out", "\x1b[1;32minsaneos\x1b[0m@host:~$ ls", "insaneos@host:~$ ls");
     clean("a window title out", "\x1b]0;title\x07hola", "hola");
     clean("spaces and tabs", "  uno \t  dos   tres ", "uno dos tres");
     clean("blank lines kept as one", "uno\n\n\n\ndos\ntres", "uno\n\ndos\ntres");

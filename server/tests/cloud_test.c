@@ -431,9 +431,9 @@ static void meta(const char *rel, long size, int dirty, const char *atime) {
     char m[512], p[700], d[700];
     snprintf(m, sizeof m, "{\"ModTime\":\"2026-11-06T14:51:51Z\",\"ATime\":\"%s\",\"Size\":%ld,\"Rs\":[{\"Pos\":0,\"Size\":%ld}],\"Fingerprint\":\"x\",\"Dirty\":%s}",
              atime, size, size, dirty ? "true" : "false");
-    snprintf(p, sizeof p, ".cache/lordos/cloud/vfsMeta/cab12cd34/%s", rel);
+    snprintf(p, sizeof p, ".cache/insaneos/cloud/vfsMeta/cab12cd34/%s", rel);
     put(p, m);
-    snprintf(d, sizeof d, ".cache/lordos/cloud/vfs/cab12cd34/%s", rel);
+    snprintf(d, sizeof d, ".cache/insaneos/cloud/vfs/cab12cd34/%s", rel);
     char *data = malloc((size_t)size + 1);
     memset(data, 'x', (size_t)size);
     data[size] = 0;
@@ -444,16 +444,16 @@ static void meta(const char *rel, long size, int dirty, const char *atime) {
 static void t_state(void) {
     snprintf(home, sizeof home, "%s/cloud-test.XXXXXX", getenv("TMPDIR") ? getenv("TMPDIR") : "/tmp");
     if (!mkdtemp(home)) { CHECK(0); return; }
-    setenv("LORDOS_CLOUD_RCLONE", "/nonexistent/rclone", 1);
-    put(".config/lordos/cloud/accounts.json",
+    setenv("INSANEOS_CLOUD_RCLONE", "/nonexistent/rclone", 1);
+    put(".config/insaneos/cloud/accounts.json",
         "{\"options\":{\"bwUp\":0,\"bwDown\":0,\"autoFree\":false,\"freeBelowGb\":10},\"accounts\":["
         "{\"id\":\"cab12cd34\",\"name\":\"Work\",\"kind\":\"webdav\",\"created\":1},"
         "{\"id\":\"BAD\",\"name\":\"Bad\",\"kind\":\"webdav\"},"
         "{\"id\":\"c00000001\",\"name\":\"../escape\",\"kind\":\"webdav\"},"
         "{\"id\":\"c00000002\",\"name\":\"Other\",\"kind\":\"core\"}]}");
-    put(".config/lordos/cloud/rclone.conf", "[cab12cd34]\ntype = webdav\nurl = https://dav.example.test/remote.php/dav\nvendor = other\n");
-    put(".config/lordos/cloud/keep.json", "{\"cab12cd34\":[\"Kept\",\"../x\"]}");
-    put(".config/lordos/cloud/links.json", "{\"links\":[{\"id\":\"cab12cd34\",\"path\":\"Share/a.txt\",\"url\":\"https://dav.example.test/s/abc\",\"expires\":0,\"made\":5},"
+    put(".config/insaneos/cloud/rclone.conf", "[cab12cd34]\ntype = webdav\nurl = https://dav.example.test/remote.php/dav\nvendor = other\n");
+    put(".config/insaneos/cloud/keep.json", "{\"cab12cd34\":[\"Kept\",\"../x\"]}");
+    put(".config/insaneos/cloud/links.json", "{\"links\":[{\"id\":\"cab12cd34\",\"path\":\"Share/a.txt\",\"url\":\"https://dav.example.test/s/abc\",\"expires\":0,\"made\":5},"
         "{\"id\":\"cab12cd34\",\"path\":\"../x\",\"url\":\"https://dav.example.test/s/x\",\"expires\":0,\"made\":5},"
         "{\"id\":\"cab12cd34\",\"path\":\"Old\",\"url\":\"https://dav.example.test/s/old\",\"expires\":1000,\"made\":5},"
         "{\"id\":\"cab12cd34\",\"path\":\"b\",\"url\":\"javascript:x\",\"expires\":0,\"made\":5}]}");
@@ -620,10 +620,10 @@ static void t_state(void) {
         json_free(&d);
     }
     free(s);
-    CHECK(!exists(".cache/lordos/cloud/vfs/cab12cd34/clean.bin") && !exists(".cache/lordos/cloud/vfsMeta/cab12cd34/clean.bin"));
-    CHECK(!exists(".cache/lordos/cloud/vfs/cab12cd34/Dir/Sub/two.bin") && !exists(".cache/lordos/cloud/vfs/cab12cd34/open.txt"));
-    CHECK(exists(".cache/lordos/cloud/vfs/cab12cd34/dirty.txt") && exists(".cache/lordos/cloud/vfs/cab12cd34/queued.txt"));
-    CHECK(exists(".cache/lordos/cloud/vfs/cab12cd34/Kept/k.bin") && exists(".cache/lordos/cloud/vfsMeta/cab12cd34/Kept/k.bin"));
+    CHECK(!exists(".cache/insaneos/cloud/vfs/cab12cd34/clean.bin") && !exists(".cache/insaneos/cloud/vfsMeta/cab12cd34/clean.bin"));
+    CHECK(!exists(".cache/insaneos/cloud/vfs/cab12cd34/Dir/Sub/two.bin") && !exists(".cache/insaneos/cloud/vfs/cab12cd34/open.txt"));
+    CHECK(exists(".cache/insaneos/cloud/vfs/cab12cd34/dirty.txt") && exists(".cache/insaneos/cloud/vfs/cab12cd34/queued.txt"));
+    CHECK(exists(".cache/insaneos/cloud/vfs/cab12cd34/Kept/k.bin") && exists(".cache/insaneos/cloud/vfsMeta/cab12cd34/Kept/k.bin"));
     /* a file open right now: rclone says something is in use, and a process of this user has it open */
     meta("busy.bin", 64, 0, "2026-11-06T14:51:51Z");
     put("Cloud/Work/busy.bin", "");
@@ -637,12 +637,12 @@ static void t_state(void) {
     s = cloud_free(bp, 1);
     CHECK(s && strstr(s, "\"reason\":\"open\"") && strstr(s, "\"freed\":0"));
     free(s);
-    CHECK(exists(".cache/lordos/cloud/vfs/cab12cd34/busy.bin"));
+    CHECK(exists(".cache/insaneos/cloud/vfs/cab12cd34/busy.bin"));
     close(fd);
     s = cloud_free(bp, 1);
     CHECK(s && !strstr(s, "\"reason\":\"open\"") && !strstr(s, "\"freed\":0"));
     free(s);
-    CHECK(!exists(".cache/lordos/cloud/vfs/cab12cd34/busy.bin"));
+    CHECK(!exists(".cache/insaneos/cloud/vfs/cab12cd34/busy.bin"));
     /* Keep and Unkeep: the files on disk */
     snprintf(p, sizeof p, "%s/Cloud/Work/Dir", home);
     const char *kp[] = { p, "/etc/passwd" };
@@ -650,7 +650,7 @@ static void t_state(void) {
     char *kj = NULL;
     {
         char kf[1024];
-        snprintf(kf, sizeof kf, "%s/.config/lordos/cloud/keep.json", home);
+        snprintf(kf, sizeof kf, "%s/.config/insaneos/cloud/keep.json", home);
         FILE *f = fopen(kf, "r");
         static char b[4096];
         size_t n = f ? fread(b, 1, sizeof b - 1, f) : 0;
@@ -666,9 +666,9 @@ static void t_state(void) {
     CHECK(s && !strstr(s, "/Cloud/Work/Dir\""));
     free(s);
     struct stat st;
-    snprintf(p, sizeof p, "%s/.config/lordos/cloud", home);
+    snprintf(p, sizeof p, "%s/.config/insaneos/cloud", home);
     CHECK(!stat(p, &st) && (st.st_mode & 0777) == 0700);
-    snprintf(p, sizeof p, "%s/.config/lordos/cloud/accounts.json", home);
+    snprintf(p, sizeof p, "%s/.config/insaneos/cloud/accounts.json", home);
     CHECK(!stat(p, &st) && (st.st_mode & 0777) == 0600);
     char cmd[1200];
     snprintf(cmd, sizeof cmd, "rm -rf '%s'", home);

@@ -1,6 +1,6 @@
 /* keygrab.h — the keys the desktop keeps from a focused Wayland app (see keygrab.c). */
-#ifndef LORD_KEYGRAB_H
-#define LORD_KEYGRAB_H
+#ifndef INSANE_KEYGRAB_H
+#define INSANE_KEYGRAB_H
 
 enum { KG_SHIFT = 1, KG_CTRL = 2, KG_ALT = 4, KG_META = 8 };
 enum { KG_PASS = 0, KG_TAKE = 1, KG_HOLD = 2 };

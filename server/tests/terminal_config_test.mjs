@@ -1,8 +1,8 @@
 // terminal_config_test.mjs — (0.8.8.7) the Terminal's own configuration file (apps/terminal/config.js): the move out
 // of settings.json (every field kept, the section removed only once the file is written), a chosen file that isn't
 // there (the last good copy, read-only, nothing written), choosing a place (move or use what is there), and files
-// that are refused (not JSON, a newer schema). lord.termconf is a fake over a map of files; the C side has its own
-// test (tests/termconf_test.c). Bundles the real modules with esbuild over a stub '@lordos/sdk'.
+// that are refused (not JSON, a newer schema). insane.termconf is a fake over a map of files; the C side has its own
+// test (tests/termconf_test.c). Bundles the real modules with esbuild over a stub '@insaneos/sdk'.
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,12 +17,12 @@ if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 const entry = `
 import * as config from './apps/terminal/config.js';
 import { terminalSettings, saveTerminalSettings } from './apps/terminal/profiles.js';
-import { settings } from '@lordos/sdk';
+import { settings } from '@insaneos/sdk';
 globalThis.__out = { ...config, terminalSettings, saveTerminalSettings, settings };`;
 const sdkStub = {
   name: 'sdk-stub',
   setup(b) {
-    b.onResolve({ filter: /^@lordos\/sdk$/ }, () => ({ path: 'sdk', namespace: 'stub' }));
+    b.onResolve({ filter: /^@insaneos\/sdk$/ }, () => ({ path: 'sdk', namespace: 'stub' }));
     b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({
       contents: `export const t = (k) => k;
         export function createStore(v) { let s = v; return { get: () => s, set: (f) => { s = typeof f === 'function' ? f(s) : { ...s, ...f }; }, subscribe: () => () => {} }; }
@@ -34,8 +34,8 @@ const sdkStub = {
 const built = (await esbuild.build({ stdin: { contents: entry, resolveDir: root, loader: 'js' }, bundle: true, write: false, format: 'iife', plugins: [sdkStub], logLevel: 'silent' })).outputFiles[0].text;
 globalThis.setInterval = () => 0;      // the watcher: not in a test
 
-const DEF = '/home/u/.config/lordos/terminal.json';
-// a fresh copy of the modules over a fake lord.termconf: files { path: text }, away: folders that aren't there
+const DEF = '/home/u/.config/insaneos/terminal.json';
+// a fresh copy of the modules over a fake insane.termconf: files { path: text }, away: folders that aren't there
 function load(settingsJson, files = {}, away = []) {
   const fs = { ...files };
   let custom = '';
@@ -43,7 +43,7 @@ function load(settingsJson, files = {}, away = []) {
   const isAway = (p) => away.some((d) => p.startsWith(`${d}/`));
   const active = () => custom || DEF;
   const calls = { migrate: 0, write: 0 };
-  globalThis.lord = { termconf: {
+  globalThis.insane = { termconf: {
     setPath: (p) => { custom = p === DEF ? '' : p; return active(); },
     where: () => ({ path: active(), cache: DEF, custom: !!custom }),
     read: (which) => {

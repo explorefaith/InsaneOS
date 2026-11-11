@@ -1,7 +1,7 @@
 /* share.h — the public screen-sharing API (share.c, docs/SCREEN-SHARING.md). A separate door from remote.sock:
  * its own socket, table and parser; only the composed frame, the shared encoder and the formats are in common. */
-#ifndef LORD_REMOTE_SHARE_H
-#define LORD_REMOTE_SHARE_H
+#ifndef INSANE_REMOTE_SHARE_H
+#define INSANE_REMOTE_SHARE_H
 
 #include <poll.h>
 #include <stddef.h>
@@ -28,7 +28,7 @@ typedef struct {
 } ShareHost;
 
 /* A connection for a packaged app's companion (id without "lpk:"): the descriptor to hand it, as fd 4, or -1. There
- * is no peer to ask who it is, so lord-server's word is what ties it to the app. */
+ * is no peer to ask who it is, so insane-server's word is what ties it to the app. */
 int share_companion(const char *id, int may_input);
 
 /* Not called for the login screen: that session has no listener at all. 0 on success. */
@@ -59,7 +59,7 @@ void share_vinfo(int codec, const void *m, size_t n);
 void share_changed(void);               /* the screen changed (keyframe limit) */
 void share_clipboard(const char *text, unsigned gen, int sensitive);
 
-/* the shell (lord.share) */
+/* the shell (insane.share) */
 void share_shown(unsigned token);       /* the indicator is on screen */
 void share_hidden(void);                /* it no longer is: the share ends */
 void share_answer(unsigned token);      /* the prompt was answered: the store decides */

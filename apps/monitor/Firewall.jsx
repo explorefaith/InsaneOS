@@ -1,6 +1,6 @@
 // Firewall.jsx — Settings → Privacy → "Apps' network" (registered with registerPrivacySection,
 // like the Monitor item). See docs/FIREWALL.md, step 4.
-//   - status of lord-netperm (the service that applies the rules in the kernel) and the mode;
+//   - status of insane-netperm (the service that applies the rules in the kernel) and the mode;
 //   - Trusted apps: allowed without logging (explicit denials still apply);
 //   - Restricted apps: one checkbox per restriction (no internet = "LAN only", no LAN, no network,
 //     no incoming connections, and the non-network ones: camera, microphone…). Every one is
@@ -8,15 +8,15 @@
 //     itself: it does not offer files, USB, clipboard or Bluetooth, which the shell always uses.
 //     For Linux apps each checkbox says when it applies (all at once, files at the next launch)
 //     and the clipboard isn't offered yet; a help line per restriction says what it covers.
-// The rules are saved by lord-server (lord.fw); this screen writes no files. Drawn like the
+// The rules are saved by insane-server (insane.fw); this screen writes no files. Drawn like the
 // Settings sections: 13/600 headers, inset GroupBoxes with hairlines, footers.
-import { View, Text, Button, Segmented, ScrollView, GroupBox, useTheme, useLocale, useStore, useLauncherApps, firewall, firewallState, spacing, typeScale, errorText, netModel } from '@lordos/sdk';
+import { View, Text, Button, Segmented, ScrollView, GroupBox, useTheme, useLocale, useStore, useLauncherApps, firewall, firewallState, spacing, typeScale, errorText, netModel } from '@insaneos/sdk';
 import { useState } from 'react';
 
 // Firewall id of a launcher app: the built-in ones run inside Insane OS.
 // Isolated built-in apps (Passwords) have their own scope, like a package.
-const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'lordos');
-// The desktop shell and the built-in apps share "lordos": these would cut the desktop off itself.
+const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'insaneos');
+// The desktop shell and the built-in apps share "insaneos": these would cut the desktop off itself.
 const DESKTOP_ALWAYS = ['no-files', 'no-usb', 'no-clipboard', 'no-bluetooth'];
 // Linux apps: the clipboard of a Wayland app isn't mediated per app yet, so it isn't offered.
 const LINUX_NOT_YET = ['no-clipboard'];
@@ -27,9 +27,9 @@ const isLinux = (id) => id.startsWith('desktop:');
 // (0.8.5) Insane OS's components with their own scope (Mail, Store, Printers, Terminal, Blocklists): they
 // take restrictions like an app; the system services (system:*) and the VPN row never do
 const { COMPONENTS } = netModel;
-const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('lordos:') && !COMPONENTS[id].system);
+const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('insaneos:') && !COMPONENTS[id].system);
 const NET_ONLY = ['no-internet', 'no-lan', 'no-network', 'no-incoming'];
-const offered = (id) => (COMPONENTS[id] ? NET_ONLY : id === 'lordos' ? firewall.RESTRICTIONS.filter((f) => !DESKTOP_ALWAYS.includes(f))
+const offered = (id) => (COMPONENTS[id] ? NET_ONLY : id === 'insaneos' ? firewall.RESTRICTIONS.filter((f) => !DESKTOP_ALWAYS.includes(f))
   : isLinux(id) ? firewall.RESTRICTIONS.filter((f) => !LINUX_NOT_YET.includes(f)) : firewall.RESTRICTIONS);
 
 function useAppIndex() {
@@ -37,7 +37,7 @@ function useAppIndex() {
   const byId = new Map();
   for (const a of list) {
     const id = fwId(a);
-    if (id !== 'lordos' && !byId.has(id)) byId.set(id, a);
+    if (id !== 'insaneos' && !byId.has(id)) byId.set(id, a);
   }
   return byId;
 }
@@ -50,7 +50,7 @@ function AppLabel({ id, apps, tr }) {
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 }}>
       {Icon ? <Icon size={24} /> : <View style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: t.control }} />}
       <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-        <Text style={{ fontSize: typeScale.body, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textAlign: 'start' }}>{id === 'lordos' ? tr('monitor.lordos') : COMPONENTS[id] ? tr(COMPONENTS[id].label) : a?.name || id.replace(/^(desktop|lpk):/, '')}</Text>
+        <Text style={{ fontSize: typeScale.body, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textAlign: 'start' }}>{id === 'insaneos' ? tr('monitor.insaneos') : COMPONENTS[id] ? tr(COMPONENTS[id].label) : a?.name || id.replace(/^(desktop|lpk):/, '')}</Text>
         <Text style={{ fontSize: 10, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden', fontFamily: 'monospace', textAlign: 'start' }}>{id}</Text>
       </View>
     </View>
@@ -61,7 +61,7 @@ function AppLabel({ id, apps, tr }) {
 function AddApp({ apps, exclude, onPick, tr }) {
   const t = useTheme();
   const [open, setOpen] = useState(false);
-  const choices = ['lordos', ...COMPONENT_IDS, ...apps.keys()].filter((id) => !exclude.has(id));
+  const choices = ['insaneos', ...COMPONENT_IDS, ...apps.keys()].filter((id) => !exclude.has(id));
   return (
     <View style={{ gap: spacing.s, paddingVertical: spacing.s }}>
       <View style={{ flexDirection: 'row' }}>
@@ -166,7 +166,7 @@ export function FirewallPrivacy() {
                 ))}
               </View>
               {isLinux(id) && <Text style={{ fontSize: typeScale.caption, color: t.textDim, lineHeight: 1.35, paddingHorizontal: 32, textAlign: 'start' }}>{tr('firewall.linuxWhen')}</Text>}
-              {id === 'lordos' && <Text style={{ fontSize: typeScale.caption, color: t.textDim, lineHeight: 1.35, paddingHorizontal: 32, textAlign: 'start' }}>{tr('firewall.desktopAlways')}</Text>}
+              {id === 'insaneos' && <Text style={{ fontSize: typeScale.caption, color: t.textDim, lineHeight: 1.35, paddingHorizontal: 32, textAlign: 'start' }}>{tr('firewall.desktopAlways')}</Text>}
             </View>
           ))}
           {!Object.keys(restricted).length && empty}

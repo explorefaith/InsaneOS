@@ -8,7 +8,7 @@
  *   VMI_OVF   an .ovf descriptor, or an .ova (a tar holding the descriptor and stream-optimized VMDKs, read in place)
  *   VMI_DISK  one disk image: VMDK, VDI, VHDX, qcow2, raw
  *
- * Everything here is pure: text in, a VmiMachine out. Paths stay as the file wrote them; lordvm.c resolves them
+ * Everything here is pure: text in, a VmiMachine out. Paths stay as the file wrote them; insanevm.c resolves them
  * inside the bundle (vmi_rel_ok, then realpath and a prefix check), opens every disk only through the jailed qemu-img
  * with an explicit driver, and never follows a name the image itself carries.
  *
@@ -17,8 +17,8 @@
  *   - the SMBIOS system UUID, derived from how that app writes it into its tables and how the guest reads it back
  *     (vmi_guest_uuid); manufacturer, product, version, serial, SKU and family where the source sets them;
  *   - BIOS or UEFI, the vCPU count and topology, memory, the disks' order, virtual sizes and serials, the RTC's base. */
-#ifndef LORD_VM_IMPORT_H
-#define LORD_VM_IMPORT_H
+#ifndef INSANE_VM_IMPORT_H
+#define INSANE_VM_IMPORT_H
 
 #include <stddef.h>
 #include <stdint.h>

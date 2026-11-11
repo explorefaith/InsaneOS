@@ -1,9 +1,9 @@
 /* lbcond.h — what InsaneBench records about the machine around a run, and its thermal and power guards
  * (docs/BENCHMARK.md, "Thermal and power safety", "Recorded conditions"). World-readable sysfs and
- * procfs only, read by lord-server (never by lord-bench). Every reader takes a root folder ("" for the
+ * procfs only, read by insane-server (never by insane-bench). Every reader takes a root folder ("" for the
  * real one) so tests can feed fake trees. */
-#ifndef LORD_BENCH_LBCOND_H
-#define LORD_BENCH_LBCOND_H
+#ifndef INSANE_BENCH_LBCOND_H
+#define INSANE_BENCH_LBCOND_H
 
 #include <stdint.h>
 

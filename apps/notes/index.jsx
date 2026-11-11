@@ -5,7 +5,7 @@ import {
   View, Text, useTheme, useLocale, useAppWindow, useStore, useKeyboard, Button, TextInput, ScrollView, ThemeProvider, Segmented, speechItems, registerSelection, ContextMenu,
   Toolbar, ToolbarButton, ToolbarSpacer, MenuButton, SearchField, EmptyState, textDirection,
   Markdown, markdownHeadings, toggleTask, wm, fs, formatBytes, addListener, screen, t, print, FilePicker as SysFilePicker,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { NoteEditor } from './NoteEditor.jsx';
 import { CATEGORIES, EMOJIS, emojiFor, searchEmoji } from './emoji.js';
@@ -114,7 +114,7 @@ function NoteBody({ note, mode, onMode, editorApi, compact, showToc, size = 14, 
   const [w, setW] = useState(300);
   const box = useRef(null);
   useEffect(() => {
-    const id = setInterval(() => { if (box.current) { const nw = lord.getLayout(box.current.id)[2]; if (Math.abs(nw - w) > 1) setW(nw); } }, 400);
+    const id = setInterval(() => { if (box.current) { const nw = insane.getLayout(box.current.id)[2]; if (Math.abs(nw - w) > 1) setW(nw); } }, 400);
     return () => clearInterval(id);
   });
   // right click while editing: Speech, for the selection or the whole note
@@ -128,7 +128,7 @@ function NoteBody({ note, mode, onMode, editorApi, compact, showToc, size = 14, 
           onPasteImage={() => pasteClipboardImage(note.slug)} onEscape={() => onMode('read')} onBlur={compact ? () => onMode('read') : undefined}
           onCommand={(b) => { if (b === 'e') onMode('read'); else onCommand?.(b); }}
           onContextMenu={(e) => { const items = speechItems(speechText).filter((x) => x !== '-'); if (items.length) setCtx({ ...(box.current ? e.local(box.current) : e), items }); }} />
-        {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w, h: box.current ? lord.getLayout(box.current.id)[3] : 600 }} />}
+        {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w, h: box.current ? insane.getLayout(box.current.id)[3] : 600 }} />}
       </View>
     );
   }
@@ -136,7 +136,7 @@ function NoteBody({ note, mode, onMode, editorApi, compact, showToc, size = 14, 
   const jump = (id) => {
     const n = heads.current.get(id), sc = scroll.current;
     if (!n || !sc?.inner?.current) return;
-    sc.scrollTo(lord.getLayout(n.id)[1] - lord.getLayout(sc.inner.current.id)[1] - 4);
+    sc.scrollTo(insane.getLayout(n.id)[1] - insane.getLayout(sc.inner.current.id)[1] - 4);
   };
   return (
     // the note's own direction (an Arabic note reads right to left even in a Spanish interface)
@@ -319,7 +319,7 @@ export default function Notes() {
   const root = useRef(null);
   const [winW, setWinW] = useState(860);
   useEffect(() => {
-    const id = setInterval(() => { if (root.current) { const w = lord.getLayout(root.current.id)[2]; if (Math.abs(w - winW) > 2) setWinW(w); } }, 300);
+    const id = setInterval(() => { if (root.current) { const w = insane.getLayout(root.current.id)[2]; if (Math.abs(w - winW) > 2) setWinW(w); } }, 300);
     return () => clearInterval(id);
   }, [winW]);
   const sideW = winW < 720 ? 200 : 240;

@@ -1,6 +1,6 @@
 /* wallpaper_image.h — a picture chosen by the user, made safe and quick to show (docs/WALLPAPERS.md). */
-#ifndef LORD_HW_WALLPAPER_IMAGE_H
-#define LORD_HW_WALLPAPER_IMAGE_H
+#ifndef INSANE_HW_WALLPAPER_IMAGE_H
+#define INSANE_HW_WALLPAPER_IMAGE_H
 #include <stddef.h>
 
 #define WP_MAX_FILE   (64u << 20)                   /* the file the user picks */

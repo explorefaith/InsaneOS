@@ -1,10 +1,10 @@
 /* hwdec.h — hardware VP9/AV1 decoding probe, once per boot (see hwdec.c and docs/VIDEO.md). */
-#ifndef LORD_MEDIA_HWDEC_H
-#define LORD_MEDIA_HWDEC_H
+#ifndef INSANE_MEDIA_HWDEC_H
+#define INSANE_MEDIA_HWDEC_H
 
 #include <stddef.h>
 
-/* JSON with the answer, or NULL while lord-media is still probing (the first call starts it):
+/* JSON with the answer, or NULL while insane-media is still probing (the first call starts it):
  * {"boot","vm","gpu","virtualGpu","vaapi","vendor","v4l2","vp9","av1","h264","hevc","reason"} */
 const char *hwdec_result(void);
 int  hwdec_pollfd(void);                /* -1 when nothing is pending (main loop, via media_pollfds) */

@@ -1,10 +1,10 @@
-/* js_disk.c — lord.disks: disks and partitions for the Disks app (see docs/SYSTEM.md).
+/* js_disk.c — insane.disks: disks and partitions for the Disks app (see docs/SYSTEM.md).
  *
  * Read-only and without root (disk/disk.c). Anything that changes something goes through the
  * helper (disk-* actions).
  *   list()        [{ name, model, size, transport, removable, system, table, partitions: […] }]
  *   tools()       { fat32, exfat, ext4, ntfs }: which formats can be created on this machine
- *   watch(on)     change notifications while the app is open: __lordDisks('change') when a disk is
+ *   watch(on)     change notifications while the app is open: __insaneDisks('change') when a disk is
  *                 mounted, unmounted, plugged in or changed (mountinfo + udev, no polling) */
 #include "js_disk.h"
 #include "../disk/disk.h"
@@ -41,8 +41,8 @@ static const JSCFunctionListEntry funcs[] = {
     JS_CFUNC_DEF("watch", 1, f_watch),
 };
 
-void js_disk_register(JSContext *c, JSValue lord) {
+void js_disk_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, funcs, sizeof funcs / sizeof funcs[0]);
-    JS_SetPropertyStr(c, lord, "disks", o);
+    JS_SetPropertyStr(c, insane, "disks", o);
 }

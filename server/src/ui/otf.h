@@ -6,8 +6,8 @@
  *   - CBDT/CBLC color glyphs (PNG inside the font, like Noto Color Emoji).
  *
  * All reads validate bounds: fonts may come from ~/.fonts. */
-#ifndef LORD_OTF_H
-#define LORD_OTF_H
+#ifndef INSANE_OTF_H
+#define INSANE_OTF_H
 
 #include <stddef.h>
 #include <stdint.h>

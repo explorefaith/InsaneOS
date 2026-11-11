@@ -1,4 +1,4 @@
-We want lordos.org to be usable by everyone, including people who use a keyboard only, a screen reader, magnification or high contrast. Our goal is the Web Content Accessibility Guidelines (WCAG) 2.2, level AA. This statement covers the website; the accessibility of the Insane OS distribution is described at the end.
+We want insaneos.org to be usable by everyone, including people who use a keyboard only, a screen reader, magnification or high contrast. Our goal is the Web Content Accessibility Guidelines (WCAG) 2.2, level AA. This statement covers the website; the accessibility of the Insane OS distribution is described at the end.
 
 ## What the website does today
 

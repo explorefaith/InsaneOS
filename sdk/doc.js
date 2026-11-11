@@ -1,6 +1,6 @@
-// doc.js — documents base: talks to lord.doc (the confined helper lord-doc, see
+// doc.js — documents base: talks to insane.doc (the confined helper insane-doc, see
 // docs/DOCUMENTS.md). Everything is asynchronous: requests return promises and a timer reads
-// the results (lord.doc.poll) only while something is pending, so the desktop never waits.
+// the results (insane.doc.poll) only while something is pending, so the desktop never waits.
 //
 //   docAvailable()                         is the helper there?
 //   <DocImage image={id} style />          shows a returned image (page, font sample)
@@ -10,16 +10,16 @@
 //   PDF for printing: makeTextPdf({ text, title, mono, paper }), makeImagePdf(path, { paper }) → { blob, size }
 //   blobs: saveBlob(blob, path), releaseBlob(blob)
 import { createElement as h, useEffect, useRef } from 'react';
-import { Image } from '@lordos/runtime';
+import { Image } from '@insaneos/runtime';
 import { settings } from './settings.js';
 import { tOptional } from './i18n.js';
 import { errorText } from './errors.js';
 
-// lord-doc reports short codes ('corrupt', 'password'…): the message is their translation (docs.err.*).
+// insane-doc reports short codes ('corrupt', 'password'…): the message is their translation (docs.err.*).
 const docError = (code, extra = {}) => Object.assign(new Error(code ? tOptional(`docs.err.${code}`) ?? errorText(code) : errorText('sys.unknown')), { code, ...extra });
 
-const has = () => typeof lord !== 'undefined' && typeof lord.doc !== 'undefined';
-export const docAvailable = () => has() && lord.doc.available();
+const has = () => typeof insane !== 'undefined' && typeof insane.doc !== 'undefined';
+export const docAvailable = () => has() && insane.doc.available();
 
 const waiting = new Map();        // `${sid}:${req}` → { resolve, reject, onPart, onProgress }
 let timer = null;
@@ -37,8 +37,8 @@ function dispatch(e) {
   const k = `${e.sid}:${e.req}`;
   const w = waiting.get(k);
   if (!w) {
-    if (e.type === 'img') lord.doc.release(e.image);        // nobody is waiting for it: release it
-    else if (e.type === 'blob') lord.doc.blobRelease(e.blob);
+    if (e.type === 'img') insane.doc.release(e.image);        // nobody is waiting for it: release it
+    else if (e.type === 'blob') insane.doc.blobRelease(e.blob);
     return;
   }
   if (e.type === 'part') { w.onPart?.(e.data); return; }
@@ -52,7 +52,7 @@ function dispatch(e) {
 
 function pump() {
   let evs = null;
-  try { evs = lord.doc.poll(); } catch (e) { evs = null; }
+  try { evs = insane.doc.poll(); } catch (e) { evs = null; }
   if (evs) {
     for (const e of evs) { try { dispatch(e); } catch (err) { console.log(`doc: ${err.message}`); } }
     if (evs.length) {
@@ -60,7 +60,7 @@ function pump() {
       if (timer && timerPeriod !== DOC_FAST_MS) { clearInterval(timer); timer = setInterval(pump, DOC_FAST_MS); timerPeriod = DOC_FAST_MS; }
     }
   }
-  if (!waiting.size && !lord.doc.pending() && timer) { clearInterval(timer); timer = null; }
+  if (!waiting.size && !insane.doc.pending() && timer) { clearInterval(timer); timer = null; }
   else if (timer && lastAct && Date.now() - lastAct > DOC_BACKOFF_AFTER && timerPeriod !== DOC_BACKOFF_MS) {
     clearInterval(timer); timer = setInterval(pump, DOC_BACKOFF_MS); timerPeriod = DOC_BACKOFF_MS;
   }
@@ -85,7 +85,7 @@ export function waitFor(sid, req, { onPart, onProgress } = {}) {
 }
 
 export function cancelRequest(sid, req) {
-  if (lord.doc.cancel(sid, req)) {
+  if (insane.doc.cancel(sid, req)) {
     const w = waiting.get(`${sid}:${req}`);
     waiting.delete(`${sid}:${req}`);
     w?.reject(docError('cancelled'));
@@ -95,7 +95,7 @@ export function cancelRequest(sid, req) {
 // Request to a PDF/archive session (op: open render select find outline pageinfo setfield annot undo blob sizes list).
 export function request(sid, op, args, { prio = 0, timeout, onPart, onProgress } = {}) {
   let req;
-  try { req = lord.doc.request(sid, op, args ? JSON.stringify(args) : '', prio, timeout ?? -1); } catch (e) { return Promise.reject(e); }
+  try { req = insane.doc.request(sid, op, args ? JSON.stringify(args) : '', prio, timeout ?? -1); } catch (e) { return Promise.reject(e); }
   const p = waitFor(sid, req, { onPart, onProgress });
   p.req = req;
   return p;
@@ -105,15 +105,15 @@ export function request(sid, op, args, { prio = 0, timeout, onPart, onProgress }
 function util(op, args, path, out) {
   let r;
   const t0 = Date.now();
-  try { r = lord.doc.util(op, args ? JSON.stringify(args) : '{}', path || undefined, out || undefined); } catch (e) { return Promise.reject(e); }
+  try { r = insane.doc.util(op, args ? JSON.stringify(args) : '{}', path || undefined, out || undefined); } catch (e) { return Promise.reject(e); }
   const p = waitFor(r.sid, r.req);
   if (settings.get().docTrace) p.then(() => console.log(`doc: ${op} ${Date.now() - t0} ms`), () => {});
   return p;
 }
 
-export const releaseImage = (id) => { if (id && has()) lord.doc.release(id); };
-export const releaseBlob = (id) => { if (id && has()) lord.doc.blobRelease(id); };
-export const saveBlob = (blob, path) => lord.doc.blobSave(blob, path);
+export const releaseImage = (id) => { if (id && has()) insane.doc.release(id); };
+export const releaseBlob = (id) => { if (id && has()) insane.doc.blobRelease(id); };
+export const saveBlob = (blob, path) => insane.doc.blobSave(blob, path);
 
 export const fontInfo = (path, index = 0) => util('fontinfo', { index }, path);
 export const fontSample = (path, { lines, width = 600, fg = '#000000', bg = '#00000000', index = 0 }) => util('fontrender', { lines, width: Math.round(width), fg, bg, index }, path);
@@ -132,7 +132,7 @@ export function DocImage({ image, style }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!ref.current || !has()) return;
-    lord.doc.bind(ref.current.id, image || 0);
+    insane.doc.bind(ref.current.id, image || 0);
   }, [image]);
   return h(Image, { ref, style });
 }

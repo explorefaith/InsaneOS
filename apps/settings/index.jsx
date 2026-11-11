@@ -6,8 +6,8 @@ import {
   View, Text, Image, useTheme, useSettings, shortcutList, shortcutsRev, themes, session, keyboard, admin, languages, setLanguage, useLocale,
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
   spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
-  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, lordosWallpapers,
-} from '@lordos/sdk';
+  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers,
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { SoundSettings } from './Sound.jsx';
 import { SharingSettings } from './Sharing.jsx';
@@ -205,10 +205,10 @@ function Appearance() {
         {s.dynamicWallpaper?.on ? (
           <>
             <SettingRow label={tOptional('settings.auto.dayWall') || 'Day wallpaper'}>
-              <PopUp value={s.dynamicWallpaper.day || ''} options={lordosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), day: v } })} />
+              <PopUp value={s.dynamicWallpaper.day || ''} options={insaneosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), day: v } })} />
             </SettingRow>
             <SettingRow label={tOptional('settings.auto.nightWall') || 'Night wallpaper'}>
-              <PopUp value={s.dynamicWallpaper.night || ''} options={lordosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), night: v } })} />
+              <PopUp value={s.dynamicWallpaper.night || ''} options={insaneosWallpapers.map((w) => [w.id, w.name])} onChange={(v) => set({ dynamicWallpaper: { ...(s.dynamicWallpaper || {}), night: v } })} />
             </SettingRow>
           </>
         ) : null}
@@ -476,6 +476,27 @@ function Wallpapers() {
           </View>
         </SettingRow>
       </Section>
+      {/* Glass (0.8.8.8): how strongly the panels and widgets blur and show the wallpaper behind
+          them. Live: the theme and the widgets read these settings on every render. Off (effects
+          off) both sliders do nothing, as the whole glass does. */}
+      <Section title={tOptional('settings.glass.title') || 'Glass'} footer={tOptional('settings.glass.hint') || 'How much the desktop panels and widgets blur what is behind them and show the wallpaper through.'}>
+        <SettingRow label={tOptional('settings.glass.blur') || 'Blur'} stack>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.s, direction: 'ltr' }}>
+            <Text style={cap}>{tOptional('settings.glass.off') || 'Off'}</Text>
+            <Slider value={Number.isFinite(s.glassBlur) ? s.glassBlur : 24} min={0} max={64} width={180}
+              onChange={(v) => set({ glassBlur: Math.round(v) })} />
+            <Text style={cap}>{`${Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24} px`}</Text>
+          </View>
+        </SettingRow>
+        <SettingRow label={tOptional('settings.glass.transparency') || 'Transparency'} stack>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.s, direction: 'ltr' }}>
+            <Text style={cap}>{tOptional('settings.glass.solid') || 'Solid'}</Text>
+            <Slider value={Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3} min={0} max={1} width={180}
+              onChange={(v) => set({ glassTransparency: Math.round(v * 100) / 100 })} />
+            <Text style={cap}>{`${Math.round((Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3) * 100)} %`}</Text>
+          </View>
+        </SettingRow>
+      </Section>
       <UserImages login={login} curId={shown} setNote={setNote}
         onChoose={(id) => (login ? setLoginImage(id).then(() => { set({ loginWallpaper: id }); setNote(tr('settings.wallpaperImage.loginDone')); }) : set({ wallpaper: id, motion: {} }))}
         onDefault={() => setLoginMotion(null).then(() => { set({ loginWallpaper: null }); setNote(tr('settings.motion.loginReset')); }, (e) => setNote(errorText(e)))} />
@@ -530,9 +551,9 @@ function LanguageRegion() {
   const [showZones, setShowZones] = useState(false);
   const [showRegions, setShowRegions] = useState(false);
   const langs = languages();
-  const [locales] = useState(() => lord.locale.available());
-  const [zone, setZone] = useState(() => lord.time.zone());
-  const [sys, setSys] = useState(() => lord.locale.get().system.LANG || 'C.UTF-8');
+  const [locales] = useState(() => insane.locale.available());
+  const [zone, setZone] = useState(() => insane.time.zone());
+  const [sys, setSys] = useState(() => insane.locale.get().system.LANG || 'C.UTF-8');
   const isAdmin = admin.available();
   const report = (p, ok) => p.then((m) => { setMsg({ ok: true, text: ok || m }); return true; }, (e) => { setMsg({ ok: false, text: e.message }); return false; });
 
@@ -547,8 +568,8 @@ function LanguageRegion() {
       const l = locales.find((x) => regionOf(x.name) === r);
       if (l) l.generated = true;
     }
-    lord.locale.set({ LANG: name });
-    lord.keyboard?.reloadCompose?.();
+    insane.locale.set({ LANG: name });
+    insane.keyboard?.reloadCompose?.();
     set({ region: r });
   }
   // the first preferred language changed: its region too, if none was chosen
@@ -585,8 +606,8 @@ function LanguageRegion() {
         <SettingRow label={zone.split('/').pop().replace(/_/g, ' ')} hint={zone.replace(/_/g, ' ')}>
           <Button small label={tr('settings.change')} onClick={() => setShowZones(!showZones)} />
         </SettingRow>
-        {showZones && <SearchList items={lord.time.zones().sort().map((z) => [z, z.replace(/_/g, ' ')])} value={zone} placeholder={tr('settings.tz.search')}
-          onPick={(z) => { setShowZones(false); report(admin.run('timezone', z)).then((ok) => { if (ok) { lord.time.reload(); setZone(z); } }); }} />}
+        {showZones && <SearchList items={insane.time.zones().sort().map((z) => [z, z.replace(/_/g, ' ')])} value={zone} placeholder={tr('settings.tz.search')}
+          onPick={(z) => { setShowZones(false); report(admin.run('timezone', z)).then((ok) => { if (ok) { insane.time.reload(); setZone(z); } }); }} />}
       </Section>
       <Section title={tr('settings.system.title')} footer={tr('settings.system.hint', { name: sys })}>
         <ValueRow label="LANG" value={sys} mono>
@@ -710,12 +731,12 @@ function AddLanguage({ langs, have, onAdd }) {
   );
 }
 
-// Insane OS language pack (built by tools/i18n-pack.mjs): lordos-lang-<id>.json in Downloads.
+// Insane OS language pack (built by tools/i18n-pack.mjs): insaneos-lang-<id>.json in Downloads.
 function PackImport({ onDone }) {
   const { t: tr } = useLocale();
   const found = [];
   for (const d of ['Descargas', 'Downloads', '.']) {
-    try { for (const e of fs.list(d)) if (/^lordos-lang-[\w-]+\.json$/.test(e.name)) found.push(d === '.' ? e.name : `${d}/${e.name}`); } catch (e) { /* does not exist */ }
+    try { for (const e of fs.list(d)) if (/^insaneos-lang-[\w-]+\.json$/.test(e.name)) found.push(d === '.' ? e.name : `${d}/${e.name}`); } catch (e) { /* does not exist */ }
   }
   if (!found.length) return null;
   const install = (p) => {
@@ -724,12 +745,12 @@ function PackImport({ onDone }) {
       const id = String(pack.meta?.id || '');
       const files = { meta: JSON.stringify(pack.meta, null, 2) };
       for (const [ns, obj] of Object.entries(pack.catalogs || {})) files[ns] = JSON.stringify(obj, null, 2);
-      if (!lord.locale.installPack(id, files)) throw new Error(tr('settings.pack.invalid'));
+      if (!insane.locale.installPack(id, files)) throw new Error(tr('settings.pack.invalid'));
       onDone(tr('settings.pack.imported', { name: pack.meta.name || id }));
     } catch (e) { onDone(`${p}: ${e.message}`); }
   };
   return (
-    <SettingRow label={tr('settings.pack.lordos')} hint={found.join(' · ')}>
+    <SettingRow label={tr('settings.pack.insaneos')} hint={found.join(' · ')}>
       {found.map((p) => <Button small key={p} label={tr('settings.pack.add', { file: p.split('/').pop() })} onClick={() => install(p)} />)}
     </SettingRow>
   );
@@ -939,8 +960,8 @@ const GROUPS = [
 ];
 const SECTIONS = GROUPS.flat();
 // Board firmware
-// only on a BCM2712 board (Raspberry Pi 5, 500, CM5: lord.system.info().board)
-const isPi5 = () => { try { return lord.system.info().board === 'pi5'; } catch (e) { return false; } };
+// only on a BCM2712 board (Raspberry Pi 5, 500, CM5: insane.system.info().board)
+const isPi5 = () => { try { return insane.system.info().board === 'pi5'; } catch (e) { return false; } };
 const sectionShown = (id, hasPad, pi5 = isPi5()) => id !== 'firmware' || pi5;
 
 // The Dock's right-click menu lists every section, in the sidebar's order and with its names; one
@@ -986,6 +1007,7 @@ export default function Settings() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const { args } = useAppWindow();
+  const [prefs] = useSettings();
   const [section, setSectionState] = useState(lastSection);
   const [query, setQuery] = useState('');
   const setSection = (s) => { lastSection = s; setSectionState(s); };
@@ -993,7 +1015,15 @@ export default function Settings() {
   useEffect(() => { const sec = args?.section === 'themes' ? 'appearance' : args?.section; if (sec && SECTIONS.some(([id]) => id === sec)) setSection(sec); }, [args?.nonce]);
   const [, Body] = SECTIONS.find(([id]) => id === section) || SECTIONS[0];
   const q = query.trim().toLowerCase();
-  // Mouse & Trackpad always shows (its touchpad rows need a touchpad, which lord-sessiond lends with the monitor);
+  // The glass window (manifest "glass": true) shows the wallpaper behind this sidebar: it goes
+  // translucent with the same sliders (Settings → Wallpaper → Glass), otherwise it keeps its colour.
+  const gt = prefs.effects !== false ? Math.max(0, Math.min(1, Number.isFinite(prefs.glassTransparency) ? prefs.glassTransparency : 0.3)) : 0;
+  const glass = gt > 0;
+  const sidebarA = Math.max(0.3, 0.96 + (0.55 - 0.96) * gt);
+  const sidebarBg = glass && /^#([0-9a-f]{6})$/i.test(t.sidebarBg || '')
+    ? `rgba(${parseInt(t.sidebarBg.slice(1, 3), 16)},${parseInt(t.sidebarBg.slice(3, 5), 16)},${parseInt(t.sidebarBg.slice(5, 7), 16)},${sidebarA.toFixed(3)})`
+    : t.sidebarBg;
+  // Mouse & Trackpad always shows (its touchpad rows need a touchpad, which insane-sessiond lends with the monitor);
   // hasPad is still passed to sectionShown, which only hides Board firmware off a Raspberry Pi 5
   const hasPad = useTrackpads().some((d) => d.kind === 'touchpad');
   const [pi5] = useState(isPi5);
@@ -1001,7 +1031,7 @@ export default function Settings() {
   const groups = GROUPS.map((g) => g.filter(([id]) => visible(id))).filter((g) => g.length);
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
-      <View style={{ width: 220, backgroundColor: t.sidebarBg, paddingTop: spacing.m }}>
+      <View style={{ width: 220, backgroundColor: sidebarBg, paddingTop: spacing.m }}>
         <Hairline edge="end" />
         <View style={{ paddingHorizontal: 10, gap: spacing.s }}>
           <SearchField value={query} onChange={setQuery} placeholder={tr('settings.search')}

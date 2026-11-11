@@ -2,15 +2,15 @@
 //
 //   identifyDisplays(ids?)   shows each display's number (1, 2, 3…; sdk/displaylayout.js displayNumbers),
 //                            big, centered on that real display for 2 s, the screens slightly dimmed. `ids` are
-//                            lord.display.list() output ids (one or an array); none = every active display.
+//                            insane.display.list() output ids (one or an array); none = every active display.
 //                            Returns false when there is nothing to show (no display API, mirror mode).
 //   <DisplayIdentify />      the badges; startShell mounts it in the `notification` layer (sdk/index.js,
 //                            docs/LAYERS.md), so every theme has it. It never takes clicks.
 //
 // The desktop is one logical space across displays: each badge is placed at its display's global
-// rectangle (lord.screen.displays, matched by connector; the list's own rectangle otherwise).
+// rectangle (insane.screen.displays, matched by connector; the list's own rectangle otherwise).
 import { createElement as h } from 'react';
-import { View, Text, screen as desk, displays as screenDisplays } from '@lordos/runtime';
+import { View, Text, screen as desk, displays as screenDisplays } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { displays } from './hardware.jsx';
 import { displayNumbers } from './displaylayout.js';

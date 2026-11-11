@@ -2,7 +2,7 @@
 
 A theme is a React app that draws **the whole desktop**: wallpaper, bars, dock or taskbar, menus
 and window frames. Apps (`apps/`) go inside those windows and adapt to the theme's colors on
-their own. `lord-server` runs the theme with QuickJS and paints it with its C engine.
+their own. `insane-server` runs the theme with QuickJS and paints it with its C engine.
 
 | Theme | Style |
 |---|---|
@@ -40,7 +40,7 @@ Note that a theme Insane OS did not sign only loads on a development build (see 
    - the app's menus with `useAppMenus(focusedWindow)` (e.g. the Terminal's Shell, Edit, View),
    - the window node with the SDK's `<WindowShell win={w} style={…frame…}>`: it adds the invisible
      borders for resizing (4 sides and 4 corners, with their cursor) and the title bar calls
-     `wm.beginMove(w.id)` in `onMouseDown`. Moving and resizing are done by lord-server in C,
+     `wm.beginMove(w.id)` in `onMouseDown`. Moving and resizing are done by insane-server in C,
      without one event per frame (see `docs/WINDOWS.md`),
    - the dock's "app open" dot by comparing with `w.app` (an app can have several windows).
    - texts with `t('shell.…')` (see `docs/LANGUAGES.md`), app names with `appName(app)` and date
@@ -74,7 +74,7 @@ Images (`<Image src="assets/...">`) are resolved relative to the theme's folder.
 `mode`, `accent`, `text`, `textDim`, `windowBg`, `sidebarBg`, `separator`, `hover`, `control`,
 `inputBg`. Optional: `gtkButtons` (order of the GTK apps' buttons, e.g. `':minimize,maximize,close'`; by default the traffic lights on the left, see `docs/WAYLAND.md`), `accents` (name → color map, for Settings), `wallpapers`
 (`[{ id, nameKey, name, src, thumb?, category?, variants? }]`; Settings groups them by `category` and
-shows `thumb` in its grid; add `lordosWallpapers` from the SDK to offer the Insane OS collection, and
+shows `thumb` in its grid; add `insaneosWallpapers` from the SDK to offer the Insane OS collection, and
 draw with `wallpaperSrc(w, width, height)` so a higher-resolution variant is used where it exists,
 see `assets/wallpapers/README.md`), and the overlay scroll bars' look (0.8.3, `ScrollView`):
 `scrollThumb`, `scrollThumbHover` (colors), `scrollRadius` (corner radius; a pill by default) and
@@ -85,7 +85,7 @@ tokens of its own.
 Optional shape tokens restyle the SDK's shared controls in every app (see `docs/DESIGN.md`, "Theme
 tokens for the shared controls"): `controlRadius`, `controlRadiusSmall`, `groupRadius`, `menuRadius`,
 `menuItemRadius`, `menuHighlight` (`'accent'` | `'subtle'`), `selection` (`'fill'` | `'indicator'`),
-`inputFocus` (`'ring'` | `'underline'`), `buttonBorder` and `popupBg`. Without them a theme gets Lord
+`inputFocus` (`'ring'` | `'underline'`), `buttonBorder` and `popupBg`. Without them a theme gets Insane
 Default's shapes.
 
 Two switches a taskbar theme usually wants: `configureWindows({ snap: true })` turns on window

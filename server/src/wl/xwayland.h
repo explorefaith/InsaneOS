@@ -1,11 +1,11 @@
 /* xwayland.h — X11 apps through Xwayland, started only when one connects (xwayland.c).
  *
- * The fourth exception to "lord-server doesn't run programs" (AGENTS.md): it only ever starts
+ * The fourth exception to "insane-server doesn't run programs" (AGENTS.md): it only ever starts
  * /usr/bin/Xwayland (root-owned, not writable by others), with an argument list fixed in C, when
  * the first X11 client connects to this session's X socket; never from JS and with no argument
  * from anyone. See docs/WAYLAND.md, "X11 apps (Xwayland)". */
-#ifndef LORD_XWAYLAND_H
-#define LORD_XWAYLAND_H
+#ifndef INSANE_XWAYLAND_H
+#define INSANE_XWAYLAND_H
 
 /* After wl_start(), in a user session (not the login screen, not app mode): if Xwayland is
  * installed, reserves a display (/tmp/.X11-unix/X<n>, 0600, and its lock file), sets DISPLAY for

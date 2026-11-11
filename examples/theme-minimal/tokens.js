@@ -1,7 +1,7 @@
 // Tokens of the "Minimal" example theme. The base keys (mode … inputBg) are the contract with the
 // apps (sdk/theme.js, docs/THEMES-GUIDE.md "tokens.js"); every app reads them through useTheme().
 // The keys after "This theme's own" are used only by this theme's frame and bar.
-import { lordosWallpapers } from '@lordos/sdk';
+import { insaneosWallpapers } from '@insaneos/sdk';
 
 // The same names as the bundled themes' accents, so the user's choice in Settings → Appearance
 // survives a theme switch (Settings shows these swatches).
@@ -20,7 +20,7 @@ export function makeTheme({ mode, accent, effects }) {
     mode,
     accent: accents[accent] || accents.azul,
     accents,
-    wallpapers: lordosWallpapers,
+    wallpapers: insaneosWallpapers,
     text: dark ? '#f2f2f5' : '#1c1c21',
     textDim: dark ? 'rgba(242,242,245,0.58)' : 'rgba(28,28,33,0.6)',
     windowBg: dark ? '#1e1e22' : '#fcfcfd',

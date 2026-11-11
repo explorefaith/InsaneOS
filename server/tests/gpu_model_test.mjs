@@ -86,7 +86,7 @@ eq('no caps yet', gpuApis(rx580, null), []);
 
 // ---- APIs in use, from maps lines (gpustat.c keeps the base names) ----
 const ids = (l) => l.map((x) => (x.detail ? `${x.id}:${x.detail}` : x.id));
-eq('lord-server (GLES through EGL)', ids(apiTags(['libEGL.so.1.1.0', 'libEGL_mesa.so.0.0.0', 'libGLESv2.so.2.1.0', 'libgallium-25.0.7-2+deb13u1.so'], 'amdgpu')), ['opengles:radeonsi']);
+eq('insane-server (GLES through EGL)', ids(apiTags(['libEGL.so.1.1.0', 'libEGL_mesa.so.0.0.0', 'libGLESv2.so.2.1.0', 'libgallium-25.0.7-2+deb13u1.so'], 'amdgpu')), ['opengles:radeonsi']);
 eq('a browser (the RX 580 GPU process)', ids(apiTags(['libva.so.2.2200.0', 'libEGL_mesa.so.0.0.0', 'libgallium-25.0.7-2+deb13u1.so', 'libva-drm.so.2.2200.0', 'libEGL.so.1.1.0'], 'amdgpu')),
   ['opengl:radeonsi', 'video']);
 eq('a Vulkan game', ids(apiTags(['libvulkan.so.1.4.309', 'libvulkan_radeon.so'])), ['vulkan:RADV']);
@@ -98,14 +98,14 @@ eq('ggml on Vulkan', ids(apiTags(['libggml-vulkan.so'])), ['vulkan']);
 eq('nothing known', apiTags([]), []);
 
 // ---- AI engines ----
-const rawAi = { ai: [{ pid: 400, ppid: 1, name: 'lord-say', state: 'S', own: true }, { pid: 401, ppid: 400, name: 'lord-tts', state: 'R', own: false }],
+const rawAi = { ai: [{ pid: 400, ppid: 1, name: 'insane-say', state: 'S', own: true }, { pid: 401, ppid: 400, name: 'insane-tts', state: 'R', own: false }],
   say: [{ pid: 400, state: 'S', backend: 'vulkan', quality: 'hd', lang: 'es', mode: 'speak' }] };
 eq('voice on the GPU', aiEngines(rawAi), [{ id: 'voice', pid: 401, backend: 'gpu', api: 'vulkan', quality: 'hd', lang: 'es', state: 'speaking', mem: null, hidden: true }]);
 eq('paused', aiEngines({ ...rawAi, ai: [{ ...rawAi.ai[0], state: 'T' }, rawAi.ai[1]] })[0].state, 'paused');
 eq('saving on the CPU', aiEngines({ ...rawAi, say: [{ ...rawAi.say[0], backend: 'cpu', mode: 'save', quality: 'standard' }] }).map((e) => [e.backend, e.api, e.state, e.quality]), [['cpu', null, 'saving', 'standard']]);
 eq('no note yet', aiEngines({ ai: rawAi.ai, say: [] })[0].backend, null);
-eq('OCR: CPU', aiEngines({ ai: [{ pid: 9, ppid: 1, name: 'lord-ocr', state: 'R', own: false }] }).map((e) => [e.id, e.backend]), [['ocr', 'cpu']]);
-eq('lord-say alone (a preview): no engine', aiEngines({ ai: [rawAi.ai[0]], say: [] }), []);
+eq('OCR: CPU', aiEngines({ ai: [{ pid: 9, ppid: 1, name: 'insane-ocr', state: 'R', own: false }] }).map((e) => [e.id, e.backend]), [['ocr', 'cpu']]);
+eq('insane-say alone (a preview): no engine', aiEngines({ ai: [rawAi.ai[0]], say: [] }), []);
 eq('a dead helper', aiEngines({ ai: [{ ...rawAi.ai[1], state: 'Z' }] }), []);
 eq('its memory when readable', aiEngines({ ...rawAi, ai: [rawAi.ai[0], { ...rawAi.ai[1], own: true }] }, [{ pids: [401], mem: 300 << 20 }])[0].mem, 300 << 20);
 
@@ -134,8 +134,8 @@ eq('estimated from apps', [vi.cards[0].busy, vi.cards[0].busySource, vi.cards[0]
 near('power from energy', vi.cards[0].powerW, 12);
 eq('nothing reported', gpuStep(createGpuState(), { ...raw1, cards: [{ ...intel, energyUj: null }], list: [] }).cards[0].busy, null);
 eq('not an answer', gpuStep(createGpuState(), null), null);
-// lord-server itself is Insane OS
-eq('self', gpuStep(createGpuState(), { ...raw1, list: [{ ...proc(10, 0), self: true }] }).apps[0].key, 'app:lordos');
+// insane-server itself is Insane OS
+eq('self', gpuStep(createGpuState(), { ...raw1, list: [{ ...proc(10, 0), self: true }] }).apps[0].key, 'app:insaneos');
 
 // ---- history and the Overview ----
 let h = {};

@@ -5,37 +5,37 @@
 //     the same one the Monitor's switch writes);
 //   - its rules: allow or block a domain (exact, or *.example.com with every subdomain), an IP
 //     address or a CIDR network, with an optional port or range and protocol. Each row says when
-//     the rule last decided a connection (lord-netperm's notices, seen by this session);
+//     the rule last decided a connection (insane-netperm's notices, seen by this session);
 //   - add (a sheet that checks what is typed), edit and delete. There is no priority to reorder:
 //     the engine picks the most specific match (rules.c, fw_decide), so the list is shown in that
 //     order and the footer explains it.
-// The rules are saved by lord-server (lord.fw); this screen writes no files.
+// The rules are saved by insane-server (insane.fw); this screen writes no files.
 import {
   View, Text, Button, Segmented, ScrollView, GroupBox, useTheme, useLocale, useStore, useLauncherApps, firewall, firewallState, fwRule,
   spacing, typeScale, formatDate, formatTime, direction, netModel,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { RuleSheet, destKind, RED, GREEN } from './RuleSheet.jsx';
 
 const { sortByPrecedence, isDefaultRule } = fwRule;
 
 // Firewall id of a launcher app: the built-in ones run inside Insane OS; isolated ones have a scope.
-const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'lordos');
+const fwId = (a) => (a.kind === 'linux' ? a.id : a.kind === 'package' || a.isolated ? `lpk:${a.id}` : 'insaneos');
 
 function useAppIndex() {
   const list = useLauncherApps();
   const byId = new Map();
   for (const a of list) {
     const id = fwId(a);
-    if (id !== 'lordos' && !byId.has(id)) byId.set(id, a);
+    if (id !== 'insaneos' && !byId.has(id)) byId.set(id, a);
   }
   return byId;
 }
 
 // (0.8.5) Insane OS's own components with their own scope take rules too (Mail, Store, Printers, Terminal, Blocklists)
 const { COMPONENTS } = netModel;
-const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('lordos:') && !COMPONENTS[id].system);
-export const appLabelOf = (tr, apps, id) => (id === 'lordos' ? tr('monitor.lordos') : COMPONENTS[id] ? tr(COMPONENTS[id].label) : apps.get(id)?.name || id.replace(/^(desktop|lpk):/, ''));
+const COMPONENT_IDS = Object.keys(COMPONENTS).filter((id) => id.startsWith('insaneos:') && !COMPONENTS[id].system);
+export const appLabelOf = (tr, apps, id) => (id === 'insaneos' ? tr('monitor.insaneos') : COMPONENTS[id] ? tr(COMPONENTS[id].label) : apps.get(id)?.name || id.replace(/^(desktop|lpk):/, ''));
 
 function AppIcon({ a, size = 24 }) {
   const t = useTheme();
@@ -152,7 +152,7 @@ function AddApp({ apps, exclude, onPick }) {
   const t = useTheme();
   const { t: tr } = useLocale();
   const [open, setOpen] = useState(false);
-  const choices = ['lordos', ...COMPONENT_IDS, ...apps.keys()].filter((id) => !exclude.has(id));
+  const choices = ['insaneos', ...COMPONENT_IDS, ...apps.keys()].filter((id) => !exclude.has(id));
   return (
     <View style={{ gap: spacing.s, paddingVertical: spacing.s }}>
       <View style={{ flexDirection: 'row' }}>

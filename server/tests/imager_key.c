@@ -1,6 +1,6 @@
 /* imager_key.c — the release key for build/disk-cli, which doesn't link src/sec/codesig.c. The
  * same 32 bytes as codesig_release_key; build/codesig-test checks those against
- * tools/release/lordos-release.pub.pem, and tests/imager_test.c checks that PEM's fingerprint. */
+ * tools/release/insaneos-release.pub.pem, and tests/imager_test.c checks that PEM's fingerprint. */
 #include <stdint.h>
 
 const uint8_t codesig_release_key[32] = {

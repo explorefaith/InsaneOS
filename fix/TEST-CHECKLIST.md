@@ -8,7 +8,7 @@
 - [ ] ডেস্কটপ **স্ন্যাপি** — আগের মতো ল্যাগি না
 
 ## ২. Speed / Optimization
-- [ ] Terminal খুলে `top` → `1` → lord-server idle-এ **অনেক কম CPU** (আগে 112–363%; এখন <50% হওয়ার কথা)
+- [ ] Terminal খুলে `top` → `1` → insane-server idle-এ **অনেক কম CPU** (আগে 112–363%; এখন <50% হওয়ার কথা)
 - [ ] `free -h` → **zram** দেখা যায় (~3.8GB, zstd)
 - [ ] `findmnt -n -o OPTIONS /` → **noatime** লেখা আছে
 - [ ] `systemctl status fstrim.timer` → active
@@ -32,7 +32,7 @@
 ## ৬. Settings
 - [ ] **Settings → Appearance**: "Automatic Appearance" — auto dark toggle + ঘণ্টা
 - [ ] **Settings → Desktops → Hot Corners** — প্রতি কোণার dropdown
-- [ ] **Settings → Keyboard → Text Replacement** — token যোগ করে টেস্ট (যেমন `omw` → `on my way`), তারপর Terminal ছাড়া অন্য LordOS অ্যাপে (Notes/Text Editor) টাইপ করে দেখো
+- [ ] **Settings → Keyboard → Text Replacement** — token যোগ করে টেস্ট (যেমন `omw` → `on my way`), তারপর Terminal ছাড়া অন্য InsaneOS অ্যাপে (Notes/Text Editor) টাইপ করে দেখো
 - [ ] **Settings → Energy → Charge limit** — 80% সেট করলে `cat /sys/class/power_supply/BAT0/charge_control_end_threshold` = 80
 
 ## ৭. Hot corners + auto behavior
@@ -42,7 +42,7 @@
 - [ ] চার্জার খুললে নিচে-ডান কোণায় নয় — কোণা ঠিক আছে; চার্জার খুললে **power-saver** এ যায় (Settings → Energy-তে Low Power জ্বলে)
 
 ## ৮. Freezer (memory চাপ)
-- [ ] Chrome-এ ১০-১৫টা ট্যাব খুলো + কয়েকটা অ্যাপ → কিছুক্ষণ পরে `~/.cache/lordos/freeze/log`-এ "freeze" লাইন
+- [ ] Chrome-এ ১০-১৫টা ট্যাব খুলো + কয়েকটা অ্যাপ → কিছুক্ষণ পরে `~/.cache/insaneos/freeze/log`-এ "freeze" লাইন
 - [ ] ব্যাকগ্রাউন্ড অ্যাপে ফিরে গেলে সাথে সাথে জেগে ওঠে
 
 ## ৯. YouTube
@@ -51,4 +51,4 @@
 
 ## ⚠️ সমস্যা হলে
 - এক ফিচার ভাঙলে বাকি সব ঠিক থাকবে — নম্বর বললেই আলাদা করে ঠিক করব
-- সব revert: `sudo bash /var/backups/lordos-fix-*/REVERT.sh` + রিবুট
+- সব revert: `sudo bash /var/backups/insaneos-fix-*/REVERT.sh` + রিবুট

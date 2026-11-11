@@ -1,17 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lordos.org/schemas/hwreport-1.schema.json",
+  "$id": "https://insaneos.org/schemas/hwreport-1.schema.json",
   "title": "Insane OS hardware report, version 1",
   "description": "The report System Information shares on GitHub (docs/BENCHMARK.md, '0.8.7 — Community hardware reports'). It is an allow-list: every object closes its properties, so a field that isn't listed here can't be shared. It has no field for serials, UUIDs, MAC or IP addresses, host or user names, Wi-Fi network names, device names (the boot medium is a class: internal, usb, sd…) or home-folder paths. Used by apps/sysinfo/share.js (to pick the fields), tools/hwreport (the workflow's validator and the catalogue) and their tests. Only the subset of JSON Schema that tools/hwreport/jsonschema.mjs implements is used.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["format", "version", "createdAt", "source", "lordos", "live", "system", "compatibility"],
+  "required": ["format", "version", "createdAt", "source", "insaneos", "live", "system", "compatibility"],
   "properties": {
-    "format": { "const": "lordos-hwreport" },
+    "format": { "const": "insaneos-hwreport" },
     "version": { "const": 1 },
     "createdAt": { "type": "string", "pattern": "^20[2-9][0-9]-[01][0-9]-[0-3][0-9]$" },
     "source": { "enum": ["community", "reference"] },
-    "lordos": { "$ref": "#/$defs/version" },
+    "insaneos": { "$ref": "#/$defs/version" },
     "live": { "type": "boolean" },
     "system": { "$ref": "#/$defs/system" },
     "compatibility": {
@@ -147,7 +147,7 @@
           "type": "object", "additionalProperties": false,
           "properties": {
             "os": { "$ref": "#/$defs/text" }, "osId": { "$ref": "#/$defs/word" }, "osVersion": { "$ref": "#/$defs/word" },
-            "kernel": { "$ref": "#/$defs/word" }, "lordos": { "$ref": "#/$defs/word" }, "lsm": { "$ref": "#/$defs/text" },
+            "kernel": { "$ref": "#/$defs/word" }, "insaneos": { "$ref": "#/$defs/word" }, "lsm": { "$ref": "#/$defs/text" },
             "landlockAbi": { "$ref": "#/$defs/optCount" }, "bpfLsm": { "type": "boolean" }, "cgroup2": { "type": "boolean" },
             "live": { "type": "boolean" },
             "bootMedium": { "enum": ["", "internal", "usb", "sd", "emmc", "optical", "network"] },
@@ -160,8 +160,8 @@
             },
             "services": {
               "type": "object", "additionalProperties": false, "properties": {
-                "lord-sessiond": { "type": "boolean" }, "lord-netd": { "type": "boolean" },
-                "lord-netperm": { "type": "boolean" }, "lord-fand": { "type": "boolean" } }
+                "insane-sessiond": { "type": "boolean" }, "insane-netd": { "type": "boolean" },
+                "insane-netperm": { "type": "boolean" }, "insane-fand": { "type": "boolean" } }
             }
           }
         },
@@ -182,14 +182,14 @@
     },
     "bench": {
       "type": "object", "additionalProperties": false,
-      "required": ["lordbench", "mode", "status", "results"],
+      "required": ["insanebench", "mode", "status", "results"],
       "properties": {
-        "lordbench": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "insanebench": { "type": "integer", "minimum": 1, "maximum": 1000 },
         "mode": { "enum": ["quick", "full", "desktop"] },
         "seconds": { "$ref": "#/$defs/num" },
         "status": { "enum": ["done", "stopped", "failed", "running", "cancelled"] },
         "stopReason": { "$ref": "#/$defs/word" },
-        "lordos": { "$ref": "#/$defs/word" }, "kernel": { "$ref": "#/$defs/word" }, "arch": { "$ref": "#/$defs/word" },
+        "insaneos": { "$ref": "#/$defs/word" }, "kernel": { "$ref": "#/$defs/word" }, "arch": { "$ref": "#/$defs/word" },
         "live": { "type": "boolean" }, "threads": { "$ref": "#/$defs/count" }, "cpus": { "$ref": "#/$defs/count" },
         "quiet": { "type": "object", "additionalProperties": false, "properties": {
           "quiet": { "type": "boolean" }, "busyPct": { "$ref": "#/$defs/num" }, "waitedS": { "$ref": "#/$defs/num" } } },

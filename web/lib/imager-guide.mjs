@@ -8,7 +8,7 @@ import { inline } from './md.mjs';
 
 // The video turns on by itself when its files are there (one English narration, three subtitle
 // tracks). Until then the page shows the poster with "Video coming soon".
-export const VIDEO_BASE = 'lordos_imager_guide';
+export const VIDEO_BASE = 'insaneos_imager_guide';
 export const VIDEO_LANGS = ['en', 'es', 'pt'];
 
 export function imagerGuide({ content, repo, lang: l, t, g, version, esc, webp, hashed, read, lumo, pageUrl, prefix, links, videoDir }) {
@@ -168,8 +168,8 @@ ${end}`;
 }
 
 
-// The video slot. With web/content/imager/video/lordos_imager_guide.mp4 (and .webm, and the subtitles
-// lordos_imager_guide.<en|es|pt>.vtt) the real player is built; without them, the mockup.
+// The video slot. With web/content/imager/video/insaneos_imager_guide.mp4 (and .webm, and the subtitles
+// insaneos_imager_guide.<en|es|pt>.vtt) the real player is built; without them, the mockup.
 // IMAGER_VIDEO_DIR points somewhere else when the video is kept out of git.
 function videoSlot({ l, g, esc, hashed, read, videoDir, lumo }) {
   const f = (ext) => path.join(videoDir, `${VIDEO_BASE}.${ext}`);
@@ -218,7 +218,7 @@ const COOL_ART = {
 export function writeBlock({ l, t, g, esc, links, version, isoVersion = version, guideUrl }) {
   const h = g.home;
   const md = (s) => inline(String(s || ''));
-  const iso = `lordos-live-${isoVersion}-amd64.iso`, pi = `lordos-${version}-rpi5-arm64.img.xz`;
+  const iso = `insaneos-live-${isoVersion}-amd64.iso`, pi = `insaneos-${version}-rpi5-arm64.img.xz`;
   const cmd = (id, label, text) => `<div class="cmd"><div class="cmd-bar"><span class="cmd-t" aria-hidden="true"><i></i><i></i><i></i>${esc(label)}</span><button type="button" class="copy" data-copy="${id}" data-done="${esc(t.copied)}" aria-label="${esc(t.copy)}: ${esc(label)}" hidden>${esc(t.copy)}</button></div><pre id="${id}" tabindex="0">${esc(text)}</pre></div>`;
   return `<section class="dl-write" id="write" aria-labelledby="wr-h">
 <div class="center"><h3 id="wr-h" class="dl-write-h">${esc(h.title)}</h3><p class="sub">${esc(h.lead)}</p></div>

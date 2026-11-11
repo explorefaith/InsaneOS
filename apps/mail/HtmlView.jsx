@@ -1,8 +1,8 @@
-// HtmlView — draws the safe tree that lord-maild's sanitizer made from a message's HTML
+// HtmlView — draws the safe tree that insane-maild's sanitizer made from a message's HTML
 // (server/src/mail/html.h) with our own views: blocks, layout tables, text runs, images and
-// links. Nothing here ever interprets HTML or runs anything; images are decoded in lord-maild
+// links. Nothing here ever interprets HTML or runs anything; images are decoded in insane-maild
 // and remote ones are requested only after the user chose to load them.
-import { View, Text, Image, useTheme, mailRequest } from '@lordos/sdk';
+import { View, Text, Image, useTheme, mailRequest } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const MAX_WORDS = 6000;           // beyond this a paragraph keeps whole runs (wrapping is coarser)
@@ -33,7 +33,7 @@ function MailImage({ node, ctx }) {
     return () => { live = false; };
   }, [node.src, allowed, ctx.msg.uid]);
   useEffect(() => {
-    if (ref.current && img?.image) { lord.mail.bind(ref.current.id, img.image); lord.mail.release(img.image); }
+    if (ref.current && img?.image) { insane.mail.bind(ref.current.id, img.image); insane.mail.release(img.image); }
   }, [img?.image]);
   // size: the HTML's width/height, or the picture's own, scaled to fit
   let w = node.wp ? (ctx.w * node.wp) / 100 : node.w || (img?.w ? img.w / 2 : Math.min(ctx.w, 200));
@@ -202,7 +202,7 @@ export function HtmlView({ doc, msg, remote, width: hint, onLink }) {
   const box = useRef(null);
   const [width, setWidth] = useState(hint);
   useEffect(() => {
-    const read = () => { if (box.current) { const w = lord.getLayout(box.current.id)[2]; if (w > 40) setWidth((o) => (Math.abs(o - w) > 2 ? w : o)); } };
+    const read = () => { if (box.current) { const w = insane.getLayout(box.current.id)[2]; if (w > 40) setWidth((o) => (Math.abs(o - w) > 2 ? w : o)); } };
     read();
     const id = setInterval(read, 300);
     return () => clearInterval(id);

@@ -2,7 +2,7 @@
  *
  * The companion reads the network and has no decoder, and the app has no way to run one. Encoded pictures and Opus
  * packets arrive here over the link (../live.h): pictures go to the frame slots of lm_out.c, which the app shows in a
- * <MediaView>, and sound to the ring lord-server plays. With the microphone (MM_RECORD, a ring lord-server fills after
+ * <MediaView>, and sound to the ring insane-server plays. With the microphone (MM_RECORD, a ring insane-server fills after
  * the permission), it's encoded here and goes back the same way. What comes in is a stranger's data: this process has
  * no network, no files and no exec, and it decodes one frame at a time, always the newest it can. */
 #include "lm.h"

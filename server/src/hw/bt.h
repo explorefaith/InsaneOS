@@ -5,15 +5,15 @@
  *     InterfacesAdded / InterfacesRemoved / PropertiesChanged signals (no polling);
  *   - actions: power, discovery, pair (then trust and connect), connect, disconnect, forget; a
  *     paired device the user connects, or that our agent lets in, is trusted too (bt_should_trust);
- *   - pairing agent: lord-server exports org.bluez.Agent1 at /org/lordos/BluetoothAgent
+ *   - pairing agent: insane-server exports org.bluez.Agent1 at /org/insaneos/BluetoothAgent
  *     ("KeyboardDisplay") and registers it as the default agent. PIN and passkey requests are
  *     shown by the system (sdk/bluetooth.js) and answered with bt_answer(). Calls to the agent
  *     are only accepted from org.bluez's unique bus name.
  *
  * Audio devices (headphones, speakers) show up in Sound through PipeWire's own BlueZ support.
  * See docs/SETTINGS.md, "Bluetooth". */
-#ifndef LORD_HW_BT_H
-#define LORD_HW_BT_H
+#ifndef INSANE_HW_BT_H
+#define INSANE_HW_BT_H
 
 #include <stdint.h>
 #include "../vault/dbus.h"

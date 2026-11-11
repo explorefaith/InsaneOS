@@ -1,6 +1,6 @@
 # Validating the paper
 
-The technical paper (https://lordos.org/paper/, `docs/PAPER.md`) makes claims about Insane OS. This page was
+The technical paper (https://insaneos.org/paper/, `docs/PAPER.md`) makes claims about Insane OS. This page was
 written against its 0.8.0 edition and lists each claim with how it is checked today and its state in 0.8.5, with rows added for the
 0.8.6 edition (published with the 0.8.6-beta release on 2026-10-30) and for what the paper marks in 0.8.7,
 so anyone can see what is proven, what was measured once and what is not tested. **The rows marked
@@ -26,9 +26,9 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 1.2 | JavaScript has no API to run programs, with three narrow exceptions | Design (`AGENTS.md`); the exceptions grew since: Xwayland (0.8.3), the network connectors and the blocklist downloader (0.8.5) | **Outdated → corrected in 0.8.5** (§1.2 now lists them, the Store's download child included) |
 | 1.2 | GPU composition optional, the CPU path always works | Test (`canvas-test`, CPU path in every test); Check `gpu` says which path and why | Holds |
 | 1.2 | The compositor never waits on helpers or apps | Design (non-blocking sockets) | Design |
-| 2.2 | `lord-server` runs as the user | Check `serverUser` (configured) | Holds |
-| 2.4 | `lord-netd` only takes `net-*` actions from uid 0 peers | Design; `net-test` covers the actions | Partly tested |
-| 2.4 | `lord-fand` writes only fans its scan found and restores them on stop or crash | Test (`fan-test`, fake sysfs); Measured on the Pi 5 (§7.4) | Holds |
+| 2.2 | `insane-server` runs as the user | Check `serverUser` (configured) | Holds |
+| 2.4 | `insane-netd` only takes `net-*` actions from uid 0 peers | Design; `net-test` covers the actions | Partly tested |
+| 2.4 | `insane-fand` writes only fans its scan found and restores them on stop or crash | Test (`fan-test`, fake sysfs); Measured on the Pi 5 (§7.4) | Holds |
 | 2.4 | (0.8.6) With no default chosen, a file opens with the system's default or the first installed app that declares its type, shown as "Automatic" | Test (`defaults-test`, fake XDG tree); checked once in an isolated session on VM 116 (2026-10-29) | Holds |
 | 2.4 | Display changes revert after 15 s without confirmation | Manual | Not automated |
 | 3.6 | Passwords are checked by the root process, not the login screen | Design; `remote-sec-test` covers the parsers | Design |
@@ -62,7 +62,7 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 5.1 | About thirty native apps | Count | 34 in `apps/`, System Information and its hidden probe included; the 0.8.5 edition says thirty-one (without the live installer and the hidden probe) |
 | 5.2 | `.lpk` limits: 2,000 files, 64 MB | Test (`pkg-test`, `sign-test`) | Holds |
 | 5.3 | InRelease signatures, plans equal to apt's in 12 cases | Test (`pkg-test`, `engine-test`) | Holds |
-| 5.3 | Downloads over HTTP even for HTTPS sources | `lord-tls` (0.8.5) fetches `https://` sources over HTTPS; the Store's update and installs used it on VM 116 and the VMware machine | **Outdated → corrected in 0.8.5** (2026-10-27: §5.3 now says HTTPS since 0.8.5) |
+| 5.3 | Downloads over HTTP even for HTTPS sources | `insane-tls` (0.8.5) fetches `https://` sources over HTTPS; the Store's update and installs used it on VM 116 and the VMware machine | **Outdated → corrected in 0.8.5** (2026-10-27: §5.3 now says HTTPS since 0.8.5) |
 | 5.3 | AI category: vendor repositories added with the pinned key; llama.cpp downloads models with `-hf` and runs on the CPU | Measured: VMware machine, 2026-10-27 (llama.cpp from the Store, `llama-server -hf ggml-org/Qwen3-0.6B-GGUF:Q8_0`, about 33 tokens/s on the CPU); VM 116 (Cursor's and VS Code's sources added, `apt update` and the engine's update clean). GPU through Vulkan | Holds; GPU **Untested** |
 | 5.4 | Linux apps not sandboxed by default | Still true; restrictions per app since 0.8.3 | Holds, needs a note |
 | 5.5 | WebAssembly 2.0 without SIMD, 26,290 of 26,290 assertions | Test (`wasm-test`) | Holds |
@@ -74,7 +74,7 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | § | Claim | How | State |
 |---|---|---|---|
 | 6.4 | Landlock ABI up to 6 for `.lpk` apps | Check `landlock` (configured) + Sandbox Probe `appSandbox` (effective) | Holds |
-| 6.4 | Seccomp denies ptrace, mount, exec…; no new privileges; no capabilities | Sandbox Probe (effective: each tried; NoNewPrivs, Seccomp 2, CapEff 0 read by lord-server); Test (`sandbox-test`) | Holds |
+| 6.4 | Seccomp denies ptrace, mount, exec…; no new privileges; no capabilities | Sandbox Probe (effective: each tried; NoNewPrivs, Seccomp 2, CapEff 0 read by insane-server); Test (`sandbox-test`) | Holds |
 | 6.4 | Per-app cgroup: memory.high 192 MB, memory.max 512 MB, one core | Sandbox Probe `appScope` (memory.max) | Holds in a session; memory.high and CPU not shown yet |
 | 6.4 | No network permission: no internet sockets, no TCP | Sandbox Probe (`netInet` refused) | Holds |
 | 6.4 | `sandbox-test` 14/14 and 14/14 with network | Test (`test-full`) | Holds |
@@ -103,14 +103,14 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 |---|---|---|---|
 | 7.1 | Live ISO idle 465 MB, installed idle 487 MB, CPU 99 % idle | Measured once (VM 117, 120) | Measured → InsaneBench |
 | 7.1 | Boot 16.3 s with UEFI | Measured once | Measured → InsaneBench |
-| 7.1 | `lord-server` without 3D ~32 MB RSS; session ~50 MB, login 41 MB | Measured once; Check `memory` shows the current number (VM 116 today: ~100 MB in a headless session with apps open) | **Re-measure** at idle |
+| 7.1 | `insane-server` without 3D ~32 MB RSS; session ~50 MB, login 41 MB | Measured once; Check `memory` shows the current number (VM 116 today: ~100 MB in a headless session with apps open) | **Re-measure** at idle |
 | 7.2 | Window drag 1280×800 CPU path 6.7–6.9 ms, ~120 fps | Measured once (VM 118) | Measured → InsaneBench |
-| 7.2 | Video: lord-server 42 % → 13 %, fullscreen 92 % → 15 % of a core | Measured once | Measured |
+| 7.2 | Video: insane-server 42 % → 13 %, fullscreen 92 % → 15 % of a core | Measured once | Measured |
 | 7.1 | — | New in the 0.8.5-beta edition: the released package measured on a VMware VM updated from 0.8.4.1, whole system 592 MB used and the first frame 7.4 s after the kernel started (`results/0.8.5-beta/vmware-fusion`, `RESULTS.md`) | Measured, versioned results (§7.1) |
 | 7.2 | — | New in 0.8.5: remote desktop CPU reference (`REMOTE.md`, "Measurements (0.8.5, CPU reference)") | Added in the 0.8.5 edition (§7.2) |
-| 7.2 | — | New in 0.8.6: dragged windows' rounded corners no longer turn black (the drag layer's corner restore mixes both pixels alpha included); a drag frame repaints only what changed, pixel-identical except an approved 1-level change at rounded corners below the window; GPU drag composes the window with the CPU's exact arithmetic after a self-test (`WINDOWS.md`, `GPU.md`) | Test (`engine-test`: `test_drag_corners` against a full repaint on both paths, `test_drag_exact`'s 2,417 golden frame hashes per path, the `gpu-drag` path; `canvas-test`: GPU drag's arithmetic over all 8,421,376 valid combinations, x86_64 only) | Holds on VM 116; on the Pi 5 (V3D, 2026-10-29) GPU drag's self-test passes (11,373,321 pixels, 341 ms), `LORD_GPU_VERIFY=1` compared 138 frames with 0 differences, and screenshots of the monitor show clean corners while dragging; GPU drag is off by default (no measurable gain) |
+| 7.2 | — | New in 0.8.6: dragged windows' rounded corners no longer turn black (the drag layer's corner restore mixes both pixels alpha included); a drag frame repaints only what changed, pixel-identical except an approved 1-level change at rounded corners below the window; GPU drag composes the window with the CPU's exact arithmetic after a self-test (`WINDOWS.md`, `GPU.md`) | Test (`engine-test`: `test_drag_corners` against a full repaint on both paths, `test_drag_exact`'s 2,417 golden frame hashes per path, the `gpu-drag` path; `canvas-test`: GPU drag's arithmetic over all 8,421,376 valid combinations, x86_64 only) | Holds on VM 116; on the Pi 5 (V3D, 2026-10-29) GPU drag's self-test passes (11,373,321 pixels, 341 ms), `INSANE_GPU_VERIFY=1` compared 138 frames with 0 differences, and screenshots of the monitor show clean corners while dragging; GPU drag is off by default (no measurable gain) |
 | 7.3 | GPU benefits on real cards not measured | — | **Untested** |
-| 7.4 | In 0.8.7: GPU drag covers the whole drag and is on by default, verified on V3D and SVGA3D only (`GPU.md`, "The whole drag") | Pi 5 (V3D, v087.22, 4 real 16 s drags per setting): alone 58.1–60.6 % → 27.2–28.4 % of a core, 7.0 → 5.0 ms; under a memory load 28.8–29.1 → 34.4–35.1 fps, 20.3 → 13.2 ms, 67 % → 45 %; `LORD_GPU_VERIFY=1` 1,662 frames, all `differ=0`. VMware (SVGA3D, development build): 2,102 frames, all `differ=0`. Any other GPU: **Untested**, only the self-test guards it. Measured |
+| 7.4 | In 0.8.7: GPU drag covers the whole drag and is on by default, verified on V3D and SVGA3D only (`GPU.md`, "The whole drag") | Pi 5 (V3D, v087.22, 4 real 16 s drags per setting): alone 58.1–60.6 % → 27.2–28.4 % of a core, 7.0 → 5.0 ms; under a memory load 28.8–29.1 → 34.4–35.1 fps, 20.3 → 13.2 ms, 67 % → 45 %; `INSANE_GPU_VERIFY=1` 1,662 frames, all `differ=0`. VMware (SVGA3D, development build): 2,102 frames, all `differ=0`. Any other GPU: **Untested**, only the self-test guards it. Measured |
 | 7.4 | In 0.8.7: what slows the Pi 5's GPU under load is memory (`build/gpu-contention`, verdict `memory`, two runs: 1.4 ms spinning, 28 ms reading, 3.7 ms writing; no throttling) | Measured on the Pi 5 16 GB, build 0.8.6+v087.4. What a real desktop load reads, and what a compositor change can avoid, is open. Measured |
 | 7.4 | In 0.8.7: the buffer-age scissor stays off (GPU part 1.51 → 2.58 ms alone; under load 30.1–31.8 → 28.4–29.9 fps, pointer p99 63–66 → 83–95 ms) | Measured on the Pi 5 (5 runs without, 3 with, v087.22); `build/engine-test` over a simulated chain. Measured |
 | 10.1 | In 0.8.7: Cleaner on a Pi 5 with its monitor: 4.5–7.2 % of a core with the hero idle, 12.2–18.0 % scanning, 0.1 % closed (`CLEANER-TESTS.md`) | Measured (v087.22, two runs a cell). Aurora's pauses of up to a second are not explained. Measured |
@@ -119,7 +119,7 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 7.4 | — | New in 0.8.6: InsaneBench's square now turns; with it, the frame-cost work took the Pi 5 with its monitor from 53–58 to 59.8–60 fps alone and from 24–25 to about 31 fps under load; the frame pipeline (+2–5 fps under load, 17–29 ms more pointer latency) and GPU drag (no measurable gain) were measured and are off by default; the remaining cost under load is the GPU's time per frame (1.5 → 14–16 ms, no clock or thermal throttling; memory contention likely, not proven); fewer pixels per frame, what slows the GPU and GPU drag for the whole drag moved to 0.8.7 (2026-10-30) (`BENCHMARK.md`, "The drag frame's cost") | Measured with InsaneBench on the Pi 5 (2–3 runs each, 2026-10-28; final run 2026-10-29: both off 59.9 / 30.5–31.1 fps, pointer to screen p50 25.7–25.9 / 48.5–49.0 ms; GPU drag on 59.9 / 30.8–31.6; the pipeline 60.0 / 33.0–36.2 fps, pointer 42 / 78 ms; `vcgencmd` every 2 s) | Measured (2026-10-29) |
 | 7.5 | No measurements on real PCs | — | **Untested** |
 | 7.5 | — | New in 0.8.6: InsaneBench's interface workloads on VM 116 (layout and paint 37.0/39.9 fps, shaping 619/3,595 runs/s; compared only within the same Insane OS version) and the helper-sandbox self-test (six tries, all refused on VM 116: seccomp `EPERM`, Landlock `EACCES`) (`BENCHMARK.md`, "Built so far") | Measured with InsaneBench (one Full and four Quick runs); on the Pi 5 two Quick runs from a terminal (2026-10-29): 39.3–39.4 / 45.4 fps, 630–632 / 2,522–2,527 runs/s; its reference from a Full run over SSH without the monitor (2026-10-30, `ondemand`, 180 s sustained, 37.0 → 49.6 °C, no throttling or under-voltage): 39.22 / 45.23 fps, 628.3 / 2,514.0 runs/s, a second Full run within 0.4 % | Measured (2026-10-30) |
-| 7.5 | — | New in 0.8.6: on a Raspberry Pi InsaneBench watches the firmware's under-voltage alarm (the only flag the Insane OS kernel exposes), `get_throttled` on older kernels and 80 °C as the firmware's limit (a peak test stops as throttled); System Information's Raspberry Pi section reads the same through `hw/rpifw.c` and leaves out what the kernel doesn't show (`BENCHMARK.md`, "The Raspberry Pi firmware's throttling") | Tested on fake sysfs trees (`tests/lordbench_test.c`, `tests/sysreport_test.c`) on VM 116; on the Pi 5 (2026-10-29) the `rpi_volt` alarm is present and reads 0 with the official supply (InsaneBench's `piFirmware`), `get_throttled` absent; an actual under-voltage not provoked |
+| 7.5 | — | New in 0.8.6: on a Raspberry Pi InsaneBench watches the firmware's under-voltage alarm (the only flag the Insane OS kernel exposes), `get_throttled` on older kernels and 80 °C as the firmware's limit (a peak test stops as throttled); System Information's Raspberry Pi section reads the same through `hw/rpifw.c` and leaves out what the kernel doesn't show (`BENCHMARK.md`, "The Raspberry Pi firmware's throttling") | Tested on fake sysfs trees (`tests/insanebench_test.c`, `tests/sysreport_test.c`) on VM 116; on the Pi 5 (2026-10-29) the `rpi_volt` alarm is present and reads 0 with the official supply (InsaneBench's `piFirmware`), `get_throttled` absent; an actual under-voltage not provoked |
 
 ## §10–§11 Limits and verification
 
@@ -142,22 +142,22 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 3.3 | On-screen keyboard: closed key list, no Ctrl, Alt or Super, only the theme and login screen | Test (`osk-test`, `osk_model_test.mjs`); VM 125 end to end | Holds; a real touchscreen **Untested** |
 | 3.6 | Session restore after logout, restart, shutdown, forced power-off and `SIGKILL` | Manual on VM 125 | Measured once; after a forced power-off Chromium needs its own "Restore pages?" |
 | 3.6 | A card with no KMS counts as no display, with a message on the text console | Manual | Not automated |
-| 4.3 | `lord.fs` refuses a parent of a protected path | Test (`fsops-test`) | Holds |
+| 4.3 | `insane.fs` refuses a parent of a protected path | Test (`fsops-test`) | Holds |
 | 5.1 | Files → Network: one bounded pass, read by a sandboxed helper, JS names no address | Test (`lan-test` under ASan and UBSan, 40,000 damaged answers); a pass on the real LAN on VM 116 and VM 125, outside a session | Holds outside a session; no pass through the `lan` connector inside a session is recorded |
 | 5.1 | `share-mount`: guest, password and NFS 4.2 | VM 125 against a test server over a veth | Measured once; a real NFS server **Untested** |
 | 5.1 | SMB with a password: sign-in, share list, mount, reading a file | One real share on a desktop system with a local account (`FILES.md`), and that test server | Measured once; no other SMB server tried; listing the shares of a server outside the local network is refused |
 | 5.1 | RDP refuses RDP's own security before any credential | Test (`rdesk_rdp_test.c`, stub server; the old setting sent 395 bytes); xrdp over TLS on the test VM | Holds |
 | 5.1 | SMB sign-in carries a target name and MIC and needs the server's signature | Test (`lan-test`); `lan-list` against Samba on the test VM, right and wrong password | Holds on Samba and on the one real share above |
 | 5.1 | Programs that read a server's bytes run read-only with a 15 s limit | Test (`rconnect-run-test`, also `ssh-keyscan`, `openssl`, `rclone obscure` for real) | Holds with Landlock; without it only scope and deadline |
-| 3.3, 7.4 | Moving wallpapers need GPU composition and hardware decoding; on the Pi 5 at login, 1080p60 HEVC: `lord-media` 41 %, `lord-server` 147 % of one core | Test (`motion_model_test.mjs`, `wallpaper_find_test.c`); Measured on the Pi 5, 30 s, SoC 52 °C (`WALLPAPERS.md`) | Measured once; no run on a desktop session is recorded |
-| 3.6 | The login screen composes on the GPU (`lordos-greeter` in `render` and `video`) | Measured on the Pi 5 with the row above | Measured once |
+| 3.3, 7.4 | Moving wallpapers need GPU composition and hardware decoding; on the Pi 5 at login, 1080p60 HEVC: `insane-media` 41 %, `insane-server` 147 % of one core | Test (`motion_model_test.mjs`, `wallpaper_find_test.c`); Measured on the Pi 5, 30 s, SoC 52 °C (`WALLPAPERS.md`) | Measured once; no run on a desktop session is recorded |
+| 3.6 | The login screen composes on the GPU (`insaneos-greeter` in `render` and `video`) | Measured on the Pi 5 with the row above | Measured once |
 | 5.1 | Remote Desk: VNC and RDP with pointer and keyboard | A throwaway test machine | Measured once; RDP to a real session of a desktop system and RDP's shared folders **Untested** |
 | 5.1 | Disk Formats: NTFS, exFAT and FAT32 read and write, HFS+ and APFS read-only | VM 125 from the sidebar with the drivers present (`FILES.md`) | Measured once |
 | 5.6 | arm64 live ISO: live desktop, wizard install, boot of the result | An unsigned development build on emulated QEMU (`ISO.md`) | Measured once; real hardware, a USB stick, a hardware-accelerated hypervisor, a 3D virtual GPU, sound, the browsers and a signed build **Untested** |
-| 6.2, 6.7 | `lord-media` opens two exact decoder device files, only for `v4l2request` playback | Design (`lm_main.c`) | Design |
+| 6.2, 6.7 | `insane-media` opens two exact decoder device files, only for `v4l2request` playback | Design (`lm_main.c`) | Design |
 | 6.3 | `wallpaper-get` deletes a file whose size or SHA-256 isn't the catalog's | Design (`wallpaper_admin.c`); `wallpaper_find_test.c` covers the lookup | Partly tested |
-| 6.6 | A `.desktop` file can't take `desktop:lordos-rclone`, `desktop:lordos-cloud` or `desktop:lordos-rdesk` | Design (`app_scope_reserved`) | Design |
-| 6.7 | `lord-rdesk` takes the helpers' sandbox after connecting; a VNC server that skips a given password is refused | Test (`rdesk_test.c`, with a fuzz run) | Holds |
+| 6.6 | A `.desktop` file can't take `desktop:insaneos-rclone`, `desktop:insaneos-cloud` or `desktop:insaneos-rdesk` | Design (`app_scope_reserved`) | Design |
+| 6.7 | `insane-rdesk` takes the helpers' sandbox after connecting; a VNC server that skips a given password is refused | Test (`rdesk_test.c`, with a fuzz run) | Holds |
 | 6.7 | SFTP keys, and certificates for ftps and https WebDAV, kept only after being shown; an accepted certificate outranks the system's list | Test (`lan-test`, `rconnect-run-test`); VM 116 against the test server | Partly tested |
 | 6.9 | The tested-hardware snapshot is verified in C before it is shown | Test (`hwsnap-test`, a tampered snapshot refused) | Holds; the update path against the real signed repository **Untested** |
 | 7.2 | Cleaner: a tree of 102,653 entries in 446 ms, duplicates in 5.1 s, a real delete of 20,000 files in 1.0 s | Measured on VM 116 (122,000 files, warm cache; `CLEANER-TESTS.md`) | Measured once |
@@ -167,21 +167,21 @@ memory from a process's RSS (§7.1) and points to versioned results (§11.5, `do
 | 5.6 | `install.sh` names an administrator on a Debian with a root password | A clean amd64 Debian 13 virtual machine | Measured once; logging in on the login screen not part of that run |
 | 6.3 | `admin-rescue` decides again as root and refuses when an administrator exists | Test (`admin-rescue-test`); an installed amd64 virtual machine | Holds; real hardware and arm64 **Untested** |
 | 6.3 | `hw-serial-numbers`, `rpi-pmic`: read-only, values validated in C | Test (`settings-hw-test`) | Holds |
-| 6.7 | `lord-clean` and `lord-lan` take the helpers' sandbox | Test (`clean-test`, `lan-test`) | Holds; `clean-test` has no case yet for what a scan shows per rule or for the minimum time per step |
+| 6.7 | `insane-clean` and `insane-lan` take the helpers' sandbox | Test (`clean-test`, `lan-test`) | Holds; `clean-test` has no case yet for what a scan shows per rule or for the minimum time per step |
 | 6.11 | The on-screen keyboard's panel and System Information with serials showing are protected | Design (`protected` node) | Partly tested |
 
 ## 0.8.8.6 (released on 2026-11-08 as 0.8.8.6-beta; the paper's edition of 2026-11-08)
 
 | § | Claim | How | State |
 |---|---|---|---|
-| 1.2, 6.7 | `lord-server` starts only `lord-say`, from a fixed path, with fixed arguments, the text on a sealed memfd and a voice name checked in C | Design (`server/src/tts/speak.c`, AGENTS.md); `saytext_test.c` (25) | Design |
-| 5.1, 6.7 | `lord-tts` is the only binary that links audio.cpp and ggml; no network, sockets, fork or exec; on the GPU only the render node and a read-only listing of `/dev/dri` | Test (`server/tests/tts_test.sh`, 17, in `test-full` when a model is installed) | Holds where a model is installed; the Raspberry Pi **Untested** |
+| 1.2, 6.7 | `insane-server` starts only `insane-say`, from a fixed path, with fixed arguments, the text on a sealed memfd and a voice name checked in C | Design (`server/src/tts/speak.c`, AGENTS.md); `saytext_test.c` (25) | Design |
+| 5.1, 6.7 | `insane-tts` is the only binary that links audio.cpp and ggml; no network, sockets, fork or exec; on the GPU only the render node and a read-only listing of `/dev/dri` | Test (`server/tests/tts_test.sh`, 17, in `test-full` when a model is installed) | Holds where a model is installed; the Raspberry Pi **Untested** |
 | 5.1 | About 10 s of speech in 1.3 s on the GPU and 3 s on the CPU, 220 MB | Measured once (i9-10900 with a Radeon RX 580; `docs/VOICE.md`) | Measured |
 | 5.1 | 23 voices, Standard 128 MB and HD 672 MB (English 1.3 GB) per language, as signed packages; only voices whose recordings allow redistribution and commercial use | `sdk/voicecatalog.js` (`voicecatalog_test.mjs`, 21), `tools/voice/` | Holds in the catalog; the published packages in the APT repository were not checked for this edition |
 | 5.1 | Personal Voice: consent first, a room check, six phrases or 15–30 s of free speech | Test (`voicerec_model_test.mjs`, 20) | Model tested; a run with a real microphone not recorded here |
-| 5.1, 6.7 | `lord-ocr` is the only binary that links Tesseract; pixels in a sealed memfd; no home folder, `/tmp` writes, network, sockets or fork | Test (`server/tests/ocr_test.sh`, `test-full`) | Holds |
+| 5.1, 6.7 | `insane-ocr` is the only binary that links Tesseract; pixels in a sealed memfd; no home folder, `/tmp` writes, network, sockets or fork | Test (`server/tests/ocr_test.sh`, `test-full`) | Holds |
 | 5.1 | Text recognition takes about 0.3 s a selection | Measured (`CHANGELOG.md`, 0.8.8.6-beta) | Measured once |
-| 6.10 | A Terminal password goes between `lord-vault` and the pty in C, never through JavaScript; a typed one is kept in one `mlock`ed page and wiped on every way out | Test (`build/term-secret-test`, 10, on a real pty; `build/term-capture-test`, 28, also under ASan and UBSan; `terminal_secret_test.mjs`) | Holds |
+| 6.10 | A Terminal password goes between `insane-vault` and the pty in C, never through JavaScript; a typed one is kept in one `mlock`ed page and wiped on every way out | Test (`build/term-secret-test`, 10, on a real pty; `build/term-capture-test`, 28, also under ASan and UBSan; `terminal_secret_test.mjs`) | Holds |
 | 3.3 | Shake to find the pointer | Test (`build/shake-test`, 12) | Detector tested; the cursor on screen not automated |
 | 3.3 | Alps touchpads that report pressure above their declared range | Test (a `tp-test` case built from the driver's report format) | Holds in the test; the touchpads themselves were reported by users (#43, #54, #67) |
 | 3.5 | Scales up to 300 % where the desktop keeps at least 1024 × 600 | `CHANGELOG.md`, 0.8.8.6-beta (#47) | Not automated; a 4K laptop panel **Untested** |
@@ -195,14 +195,14 @@ State in the 0.8.5 edition (`web/content/paper/paper.en.md`, checked 2026-10-26)
 
 1. §1.2: the approved exceptions are more than three (Xwayland, the network connectors, the blocklist
    downloader, the Store's download child, the Sandbox Probe's system package). **Done**; the Sandbox
-   Probe is not listed as an exception there, since it starts through `lord.apps.launchPackage(id)` (§6.4
+   Probe is not listed as an exception there, since it starts through `insane.apps.launchPackage(id)` (§6.4
    describes it).
 2. §3.4: Xwayland is supported on demand (0.8.3). **Done.**
 3. §3.6: remote login lockout (3 failures; 15 min → 1 h → 24 h; fixed 1.25 s answers); WebRTC video with
    H.264/VP8 and Opus sound instead of PNG/JPEG and no audio. **Done.**
-4. §7: re-measure `lord-server`'s memory at idle and the theme's size; add the 0.8.5 remote desktop and CPU
+4. §7: re-measure `insane-server`'s memory at idle and the theme's size; add the 0.8.5 remote desktop and CPU
    path measurements (`REMOTE.md`, `GPU.md`). **Partly:** the theme's size and the 0.8.5 CPU path are in;
-   §7.1 now separates whole-system memory from a process's RSS, but `lord-server`'s idle RSS is still the
+   §7.1 now separates whole-system memory from a process's RSS, but `insane-server`'s idle RSS is still the
    0.8.0 number (not re-measured).
 5. §6: mention that anyone can now check the sandbox on their own computer (System Information → Checks).
    **Done** (§6.4).
@@ -212,15 +212,15 @@ State in the 0.8.5 edition (`web/content/paper/paper.en.md`, checked 2026-10-26)
 | Gap | Covers | Plan |
 |---|---|---|
 | A denied connection, tried on the user's machine | §6.6 effective | An app with network access and a temporary rule (Checks) |
-| Repeatable performance numbers | §7 | InsaneBench (0.8.6: CPU, memory, GPU offscreen, storage, sustained load, software video decoding and encoders, the desktop's frame times and pointer-to-screen latency alone and under load (and the compositor's CPU weight and real-time priority they led to), the boot time per version, the N-boot test, `lordos-sysreport bench`, the interface layout/paint and shaping workloads and the helper-sandbox self-test are built, with VM 116 and the Pi 5 as references, `BENCHMARK.md` "Built so far"; idle memory and CPU, hardware video decoding and app start are not; hardware video decoding and the x86 PC reference moved to 0.8.7 on 2026-10-29) |
+| Repeatable performance numbers | §7 | InsaneBench (0.8.6: CPU, memory, GPU offscreen, storage, sustained load, software video decoding and encoders, the desktop's frame times and pointer-to-screen latency alone and under load (and the compositor's CPU weight and real-time priority they led to), the boot time per version, the N-boot test, `insaneos-sysreport bench`, the interface layout/paint and shaping workloads and the helper-sandbox self-test are built, with VM 116 and the Pi 5 as references, `BENCHMARK.md` "Built so far"; idle memory and CPU, hardware video decoding and app start are not; hardware video decoding and the x86 PC reference moved to 0.8.7 on 2026-10-29) |
 | Rendering, 3D and video on every GPU | §3.2, §7.2–7.3 | The visual test bench below |
 | Every key, the mouse, touchpads, gamepads, and the Wayland protocols | §3.3–§3.4 | The visual test bench below |
 | Real hardware | §10.2 | Reports from System Information (0.8.7) |
 
-## The visual test bench (`lordos-testbench`)
+## The visual test bench (`insaneos-testbench`)
 
-**Phase 1 built (2026-10-26):** `server/src/testbench/` (`make -C server build/lordos-testbench`), packaged as
-`/usr/bin/lordos-testbench` with `packaging/desktop/lordos-testbench.desktop` (Test Bench in the launcher).
+**Phase 1 built (2026-10-26):** `server/src/testbench/` (`make -C server build/insaneos-testbench`), packaged as
+`/usr/bin/insaneos-testbench` with `packaging/desktop/insaneos-testbench.desktop` (Test Bench in the launcher).
 The test card is ported from go-link-console's `pkg/testpattern` (same author). It shows the card with a
 live clock and a marker that moves one step per frame, frames a second and frame times, `wp_presentation`
 feedback (shown, discarded, refresh, skipped vblanks, zero-copy), the pointer (exact crosshair, eight
@@ -241,7 +241,7 @@ run on VM 116 (headless session); after the two compositor fixes below: 16 passe
 | Check | Result |
 |---|---|
 | `wl_shm` formats | pass: ARGB8888 and XRGB8888 |
-| `wl_output` modes, `zxdg_output` layout | pass: LORD-1 1280×800 at 60.00 Hz, scale 1, logical 1280×800 at 0,0 |
+| `wl_output` modes, `zxdg_output` layout | pass: INSANE-1 1280×800 at 60.00 Hz, scale 1, logical 1280×800 at 0,0 |
 | fractional scale | pass: preferred 1.000 |
 | subsurface + viewport | pass: shown (its frame callback came back), viewport 48 → 96 |
 | xdg popup | pass: configured 200×100 and mapped |
@@ -274,7 +274,7 @@ keyboard test can't light them; the bench should list them as taken by the syste
 ![3D on VM 116 (software renderer)](testbench-3d.png)
 
 **Phase 4 (2026-10-26): the report in System Information.** The bench writes its last report to
-`~/.local/state/lordos/testbench.json` (atomically, after its checklist and on exit); System Information →
+`~/.local/state/insaneos/testbench.json` (atomically, after its checklist and on exit); System Information →
 Checks shows it (Wayland protocols, the 3D renderer, whether frames reach the screen, input-to-screen
 latency; `evaluateBench` in `apps/sysinfo/checks.js`, tested) with **Open Test Bench**, which launches it like any
 Linux app.
@@ -298,10 +298,10 @@ Insane OS writes its own compositor, so it needs its own tool to show, on any co
 and what it receives are right. The idea is a test-pattern window like a TV test card (and like the test
 pattern of go-link-console), with live measurements around it:
 
-- **What it is:** a native Wayland client in C (`tools/testbench/`, installed as `/usr/bin/lordos-testbench`
+- **What it is:** a native Wayland client in C (`tools/testbench/`, installed as `/usr/bin/insaneos-testbench`
   with a `.desktop` file). It speaks the protocol directly with `libwayland-client`, the way any app does,
-  so it tests the compositor from the outside. It is launched like any Linux app (`lord.apps.launch`), so
-  no new exception in `lord-server`, and it also runs on other compositors for comparison.
+  so it tests the compositor from the outside. It is launched like any Linux app (`insane.apps.launch`), so
+  no new exception in `insane-server`, and it also runs on other compositors for comparison.
 - **The pattern (rendering):** colour bars, grey steps, a resolution grating (1-pixel lines that show
   scaling or blurring), a geometry grid and circle (wrong aspect or scaling shows at once), a live clock
   and a frame counter that changes every frame (a dropped or repeated frame is visible), scale and
@@ -311,7 +311,7 @@ pattern of go-link-console), with live measurements around it:
 - **3D:** a rotating textured scene with EGL/GLES2 on the GPU (`linux-dmabuf`), showing the renderer and
   whether the buffer was scanned out directly or composed; a CPU-only shm mode to compare.
 - **Video:** a generated moving pattern at 24/30/60 fps (no files, no decoders), to see judder and dropped
-  frames; later the same through `lord-media`'s hardware decoder.
+  frames; later the same through `insane-media`'s hardware decoder.
 - **Keyboard:** a full keyboard drawn on screen; each key lights when its key event arrives, with the
   keycode, the keysym from the keymap the compositor sent, modifiers, repeat rate and delay; a list of
   keys never seen, to go through every key of a real keyboard.
@@ -326,6 +326,6 @@ pattern of go-link-console), with live measurements around it:
   `idle-inhibit`, `xdg-activation`, cursor-shape. Its output is a report (JSON and Markdown) that System
   Information can attach, with the GPU and the monitor, so the same run on many computers shows where
   Insane OS's Wayland works and where it doesn't.
-- **Automation:** `lordos-testbench --auto` runs the protocol checklist and a timed render without a person,
+- **Automation:** `insaneos-testbench --auto` runs the protocol checklist and a timed render without a person,
   for CI and for the VMs (the input tests then use the remote desktop's injected keys and pointer, as the
   tests in this repository already do).

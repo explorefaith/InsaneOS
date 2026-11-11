@@ -1,5 +1,5 @@
 // Calculator — sample native app: buttons and keyboard (no eval: our own parser).
-import { View, Text, useTheme, useKeyboard, t as tr, formatNumber } from '@lordos/sdk';
+import { View, Text, useTheme, useKeyboard, t as tr, formatNumber } from '@insaneos/sdk';
 import { useState } from 'react';
 
 export function Icon({ size: s }) {

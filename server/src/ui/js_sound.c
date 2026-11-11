@@ -1,7 +1,7 @@
-/* js_sound.c — lord.sound: outputs, inputs and per-app volume (PipeWire client in
+/* js_sound.c — insane.sound: outputs, inputs and per-app volume (PipeWire client in
  * sound/snd.c). It launches nothing and touches no files: it only talks to the user's sound server.
  * Each command validates its type and index; changes arrive later as a "state" event to
- * __lordSound (see docs/SOUND.md). */
+ * __insaneSound (see docs/SOUND.md). */
 #include "js_sound.h"
 #include "../sound/snd.h"
 
@@ -150,8 +150,8 @@ static const JSCFunctionListEntry sound_funcs[] = {
     JS_CFUNC_DEF("play", 1, f_play),
 };
 
-void js_sound_register(JSContext *c, JSValue lord) {
+void js_sound_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, sound_funcs, sizeof sound_funcs / sizeof sound_funcs[0]);
-    JS_SetPropertyStr(c, lord, "sound", o);
+    JS_SetPropertyStr(c, insane, "sound", o);
 }

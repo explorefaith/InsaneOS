@@ -1,9 +1,9 @@
 /* pkg.h — Insane OS's own Debian packages (see pkg.c and docs/PACKAGES.md).
  *
- * Everything that modifies the system is an action of the privileged helper (admin.c); lord-server
+ * Everything that modifies the system is an action of the privileged helper (admin.c); insane-server
  * only reads the index (idx.h) and the dpkg database (status.h). */
-#ifndef LORD_PKG_H
-#define LORD_PKG_H
+#ifndef INSANE_PKG_H
+#define INSANE_PKG_H
 
 #include "../admin.h"
 

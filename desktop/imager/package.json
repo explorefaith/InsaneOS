@@ -1,5 +1,5 @@
 {
-  "name": "lordos-imager-desktop",
+  "name": "insaneos-imager-desktop",
   "private": true,
   "version": "0.8.86",
   "description": "Insane OS Imager for the desktop (Tauri). The UI is apps/imager, shared with Insane OS.",

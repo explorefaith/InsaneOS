@@ -1,8 +1,8 @@
-/* sql_proto_test.c — the MySQL protocol code of lord-sql (src/sql/mysqlproto.c) against hostile and broken
+/* sql_proto_test.c — the MySQL protocol code of insane-sql (src/sql/mysqlproto.c) against hostile and broken
  * servers: length-encoded integers and strings past the packet, packets out of sequence, oversized and split
  * packets, greetings cut at every byte, column-count bombs, rows with too few or too many values, ERR in the
  * middle of rows, truncation by rows and by bytes, LOAD DATA LOCAL requests, and a mutation fuzzer over a whole
- * result set. Every server byte comes from memory: no network, no lord-sql.
+ * result set. Every server byte comes from memory: no network, no insane-sql.
  *
  *   make -C server build/sql-proto-test        (also in `make test`; build/sql-proto-test-asan: under ASan) */
 #include "../src/sql/mysqlproto.h"

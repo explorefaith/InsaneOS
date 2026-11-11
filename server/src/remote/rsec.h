@@ -5,8 +5,8 @@
  *
  * Every function rejects instead of guessing: a request that is not exactly what our own pages
  * send gets an error status and the connection is closed. */
-#ifndef LORD_REMOTE_RSEC_H
-#define LORD_REMOTE_RSEC_H
+#ifndef INSANE_REMOTE_RSEC_H
+#define INSANE_REMOTE_RSEC_H
 
 #include <stddef.h>
 #include <stdint.h>

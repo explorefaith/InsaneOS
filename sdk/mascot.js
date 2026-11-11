@@ -10,7 +10,7 @@
 // one Lumo per view, in an empty, error, welcome or "done" state (docs/DESIGN.md, "Empty state").
 // `alt` is the translated description (mascot.<pose>); a caller may pass its own.
 import { createElement as h } from 'react';
-import { Image } from '@lordos/runtime';
+import { Image } from '@insaneos/runtime';
 import { t } from './i18n.js';
 
 const POSES = new Set(['wave', 'shield', 'celebrate', 'confused', 'sleep', 'run']);

@@ -1,12 +1,12 @@
 // community.js — community data in the Compatibility panel (0.8.7, docs/BENCHMARK.md "Compatibility"): which
 // devices of this machine other Insane OS users confirmed, from the catalogue's signed snapshot
-// (lord.sysinfo.community(): verified in C, server/src/sysreport/hwsnap.c, before JS sees it). Pure functions,
+// (insane.sysinfo.community(): verified in C, server/src/sysreport/hwsnap.c, before JS sees it). Pure functions,
 // tested by server/tests/hwreport_test.mjs; tools/hwreport/catalog.mjs builds the snapshot with the same keys.
 //
 // A device is named by a key that holds no identity of the machine: PCI ids, a driver name or a product
 // name. Only entries for the same Insane OS version (x.y.z, the channel ignored) are shown, as the design asks.
 
-export const SNAPSHOT_FORMAT = 'lordos-hwsnapshot';
+export const SNAPSHOT_FORMAT = 'insaneos-hwsnapshot';
 // the Compatibility rows a machine-wide key answers for (the GPU, network, Wi-Fi, Bluetooth and audio rows
 // have keys of their own)
 export const MACHINE_COMPONENTS = ['display', 'storage', 'power', 'suspend'];
@@ -16,7 +16,7 @@ const clean = (s, max = 96) => String(s || '').replace(/[\u0000-\u001f\u007f]+/g
 const hex = (s) => (/^[0-9a-fA-F]{1,8}$/.test(String(s || '')) ? String(s).toLowerCase() : '');
 const word = (s) => (/^[A-Za-z0-9._+-]{1,40}$/.test(String(s || '')) ? String(s) : '');
 
-// The devices of a report's `system` (lord.sysinfo.report() or a shared report's system: same fields), each
+// The devices of a report's `system` (insane.sysinfo.report() or a shared report's system: same fields), each
 // as { key, component, name }. component is the Compatibility row it answers for.
 export function deviceKeys(system) {
   const s = system || {};
@@ -51,15 +51,15 @@ const base = (v) => { const m = /^(\d+\.\d+\.\d+(?:\.\d+)?)/.exec(String(v || ''
 // For each Compatibility row, what the snapshot says about this machine's devices with this Insane OS version:
 // { [component]: [{ name, works, limits, no, reports, references }] }. A snapshot that isn't one (wrong format
 // or version) gives nothing.
-export function communityFor(snapshot, system, lordos) {
+export function communityFor(snapshot, system, insaneos) {
   const out = {};
   const sn = snapshot && typeof snapshot === 'object' ? snapshot : null;
   if (!sn || sn.format !== SNAPSHOT_FORMAT || sn.version !== 1 || !Array.isArray(sn.devices)) return out;
-  const v = base(lordos);
+  const v = base(insaneos);
   if (!v) return out;
   const index = new Map();
   for (const d of sn.devices) {
-    if (!d || typeof d.key !== 'string' || typeof d.component !== 'string' || base(d.lordos) !== v) continue;
+    if (!d || typeof d.key !== 'string' || typeof d.component !== 'string' || base(d.insaneos) !== v) continue;
     index.set(`${d.component} ${d.key}`, d);
   }
   for (const dev of deviceKeys(system)) {

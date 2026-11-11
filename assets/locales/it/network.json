@@ -33,7 +33,7 @@
   "type.vlan": "VLAN",
   "type.wifi": "Wi-Fi",
   "type.wireguard": "WireGuard",
-  "unavailable": "lord-server non ha il modulo di rete.",
+  "unavailable": "insane-server non ha il modulo di rete.",
   "unmanage": "Restituisci al sistema",
   "vpn.add": "Aggiungi VPN…",
   "vpn.addServer": "Aggiungi server",

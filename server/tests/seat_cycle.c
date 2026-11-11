@@ -1,4 +1,4 @@
-/* seat_cycle.c — plays lord-sessiond's monitor part against one session, to test what happens
+/* seat_cycle.c — plays insane-sessiond's monitor part against one session, to test what happens
  * when a session leaves the monitor and comes back (docs/GPU.md, "When the GPU context is
  * re-created"; run by tests/gpu_cycle.sh).
  *
@@ -8,7 +8,7 @@
  * card (DRM master), lends it with RP_DISPLAY, waits <on_ms>, saves what the CRTC shows as
  * <prefix>-NN.bmp (GETFB2 + MAP_DUMB: works with dumb-backed buffers such as vkms with Mesa's
  * kms_swrast), sends RP_UNDISPLAY, waits <off_ms>, drops master and closes the card: the same
- * steps lord-sessiond takes on a session switch. No input devices are lent. After each cycle it runs
+ * steps insane-sessiond takes on a session switch. No input devices are lent. After each cycle it runs
  * <hook> (a shell command, with the cycle number in $CYCLE), and at the end it lends the card once more
  * and leaves the session on the monitor (snapshot <prefix>-final.bmp).
  * A test tool only: it is never installed. */

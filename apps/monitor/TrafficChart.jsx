@@ -8,7 +8,7 @@
 //
 // buckets are bytes per second, oldest first; shift is how far the newest bucket has filled (the
 // strip slides smoothly between buckets). Drawn in pixels at the box's real width (draw.js).
-import { View, Text, Image, useTheme, useLocale, formatBytes } from '@lordos/sdk';
+import { View, Text, Image, useTheme, useLocale, formatBytes } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { C, fmt } from './index.jsx';
 import { canvas, drawMirror, niceMax, parseColor } from './draw.js';
@@ -34,7 +34,7 @@ export function TrafficChart({ buckets, shift = 0, seconds = 60, height = 52, to
   const [w, setW] = useState(0);
   useEffect(() => {
     if (!box.current) return;
-    const nw = Math.round(lord.getLayout(box.current.id)[2]);
+    const nw = Math.round(insane.getLayout(box.current.id)[2]);
     if (nw > 0 && Math.abs(nw - w) > 1) setW(nw);
   });
   let peak = 0;

@@ -63,7 +63,7 @@ static int land_load(const char *path) {
     long len = -1;
     if (!fseek(f, 0, SEEK_END)) len = ftell(f);
     uint8_t *b = len > 12 && (unsigned long)len <= LAND_MAX ? malloc((size_t)len) : NULL;
-    int ok = b && !fseek(f, 0, SEEK_SET) && fread(b, 1, (size_t)len, f) == (size_t)len && !memcmp(b, "LORDMAP1", 8);
+    int ok = b && !fseek(f, 0, SEEK_SET) && fread(b, 1, (size_t)len, f) == (size_t)len && !memcmp(b, "INSANEMAP1", 8);
     fclose(f);
     if (!ok) { free(b); return -1; }
     size_t n = (size_t)len, o = 12;

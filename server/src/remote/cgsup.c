@@ -1,10 +1,10 @@
-/* cgsup.c — lord-sessiond's cgroup placement service (see sec/cgroup.h, docs/PRIVACY.md).
+/* cgsup.c — insane-sessiond's cgroup placement service (see sec/cgroup.h, docs/PRIVACY.md).
  *
- * A small root child of lord-sessiond listens on /run/lordos/cgroup.sock. lord-server (and the
- * children it forks right before exec: Linux apps, .lpk apps, lord-media, lord-doc…) ask it to be
+ * A small root child of insane-sessiond listens on /run/insaneos/cgroup.sock. insane-server (and the
+ * children it forks right before exec: Linux apps, .lpk apps, insane-media, insane-doc…) ask it to be
  * placed into their app scope. The scopes and their cgroup.procs are root-owned, so a process of
  * the user can never move itself out of its scope. The child runs serially with short timeouts
- * and dies with its parent (PR_SET_PDEATHSIG): a lord-sessiond restart starts a fresh one. */
+ * and dies with its parent (PR_SET_PDEATHSIG): a insane-sessiond restart starts a fresh one. */
 #include "sessiond.h"
 #include "../sec/cgroup.h"
 

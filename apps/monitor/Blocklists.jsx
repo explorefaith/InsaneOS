@@ -4,10 +4,10 @@
 //     licence, how many entries it has and when it was last downloaded; a checkbox turns it on;
 //   - custom lists: an https address and its format (hosts file, one domain per line, one address
 //     or network per line);
-//   - "Update now"; otherwise lord-server downloads the enabled lists once a day.
-// Lists never override a rule the owner wrote for a destination, and lord-server writes every file
-// (lord.fw.*List); this screen writes none.
-import { View, Text, Button, Segmented, GroupBox, TextInput, useTheme, useLocale, useStore, firewall, firewallState, spacing, typeScale, formatNumber, formatDate, formatTime, tOptional, errorText } from '@lordos/sdk';
+//   - "Update now"; otherwise insane-server downloads the enabled lists once a day.
+// Lists never override a rule the owner wrote for a destination, and insane-server writes every file
+// (insane.fw.*List); this screen writes none.
+import { View, Text, Button, Segmented, GroupBox, TextInput, useTheme, useLocale, useStore, firewall, firewallState, spacing, typeScale, formatNumber, formatDate, formatTime, tOptional, errorText } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 
 const TOPICS = ['ads', 'trackers', 'malware', 'custom'];

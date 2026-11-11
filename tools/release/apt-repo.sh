@@ -1,20 +1,20 @@
 #!/bin/sh
-# apt-repo.sh — the signed Insane OS APT repository on lordos.org (docs/UPDATES.md, docs/RELEASING.md).
+# apt-repo.sh — the signed Insane OS APT repository on insaneos.org (docs/UPDATES.md, docs/RELEASING.md).
 #
 #   tools/release/apt-repo.sh build   <target> [--notes VERSION=SECTION]… [--rpi] [--catalog] <file.deb>…
 #   tools/release/apt-repo.sh publish <target>
 #   tools/release/apt-repo.sh verify  <target>
 #   tools/release/apt-repo.sh rpi-fetch <target>     (only fetches and verifies the --rpi packages)
 #
-# <target> is "staging" (https://lordos.org/apt-staging, for tests) or "live" (https://lordos.org/apt,
+# <target> is "staging" (https://insaneos.org/apt-staging, for tests) or "live" (https://insaneos.org/apt,
 # what every Insane OS system reads). Both have one suite, "stable", component "main", for amd64 and arm64.
 #
 #   build    copies the published pool down from S3, adds the .debs, writes the indexes with Debian's
 #            apt-ftparchive (in a debian:trixie container when this machine has none), the release notes
-#            of each lordos version from CHANGELOG.md (main/notes/ReleaseNotes), and signs Release
+#            of each insaneos version from CHANGELOG.md (main/notes/ReleaseNotes), and signs Release
 #            with the Insane OS archive key: InRelease and Release.gpg. Then it checks the signatures.
 #   publish  uploads the pool first, then the indexes, the signed files last; the archive keyring to
-#            lordos.org/keys/ and lordos.sources next to the repository; invalidates the CDN.
+#            insaneos.org/keys/ and insaneos.sources next to the repository; invalidates the CDN.
 #   verify   downloads InRelease over https AND http (the Store's package engine has no TLS of its
 #            own and reads https sources over http), checks the signature and every index hash.
 #
@@ -35,40 +35,40 @@
 # vendor has its own signed APT repository ("delivery": "direct") are only checked, never mirrored: the
 # user's system installs them from the vendor (docs/UPDATES.md, "Mirrored apps (catalog)").
 #
-# lordos-hwdata (0.8.7, docs/BENCHMARK.md "Newer snapshots between releases"): the signed tested-hardware
-# snapshot, an Architecture: all package (tools/iso/mkdeb-hwdata.sh) that lordos depends on. It is added like any
-# .deb, with a release or alone between releases (`build live lordos-hwdata_<date>_all.deb`, docs/RELEASING.md),
-# and only after its snapshot's Ed25519 signature verifies with tools/release/lordos-release.pub.pem
-# (LORDOS_HWDATA_PUB=<public.pem> names a throwaway test key, for the staging target only). A lordos that
-# depends on it is refused while the pool has no lordos-hwdata.
+# insaneos-hwdata (0.8.7, docs/BENCHMARK.md "Newer snapshots between releases"): the signed tested-hardware
+# snapshot, an Architecture: all package (tools/iso/mkdeb-hwdata.sh) that insaneos depends on. It is added like any
+# .deb, with a release or alone between releases (`build live insaneos-hwdata_<date>_all.deb`, docs/RELEASING.md),
+# and only after its snapshot's Ed25519 signature verifies with tools/release/insaneos-release.pub.pem
+# (INSANEOS_HWDATA_PUB=<public.pem> names a throwaway test key, for the staging target only). A insaneos that
+# depends on it is refused while the pool has no insaneos-hwdata.
 #
-# lordos-rclone (0.8.8.5, docs/CLOUD.md 3.1): upstream rclone for Cloud and Connect to Server, one package per
-# architecture from tools/iso/mkdeb-rclone.sh, added like any .deb with the release. A lordos that depends on it
+# insaneos-rclone (0.8.8.5, docs/CLOUD.md 3.1): upstream rclone for Cloud and Connect to Server, one package per
+# architecture from tools/iso/mkdeb-rclone.sh, added like any .deb with the release. A insaneos that depends on it
 # is refused while the pool has none of its architecture.
 #
-# lordos-disk-formats (0.8.7, docs/FILES.md): the Store's Disk Formats item, from tools/iso/mkdeb-diskformats.sh, one
+# insaneos-disk-formats (0.8.7, docs/FILES.md): the Store's Disk Formats item, from tools/iso/mkdeb-diskformats.sh, one
 # package per architecture, added like any .deb with the release. Its entry in apt/catalog.json has "section": "commercial".
 #
-# --notes VERSION=SECTION takes the notes of lordos VERSION from CHANGELOG.md section SECTION (for
+# --notes VERSION=SECTION takes the notes of insaneos VERSION from CHANGELOG.md section SECTION (for
 # example 0.8.1~staging1=Unreleased). By default the section is "VERSION" or "VERSION-<suffix>".
 #
 # The private key lives ONLY on the maintainer's machine, next to the release key:
-#   ~/.config/lordos-release/apt-gnupg   (a GnuPG home, mode 0700; LORDOS_APT_GNUPGHOME overrides)
+#   ~/.config/insaneos-release/apt-gnupg   (a GnuPG home, mode 0700; INSANEOS_APT_GNUPGHOME overrides)
 # Never copy it to a VM, a server or the repository. The public key is
-# packaging/keys/lordos-archive-keyring.gpg (shipped in the lordos package) and the script refuses to
-# sign with any other key. Uploads use only the AWS profile "lordos" (tools/web/deploy.sh's).
+# packaging/keys/insaneos-archive-keyring.gpg (shipped in the insaneos package) and the script refuses to
+# sign with any other key. Uploads use only the AWS profile "insaneos" (tools/web/deploy.sh's).
 set -eu
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-PROFILE=lordos
-BUCKET=lordos.org
+PROFILE=insaneos
+BUCKET=insaneos.org
 DISTRIBUTION=E35DXDFJ83X7Z8
 SUITE=stable
 ARCHES="amd64 arm64"
-KEYRING=$ROOT/packaging/keys/lordos-archive-keyring.gpg
-GNUPGHOME=${LORDOS_APT_GNUPGHOME:-$HOME/.config/lordos-release/apt-gnupg}
-WORKDIR=${LORDOS_APT_DIR:-$HOME/.local/share/lordos-apt}
-IMAGE=lordos-apt-tools:trixie
+KEYRING=$ROOT/packaging/keys/insaneos-archive-keyring.gpg
+GNUPGHOME=${INSANEOS_APT_GNUPGHOME:-$HOME/.config/insaneos-release/apt-gnupg}
+WORKDIR=${INSANEOS_APT_DIR:-$HOME/.local/share/insaneos-apt}
+IMAGE=insaneos-apt-tools:trixie
 RPI_LIST=$ROOT/tools/release/rpi-mirror.list
 RPI_KEYRING=$ROOT/tools/release/raspberrypi-archive-keyring.pgp
 RPI_KEY_FPR=CF8A1AF502A2AA2D763BAE7E82B129927FA3303E
@@ -103,7 +103,7 @@ debtool() {
     docker run --rm -u "$(id -u):$(id -g)" -v "$TREE:/repo" -w /repo "$IMAGE" "$@"
 }
 
-# the fingerprint of the one key in packaging/keys/lordos-archive-keyring.gpg
+# the fingerprint of the one key in packaging/keys/insaneos-archive-keyring.gpg
 expected_fpr() {
     t=$(mktemp -d)
     GNUPGHOME=$t gpg --batch --quiet --import "$KEYRING" 2>/dev/null
@@ -116,7 +116,7 @@ check_key() {
     FPR=$(expected_fpr)
     [ -n "$FPR" ] || die "cannot read $KEYRING"
     gpg --batch --with-colons --list-secret-keys "$FPR" >/dev/null 2>&1 \
-        || die "the secret key for $FPR (packaging/keys/lordos-archive-keyring.gpg) is not in $GNUPGHOME"
+        || die "the secret key for $FPR (packaging/keys/insaneos-archive-keyring.gpg) is not in $GNUPGHOME"
 }
 
 # CHANGELOG.md section → deb822 "Notes" lines (one leading space, " ." for an empty line)
@@ -237,18 +237,18 @@ rpi_src_import() {
     rm -rf "$t"
 }
 
-# a lordos-hwdata package (in $TREE/incoming): Architecture all, and its snapshot signed with the release key
+# a insaneos-hwdata package (in $TREE/incoming): Architecture all, and its snapshot signed with the release key
 check_hwdata() {
-    [ "$2" = all ] || die "$1: lordos-hwdata must be Architecture: all, not $2"
-    pub=$ROOT/tools/release/lordos-release.pub.pem
-    if [ -n "${LORDOS_HWDATA_PUB:-}" ]; then
-        [ "$target" = staging ] || die "LORDOS_HWDATA_PUB (a test key) is only for the staging target"
-        pub=$LORDOS_HWDATA_PUB
+    [ "$2" = all ] || die "$1: insaneos-hwdata must be Architecture: all, not $2"
+    pub=$ROOT/tools/release/insaneos-release.pub.pem
+    if [ -n "${INSANEOS_HWDATA_PUB:-}" ]; then
+        [ "$target" = staging ] || die "INSANEOS_HWDATA_PUB (a test key) is only for the staging target"
+        pub=$INSANEOS_HWDATA_PUB
     fi
     command -v openssl >/dev/null 2>&1 || die "openssl is needed to check the snapshot of $1"
     t=$(mktemp -d)
     debtool dpkg-deb --fsys-tarfile "$1" | tar -x -C "$t" -f - || { rm -rf "$t"; die "cannot read $1"; }
-    h=$t/usr/lib/lordos/assets/hwreport
+    h=$t/usr/lib/insaneos/assets/hwreport
     [ -f "$h/snapshot.json" ] && [ -f "$h/snapshot.json.sig" ] || { rm -rf "$t"; die "$1 has no signed snapshot (tools/release/sign-hwsnapshot.sh)"; }
     { base64 -d < "$h/snapshot.json.sig" > "$t/sig.bin" || base64 -D < "$h/snapshot.json.sig" > "$t/sig.bin"; } 2>/dev/null
     openssl pkeyutl -verify -pubin -inkey "$pub" -rawin -in "$h/snapshot.json" -sigfile "$t/sig.bin" >/dev/null 2>&1 ||
@@ -281,7 +281,7 @@ do_build() {
         set -- "$@" $rpis
     fi
     if [ "$CATALOG" = 1 ]; then
-        cats=$(LORDOS_APT_DIR=$WORKDIR "$ROOT/apt/build.sh" fetch) || die "apt/build.sh fetch failed"
+        cats=$(INSANEOS_APT_DIR=$WORKDIR "$ROOT/apt/build.sh" fetch) || die "apt/build.sh fetch failed"
         echo "  catalog packages verified: $(echo "$cats" | grep -c .)"
         # shellcheck disable=SC2086
         set -- "$@" $cats
@@ -289,7 +289,7 @@ do_build() {
     fi
     mkdir -p "$TREE/pool/main"
     # the pool is append-only: start from what is published (old versions stay installable)
-    if [ -z "${LORDOS_APT_OFFLINE:-}" ]; then
+    if [ -z "${INSANEOS_APT_OFFLINE:-}" ]; then
         aws s3 sync "s3://$BUCKET/$PREFIX/pool" "$TREE/pool" --only-show-errors || die "could not read s3://$BUCKET/$PREFIX/pool"
     fi
     for deb in "$@"; do
@@ -304,7 +304,7 @@ do_build() {
         comp=main
         is_rpi_pkg "$name" && comp=rpi
         case "$cats" in *" $deb "*) comp=catalog ;; esac
-        [ "$name" = lordos-hwdata ] && check_hwdata "incoming/$b" "$arch"
+        [ "$name" = insaneos-hwdata ] && check_hwdata "incoming/$b" "$arch"
         dest="pool/$comp/$dir/$name/${name}_${ver#*:}_$arch.deb"
         if [ -f "$TREE/$dest" ] && ! cmp -s "$TREE/incoming/$b" "$TREE/$dest"; then
             die "$dest is already published with different contents: a version is never replaced (bump it)"
@@ -314,21 +314,21 @@ do_build() {
         echo "  $dest"
     done
     rm -rf "$TREE/incoming"
-    # every lordos that depends on lordos-hwdata needs one in the pool, or no system could install it
-    if [ -z "$(find "$TREE/pool/main/l/lordos-hwdata" -name 'lordos-hwdata_*_all.deb' 2>/dev/null | head -n 1)" ]; then
-        for d in $(find "$TREE/pool/main/l/lordos" -name 'lordos_*.deb' 2>/dev/null | sed "s#^$TREE/##"); do
+    # every insaneos that depends on insaneos-hwdata needs one in the pool, or no system could install it
+    if [ -z "$(find "$TREE/pool/main/l/insaneos-hwdata" -name 'insaneos-hwdata_*_all.deb' 2>/dev/null | head -n 1)" ]; then
+        for d in $(find "$TREE/pool/main/l/insaneos" -name 'insaneos_*.deb' 2>/dev/null | sed "s#^$TREE/##"); do
             case "$(debtool dpkg-deb -f "$d" Depends)" in
-                *lordos-hwdata*) die "$d depends on lordos-hwdata and the pool has none: add tools/iso/mkdeb-hwdata.sh's package" ;;
+                *insaneos-hwdata*) die "$d depends on insaneos-hwdata and the pool has none: add tools/iso/mkdeb-hwdata.sh's package" ;;
             esac
         done
     fi
-    # (0.8.8.5) and on lordos-rclone of its own architecture (tools/iso/mkdeb-rclone.sh)
-    for d in $(find "$TREE/pool/main/l/lordos" -name 'lordos_*.deb' 2>/dev/null | sed "s#^$TREE/##"); do
+    # (0.8.8.5) and on insaneos-rclone of its own architecture (tools/iso/mkdeb-rclone.sh)
+    for d in $(find "$TREE/pool/main/l/insaneos" -name 'insaneos_*.deb' 2>/dev/null | sed "s#^$TREE/##"); do
         case "$(debtool dpkg-deb -f "$d" Depends)" in
-            *lordos-rclone*)
+            *insaneos-rclone*)
                 a=$(debtool dpkg-deb -f "$d" Architecture)
-                [ -n "$(find "$TREE/pool/main/l/lordos-rclone" -name "lordos-rclone_*_$a.deb" 2>/dev/null | head -n 1)" ] \
-                    || die "$d depends on lordos-rclone and the pool has none for $a: add tools/iso/mkdeb-rclone.sh's package" ;;
+                [ -n "$(find "$TREE/pool/main/l/insaneos-rclone" -name "insaneos-rclone_*_$a.deb" 2>/dev/null | head -n 1)" ] \
+                    || die "$d depends on insaneos-rclone and the pool has none for $a: add tools/iso/mkdeb-rclone.sh's package" ;;
         esac
     done
     # the sources of the mirrored copyleft packages, next to them and unindexed (append-only too)
@@ -365,17 +365,17 @@ do_build() {
         printf 'Archive: %s\nOrigin: Insane OS\nLabel: Insane OS\nComponent: main\nArchitecture: %s\n' "$SUITE" "$a" > "$TREE/$D/main/binary-$a/Release"
     done
 
-    # release notes of every lordos version in the pool (Store → Updates shows the candidate's)
+    # release notes of every insaneos version in the pool (Store → Updates shows the candidate's)
     mkdir -p "$TREE/$D/main/notes"
     : > "$TREE/$D/main/notes/ReleaseNotes"
-    versions=$(awk '/^Package: lordos$/ { p = 1; next } /^Package:/ { p = 0 } p && /^Version:/ { print $2 }' "$TREE"/$D/main/binary-*/Packages | sort -u)
+    versions=$(awk '/^Package: insaneos$/ { p = 1; next } /^Package:/ { p = 0 } p && /^Version:/ { print $2 }' "$TREE"/$D/main/binary-*/Packages | sort -u)
     for v in $versions; do
         section=""
         for m in $NOTES_MAP; do [ "${m%%=*}" = "$v" ] && section=${m#*=}; done
         body=$(notes_for "$v" "$section")
-        [ -n "$body" ] || { echo "  (no CHANGELOG section for lordos $v: no release notes)"; continue; }
-        printf 'Package: lordos\nVersion: %s\nNotes:\n%s\n\n' "$v" "$body" >> "$TREE/$D/main/notes/ReleaseNotes"
-        echo "  notes for lordos $v"
+        [ -n "$body" ] || { echo "  (no CHANGELOG section for insaneos $v: no release notes)"; continue; }
+        printf 'Package: insaneos\nVersion: %s\nNotes:\n%s\n\n' "$v" "$body" >> "$TREE/$D/main/notes/ReleaseNotes"
+        echo "  notes for insaneos $v"
     done
     xz -9 -k -f "$TREE/$D/main/notes/ReleaseNotes"
 
@@ -417,14 +417,14 @@ do_build() {
     echo "built $TREE ($(find "$TREE/pool" -name '*.deb' | wc -l | tr -d ' ') packages); publish with: $0 publish $target"
 }
 
-# the signatures against the public keyring that the lordos package ships (not the signing home)
+# the signatures against the public keyring that the insaneos package ships (not the signing home)
 check_signatures() {
     t=$(mktemp -d)
     GNUPGHOME=$t gpg --batch --quiet --import "$KEYRING" 2>/dev/null
     GNUPGHOME=$t gpg --batch --quiet --verify "$1" 2>/dev/null || { rm -rf "$t"; die "InRelease does not verify with $KEYRING"; }
     GNUPGHOME=$t gpg --batch --quiet --verify "$3" "$2" 2>/dev/null || { rm -rf "$t"; die "Release.gpg does not verify with $KEYRING"; }
     rm -rf "$t"
-    echo "  signatures verified with packaging/keys/lordos-archive-keyring.gpg"
+    echo "  signatures verified with packaging/keys/insaneos-archive-keyring.gpg"
 }
 
 do_publish() {
@@ -446,15 +446,15 @@ do_publish() {
             --content-type "text/plain; charset=utf-8" --only-show-errors
     done
     # the sources file of this target (live: byte for byte the one the package installs)
-    sed "s#^URIs: https://lordos.org/apt\$#URIs: $URL#" "$ROOT/packaging/apt/lordos.sources" > "$TREE/lordos.sources"
-    aws s3 cp "$TREE/lordos.sources" "s3://$BUCKET/$PREFIX/lordos.sources" --cache-control "no-cache" \
+    sed "s#^URIs: https://insaneos.org/apt\$#URIs: $URL#" "$ROOT/packaging/apt/insaneos.sources" > "$TREE/insaneos.sources"
+    aws s3 cp "$TREE/insaneos.sources" "s3://$BUCKET/$PREFIX/insaneos.sources" --cache-control "no-cache" \
         --content-type "text/plain; charset=utf-8" --only-show-errors
-    aws s3 cp "$KEYRING" "s3://$BUCKET/keys/lordos-archive-keyring.gpg" --cache-control "no-cache" \
+    aws s3 cp "$KEYRING" "s3://$BUCKET/keys/insaneos-archive-keyring.gpg" --cache-control "no-cache" \
         --content-type application/pgp-keys --only-show-errors
-    aws s3 cp "${KEYRING%.gpg}.asc" "s3://$BUCKET/keys/lordos-archive-keyring.asc" --cache-control "no-cache" \
+    aws s3 cp "${KEYRING%.gpg}.asc" "s3://$BUCKET/keys/insaneos-archive-keyring.asc" --cache-control "no-cache" \
         --content-type "text/plain; charset=utf-8" --only-show-errors
     id=$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" \
-        --paths "/$PREFIX/dists/*" "/$PREFIX/lordos.sources" "/keys/*" --query Invalidation.Id --output text)
+        --paths "/$PREFIX/dists/*" "/$PREFIX/insaneos.sources" "/keys/*" --query Invalidation.Id --output text)
     echo "published $URL (invalidation $id); check it with: $0 verify $target"
 }
 

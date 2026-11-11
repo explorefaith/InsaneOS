@@ -9,9 +9,9 @@
  *                                                    writes a verified image to a whole removable disk
  *                                                    (cancel: disk-cancel <disk>)
  *
- * Downloads: only two fixed URL shapes (the release list of lordbasex/Insane OS, and a file of one of
+ * Downloads: only two fixed URL shapes (the release list of insaneos/Insane OS, and a file of one of
  * its releases), fetched by /usr/bin/curl running as the session user (setresuid, no new privileges,
- * no curlrc, https only, also on redirects) into ~/.cache/lordos/imager. Root never parses what
+ * no curlrc, https only, also on redirects) into ~/.cache/insaneos/imager. Root never parses what
  * arrives; the UI reads the list as the user, and the image is verified by imager-write.
  *
  * Writing, all checked here (the UI is not trusted):
@@ -64,7 +64,7 @@
 
 #define CURL "/usr/bin/curl"
 #define XZ   "/usr/bin/xz"
-#define REPO "lordbasex/Insane OS"
+#define REPO "insaneos/Insane OS"
 #define MIB (1024u * 1024u)
 #define MAX_IMAGE (64ull << 30)          /* 64 GiB: far above any Insane OS image */
 
@@ -102,10 +102,10 @@ static int lines(char *buf, char **f, int max) {
 static void as_user(const AdminReq *r) { setfsgid(r->gid); setfsuid(r->uid); }
 static void as_root(void) { setfsuid(0); setfsgid(0); }
 
-/* ~/.cache/lordos/imager[/<tag>] created as the user; returns 0 and the path. */
+/* ~/.cache/insaneos/imager[/<tag>] created as the user; returns 0 and the path. */
 static int cache_dir(const AdminReq *r, const char *tag, char *out, size_t n) {
     char p[PATH_MAX];
-    static const char *const parts[] = { "/.cache", "/.cache/lordos", "/.cache/lordos/imager" };
+    static const char *const parts[] = { "/.cache", "/.cache/insaneos", "/.cache/insaneos/imager" };
     as_user(r);
     int ok = 1;
     for (int i = 0; i < 3 && ok; i++) {
@@ -113,7 +113,7 @@ static int cache_dir(const AdminReq *r, const char *tag, char *out, size_t n) {
         if (mkdir(p, 0755) && errno != EEXIST) ok = 0;
     }
     if (ok && tag) {
-        pathf(p, sizeof p, "%s/.cache/lordos/imager/%s", r->home, tag);
+        pathf(p, sizeof p, "%s/.cache/insaneos/imager/%s", r->home, tag);
         if (mkdir(p, 0755) && errno != EEXIST) ok = 0;
     }
     struct stat st;
@@ -139,7 +139,7 @@ static int drop_to_user(const AdminReq *r) {
 static volatile sig_atomic_t fetch_stop;
 static void on_fetch_stop(int s) { (void)s; fetch_stop = 1; }
 
-static void fetch_job(const AdminReq *r, char *p, size_t n) { pathf(p, n, "/run/lordos/imager-fetch-%u.job", (unsigned)r->uid); }
+static void fetch_job(const AdminReq *r, char *p, size_t n) { pathf(p, n, "/run/insaneos/imager-fetch-%u.job", (unsigned)r->uid); }
 
 void imager_act_fetch(const AdminReq *r, const char *arg, size_t len) {
     char *buf = strndup(arg, len), *f[4];
@@ -184,7 +184,7 @@ void imager_act_fetch(const AdminReq *r, const char *arg, size_t len) {
 
     char jp[96];
     fetch_job(r, jp, sizeof jp);
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     FILE *jf = fopen(jp, "we");
     if (jf) { fprintf(jf, "%d %u\n", (int)getpid(), (unsigned)r->uid); fclose(jf); }
     struct sigaction sa = { .sa_handler = on_fetch_stop };
@@ -259,7 +259,7 @@ void imager_act_fetch_cancel(const AdminReq *r, const char *arg, size_t len) {
     pathf(cp, sizeof cp, "/proc/%d/comm", pid);
     FILE *c = fopen(cp, "re");
     if (c) { if (!fgets(comm, sizeof comm, c)) comm[0] = 0; fclose(c); }
-    if (strncmp(comm, "lord-admin", 10)) { unlink(jp); admin_err("imager.nothingRunning", NULL); return; }
+    if (strncmp(comm, "insane-admin", 10)) { unlink(jp); admin_err("imager.nothingRunning", NULL); return; }
     kill(pid, SIGTERM);
     admin_ok("imager.cancelling", NULL);
 }

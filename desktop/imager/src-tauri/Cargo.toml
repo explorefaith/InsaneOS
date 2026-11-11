@@ -1,6 +1,6 @@
 [package]
-name = "lordos-imager"
-description = "LordOS Imager: writes LordOS to SD cards and USB sticks and prepares the Raspberry Pi's first boot"
+name = "insaneos-imager"
+description = "InsaneOS Imager: writes InsaneOS to SD cards and USB sticks and prepares the Raspberry Pi's first boot"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,7 +9,7 @@ license.workspace = true
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-lordos-imager-core = { path = "../core" }
+insaneos-imager-core = { path = "../core" }
 tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }

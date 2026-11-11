@@ -1581,8 +1581,8 @@ static void blur_walk(Node *n, int *grew) {
 /* Off by default since the 0.8.2 release: once, out of five tries during the 0.8.2 integration
  * test, a window minimized over Monitor's animated map left a grey rectangle until it came back,
  * and the cause was not found (engine-test test_minimize_damage, a full-repaint comparison of that
- * scene, passes). Correctness first: one box, exactly as in 0.8.1, unless lord-server runs with
- * LORD_DAMAGE=multi (main.c). The clipped-subtree skip (paint_cull) and the copy of only the
+ * scene, passes). Correctness first: one box, exactly as in 0.8.1, unless insane-server runs with
+ * INSANE_DAMAGE=multi (main.c). The clipped-subtree skip (paint_cull) and the copy of only the
  * painted rectangles (present_cpu) follow the same switch.
  * (0.8.6) engine-test test_damage_pipeline (that scene through a copy of main.c's whole
  * bookkeeping: pending flips, both KMS buffers, the cursor) and test_damage_fuzz (random trees)
@@ -1930,7 +1930,7 @@ static void gdrag_walk(Canvas *c, Node *root) {
     paint_node(c, root, 1);
 }
 
-/* LORD_GPU_VERIFY=N: every N-th GPU drag frame, W painted by the CPU (a walk clipped to W on a scratch
+/* INSANE_GPU_VERIFY=N: every N-th GPU drag frame, W painted by the CPU (a walk clipped to W on a scratch
  * canvas the scene's size: the save of an ancestor's rounded corners reads outside the clip), leaving
  * the frame's list of app windows and the counters as they were. W's rows are returned packed (W's
  * width a row). */
@@ -1964,7 +1964,7 @@ static int gdrag_paint(Canvas *c, Node *root, Rect w, GpuDrag *g) {
     static int every = -1;
     static long frames;
     if (every < 0) {
-        const char *e = getenv("LORD_GPU_VERIFY");
+        const char *e = getenv("INSANE_GPU_VERIFY");
         every = e ? atoi(e) : 0;
         if (every < 0) every = 0;
     }
@@ -2050,7 +2050,7 @@ static int paint_root_body(Canvas *c, Node *root, int clear, uint32_t rgb, GpuDr
         skip_stamp();
         paint_node(c, root, 1);
     }
-    if (pre && taken) free(pre);                /* W is the GPU's: the old way is compared there by LORD_GPU_VERIFY */
+    if (pre && taken) free(pre);                /* W is the GPU's: the old way is compared there by INSANE_GPU_VERIFY */
     else if (pre) below_verify(c, root, pre);
     skip_until = 0;
     paint_cull = 0;
@@ -2079,7 +2079,7 @@ int paint_root_gdrag(Canvas *c, Node *root, GpuDrag *g) {
 }
 
 /* The whole tree painted again with nothing kept from earlier frames: no drag layer, no copy of what
- * is below it, no node skipped (LORD_PAINT_VERIFY in main.c and engine-test compare it with the
+ * is below it, no node skipped (INSANE_PAINT_VERIFY in main.c and engine-test compare it with the
  * frame). Like paint_root it starts a new list of app windows on the GPU path: the caller keeps the
  * frame's (wl_paint_save/wl_paint_restore). The canvas must be cleared first. */
 void paint_root_full(Canvas *c, Node *root) {

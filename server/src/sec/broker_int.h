@@ -1,7 +1,7 @@
 /* broker_int.h — internals shared by the broker's server-side files (brokersrv.c,
- * brokercam.c and brokerkr.c). Not for the rest of lord-server: use broker.h. */
-#ifndef LORD_SEC_BROKER_INT_H
-#define LORD_SEC_BROKER_INT_H
+ * brokercam.c and brokerkr.c). Not for the rest of insane-server: use broker.h. */
+#ifndef INSANE_SEC_BROKER_INT_H
+#define INSANE_SEC_BROKER_INT_H
 
 #include "broker.h"
 
@@ -27,20 +27,20 @@ void brokerkr_handle(int conn, int fd, uint32_t reqid, const char *app, char *pa
 int  brokerkr_resolve(uint32_t prompt, int allow);             /* 1 if it was a keyring prompt */
 void brokerkr_conn_closed(int conn);
 void brokerkr_tick(void);
-int  brokerkr_pollfd(void);                                    /* lord-vault replies waiting, or -1 */
+int  brokerkr_pollfd(void);                                    /* insane-vault replies waiting, or -1 */
 
 /* Is broker connection `conn` a system package? */
 int  brokersrv_conn_system(int conn);
-/* Event for the session's JS (privacy.js __lordBroker): kind, preformatted JSON (≤ 4 KiB). */
+/* Event for the session's JS (privacy.js __insaneBroker): kind, preformatted JSON (≤ 4 KiB). */
 void brokersrv_shell_event(const char *kind, const char *json);
 
-/* ---- brokermail.c: lord-maild for the isolated system Mail, Calendar, Contacts and Reminders ---- */
+/* ---- brokermail.c: insane-maild for the isolated system Mail, Calendar, Contacts and Reminders ---- */
 /* fds: received with the request; the handler closes or keeps every one of them. */
 void brokermail_handle(int conn, int fd, uint32_t reqid, const char *app, char *payload, uint32_t len, int *fds, int nfds);
 void brokermail_sys_open(int conn, int fd, uint32_t reqid, const char *app, char *payload, uint32_t len);
 void brokermail_conn_closed(int conn);
 void brokermail_tick(void);
-int  brokermail_pollfd(void);                                  /* lord-maild replies waiting, or -1 */
+int  brokermail_pollfd(void);                                  /* insane-maild replies waiting, or -1 */
 int  brokermail_wants_write(int conn);                         /* output queued for that app */
 
 /* ---- brokercam.c: the camera of isolated apps ---- */

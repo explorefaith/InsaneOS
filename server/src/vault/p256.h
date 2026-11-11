@@ -6,8 +6,8 @@
  * infinity or P = Q) and a Montgomery ladder with branch-free conditional swap.
  * There is no ECDSA: our client never verifies signatures (the key coming out of hmac-secret
  * checks itself when decrypting the vault). Scalars and coordinates are 32-byte big-endian. */
-#ifndef LORD_VAULT_P256_H
-#define LORD_VAULT_P256_H
+#ifndef INSANE_VAULT_P256_H
+#define INSANE_VAULT_P256_H
 
 #include <stdint.h>
 

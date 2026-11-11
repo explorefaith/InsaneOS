@@ -1,6 +1,6 @@
 {
   "title": "Nube",
-  "unavailable": "La Nube no está disponible en esta sesión: su motor (lordos-rclone) no está instalado o no está funcionando.",
+  "unavailable": "La Nube no está disponible en esta sesión: su motor (insaneos-rclone) no está instalado o no está funcionando.",
   "addAccount": "Agregar cuenta…",
   "accounts": "Cuentas",
   "allAccounts": "Todas las cuentas",

@@ -21,7 +21,7 @@ static int n, bad;
 
 int main(int argc, char **argv) {
     SshKey k;
-    CHECK("ed25519 with comment", sshkey_parse(ED " test@lordos", &k) == 0 && !strcmp(k.type, "ssh-ed25519") && !strcmp(k.comment, "test@lordos"));
+    CHECK("ed25519 with comment", sshkey_parse(ED " test@insaneos", &k) == 0 && !strcmp(k.type, "ssh-ed25519") && !strcmp(k.comment, "test@insaneos"));
     CHECK("ed25519 without comment, trailing newline", sshkey_parse(ED "\n", &k) == 0 && !k.comment[0]);
     CHECK("options are refused", sshkey_parse("command=\"/bin/sh\" " ED, &k) != 0);
     CHECK("two lines are refused", sshkey_parse(ED "\n" ED, &k) != 0);

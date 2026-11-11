@@ -1,7 +1,7 @@
-/* mpulse.c — PipeWire streams for media, in lord-server (PulseAudio protocol, the
+/* mpulse.c — PipeWire streams for media, in insane-server (PulseAudio protocol, the
  * same tagstruct as server/src/sound/pulse.c). One connection per stream, so that each one
  * shows up with its app in Settings → Sound: playback (Player, Photos) with its latency for the
- * video clock, or recording (microphone, after the permission). All asynchronous: lord-server never
+ * video clock, or recording (microphone, after the permission). All asynchronous: insane-server never
  * waits for PipeWire (see aring.h and docs/MEDIA.md). */
 #include "mpulse.h"
 #include "../sound/pulse.h"
@@ -159,7 +159,7 @@ static int send_name(LmPulse *p) {
     char pid[16];
     snprintf(pid, sizeof pid, "%d", (int)getpid());
     const char *kv[] = { "application.name", app_name, "application.id", app_id, "application.process.id", pid,
-                         "application.process.binary", "lord-media", "application.icon_name", "multimedia-player" };
+                         "application.process.binary", "insane-media", "application.icon_name", "multimedia-player" };
     ts_proplist(&t, kv, 5);
     return sendcmd(p, &t, tag, W_NAME);
 }
@@ -338,7 +338,7 @@ void lmp_volume(LmPulse *p, double v) {
     if (p->fd < 0 || !p->ready || p->play_ch == 0xffffffffu) return;
     if (v < 0) v = 0;
     if (v > 1.5) v = 1.5;
-    uint32_t vol = (uint32_t)(v * PA_VOLUME_NORM + 0.5);      /* linear, same as lord.sound */
+    uint32_t vol = (uint32_t)(v * PA_VOLUME_NORM + 0.5);      /* linear, same as insane.sound */
     uint32_t vv[2] = { vol, vol };
     TsOut t;
     uint32_t tag = begin(p, &t, PA_CMD_SET_SINK_INPUT_VOLUME);

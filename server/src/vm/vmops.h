@@ -1,14 +1,14 @@
 /* vmops.h — the intent of a multi-step operation on a machine (docs/VIRTUALIZATION.md 3.6, "Interrupted
  * operations"). Before a suspend, a resume, a snapshot (take, revert, delete), a compaction or a linked clone changes
- * anything, lord-vm writes <machine>/operation.json naming the work; the new files are made beside the old ones and
- * replace them by rename; operation.json is removed last. At the next open under the machine's lock, lord-vm reads
- * it and finishes the work or rolls it back (lordvm.c, ops_recover), and says which in the log and as a notice.
+ * anything, insane-vm writes <machine>/operation.json naming the work; the new files are made beside the old ones and
+ * replace them by rename; operation.json is removed last. At the next open under the machine's lock, insane-vm reads
+ * it and finishes the work or rolls it back (insanevm.c, ops_recover), and says which in the log and as a notice.
  *
  *   {"op":"snapshot-take","tag":"s20261105-120000","a":"","b":"","started":"2026-11-05T12:00:00Z"}
  *
- * Only lord-vm writes it, in the machine's folder (QEMU can't: it may write only in disks/). */
-#ifndef LORD_VM_OPS_H
-#define LORD_VM_OPS_H
+ * Only insane-vm writes it, in the machine's folder (QEMU can't: it may write only in disks/). */
+#ifndef INSANE_VM_OPS_H
+#define INSANE_VM_OPS_H
 
 #include "machine.h"
 
@@ -25,7 +25,7 @@ int vm_op_begin(const char *dir, const char *op, const char *tag, const char *a,
 /* reads it: 1 there is one (o filled), 0 none, -1 unreadable (it's removed: an intent that can't be read was never
  * acted on, since the work starts only after the rename) */
 int vm_op_read(const char *dir, VmOp *o);
-/* reads it without touching it (an unreadable one stays for lord-vm): 1 there is one */
+/* reads it without touching it (an unreadable one stays for insane-vm): 1 there is one */
 int vm_op_read_peek(const char *dir, VmOp *o);
 /* removes it (and syncs the folder) */
 void vm_op_end(const char *dir);
@@ -37,8 +37,8 @@ int vm_snap_tag_valid(const char *s);
 /* fsync of a folder, after a rename in it */
 void vm_sync_dir(const char *dir);
 
-/* <machine>/snapshots.json (6.2): the snapshots that are complete, with their names. Written by lord-vm only, last in
- * each operation, so an entry is proof that every disk has the tag. Pictures: <machine>/snapshots/<tag>.png (lord-server).
+/* <machine>/snapshots.json (6.2): the snapshots that are complete, with their names. Written by insane-vm only, last in
+ * each operation, so an entry is proof that every disk has the tag. Pictures: <machine>/snapshots/<tag>.png (insane-server).
  *   {"snapshots":[{"tag":"s20261105-120000","name":"Before the upgrade","created":"2026-11-05T12:00:00Z",
  *                  "memory":true,"vmstate":301989888}]} */
 #define VM_SNAPS_MAX  64           /* refused beyond */
@@ -55,7 +55,7 @@ int vm_snaps_save(const char *dir, const VmSnap *s, int n);       /* atomically;
 int vm_snaps_find(const VmSnap *s, int n, const char *tag);       /* index or -1 */
 
 /* A Clone's own identity inside the guest (6.3): <machine>/identity.json, {"hostname":"debian-clone"}, written by
- * lord-vm --clone (unless the identity is kept) and removed once the guest agent gave the guest that hostname, a new
+ * insane-vm --clone (unless the identity is kept) and removed once the guest agent gave the guest that hostname, a new
  * machine-id and new SSH host keys at the clone's first start. */
 #define VM_HOSTNAME_MAX 63
 int vm_hostname_valid(const char *s);                               /* one DNS label: a-z 0-9 '-', not at the ends */

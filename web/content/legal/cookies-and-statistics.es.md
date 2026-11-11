@@ -2,7 +2,7 @@
 
 ## Sin cookies
 
-lordos.org **no usa cookies**: ni de sesión, ni de analítica, ni de publicidad, ni de seguimiento, y tampoco de terceros. Por eso el sitio no muestra un cartel de cookies.
+insaneos.org **no usa cookies**: ni de sesión, ni de analítica, ni de publicidad, ni de seguimiento, y tampoco de terceros. Por eso el sitio no muestra un cartel de cookies.
 
 ## Sin analítica ni estadísticas
 
@@ -17,10 +17,10 @@ Se guardan dos preferencias chiquitas en el `localStorage` de tu navegador, solo
 
 | Clave | Valor | Para qué |
 |---|---|---|
-| `lordos-theme` | `light` o `dark` | recuerda el tema que elegiste con el botón de tema; en automático no se guarda nada y el sitio sigue a tu sistema |
-| `lordos-lang-seen` | `1` | muestra una sola vez la sugerencia de leer el sitio en tu idioma |
+| `insaneos-theme` | `light` o `dark` | recuerda el tema que elegiste con el botón de tema; en automático no se guarda nada y el sitio sigue a tu sistema |
+| `insaneos-lang-seen` | `1` | muestra una sola vez la sugerencia de leer el sitio en tu idioma |
 
-Nunca se mandan a un servidor, no te identifican y no se comparten con nadie. Si tu navegador bloquea el almacenamiento, el sitio funciona igual; solo se olvida de lo que elegiste. Para borrarlas, eliminá los datos del sitio lordos.org en la configuración de tu navegador; las ventanas privadas las borran al cerrarse.
+Nunca se mandan a un servidor, no te identifican y no se comparten con nadie. Si tu navegador bloquea el almacenamiento, el sitio funciona igual; solo se olvida de lo que elegiste. Para borrarlas, eliminá los datos del sitio insaneos.org en la configuración de tu navegador; las ventanas privadas las borran al cerrarse.
 
 ## Registros del servidor
 
@@ -32,7 +32,7 @@ Los archivos de cada versión están alojados en GitHub Releases. GitHub lleva u
 
 ## Sitios de donación
 
-Los botones de donación te llevan a PayPal o Mercado Pago (y, más adelante, Binance). Esos sitios ponen sus propias cookies, con sus propias políticas, una vez que estás ahí. Nada de ellos se carga en lordos.org antes de que hagas clic.
+Los botones de donación te llevan a PayPal o Mercado Pago (y, más adelante, Binance). Esos sitios ponen sus propias cookies, con sus propias políticas, una vez que estás ahí. Nada de ellos se carga en insaneos.org antes de que hagas clic.
 
 ## Consultas
 

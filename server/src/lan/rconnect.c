@@ -25,8 +25,8 @@
 
 extern char **environ;
 
-/* the lordos-rclone package's binary (docs/CLOUD.md 3.1); Debian's only if that one isn't there */
-#define RCLONE_OURS "/usr/lib/lordos/rclone/rclone"
+/* the insaneos-rclone package's binary (docs/CLOUD.md 3.1); Debian's only if that one isn't there */
+#define RCLONE_OURS "/usr/lib/insaneos/rclone/rclone"
 #define RCLONE_DEBIAN "/usr/bin/rclone"
 static const char *rclone_path(void) { return access(RCLONE_OURS, X_OK) && !access(RCLONE_DEBIAN, X_OK) ? RCLONE_DEBIAN : RCLONE_OURS; }
 #define RCLONE rclone_path()
@@ -122,7 +122,7 @@ static char *slurp(const char *path) {
  * on the real connection. -1 finished here (state set), 0 go on. */
 static int trust_ssh(char *known, size_t kn) {
     if (access(KEYSCAN, X_OK) || access(KEYGEN, X_OK)) { finish("missing", "openssh-client", NULL); return -1; }
-    snprintf(known, kn, "%s/.config/lordos/remote_known_hosts", fsops_home());
+    snprintf(known, kn, "%s/.config/insaneos/remote_known_hosts", fsops_home());
     char tag[300], ps[8], *out = malloc(32768), fp[1024] = "", shown[512];
     if (!out) { finish("failed", NULL, NULL); return -1; }
     rconnect_host_tag(q.host, q.port, tag, sizeof tag);
@@ -150,7 +150,7 @@ static int trust_ssh(char *known, size_t kn) {
     if (rconnect_prints(fp, shown, sizeof shown)) { finish("failed", NULL, NULL); return -1; }
     if (!ask_trust(shown)) { finish("refused", NULL, NULL); return -1; }
     char dir[PATH_MAX];
-    snprintf(dir, sizeof dir, "%s/.config/lordos", fsops_home());
+    snprintf(dir, sizeof dir, "%s/.config/insaneos", fsops_home());
     mkparents(dir);
     int fd = open(known, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC | O_NOFOLLOW, 0600);
     if (fd < 0 || write(fd, good, gl) != (ssize_t)gl) { if (fd >= 0) close(fd); finish("failed", NULL, NULL); return -1; }
@@ -173,7 +173,7 @@ static int trust_tls(char *ca, size_t cn) {
     int v = n > 0 ? rconnect_tls_parse(out, pem, sizeof pem) : -1;
     free(out);
     if (v < 0) { finish("failed", NULL, NULL); return -1; }
-    snprintf(dir, sizeof dir, "%s/.config/lordos/remote_certs", fsops_home());
+    snprintf(dir, sizeof dir, "%s/.config/insaneos/remote_certs", fsops_home());
     mkparents(dir);
     if ((size_t)snprintf(ca, cn, "%s/%s_%d.pem", dir, q.host, port) >= cn) { finish("failed", NULL, NULL); return -1; }
     int how = rconnect_tls_decide(slurp(ca), pem, v);
@@ -197,7 +197,7 @@ static int trust_tls(char *ca, size_t cn) {
 }
 
 static int memfd_with(const void *data, size_t n) {
-    int fd = (int)syscall(SYS_memfd_create, "lordos-connect", 1u /* MFD_CLOEXEC */);
+    int fd = (int)syscall(SYS_memfd_create, "insaneos-connect", 1u /* MFD_CLOEXEC */);
     if (fd < 0) return -1;
     if (write(fd, data, n) != (ssize_t)n) { close(fd); return -1; }
     lseek(fd, 0, SEEK_SET);
@@ -221,12 +221,12 @@ static int mounted_at(const char *dir) {
 }
 
 static const char *remote_root(char *out, size_t n) {
-    snprintf(out, n, "%s/.local/share/lordos/remote", fsops_home());
+    snprintf(out, n, "%s/.local/share/insaneos/remote", fsops_home());
     return out;
 }
 
 static void mount_job(void) {
-    if (access(RCLONE, X_OK)) { finish("missing", "lordos-rclone", NULL); return; }
+    if (access(RCLONE, X_OK)) { finish("missing", "insaneos-rclone", NULL); return; }
     if (access(FUSERMOUNT, X_OK)) { finish("missing", "fuse3", NULL); return; }
     char known[PATH_MAX] = "", ca[PATH_MAX] = "";
     if (!strcmp(q.kind, "sftp") && trust_ssh(known, sizeof known)) return;
@@ -258,7 +258,7 @@ static void mount_job(void) {
         child_fds(-1, fd);
         /* the one certificate accepted replaces the system's list: file and folders both, an empty value means the default */
         if (ca[0]) { setenv("SSL_CERT_FILE", ca, 1); setenv("SSL_CERT_DIR", "/nonexistent", 1); }
-        if (app_scope_enter(RCONNECT_SCOPE) && getenv("LORDOS_SESSIOND")) _exit(126);
+        if (app_scope_enter(RCONNECT_SCOPE) && getenv("INSANEOS_SESSIOND")) _exit(126);
         execve(RCLONE, argv, environ);
         _exit(127);
     }

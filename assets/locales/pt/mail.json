@@ -17,7 +17,7 @@
   "flagged": "Sinalizados",
   "addAccount": "Adicionar conta",
   "noAccounts": "Adicione uma conta de e-mail para começar. Qualquer conta IMAP/SMTP funciona; provedores populares são configurados automaticamente.",
-  "unavailable": "O auxiliar do Mail (lord-maild) não está instalado.",
+  "unavailable": "O auxiliar do Mail (insane-maild) não está instalado.",
   "empty": "Nenhuma mensagem",
   "noSelection": "Nenhuma mensagem selecionada",
   "noSubject": "(sem assunto)",

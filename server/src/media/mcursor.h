@@ -1,6 +1,6 @@
 /* mcursor.h — the pointer image of a media node's source (a Machines guest's own cursor), see mcursor.c. */
-#ifndef LORD_MCURSOR_H
-#define LORD_MCURSOR_H
+#ifndef INSANE_MCURSOR_H
+#define INSANE_MCURSOR_H
 
 #include <stdint.h>
 

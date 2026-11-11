@@ -1,6 +1,6 @@
 // components.jsx — base controls for apps. They take colors from useTheme(), so they
 // adapt to any theme.
-import { View, Text, addListener, displayFor, onCommit, onScreenChange } from '@lordos/runtime';
+import { View, Text, addListener, displayFor, onCommit, onScreenChange } from '@insaneos/runtime';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useTheme } from './theme.js';
 import { getApp, windows, openedAt, wm, activeDesktop, onActiveDesktop } from './windows.js';
@@ -135,7 +135,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
   st.current.ui = ui; st.current.mode = mode; st.current.reduce = reduce; st.current.metrics = metrics;
   const measure = () => {
     if (!outer.current || !inner.current) return null;
-    const view = lord.getLayout(outer.current.id)[3], content = lord.getLayout(inner.current.id)[3];
+    const view = insane.getLayout(outer.current.id)[3], content = insane.getLayout(inner.current.id)[3];
     const m = st.current.metrics;
     if (view !== m.view || content !== m.content) { st.current.metrics = { view, content }; setMetrics({ view, content }); }
     return { view, content };
@@ -146,7 +146,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
   const geom = thumbGeometry(metrics.view, metrics.content, y);
 
   // ---- showing and hiding ----
-  const setOpacity = (o) => { try { if (thumb.current) lord.setStyle(thumb.current.id, 'opacity', o); } catch (e) { /* unmounted */ } };
+  const setOpacity = (o) => { try { if (thumb.current) insane.setStyle(thumb.current.id, 'opacity', o); } catch (e) { /* unmounted */ } };
   const update = (patch) => setUi((u) => {
     const n = { ...u, ...patch };
     return n.near === u.near && n.hover === u.hover && n.dragging === u.dragging && n.shown === u.shown ? u : n;
@@ -160,16 +160,16 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
     if (at == null) return;
     s.hideTimer = setTimeout(() => {
       if (!s.ui.shown) return;
-      if (barShown(model(), lord.now())) { schedule(); return; }
+      if (barShown(model(), insane.now())) { schedule(); return; }
       if (s.reduce) { s.ui = { ...s.ui, shown: false }; update({ shown: false }); return; }
-      const t0 = lord.now();
+      const t0 = insane.now();
       stopFade();
       s.fadeTimer = setInterval(() => {
-        const o = barOpacity(model(), lord.now(), t0, false);
+        const o = barOpacity(model(), insane.now(), t0, false);
         setOpacity(o);
         if (o <= 0) { stopFade(); s.ui = { ...s.ui, shown: false }; update({ shown: false }); }
       }, 33);
-    }, Math.max(0, at - lord.now()));
+    }, Math.max(0, at - insane.now()));
   };
   const show = (patch) => {
     stopFade();
@@ -178,7 +178,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
     update({ ...patch, shown: true });
     schedule();
   };
-  const scrolled = () => { st.current.lastScroll = lord.now(); show({}); };
+  const scrolled = () => { st.current.lastScroll = insane.now(); show({}); };
   useEffect(() => () => { clearTimeout(st.current.hideTimer); stopFade(); }, []);
   useEffect(() => { if (mode === 'always') show({}); else schedule(); }, [mode]);
 
@@ -187,15 +187,15 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
     const a = addListener('pointermove', (e) => {
       const s = st.current;
       if (!s.ui.dragging || !outer.current) return;
-      const [, oy] = lord.getLayout(outer.current.id);
+      const [, oy] = insane.getLayout(outer.current.id);
       const m = s.metrics;
       setOffset(offsetForThumb(m.view, m.content, e.y - oy - s.grab));
-      s.lastScroll = lord.now();
+      s.lastScroll = insane.now();
     });
     const b = addListener('pointerup', () => {
       const s = st.current;
       if (!s.ui.dragging) return;
-      s.lastScroll = lord.now();
+      s.lastScroll = insane.now();
       s.ui = { ...s.ui, dragging: false };
       update({ dragging: false });
       schedule();
@@ -217,7 +217,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
   const latestReveal = useRef(null);
   latestReveal.current = (c, always) => {
     if (!outer.current) return;
-    const [, oy, , h] = lord.getLayout(outer.current.id);
+    const [, oy, , h] = insane.getLayout(outer.current.id);
     const resized = st.current.fieldView !== h;
     st.current.fieldView = h;
     if (!always && !resized) return;
@@ -229,7 +229,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
   const onMove = (e) => {
     if (!outer.current) return;
     if (!geom) measure();                       // content that grew by itself has told nobody
-    const [ox, oy, ow] = lord.getLayout(outer.current.id);
+    const [ox, oy, ow] = insane.getLayout(outer.current.id);
     const near = !!geom && nearEdge(e.x - ox, ow, rtl);
     const hover = !!geom && st.current.ui.shown && hitThumb(e.x - ox, e.y - oy, ow, geom, rtl);
     const u = st.current.ui;
@@ -256,7 +256,7 @@ export function ScrollView({ style, contentStyle, children, scrollRef, gutter, r
       {geom && (
         <View onMouseDown={(e) => {
           if (!outer.current) return;
-          const [, oy] = lord.getLayout(outer.current.id);
+          const [, oy] = insane.getLayout(outer.current.id);
           e.stopPropagation();
           st.current.grab = e.y - oy - geom.top;
           st.current.ui = { ...st.current.ui, dragging: true };
@@ -381,7 +381,7 @@ export function TextInput({ value, onChange, placeholder, onSubmit, onCancel, on
 
   useEffect(() => {
     // with focus, keys go through the input method (Korean, Japanese, Chinese)
-    const caretRect = () => { if (!caret.current) return null; const [x, y, , h] = lord.getLayout(caret.current.id); return { x, y, h }; };
+    const caretRect = () => { if (!caret.current) return null; const [x, y, , h] = insane.getLayout(caret.current.id); return { x, y, h }; };
     const sync = () => {
       setIsFocused(focused === token);
       if (focused === token && !secureRef.current) ime.attach(token, caretRect, { inline: true }); else ime.detach(token);
@@ -410,7 +410,7 @@ export function TextInput({ value, onChange, placeholder, onSubmit, onCancel, on
         p.value = '';
       } else if (all && /^Arrow|^Home$|^End$/.test(e.key || '')) { setAllSel(false); allRef.current = false; return; }
       const cur = at.current;
-      if ((e.ctrl || e.meta) && e.base === 'v') { put(insertAt(cur.value, cur.pos, lord.clipboard.get().replace(/\n/g, ' '))); return; }
+      if ((e.ctrl || e.meta) && e.base === 'v') { put(insertAt(cur.value, cur.pos, insane.clipboard.get().replace(/\n/g, ' '))); return; }
       const rtl = !secureRef.current && (p.value ? textDirection(p.value) === 'rtl' : direction() === 'rtl');
       const k = fieldKey(cur.value, cur.pos, e, rtl);
       if (k) put(k);
@@ -448,8 +448,8 @@ export function TextInput({ value, onChange, placeholder, onSubmit, onCancel, on
     const shown = secure ? '•'.repeat([...value].length) : value;
     const rtl = !secure && textDirection(value) === 'rtl';
     let x;
-    try { const w = lord.getLayout(textBox.current.id)[2]; const lx = ev.local(textBox.current).x; x = rtl ? w - lx : lx; } catch (e) { return; }
-    at.current = { value, pos: clampPos(value, caretAt(shown, x, (s) => lord.measureText(s, size, 400))) };
+    try { const w = insane.getLayout(textBox.current.id)[2]; const lx = ev.local(textBox.current).x; x = rtl ? w - lx : lx; } catch (e) { return; }
+    at.current = { value, pos: clampPos(value, caretAt(shown, x, (s) => insane.measureText(s, size, 400))) };
     redraw((n) => n + 1);
     setBlink(true);
   };
@@ -503,7 +503,7 @@ export function Slider({ value, onChange, min = 0, max = 1, width = 160 }) {
   const latest = useRef(onChange);
   latest.current = onChange;
   const at = (x) => {
-    const [lx, , w] = lord.getLayout(ref.current.id);
+    const [lx, , w] = insane.getLayout(ref.current.id);
     const f = Math.max(0, Math.min(1, (x - lx) / w));
     latest.current(min + f * (max - min));
   };
@@ -558,7 +558,7 @@ export function AppHost({ id, focused }) {
   const [overlayHost, setOverlayHost] = useState(null);
   useEffect(() => {                       // developer timing: open → first commit of this window
     const t0 = openedAt.get(id);
-    if (t0 != null && app && !app.isolated) { openedAt.delete(id); console.log(`timing: ${app.id} window committed ${(lord.now() - t0).toFixed(1)} ms after wm.open`); }
+    if (t0 != null && app && !app.isolated) { openedAt.delete(id); console.log(`timing: ${app.id} window committed ${(insane.now() - t0).toFixed(1)} ms after wm.open`); }
   }, []);
   if (!app) return null;
   const C = app.Component;

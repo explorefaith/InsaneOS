@@ -12,17 +12,17 @@ Insane OS contiene software criptográfico. Esta página lo enumera y explica, e
 
 **Bibliotecas y programas de Debian** que usa Insane OS:
 
-- **OpenSSL 3** (Apache-2.0), enlazado solo por `lord-sessiond` (el TLS del escritorio remoto), `lord-maild` (TLS para IMAP, SMTP, CalDAV y CardDAV), `lord-fetch` (las descargas de las listas de bloqueo) y `lord-tls` (el HTTPS de la Tienda);
+- **OpenSSL 3** (Apache-2.0), enlazado solo por `insane-sessiond` (el TLS del escritorio remoto), `insane-maild` (TLS para IMAP, SMTP, CalDAV y CardDAV), `insane-fetch` (las descargas de las listas de bloqueo) y `insane-tls` (el HTTPS de la Tienda);
 - **OpenVPN**, **strongSwan** (IPsec/IKEv2), **OpenConnect** y **openfortivpn**, que Insane OS inicia para las VPN que configurás (OpenVPN viene instalado; los demás son paquetes de Debian que sumás cuando los necesitás), y el WireGuard del kernel Linux, que Insane OS configura por netlink;
 - **FreeRDP** para RDP en Remote Desk, y **rclone** y el cliente OpenSSH para conectarse a servidores desde Archivos;
 - **wpa_supplicant** para el Wi-Fi, y **OpenSSH** en la imagen para Raspberry Pi 5 (apagado de fábrica);
 - el kernel Linux, la verificación de firmas de apt, los navegadores web y otros paquetes de Debian, cada uno con su propia criptografía.
 
-La lista completa de componentes incluidos y sus licencias está en [THIRD_PARTY.md](https://github.com/lordbasex/Insane OS/blob/main/THIRD_PARTY.md) y en la página de [Licencias](/legal/licenses/).
+La lista completa de componentes incluidos y sus licencias está en [THIRD_PARTY.md](https://github.com/insaneos/Insane OS/blob/main/THIRD_PARTY.md) y en la página de [Licencias](/legal/licenses/).
 
 ## Código fuente disponible públicamente
 
-Insane OS es software libre. Su código fuente completo, incluido el de cada versión, es público en [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). Los componentes de Debian los publica Debian en [sources.debian.org](https://sources.debian.org).
+Insane OS es software libre. Su código fuente completo, incluido el de cada versión, es público en [github.com/insaneos/Insane OS](https://github.com/insaneos/Insane OS). Los componentes de Debian los publica Debian en [sources.debian.org](https://sources.debian.org).
 
 ## Restricciones de exportación, importación y uso
 

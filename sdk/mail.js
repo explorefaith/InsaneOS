@@ -1,11 +1,11 @@
 // mail.js — Mail, and the shared channel for Calendar, Contacts and Reminders: everything goes
-// through lord.mail to the sandboxed helper lord-maild (docs/MAIL.md). All calls are
-// asynchronous: requests return promises; a timer reads results and events (lord.mail.poll),
+// through insane.mail to the sandboxed helper insane-maild (docs/MAIL.md). All calls are
+// asynchronous: requests return promises; a timer reads results and events (insane.mail.poll),
 // so the desktop never waits for the network.
 //
-//   mailAvailable()                          is lord-maild installed?
+//   mailAvailable()                          is insane-maild installed?
 //   mailRequest(op, args, { files })         → promise with the reply, or an Error with .code; files are paths, or
-//                                            { fd } in an isolated app (lord.mail.appMode)
+//                                            { fd } in an isolated app (insane.mail.appMode)
 //   onMailEvent(fn)                          events: new, changed, folders, status, need-auth, auth-failed,
 //                                            cert, sent, send-failed, pim-changed, crash
 //   mailConfig.get() / mailConfig.save(cfg)  the accounts file (no passwords: those live in the keyring)
@@ -27,21 +27,21 @@ import { notify } from './notify.js';
 import { t } from './i18n.js';
 import { wm, getApp } from './windows.js';
 
-const has = () => typeof lord !== 'undefined' && typeof lord.mail !== 'undefined';
-export const mailAvailable = () => has() && lord.mail.available();
+const has = () => typeof insane !== 'undefined' && typeof insane.mail !== 'undefined';
+export const mailAvailable = () => has() && insane.mail.available();
 
-// Mail, Calendar, Contacts and Reminders in their own process (lord.mail.appMode): files come from
+// Mail, Calendar, Contacts and Reminders in their own process (insane.mail.appMode): files come from
 // the system file dialog as fds, never as paths.
-export const isolatedPim = () => has() && !!lord.mail.appMode;
+export const isolatedPim = () => has() && !!insane.mail.appMode;
 // → { fd, name, size } | null; the system draws the dialog, this process only gets the fd
 export function pickFileFd() {
-  if (typeof lord === 'undefined' || !lord.broker || typeof lord.broker.pick !== 'function') return null;
-  const r = lord.broker.pick(false, '');
+  if (typeof insane === 'undefined' || !insane.broker || typeof insane.broker.pick !== 'function') return null;
+  const r = insane.broker.pick(false, '');
   if (!r) return null;
-  const size = typeof lord.broker.fdSize === 'function' ? lord.broker.fdSize(r.fd) : -1;
+  const size = typeof insane.broker.fdSize === 'function' ? insane.broker.fdSize(r.fd) : -1;
   return { fd: r.fd, name: r.name, size: size > 0 ? size : 0 };
 }
-export const closeFileFd = (f) => { if (f && typeof f === 'object' && f.fd >= 0) { try { lord.broker.fdClose(f.fd); } catch (e) { /* closed */ } } };
+export const closeFileFd = (f) => { if (f && typeof f === 'object' && f.fd >= 0) { try { insane.broker.fdClose(f.fd); } catch (e) { /* closed */ } } };
 
 const waiting = new Map();
 const listeners = new Set();
@@ -70,7 +70,7 @@ function dispatch(m) {
 
 function pump() {
   let list = null;
-  try { list = lord.mail.poll(); } catch (e) { list = null; }
+  try { list = insane.mail.poll(); } catch (e) { list = null; }
   if (Array.isArray(list)) {
     for (const m of list) dispatch(m);
     if (list.length) {
@@ -91,7 +91,7 @@ export function mailRequest(op, args = {}, { files } = {}) {
   let id;
   // a file is a path (in the session) or { fd } (the isolated apps: an fd from the system file dialog)
   const list = files && files.length ? files.map((f) => (f && typeof f === 'object' ? f.fd : f)) : undefined;
-  try { id = lord.mail.request(JSON.stringify({ op, ...args }), list); }
+  try { id = insane.mail.request(JSON.stringify({ op, ...args }), list); }
   catch (e) { return Promise.reject(Object.assign(new Error(e.message), { code: 'file' })); }
   if (id < 0) return Promise.reject(Object.assign(new Error('unavailable'), { code: 'unavailable' }));
   startSlow();
@@ -114,9 +114,9 @@ export function onMailEvent(fn) {
 export const mailConfig = {
   get() {
     if (!has()) return { accounts: [] };
-    try { const c = JSON.parse(lord.mail.config() || '{}'); return { accounts: [], ...c }; } catch (e) { return { accounts: [] }; }
+    try { const c = JSON.parse(insane.mail.config() || '{}'); return { accounts: [], ...c }; } catch (e) { return { accounts: [] }; }
   },
-  save(cfg) { if (has()) lord.mail.saveConfig(JSON.stringify(cfg, null, 1)); bumpStatus(); },
+  save(cfg) { if (has()) insane.mail.saveConfig(JSON.stringify(cfg, null, 1)); bumpStatus(); },
 };
 
 export const mailStatus = createStore({ accounts: {}, unread: 0, rev: 0, certs: [], authFailed: {} });
@@ -178,7 +178,7 @@ export const mailAccounts = {
     const cfg = mailConfig.get();
     cfg.accounts = [...cfg.accounts.filter((a) => a.id !== acct.id), acct];
     mailConfig.save(cfg);
-    lord.mail.start();
+    insane.mail.start();
     if (password) await mailRequest('auth', { acct: acct.id, password }).catch(() => {});
     return acct.id;
   },
@@ -288,13 +288,13 @@ function openMessage(acct, folder, uid) {
   if (getApp('mail')) wm.open('mail', { args: { acct, folder, uid, nonce: Date.now() } });
 }
 
-// In the isolated Mail app (lord-server --app mail, lord.mail.appMode) startMail never runs: the
+// In the isolated Mail app (insane-server --app mail, insane.mail.appMode) startMail never runs: the
 // session keeps notifications, the unread count and passwords on demand. The app keeps its own copy
-// of the account status from the events lord-server forwards to it (sec/brokermail.c), seeded with
-// lord-maild's current status.
+// of the account status from the events insane-server forwards to it (sec/brokermail.c), seeded with
+// insane-maild's current status.
 let tracking = false;
 export function trackMailStatus() {
-  if (tracking || !has() || !lord.mail.appMode) return;
+  if (tracking || !has() || !insane.mail.appMode) return;
   tracking = true;
   onMailEvent(async (ev) => {
     if (ev.ev === 'status') {
@@ -311,7 +311,7 @@ export function trackMailStatus() {
       else mailStatus.set((s) => ({ ...s, authFailed: { ...s.authFailed, [ev.acct]: true } }));
     } else if (ev.ev === 'new' || ev.ev === 'changed' || ev.ev === 'folders' || ev.ev === 'ready') refreshCounts();
   });
-  lord.mail.start();
+  insane.mail.start();
   mailRequest('status').then((st) => {
     const accounts = {};
     for (const a of st.accounts || []) accounts[a.id] = { status: a.status, error: a.error };
@@ -336,15 +336,15 @@ function fixDavAccounts(cfg) {
   return changed ? { ...cfg, accounts } : cfg;
 }
 
-// lord-maild asks for each account's password once (need-auth). When the session keyring is not open
-// yet (automatic login, a login password changed outside Insane OS, or lord-maild asking before
-// lord-vault finished opening it at login), the accounts wait here: the system keyring prompt is
+// insane-maild asks for each account's password once (need-auth). When the session keyring is not open
+// yet (automatic login, a login password changed outside Insane OS, or insane-maild asking before
+// insane-vault finished opening it at login), the accounts wait here: the system keyring prompt is
 // shown once, and every waiting account is answered as soon as the keyring opens, from that prompt,
 // a screen unlock with the password or the login itself (issue #63: before, the password was taken
 // as missing and Mail asked for it again at every boot, while its "Save to Keyring" failed quietly).
 const waitingKeyring = new Set();
 let unlockAsked = false;
-const ASK_AFTER_MS = 3000;    // lord-vault may still be opening it at login: no prompt for that
+const ASK_AFTER_MS = 3000;    // insane-vault may still be opening it at login: no prompt for that
 
 async function answerNeedAuth(id) {
   const a = mailAccounts.get(id);
@@ -364,13 +364,13 @@ async function answerNeedAuth(id) {
 }
 
 export function startMail() {
-  if (started || !has() || !lord.mail.available()) return;
+  if (started || !has() || !insane.mail.available()) return;
   started = true;
   const cfg = fixDavAccounts(mailConfig.get());
   onVaultEvent((ev) => {
     if (ev.ev !== 'unlocked' || ev.v !== 'login') return;
     for (const id of [...waitingKeyring]) {
-      // the person typed the password in Mail meanwhile: lord-maild already has it
+      // the person typed the password in Mail meanwhile: insane-maild already has it
       const st = mailStatus.get().accounts[id]?.status;
       if (st === 'idle' || st === 'sync') waitingKeyring.delete(id);
       else answerNeedAuth(id);
@@ -408,13 +408,13 @@ export function startMail() {
     } else if (ev.ev === 'send-failed') {
       notify({ app: 'mail', title: t('mail.notify.sendFailed'), body: `${ev.subject || ''}\n${ev.error || ''}`, sticky: true });
     } else if (ev.ev === 'crash') {
-      // lord-maild went away (crash or update): start it again; lord-server waits 3 s between tries
-      setTimeout(() => { try { lord.mail.start(); } catch (e) { /* not available */ } }, 3500);
+      // insane-maild went away (crash or update): start it again; insane-server waits 3 s between tries
+      setTimeout(() => { try { insane.mail.start(); } catch (e) { /* not available */ } }, 3500);
     } else if (ev.ev === 'ready') {
       refreshCounts();
     }
   });
-  // lord-maild also keeps calendars and reminders: start it if there is anything to keep
-  lord.mail.start();
+  // insane-maild also keeps calendars and reminders: start it if there is anything to keep
+  insane.mail.start();
   if (cfg.accounts.length) refreshCounts();
 }

@@ -1,7 +1,7 @@
 // fileparts.jsx — what Files and the system file dialog (filepicker.jsx) draw the same way: the
 // sidebar's rows, the list's rows, the crumbs of a path and the user's folders.
 import { useEffect, useState } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { direction, formatDate, formatTime } from './i18n.js';
 import { typeScale, spacing } from './controls.jsx';
 import { FolderGlyph } from './fileglyphs.jsx';
@@ -60,7 +60,7 @@ export function PathCrumbs({ crumbs, onGo, t }) {
 export function useWidth(ref, initial) {
   const [w, setW] = useState(initial);
   useEffect(() => {
-    const measure = () => { if (!ref.current) return; const lw = Math.round(lord.getLayout(ref.current.id)[2]); if (lw > 0) setW((x) => (Math.abs(x - lw) > 2 ? lw : x)); };
+    const measure = () => { if (!ref.current) return; const lw = Math.round(insane.getLayout(ref.current.id)[2]); if (lw > 0) setW((x) => (Math.abs(x - lw) > 2 ? lw : x)); };
     measure();
     const id = setInterval(measure, 300);
     return () => clearInterval(id);
@@ -77,7 +77,7 @@ export function userDirs() {
   let conf = '';
   try { conf = fs.read('.config/user-dirs.dirs'); } catch (e) { /* no xdg-user-dirs */ }
   let existing;
-  try { existing = new Set(lord.fs.list(home).filter((e) => e.dir).map((e) => e.name)); } catch (e) { existing = new Set(); }
+  try { existing = new Set(insane.fs.list(home).filter((e) => e.dir).map((e) => e.name)); } catch (e) { existing = new Set(); }
   const out = [];
   for (const [key, label, names] of XDG) {
     const m = new RegExp(`^XDG_${key}_DIR="\\$HOME/([^"]+)"`, 'm').exec(conf);

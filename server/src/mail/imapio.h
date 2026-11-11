@@ -1,6 +1,6 @@
 /* imapio.h — see imapio.c. */
-#ifndef LORD_MAIL_IMAPIO_H
-#define LORD_MAIL_IMAPIO_H
+#ifndef INSANE_MAIL_IMAPIO_H
+#define INSANE_MAIL_IMAPIO_H
 
 #include <stddef.h>
 #include "net.h"

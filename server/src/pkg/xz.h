@@ -1,6 +1,6 @@
 /* xz.h — in-memory decompression of .xz (LZMA2, our own) and .gz (stb_image's inflate). */
-#ifndef LORD_PKG_XZ_H
-#define LORD_PKG_XZ_H
+#ifndef INSANE_PKG_XZ_H
+#define INSANE_PKG_XZ_H
 
 #include <stddef.h>
 #include <stdint.h>

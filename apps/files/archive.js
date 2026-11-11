@@ -1,9 +1,9 @@
 // archive.js — archives in Files: browse them like a folder, open or view a file inside
 // (only that one is extracted, to the cache), "Extract Here" and "Compress". The work is done by
-// the confined helper lord-doc (libarchive), which never writes outside the destination folder
+// the confined helper insane-doc (libarchive), which never writes outside the destination folder
 // (see docs/DOCUMENTS.md).
 //   location: { type: 'archive', path: '/…/photos.zip', inner: 'folder/sub' }
-import { archive, createStore, fs } from '@lordos/sdk';
+import { archive, createStore, fs } from '@insaneos/sdk';
 import { bump, freeName } from './ops.js';
 
 const lists = new Map();            // path → { mtime, state: 'loading' | 'ok' | 'error', dirs, info, error }
@@ -47,8 +47,8 @@ function cacheDir(file) {
   let h = 2166136261;
   const key = `${file}|${lists.get(file)?.mtime || 0}`;
   for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
-  for (const p of ['.cache', '.cache/lordos', '.cache/lordos/archives']) { try { fs.mkdir(p); } catch (e) { /* already there */ } }
-  const dir = `${fs.home()}/.cache/lordos/archives/${h.toString(16)}`;
+  for (const p of ['.cache', '.cache/insaneos', '.cache/insaneos/archives']) { try { fs.mkdir(p); } catch (e) { /* already there */ } }
+  const dir = `${fs.home()}/.cache/insaneos/archives/${h.toString(16)}`;
   try { fs.mkdir(dir); } catch (e) { /* already there */ }
   return dir;
 }

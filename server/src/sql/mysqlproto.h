@@ -1,4 +1,4 @@
-/* mysqlproto.h — the MySQL / MariaDB client protocol for lord-sql (docs/DATABASES.md): packet
+/* mysqlproto.h — the MySQL / MariaDB client protocol for insane-sql (docs/DATABASES.md): packet
  * framing, the v10 handshake, HandshakeResponse41 and SSLRequest, the auth plugins
  * mysql_native_password and caching_sha2_password (fast path; full auth sends the password over
  * TLS, or encrypts it with the server's RSA key without TLS), the auth switch, COM_QUERY text
@@ -8,10 +8,10 @@
  * Everything here reads bytes from a server we don't trust: every length is checked against what
  * is left in the packet, packets are reassembled up to a fixed maximum, sequence numbers must
  * follow, column counts are capped and every row must have exactly that many values. The code
- * does no I/O of its own: MyConn's callbacks read and write (lord-sql: the socket or TLS; the
+ * does no I/O of its own: MyConn's callbacks read and write (insane-sql: the socket or TLS; the
  * tests: memory). */
-#ifndef LORD_SQL_MYSQLPROTO_H
-#define LORD_SQL_MYSQLPROTO_H
+#ifndef INSANE_SQL_MYSQLPROTO_H
+#define INSANE_SQL_MYSQLPROTO_H
 
 #include <stddef.h>
 #include <stdint.h>

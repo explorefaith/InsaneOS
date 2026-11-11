@@ -1,7 +1,7 @@
 # Sound in Insane OS
 
 The sound server is **PipeWire**, the same one GTK, Qt and Firefox apps use. Insane OS doesn't ship
-another server or use libpipewire or libpulse: lord-server talks to PipeWire with its own C
+another server or use libpipewire or libpulse: insane-server talks to PipeWire with its own C
 client (`server/src/sound/`). With that client, the UI shows and changes:
 
 - outputs and inputs;
@@ -47,7 +47,7 @@ That code was only read to follow the format: it isn't linked or copied.
   `$PULSE_SERVER` (`unix:/path`) or to `$XDG_RUNTIME_DIR/pulse/native`. If `XDG_RUNTIME_DIR`
   isn't set, it uses `/run/user/<uid>`. It only connects if the socket belongs to the user.
 - **Handshake.** It sends `AUTH` (protocol 32, without shared memory, so the data goes over the
-  socket) and `SET_CLIENT_NAME` ("Insane OS", `org.lordos.Server`).
+  socket) and `SET_CLIENT_NAME` ("Insane OS", `org.insaneos.Server`).
 - **State.** It subscribes to changes of sinks, sources, apps, server and cards, and requests the
   four lists. With each notification it requests only what changed.
 - **Notifications to JS.** When something changed and all the replies have arrived, JS is
@@ -62,7 +62,7 @@ That code was only read to follow the format: it isn't linked or copied.
 - **Our own streams.** Insane OS's streams (the meter and the sounds) don't show up in the app
   lists. Otherwise, the microphone meter would make it look like someone is recording.
 
-## API: `lord.sound`
+## API: `insane.sound`
 
 | Function | What it does |
 |---|---|
@@ -81,7 +81,7 @@ That code was only read to follow the format: it isn't linked or copied.
 - They validate the type, the index (32-bit integer) and the names (no control characters,
   less than 256 bytes). Also, the index or name must exist in the current state.
 
-Events: `globalThis.__lordSound = (type, data) => …`
+Events: `globalThis.__insaneSound = (type, data) => …`
 
 - `type === 'state'`: `data` is the same as `state()`.
 - `type === 'peak'`: `data` is `{ source, level }` (0..1), 25 times per second while the meter
@@ -117,7 +117,7 @@ normally hides them from the microphone list.
   types.
 - `build/sound-cli` (`make -C server build/sound-cli`) is a command-line client over the same
   `snd.c`, against the real PipeWire: `list`, `volume`, `mute`, `default`, `port`, `move`,
-  `meter`, `play`, `watch`. `LORD_SND_DEBUG=1` shows every packet.
+  `meter`, `play`, `watch`. `INSANE_SND_DEBUG=1` shows every packet.
 
 Tested in the VM (PipeWire 1.4.2) with two virtual outputs (`module-null-sink`) and one virtual
 input. The results were compared with `pactl` and `wpctl status`:
@@ -130,12 +130,12 @@ input. The results were compared with `pactl` and `wpctl status`:
 | Default output and input | `pactl get-default-sink` and `wpctl status` (the `*`) |
 | An app's volume (25 %) and moving it to another output | `pactl list sink-inputs`: 25 %, `Sink: 59` |
 | Meter | 50 peaks in 2 s (25 Hz) with sound; level ~0 in silence |
-| System sounds | `pactl list samples`: `lordos-pop`, `lordos-notify` and `lordos-error`; when played, `pactl subscribe` sees the stream appear and end |
+| System sounds | `pactl list samples`: `insaneos-pop`, `insaneos-notify` and `insaneos-error`; when played, `pactl subscribe` sees the stream appear and end |
 | Changes made by another program (`pactl set-sink-volume`, `set-default-sink`) | a new `state` arrives with the value |
 | `systemctl --user restart pipewire pipewire-pulse wireplumber` | "desconectado… reintentando" ("disconnected… retrying"), `connected: false`, and after 2 s it reconnects by itself |
-| `lord.sound` from JS (QuickJS with the binding, without the screen) | changes volume and mute, turns on the meter and plays sounds; rejects invalid type, index or name |
+| `insane.sound` from JS (QuickJS with the binding, without the screen) | changes volume and mute, turns on the meter and plays sounds; rejects invalid type, index or name |
 
-lord-server builds with the client inside (`main.c` polls `snd_fd()`). The sound UI in Control
+insane-server builds with the client inside (`main.c` polls `snd_fd()`). The sound UI in Control
 Center and Settings is built separately, on top of this API.
 
 ## Session: where PipeWire lives
@@ -144,16 +144,16 @@ PipeWire runs as a systemd user service (`pipewire`, `pipewire-pulse` and `wirep
 socket activation). Those services live in the user's `systemd --user`, which exists while the
 user has a session or "linger".
 
-- **Today in the VM:** lord-server is started with `sudo` from SSH and then drops privileges to
-  `lord`. So that PipeWire is there even without an open SSH session,
-  `loginctl enable-linger lord` was enabled: `systemd --user` starts with the machine and leaves
-  the sockets in `/run/user/1000`. lord-server finds the socket there even though `sudo` cleared
+- **Today in the VM:** insane-server is started with `sudo` from SSH and then drops privileges to
+  `insane`. So that PipeWire is there even without an open SSH session,
+  `loginctl enable-linger insane` was enabled: `systemd --user` starts with the machine and leaves
+  the sockets in `/run/user/1000`. insane-server finds the socket there even though `sudo` cleared
   `XDG_RUNTIME_DIR`. The Wayland compositor already fills in that variable with
   `/run/user/<uid>`.
 - **With our own session (M8):** login goes through PAM with `pam_systemd`. That creates the
   logind session with a seat (`seat0`), `XDG_RUNTIME_DIR` and the `user@<uid>.service`. That way
   PipeWire comes up via socket without linger. Also, logind gives the seat's user access to
-  `/dev/snd/*` (`uaccess` ACL), which today, over SSH and without a seat, it doesn't have: `lord`
+  `/dev/snd/*` (`uaccess` ACL), which today, over SSH and without a seat, it doesn't have: `insane`
   isn't in the `audio` group.
 
 ## Packages in the VM
@@ -165,7 +165,7 @@ user has a session or "linger".
 | `pulseaudio-utils` | testing only: `pactl` and `paplay` |
 | `sound-theme-freedesktop` | testing only: `.oga` sounds for `paplay` |
 
-Configuration: `sudo loginctl enable-linger lord` and
+Configuration: `sudo loginctl enable-linger insane` and
 `systemctl --user enable --now pipewire pipewire-pulse wireplumber`. To read the format,
 PulseAudio's source was downloaded with `apt-get source --download-only pulseaudio` into
 `~/snd-ref`: it was only used as a reference and isn't built.
@@ -174,14 +174,14 @@ PulseAudio's source was downloaded with `apt-get source --download-only pulseaud
 
 Chromium's audio (YouTube) stuttered on the live ISO.
 
-**Cause.** PipeWire ran at normal priority (`SCHED_OTHER`, nice 0), the same as lord-server, which
+**Cause.** PipeWire ran at normal priority (`SCHED_OTHER`, nice 0), the same as insane-server, which
 composites on the CPU, and as the browser. It asks for real time in two ways, and neither worked
 in Insane OS:
 
 - **Through the user's limits (`RLIMIT_RTPRIO`).** It didn't have them.
 - **Through RealtimeKit (`rtkit`).** The ISO ships it, but rtkit asks polkit. rtkit's rule is
   `allow_any=no`: it only gives real time to processes of an active session on a logind seat.
-  `lord-sessiond` sessions run in `user@<uid>.service` without a seat, so polkit says no.
+  `insane-sessiond` sessions run in `user@<uid>.service` without a seat, so polkit says no.
   PipeWire's log shows "can't set rt prio to 83 (try increasing rlimits)".
 
 On a PC the quantum is small (browsers ask for ~5–10 ms). With PipeWire competing for the CPU,
@@ -213,7 +213,7 @@ and for the stream:
 For the "without real time" case, PipeWire's VM adjustment was removed with two test files in
 `~/.config/pipewire/*.conf.d/` (deleted afterwards).
 
-lord-server doesn't need real time and doesn't hold PipeWire back:
+insane-server doesn't need real time and doesn't hold PipeWire back:
 - its PulseAudio client is non-blocking (`O_NONBLOCK`; if the socket is full, it buffers and
   moves on);
 - it uses 2 % CPU with or without audio playing.
@@ -234,7 +234,7 @@ to 1024 (`pipewire.conf`, `vm.overrides`) and Debian's WirePlumber gives emulate
 On the user's VMware machine those were active and the sink still ran dry (ERR 989 → 1042 in
 ~10 s with YouTube playing).
 
-**Fix.** `/etc/wireplumber/wireplumber.conf.d/lordos-vm-audio.conf` (in the `lordos` package,
+**Fix.** `/etc/wireplumber/wireplumber.conf.d/insaneos-vm-audio.conf` (in the `insaneos` package,
 `tools/iso/rootfs/`) adds a rule for `alsa_output.*` with the same VM-only match as
 `alsa-vm.conf` (`cpu.vm.name = "~.*"`): 8 periods of 1024 frames, `api.alsa.headroom = 8192`
 (~170 ms at 48 kHz) and `api.alsa.disable-tsched = true` (the card's interrupts drive PipeWire,
@@ -243,8 +243,8 @@ took ERR from climbing to 0 → 0 over 30 s of YouTube (sink WAIT 287 µs, BUSY 
 hardware `cpu.vm.name` is not set, the rule doesn't match and latency stays as before. No unit or
 generator is needed: the match is WirePlumber's own.
 
-Startup: helpers that do background work right after login now yield. `lord-maild` (its first
-full sync starts at login) runs at nice 19 with the idle I/O class; the `lord-media` thumbnail and
+Startup: helpers that do background work right after login now yield. `insane-maild` (its first
+full sync starts at login) runs at nice 19 with the idle I/O class; the `insane-media` thumbnail and
 probe worker runs at nice 10 with the lowest best-effort I/O level. The backup thread already ran
 at nice 19, idle I/O, 5 minutes after login and never on battery. PipeWire itself runs with
 real-time priority (see above), so contention inside the guest can't starve it; what the extra
@@ -268,7 +268,7 @@ does no harm.
 ## Pending
 
 - **Real speakers.** The VM now has an HDA card with a codec (`audio0: ich9-intel-hda`; the user
-  `lord` is in the `audio` group): WirePlumber sees the analog output and microphone and
+  `insane` is in the `audio` group): WirePlumber sees the analog output and microphone and
   `setPort` (Line Out ↔ Speakers) was tested with `pactl`. Whether it is actually audible can't
   be checked in a VM with no audio on the host (`driver=none`); it still needs testing on a
   physical machine.
@@ -287,7 +287,7 @@ does no harm.
 
 ## Volume
 
-An output starts at 80 % and every slider stops at 100 %: past that the gain is digital and loud sound clips, whatever the card or headphones. `lordos-volume.conf` sets the start, and a saved volume stays. Sliders are cubic, so 80 % is a linear 0.512.
+An output starts at 80 % and every slider stops at 100 %: past that the gain is digital and loud sound clips, whatever the card or headphones. `insaneos-volume.conf` sets the start, and a saved volume stays. Sliders are cubic, so 80 % is a linear 0.512.
 
 Measured on a Raspberry Pi 5 with a full-scale 1 kHz tone on a null sink, its monitor taken after the volume (2026-10-31):
 

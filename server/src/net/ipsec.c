@@ -12,7 +12,7 @@
  *   routes=10.0.0.0/8,…           optional: split tunnel; if missing, full
  *
  * Connect: a resident process "vpn:<name>" creates the XFRM interface ips-<name> (if_id),
- * writes that VPN's strongswan.conf (0600) in /etc/strongswan.d/lordos/ and launches its own
+ * writes that VPN's strongswan.conf (0600) in /etc/strongswan.d/insaneos/ and launches its own
  * charon (random ports, its own VICI socket, no updown or scripts). Over VICI (vici.c, no
  * swanctl) it passes keys, secrets, certificates and the connection: none of that is left in files
  * another program reads. It requests a virtual IP (vips), which charon puts on ips-<name>; routes
@@ -40,8 +40,8 @@
 #include <unistd.h>
 
 #define CHARON  "/usr/lib/ipsec/charon"
-#define SCONF_DIR "/etc/strongswan.d/lordos"     /* each VPN's strongswan.conf (AppArmor) */
-#define VICI_PREFIX "/run/charon.lordos-"        /* VICI socket and DNS (AppArmor: /run/charon.*) */
+#define SCONF_DIR "/etc/strongswan.d/insaneos"     /* each VPN's strongswan.conf (AppArmor) */
+#define VICI_PREFIX "/run/charon.insaneos-"        /* VICI socket and DNS (AppArmor: /run/charon.*) */
 
 static const char *const keys[] = { "server", "remote_id", "auth", "user", "password", "psk", "local_id", "ike", "esp", "routes", NULL };
 static const char *const pems[] = { "ca", "cert", "key", NULL };
@@ -93,7 +93,7 @@ int ipsec_import(const char *name, const char *text, char *err, size_t errn) {
     return rc;
 }
 
-/* This VPN's strongswan.conf. It goes in /etc/strongswan.d/lordos/ (charon's AppArmor profile
+/* This VPN's strongswan.conf. It goes in /etc/strongswan.d/insaneos/ (charon's AppArmor profile
  * only lets it read /etc/strongswan.d and write /run/charon.<something>); the system's
  * strongswan.conf doesn't include it (it only includes first-level *.conf and charon/). */
 static int write_sconf(const char *name, const char *ifn, const char *path) {
@@ -154,7 +154,7 @@ static void list_items(ViciMsg *m, const char *name, const char *csv) {
     vici_list_end(m);
 }
 
-/* Loads keys, secrets and the "lordos" connection into this VPN's charon. */
+/* Loads keys, secrets and the "insaneos" connection into this VPN's charon. */
 static int vici_load(int fd, const VpnKv *kv, uint32_t if_id, char *err, size_t errn) {
     const char *auth = vpn_kv(kv, "auth"), *server = vpn_kv(kv, "server");
     const char *rid = vpn_kv(kv, "remote_id") ? vpn_kv(kv, "remote_id") : server;
@@ -177,7 +177,7 @@ static int vici_load(int fd, const VpnKv *kv, uint32_t if_id, char *err, size_t 
     char hex[16];
     snprintf(hex, sizeof hex, "0x%x", if_id);
     ViciMsg m = {0};
-    vici_begin(&m, "lordos");
+    vici_begin(&m, "insaneos");
     vici_kv(&m, "version", "2");
     list_items(&m, "remote_addrs", server);
     list_items(&m, "vips", "0.0.0.0,::");
@@ -237,7 +237,7 @@ typedef struct { char vip[64]; int established; } SaCtx;
 
 static void sa_cb(const char *path, const char *key, const char *val, void *ud) {
     SaCtx *s = ud;
-    if (strcmp(path, "lordos")) return;
+    if (strcmp(path, "insaneos")) return;
     if (!strcmp(key, "state") && !strcmp(val, "ESTABLISHED")) s->established = 1;
     if (!strcmp(key, "local-vips") && !s->vip[0] && strchr(val, '.')) snprintf(s->vip, sizeof s->vip, "%s", val);
 }
@@ -245,7 +245,7 @@ static void sa_cb(const char *path, const char *key, const char *val, void *ud) 
 static int list_sas(int fd, SaCtx *s) {
     memset(s, 0, sizeof *s);
     ViciMsg m = {0};
-    vici_kv(&m, "ike", "lordos");
+    vici_kv(&m, "ike", "insaneos");
     int rc = vici_call(fd, "list-sas", &m, "list-sa", sa_cb, NULL, s, 5000);
     vici_free(&m);
     return rc;
@@ -294,7 +294,7 @@ void ipsec_run(const char *name) {
     InitCtx ic = { .log = "" };
     ViciMsg m = {0};
     vici_kv(&m, "child", "net");
-    vici_kv(&m, "ike", "lordos");
+    vici_kv(&m, "ike", "insaneos");
     vici_kv(&m, "timeout", "30000");
     vici_kv(&m, "loglevel", "1");
     r = vici_call(vfd, "initiate", &m, "control-log", init_log, init_reply, &ic, 40000);
@@ -351,7 +351,7 @@ void ipsec_run(const char *name) {
     }
     {
         ViciMsg t = {0};
-        vici_kv(&t, "ike", "lordos");
+        vici_kv(&t, "ike", "insaneos");
         vici_kv(&t, "timeout", "5000");
         ViciResult tr;
         vici_simple(vfd, "terminate", &t, &tr, 8000);

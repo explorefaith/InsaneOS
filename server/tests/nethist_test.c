@@ -57,7 +57,7 @@ static void test_roundtrip(void) {
         nh_add(h, now, NULL, 1000, 100);
         nh_add(h, now, "desktop:firefox-esr", 600, 60);
         nh_add(h, now, "lpk:fractal", m % 2 ? 300 : 0, 30);
-        nh_add(h, now, "lordos", 10, 1);
+        nh_add(h, now, "insaneos", 10, 1);
         nh_flush(h, now + 50);
     }
     double rx, tx;
@@ -238,14 +238,14 @@ static void test_apps_and_clear(void) {
 int main(void) {
     snprintf(dir, sizeof dir, "/tmp/nethist-test-XXXXXX");
     if (!mkdtemp(dir)) { perror("mkdtemp"); return 1; }
-    snprintf(path, sizeof path, "%s/state/lordos/net-history.bin", dir);
+    snprintf(path, sizeof path, "%s/state/insaneos/net-history.bin", dir);
     test_roundtrip();
     test_rotation();
     test_corruption();
     test_apps_and_clear();
     unlink(path);
     char p[400];
-    snprintf(p, sizeof p, "%s/state/lordos", dir); rmdir(p);
+    snprintf(p, sizeof p, "%s/state/insaneos", dir); rmdir(p);
     snprintf(p, sizeof p, "%s/state", dir); rmdir(p);
     rmdir(dir);
     printf("nethist-test: %d checks, %d failures\n", checks, fails);

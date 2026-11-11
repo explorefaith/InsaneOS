@@ -98,11 +98,11 @@ export function resumedOf(line) {
 export const sizeMb = (approxMb, bytes) => Math.round(bytes > 0 ? bytes / 1048576 : approxMb);
 
 // ---- downloaded images (the Storage window, 6.16) ----
-// /var/lib/lordos/machines/images: <sha256>.iso (checked), <sha256>.iso.part (a stopped download, continued on the next
+// /var/lib/insaneos/machines/images: <sha256>.iso (checked), <sha256>.iso.part (a stopped download, continued on the next
 // try) and <sha256>.json (what it is: { id, arch, file, size, at }, written by the admin helper). entries: fs.list of
-// that folder; infoOf(sha): the parsed .json or null; machines: lord.vm.list() (this account's: { name, iso, state }).
+// that folder; infoOf(sha): the parsed .json or null; machines: insane.vm.list() (this account's: { name, iso, state }).
 // → [{ sha, path, partial, size, id, arch, file, version, label, users: [names], dirs, running: [names] }], biggest first
-export const IMAGES_DIR = '/var/lib/lordos/machines/images';
+export const IMAGES_DIR = '/var/lib/insaneos/machines/images';
 export function downloadedImages(cat, entries, infoOf, machines, runningOf = (m) => m.state === 'running' || m.state === 'paused') {
   const out = new Map();
   for (const e of Array.isArray(entries) ? entries : []) {
@@ -142,7 +142,7 @@ export function unattendedOf(cat, id, arch) {
   return { kind: u.kind, image, kernel: a.kernel, initrd: a.initrd, append: String(u.append || ''), release: String(s.release || '') };
 }
 
-// what the person types for an unattended install, checked as lord-vm checks it: { ok, errors: { user, password, hostname } }
+// what the person types for an unattended install, checked as insane-vm checks it: { ok, errors: { user, password, hostname } }
 const RESERVED = ['root', 'daemon', 'bin', 'sys', 'sync', 'games', 'man', 'lp', 'mail', 'news', 'uucp', 'proxy', 'www-data', 'backup', 'list',
   'irc', 'nobody', 'systemd-network', 'messagebus', 'admin', 'sudo', 'wheel', 'adm'];
 export function checkSetup({ user, password, hostname }) {
@@ -161,7 +161,7 @@ export function hostnameFor(name) {
   return h || 'machine';
 }
 
-// an account name from the person's own: "Federico Pereira" or "lordbasex" → "lordbasex"
+// an account name from the person's own: "Federico Pereira" or "insaneos" → "insaneos"
 export function userFor(home) {
   const u = String(home || '').split('/').filter(Boolean).pop() || '';
   return /^[a-z_][a-z0-9_-]{0,31}$/.test(u) && !RESERVED.includes(u) ? u : 'user';

@@ -1,8 +1,8 @@
 /* wlregion.h — a wl_region as the list of add/subtract requests that made it. A point is inside if
  * the last rectangle holding it was an add. Used for wl_surface.set_input_region: an app can give
  * a surface no input at all, and the pointer then goes to what is below it. */
-#ifndef LORD_WLREGION_H
-#define LORD_WLREGION_H
+#ifndef INSANE_WLREGION_H
+#define INSANE_WLREGION_H
 
 #include <stdlib.h>
 #include <string.h>

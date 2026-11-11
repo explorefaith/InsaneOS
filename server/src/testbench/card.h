@@ -1,6 +1,6 @@
-/* card.h — the test card of lordos-testbench (see card.c). */
-#ifndef LORD_TESTBENCH_CARD_H
-#define LORD_TESTBENCH_CARD_H
+/* card.h — the test card of insaneos-testbench (see card.c). */
+#ifndef INSANE_TESTBENCH_CARD_H
+#define INSANE_TESTBENCH_CARD_H
 
 #include <stdint.h>
 

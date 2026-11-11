@@ -2,8 +2,8 @@
  * so tests/osk_test.c covers it: is a device a keyboard someone can type on, which keys a tap may
  * press, and the short queue of taps. Never stores or prints what is typed: a queued tap is a key
  * code that leaves the queue at the next pass of the main loop. */
-#ifndef LORD_OSK_H
-#define LORD_OSK_H
+#ifndef INSANE_OSK_H
+#define INSANE_OSK_H
 
 #include <stddef.h>
 
@@ -15,7 +15,7 @@
 
 typedef struct { int code, level; } OskTap;
 
-/* The keys with a label on the keyboard, in a fixed order (lord.input.keyLabels). */
+/* The keys with a label on the keyboard, in a fixed order (insane.input.keyLabels). */
 extern const unsigned short osk_label_codes[];
 extern const size_t osk_label_count;
 

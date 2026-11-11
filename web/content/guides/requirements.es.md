@@ -4,7 +4,7 @@ Qué necesita cada imagen de Insane OS. Si un número de esta página no coincid
 
 | | PC (ISO) | Máquina virtual | Raspberry Pi 5 / Raspberry Pi 500 | Paquete para Debian 13 |
 |---|---|---|---|---|
-| Archivo | `lordos-live-<versión>-amd64.iso` | `lordos-<versión>-amd64.ova`, o una ISO | `lordos-<versión>-rpi5-arm64.img.xz` | `install.sh` |
+| Archivo | `insaneos-live-<versión>-amd64.iso` | `insaneos-<versión>-amd64.ova`, o una ISO | `insaneos-<versión>-rpi5-arm64.img.xz` | `install.sh` |
 | Procesador | Intel o AMD de 64 bits (amd64) | al menos 4 CPU | Raspberry Pi 5 o Raspberry Pi 500 | amd64 o arm64 |
 | Memoria | 4 GB mínimo, 8 GB recomendado | 4 GB mínimo, lo ideal 16 GB | con 4 GB anda, se recomiendan 8 o 16 GB | igual que en una PC |
 | Almacenamiento | disco de 8 GB mínimo, 32 GB recomendado | disco de 32 GB (el de la OVA crece con el uso) | tarjeta SD de 16 GB (8 GB mínimo) o NVMe | 2 GB libres en `/var` |
@@ -21,7 +21,7 @@ Qué necesita cada imagen de Insane OS. Si un número de esta página no coincid
 
 ## ISO arm64
 
-`lordos-live-<versión>-arm64.iso` es para máquinas y máquinas virtuales arm64 que arrancan con UEFI. Por ahora solo se corrió en QEMU emulado, no en hardware real. Los números de memoria y almacenamiento son los de la PC.
+`insaneos-live-<versión>-arm64.iso` es para máquinas y máquinas virtuales arm64 que arrancan con UEFI. Por ahora solo se corrió en QEMU emulado, no en hardware real. Los números de memoria y almacenamiento son los de la PC.
 
 ## Máquina virtual
 
@@ -42,7 +42,7 @@ Paso a paso: [Máquina virtual (OVA)](/es/virtual-machine/).
 
 ## Sobre un Debian 13 que ya tenés
 
-`curl -fsSL https://lordos.org/install.sh | sh` agrega Insane OS a Debian 13 (trixie), amd64 o arm64, arrancado con systemd. Necesita root o `sudo` y 2 GB libres en `/var`. Otras distribuciones basadas en Debian pueden funcionar, con una advertencia.
+`curl -fsSL https://insaneos.org/install.sh | sh` agrega Insane OS a Debian 13 (trixie), amd64 o arm64, arrancado con systemd. Necesita root o `sudo` y 2 GB libres en `/var`. Otras distribuciones basadas en Debian pueden funcionar, con una advertencia.
 
 ## No soportado
 

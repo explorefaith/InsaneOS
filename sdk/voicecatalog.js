@@ -11,9 +11,9 @@
 //   VOICES                         [{ id: 'lola', gender: 'f', source: 'kyutai' }, …]   every voice speaks every language;
 //                                  hdOnly: only the HD models carry it
 //   hasVoice(voice, hd)            whether that quality offers the voice
-//   modelPackage(lang, hd)         'lordos-voice-es' | 'lordos-voice-es-hd'
-//   voicePackage(lang, voice, hd)  'lordos-voice-es-lola' | 'lordos-voice-es-lola-hd'
-//   PREVIEWS_PACKAGE               'lordos-voice-previews': a recorded sample of every voice in every language
+//   modelPackage(lang, hd)         'insaneos-voice-es' | 'insaneos-voice-es-hd'
+//   voicePackage(lang, voice, hd)  'insaneos-voice-es-lola' | 'insaneos-voice-es-lola-hd'
+//   PREVIEWS_PACKAGE               'insaneos-voice-previews': a recorded sample of every voice in every language
 //   voiceLabel(id)                 'Bill Boerst' from 'bill_boerst' (a proper name: not translated)
 
 // sample: what a voice reads to be tried, and what its recorded preview says (tools/voice/make-previews.sh); in the
@@ -61,7 +61,7 @@ export const SOURCE_LICENSES = {
   vctk: 'CC-BY-4.0',
 };
 
-export const PREVIEWS_PACKAGE = 'lordos-voice-previews';
+export const PREVIEWS_PACKAGE = 'insaneos-voice-previews';
 
 const LANG_IDS = new Set(VOICE_LANGS.map((l) => l.id));
 const VOICE_IDS = new Set(VOICES.map((v) => v.id));
@@ -69,12 +69,12 @@ const pkgPart = (s) => String(s).replace(/_/g, '-');        // Debian package na
 
 export function modelPackage(lang, hd) {
   if (!LANG_IDS.has(lang)) return null;
-  return `lordos-voice-${lang}${hd ? '-hd' : ''}`;
+  return `insaneos-voice-${lang}${hd ? '-hd' : ''}`;
 }
 
 export function voicePackage(lang, voice, hd) {
   if (!LANG_IDS.has(lang) || !VOICE_IDS.has(voice) || !hasVoice(voice, hd)) return null;
-  return `lordos-voice-${lang}-${pkgPart(voice)}${hd ? '-hd' : ''}`;
+  return `insaneos-voice-${lang}-${pkgPart(voice)}${hd ? '-hd' : ''}`;
 }
 
 export const voiceLabel = (id) => String(id).split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');

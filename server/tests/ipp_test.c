@@ -15,7 +15,7 @@ static int fails, total;
 static void t_roundtrip(void) {
     IppBuf b;
     ipp_init(&b, IPP_OP_PRINT_JOB, 42);
-    ipp_std(&b, "ipp://localhost/printers/PDF", "lord");
+    ipp_std(&b, "ipp://localhost/printers/PDF", "insane");
     ipp_add_str(&b, IPP_T_NAME, "job-name", "Informe ñ.pdf");
     ipp_add_str(&b, IPP_T_MIMETYPE, "document-format", "application/pdf");
     ipp_group(&b, IPP_G_JOB);

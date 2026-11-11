@@ -7,7 +7,7 @@
 // Enter says the text and keeps the panel open for the next; the last phrases stay below it to be said again with a
 // click (only in memory: they go when Insane OS restarts). Esc closes it. The player shows as for any reading.
 import { useState } from 'react';
-import { View, Text, mainBox } from '@lordos/runtime';
+import { View, Text, mainBox } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme, ThemeContext, DEFAULT_TOKENS, shellTokens } from './theme.js';
 import { t } from './i18n.js';

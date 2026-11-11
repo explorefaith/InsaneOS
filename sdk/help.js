@@ -21,14 +21,14 @@
 //   ---
 // Special links in the text: [Open Settings → Network](settings:network), [Files](app:files)
 // and [another article](help:spotlight). Search indexes the articles (registerSpotlightSource).
-// They are read by lord.help (server/src/ui/js_help.c), only from Insane OS's assets/help folder.
+// They are read by insane.help (server/src/ui/js_help.c), only from Insane OS's assets/help folder.
 import { locale, t } from './i18n.js';
 import { settings } from './settings.js';
 import { wm, getApp, isLiveSystem } from './windows.js';
 import { registerSpotlightSource } from './spotlight.js';
 
 const DEFAULT_LANG = 'en';
-const has = () => typeof lord.help !== 'undefined';
+const has = () => typeof insane.help !== 'undefined';
 const langOf = () => String(locale.get().lang || DEFAULT_LANG).split('-')[0];
 const lists = new Map();                    // 'es' → raw list of that language
 const bodies = new Map();                   // 'es/clock' → parsed article (with the fallback applied)
@@ -48,7 +48,7 @@ function parse(txt) {
 function rawList(lang) {
   if (lists.has(lang)) return lists.get(lang);
   let list = [];
-  try { list = has() ? lord.help.list(lang) : []; } catch (e) { list = []; }
+  try { list = has() ? insane.help.list(lang) : []; } catch (e) { list = []; }
   lists.set(lang, list);
   return list;
 }
@@ -67,7 +67,7 @@ function mergedList(lang) {
 }
 
 function readRaw(lang, id) {
-  try { return has() ? lord.help.read(lang, id) : null; } catch (e) { return null; }
+  try { return has() ? insane.help.read(lang, id) : null; } catch (e) { return null; }
 }
 
 const fold = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');

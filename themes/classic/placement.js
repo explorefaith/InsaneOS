@@ -5,7 +5,7 @@
 //   workAreaFor(pos, d, every)   a display's work area: without its bar when it has one (sdk/menubarmodel.js hasBar)
 //   onBar(pos, x, y, bars)       a point on one of the bars (a click there doesn't close a panel)
 //   trayPanel(pos, w, h, d)      quick settings or notifications at the tray's end of display d's bar
-import { screen, direction, mainDisplay, hasBar } from '@lordos/sdk';
+import { screen, direction, mainDisplay, hasBar } from '@insaneos/sdk';
 import { BAR_H, barSize } from './components/Taskbar.jsx';
 
 // Several displays (docs/DISPLAYS.md): a taskbar on every display, each one's work area without its bar, unless

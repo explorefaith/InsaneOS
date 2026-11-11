@@ -16,8 +16,8 @@ static const CleanRule table[] = {
     /* caches anything rebuilds by itself */
     { .id = "thumbnails", .version = 1, .category = "cache", .root = ".cache/thumbnails", .pattern = "*.png", .risk = CLEAN_RISK_REGENERABLE, .action = CLEAN_ACT_DELETE,
       .text_key = "cleaner.rule.thumbnails" },
-    { .id = "lordos-thumbnails", .version = 1, .category = "cache", .root = ".cache/lordos/thumbs", .pattern = "*.png", .risk = CLEAN_RISK_REGENERABLE, .action = CLEAN_ACT_DELETE,
-      .text_key = "cleaner.rule.lordos-thumbnails" },
+    { .id = "insaneos-thumbnails", .version = 1, .category = "cache", .root = ".cache/insaneos/thumbs", .pattern = "*.png", .risk = CLEAN_RISK_REGENERABLE, .action = CLEAN_ACT_DELETE,
+      .text_key = "cleaner.rule.insaneos-thumbnails" },
     { .id = "fontconfig", .version = 1, .category = "cache", .root = ".cache/fontconfig", .pattern = "*", .risk = CLEAN_RISK_REGENERABLE, .action = CLEAN_ACT_DELETE,
       .text_key = "cleaner.rule.fontconfig" },
     { .id = "shader-cache", .version = 1, .category = "cache", .root = ".cache/mesa_shader_cache", .pattern = "*", .risk = CLEAN_RISK_REGENERABLE, .action = CLEAN_ACT_DELETE,
@@ -114,7 +114,7 @@ static const CleanRule table[] = {
     { .id = "ai-ollama", .version = 1, .category = "ai", .root = ".ollama/models", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,
       .text_key = "cleaner.rule.ai-ollama" },
     /* what a removed Insane OS app left: its folder, whole, chosen by name. An installed app's folder is never offered */
-    { .id = "app-leftovers", .version = 1, .category = "apps", .root = ".local/share/lordos/appdata", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_TRASH,
+    { .id = "app-leftovers", .version = 1, .category = "apps", .root = ".local/share/insaneos/appdata", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_TRASH,
       .text_key = "cleaner.rule.app-leftovers", .unit_depth = 1, .explicit_only = 1, .leftover = 1 },
     /* shown and measured, nothing offered */
     { .id = "old-downloads", .version = 1, .category = "info", .root = "Downloads", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,
@@ -128,7 +128,7 @@ static const CleanRule table[] = {
       .text_key = "cleaner.rule.gradle" },
     { .id = "containers", .version = 1, .category = "info", .root = ".local/share/docker", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,
       .text_key = "cleaner.rule.containers" },
-    /* only the real Trash empties these (lord.clean.emptyTrash) */
+    /* only the real Trash empties these (insane.clean.emptyTrash) */
     { .id = "trash", .version = 1, .category = "trash", .root = ".local/share/Trash/files", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,
       .text_key = "cleaner.rule.trash" },
     { .id = "trash-disks", .version = 1, .category = "trash", .root = ".Trash-$/files", .pattern = "*", .risk = CLEAN_RISK_REVIEW, .action = CLEAN_ACT_NONE,

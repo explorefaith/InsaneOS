@@ -39,8 +39,8 @@ SHA-256 and Ed25519 are **our own code**, small and readable. Ed25519 follows th
 (`ed25519_sign`/`ed25519_public`) was added on top of the verification the package engine already
 had. The JSON reader is our own and strict (`server/src/sec/json.c`).
 
-**No OpenSSL:** by policy only `lord-sessiond`, `lord-maild` and (0.8.5) `lord-fetch` and `lord-tls` link it (`lord-rdesk` loads it through libfreerdp), never
-`lord-server`. `.lpk` verification happens in C, at
+**No OpenSSL:** by policy only `insane-sessiond`, `insane-maild` and (0.8.5) `insane-fetch` and `insane-tls` link it (`insane-rdesk` loads it through libfreerdp), never
+`insane-server`. `.lpk` verification happens in C, at
 install time (`lpk_check` in `js_sys.c`) and at load time (modification detection via
 `pkg_status`).
 
@@ -70,7 +70,7 @@ They are shown in the Store and in the install dialog:
 | ![unsigned](signing-unsigned.png) | ![revoked](signing-revoked.png) |
 | An unsigned package warns before installing | A revoked package is not installed, with a clear message |
 
-A **packaged app** in `/usr/lib/lordos-apps/<id>/` must be a Verified author's: a key the catalog lists, not revoked, checked at every load over every file
+A **packaged app** in `/usr/lib/insaneos-apps/<id>/` must be a Verified author's: a key the catalog lists, not revoked, checked at every load over every file
 ([PACKAGED-APPS.md](PACKAGED-APPS.md)). Signed by any other key, or by the official one, or with no catalog, it doesn't load.
 
 ## Rules
@@ -80,17 +80,17 @@ A **packaged app** in `/usr/lib/lordos-apps/<id>/` must be a Verified author's: 
 - **Signed catalog** (`catalog.json` + `catalog.sig`): signed by the Insane OS key, it carries the
   versions, sizes, hashes, the keys of verified authors and a **revocation list** of keys and
   packages. A revoked package is disabled with a clear message (`catalog_revoked`). The catalog in
-  force is the valid one with the highest `serial` between `/usr/share/lordos/catalog.json` and
-  `~/.local/share/lordos/catalog/catalog.json`.
+  force is the valid one with the highest `serial` between `/usr/share/insaneos/catalog.json` and
+  `~/.local/share/insaneos/catalog/catalog.json`.
 
 ## Modify, restore and share (the "business" idea)
 
-- At install time, the **original `.lpk` is kept** in `~/.local/share/lordos/apps/.orig/<id>.lpk`.
+- At install time, the **original `.lpk` is kept** in `~/.local/share/insaneos/apps/.orig/<id>.lpk`.
 - If the user **edits** the installed app, Insane OS detects it through the hashes and marks it
   "**Modified by you**", showing which files changed (`pkg_status`).
 - "**Restore original**" puts it back exactly as it was (`pkg_restore`).
 - "**Share my version**" builds a new `.lpk` signed with the **user's own key** (generated the
-  first time in `~/.local/share/lordos/keys/user.json`, permissions 600), with
+  first time in `~/.local/share/insaneos/keys/user.json`, permissions 600), with
   `basedOn: <id>@<version> by <author>` in the manifest, so credit is preserved (`pkg_share`).
 
 | | |
@@ -109,7 +109,7 @@ node tools/lpk.mjs catalog <fuente.json> --key oficial.json [carpeta]   # signed
 ```
 
 `lpk.mjs` signs while packaging if given `--key`, `$LPK_KEY`, or if
-`~/.config/lordos/lpk-key.json` exists. With `--unsigned` the result is "Unsigned" (still with
+`~/.config/insaneos/lpk-key.json` exists. With `--unsigned` the result is "Unsigned" (still with
 hashes).
 
 ### The Insane OS key
@@ -117,11 +117,11 @@ hashes).
 Official packages (bundled apps, catalog) are signed with the **Insane OS key**. Today there is only
 one, the **development** key:
 
-- its **public key** is in the repository: `packaging/keys/lordos-dev.pub`, and compiled into the
+- its **public key** is in the repository: `packaging/keys/insaneos-dev.pub`, and compiled into the
   binary in `server/src/sec/keys.h` (on purpose: no file in the home folder can add an official
   key);
 - its **private key is NOT in the repository**: it lives on the development machine, in
-  `~/.config/lordos-dev/lordos-dev.key` (permissions 600). **Do not commit private keys.**
+  `~/.config/insaneos-dev/insaneos-dev.key` (permissions 600). **Do not commit private keys.**
 
 For a public release, the final key is added to `keys.h` and the development one is removed.
 
@@ -131,29 +131,29 @@ Every GitHub release file (the `.deb`, the ISO, the Raspberry Pi image) is liste
 in `SHA256SUMS`, and `SHA256SUMS` is signed with the Insane OS release key:
 
 - `SHA256SUMS.sig` = base64 of the 64-byte Ed25519 signature over the exact bytes of `SHA256SUMS`.
-- Public key: `tools/release/lordos-release.pub.pem`, also embedded as `RELEASE_PUBKEY_PEM` in
+- Public key: `tools/release/insaneos-release.pub.pem`, also embedded as `RELEASE_PUBKEY_PEM` in
   `tools/install/install.sh`.
 - Fingerprint (SHA-256 of the DER public key):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 - Signing: `tools/release/sign-release.sh <release-dir>` writes `SHA256SUMS` and `SHA256SUMS.sig`
   and checks the result against the public key. The private key lives only on the maintainer's
-  machine (`~/.config/lordos-release/release-ed25519.key.pem`, mode 0600), never in the repository
+  machine (`~/.config/insaneos-release/release-ed25519.key.pem`, mode 0600), never in the repository
   or on a build VM. Keep an offline backup of it.
 - The Debian installer refuses to install when the signature is missing or invalid, before the
   `.deb` is downloaded.
-- Installed systems update from the signed APT repository on lordos.org (0.8.1), which has its own
-  OpenPGP key (`packaging/keys/lordos-archive-keyring.gpg`), because APT needs OpenPGP; see
+- Installed systems update from the signed APT repository on insaneos.org (0.8.1), which has its own
+  OpenPGP key (`packaging/keys/insaneos-archive-keyring.gpg`), because APT needs OpenPGP; see
   [UPDATES.md](UPDATES.md).
 
 Checking a download by hand (OpenSSL 3):
 
 ```sh
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 ```
 
-Each release also carries an SPDX SBOM (`lordos_<version>_<arch>.spdx.json`, from
+Each release also carries an SPDX SBOM (`insaneos_<version>_<arch>.spdx.json`, from
 `tools/release/make-sbom.sh`). It goes into the release folder before signing, so `SHA256SUMS` and
 its signature cover it too. See [COMPLIANCE.md](COMPLIANCE.md).
 
@@ -163,25 +163,25 @@ The whole release process (changelog, tag, build, SBOM, signing and `gh release 
 ## Verified system code (0.8.2)
 
 The `.lpk` signing above covers apps installed by the user. Insane OS's **own** code — the desktop,
-the login screen and every native app — is checked too: lord-server refuses to run a bundle that no
+the login screen and every native app — is checked too: insane-server refuses to run a bundle that no
 longer matches the signed copy. This is phase 1 of 3 of "System apps immutable" (phase 3 brings
 fs-verity and A/B system images).
 
 ### What is signed
 
-`code-manifest.json`, at the root of the Insane OS folder (`/usr/lib/lordos`; the repository root in a
+`code-manifest.json`, at the root of the Insane OS folder (`/usr/lib/insaneos`; the repository root in a
 development tree), lists the size and SHA-256 of every file Insane OS runs as JavaScript:
 
 | File | What it is |
 |---|---|
 | `themes/<theme>/theme.bundle.js` | the shell, the SDK, the React runtime and **every native app** (they are bundled into each theme), for `default`, `classic` and `greeter` (the login screen) |
-| `assets/app-host.bundle.js` | React + SDK of isolated app processes (`lord-server --app <id>`) |
+| `assets/app-host.bundle.js` | React + SDK of isolated app processes (`insane-server --app <id>`) |
 | `assets/sysapps/<id>/app.js` | system apps that run as their own sandboxed process (Passwords; Mail, Calendar, Contacts and Reminders since 0.8.2; System Information's Sandbox Probe `sysprobe` in 0.8.5) |
 
 ```json
 {
   "format": 1,
-  "kind": "lordos-system-code",
+  "kind": "insaneos-system-code",
   "version": "0.8.2",
   "files": [
     { "path": "assets/app-host.bundle.js", "size": 433360, "sha256": "25d0b1ae…" },
@@ -192,20 +192,20 @@ development tree), lists the size and SHA-256 of every file Insane OS runs as Ja
 
 `code-manifest.sig` is the base64 of the Ed25519 signature over the exact bytes of the manifest,
 made with the **Insane OS release key** (the same key as `SHA256SUMS.sig`, see "Release files" below).
-The public key is compiled into lord-server (`codesig_release_key` in `server/src/sec/codesig.c`;
-`build/codesig-test` checks it against `tools/release/lordos-release.pub.pem`), so no file on disk
+The public key is compiled into insane-server (`codesig_release_key` in `server/src/sec/codesig.c`;
+`build/codesig-test` checks it against `tools/release/insaneos-release.pub.pem`), so no file on disk
 can add a trusted key. The `kind` field keeps a signature made for another purpose from passing as
 this one.
 
 **Not listed, on purpose:** fonts, language catalogs, icons, images, Help articles, `theme.json`
-and a system app's `manifest.json` (its window size; its permissions are decided by lord-server).
+and a system app's `manifest.json` (its window size; its permissions are decided by insane-server).
 They are data read by bounded parsers, not code. A modified catalog can change what a text says
 but cannot run anything; phase 3 (fs-verity over the whole system image) covers them.
 
 `tools/code-manifest.mjs` writes the manifest (deterministic: the same bundles give the same bytes);
 `npm run build` runs it after building, and removes a `code-manifest.sig` that no longer matches.
 
-### How lord-server checks it (`server/src/sec/codesig.c`)
+### How insane-server checks it (`server/src/sec/codesig.c`)
 
 - **Once per process**, before the first bundle: read `code-manifest.json` and `.sig` from the
   Insane OS folder, verify the signature with the compiled-in key, then parse the manifest with the
@@ -228,7 +228,7 @@ but cannot run anything; phase 3 (fs-verity over the whole system image) covers 
 | State | When | About shows |
 |---|---|---|
 | **Verified** | signed manifest, good signature, every loaded bundle matches | "Verified" (green) and "Signed by Insane OS · N components" |
-| **Development build** | no `.sig` (a development tree, `npm run build`), or no manifest at all, in a development build of lord-server | "Development build" (orange) and "Development build: the system code is not signed by Insane OS." |
+| **Development build** | no `.sig` (a development tree, `npm run build`), or no manifest at all, in a development build of insane-server | "Development build" (orange) and "Development build: the system code is not signed by Insane OS." |
 | **Modified** | a bundle does not match, or the manifest or its signature is bad | "Modified — not loaded" (red) |
 
 In a development build with an unsigned manifest the hashes are still checked, so a modified bundle
@@ -240,21 +240,21 @@ development state: without a valid signature nothing is loaded.
 - The bundle is **not run**. The refusal is logged (`code: REFUSED themes/default/theme.bundle.js:
   SHA-256 differs from the manifest — this Insane OS component was modified and was not loaded` in the
   session log or the journal) and remembered for the session.
-- **A theme:** at session start lord-server falls back to Insane Flow (`default`), then Insane Classic
+- **A theme:** at session start insane-server falls back to Insane Flow (`default`), then Insane Classic
   (`classic`); on a theme switch it keeps the last theme that loaded (since 0.8.5, so two refused
   switches in a row no longer leave the session without a theme). The desktop
   shows a notification: **"This Insane OS component was modified and was not loaded"**, naming the file,
   with a Details button (About). The broken theme is not offered again in this session.
 - **Nothing left to load** (every theme, the login screen, or a bad manifest/signature): the built-in
-  **recovery screen** — compiled into lord-server, so it is as trusted as lord-server itself — says
-  what happened, lists the files and how to repair it (`sudo apt install --reinstall lordos`); in a
+  **recovery screen** — compiled into insane-server, so it is as trusted as insane-server itself — says
+  what happened, lists the files and how to repair it (`sudo apt install --reinstall insaneos`); in a
   session it has a Log Out button. Never a blank screen.
 - **An isolated system app** (Passwords, Mail, Calendar, Contacts, Reminders): its window shows the same recovery screen instead of the app.
 
-`lord.code.status()` (`ui/js_sec.c`) gives the SDK the state and the refusals; `sdk/codesig.js`
-shows the notification. `lord-server --check-code [<folder>] [--require-signed]` checks a whole tree
+`insane.code.status()` (`ui/js_sec.c`) gives the SDK the state and the refusals; `sdk/codesig.js`
+shows the notification. `insane-server --check-code [<folder>] [--require-signed]` checks a whole tree
 the way a session would and exits 1 if anything is off (used by `tools/iso/mkdeb.sh`, and for
-troubleshooting: `sudo /usr/lib/lordos/bin/lord-server --check-code`).
+troubleshooting: `sudo /usr/lib/insaneos/bin/insane-server --check-code`).
 
 | | |
 |---|---|
@@ -269,7 +269,7 @@ troubleshooting: `sudo /usr/lib/lordos/bin/lord-server --check-code`).
 
 Every app in `apps/` is a **system app** (`system: true`, set by `tools/build-theme.mjs`; a
 package can never claim it, `sdk/windows.js` `isSystemApp`). Store → Installed shows "System app —
-part of Insane OS" where a Linux app has Remove, and About shows a "System app" badge. The `lordos`
+part of Insane OS" where a Linux app has Remove, and About shows a "System app" badge. The `insaneos`
 Debian package is marked `Protected: yes` (Debian's field for packages the system needs), so the
 Store's package engine refuses to remove it (`pkg.removeEssential`, the same rule as essential
 packages) and dpkg wants `--force-remove-protected`. This part was checked in the code
@@ -284,21 +284,21 @@ packages) and dpkg wants `--force-remove-protected`. This part was checked in th
 ### Threat model
 
 - **Protects against** a process running as the user (or as any non-root account) changing
-  Insane OS's code: it can't write `/usr/lib/lordos` anyway, and a copy elsewhere is never loaded
-  (lord-server only runs files under its own folder, checked against the signed list). It also
+  Insane OS's code: it can't write `/usr/lib/insaneos` anyway, and a copy elsewhere is never loaded
+  (insane-server only runs files under its own folder, checked against the signed list). It also
   catches **offline modification** of the bundles or the manifest — a disk edited from another
   system, a corrupted or tampered image — and plain corruption, and it tells the user instead of
   running it.
-- **Does not protect against root.** An attacker with root can replace lord-server itself (and its
-  compiled-in key), or the kernel; no check inside lord-server can stop that. A development build of
-  lord-server accepts an unsigned manifest by design, so swapping in a development build also needs
+- **Does not protect against root.** An attacker with root can replace insane-server itself (and its
+  compiled-in key), or the kernel; no check inside insane-server can stop that. A development build of
+  insane-server accepts an unsigned manifest by design, so swapping in a development build also needs
   root. Full protection of the system files against offline and root-level changes comes with phase 3
   (fs-verity and A/B system images, verified from boot).
 - Fonts, catalogs and images are not covered (see above).
 
 ### Startup cost
 
-Measured with the logs lord-server prints (`code: …`), 2026-10-19:
+Measured with the logs insane-server prints (`code: …`), 2026-10-19:
 
 | Machine | Signature check (once per process) | Default theme (1.46 MB) | Login screen (431 KB) | Added to a session start |
 |---|---|---|---|---|
@@ -313,26 +313,26 @@ noise of the build without the check (727–870 ms against 745–855 ms).
 ### The release flow
 
 1. On the maintainer's machine: `npm run build`, then `tools/release/sign-code.sh` (regenerates
-   `code-manifest.json`, signs it with `~/.config/lordos-release/release-ed25519.key.pem` into
-   `code-manifest.sig` and verifies it against `lordos-release.pub.pem`). The bundles don't depend on
+   `code-manifest.json`, signs it with `~/.config/insaneos-release/release-ed25519.key.pem` into
+   `code-manifest.sig` and verifies it against `insaneos-release.pub.pem`). The bundles don't depend on
    the architecture, so one signature serves amd64 and arm64.
    (0.8.7) Then `tools/release/sign-hwsnapshot.sh`: it rebuilds
    `assets/hwreport/snapshot.json` (the tested-hardware catalogue's snapshot, `tools/hwreport/catalog.mjs`) and
-   signs it the same way into `assets/hwreport/snapshot.json.sig`. lord-server verifies it in C
+   signs it the same way into `assets/hwreport/snapshot.json.sig`. insane-server verifies it in C
    (`sysreport/hwsnap.c`) before System Information shows any of it ([BENCHMARK.md](BENCHMARK.md), "0.8.7").
-   It ships in its own package, `lordos-hwdata` (`tools/iso/mkdeb-hwdata.sh`; `REQUIRE_SIGNED_CODE=1` refuses a
-   missing signature and checks it with `openssl` against `lordos-release.pub.pem`), which `lordos` depends on;
+   It ships in its own package, `insaneos-hwdata` (`tools/iso/mkdeb-hwdata.sh`; `REQUIRE_SIGNED_CODE=1` refuses a
+   missing signature and checks it with `openssl` against `insaneos-release.pub.pem`), which `insaneos` depends on;
    `tools/release/apt-repo.sh` checks the signature again before adding that package to the repository, and a
    newer one can be published alone between releases ([RELEASING.md](RELEASING.md), "A newer hardware snapshot
    between releases").
 2. The tree (with both files) goes to the build VMs; `make -C server RELEASE=1`.
-3. `REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb.sh` installs both files into `/usr/lib/lordos/` and runs
-   `lord-server --check-code` on the staged tree: the `.deb` is not built if a bundle doesn't match
+3. `REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb.sh` installs both files into `/usr/lib/insaneos/` and runs
+   `insane-server --check-code` on the staged tree: the `.deb` is not built if a bundle doesn't match
    or (release build) the signature is missing. The ISO and the Raspberry Pi image install that `.deb`
    (`tools/rpi/build-img.sh` passes `RELEASE` and `REQUIRE_SIGNED_CODE` to its arm64 chroot), together with
-   `lordos-hwdata` from `REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb-hwdata.sh`. An x86-64
-   host packaging an `server/build` already compiled for aarch64 can't run that `lord-server`, so it
-   sets `CODE_CHECK_SERVER` to a `lord-server` built for the host from the same tree: the check reads
+   `insaneos-hwdata` from `REQUIRE_SIGNED_CODE=1 tools/iso/mkdeb-hwdata.sh`. An x86-64
+   host packaging an `server/build` already compiled for aarch64 can't run that `insane-server`, so it
+   sets `CODE_CHECK_SERVER` to a `insane-server` built for the host from the same tree: the check reads
    only the bundles and the signature, which are the same on both architectures.
 
 See [RELEASING.md](RELEASING.md), step 3.
@@ -356,10 +356,10 @@ See [RELEASING.md](RELEASING.md), step 3.
 | `server/src/sec/pkgstate.c` | saved original, "Modified by you", restore, share, update rule |
 | `server/src/sec/json.c` | strict JSON reader |
 | `server/src/sec/keys.h` | official public keys |
-| `server/src/ui/js_sec.c` | `lord.sign` for the SDK (status, restore, share, userKey) |
+| `server/src/ui/js_sec.c` | `insane.sign` for the SDK (status, restore, share, userKey) |
 | `server/src/sec/pkgapp.c` | the third app root: the same check on a folder, a Verified author's key |
 | `tools/lpk.mjs` | package, sign, verify, keygen, catalog and a signed tree for a packaged app |
-| `packaging/keys/lordos-dev.pub` | development public key |
+| `packaging/keys/insaneos-dev.pub` | development public key |
 | `server/src/sec/codesig.c` | verified system code: the signed manifest and the check of each bundle at load time |
 | `tools/code-manifest.mjs` | writes `code-manifest.json` (run by `npm run build`) |
 | `tools/release/sign-code.sh` | signs it with the release key (maintainer's machine only) |

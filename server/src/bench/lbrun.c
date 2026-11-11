@@ -7,7 +7,7 @@
 #include "boottest.h"
 #include "bench.h"
 #include "../hw/jbuf.h"
-#include "lord_version.h"
+#include "insane_version.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -49,7 +49,7 @@ typedef struct {
     char *extra;
 } Job;
 
-/* ---- the helper's fixed path, next to lord-server, as for lord-doc and lord-media ---- */
+/* ---- the helper's fixed path, next to insane-server, as for insane-doc and insane-media ---- */
 
 static int helper_path(char *out, size_t n) {
     char self[PATH_MAX];
@@ -59,14 +59,14 @@ static int helper_path(char *out, size_t n) {
     char *slash = strrchr(self, '/');
     if (!slash) return -1;
     *slash = 0;
-    if ((size_t)snprintf(out, n, "%s/lord-bench", self) >= n) return -1;
+    if ((size_t)snprintf(out, n, "%s/insane-bench", self) >= n) return -1;
     struct stat st;
     if (stat(out, &st) || !S_ISREG(st.st_mode) || !(st.st_mode & S_IXUSR)) return -1;
     if ((st.st_uid != 0 && st.st_uid != getuid()) || (st.st_mode & (S_IWGRP | S_IWOTH))) return -1;
     return 0;
 }
 
-/* ---- what lord-server opens for it ---- */
+/* ---- what insane-server opens for it ---- */
 
 static int open_render_node(void) {
     for (int i = 128; i < 136; i++) {
@@ -137,7 +137,7 @@ static void cond_json(HBuf *b, const LbCond *c) {
     hb_printf(b, "}");
 }
 
-/* the frame phases lord-server recorded itself (bench/lbframes.h): [p50, p99] in ms, and counts */
+/* the frame phases insane-server recorded itself (bench/lbframes.h): [p50, p99] in ms, and counts */
 static void phases_json(HBuf *b, const LbPhaseStats *p) {
     const struct { const char *k; LbPct v; } t[] = {
         { "wakeMs", p->wake }, { "beforeRenderMs", p->pre }, { "renderMs", p->build }, { "paintMs", p->paint },
@@ -166,10 +166,10 @@ static char *build_result(const Job *j, int st, const char *why, const Res *r, c
     HBuf b = { 0 };
     struct utsname u;
     if (uname(&u)) u.release[0] = u.machine[0] = 0;
-    hb_printf(&b, "{\"lordbench\":%d,\"mode\":\"%s\",\"at\":%lld,\"seconds\":%.0f,\"status\":\"%s\",\"stopReason\":",
+    hb_printf(&b, "{\"insanebench\":%d,\"mode\":\"%s\",\"at\":%lld,\"seconds\":%.0f,\"status\":\"%s\",\"stopReason\":",
               LB_VERSION, j->desktop ? "desktop" : j->full ? "full" : "quick", (long long)time(NULL), secs, st_name[st]);
     hb_str(&b, why ? why : "");
-    hb_printf(&b, ",\"lordos\":\"%s%s%s\",\"kernel\":", LORD_VERSION, LORD_CHANNEL[0] ? "-" : "", LORD_CHANNEL);
+    hb_printf(&b, ",\"insaneos\":\"%s%s%s\",\"kernel\":", INSANE_VERSION, INSANE_CHANNEL[0] ? "-" : "", INSANE_CHANNEL);
     hb_str(&b, u.release);
     hb_printf(&b, ",\"arch\":");
     hb_str(&b, u.machine);
@@ -193,7 +193,7 @@ static char *build_result(const Job *j, int st, const char *why, const Res *r, c
     hb_printf(&b, ",\"sandbox\":%d", r->sandbox);
     int any_sbx = 0;
     for (int i = 0; i < LB_SBX_COUNT; i++) any_sbx |= r->sbx_have[i];
-    if (any_sbx) {                      /* what lord-bench tried after locking itself in: each one must be denied */
+    if (any_sbx) {                      /* what insane-bench tried after locking itself in: each one must be denied */
         hb_printf(&b, ",\"sandboxTries\":[");
         for (int i = 0, k = 0; i < LB_SBX_COUNT; i++) if (r->sbx_have[i])
             hb_printf(&b, "%s{\"id\":\"%s\",\"denied\":%s,\"errno\":%d}", k++ ? "," : "", lb_sbx_name(i), r->sbx_refused[i] ? "true" : "false", r->sbx_errno[i]);
@@ -240,19 +240,19 @@ static char *build_result(const Job *j, int st, const char *why, const Res *r, c
     return hb_take(&b);
 }
 
-/* ~/.local/state/lordos/lordbench.json, the previous one kept as lordbench-prev.json */
+/* ~/.local/state/insaneos/insanebench.json, the previous one kept as insanebench-prev.json */
 static const char *saving;
 static void write_saving(FILE *f) { fputs(saving, f); fputc('\n', f); }
 static int state_dir(char *out, size_t n) {
     const char *st = getenv("XDG_STATE_HOME"), *home = getenv("HOME");
-    if (st && st[0] == '/') snprintf(out, n, "%s/lordos", st);
-    else if (home && home[0] == '/') snprintf(out, n, "%s/.local/state/lordos", home);
+    if (st && st[0] == '/') snprintf(out, n, "%s/insaneos", st);
+    else if (home && home[0] == '/') snprintf(out, n, "%s/.local/state/insaneos", home);
     else return -1;
     return 0;
 }
 static void save_result(const char *json, int desktop) {
     char dir[PATH_MAX], a[PATH_MAX + 32], b[PATH_MAX + 32];
-    const char *name = desktop ? "lordbench-desktop" : "lordbench";
+    const char *name = desktop ? "insanebench-desktop" : "insanebench";
     if (!state_dir(dir, sizeof dir)) {
         snprintf(a, sizeof a, "%s/%s.json", dir, name);
         snprintf(b, sizeof b, "%s/%s-prev.json", dir, name);
@@ -263,7 +263,7 @@ static void save_result(const char *json, int desktop) {
 }
 
 char *lbrun_saved(int which) {
-    static const char *const names[] = { "lordbench", "lordbench-prev", "lordbench-desktop", "lordbench-desktop-prev" };
+    static const char *const names[] = { "insanebench", "insanebench-prev", "insanebench-desktop", "insanebench-desktop-prev" };
     char dir[PATH_MAX], p[PATH_MAX + 32];
     if (which < 0 || which > 3 || state_dir(dir, sizeof dir)) return NULL;
     snprintf(p, sizeof p, "%s/%s.json", dir, names[which]);
@@ -287,7 +287,7 @@ static double cpu_busy(unsigned long long b0, unsigned long long t0, unsigned lo
     return t1 > t0 ? 100.0 * (double)(b1 - b0) / (double)(t1 - t0) : 0;
 }
 
-/* launches lord-bench with the job and the fds; its socket, or -1 */
+/* launches insane-bench with the job and the fds; its socket, or -1 */
 static int spawn_helper(const char *path, const LbGo *go, const int *fds, int nfd, pid_t *pid) {
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv)) return -1;
@@ -302,9 +302,9 @@ static int spawn_helper(const char *path, const LbGo *go, const int *fds, int nf
     posix_spawnattr_setsigmask(&at, &none);
     posix_spawnattr_setsigdefault(&at, &all);
     posix_spawnattr_setflags(&at, POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETSIGDEF);
-    char sessiond[32] = "LORDOS_SESSIOND=1";
-    char *envp[] = { "LANG=C.UTF-8", getenv("LORDOS_SESSIOND") ? sessiond : NULL, NULL };
-    char *argv[] = { "lord-bench", NULL };
+    char sessiond[32] = "INSANEOS_SESSIOND=1";
+    char *envp[] = { "LANG=C.UTF-8", getenv("INSANEOS_SESSIOND") ? sessiond : NULL, NULL };
+    char *argv[] = { "insane-bench", NULL };
     int e = posix_spawn(pid, path, &fa, &at, argv, envp);
     posix_spawn_file_actions_destroy(&fa);
     posix_spawnattr_destroy(&at);
@@ -416,7 +416,7 @@ static int put_frames(Res *r, int first) {
     if (ph.n) {                             /* also in the session's log, as the drag's line has them */
         char t[1024];
         lbf_phases_text(&ph, t, sizeof t);
-        fprintf(stderr, "lordbench: desktop %s: %s\n", k ? "under load" : "alone", t);
+        fprintf(stderr, "insanebench: desktop %s: %s\n", k ? "under load" : "alone", t);
     }
     return 0;
 }
@@ -532,7 +532,7 @@ static void *run(void *arg) {
         goto stop;
     }
 
-    /* the helper, with what lord-server opened for it */
+    /* the helper, with what insane-server opened for it */
     gpu = open_render_node();
     if (j->full) {
         disk = open_scratch(scratch_dir, sizeof scratch_dir, &storage_mb);
@@ -606,7 +606,7 @@ static void *run(void *arg) {
     pthread_mutex_unlock(&mu);
     pid = -1;
 
-    /* video, in lord-media: the sustained test is over, so throttling stops a run again */
+    /* video, in insane-media: the sustained test is over, so throttling stops a run again */
     g.sustained = 0;
     VidCtx vc = { r, &g, 0 };
     int vr = lbv_run(j->full, on_video, video_tick, &vc);
@@ -700,7 +700,7 @@ char *lbrun_poll(void) {
     return hb_take(&b);
 }
 
-/* ---- boot history (lord-sessiond's boot-times.jsonl) ---- */
+/* ---- boot history (insane-sessiond's boot-times.jsonl) ---- */
 
 static int cmp_d(const void *a, const void *b) { double x = *(const double *)a, y = *(const double *)b; return (x > y) - (x < y); }
 

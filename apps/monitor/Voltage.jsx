@@ -1,9 +1,9 @@
 // Monitor → Voltage (docs/MONITOR.md, "Voltage"): one view over whatever this machine reports. The sources come from
 // voltmodel.js: the Raspberry Pi 5's power chip (the closed, read-only rpi-pmic admin action), hwmon chips, batteries
-// and adapters (lord.monitor.voltage(), world-readable sysfs read on the Monitor's thread). The tab only exists on
+// and adapters (insane.monitor.voltage(), world-readable sysfs read on the Monitor's thread). The tab only exists on
 // machines with something to show (the sample's "volt"). It is read about every 2 s, only while this view is mounted
 // and its window is not minimized.
-import { View, Text, admin, monitor, useAppWindow, useLocale, useStore, useTheme, useWindowHidden, formatNumber } from '@lordos/sdk';
+import { View, Text, admin, monitor, useAppWindow, useLocale, useStore, useTheme, useWindowHidden, formatNumber } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Card, Big, Stat, useCardStyle } from './index.jsx';
 import { Chart } from './Chart.jsx';

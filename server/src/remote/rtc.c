@@ -9,12 +9,12 @@
  *     LAN works with no outside server. It has to be another port: browsers hand every STUN packet
  *     from their STUN server's address to the server's own request handler, ICE answers included.
  *   - ICE over TCP (RFC 6544): passive candidates on the remote desktop's own TCP port, for networks
- *     that drop UDP. lord-sessiond's root connection child reads the first framed check of such a
+ *     that drop UDP. insane-sessiond's root connection child reads the first framed check of such a
  *     connection, picks the bridge by the first 8 characters of its user name (our "route") and hands
  *     the socket over; everything after that, the check's integrity included, is ours.
  *   - ICE restarts: a later offer brings new credentials for both sides over the same DTLS association,
  *     so a changed or interrupted network path recovers without a new sign-in or a new peer.
- *   - DTLS 1.2 with OpenSSL (lord-sessiond already links it), we are the server; the browser's
+ *   - DTLS 1.2 with OpenSSL (insane-sessiond already links it), we are the server; the browser's
  *     certificate must hash to the fingerprint in the offer that came over the authenticated
  *     WebSocket, or the connection ends.
  *   - SRTP with libsrtp2 (keys exported from DTLS), RTCP feedback (NACK, PLI, FIR, receiver reports).
@@ -391,7 +391,7 @@ static int bio_create(BIO *b) { BIO_set_init(b, 1); return 1; }
 static BIO_METHOD *bio_method(void) {
     static BIO_METHOD *m;
     if (!m) {
-        m = BIO_meth_new(BIO_TYPE_SOURCE_SINK | BIO_get_new_index(), "lordos-dtls");
+        m = BIO_meth_new(BIO_TYPE_SOURCE_SINK | BIO_get_new_index(), "insaneos-dtls");
         BIO_meth_set_write(m, bio_write);
         BIO_meth_set_ctrl(m, bio_ctrl);
         BIO_meth_set_create(m, bio_create);
@@ -418,7 +418,7 @@ static int make_cert(Rtc *r) {
     X509_gmtime_adj(X509_getm_notBefore(r->cert), -86400);
     X509_gmtime_adj(X509_getm_notAfter(r->cert), 30L * 86400);
     X509_NAME *nm = X509_get_subject_name(r->cert);
-    X509_NAME_add_entry_by_txt(nm, "CN", MBSTRING_ASC, (const unsigned char *)"lordos", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(nm, "CN", MBSTRING_ASC, (const unsigned char *)"insaneos", -1, -1, 0);
     X509_set_issuer_name(r->cert, nm);
     X509_set_pubkey(r->cert, r->key);
     if (!X509_sign(r->cert, r->key, EVP_sha256())) return -1;
@@ -1062,7 +1062,7 @@ static void tcp_close(Rtc *r, int i, const char *why) {
     if (lost_sel) reselect(r);
 }
 
-/* lord-sessiond's root connection child hands us an ICE-TCP connection: the socket and the first
+/* insane-sessiond's root connection child hands us an ICE-TCP connection: the socket and the first
  * framed packet it read (whose check names our route). Only from root, only a TCP socket. */
 static void tcp_accept(Rtc *r) {
     int u = accept4(r->cfg.ice_lfd, NULL, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);

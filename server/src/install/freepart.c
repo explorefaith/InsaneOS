@@ -24,7 +24,7 @@
 
 #define SGDISK     "/usr/sbin/sgdisk"
 #define EFIBOOTMGR "/usr/bin/efibootmgr"
-#define RUNDIR     "/run/lordos-install"
+#define RUNDIR     "/run/insaneos-install"
 #define ESP_PROBE  RUNDIR "/esp-probe"
 #define TEXT_MAX   32768
 

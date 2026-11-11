@@ -1,10 +1,10 @@
 // "greeter" theme: the Insane OS login screen (docs/SESSIONS.md).
 //
-// It is not a theme you choose in Settings: lord-sessiond loads it with `lord-server --greeter`,
-// as the system user lordos-greeter, without the administration helper. It shows the date,
+// It is not a theme you choose in Settings: insane-sessiond loads it with `insane-server --greeter`,
+// as the system user insaneos-greeter, without the administration helper. It shows the date,
 // a big clock, the users and the password field. Everything that needs root (verifying the
-// password, opening the session, rebooting, powering off) is requested with lord.greeter.send() and the answer
-// arrives through __lordGreeter: this JS never sees /etc/shadow.
+// password, opening the session, rebooting, powering off) is requested with insane.greeter.send() and the answer
+// arrives through __insaneGreeter: this JS never sees /etc/shadow.
 //
 // Requests: {t:'hello'} · {t:'login', user, pass} · {t:'power', a:'reboot'|'poweroff'|'suspend'} · {t:'bootTestCancel'}
 // Notices:  {t:'hello', mode, user, last, host, layouts, variants, lang, users:[{name, full, color, image, admin, open}],
@@ -12,32 +12,32 @@
 //           (last: the user whose session was last shown on the monitor)
 //           {t:'mode', mode:'login'|'lock'|'switch', user, dark, off, sleep, sleepLeft} · {t:'ok'} · {t:'fail', wait} · {t:'error'}
 //           · {t:'busy'} (dark, off, sleep, sleepLeft: a locked session's idle state, see idleOnLock)
-import { render, screen, mainBox, onScreenChange, addListener } from '@lordos/runtime';
+import { render, screen, mainBox, onScreenChange, addListener } from '@insaneos/runtime';
 import {
   View, Text, Image, TextInput, ThemeProvider, useStore, locale, t, formatDate, formatTime, setLanguage, languages, CORE_LANGUAGES, keyboard, settings, InsaneWordmark,
-  lordosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView,
+  insaneosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView,
   regionOf, regionCountry,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { createElement } from 'react';
 
-const send = (msg) => { try { return lord.greeter.send(JSON.stringify(msg)); } catch (e) { return false; } };
+const send = (msg) => { try { return insane.greeter.send(JSON.stringify(msg)); } catch (e) { return false; } };
 
 // A locked session no longer has the monitor, so its idle deadlines move here (docs/SETTINGS.md): the
 // screen goes off after `off` seconds without input, and the computer sleeps when the session's time is up
-// (`sleepLeft` seconds after the lock, then `sleep` after the last input; lord-sessiond suspends,
+// (`sleepLeft` seconds after the lock, then `sleep` after the last input; insane-sessiond suspends,
 // sdk/hardware.jsx onIdle). Locked because the screen had turned off (`dark`): this screen stays off
 // until a key, the mouse or the trackpad. Any other showing has none.
 function idleOnLock(m) {
   try {
     const lock = m.mode === 'lock';
-    lord.display.setIdle(lock ? m.off || 0 : 0, 0, lock ? m.sleep || 0 : 0, lock ? m.sleepLeft || 0 : 0);
-    if (lock && m.dark) lord.display.blank();
-  } catch (e) { /* an older lord-server */ }
+    insane.display.setIdle(lock ? m.off || 0 : 0, 0, lock ? m.sleep || 0 : 0, lock ? m.sleepLeft || 0 : 0);
+    if (lock && m.dark) insane.display.blank();
+  } catch (e) { /* an older insane-server */ }
 }
 
 const listeners = new Set();
-globalThis.__lordGreeter = (json) => {
+globalThis.__insaneGreeter = (json) => {
   let m = null;
   try { m = JSON.parse(json); } catch (e) { return; }
   for (const fn of listeners) fn(m);
@@ -48,15 +48,15 @@ const PALETTE = [['#5b9cff', '#2f6fe0'], ['#f0915a', '#d0602b'], ['#4cc37a', '#2
 
 // A looping video behind the clock, on the main display, when the file is there. It has no sound, and it only
 // covers the wallpaper once it plays: no file, no helper or a crash leave the still image, with nothing on screen.
-const LOGIN_PICKED = '/var/lib/lordos/wallpapers/login.mp4';      // chosen in Settings (wallpaper-login)
-const LOGIN_BUILTIN = '/usr/share/backgrounds/lordos/motion/crown';
-const LOGIN_STILL = '/var/lib/lordos/wallpapers/login-still';     // a still wallpaper's id: no video at all
+const LOGIN_PICKED = '/var/lib/insaneos/wallpapers/login.mp4';      // chosen in Settings (wallpaper-login)
+const LOGIN_BUILTIN = '/usr/share/backgrounds/insaneos/motion/apple';
+const LOGIN_STILL = '/var/lib/insaneos/wallpapers/login-still';     // a still wallpaper's id: no video at all
 const loginStill = () => { try { return String(fs.read(LOGIN_STILL)).trim(); } catch (e) { return ''; } };
 // A picture of the user's own, kept there by wallpaper-login-image; the greeter never sees a home.
 function loginImage(still) {
   const m = /^image:([0-9a-f]{16})$/.exec(still);
   if (!m) return null;
-  const file = `/var/lib/lordos/wallpapers/login-${m[1]}.jpg`;
+  const file = `/var/lib/insaneos/wallpapers/login-${m[1]}.jpg`;
   try { return fs.stat(file) ? file : null; } catch (e) { return null; }
 }
 const IDLE_MS = 300000;
@@ -84,7 +84,7 @@ function LoginVideo({ box, stop }) {
     };
     const poll = () => {
       let c = [];
-      try { c = motionCodecs(lord.media.hwDecode(), lord.media.composition()); } catch (e) { c = []; }
+      try { c = motionCodecs(insane.media.hwDecode(), insane.media.composition()); } catch (e) { c = []; }
       if (c.length) start(c);                // hardware only: otherwise the still image stays
       else if (++polls < 40) timer = setTimeout(poll, 250);
     };
@@ -128,7 +128,7 @@ function Avatar({ user, size, dim, onClick }) {
       boxShadow: size > 60 ? '0 10px 30px rgba(0,0,0,0.35)' : '0 3px 10px rgba(0,0,0,0.3)',
     }}>
       {user.image
-        ? <Image src={`/var/lib/lordos/users/${user.name}.png`} style={{ width: size, height: size, objectFit: 'cover' }} />
+        ? <Image src={`/var/lib/insaneos/users/${user.name}.png`} style={{ width: size, height: size, objectFit: 'cover' }} />
         : <Text style={{ fontSize: Math.round(size * 0.4), fontWeight: 600, color: 'rgba(255,255,255,0.95)' }}>{initials(user)}</Text>}
     </View>
   );
@@ -199,7 +199,7 @@ function PopupList({ items, onPick, onClose, right }) {
 
 function lanAddress() {
   try {
-    for (const i of lord.net.interfaces()) {
+    for (const i of insane.net.interfaces()) {
       if (i.type === 'loopback' || /^(wg|ovpn|ips|ppp|oc|fvpn)-/.test(i.name)) continue;
       for (const a of i.addresses) if (a.family === 4 && a.scope === 'global') return a.address;
     }
@@ -307,7 +307,7 @@ function Greeter() {
   const user = info.users.find((u) => u.name === sel);
   const others = info.users.filter((u) => u.name !== sel);
   const submit = () => {
-    if (!user || busy) return;     // empty: only valid for the live ISO user (lord-sessiond decides)
+    if (!user || busy) return;     // empty: only valid for the live ISO user (insane-sessiond decides)
     setBusy(true);
     setMsg('');
     if (!send({ t: 'login', user: user.name, pass })) { setBusy(false); setMsg(t('greeter.error')); }
@@ -341,7 +341,7 @@ function Greeter() {
       inputBg: 'rgba(255,255,255,0.16)', separator: 'rgba(255,255,255,0.22)',
       panelBg: 'rgba(30,22,40,0.94)', control: 'rgba(255,255,255,0.18)', sidebarBg: 'rgba(255,255,255,0.09)' }}>
       <View style={{ width: screen.width, height: screen.height, direction: 'ltr' }}>
-        <Image src={image || wallpaperSrc(findWallpaper(lordosWallpapers, still || GREETER_WALLPAPER), screen.width, screen.height) || 'assets/background.jpg'}
+        <Image src={image || wallpaperSrc(findWallpaper(insaneosWallpapers, still || GREETER_WALLPAPER), screen.width, screen.height) || 'assets/background.jpg'}
           style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height, objectFit: 'cover' }} />
         {/* soft dark vignette so the glass panels read on any wallpaper */}
         <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
@@ -405,7 +405,7 @@ function Greeter() {
           ) : null}
         </View>
 
-        {/* the Insane OS logo: the crown and the wordmark as live text (docs/brand/README.md) */}
+        {/* the Insane OS logo: the apple and the wordmark as live text (docs/brand/README.md) */}
         <View style={{ position: 'absolute', left: 0, bottom: 24, width: W, height: 28, alignItems: 'center', justifyContent: 'center' }}>
           <InsaneWordmark size={17} color="#ffffff" />
         </View>

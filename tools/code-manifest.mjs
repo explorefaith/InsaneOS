@@ -1,10 +1,10 @@
 // Writes code-manifest.json: the size and SHA-256 of every file Insane OS runs as its own code (see
-// docs/SIGNING.md, "Verified system code"). lord-server checks each file against it before loading
+// docs/SIGNING.md, "Verified system code"). insane-server checks each file against it before loading
 // it (server/src/sec/codesig.c); tools/release/sign-code.sh signs it with the Insane OS release key.
 //
 //   node tools/code-manifest.mjs [--root <dir>] [--check]
 //
-// <dir> (default: the repository) holds themes/ and assets/ as installed (/usr/lib/lordos has the
+// <dir> (default: the repository) holds themes/ and assets/ as installed (/usr/lib/insaneos has the
 // same layout). The output is deterministic: the same files give the same bytes, so a signature
 // made on the maintainer's machine stays valid for the .deb, the ISO and the Raspberry Pi image.
 // If the manifest changes, a code-manifest.sig next to it no longer matches and is removed.
@@ -32,7 +32,7 @@ export function codeFiles(dir) {
   for (const t of list('themes')) add(`themes/${t}/theme.bundle.js`);
   add('assets/app-host.bundle.js');
   for (const a of list('assets/sysapps')) add(`assets/sysapps/${a}/app.js`);
-  // byte order, as lord-server compares paths with strcmp
+  // byte order, as insane-server compares paths with strcmp
   return out.sort((a, b) => (Buffer.compare(Buffer.from(a), Buffer.from(b))));
 }
 
@@ -41,7 +41,7 @@ export function manifestText(dir, version) {
     const data = fs.readFileSync(path.join(dir, rel));
     return `    { "path": ${JSON.stringify(rel)}, "size": ${data.length}, "sha256": "${createHash('sha256').update(data).digest('hex')}" }`;
   });
-  return `{\n  "format": 1,\n  "kind": "lordos-system-code",\n  "version": ${JSON.stringify(version)},\n  "files": [\n${files.join(',\n')}\n  ]\n}\n`;
+  return `{\n  "format": 1,\n  "kind": "insaneos-system-code",\n  "version": ${JSON.stringify(version)},\n  "files": [\n${files.join(',\n')}\n  ]\n}\n`;
 }
 
 export function writeManifest(dir = root) {

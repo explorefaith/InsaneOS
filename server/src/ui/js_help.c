@@ -1,9 +1,9 @@
-/* js_help.c — lord.help (Help app articles) and lord.time.zoneOffset (Clock app).
+/* js_help.c — insane.help (Help app articles) and insane.time.zoneOffset (Clock app).
  * See docs/SYSTEM.md.
  *
- *   lord.help.list(lang)      → [{ id, title, app, section, order, keywords }] of the .md files in assets/help/<lang>
- *   lord.help.read(lang, id)  → the article text, or null
- *   lord.time.zoneOffset(zone, unixSeconds) → { offset, abbr, dst } or null (our own TZif reader, tzif.c)
+ *   insane.help.list(lang)      → [{ id, title, app, section, order, keywords }] of the .md files in assets/help/<lang>
+ *   insane.help.read(lang, id)  → the article text, or null
+ *   insane.time.zoneOffset(zone, unixSeconds) → { offset, abbr, dst } or null (our own TZif reader, tzif.c)
  *
  * Read-only and only from Insane OS's assets/help folder: the language and the id are validated
  * ([a-z0-9-], no dots or slashes), so nothing outside it can be reached. English (assets/help/en)
@@ -141,12 +141,12 @@ static const JSCFunctionListEntry help_funcs[] = {
     JS_CFUNC_DEF("read", 2, f_help_read),
 };
 
-void js_help_register(JSContext *c, JSValue lord) {
+void js_help_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, help_funcs, sizeof help_funcs / sizeof help_funcs[0]);
-    JS_SetPropertyStr(c, lord, "help", o);
-    /* lord.time was already created by js_sys_register: zoneOffset is added to it */
-    JSValue time = JS_GetPropertyStr(c, lord, "time");
+    JS_SetPropertyStr(c, insane, "help", o);
+    /* insane.time was already created by js_sys_register: zoneOffset is added to it */
+    JSValue time = JS_GetPropertyStr(c, insane, "time");
     if (JS_IsObject(time)) JS_SetPropertyStr(c, time, "zoneOffset", JS_NewCFunction(c, f_zone_offset, "zoneOffset", 2));
     JS_FreeValue(c, time);
 }

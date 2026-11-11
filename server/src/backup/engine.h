@@ -9,8 +9,8 @@
  * source and then deletes it.
  *
  * This file knows nothing about threads or JS (backup.c uses it, tests/backup_test.c tests it). */
-#ifndef LORD_BACKUP_ENGINE_H
-#define LORD_BACKUP_ENGINE_H
+#ifndef INSANE_BACKUP_ENGINE_H
+#define INSANE_BACKUP_ENGINE_H
 
 #include <stdint.h>
 #include <time.h>
@@ -63,7 +63,7 @@ int  bk_delete(const char *machine, const char *id);
 /* Restores rel ("" = everything) from a snapshot into base/rel (base: normally home).
  * replace = 0: if the target exists and differs, the restored copy goes next to it as
  * "name<suffix>" (suffix comes from the UI, no '/'); replace = 1: it is replaced. Never writes
- * where lord.fs refuses to (fsops_protected) nor outside its roots (fsops_allowed). */
+ * where insane.fs refuses to (fsops_protected) nor outside its roots (fsops_allowed). */
 typedef struct {
     uint64_t files, bytes, kept_both, replaced, skipped, errors;
     volatile int *cancel;

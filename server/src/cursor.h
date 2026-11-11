@@ -1,6 +1,6 @@
 /* cursor.h — Insane OS cursor shapes (own vector drawing, at 1x and 2x). See docs/WINDOWS.md. */
-#ifndef LORD_CURSOR_H
-#define LORD_CURSOR_H
+#ifndef INSANE_CURSOR_H
+#define INSANE_CURSOR_H
 
 #include <stdint.h>
 

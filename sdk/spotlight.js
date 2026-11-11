@@ -4,9 +4,9 @@
 // Searches apps, files in the home folder, Settings sections, notes, the clipboard
 // history and the Store; it also calculates (2*(3+4), 15% of 2400, sqrt(2)) and converts units
 // (10 km to mi, 72 f to c, 1,5 gb to mb). ↑↓ choose, Enter opens, ❖Enter shows in Files, Esc closes.
-// What is opened often rises in the results (~/.local/share/lordos/spotlight.json).
+// What is opened often rises in the results (~/.local/share/insaneos/spotlight.json).
 import { createElement as h, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, addListener, screen, mainBox, displays } from '@lordos/runtime';
+import { View, Text, Image, addListener, screen, mainBox, displays } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { t, tOptional, formatNumber, formatDate, locale } from './i18n.js';
@@ -35,7 +35,7 @@ function searchBox() {
 
 // ---- recent use (for ranking) ----
 
-const USE_FILE = '.local/share/lordos/spotlight.json';
+const USE_FILE = '.local/share/insaneos/spotlight.json';
 let usage = null;
 function loadUsage() {
   if (usage) return usage;
@@ -52,7 +52,7 @@ function noteUse(key) {
   u[key] = { n: (u[key]?.n || 0) + 1, at: Date.now() };
   const keys = Object.keys(u);
   if (keys.length > 300) for (const k of keys.sort((a, b) => u[a].at - u[b].at).slice(0, keys.length - 300)) delete u[k];
-  try { ensureDir('.local/share/lordos'); fs.write(USE_FILE, JSON.stringify(u)); } catch (e) { /* no disk: memory only */ }
+  try { ensureDir('.local/share/insaneos'); fs.write(USE_FILE, JSON.stringify(u)); } catch (e) { /* no disk: memory only */ }
 }
 function usageBoost(key) {
   const u = loadUsage()[key];
@@ -168,7 +168,7 @@ export function convert(input) {
   return { value: (v * UNITS[ga][a]) / UNITS[ga][b], from: m[2], to: m[3], input: v };
 }
 
-// ---- file index (if the server doesn't provide lord.fs.search) ----
+// ---- file index (if the server doesn't provide insane.fs.search) ----
 
 let fileIndex = { at: 0, list: [], building: false };
 function buildFileIndex() {
@@ -198,8 +198,8 @@ const resultsVersion = createStore(0);
 
 function searchFiles(q) {
   if (q.length < 2) return [];
-  if (typeof lord.fs.search === 'function') {
-    try { return lord.fs.search(fs.home(), q, { limit: 60, depth: 6 }); } catch (e) { /* fall back to the index */ }
+  if (typeof insane.fs.search === 'function') {
+    try { return insane.fs.search(fs.home(), q, { limit: 60, depth: 6 }); } catch (e) { /* fall back to the index */ }
   }
   buildFileIndex();
   return fileIndex.list.filter((f) => fold(f.name).includes(q)).slice(0, 60);
@@ -324,9 +324,9 @@ function buildResults(raw, apps) {
   }
 
   // Store (AppStream apps)
-  if (q.length >= 3 && typeof lord.pkg !== 'undefined' && lord.pkg.available()) {
+  if (q.length >= 3 && typeof insane.pkg !== 'undefined' && insane.pkg.available()) {
     let res = [];
-    try { res = lord.pkg.search(query, { limit: 20, every: true, lang: locale.get().lang.split('-')[0] }).filter((r) => r.app && !r.installed).slice(0, 5); } catch (e) { res = []; }
+    try { res = insane.pkg.search(query, { limit: 20, every: true, lang: locale.get().lang.split('-')[0] }).filter((r) => r.app && !r.installed).slice(0, 5); } catch (e) { res = []; }
     add('store', res.map((r) => ({ key: `store:${r.name}`, score: 10, title: r.app.name, subtitle: r.app.summary || r.summary, image: r.app.icon,
       preview: { kind: 'pkg', pkg: r }, run: () => wm.open('store', { args: { search: query, package: r.name } }) })));
   }

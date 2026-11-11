@@ -1,6 +1,6 @@
 #!/bin/sh
-# mkdeb-rclone.sh — builds lordos-rclone_<version>_<arch>.deb: rclone's official release binary, unmodified, at
-# /usr/lib/lordos/rclone/rclone, so it never fights Debian's /usr/bin/rclone (docs/CLOUD.md 3.1 and 17.2 item 7).
+# mkdeb-rclone.sh — builds insaneos-rclone_<version>_<arch>.deb: rclone's official release binary, unmodified, at
+# /usr/lib/insaneos/rclone/rclone, so it never fights Debian's /usr/bin/rclone (docs/CLOUD.md 3.1 and 17.2 item 7).
 # Cloud (server/src/cloud) and Files' Connect to Server (server/src/lan/rconnect.c) run this binary.
 #
 #   tools/iso/mkdeb-rclone.sh <output folder> [amd64] [arm64]     (from the repository root; default: both)
@@ -77,9 +77,9 @@ for ARCH in $ARCHES; do
         [ "$v" = "rclone v$RCLONE_VERSION" ] || { echo "$Z: the binary says '$v'" >&2; exit 1; }
     fi
     PKG=$W/pkg-$ARCH
-    D=$PKG/usr/share/doc/lordos-rclone
-    install -d "$PKG/usr/lib/lordos/rclone" "$D" "$PKG/DEBIAN"
-    install -m 755 "$BIN" "$PKG/usr/lib/lordos/rclone/rclone"
+    D=$PKG/usr/share/doc/insaneos-rclone
+    install -d "$PKG/usr/lib/insaneos/rclone" "$D" "$PKG/DEBIAN"
+    install -m 755 "$BIN" "$PKG/usr/lib/insaneos/rclone/rclone"
     {
         cat <<C
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
@@ -92,16 +92,16 @@ Comment: rclone's official release binary v$RCLONE_VERSION, unmodified, repackag
 C
         cat "$LIC"
     } > "$D/copyright"
-    printf 'lordos-rclone (%s) trixie; urgency=medium\n\n  * rclone v%s, the official release binary for linux-%s, repackaged by tools/iso/mkdeb-rclone.sh.\n\n -- Insane OS <lord.basex@gmail.com>  %s\n' \
+    printf 'insaneos-rclone (%s) trixie; urgency=medium\n\n  * rclone v%s, the official release binary for linux-%s, repackaged by tools/iso/mkdeb-rclone.sh.\n\n -- Insane OS <insane.basex@gmail.com>  %s\n' \
         "$VERSION" "$RCLONE_VERSION" "$ARCH" "$RFC" | gzip -9n > "$D/changelog.gz"
     chmod 644 "$D/copyright" "$D/changelog.gz"
     (cd "$PKG" && find usr -type f | LC_ALL=C sort | xargs md5sum) > "$PKG/DEBIAN/md5sums"
     SIZE=$(du -sk "$PKG/usr" | awk '{print $1}')
     cat > "$PKG/DEBIAN/control" <<C
-Package: lordos-rclone
+Package: insaneos-rclone
 Version: $VERSION
 Architecture: $ARCH
-Maintainer: Insane OS <lord.basex@gmail.com>
+Maintainer: Insane OS <insane.basex@gmail.com>
 Installed-Size: $SIZE
 Depends: fuse3
 Section: net
@@ -109,14 +109,14 @@ Priority: optional
 Homepage: https://rclone.org
 Description: rclone for Insane OS Cloud and Connect to Server
  rclone's official release binary v$RCLONE_VERSION, unmodified, at
- /usr/lib/lordos/rclone/rclone, apart from Debian's own rclone package. Insane OS
+ /usr/lib/insaneos/rclone/rclone, apart from Debian's own rclone package. Insane OS
  runs it for the cloud accounts of Cloud (rclone rcd on a Unix socket, for the
  session user only) and for the remote folders of Files' Connect to Server.
 C
     chmod 644 "$PKG/DEBIAN/control" "$PKG/DEBIAN/md5sums"
     find "$PKG" -type d -exec chmod 755 {} +
     find "$PKG" -exec env TZ=UTC touch -h -t "$STAMP" {} +
-    OUT="$OUTDIR/lordos-rclone_${VERSION}_$ARCH.deb"
+    OUT="$OUTDIR/insaneos-rclone_${VERSION}_$ARCH.deb"
     SOURCE_DATE_EPOCH=$EPOCH dpkg-deb --root-owner-group -Zxz --build "$PKG" "$OUT" >/dev/null
     echo "$OUT"
 done

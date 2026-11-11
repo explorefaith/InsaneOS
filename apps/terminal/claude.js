@@ -2,12 +2,12 @@
 // server/tests/terminal_claude_test.mjs). Two sources, both files in the home folder:
 //  - ~/.claude/sessions/<pid>.json, which Claude Code keeps for each running session (its pid is the pane's
 //    foreground process group): the session's id and whether it is working or waiting for the user;
-//  - ~/.cache/lordos/claude/<session>.json, the status line JSON lord-claude-status keeps once the Terminal is
+//  - ~/.cache/insaneos/claude/<session>.json, the status line JSON insane-claude-status keeps once the Terminal is
 //    connected (server/src/term/claudebridge.c): the context window and the plan's 5-hour and weekly limits.
 
-export const BRIDGE = '/usr/lib/lordos/bin/lord-claude-status';
+export const BRIDGE = '/usr/lib/insaneos/bin/insane-claude-status';
 export const sessionFile = (home, pid) => `${home}/.claude/sessions/${pid}.json`;
-export const snapshotFile = (home, id) => `${home}/.cache/lordos/claude/${id}.json`;
+export const snapshotFile = (home, id) => `${home}/.cache/insaneos/claude/${id}.json`;
 export const settingsFile = (home) => `${home}/.claude/settings.json`;
 
 const SESSION_ID = /^[A-Za-z0-9-]{1,64}$/;
@@ -72,7 +72,7 @@ export const fitSegments = (cols, have) => ORDER.filter((k) => have[k] && cols >
 const quote = (s) => `'${s.replace(/'/g, `'\\''`)}'`;
 const unquote = (s) => s.slice(1, -1).replace(/'\\''/g, "'");
 
-// The status line command with lord-claude-status in front: a simple command gets it as its first word,
+// The status line command with insane-claude-status in front: a simple command gets it as its first word,
 // anything with shell syntax goes in whole through sh -c, so it runs as before.
 export function wrapCommand(cmd) {
   const c = String(cmd || '').trim();

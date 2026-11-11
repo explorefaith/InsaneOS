@@ -50,7 +50,7 @@ would pass as a rule's root counts; anything else, or no such file, means `~/Dow
 
 ## Code projects
 
-A folder's name proves nothing, so a rules scan walks the home folder, in the sandboxed `lord-clean`, for build outputs that prove themselves by what is next to them or inside them.
+A folder's name proves nothing, so a rules scan walks the home folder, in the sandboxed `insane-clean`, for build outputs that prove themselves by what is next to them or inside them.
 
 | Kind | Folders | Evidence |
 |---|---|---|
@@ -65,13 +65,13 @@ A folder's name proves nothing, so a rules scan walks the home folder, in the sa
 
 Node's 60 days are judged over the whole project: the newest change in any file or folder of it, leaving build outputs, `.git`, `dist`, `coverage` and `__pycache__` out. A project with nothing else in it proves nothing and is not offered.
 
-Each folder is one candidate, moved whole. They are chosen one by one, never by category, and go to the Trash and not to the real delete, because that approval covers fixed roots only. The confirmation names them and says the project needs its install or build step again. `lord-server` checks the evidence again at the plan and right before acting.
+Each folder is one candidate, moved whole. They are chosen one by one, never by category, and go to the Trash and not to the real delete, because that approval covers fixed roots only. The confirmation names them and says the project needs its install or build step again. `insane-server` checks the evidence again at the plan and right before acting.
 
 The walk doesn't enter folders starting with a dot, an unproved `node_modules`, or `go`, `snap`, `Android` and `flutter` directly in the home folder, where tools unpack other people's sources. It stops at a proved output and at 5,000,000 entries, then marks the scan incomplete.
 
 ## Similar images
 
-Found by a separate scan of the folders the user chose, from the Duplicates section. `lord-clean` decodes JPEG, PNG, GIF (first
+Found by a separate scan of the folders the user chose, from the Duplicates section. `insane-clean` decodes JPEG, PNG, GIF (first
 frame) and BMP, reduces each picture to 9 × 8 grey cells and keeps one bit per neighbouring pair: a 64-bit difference hash.
 Two images are similar within 6 of those bits and 2 % in proportions, and each image joins the largest one it resembles, so a
 chain of slight changes doesn't become one group. Files under 8 KiB, pictures under 32 pixels a side, files over 64 MiB and
@@ -87,17 +87,17 @@ The map view colours a band rising from the bottom of each tile: what rebuilds b
 
 The line above the views gives the free space, both amounts, and what wasn't scanned: the disk's used space minus what this scan walked, so other folders, other users' files and what the system reserves. Space that goes to the Trash isn't free until the Trash is emptied, so it is never added to the free space.
 
-**Kept between sessions.** A tree scan of the home folder or `/` writes `~/.cache/lordos/cleaner-map.txt`, mode 0600: folder names and sizes, for the session user. It is on by default. Turning off the switch in Settings removes the file, and Clear in Activity removes it with the history. Opening Storage with no scan yet shows it with its date. It holds no candidates, so nothing can be acted on from it: Large files, the summary by type, the bands, the line above the views (its date takes that place) and Review are not there until a new scan. Files in Show still opens the folder.
+**Kept between sessions.** A tree scan of the home folder or `/` writes `~/.cache/insaneos/cleaner-map.txt`, mode 0600: folder names and sizes, for the session user. It is on by default. Turning off the switch in Settings removes the file, and Clear in Activity removes it with the history. Opening Storage with no scan yet shows it with its date. It holds no candidates, so nothing can be acted on from it: Large files, the summary by type, the bands, the line above the views (its date takes that place) and Review are not there until a new scan. Files in Show still opens the folder.
 
 The file is replaced at each scan. A scan of another disk doesn't save a map, and removes the one there was.
 
 ## Apps
 
-Only apps the package index knows as desktop applications appear, plus Insane OS `.lpk` apps. Essential packages and `lordos`
-itself are left out, and a plan that would take `lordos` is refused. So is a removal the engine won't do alone because other packages need that app: Cleaner shows a message and doesn't offer to take them too. Without administrator rights, Linux apps are listed with no
+Only apps the package index knows as desktop applications appear, plus Insane OS `.lpk` apps. Essential packages and `insaneos`
+itself are left out, and a plan that would take `insaneos` is refused. So is a removal the engine won't do alone because other packages need that app: Cleaner shows a message and doesn't offer to take them too. Without administrator rights, Linux apps are listed with no
 Remove button.
 
-A removed `.lpk` app keeps its data folder (`~/.local/share/lordos/appdata/<id>`). That folder is a leftover only while no installed
+A removed `.lpk` app keeps its data folder (`~/.local/share/insaneos/appdata/<id>`). That folder is a leftover only while no installed
 app and no system app has that id, checked at the scan and again right before acting. Removing it is a choice by name, to the
 Trash, since it may hold what the user made there.
 
@@ -108,20 +108,20 @@ Three closed admin actions, for administrators, each confirmed: `clean-journal`,
 
 **Old kernels** appear for administrators when there is something to remove. Only packages named `linux-image-<version>-<flavour>`
 of the running kernel's flavour count, and three stay: the running kernel, the newest, and the newest below the running one as a
-way back. With a running kernel that isn't one of those packages, nothing is offered. `lord.pkg.plan` builds the removal; it is
+way back. With a running kernel that isn't one of those packages, nothing is offered. `insane.pkg.plan` builds the removal; it is
 shown only if it stays within kernel packages and leaves the running one alone, and `pkg-remove` runs it, as in the Store.
 
 ## The item by the clock
 
 On by default, because it costs nothing when idle: a still image with no timer. Everything in its panel is read only while the
-panel is open, every two seconds: disk, memory, processor load, temperature if `lord-fand` reports it, network rates and
+panel is open, every two seconds: disk, memory, processor load, temperature if `insane-fand` reports it, network rates and
 connected disks. It makes no monitoring claim, has no memory "free up" and no speed test. Its one recommendation is the last
 scan's real size. Turn it off in Cleaner → Settings.
 
 **The status word** (`statusWord` in `sdk/cleanerstatus.jsx`) has one written rule:
 
 - under 10 % of the home disk free: low on space;
-- otherwise, with a newer `lordos` package known to the last update check: an update is waiting. It is read once, as the panel opens, and fetches nothing;
+- otherwise, with a newer `insaneos` package known to the last update check: an update is waiting. It is read once, as the panel opens, and fetches nothing;
 - otherwise: good;
 - with no disk reading: no word.
 
@@ -147,7 +147,7 @@ translated names; anything else is a plain folder.
 
 ## Motion
 
-One frame callback (`requestAnimationFrame`, `apps/cleaner/ui.jsx`) and `lord.setStyle`, no React render per frame. It runs only while the window is in front and not minimized, and
+One frame callback (`requestAnimationFrame`, `apps/cleaner/ui.jsx`) and `insane.setStyle`, no React render per frame. It runs only while the window is in front and not minimized, and
 stops entirely with Reduce motion.
 
 The engine repaints one box around all of a frame's changes, and a box that reaches a blurred surface, within 49 px of the Dock or the menu bar, grows to all of it. Stars in the

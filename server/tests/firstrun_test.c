@@ -24,7 +24,7 @@ static char full[8192];
 
 static const char *full_file(void) {
     snprintf(full, sizeof full,
-        "# lordos-firstrun, written by the Insane OS Imager\n"
+        "# insaneos-firstrun, written by the Insane OS Imager\n"
         "version=1\n"
         "hostname=pi-living\n"
         "lang=es\n"
@@ -87,7 +87,7 @@ static void validators(void) {
     CHECK(!fr_valid_user("1ana"));
     CHECK(!fr_valid_user("-ana"));
     CHECK(!fr_valid_user("root"));
-    CHECK(!fr_valid_user("lordos"));
+    CHECK(!fr_valid_user("insaneos"));
     CHECK(!fr_valid_user("systemd-foo"));
     CHECK(!fr_valid_user("sudo"));
     CHECK(!fr_valid_user("ana maria"));

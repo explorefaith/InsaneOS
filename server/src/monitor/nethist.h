@@ -1,12 +1,12 @@
 /* nethist.h — the Monitor's traffic history (0.8.2, docs/MONITOR.md "Traffic history").
  *
  * Bytes received and sent per minute, for the machine (every interface but lo, as the Monitor's
- * totals) and for each of the user's apps (lord-netperm's per-app counters), kept 7 days per minute
+ * totals) and for each of the user's apps (insane-netperm's per-app counters), kept 7 days per minute
  * and 30 days per hour in one compact file of the user's:
  *
- *   $XDG_STATE_HOME/lordos/net-history.bin   (default ~/.local/state/lordos/net-history.bin, 0600)
+ *   $XDG_STATE_HOME/insaneos/net-history.bin   (default ~/.local/state/insaneos/net-history.bin, 0600)
  *
- * The apps are the user's own, so the file is the user's (lord-server writes it as the user; no
+ * The apps are the user's own, so the file is the user's (insane-server writes it as the user; no
  * root process writes into a home folder). It holds app ids and byte counts only: never an address,
  * a domain or a country.
  *
@@ -18,8 +18,8 @@
  *   NH_HOUR  u32 hour (Unix time / 3600), the same
  * A minute is appended when it ends (one write of a few dozen bytes); compaction folds minutes older
  * than 7 days into hours and drops hours older than 30 days (at startup and every 6 hours). */
-#ifndef LORD_NETHIST_H
-#define LORD_NETHIST_H
+#ifndef INSANE_NETHIST_H
+#define INSANE_NETHIST_H
 
 #include <stddef.h>
 #include <stdint.h>

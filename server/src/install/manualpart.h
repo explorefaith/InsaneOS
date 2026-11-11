@@ -1,8 +1,8 @@
 /* manualpart.h — "choose the partitions yourself": looking at a disk, then deleting, creating and
  * formatting exactly what the plan says, with its undo. Used by install.c; the decisions are in
  * manual.c. */
-#ifndef LORD_MANUALPART_H
-#define LORD_MANUALPART_H
+#ifndef INSANE_MANUALPART_H
+#define INSANE_MANUALPART_H
 
 #include "freepart.h"
 #include "manual.h"

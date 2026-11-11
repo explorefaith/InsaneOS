@@ -33,7 +33,7 @@ pub struct Drive {
     pub labels: Vec<String>,
     pub mounted: Vec<String>,
     /// a disk image (`macos`) or loop device (`linux`) attached for testing, only listed when its backing
-    /// file is inside LORDOS_IMAGER_TEST_DEVICES=<folder>
+    /// file is inside INSANEOS_IMAGER_TEST_DEVICES=<folder>
     pub test_device: bool,
 }
 
@@ -45,10 +45,10 @@ pub fn same_identity(a: &Drive, b: &Drive) -> bool {
 pub fn writable(d: &Drive) -> bool { d.removable && !d.system && !d.read_only && d.size <= MAX_DRIVE }
 
 /// Testing only: also list disk images (`macos`) or loop devices (`linux`) whose backing file is inside
-/// this folder (LORDOS_IMAGER_TEST_DEVICES=<absolute folder>). Images attached for anything else are
+/// this folder (INSANEOS_IMAGER_TEST_DEVICES=<absolute folder>). Images attached for anything else are
 /// never listed, so a test run can't reach someone's other disk images.
 pub fn test_dir() -> Option<std::path::PathBuf> {
-    let v = std::env::var("LORDOS_IMAGER_TEST_DEVICES").ok()?;
+    let v = std::env::var("INSANEOS_IMAGER_TEST_DEVICES").ok()?;
     let p = std::path::PathBuf::from(v);
     if p.is_absolute() { p.canonicalize().ok() } else { None }
 }
@@ -56,7 +56,7 @@ fn in_test_dir(backing: &str) -> bool {
     match (test_dir(), std::path::Path::new(backing).canonicalize()) { (Some(d), Ok(b)) => b.starts_with(d), _ => false }
 }
 
-/// LordOS images use an MBR partition table, which can't address more than 2 TiB: a larger drive is
+/// InsaneOS images use an MBR partition table, which can't address more than 2 TiB: a larger drive is
 /// refused (it is also very unlikely to be a card or a stick).
 pub const MAX_DRIVE: u64 = 2 << 40;
 

@@ -1,7 +1,7 @@
 /* sysreport.h — System Information's collector (0.8.5, see docs/BENCHMARK.md): what hardware this
  * machine has and what the kernel made of it, read without root from world-readable files (sysfs,
- * /proc, the device tree, os-release, the kernel config). Used by `lordos-sysreport` and, later, by
- * `lord.sysinfo`; nothing is written, executed or sent anywhere.
+ * /proc, the device tree, os-release, the kernel config). Used by `insaneos-sysreport` and, later, by
+ * `insane.sysinfo`; nothing is written, executed or sent anywhere.
  *
  * Privacy by construction: the report is built from a fixed list of fields, and the structures below
  * have no place for serial numbers, UUIDs, MAC or IP addresses, host or user names, Wi-Fi network
@@ -12,8 +12,8 @@
  * `root` prefixes every path ("" for this machine; tests point it at a fake tree). Facts that only
  * the running system can give (the Landlock ABI, which Insane OS services are up) are left unknown
  * under a fake root. */
-#ifndef LORD_SYSREPORT_H
-#define LORD_SYSREPORT_H
+#ifndef INSANE_SYSREPORT_H
+#define INSANE_SYSREPORT_H
 
 #include <stdint.h>
 
@@ -134,7 +134,7 @@ typedef struct {
 typedef struct {
     char os[SR_NAME], os_id[24], os_version[24];
     char kernel[64];
-    char lordos[48];                    /* Insane OS version, filled by the caller */
+    char insaneos[48];                    /* Insane OS version, filled by the caller */
     char lsm[96];                       /* /sys/kernel/security/lsm */
     int landlock_abi;                   /* -1 unknown, 0 unavailable */
     int bpf_lsm;                        /* "bpf" in the LSM list */
@@ -146,7 +146,7 @@ typedef struct {
     int boot_toram;                     /* live session copied to RAM (the "toram" boot option) */
     int nkconf;
     SrKconf kconf[SR_MAX_KCONF];
-    int sessiond, netperm, fand, netd;  /* their sockets in /run/lordos (-1 unknown) */
+    int sessiond, netperm, fand, netd;  /* their sockets in /run/insaneos (-1 unknown) */
 } SrSoftware;
 
 typedef struct {

@@ -19,7 +19,7 @@
 #define MAX_PROFILES 64
 
 #define FF_PREF "browser.tabs.inTitlebar"
-#define FF_MARK "// lordos: Settings > Appearance"     /* i18n-ok: a marker in a config file */
+#define FF_MARK "// insaneos: Settings > Appearance"     /* i18n-ok: a marker in a config file */
 
 /* ---- JSON: just enough scanning to find a member's value span (the text was validated with
  * json_parse first, and the result is validated again) ---- */
@@ -295,7 +295,7 @@ static char *read_at(int dfd, const char *name, size_t max, size_t *len, struct 
  * then renamed over it. */
 static int write_at(int dfd, const char *name, const char *data, size_t len, mode_t mode) {
     char tmp[256];
-    if ((size_t)snprintf(tmp, sizeof tmp, "%s.lordos-tmp", name) >= sizeof tmp) return -1;
+    if ((size_t)snprintf(tmp, sizeof tmp, "%s.insaneos-tmp", name) >= sizeof tmp) return -1;
     unlinkat(dfd, tmp, 0);
     int fd = openat(dfd, tmp, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
     if (fd < 0) return -1;
@@ -450,7 +450,7 @@ static void chrome_apply_one(int dfd, const char *const *procs, int on, BrfResul
         if (e == BRF_BAD) r->failed++;
         else if (e == BRF_SAME) r->unchanged++;
         else if (chromium_locked(dfd, procs)) running = r->running = 1;   /* it started meanwhile: later */
-        else if (write_at(pfd, "Preferences.lordos-backup", data, n, st.st_mode) ||
+        else if (write_at(pfd, "Preferences.insaneos-backup", data, n, st.st_mode) ||
                  write_at(pfd, "Preferences", out, on_n, st.st_mode)) r->failed++;
         else r->changed++;
         free(out);
@@ -586,7 +586,7 @@ static void ff_apply_one(int pfd, void *ctx) {
         size_t pn;
         char *p = brf_userjs_ours(u ? u : "", n) < 0 ? read_at(pfd, "prefs.js", FFPREFS_MAX, &pn, NULL) : NULL;
         if (p && brf_prefs_value(p, pn) == a->value) r->unchanged++;
-        else if ((existed && n && write_at(pfd, "user.js.lordos-backup", u, n, st.st_mode)) ||
+        else if ((existed && n && write_at(pfd, "user.js.insaneos-backup", u, n, st.st_mode)) ||
                  write_at(pfd, "user.js", out, outn, existed ? st.st_mode : 0600)) r->failed++;
         else { r->changed++; if (open_now) r->running++; }
         free(p);

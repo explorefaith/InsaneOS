@@ -9,7 +9,7 @@ import { esc } from './md.mjs';
 const loc = (v, l) => (v == null ? '' : typeof v === 'string' ? v : v[l] ?? v.en ?? '');
 
 const TONE_ICON = {
-  ours: '<path d="M4 17l2-9 4 4 2-6 2 6 4-4 2 9z"/>',                 // crown
+  ours: '<path d="M4 17l2-9 4 4 2-6 2 6 4-4 2 9z"/>',                 // apple
   reused: '<path d="M4 7h16M4 12h16M4 17h16"/>',                      // stack of parts
   kernel: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>', // chip
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>', // person

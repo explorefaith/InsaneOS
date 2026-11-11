@@ -38,7 +38,7 @@ const iconFile = (id) => {
   return null;
 };
 
-// @lordos/sdk stand-in: real View/Text, everything else an inert proxy (top-level code of the app
+// @insaneos/sdk stand-in: real View/Text, everything else an inert proxy (top-level code of the app
 // module may call SDK functions; the icon only needs View and Text).
 const SDK_STUB = `
 const React = require('react');
@@ -84,7 +84,7 @@ const inert = new Proxy(function () {}, { get: (t, k) => (k === Symbol.toPrimiti
 module.exports = { View, Text, Image, ScrollView: View, inert };
 `;
 
-// Every name the apps import from @lordos/sdk becomes an explicit export of the stand-in (esbuild
+// Every name the apps import from @insaneos/sdk becomes an explicit export of the stand-in (esbuild
 // copies only real properties, so a catch-all proxy is not enough).
 function sdkNames() {
   const names = new Set();
@@ -93,7 +93,7 @@ function sdkNames() {
       const p = path.join(d, e.name);
       if (e.isDirectory()) walk(p);
       else if (/\.(jsx?|mjs)$/.test(e.name)) {
-        for (const m of fs.readFileSync(p, 'utf8').matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@lordos\/sdk['"]/g)) {
+        for (const m of fs.readFileSync(p, 'utf8').matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@insaneos\/sdk['"]/g)) {
           for (const part of m[1].split(',')) { const n = part.trim().split(/\s+as\s+/)[0].trim(); if (/^[A-Za-z_$][\w$]*$/.test(n)) names.add(n); }
         }
       }
@@ -112,7 +112,7 @@ async function bundle(id, file) {
     plugins: [{
       name: 'stubs',
       setup(b) {
-        b.onResolve({ filter: /^@lordos\/sdk/ }, () => ({ path: 'sdk', namespace: 'stub' }));
+        b.onResolve({ filter: /^@insaneos\/sdk/ }, () => ({ path: 'sdk', namespace: 'stub' }));
         b.onResolve({ filter: /^sdk-cjs$/ }, () => ({ path: 'sdk-cjs', namespace: 'stub' }));
         b.onResolve({ filter: /^react(\/.*)?$|^react-dom/ }, (a) => ({ path: dreq.resolve(a.path), external: true }));
         b.onResolve({ filter: /\.(css|png|svg|wasm|json)$/ }, (a) => ({ path: a.path, namespace: 'empty' }));

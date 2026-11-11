@@ -6,7 +6,7 @@
 import {
   View, Text, Slider, useSettings, settings, useSound, defaultSink, sound, useBluetooth, setBluetoothPower, useBattery, BatteryGlyph, NowPlayingTile,
   nightActive, setNightManual, notifyPrefs, dndActive, wm, addListener, t as tr, SoundOutputList, useSoundOutputs,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { NetworkGlyph, BluetoothGlyph, MoonGlyph, SunGlyph, ContrastGlyph, LayersGlyph, SpeakerGlyph, GearGlyph, Chevron } from '../glyphs.jsx';
 import { useNet } from './Taskbar.jsx';

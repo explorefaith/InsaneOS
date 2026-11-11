@@ -3,7 +3,7 @@
 // Everything that erases data goes through the same confirmation: it says exactly what is lost
 // (model, size, each partition with its label, file system and mount point) and, for a whole
 // disk, asks to type its name (sdb). The helper validates everything again on the root side.
-import { View, Text, ScrollView, Button, TextInput, Segmented, useTheme, useLocale, admin, fs, formatBytes, formatNumber } from '@lordos/sdk';
+import { View, Text, ScrollView, Button, TextInput, Segmented, useTheme, useLocale, admin, fs, formatBytes, formatNumber } from '@insaneos/sdk';
 import { useMemo, useState } from 'react';
 import { PartGlyph } from './icons.jsx';
 import { fsName, diskTitle, partTitle } from './index.jsx';

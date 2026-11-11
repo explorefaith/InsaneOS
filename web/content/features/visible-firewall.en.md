@@ -22,9 +22,9 @@ Picture a building with a guard at every apartment door instead of one at the st
 
 ## How it works
 
-**1. Every app has a name the kernel can see.** When you open a Linux app from the app launcher, `lord-server` asks root to place it in its own cgroup, `app-lordos-<id>.scope`. Installed `.lpk` apps get `app-lordos-lpk-<id>.scope`. These scopes are created and owned by root, so an app can't move itself to another one.
+**1. Every app has a name the kernel can see.** When you open a Linux app from the app launcher, `insane-server` asks root to place it in its own cgroup, `app-insaneos-<id>.scope`. Installed `.lpk` apps get `app-insaneos-lpk-<id>.scope`. These scopes are created and owned by root, so an app can't move itself to another one.
 
-**2. A small root service enforces the rules.** `lord-netperm` loads its eBPF programs into the cgroup of the Insane OS service, which contains every session:
+**2. A small root service enforces the rules.** `insane-netperm` loads its eBPF programs into the cgroup of the Insane OS service, which contains every session:
 
 | Kernel hook | What it checks |
 |---|---|
@@ -39,15 +39,15 @@ Each program finds which app the calling process belongs to (by the cgroup ances
 
 [[shot:4]]
 
-**3. Your rules become kernel maps.** You change rules in the session; `lord-server` saves them to `~/.config/lordos/firewall.json` and sends `lord-netperm` a single message with no data: `RELOAD`. The service then reads the file itself, strictly validated, and compiles the rules into hash and longest-prefix-match maps. The rules never travel over the socket.
+**3. Your rules become kernel maps.** You change rules in the session; `insane-server` saves them to `~/.config/insaneos/firewall.json` and sends `insane-netperm` a single message with no data: `RELOAD`. The service then reads the file itself, strictly validated, and compiles the rules into hash and longest-prefix-match maps. The rules never travel over the socket.
 
 **4. Decided at connect time, enforced on every packet.** The decision is made when a connection is opened or a port is bound: about **0.5 µs** per UDP connect on a test VM, TCP within noise. Since 0.8.3 the same decision is also applied to each packet of an app whose rules deny something, so a new rule cuts connections that are already open (see the next section). That costs about 150 ns per packet, 1.6 % of one core at 104,000 packets a second, and about 30 ns for an app without a deny rule; TCP throughput is unchanged within noise (`docs/FIREWALL.md`).
 
 ## Blocking an app cuts what is already open
 
-Since 0.8.3, turning an app's rule off, adding a deny rule for a destination or a restriction such as "no internet" doesn't only stop new connections: a video that was already playing stops too. The kernel drops the packets of the connections the new rule denies, and `lord-netperm` closes those sockets, so the app sees the connection end instead of a stall. Only what the new rule denies is cut: other destinations, the local network under "no internet", and the clients of a server the app runs keep working. Switching back to allow works again at once, and the Monitor shows the dropped bytes as "Blocked traffic".
+Since 0.8.3, turning an app's rule off, adding a deny rule for a destination or a restriction such as "no internet" doesn't only stop new connections: a video that was already playing stops too. The kernel drops the packets of the connections the new rule denies, and `insane-netperm` closes those sockets, so the app sees the connection end instead of a stall. Only what the new rule denies is cut: other destinations, the local network under "no internet", and the clients of a server the app runs keep working. Switching back to allow works again at once, and the Monitor shows the dropped bytes as "Blocked traffic".
 
-On a Raspberry Pi 5 the closing needs the Insane OS kernel built with socket destroy (`6.18.57-lordos.3`); with an older one the packets are still dropped, but the app only sees the connection end at its own timeout.
+On a Raspberry Pi 5 the closing needs the Insane OS kernel built with socket destroy (`6.18.57-insaneos.3`); with an older one the packets are still dropped, but the app only sees the connection end at its own timeout.
 
 ## Does it work per domain?
 
@@ -86,7 +86,7 @@ These came with Insane OS 0.8.5-beta, released on 27 October 2026.
 
 **Does it apply to Linux apps too?** Yes. That is one of its main points: Chromium, Firefox or any app opened from the app launcher has its own scope and its own rules. Built-in Insane OS apps and programs started from the Terminal count together as "Insane OS"; since 0.8.5 the Terminal and Insane OS's own network parts get rows of their own.
 
-**Can an app escape its scope?** It was tried. A Linux app can't write itself into another cgroup, because every `cgroup.procs` file in the session's tree belongs to root. It can still ask the user's systemd manager to start a new process outside the tree (`systemd-run --user`). Insane OS closes that too: `lord-netperm` also attaches its programs to each user's `user@<uid>.service`, and any process there is held to the strictest union of the restrictions of that user's running restricted apps. Tested with `systemd-run --user --scope`, a transient service and `setsid`: all denied.
+**Can an app escape its scope?** It was tried. A Linux app can't write itself into another cgroup, because every `cgroup.procs` file in the session's tree belongs to root. It can still ask the user's systemd manager to start a new process outside the tree (`systemd-run --user`). Insane OS closes that too: `insane-netperm` also attaches its programs to each user's `user@<uid>.service`, and any process there is held to the strictest union of the restrictions of that user's running restricted apps. Tested with `systemd-run --user --scope`, a transient service and `setsid`: all denied.
 
 [[shot:3]]
 
@@ -108,13 +108,13 @@ These came with Insane OS 0.8.5-beta, released on 27 October 2026.
 
 ## Read the source
 
-- [server/src/netperm/np.bpf.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/np.bpf.c): the cgroup and LSM eBPF programs
-- [server/src/netperm/netperm.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/netperm.c): the root service
-- [server/src/netperm/npcompile.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/npcompile.c): rules into kernel maps
-- [server/src/netperm/npdns.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/netperm/npdns.c): names from the system resolver
-- [server/src/fw/rules.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/fw/rules.c): rules, precedence and the strict file reader
-- [server/src/ui/js_fw.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_fw.c): `lord.fw`, the session API
-- [apps/monitor/Firewall.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/monitor/Firewall.jsx) and [apps/monitor/FwRules.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/monitor/FwRules.jsx): the Settings sections
-- [server/src/sec/restrict.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/restrict.c) and [server/src/sec/pwguard.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/sec/pwguard.c): restrictions in the broker, and the PipeWire guard
-- [server/tests/netperm_integration.sh](https://github.com/lordbasex/Insane OS/blob/main/server/tests/netperm_integration.sh): the kernel test, 18 of 18
-- [docs/FIREWALL.md](https://github.com/lordbasex/Insane OS/blob/main/docs/FIREWALL.md) and [docs/MONITOR.md](https://github.com/lordbasex/Insane OS/blob/main/docs/MONITOR.md)
+- [server/src/netperm/np.bpf.c](https://github.com/insaneos/Insane OS/blob/main/server/src/netperm/np.bpf.c): the cgroup and LSM eBPF programs
+- [server/src/netperm/netperm.c](https://github.com/insaneos/Insane OS/blob/main/server/src/netperm/netperm.c): the root service
+- [server/src/netperm/npcompile.c](https://github.com/insaneos/Insane OS/blob/main/server/src/netperm/npcompile.c): rules into kernel maps
+- [server/src/netperm/npdns.c](https://github.com/insaneos/Insane OS/blob/main/server/src/netperm/npdns.c): names from the system resolver
+- [server/src/fw/rules.c](https://github.com/insaneos/Insane OS/blob/main/server/src/fw/rules.c): rules, precedence and the strict file reader
+- [server/src/ui/js_fw.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/js_fw.c): `insane.fw`, the session API
+- [apps/monitor/Firewall.jsx](https://github.com/insaneos/Insane OS/blob/main/apps/monitor/Firewall.jsx) and [apps/monitor/FwRules.jsx](https://github.com/insaneos/Insane OS/blob/main/apps/monitor/FwRules.jsx): the Settings sections
+- [server/src/sec/restrict.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/restrict.c) and [server/src/sec/pwguard.c](https://github.com/insaneos/Insane OS/blob/main/server/src/sec/pwguard.c): restrictions in the broker, and the PipeWire guard
+- [server/tests/netperm_integration.sh](https://github.com/insaneos/Insane OS/blob/main/server/tests/netperm_integration.sh): the kernel test, 18 of 18
+- [docs/FIREWALL.md](https://github.com/insaneos/Insane OS/blob/main/docs/FIREWALL.md) and [docs/MONITOR.md](https://github.com/insaneos/Insane OS/blob/main/docs/MONITOR.md)

@@ -5,19 +5,19 @@
  * a 32-byte "salt", returns HMAC-SHA256(CredRandom, salt). That result is the key that
  * wraps the vault key: without the physical key (and its touch) the vault cannot be opened.
  *
- * Runs in lord-vault, sandboxed: it receives the fd of /dev/hidrawN already opened by lord-server
+ * Runs in insane-vault, sandboxed: it receives the fd of /dev/hidrawN already opened by insane-server
  * (after the user's permission) and only does read/write of 64-byte reports, no ioctl.
  * Protocol: CTAPHID (INIT with nonce, own channel, CBOR, KEEPALIVE, CANCEL, ERROR) +
  * authenticatorGetInfo, authenticatorClientPIN (getKeyAgreement and getPinToken, PIN protocol 1:
  * ECDH P-256 + SHA-256 + AES-256-CBC), authenticatorMakeCredential and authenticatorGetAssertion
  * with hmac-secret. The key agreement uses our own P-256 (p256.h). */
-#ifndef LORD_VAULT_CTAP2_H
-#define LORD_VAULT_CTAP2_H
+#ifndef INSANE_VAULT_CTAP2_H
+#define INSANE_VAULT_CTAP2_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-#define FIDO_RP_ID "contrasenas.lordos"      /* rp.id of the vault credentials */
+#define FIDO_RP_ID "contrasenas.insaneos"      /* rp.id of the vault credentials */
 #define FIDO_CRED_MAX 255
 
 enum {

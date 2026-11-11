@@ -2,7 +2,7 @@
  * vm-image-get uses them: a cut download keeps dest.part, the next try asks for the rest with a Range request and the
  * SHA-256 is over the whole file; a server that ignores Range, answers the wrong range or 416 starts again cleanly;
  * without resume a cut leaves nothing. Against a small HTTP server on loopback in a child process (no network).
- * Built with -DLORD_HTTP_TEST so the download child runs as the user who runs the test.
+ * Built with -DINSANE_HTTP_TEST so the download child runs as the user who runs the test.
  *
  *   build/http-resume-test */
 #include "../src/pkg/http.h"

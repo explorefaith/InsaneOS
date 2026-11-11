@@ -5,7 +5,7 @@
 //   node tests/regionformat_test.mjs        (from server/; run_suites.sh runs it when node exists)
 //
 // Besides fixed cases, every UTF-8 locale generated on this machine is read with `locale -k` (the same
-// fields lord.locale.formats takes with nl_langinfo_l) and, when its language is bundled, checked
+// fields insane.locale.formats takes with nl_langinfo_l) and, when its language is bundled, checked
 // against that language's format.json: glibc and our own tables must agree on the clock.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -54,7 +54,7 @@ eq('the user\'s is taken whatever the language', regionFromEnv({ user: { LANG: '
 eq('C.UTF-8 names no region', regionFromEnv({ user: {}, system: { LANG: 'C.UTF-8' } }), '');
 eq('nothing at all', regionFromEnv(null), '');
 
-// every generated UTF-8 locale on this machine, read as lord.locale.formats reads it
+// every generated UTF-8 locale on this machine, read as insane.locale.formats reads it
 let locales = [];
 try { locales = execFileSync('locale', ['-a'], { encoding: 'utf8' }).split('\n').filter((l) => /^[a-z]{2,3}_[A-Z]{2}\.utf-?8$/i.test(l)); }
 catch (e) { console.log('skipped: needs locale (glibc) for the generated-locale cases'); }

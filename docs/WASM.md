@@ -115,14 +115,14 @@ clang --target=wasm32 -O2 -nostdlib -Wl,--no-entry -o calc.wasm calc.c
 In the app (React):
 ```jsx
 import { useEffect, useState } from 'react';
-import { View, Text } from '@lordos/sdk';
+import { View, Text } from '@insaneos/sdk';
 
 export default function Calc() {
   const [r, setR] = useState(null);
   useEffect(() => {
-    // bytes: lord.apps.packageFile('my.app', 'calc.wasm') if the .wasm ships in the app's
+    // bytes: insane.apps.packageFile('my.app', 'calc.wasm') if the .wasm ships in the app's
     // package (see NATIVE-APPS.md), or fs.read(path, { binary: true }) from the home folder.
-    const bytes = lord.apps.packageFile('my.app', 'calc.wasm');
+    const bytes = insane.apps.packageFile('my.app', 'calc.wasm');
     WebAssembly.instantiate(bytes, {}).then(({ instance }) => setR(instance.exports.add(2, 3)));
   }, []);
   return <View><Text>{r === null ? '…' : `2 + 3 = ${r}`}</Text></View>;
@@ -138,7 +138,7 @@ const imports = { env: { log: (ptr, len) => console.log(new TextDecoder().decode
 
 **Security:**
 - a module only sees its own memory and the imports the app gives it;
-- it has no access to the file system, the network or `lord.*` unless the app passes them as
+- it has no access to the file system, the network or `insane.*` unless the app passes them as
   functions;
 - every address is checked against the memory size before reading or writing.
 

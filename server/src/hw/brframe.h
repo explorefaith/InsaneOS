@@ -8,7 +8,7 @@
  *             (the GTK theme, for Insane OS's window buttons) unless the profile uses a theme
  *             extension. Only while that browser is not running (it rewrites the file when it quits);
  *             a surgical edit of those keys, the rest of the file byte for byte, validated as JSON
- *             before and after, a backup (Preferences.lordos-backup) and an atomic rename.
+ *             before and after, a backup (Preferences.insaneos-backup) and an atomic rename.
  *   Firefox   ~/.config/mozilla/firefox and ~/.mozilla/firefox, the relative profiles listed in
  *             profiles.ini: one marked line user_pref("browser.tabs.inTitlebar", 1|0) in user.js
  *             (Firefox reads it at start, so it can be written while Firefox runs). brf_firefox_tidy
@@ -18,8 +18,8 @@
  *
  * No program is run, no path comes from the caller: the folders are fixed under the user's home.
  * Every file is opened with O_NOFOLLOW, must be a regular file owned by the user, and is size-capped. */
-#ifndef LORD_HW_BRFRAME_H
-#define LORD_HW_BRFRAME_H
+#ifndef INSANE_HW_BRFRAME_H
+#define INSANE_HW_BRFRAME_H
 
 #include <stddef.h>
 
@@ -54,7 +54,7 @@ int  brf_chromium_running(const char *cfg);
 /* Chromium and Brave profiles that switching off (*on) or on (*off) would change; malformed ones aren't counted. */
 void brf_chromium_state(const char *cfg, int *on, int *off);
 
-/* {"chromium":{…},"firefox":{…}} for lord.browserFrame.apply (malloc, NULL on OOM). */
+/* {"chromium":{…},"firefox":{…}} for insane.browserFrame.apply (malloc, NULL on OOM). */
 char *brf_result_json(const BrfResult *chromium, const BrfResult *firefox);
 
 #endif

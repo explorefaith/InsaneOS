@@ -3,7 +3,7 @@
 // La emulación (xterm-256color, color directo, mouse, imágenes en línea, marcas del shell)
 // y el dibujo están en C (server/src/term); esta app arma pestañas, paneles divididos,
 // perfiles, buscador, barra de herramientas, atajos y la ventana desplegable.
-import { View, Text, useAppWindow, useKeyboard, useStore, useTheme, wm, term, clipboard, addShortcuts, registerDockMenu, speechMenu, registerSelection, ContextMenu, t as tr } from '@lordos/sdk';
+import { View, Text, useAppWindow, useKeyboard, useStore, useTheme, wm, term, clipboard, addShortcuts, registerDockMenu, speechMenu, registerSelection, ContextMenu, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import {
   wins, meta, ensureWin, getWin, patchWin, activeTab, activeSid, addTab, closePane, closeTab, split, cycleTab,
@@ -65,7 +65,7 @@ function cyclePane(wid, d) {
 
 function paneInDirection(wid, dx, dy) {
   const tab = activeTab(getWin(wid));
-  const rect = (sid) => { const n = paneNodes.get(sid); return n ? lord.getLayout(n.id) : null; };
+  const rect = (sid) => { const n = paneNodes.get(sid); return n ? insane.getLayout(n.id) : null; };
   const cur = rect(tab.focus);
   if (!cur) return;
   const cx = cur[0] + cur[2] / 2, cy = cur[1] + cur[3] / 2;
@@ -129,7 +129,7 @@ function run(wid, action) {
     case 'copy': { const txt = term.copy(sid); if (txt) clipboard.remember(txt); break; }
     case 'paste': {
       // an image on the clipboard goes in as its file's path (paths.js): Claude Code attaches it
-      const img = clipboardImage(lord.clipboard.state());
+      const img = clipboardImage(insane.clipboard.state());
       if (img) { sendTo(w, (s) => term.paste(s, pathsText([img]))); break; }
       const txt = clipboard.get();
       if (txt) sendTo(w, (s) => term.paste(s, txt));
@@ -182,12 +182,12 @@ function run(wid, action) {
     case 'logSession': {
       const on = !term.info(sid)?.logging;
       const path = term.log(sid, on);
-      toast(wid, on ? (path ? tr('terminal.toast.logging', { path: path.replace(lord.fs.home(), '~') }) : tr('terminal.toast.logFailed')) : tr('terminal.toast.logStopped'));
+      toast(wid, on ? (path ? tr('terminal.toast.logging', { path: path.replace(insane.fs.home(), '~') }) : tr('terminal.toast.logFailed')) : tr('terminal.toast.logStopped'));
       break;
     }
     case 'exportText': {
       const path = term.export(sid);
-      toast(wid, path ? tr('terminal.toast.saved', { path: path.replace(lord.fs.home(), '~') }) : tr('terminal.toast.saveFailed'));
+      toast(wid, path ? tr('terminal.toast.saved', { path: path.replace(insane.fs.home(), '~') }) : tr('terminal.toast.saveFailed'));
       break;
     }
     case 'pasteOneLine': { const txt = clipboard.get().replace(/\s*\n\s*/g, ' ').trim(); if (txt) sendTo(w, (x) => term.paste(x, txt)); break; }
@@ -340,7 +340,7 @@ export default function TerminalApp() {
     // Ctrl+V in Claude Code with an image on the clipboard: its path goes in. Claude Code looks for the image
     // with xclip or wl-paste, which don't reach Insane OS's clipboard; it attaches a pasted image path the same way.
     if (e.ctrl && !e.alt && !e.shift && e.code === 47 && isClaude(term.info(s)?.process)) {
-      const img = clipboardImage(lord.clipboard.state());
+      const img = clipboardImage(insane.clipboard.state());
       if (img) { sendTo(cur, (x) => term.paste(x, pathsText([img]))); return; }
     }
     const key = e.key && e.key.length > 1 ? e.key : '';
@@ -355,7 +355,7 @@ export default function TerminalApp() {
 
   // a tab's menu: its color (over its profile's, as in other terminals), title and closing
   const onTabMenu = (e, tb) => {
-    const [rx, ry] = lord.getLayout(root.current.id);
+    const [rx, ry] = insane.getLayout(root.current.id);
     const setColor = (hex) => patchWin(wid, (x) => ({ tabs: x.tabs.map((o) => (o.id === tb.id ? { ...o, color: hex } : o)) }));
     setCtx({ x: e.x - rx, y: e.y - ry, items: [
       { label: tr('terminal.prefs.tabColor'), disabled: true, onClick: () => {} },
@@ -367,7 +367,7 @@ export default function TerminalApp() {
   };
 
   const onContextMenu = (e, s) => {
-    const [rx, ry] = lord.getLayout(root.current.id);
+    const [rx, ry] = insane.getLayout(root.current.id);
     const info = term.info(s);
     setCtx({ x: e.x - rx, y: e.y - ry, items: [
       { label: actionLabel('copy'), hint: hint('copy'), disabled: !info?.hasSelection, onClick: () => run(wid, 'copy') },
@@ -404,7 +404,7 @@ export default function TerminalApp() {
       )}
       {profile.statusBar && sid != null && <StatusBar t={t} sid={sid} wid={wid} />}
       <Overlays t={t} wid={wid} w={w} sid={sid} tab={tab} />
-      {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w: lord.getLayout(root.current.id)[2], h: lord.getLayout(root.current.id)[3] }} />}
+      {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={() => setCtx(null)} bounds={{ w: insane.getLayout(root.current.id)[2], h: insane.getLayout(root.current.id)[3] }} />}
       {w.prefs && <Preferences wid={wid} onClose={() => patchWin(wid, () => ({ prefs: false }))} />}
     </View>
   );

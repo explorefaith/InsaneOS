@@ -1,8 +1,8 @@
 /* pkfield.h — the pure parts of the authentication agent (pkagent.c): the password field, which is
  * never given to JavaScript, the lines polkit's helper writes, and what is shown from a request.
  * No I/O: tests/pkfield_test.c runs all of it. */
-#ifndef LORD_HW_PKFIELD_H
-#define LORD_HW_PKFIELD_H
+#ifndef INSANE_HW_PKFIELD_H
+#define INSANE_HW_PKFIELD_H
 
 #include <stddef.h>
 

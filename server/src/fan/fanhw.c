@@ -294,7 +294,7 @@ int fanhw_take(FanHw *h, const char *state_path) {
             tpath(t, "_enable", p, sizeof p);
             int v;
             if (t->orig_enable < 0 && !read_int(p, &v)) t->orig_enable = v;
-            if (write_int(p, 1)) { fprintf(stderr, "lord-fand: %s: manual mode refused\n", p); continue; }
+            if (write_int(p, 1)) { fprintf(stderr, "insane-fand: %s: manual mode refused\n", p); continue; }
         }
         t->taken = 1;
         ok++;
@@ -389,7 +389,7 @@ int fanhw_restore_file(const char *root, const char *state_path) {
     int rc = 0;
     if (f) {
         char line[FANHW_PATH + 64];
-        if (!fgets(line, sizeof line, f) || strcmp(line, "lord-fand 1\n")) rc = -1;
+        if (!fgets(line, sizeof line, f) || strcmp(line, "insane-fand 1\n")) rc = -1;
         while (rc == 0 && fgets(line, sizeof line, f)) {
             int a, b, n = 0;
             char dev[FANHW_PATH];
@@ -434,7 +434,7 @@ void fanhw_notes(FanHw *h, const char *state_path, int cpu) {
     pathf(tmp, sizeof tmp, "%s.tmp", state_path);
     FILE *f = tmp[0] ? fopen(tmp, "we") : NULL;
     if (!f) return;
-    fprintf(f, "lord-fand 1\n");
+    fprintf(f, "insane-fand 1\n");
     if (cpu) {
         for (int i = 0; i < h->n; i++) {
             FanTarget *t = &h->t[i];
@@ -500,7 +500,7 @@ void fanhw_gpu_auto(FanHw *h, int i, GpuRevert why, const char *state_path) {
     if (g->manual || why == GR_NONE) write_int(p, 2);   /* amdgpu's automatic: the firmware's own fan table */
     if (g->manual && why != GR_NONE) {
         g->reverted = why;
-        fprintf(stderr, "lord-fand: GPU fan %s back to automatic (%s)\n", g->slot, fanhw_revert_name(why));
+        fprintf(stderr, "insane-fand: GPU fan %s back to automatic (%s)\n", g->slot, fanhw_revert_name(why));
     }
     g->manual = 0;
     g->pct = -1;
@@ -562,7 +562,7 @@ int fanhw_uid_has_session(const char *root, unsigned uid) {
         if (!numbered(e->d_name, "") || strlen(e->d_name) > 10) continue;
         char p[FANHW_PATH], comm[32], st[1024];
         pathf(p, sizeof p, "%s/%s/comm", base, e->d_name);
-        if (read_str(p, comm, sizeof comm) || strcmp(comm, "lord-server")) continue;
+        if (read_str(p, comm, sizeof comm) || strcmp(comm, "insane-server")) continue;
         pathf(p, sizeof p, "%s/%s/status", base, e->d_name);
         if (read_str(p, st, sizeof st)) continue;
         const char *u = strstr(st, "\nUid:");

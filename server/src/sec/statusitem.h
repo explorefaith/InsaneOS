@@ -2,8 +2,8 @@
  * shell, so it describes the item and the shell draws it: its own package's icon, a short title, an alert mark
  * and a menu of plain items. No bytes of the app's reach the shell's JSON unchecked: this reads what the app sent and
  * writes a new text with only the known fields, each one escaped. No I/O, so tests/pkgapp_test.c covers it. */
-#ifndef LORD_SEC_STATUSITEM_H
-#define LORD_SEC_STATUSITEM_H
+#ifndef INSANE_SEC_STATUSITEM_H
+#define INSANE_SEC_STATUSITEM_H
 
 #include <stddef.h>
 

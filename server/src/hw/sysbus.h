@@ -2,8 +2,8 @@
  * power-profiles-daemon in hw/ppd.c), with our own D-Bus client (vault/dbus.c). Asynchronous:
  * replies go to callbacks by serial, signals and incoming method calls to the registered
  * handlers. Its fd is in the main loop's poll; nothing is polled. Only Hello blocks (at start). */
-#ifndef LORD_HW_SYSBUS_H
-#define LORD_HW_SYSBUS_H
+#ifndef INSANE_HW_SYSBUS_H
+#define INSANE_HW_SYSBUS_H
 
 #include <stdint.h>
 #include "../vault/dbus.h"

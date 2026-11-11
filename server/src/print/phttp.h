@@ -1,8 +1,8 @@
 /* phttp.h — minimal HTTP/1.1 client for printing: IPP to CUPS over its local socket and eSCL to
  * the network's scanners. One connection per request (Connection: close), deadlines with poll and size
  * caps; replies from the network are treated as untrusted. */
-#ifndef LORD_PRINT_PHTTP_H
-#define LORD_PRINT_PHTTP_H
+#ifndef INSANE_PRINT_PHTTP_H
+#define INSANE_PRINT_PHTTP_H
 
 #include <stddef.h>
 

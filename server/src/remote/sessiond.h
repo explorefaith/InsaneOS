@@ -1,10 +1,10 @@
-/* sessiond.h — lord-sessiond: the Insane OS session manager (see sessiond.c,
+/* sessiond.h — insane-sessiond: the Insane OS session manager (see sessiond.c,
  * docs/SESSIONS.md and docs/REMOTE.md). A root process with three parts:
  *   - the main one (sessiond.c): configuration, session list, login screen;
  *   - the monitor (monitor.c): lends the card and input to the session being shown;
  *   - the remote desktop (conn.c, if enabled): one child per network connection. */
-#ifndef LORD_SESSIOND_H
-#define LORD_SESSIOND_H
+#ifndef INSANE_SESSIOND_H
+#define INSANE_SESSIOND_H
 
 #include <pthread.h>
 #include <pwd.h>
@@ -16,24 +16,24 @@
 #include "ipnet.h"
 #include "lockout.h"
 
-#define RD_CONF_DIR "/etc/lordos/remote"
-#define SD_RUN_DIR "/run/lordos"
+#define RD_CONF_DIR "/etc/insaneos/remote"
+#define SD_RUN_DIR "/run/insaneos"
 #define SD_STATUS SD_RUN_DIR "/status.json"
-/* created when the first session frame is on the monitor; lordos-splash-quit.service waits for it to
+/* created when the first session frame is on the monitor; insaneos-splash-quit.service waits for it to
  * end the boot splash (plymouth quit --retain-splash). See docs/SESSIONS.md, "Boot splash". */
 #define SD_FIRST_FRAME SD_RUN_DIR "/first-frame"
-#define SD_NO_DISPLAY SD_RUN_DIR "/no-display"   /* lordos-splash: the console has to show, nothing else will */
+#define SD_NO_DISPLAY SD_RUN_DIR "/no-display"   /* insaneos-splash: the console has to show, nothing else will */
 #define SD_GREETER_RUN SD_RUN_DIR "/greeter"        /* XDG_RUNTIME_DIR of the login screen */
-#define SD_SESSION_CONF "/etc/lordos/session.conf"   /* AUTOLOGIN=user (empty: login screen) */
-#define SD_STATE_DIR "/var/lib/lordos"               /* boot-times.jsonl (docs/SESSIONS.md, "Boot time") */
-#define SD_USERS_DIR "/var/lib/lordos/users"         /* avatars: <user>.json and <user>.png */
-#define SD_GREETER_USER "lordos-greeter"
-#define RD_DEFAULT_PORT 5673          /* "LORD" on a phone keypad */
+#define SD_SESSION_CONF "/etc/insaneos/session.conf"   /* AUTOLOGIN=user (empty: login screen) */
+#define SD_STATE_DIR "/var/lib/insaneos"               /* boot-times.jsonl (docs/SESSIONS.md, "Boot time") */
+#define SD_USERS_DIR "/var/lib/insaneos/users"         /* avatars: <user>.json and <user>.png */
+#define SD_GREETER_USER "insaneos-greeter"
+#define RD_DEFAULT_PORT 5673          /* "INSANE" on a phone keypad */
 #define RD_MAX_CONNS 32                /* signed-in browsers (bridges) */
 #define RD_MAX_CHILDREN 48             /* connection processes in all, signing in or not */
 #define RD_MAX_PER_SOURCE 8            /* of those, from one address (IPv6: one /64) */
 #define RD_ACCESS RD_CONF_DIR "/access"  /* manual allow/block lists (admin actions, root 0600) */
-#define RD_COOKIE "__Host-lordos_remote"
+#define RD_COOKIE "__Host-insaneos_remote"
 #define RD_TURN_KEY RD_CONF_DIR "/turn.key"  /* the TURN password (admin action remote-ice, root 0600) */
 #define RD_RTC_DIR SD_RUN_DIR "/rtc"         /* ICE-TCP handoff sockets, one per bridge (root 0700; conn.c) */
 #define SD_MAX_SESSIONS 32
@@ -53,7 +53,7 @@ typedef struct { pid_t pid; char ip[48]; char user[33]; double since; unsigned l
 typedef struct { char key[48]; char user[33]; int count; double first, last; } RdFailLog;
 #define RD_FAILLOG 32
 #define SD_FAILURES SD_RUN_DIR "/remote-failures"     /* root 0600: "key count first last user" */
-typedef struct { pid_t pid; uid_t uid; char user[33]; double since; } SdSession;    /* a user's lord-server */
+typedef struct { pid_t pid; uid_t uid; char user[33]; double since; } SdSession;    /* a user's insane-server */
 typedef struct {
     pthread_mutex_t lock;
     RdFail fails[128];
@@ -72,7 +72,7 @@ typedef struct {
 typedef struct {
     int enabled;                /* remote desktop enabled (Settings → Sharing) */
     int port;
-    int group_only;             /* only the lordos-remote group */
+    int group_only;             /* only the insaneos-remote group */
     int insecure_dev;           /* allows binaries not owned by root (development VMs only) */
     int net_mode;               /* RS_NET_LAN (default) | RS_NET_LIST | RS_NET_ANY: who may connect */
     RsAccess access;            /* RD_ACCESS */
@@ -94,7 +94,7 @@ void   rd_unlock(void);
 
 /* ---- sess.c: users, passwords and sessions (shared by the monitor and the network) ---- */
 
-void sd_log_prefix(const char *prefix);             /* "lord-sessiond[pid] 1.2.3.4" */
+void sd_log_prefix(const char *prefix);             /* "insane-sessiond[pid] 1.2.3.4" */
 void sd_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 int  sd_valid_username(const char *u);
 void sd_dummy_init(void);                           /* hash setting for unknown users (same timing) */
@@ -106,40 +106,40 @@ double sd_fail_wait(const char *key);               /* seconds to wait for that 
 void sd_fail_note(const char *key, int failed);
 int  sd_fail_count(const char *key);
 int  sd_run_wait(const char *const argv[]);
-/* Socket of that user's session if it's already running (lord-server --headless), or -1. */
+/* Socket of that user's session if it's already running (insane-server --headless), or -1. */
 int  sd_session_connect(uid_t uid);
 /* Connects to the user's session or creates it (w×h); with a per-user lock so the monitor
  * and the network don't create two at once. Returns the fd (as root) or -1. */
 int  sd_session_get(const struct passwd *pw, int w, int h);
-/* The login screen (lord-server --greeter as lordos-greeter): creates it if it isn't running. */
+/* The login screen (insane-server --greeter as insaneos-greeter): creates it if it isn't running. */
 int  sd_greeter_get(int w, int h);
-int  sd_session_running(uid_t uid);                 /* is there a live lord-server for that user? */
+int  sd_session_running(uid_t uid);                 /* is there a live insane-server for that user? */
 /* System user without login for the login screen or the monitor; creates it if missing. */
 struct passwd *sd_system_user(const char *name, const char *home);
 
-/* ---- netsup.c: lord-netd, the system network (docs/NETWORK.md) ---- */
+/* ---- netsup.c: insane-netd, the system network (docs/NETWORK.md) ---- */
 void sd_netd_start(void);                           /* at startup; afterwards, sd_netd_tick */
-int  sd_netd_fd(void);                              /* pidfd of an adopted lord-netd, or -1 */
+int  sd_netd_fd(void);                              /* pidfd of an adopted insane-netd, or -1 */
 void sd_netd_event(void);                           /* that pidfd says it exited */
-int  sd_netd_reaped(pid_t pid, int status);         /* 1 if the child was lord-netd */
+int  sd_netd_reaped(pid_t pid, int status);         /* 1 if the child was insane-netd */
 void sd_netd_tick(void);                            /* restarts it when due */
 
-/* ---- cgsup.c: root-owned app scopes (/run/lordos/cgroup.sock, docs/PRIVACY.md) ---- */
+/* ---- cgsup.c: root-owned app scopes (/run/insaneos/cgroup.sock, docs/PRIVACY.md) ---- */
 void sd_cgroup_start(void);                         /* after cgroup_service_init */
 int  sd_cgroup_reaped(pid_t pid, int status);       /* 1 if the child was the cgroup service */
 void sd_cgroup_tick(void);                          /* restarts it if it died */
 
-/* "LORD_GPU=0" with lordos.gpu=0 on the kernel command line (or the service's LORD_GPU), or empty */
+/* "INSANE_GPU=0" with insaneos.gpu=0 on the kernel command line (or the service's INSANE_GPU), or empty */
 extern char sd_gpu_env[24];
-/* "LORD_SW_CURSOR=1" with lordos.swcursor=1 on the kernel command line (or the service's LORD_SW_CURSOR=1): the
+/* "INSANE_SW_CURSOR=1" with insaneos.swcursor=1 on the kernel command line (or the service's INSANE_SW_CURSOR=1): the
  * pointer drawn in the composition instead of the GPU's cursor plane, in every session; or empty */
 extern char sd_cursor_env[24];
-/* "LORD_MAIN_DISPLAY=<connector>" for the login screen: the main display last chosen in a session shown on
- * the monitor (kept in /var/lib/lordos/main-display), or empty */
+/* "INSANE_MAIN_DISPLAY=<connector>" for the login screen: the main display last chosen in a session shown on
+ * the monitor (kept in /var/lib/insaneos/main-display), or empty */
 extern char sd_main_display[64];
 #define SD_TUNE_N 4
-extern char sd_tune_env[SD_TUNE_N][32]; /* the service's LORD_GPU_SCISSOR, LORD_GPU_DRAG, LORD_PIPELINE, LORD_GPU_VERIFY for user sessions */
-extern int sd_input_debug;              /* LORD_INPUT_DEBUG=1 for user sessions (keylag.h) */
+extern char sd_tune_env[SD_TUNE_N][32]; /* the service's INSANE_GPU_SCISSOR, INSANE_GPU_DRAG, INSANE_PIPELINE, INSANE_GPU_VERIFY for user sessions */
+extern int sd_input_debug;              /* INSANE_INPUT_DEBUG=1 for user sessions (keylag.h) */
 
 /* ---- conn.c: one remote desktop connection (in a child process) ---- */
 void rd_serve(SSL_CTX *ctx, int fd, const char *ip, const char *key);

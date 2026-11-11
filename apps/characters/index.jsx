@@ -4,7 +4,7 @@
 import {
   View, Text, Button, Segmented, ScrollView, SidebarItem, Toolbar, ToolbarSpacer, Hairline, SearchField, EmptyState, useTheme, clipboard, emoji,
   EmojiGrid, EmojiToneBar, typeScale, t as tr,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useMemo, useState } from 'react';
 
 export function Icon({ size: s }) {

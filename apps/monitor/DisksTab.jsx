@@ -1,12 +1,12 @@
 // Monitor → Disks: read/write rates, and for each physical disk its live temperature (from the
-// kernel's hwmon sensors: the nvme driver, or drivetemp for SATA; lord.monitor, no root) and a
+// kernel's hwmon sensors: the nvme driver, or drivetemp for SATA; insane.monitor, no root) and a
 // simple health light (OK / Check / Failing) from a cached SMART summary (smart.refresh, at most
 // every 5 minutes per disk, never waking a resting disk). The chosen disk shows its temperature over
 // the last 30 minutes, Cooling style, and "Open in Disks" for the full SMART report.
 import {
   View, Text, Button, Toggle, useTheme, useLocale, useStore, useSettings, useAppWindow, wm, formatNumber, formatTemp, heatColor,
   diskTempHistory, DISK_TEMP_HISTORY, smart, useSmartSummaries, diskTempLimit, diskAlertPrefs, setDiskAlerts, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useState } from 'react';
 import { Card, Big, Pair, Stat, Table, Cell, C, fmt, useCardStyle } from './index.jsx';
 import { Chart } from './Chart.jsx';

@@ -1,12 +1,12 @@
 // InsaneBench's desktop scene (0.8.6, docs/BENCHMARK.md "Desktop impact"): while a desktop run is in its
 // comp.* or desk.* step, Performance opens a second System Information window with this scene and asks
-// lord-server to move it along a figure of eight (wm.scriptMove: the drag's own path in C, one step per
-// frame, no JS per frame), while one element inside it turns through lord.setStyle (no React render per
-// frame). lord-server records its own frame times meanwhile (bench/lbframes.c); nothing here measures.
-import { View, Text, useTheme, useLocale, spacing, typeScale, wm, workArea } from '@lordos/sdk';
+// insane-server to move it along a figure of eight (wm.scriptMove: the drag's own path in C, one step per
+// frame, no JS per frame), while one element inside it turns through insane.setStyle (no React render per
+// frame). insane-server records its own frame times meanwhile (bench/lbframes.c); nothing here measures.
+import { View, Text, useTheme, useLocale, spacing, typeScale, wm, workArea } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
 
-export const SCENE_INSTANCE = 'lordbench-scene';
+export const SCENE_INSTANCE = 'insanebench-scene';
 const SCENE_ID = `sysinfo#${SCENE_INSTANCE}`;
 const W = 760, H = 480, TICK_MS = 16;          // the app's minimum size
 const PERIOD_MS = 6000;
@@ -41,7 +41,7 @@ export function Scene() {
     const step = () => {
       a = (a + 6) % 360;
       const n = spin.current && spin.current.id;
-      if (n != null) try { lord.setStyle(n, 'rotate', a); } catch (e) { /* gone */ }
+      if (n != null) try { insane.setStyle(n, 'rotate', a); } catch (e) { /* gone */ }
       tm = setTimeout(step, TICK_MS);
     };
     tm = setTimeout(step, TICK_MS);

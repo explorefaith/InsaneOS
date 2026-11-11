@@ -11,27 +11,27 @@ events and the supported style subset), [DESIGN.md](DESIGN.md) (tokens and the s
 
 > **Today a theme only runs on a development build of Insane OS.** A release build loads only JavaScript
 > that is listed in Insane OS's signed code manifest, and a theme you build yourself is not in it. See
-> [Verified code](#verified-code-what-happens-to-a-theme-that-lordos-did-not-sign) for exactly what happens and what
+> [Verified code](#verified-code-what-happens-to-a-theme-that-insaneos-did-not-sign) for exactly what happens and what
 > would be needed.
 
 ## 1. What a theme is
 
 A theme is **the whole desktop, written in React**: wallpaper, menu bar or taskbar, Dock, app
 launcher, panels, menus and every window frame. It is not a style sheet and it does not run in a web
-engine. `lord-server` (the display server and Wayland compositor, in C) evaluates the theme's bundle
+engine. `insane-server` (the display server and Wayland compositor, in C) evaluates the theme's bundle
 with QuickJS; a React reconciler (`runtime/index.js`) turns the tree into native nodes
-(`lord.setStyle`, `appendChild`…) that `lord-server` lays out (flexbox) and paints itself, on the
+(`insane.setStyle`, `appendChild`…) that `insane-server` lays out (flexbox) and paints itself, on the
 CPU or the GPU. So you write ordinary function components with hooks, but with `<View>`, `<Text>`,
 `<Image>` instead of DOM elements, and a CSS subset as React Native-style style objects
 (`themes/README.md`, "Supported styles").
 
-**What the SDK (`@lordos/sdk`, `sdk/`) gives a theme:**
+**What the SDK (`@insaneos/sdk`, `sdk/`) gives a theme:**
 
 - the native components and events (`View`, `Text`, `Image`, `Terminal`, `addListener`, gestures);
 - the window manager: the window list, open/focus/minimize/maximize/snap, the work area, moving and
   resizing done in C (`sdk/windows.js`, `sdk/windowshell.jsx`);
 - `AppHost`, which draws an app inside a window; the native apps themselves come from `apps/`
-  (`@lordos/apps`) and Linux (Wayland and X11) windows arrive on their own (`sdk/wayland.js`);
+  (`@insaneos/apps`) and Linux (Wayland and X11) windows arrive on their own (`sdk/wayland.js`);
 - the token contract and the shared controls apps use (`ThemeProvider`, `useTheme`,
   `sdk/theme.js`, `sdk/components.jsx`, `sdk/controls.jsx`);
 - the layers that order everything above the windows (`Layer`, `Overlay`, `sdk/layers.js`);
@@ -60,12 +60,12 @@ its own layout (for example what the Super key alone does).
 since 0.8.5 lists every installed theme (the only place to choose one; `StylePicker` in
 `apps/settings/index.jsx`). Insane Flow and Insane Classic come first, the others by name; a theme with
 `"hidden": true` in its `theme.json` is not listed. Switching discards the JavaScript context and
-loads the new bundle (`themes.use` in `sdk/index.js`, `lord.themes.use` in `server/src/ui/js_sys.c`,
+loads the new bundle (`themes.use` in `sdk/index.js`, `insane.themes.use` in `server/src/ui/js_sys.c`,
 `switch_theme` in `server/src/main.c`): the Insane OS app windows that were open (up to 8) reopen in
 the new theme with their frames, and Linux windows stay connected and get the new frame. The
-choice is stored as `theme` in `~/.config/lordos/settings.json`.
+choice is stored as `theme` in `~/.config/insaneos/settings.json`.
 
-How a session starts: `lord-sessiond` always starts `lord-server` with
+How a session starts: `insane-sessiond` always starts `insane-server` with
 `--theme <Insane OS folder>/themes/default/theme.bundle.js` (`server/src/remote/sessiond.c`,
 `sess.c`); the default theme's `startShell()` sees that the user chose another one and switches to
 it at once. If the chosen theme can't be loaded, the session stays on the theme it came from.
@@ -131,7 +131,7 @@ the accent and the title-bar button order through the settings portal (`publishT
   `naranja`, `verde`, `grafito`) so the user's choice survives a switch; `syncPortal` maps them to
   the portal's accent names.
 - `wallpapers`: `[{ id, nameKey, name, src, thumb?, category?, variants? }]` for Settings →
-  Wallpaper; `lordosWallpapers` from the SDK is the Insane OS collection
+  Wallpaper; `insaneosWallpapers` from the SDK is the Insane OS collection
   (`assets/wallpapers/README.md`).
 - Shape tokens for the shared controls: `controlRadius`, `controlRadiusSmall`, `groupRadius`,
   `menuRadius`, `menuItemRadius`, `menuHighlight` (`'accent'`|`'subtle'`), `selection`
@@ -155,8 +155,8 @@ There is no exported component: `index.jsx` is a script that runs once when the 
 evaluated. The order the bundled themes follow:
 
 ```jsx
-import { startShell, configureWindows, ThemeProvider, useSettings, useWindows, getApp, Layer } from '@lordos/sdk';
-import { apps } from '@lordos/apps';          // every native app in apps/, added by the build
+import { startShell, configureWindows, ThemeProvider, useSettings, useWindows, getApp, Layer } from '@insaneos/sdk';
+import { apps } from '@insaneos/apps';          // every native app in apps/, added by the build
 import { makeTheme } from './tokens.js';
 
 // 1. At module level: the apps, the work area and the frame size (before startShell)
@@ -180,7 +180,7 @@ startShell(<App />);
 
 **`configureWindows({ apps, workArea, chrome, snap })`** (`sdk/windows.js`):
 
-- `apps`: always the `apps` from `@lordos/apps`.
+- `apps`: always the `apps` from `@insaneos/apps`.
 - `workArea`: a function `display → { x, y, w, h }`, the free area for windows on that display
   (without the bar and the Dock). Maximize, snapping, new windows and `wm.beginMove`'s top limit use
   it. An object is still accepted and means the main display's area. Call it again when the bar or
@@ -217,7 +217,7 @@ adds invisible resize edges on 4 sides and 4 corners (6 px outside, 3 px inside)
 Inside it:
 
 - a title bar whose `onMouseDown` calls **`wm.beginMove(w.id)`**. Moving and resizing are then done
-  by `lord-server` in C (`server/src/ui/grab.c`): React gets no event per frame, and the moving
+  by `insane-server` in C (`server/src/ui/grab.c`): React gets no event per frame, and the moving
   window is painted from a cached layer ([WINDOWS.md](WINDOWS.md)). `beginMove` returns `false` when
   it can't (a maximized window, no button held); Insane Classic then drags out of the maximized place
   in JS with `wm.move`;
@@ -248,7 +248,7 @@ The SDK gives menus as **item lists**; the theme draws them. An item is
 | `windowMenuItems(winId)` | the Window menu, the same in every theme: Minimize, Zoom, Fill, Center, Move & Resize (halves, quarters, thirds, arrangements), Move to *display*, Bring All to Front, the window list (`sdk/windowmenu.js`) |
 | `dockMenu(entry)` | a Dock or taskbar item's context menu |
 | `trashMenu({ onEmpty })` | the Trash's menu |
-| `recentItems(n)`, `storeUpdates()`, `runningApps()`, `forceQuit(key)`, `appGroup(winId)` | for a system menu like Insane Flow's crown menu |
+| `recentItems(n)`, `storeUpdates()`, `runningApps()`, `forceQuit(key)`, `appGroup(winId)` | for a system menu like Insane Flow's apple menu |
 
 Where they go is the theme's choice: Insane Flow shows the app menus in its top menu bar
 (`themes/default/components/MenuBar.jsx`), Insane Classic in a strip under each window's title bar
@@ -321,10 +321,10 @@ apps. Mount `<AppSwitcher />` inside the `ThemeProvider` for the app switcher, a
 
 ### The login and lock screen are not your theme
 
-`themes/greeter` is loaded by `lord-sessiond` with `lord-server --greeter`, as the system user
-`lordos-greeter`, from a fixed path (`server/src/remote/sessiond.c`). It is also the lock screen
+`themes/greeter` is loaded by `insane-sessiond` with `insane-server --greeter`, as the system user
+`insaneos-greeter`, from a fixed path (`server/src/remote/sessiond.c`). It is also the lock screen
 (mode `lock`) and the user switcher. It calls `render()` itself instead of `startShell()`, and it never
-sees passwords being checked: it sends them with `lord.greeter.send()` and the root process answers
+sees passwords being checked: it sends them with `insane.greeter.send()` and the root process answers
 ([SESSIONS.md](SESSIONS.md)). A desktop theme can't replace or restyle it; the first frame of a
 boot (the hand-off from the boot splash) is the greeter's, or the default theme's with autologin.
 
@@ -369,14 +369,14 @@ user assigned the app to from the Dock. The window list is global: windows are n
 
 ### Performance rules
 
-Everything runs on `lord-server`'s main thread, which also composites the screen and serves the
+Everything runs on `insane-server`'s main thread, which also composites the screen and serves the
 Linux apps. A slow theme makes the whole desktop slow.
 
 - **No React render per frame.** Moving and resizing windows is already in C. To animate, change one
-  style with **`lord.setStyle(ref.current.id, 'opacity' | 'rotate' | 'scaleX' | …, value)`** from a timer or
+  style with **`insane.setStyle(ref.current.id, 'opacity' | 'rotate' | 'scaleX' | …, value)`** from a timer or
   `requestAnimationFrame` (the `ScrollView` thumb fade in `sdk/components.jsx`, the fans in
   `sdk/cooling.jsx`); stop the loop when the animation ends or the surface is hidden, and don't start
-  it with reduce motion. `lord.setStyle` takes the engine's own keys (`rotate` in degrees, `scaleX`,
+  it with reduce motion. `insane.setStyle` takes the engine's own keys (`rotate` in degrees, `scaleX`,
   `scaleY`), not a CSS `transform` string: an unknown key changes nothing and is logged once.
 - **`transform` scale and rotate are cheap**: the subtree is painted once into a cached raster and
   composited (Insane Flow's minimize effect scales a whole window).
@@ -385,7 +385,7 @@ Linux apps. A slow theme makes the whole desktop slow.
   Keep blurred surfaces few and small, and turn blur off with `effects: false`.
 - **Subscribe narrowly**: `useStore(store, selector)` re-renders only when the selected value changes;
   a clock that renders every second should only re-render its own text.
-- **Don't poll** when a store exists (sound, battery, Bluetooth and displays arrive as events). Lord
+- **Don't poll** when a store exists (sound, battery, Bluetooth and displays arrive as events). Insane
   Classic's network glyph polls every 5 s; that is the upper bound to aim for.
 - The style subset has no CSS animations, dashed borders, skew or 3D (`themes/README.md`). An
   unknown style key is logged as `js: unsupported style '<key>'`, once per key per process (an
@@ -404,8 +404,8 @@ and `assets/` of each theme (`tools/iso/mkdeb.sh`), so keep your files there.
 Visible text goes through `t('namespace.key')` ([LANGUAGES.md](LANGUAGES.md)); app names through
 `appName(app)`, dates and times through `formatDate`/`formatTime`. The bundled themes' strings are in
 the `shell` catalog (`assets/locales/{en,es,pt}/shell.json`). A theme of your own can reuse existing
-`shell.*` keys (the example does) or bring its own namespace: `lord.locale.catalog` reads
-`<lang>/<namespace>.json` from `~/.local/share/lordos/locales/` first and then Insane OS's
+`shell.*` keys (the example does) or bring its own namespace: `insane.locale.catalog` reads
+`<lang>/<namespace>.json` from `~/.local/share/insaneos/locales/` first and then Insane OS's
 `assets/locales/` (`f_locale_catalog` in `js_sys.c`). A missing key shows the key itself. Inside the
 Insane OS tree, `node tools/i18n-check.mjs` checks every `t()` key in `themes/` against the English
 catalog and every language against English.
@@ -421,8 +421,8 @@ node tools/build-theme.mjs <id>       # only themes/<id>
 
 `tools/build-theme.mjs` bundles `themes/<id>/index.jsx` with esbuild into
 **`themes/<id>/theme.bundle.js`** (one minified IIFE, ES2020, JSX automatic). React, the reconciler,
-`@lordos/runtime` (`runtime/index.js`) and `@lordos/sdk` (`sdk/index.js`) are **bundled into it**, and
-so is every native app: the virtual module `@lordos/apps` imports `apps/<id>/index.jsx` and
+`@insaneos/runtime` (`runtime/index.js`) and `@insaneos/sdk` (`sdk/index.js`) are **bundled into it**, and
+so is every native app: the virtual module `@insaneos/apps` imports `apps/<id>/index.jsx` and
 `manifest.json` for each app (and checks that each has a semver `version`). That is why a theme
 bundle is 1.5–1.8 MB and why every theme carries the same apps. Apps with `"process": "isolated"`
 (Passwords, Mail…) run as their own processes; in the theme they are only a starter
@@ -440,12 +440,12 @@ signed the old one).
 
 Insane OS's own JavaScript is checked before it runs ([SIGNING.md](SIGNING.md#verified-system-code-082)).
 Every bundle goes through `codesig_load` (`server/src/sec/codesig.c`, called from `load_code` in
-`server/src/ui/js.c`): once per process `lord-server` reads `code-manifest.json` and
-`code-manifest.sig` from the Insane OS folder (`/usr/lib/lordos` installed, the repository root in a
+`server/src/ui/js.c`): once per process `insane-server` reads `code-manifest.json` and
+`code-manifest.sig` from the Insane OS folder (`/usr/lib/insaneos` installed, the repository root in a
 development tree) and verifies the signature with the release key compiled into it. Then, per
 bundle:
 
-| `lord-server` build | Manifest in the Insane OS folder | A `themes/<id>/theme.bundle.js` that is not listed |
+| `insane-server` build | Manifest in the Insane OS folder | A `themes/<id>/theme.bundle.js` that is not listed |
 |---|---|---|
 | **Release** (`make -C server RELEASE=1`; the published images and `.deb`) | signed by Insane OS | **refused**: `code: REFUSED themes/<id>/theme.bundle.js: not listed in the manifest` |
 | Release | missing, unsigned, or a bad signature | **everything is refused** (state "invalid"): the recovery screen |
@@ -453,26 +453,26 @@ bundle:
 | Development | unsigned (what `npm run build` writes) | **refused unless listed**: the hashes are still checked, so rebuild with `npm run build` / `build-theme.mjs` to list it |
 | Development | signed | refused unless listed |
 
-So on an installed release system, copying a theme into `/usr/lib/lordos/themes/<id>/` (which needs
+So on an installed release system, copying a theme into `/usr/lib/insaneos/themes/<id>/` (which needs
 root anyway) makes it **appear** in Settings → Appearance → Desktop style (the list only looks for a
 readable `theme.bundle.js`), but choosing it does nothing visible except a notice: the switch is
-refused, `lord-server` reloads the theme it was on (`switch_theme`), the session shows the sticky
+refused, `insane-server` reloads the theme it was on (`switch_theme`), the session shows the sticky
 notification "This Insane OS component was modified and was not loaded" naming the file
 (`sdk/codesig.js`), and choosing it again in that session does nothing (`ui.theme_failed`). Because `theme` was already
 saved in the settings, the same happens once at every login. **Do not** try to make it load by
 regenerating the installed manifest: on a release build an unsigned or changed manifest invalidates
 all of Insane OS's code and leaves only the recovery screen.
 
-A bundle outside the Insane OS folder (for example `lord-server --theme /home/me/x/theme.bundle.js`)
+A bundle outside the Insane OS folder (for example `insane-server --theme /home/me/x/theme.bundle.js`)
 is run only when the state is "development" (a development build with no manifest or an unsigned
 one), logged as `code: … loaded unchecked (outside …, development build)`; otherwise it is refused
 with "not part of Insane OS's system code".
 
 **Third-party themes can't run on release builds today.** That is deliberate for now: a theme is not
-sandboxed. It runs inside `lord-server`, in the same JavaScript context as every native app, with
-the whole `lord.*` API of the session (files, the terminal, the network, administrator requests),
+sandboxed. It runs inside `insane-server`, in the same JavaScript context as every native app, with
+the whole `insane.*` API of the session (files, the terminal, the network, administrator requests),
 and it sees the desktop's keyboard and pointer input. It also carries its own copy of the SDK,
-including the code that shows the permission prompts and records the answers (`lord.perms.set`,
+including the code that shows the permission prompts and records the answers (`insane.perms.set`,
 `server/src/ui/js_sec.c`), so a theme decides what those prompts do. Supporting
 them would need, at least: a theme package format and a separate, user-confirmed trust decision
 (signed like `.lpk` packages, [SIGNING.md](SIGNING.md), not the Insane OS release key), a place for
@@ -481,42 +481,42 @@ than what built-in code gets. None of that exists yet.
 
 ## 4. Installing and testing
 
-**Where themes live.** Installed: `/usr/lib/lordos/themes/<id>/` (`theme.json`, `theme.bundle.js`,
-`assets/`), next to `/usr/lib/lordos/code-manifest.json`; the development VMs also use
-`/usr/local/lib/lordos` ([VM-SETUP.md](VM-SETUP.md), step 22). The list of themes is the folder that
+**Where themes live.** Installed: `/usr/lib/insaneos/themes/<id>/` (`theme.json`, `theme.bundle.js`,
+`assets/`), next to `/usr/lib/insaneos/code-manifest.json`; the development VMs also use
+`/usr/local/lib/insaneos` ([VM-SETUP.md](VM-SETUP.md), step 22). The list of themes is the folder that
 holds the running theme's folder (`themes_root` in `js_sys.c`); there is no per-user themes folder.
 
-**Trying one in a development session** (a development build of `lord-server`, see the table
+**Trying one in a development session** (a development build of `insane-server`, see the table
 above):
 
 1. Put the theme in `themes/<id>` of your Insane OS tree and run `node tools/build-theme.mjs <id>` (or
    `npm run build`).
-2. Copy the tree to the VM and build `lord-server` as in [VM-SETUP.md](VM-SETUP.md), step 6 (`themes/`
+2. Copy the tree to the VM and build `insane-server` as in [VM-SETUP.md](VM-SETUP.md), step 6 (`themes/`
    and `assets/` with `server/`). Copy `code-manifest.json` too, or none at all: a stale manifest
    refuses the new bundle.
 3. Start it and choose the theme in **Settings → Appearance → Desktop style**. Passing
-   `--theme ../themes/<id>/theme.bundle.js` to a standalone `sudo ./build/lord-server` also works,
-   but `startShell` switches to the theme saved in `~/.config/lordos/settings.json` (`"theme"`) if it
+   `--theme ../themes/<id>/theme.bundle.js` to a standalone `sudo ./build/insane-server` also works,
+   but `startShell` switches to the theme saved in `~/.config/insaneos/settings.json` (`"theme"`) if it
    is another one, so set that too.
 4. After rebuilding, switch to another theme and back (or log out and in) to load the new bundle.
    There is no hot reload.
 
 A theme that throws while its bundle is evaluated makes the switch fall back to the theme you came
-from (`lord-server: the theme failed, going back to …`); the error is in the log. Keep Insane Flow or
+from (`insane-server: the theme failed, going back to …`); the error is in the log. Keep Insane Flow or
 Insane Classic installed: they are the fallback (`start_theme` in `main.c`).
 
 **Debugging.**
 
-- Sessions started by `lord-sessiond` write their log to **`~/.cache/lordos/session.log`** (the login
-  screen to `greeter.log`); a standalone `lord-server` writes to the terminal it was started from.
+- Sessions started by `insane-sessiond` write their log to **`~/.cache/insaneos/session.log`** (the login
+  screen to `greeter.log`); a standalone `insane-server` writes to the terminal it was started from.
 - `console.log`, `.info`, `.debug` → `js: …` lines; `console.warn` → `js: [warn] …`;
   `console.error` → `js: [error] …` (the prelude in `server/src/ui/js_prelude.h`). Exceptions in timers
   and animation frames are logged as `js: [error] timer: …` / `raf: …`.
 - Useful lines: `js: theme <path> loaded in N ms (K KB)`, `code: …` (the verified-code state and each
-  check or refusal), `lord-server: cambiando a tema <path>` (a switch), `js: unsupported style '<key>'`.
-- `sudo /usr/lib/lordos/bin/lord-server --check-code [<folder>]` checks a whole tree the way a session
-  would; `lord-server --debug` and `--profile` (per-primitive timings) for drawing problems.
-- `lord.getLayout(node.id)` returns `[x, y, w, h]` of a node (both themes use it to place menus).
+  check or refusal), `insane-server: cambiando a tema <path>` (a switch), `js: unsupported style '<key>'`.
+- `sudo /usr/lib/insaneos/bin/insane-server --check-code [<folder>]` checks a whole tree the way a session
+  would; `insane-server --debug` and `--profile` (per-primitive timings) for drawing problems.
+- `insane.getLayout(node.id)` returns `[x, y, w, h]` of a node (both themes use it to place menus).
 
 ## 5. Checklist before sharing a theme
 
@@ -528,7 +528,7 @@ Check each item on a real session and take a screenshot ([VM-SETUP.md](VM-SETUP.
 - **Menus:** every app's menus are reachable (`useAppMenus`), the Window menu works, menus never open
   under the Dock or off screen.
 - **Light and dark**, every accent, transparency on and off.
-- **Right to left:** with the Arabic test pack (`docs/packs/lordos-lang-ar.json`): rows mirrored,
+- **Right to left:** with the Arabic test pack (`docs/packs/insaneos-lang-ar.json`): rows mirrored,
   `textAlign: 'start'`, menus opening inwards, mouse-driven pieces in `direction: 'ltr'`.
 - **Translations:** no hard-coded text; en, es and pt at least; long translations truncate with an
   ellipsis instead of overflowing.

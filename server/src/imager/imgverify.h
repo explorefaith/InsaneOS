@@ -7,8 +7,8 @@
  *   - image names: what a release ships and what the imager writes;
  *   - the uncompressed size of an .xz file, from its index (to refuse a card that is too small
  *     before anything is erased). */
-#ifndef LORD_IMGVERIFY_H
-#define LORD_IMGVERIFY_H
+#ifndef INSANE_IMGVERIFY_H
+#define INSANE_IMGVERIFY_H
 
 #include <stddef.h>
 #include <stdint.h>

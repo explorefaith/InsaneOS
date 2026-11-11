@@ -1,8 +1,8 @@
 /* codesig_test.c — verified system code (src/sec/codesig.c, docs/SIGNING.md "Verified system code"):
  * the manifest parser, the signature, the per-file check, reading under the root, the development
- * and release policies, and that the compiled-in key is tools/release/lordos-release.pub.pem.
+ * and release policies, and that the compiled-in key is tools/release/insaneos-release.pub.pem.
  *
- *   build/codesig-test [path to lordos-release.pub.pem]      (make test passes it) */
+ *   build/codesig-test [path to insaneos-release.pub.pem]      (make test passes it) */
 #include "sec/codesig.h"
 #include "pkg/crypto.h"
 
@@ -119,23 +119,23 @@ static void test_parser(void) {
 
     /* strict structure (unsigned, to reach the parser) */
     const char *bad_manifests[] = {
-        "{\"format\":2,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"files\":[]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":{}}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"../etc/passwd\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"/abs.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a/./b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a//b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":-1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1.5,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"00000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"ABCDEF0000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"},"
+        "{\"format\":2,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"files\":[]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":{}}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"../etc/passwd\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"/abs.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a/./b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a//b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":-1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1.5,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"00000000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"ABCDEF0000000000000000000000000000000000000000000000000000000000\"}]}",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"b.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"},"
             "{\"path\":\"a.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"},"
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[{\"path\":\"a.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"},"
             "{\"path\":\"a.js\",\"size\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}",
-        "{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[]} trailing",
+        "{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[]} trailing",
         "not json",
     };
     for (size_t i = 0; i < sizeof bad_manifests / sizeof bad_manifests[0]; i++) {
@@ -143,7 +143,7 @@ static void test_parser(void) {
         snprintf(name, sizeof name, "strict manifest #%zu refused", i);
         CHECK(parse(bad_manifests[i], NULL, &m) != 0, name);
     }
-    CHECK(parse("{\"format\":1,\"kind\":\"lordos-system-code\",\"version\":\"1\",\"files\":[]}", NULL, &m) == 0 && m.nfiles == 0, "empty list is fine");
+    CHECK(parse("{\"format\":1,\"kind\":\"insaneos-system-code\",\"version\":\"1\",\"files\":[]}", NULL, &m) == 0 && m.nfiles == 0, "empty list is fine");
     codesig_free(&m);
 }
 
@@ -272,7 +272,7 @@ static void test_release_key(const char *pem) {
         bits += 6;
         if (bits >= 8 && o < sizeof der) { bits -= 8; der[o++] = (uint8_t)(acc >> bits); }
     }
-    CHECK(o == 44 && !memcmp(der + 12, codesig_release_key, 32), "compiled-in key matches lordos-release.pub.pem");
+    CHECK(o == 44 && !memcmp(der + 12, codesig_release_key, 32), "compiled-in key matches insaneos-release.pub.pem");
 }
 
 /* SHA-256: NIST vectors and the CPU's instructions (aarch64) against the C code, every length. */
@@ -308,7 +308,7 @@ static void test_sha256(void) {
     sha256_select(0); sha256(buf, big, a);
     sha256_select(1); sha256(buf, big, b);
     CHECK(same && !memcmp(a, b, 32), "SHA-256: the CPU's instructions match the C code");
-    /* speed of what lord-server uses here (docs/SIGNING.md, "Startup cost") */
+    /* speed of what insane-server uses here (docs/SIGNING.md, "Startup cost") */
     struct timespec t0, t1;
     clock_gettime(CLOCK_MONOTONIC, &t0);
     sha256(buf, big, a);

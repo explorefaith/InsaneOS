@@ -1,6 +1,6 @@
 /* keyboard.h — keyboard layouts with libxkbcommon (see keyboard.c). */
-#ifndef LORD_KEYBOARD_H
-#define LORD_KEYBOARD_H
+#ifndef INSANE_KEYBOARD_H
+#define INSANE_KEYBOARD_H
 
 #include <stddef.h>
 #include <stdint.h>

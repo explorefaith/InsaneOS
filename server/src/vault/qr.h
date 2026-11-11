@@ -6,8 +6,8 @@
  * and sharp photos): binarizes, finds the three finder patterns, builds the grid (with the
  * alignment pattern from version 2), reads the format, removes the mask and corrects errors
  * with Reed-Solomon. It is not a camera reader (no strong perspective). */
-#ifndef LORD_VAULT_QR_H
-#define LORD_VAULT_QR_H
+#ifndef INSANE_VAULT_QR_H
+#define INSANE_VAULT_QR_H
 
 #include <stddef.h>
 #include <stdint.h>

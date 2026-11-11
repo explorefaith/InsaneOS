@@ -121,10 +121,10 @@ eq('pi: both, sticky bits are recent', piStatus({ throttled: 0x20000, underVolta
 eq('names', [machineName(vm), machineName({ machine: { model: 'Raspberry Pi 5 Model B Rev 1.0' } }), machineName({})], ['QEMU Standard PC', 'Raspberry Pi 5 Model B Rev 1.0', '']);
 
 // ---- the Report tab ----
-const taken = new Set(['lordos-report-2026-10-26.md', 'lordos-report-2026-10-26-2.md']);
+const taken = new Set(['insaneos-report-2026-10-26.md', 'insaneos-report-2026-10-26-2.md']);
 eq('file names', [reportFileName('2026-10-26', 'md', (n) => taken.has(n)), reportFileName('2026-10-26', 'json', (n) => taken.has(n))],
-  ['lordos-report-2026-10-26-3.md', 'lordos-report-2026-10-26.json']);
-eq('a strange date never reaches the name', reportFileName('../../x', 'md', () => false), 'lordos-report-today.md');
+  ['insaneos-report-2026-10-26-3.md', 'insaneos-report-2026-10-26.json']);
+eq('a strange date never reaches the name', reportFileName('../../x', 'md', () => false), 'insaneos-report-today.md');
 eq('all taken', reportFileName('2026-10-26', 'md', () => true), null);
 eq('json text', reportJson({ schema: 1, cpu: { cores: 8 } }), '{\n  "schema": 1,\n  "cpu": {\n    "cores": 8\n  }\n}\n');
 
@@ -139,16 +139,16 @@ eq('not a list', parseMemoryLines(undefined), []);
 // ---- checks (part 1) ----
 const st = (rows) => Object.fromEntries(rows.map((r) => [r.id, r.state]));
 const good = {
-  report: { software: { landlockAbi: 6, bpfLsm: true, kernelConfig: { CONFIG_CGROUP_BPF: 'y' }, services: { 'lord-netperm': true } },
+  report: { software: { landlockAbi: 6, bpfLsm: true, kernelConfig: { CONFIG_CGROUP_BPF: 'y' }, services: { 'insane-netperm': true } },
     session: { composition: 'gpu', renderer: 'AMD Radeon RX 580' } },
-  facts: { uid: 1000, euid: 1000, cgroup: '/system.slice/lordos.service/lordos-session-1000/server', leafRoot: true, parentRoot: true, appScopes: 3, remoteListening: false },
+  facts: { uid: 1000, euid: 1000, cgroup: '/system.slice/insaneos.service/insaneos-session-1000/server', leafRoot: true, parentRoot: true, appScopes: 3, remoteListening: false },
   code: { state: 'verified', files: 9, refused: [] }, remote: { enabled: false }, stats: { rssKB: 71680 },
 };
 eq('a healthy system', st(evaluate(good)), { serverUser: 'pass', landlock: 'pass', netperm: 'pass', code: 'pass', remoteClosed: 'pass', cgroups: 'pass', gpu: 'pass', memory: 'info' });
 eq('levels', evaluate(good).map((r) => r.level), ['configured', 'configured', 'configured', 'effective', 'effective', 'configured', 'configured', 'measured']);
 const broken = {
-  report: { software: { landlockAbi: 3, bpfLsm: false, kernelConfig: {}, services: { 'lord-netperm': false } }, session: { composition: 'gpu-off', gpuInit: 'no-3d' } },
-  facts: { uid: 0, euid: 0, cgroup: '/system.slice/lordos.service/lordos-session-0/server', leafRoot: false, parentRoot: true, appScopes: 0, remoteListening: true },
+  report: { software: { landlockAbi: 3, bpfLsm: false, kernelConfig: {}, services: { 'insane-netperm': false } }, session: { composition: 'gpu-off', gpuInit: 'no-3d' } },
+  facts: { uid: 0, euid: 0, cgroup: '/system.slice/insaneos.service/insaneos-session-0/server', leafRoot: false, parentRoot: true, appScopes: 0, remoteListening: true },
   code: { state: 'verified', files: 9, refused: [{ path: 'x' }] }, remote: { enabled: false },
 };
 eq('a broken system', st(evaluate(broken)), { serverUser: 'fail', landlock: 'warn', netperm: 'fail', code: 'fail', remoteClosed: 'fail', cgroups: 'fail', gpu: 'warn' });
@@ -168,7 +168,7 @@ const KER = ['fsHome', 'fsSystem', 'cgroupEscape', 'netInet', 'netUnix', 'ptrace
 const HEL = ['helperSocket', 'helperExec', 'helperFork', 'helperData'];
 const BRO = ['brokerFsEscape', 'brokerClipboard', 'brokerFido', 'brokerMail'];
 const okProbe = { probe: { v: 1, sandbox: 63, tries: [...tr_(KER), ...tr_(['ownData'], false), ...tr_(HEL), ...tr_(BRO)] },
-  proc: { noNewPrivs: '1', seccomp: '2', capEff: '0000000000000000', cgroup: '/system.slice/lordos.service/lordos-session-1000/app-lordos-lpk-sysprobe.scope', memoryMax: '536870912' }, at: 1 };
+  proc: { noNewPrivs: '1', seccomp: '2', capEff: '0000000000000000', cgroup: '/system.slice/insaneos.service/insaneos-session-1000/app-insaneos-lpk-sysprobe.scope', memoryMax: '536870912' }, at: 1 };
 eq('a tight sandbox', st(evaluateProbe(okProbe)), { appSandbox: 'pass', helperSandbox: 'pass', broker: 'pass', appScope: 'pass' });
 eq('the cap in MB', evaluateProbe(okProbe).find((r) => r.id === 'appScope').vars.mb, 512);
 const leaky = { ...okProbe, probe: { ...okProbe.probe, tries: okProbe.probe.tries.map((x) => (x.id === 'netInet' || x.id === 'helperExec' || x.id === 'brokerFido' ? { ...x, denied: false } : x)) } };
@@ -183,14 +183,14 @@ eq('helper never ran', evaluateProbe({ ...okProbe, probe: { ...okProbe.probe, tr
 eq('garbage does not throw', evaluateProbe({ probe: { tries: [null, 3, { id: 5 }] } }).map((r) => r.state), ['unknown', 'fail', 'fail', 'unknown']);
 
 // ---- the Test Bench's report ----
-const bench = { tool: 'lordos-testbench', at: 1, fps: 59.9, presentation: true, presented: 600, discarded: 0, refreshHz: 60,
+const bench = { tool: 'insaneos-testbench', at: 1, fps: 59.9, presentation: true, presented: 600, discarded: 0, refreshHz: 60,
   latency: { n: 4, avgMs: 21.25 }, gl: { renderer: 'AMD Radeon RX 580', kind: 'HARDWARE GPU', drawMs: 0.4 },
   checks: [{ id: 'a', state: 'pass' }, { id: 'b', state: 'pass' }, { id: 'c', state: 'info' }] };
 eq('a good bench', st(evaluateBench(bench)), { wayland: 'pass', renderer3d: 'pass', presented: 'info', latency: 'info' });
 eq('a failing check is named', evaluateBench({ ...bench, checks: [...bench.checks, { id: 'clipboard round trip', state: 'fail' }] })[0].vars.list, 'clipboard round trip');
 eq('software renderer warns, headless presents nothing', st(evaluateBench({ ...bench, presented: 0, discarded: 9, gl: { renderer: 'llvmpipe', kind: 'SOFTWARE (CPU)' }, latency: {} })),
   { wayland: 'pass', renderer3d: 'warn', presented: 'warn' });
-eq('not a bench report', [evaluateBench(null), evaluateBench({ tool: 'x' }), evaluateBench({ tool: 'lordos-testbench' })], [null, null, null]);
+eq('not a bench report', [evaluateBench(null), evaluateBench({ tool: 'x' }), evaluateBench({ tool: 'insaneos-testbench' })], [null, null, null]);
 
 // ---- a Raspberry Pi's revision code ----
 eq('a Pi 5, 16 GB, from Sony UK', piBoard('e04171'), { product: 'Raspberry Pi 5 Model B', chip: 'BCM2712', maker: 'Sony UK', memoryGB: 16, version: '1.1' });

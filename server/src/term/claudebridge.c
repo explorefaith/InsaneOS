@@ -1,20 +1,20 @@
-/* claudebridge.c — lord-claude-status: the Terminal footer's source for Claude Code (docs/TERMINAL.md).
+/* claudebridge.c — insane-claude-status: the Terminal footer's source for Claude Code (docs/TERMINAL.md).
  *
  * Claude Code runs its status line command on every update with a JSON object on stdin: the context window
  * (context_window.used_percentage, context_window_size), the plan's limits (rate_limits.five_hour and
  * .seven_day: used_percentage, resets_at), the model and the session. The Terminal's "Connect" puts this
  * program in front of the user's own command in ~/.claude/settings.json:
  *
- *   "statusLine": { "command": "/usr/lib/lordos/bin/lord-claude-status bash ~/.claude/statusline-command.sh" }
+ *   "statusLine": { "command": "/usr/lib/insaneos/bin/insane-claude-status bash ~/.claude/statusline-command.sh" }
  *
- * It keeps that JSON as ~/.cache/lordos/claude/<session_id>.json (0600, in a 0700 folder of the user's, written
+ * It keeps that JSON as ~/.cache/insaneos/claude/<session_id>.json (0600, in a 0700 folder of the user's, written
  * whole and renamed into place), then runs the rest of its arguments with the same stdin, so the user's status
  * line is unchanged. With no arguments it prints Insane OS's own status line, the same as the Terminal's footer:
  *
  *   Opus 5.5 | Insane OS | main | ctx 11% | 5h 37% | sem 5%
  *
  * (the model, the folder, its git branch, the context used and the plan's limits; "5h –" when Claude Code sends the
- * limits without the 5-hour window; the labels in the user's language). It is not lord-server's: Claude Code runs it,
+ * limits without the 5-hour window; the labels in the user's language). It is not insane-server's: Claude Code runs it,
  * as the user, as it ran the command it wraps. Snapshots older than a week are removed. */
 #include "../sec/json.h"
 
@@ -75,7 +75,7 @@ static void keep(const char *data, size_t len) {
     if (h < 0) return;
     int a = sub_dir(h, ".cache");
     close(h);
-    int b = a >= 0 ? sub_dir(a, "lordos") : -1;
+    int b = a >= 0 ? sub_dir(a, "insaneos") : -1;
     if (a >= 0) close(a);
     int d = b >= 0 ? sub_dir(b, "claude") : -1;
     if (b >= 0) close(b);

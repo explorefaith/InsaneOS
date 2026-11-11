@@ -2,7 +2,7 @@
 // the panes and History; the tables, views and routines of the database with a filter and the selected table's
 // summary; the pane. A production favorite opens read-only until it is unlocked; a closed connection says why and offers
 // to reconnect.
-import { View, Text, ScrollView, SearchField, MenuButton, ConfirmDialog, wm, windows, clipboard, useStore, t as tr } from '@lordos/sdk';
+import { View, Text, ScrollView, SearchField, MenuButton, ConfirmDialog, wm, windows, clipboard, useStore, t as tr } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { usePal, Icons, ToolItem, Sep, IconBtn, Note, Btn, Later, Foot } from './ui.jsx';
 import { store, run1, useDatabase, patchSession } from './conn.js';

@@ -1,20 +1,20 @@
-/* js_mail.c — lord.mail: Mail, Calendar, Contacts and Reminders through the sandboxed helper
- * lord-maild (server/src/mail, docs/MAIL.md). Here we only validate arguments, open the files
+/* js_mail.c — insane.mail: Mail, Calendar, Contacts and Reminders through the sandboxed helper
+ * insane-maild (server/src/mail, docs/MAIL.md). Here we only validate arguments, open the files
  * the user picked and write the accounts file; IMAP, SMTP, CalDAV, CardDAV, MIME and HTML are
- * handled in lord-maild. Everything is asynchronous: request() returns an id and results arrive
+ * handled in insane-maild. Everything is asynchronous: request() returns an id and results arrive
  * through poll().
  *
- *   available()                    is lord-maild installed?
+ *   available()                    is insane-maild installed?
  *   start()                        starts it (it stays up for new-mail notifications)
  *   request(json, [paths])         → id; paths: files to attach or a contact photo (home or media only)
  *   poll()                         → [{id, type: done|err|evt|crash, data}] or null
  *   pending()
  *   config()                       → the accounts file text ("" if none). Never holds passwords.
- *   saveConfig(json)               writes ~/.config/lordos/mail/accounts.json (validated JSON,
+ *   saveConfig(json)               writes ~/.config/insaneos/mail/accounts.json (validated JSON,
  *                                  ≤ 512 KB, 0600, atomic) and reloads the allowed servers
- *   allowImages([urls])            lets lord-maild reach these image hosts for 10 minutes
+ *   allowImages([urls])            lets insane-maild reach these image hosts for 10 minutes
  *   bind(node, image) / release(image)
- *   cacheDir()                     ~/.local/share/lordos/mail (attachments saved for opening)
+ *   cacheDir()                     ~/.local/share/insaneos/mail (attachments saved for opening)
  */
 #include "js_mail.h"
 #include "js_sys.h"
@@ -143,8 +143,8 @@ static JSValue f_config(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return v;
 }
 
-/* The accounts file holds security decisions (which servers lord-maild may reach, trusted
- * certificate fingerprints): JS cannot write it through lord.fs (fsops_protected), only here and,
+/* The accounts file holds security decisions (which servers insane-maild may reach, trusted
+ * certificate fingerprints): JS cannot write it through insane.fs (fsops_protected), only here and,
  * for the isolated Mail app, through the broker (sec/brokermail.c). Both use mail_save_config. */
 static JSValue f_save_config(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -226,8 +226,8 @@ static const JSCFunctionListEntry mail_funcs[] = {
     JS_CFUNC_DEF("cacheDir", 0, f_cache_dir),
 };
 
-void js_mail_register(JSContext *c, JSValue lord) {
+void js_mail_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, mail_funcs, sizeof mail_funcs / sizeof mail_funcs[0]);
-    JS_SetPropertyStr(c, lord, "mail", o);
+    JS_SetPropertyStr(c, insane, "mail", o);
 }

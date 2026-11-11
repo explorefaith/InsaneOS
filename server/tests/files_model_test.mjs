@@ -95,12 +95,12 @@ eq('no hosts', foundHosts(undefined).hidden, 0);
 const ce = connectedEntries({
   home: '/home/ana',
   volumes: [{ path: '/media/ana/Public on 192.168.1.4', name: 'Public on 192.168.1.4', fs: 'cifs' }, { path: '/media/ana/USB', name: 'USB', fs: 'vfat' },
-    { path: '/home/ana/Cloud/Drive', name: 'Drive', fs: 'fuse.rclone' }, { path: '/home/ana/.local/share/lordos/remote/davs on nas', name: 'davs on nas', fs: 'fuse.rclone' }],
+    { path: '/home/ana/Cloud/Drive', name: 'Drive', fs: 'fuse.rclone' }, { path: '/home/ana/.local/share/insaneos/remote/davs on nas', name: 'davs on nas', fs: 'fuse.rclone' }],
   pins: [{ address: 'smb://192.168.1.4/Public', path: '/media/ana/Public on 192.168.1.4', name: 'Public on 192.168.1.4' }, { address: 'smb://192.168.1.9/Backup', path: '/media/ana/Backup on 192.168.1.9', name: 'Backup on 192.168.1.9' }],
   accounts: [{ id: 'g1', name: 'Drive', mount: '/home/ana/Cloud/Drive', state: 'idle' }, { id: 'h', name: 'Hidden', mount: '/home/ana/Cloud/H' }, { id: 'n', name: 'No mount' }],
   hiddenAccounts: ['h'],
 });
-eq('connected kinds', ce.map((e) => [e.netPlace.kind, e.netPlace.path]), [['share', '/media/ana/Public on 192.168.1.4'], ['share', '/home/ana/.local/share/lordos/remote/davs on nas'],
+eq('connected kinds', ce.map((e) => [e.netPlace.kind, e.netPlace.path]), [['share', '/media/ana/Public on 192.168.1.4'], ['share', '/home/ana/.local/share/insaneos/remote/davs on nas'],
   ['pin', '/media/ana/Backup on 192.168.1.9'], ['cloud', '/home/ana/Cloud/Drive']]);
 eq('no file path reaches a mount point', ce.every((e) => e.path.startsWith('place:') && !e.dir), true);
 eq('nothing given', connectedEntries({ accounts: null, pins: null, volumes: null }), []);

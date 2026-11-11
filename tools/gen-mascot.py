@@ -5,14 +5,14 @@
 #   python3 tools/gen-mascot.py --parts   first rewrite the parts file from the geometry in this script
 #   python3 tools/gen-mascot.py --svg     only the SVGs (no PNGs)
 #
-# The parts (head, ears, eyes, crown, cape, paws, props...) are reusable <g id="..."> groups in
+# The parts (head, ears, eyes, apple, cape, paws, props...) are reusable <g id="..."> groups in
 # assets/brand/mascot/src/lumo-parts.svg, drawn on the front view's 512 x 512 canvas. Every output
 # is assembled from those groups with transforms, so the character stays the same everywhere; the
 # output keeps only the gradients it uses. Hand edits to the parts file are kept unless you run
 # --parts (which re-authors it from PARTS below). Paths marked data-mirror="256" hold the left half
 # of a symmetric shape and are completed here, so they are exactly symmetric.
 #
-# The crown is assets/brand/crown.svg (same geometry, gradients and gem facets) with an outline.
+# The apple is assets/brand/apple.svg (same geometry, gradients and gem facets) with an outline.
 # PNGs (needs rsvg-convert: `brew install librsvg` or `apt install librsvg2-bin`):
 #   docs/brand/mascot/png/*.png   512 and 1024 for the views and poses; 64/128/256 for the avatar
 #   assets/mascot/*.png           the sizes the UI draws (sdk/mascot.js)
@@ -92,14 +92,22 @@ def mirror_all(d, axis=256.0):
     return fmt([(c, [(2 * axis - x, y) for x, y in p]) for c, p in parse(d)])
 
 
-# ---------------------------------------------------------------- the brand crown
-CROWN = ('M256 446C200 446 166 442 148 436Q124 430 122 404L72 222Q66 186 96 206C126 232 156 256 178 264Q192 268 199 254'
-         'C219 228 234 188 243 154Q256 116 269 154C278 188 293 228 313 254Q320 268 334 264C356 256 386 232 416 206'
-         'Q446 186 440 222L390 404Q388 430 364 436C346 442 312 446 256 446Z')
-GEMS = [(256, 104, 37, 43), (66, 180, 30, 35), (446, 180, 30, 35)]
+# ---------------------------------------------------------------- the brand apple
+# the same vectors as assets/brand/apple.svg (tools/gen-brand-insane.py SHAPES), loaded from there
+import importlib.util as _ilu
+_gbi_spec = _ilu.spec_from_file_location(
+    'gbi', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gen-brand-insane.py'))
+_gbi = _ilu.module_from_spec(_gbi_spec)
+_gbi_spec.loader.exec_module(_gbi)
+APPLE_SHAPES = _gbi.SHAPES
+
+
+def apple_d():
+    return ' '.join('M' + ' '.join(f'{x:.1f} {y:.1f}' for x, y in pts) + 'Z' for pts in APPLE_SHAPES)
 
 
 def gem(cx, cy, w, h, edge=None, sw=1.6):
+    """A little faceted diamond — the cape clasp (not a brand mark)."""
     t, r, b, l, c = (cx, cy - h), (cx + w, cy), (cx, cy + h), (cx - w, cy), (cx, cy)
     k = 0.42
     tt, tr_, tb, tl = (cx, cy - h * k), (cx + w * k, cy), (cx, cy + h * k), (cx - w * k, cy)
@@ -109,18 +117,17 @@ def gem(cx, cy, w, h, edge=None, sw=1.6):
             + tri('#FFE45C', tt, tr_, tb, tl))
 
 
-def crown_group(scale=0.34, base=(256, 150)):
-    """The brand crown, its base centre at `base`, with a dark outline drawn behind it."""
-    tx, ty = base[0] - 256 * scale, base[1] - 446 * scale
+def apple_group(scale=0.34, base=(256, 150)):
+    """The brand apple, its base centre at `base`, with a dark outline drawn behind it.
+    The outline is painted first and the fill second, so only the outer silhouette keeps a line."""
+    tx, ty = base[0] - 256 * scale, base[1] - 468 * scale
     sw = 3.2 / scale
-    body = (f'<path fill="none" stroke="{INK}" stroke-width="{n(sw)}" stroke-linejoin="round" d="{CROWN}"/>'
-            f'<g clip-path="url(#l-ck)"><path fill="url(#l-cb)" d="{CROWN}"/><path fill="url(#l-cs)" d="{CROWN}"/>'
-            '<path fill="url(#l-cg)" d="M80 222Q140 256 186 272Q160 300 154 372L122 372Z"/>'
-            '<path fill="url(#l-cg)" opacity=".6" d="M256 150Q238 220 206 268Q236 258 256 246Z"/>'
-            '<path fill="url(#l-cr)" d="M60 380Q256 428 452 380L452 470L60 470Z"/>'
-            '<path fill="url(#l-cv)" d="M60 350Q256 398 452 350L452 380Q256 428 60 380Z"/>'
-            '<path fill="#A996FF" opacity=".55" d="M60 352Q256 400 452 352L452 358Q256 406 60 358Z"/></g>')
-    body += ''.join(gem(*g, edge='#C27C00', sw=2.4 / scale) for g in GEMS)
+    d = apple_d()
+    body = (f'<defs><radialGradient id="l-appleg" gradientUnits="userSpaceOnUse" cx="256" cy="252" r="246">'
+            '<stop offset="0" stop-color="#FFB24A"/><stop offset=".42" stop-color="#F7701C"/>'
+            '<stop offset="1" stop-color="#C43A08"/></radialGradient></defs>'
+            f'<path fill="none" stroke="{INK}" stroke-width="{n(sw)}" stroke-linejoin="round" d="{d}"/>'
+            f'<path fill="url(#l-appleg)" d="{d}"/>')
     return f'<g transform="matrix({n(scale)} 0 0 {n(scale)} {n(tx)} {n(ty)})">{body}</g>'
 
 
@@ -144,12 +151,6 @@ DEFS = '''
 <linearGradient id="l-collar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9077FF"/><stop offset="1" stop-color="#5B3FE0"/></linearGradient>
 <radialGradient id="l-glow"><stop offset="0" stop-color="#E6DEFF" stop-opacity=".8"/><stop offset="1" stop-color="#E6DEFF" stop-opacity="0"/></radialGradient>
 <radialGradient id="l-shadow"><stop offset="0" stop-color="#6F5FE0" stop-opacity=".32"/><stop offset=".7" stop-color="#8B7CF6" stop-opacity=".14"/><stop offset="1" stop-color="#8B7CF6" stop-opacity="0"/></radialGradient>
-<clipPath id="l-ck"><path d="''' + CROWN + '''"/></clipPath>
-<linearGradient id="l-cb" x1="0" y1="0" x2="1" y2="1"><stop offset=".15" stop-color="#fff"/><stop offset=".6" stop-color="#EEEAFF"/><stop offset="1" stop-color="#BDB1F5"/></linearGradient>
-<linearGradient id="l-cs" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#7D6BEB" stop-opacity="0"/><stop offset=".78" stop-color="#7D6BEB" stop-opacity=".28"/></linearGradient>
-<linearGradient id="l-cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-<linearGradient id="l-cv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5B3FE0"/><stop offset=".5" stop-color="#7C5CFF"/><stop offset="1" stop-color="#5B3FE0"/></linearGradient>
-<linearGradient id="l-cr" x1="0" y1="0" x2="0" y2="1"><stop offset=".3" stop-color="#fff"/><stop offset="1" stop-color="#CFC6F7"/></linearGradient>
 '''
 
 SIL = f'stroke="{INK}" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"'
@@ -233,7 +234,7 @@ PARTS['mouth-grin'] = (
 PARTS['mouth-cat'] = f'<path fill="none" {LINE26} d="M238 278Q247 287 256 279Q265 287 274 278"/>'
 PARTS['mouth-wavy'] = f'<path fill="none" {LINE26} d="M240 286Q245 279 250 285Q256 291 262 285Q267 279 272 286"/>'
 
-PARTS['crown'] = crown_group(0.32, (256, 142))
+PARTS['apple'] = apple_group(0.32, (256, 142))
 
 BODY_D = 'M256 316C200 316 166 340 158 382C150 424 158 460 186 474Q222 488 256 480'
 PARTS['body'] = (sym(BODY_D, f'fill="url(#l-body)" {SIL}')
@@ -404,7 +405,7 @@ PARTS['laptop'] = (
     '<path fill="#fff" opacity=".18" d="M262 274L460 256L300 440L268 440Z"/>'
     f'<path fill="#C9C6E0" {SIL} d="M196 446L478 440Q490 440 488 452L486 464Q484 474 472 474L206 478Q192 478 190 466L188 456Q188 446 196 446Z"/>'
     '<path fill="#9C98BA" d="M190 462L488 456L486 464Q484 474 472 474L206 478Q192 478 190 466Z"/>'
-    '<g transform="matrix(.16 0 0 .16 322 300)" fill="#fff" opacity=".9"><path d="' + CROWN + '"/></g>')
+    '<g transform="matrix(.16 0 0 .16 322 300)" fill="#fff" opacity=".9"><path d="' + apple_d() + '"/></g>')
 
 QM_D = 'M410 132C410 104 432 88 456 88C482 88 500 104 500 126C500 146 488 156 472 166C462 172 458 180 458 192'
 PARTS['qmark'] = (f'<path fill="none" stroke="#7C5CFF" stroke-width="15" stroke-linecap="round" d="{QM_D}"/>'
@@ -445,7 +446,7 @@ def face(p, eyes='eyes', mouth='mouth-open'):
     p.add('ear').add('ear', MIRROR).add('head').add('face').add('blush').add(eyes)
     if eyes == 'eyes':
         p.add('brows')
-    p.add('nose').add(mouth).add('crown').add('forelock')
+    p.add('nose').add(mouth).add('apple').add('forelock')
 
 
 def tq(p, eyes='eyes-tq', mouth='mouth-open', feet=True, shadow=True, flaps=True, tail=True):
@@ -462,7 +463,7 @@ def tq(p, eyes='eyes-tq', mouth='mouth-open', feet=True, shadow=True, flaps=True
     if eyes == 'eyes-tq':
         p.add('brows-tq')
     p.add('nose', 'translate(-30 0)').add(mouth, 'translate(-30 0)')
-    p.add('crown', 'rotate(-5 256 142) translate(-14 0)').add('forelock', 'translate(-20 2)')
+    p.add('apple', 'rotate(-5 256 142) translate(-14 0)').add('forelock', 'translate(-20 2)')
     if flaps:
         p.add('flap', 'matrix(.74 0 0 1 50 0)').add('flap', 'matrix(-1.12 0 0 1 532 0)')
     p.add('knots', 'translate(-22 0)').add('clasp', 'translate(-22 0)')
@@ -479,7 +480,7 @@ def view(name, title, desc):
     return deco
 
 
-DESC = 'Lumo, the Insane OS guardian: a small celestial fox with white fur, the Insane OS crown and a violet cape'
+DESC = 'Lumo, the Insane OS guardian: a small celestial fox with white fur, the Insane OS apple and a violet cape'
 
 
 @view('lumo-front', 'Lumo', DESC + ', front view.')
@@ -495,7 +496,7 @@ def v_tq(p):
 @view('lumo-back', 'Lumo', DESC + ', seen from the back, with the star on the cape.')
 def v_back(p):
     p.add('shadow').add('tail', 'matrix(-1 0 0 1 560 -10)').add('foot').add('foot', MIRROR)
-    p.add('cape-rear').add('ear-back').add('ear-back', MIRROR).add('head').add('backfluff').add('crown')
+    p.add('cape-rear').add('ear-back').add('ear-back', MIRROR).add('head').add('backfluff').add('apple')
 
 
 @view('lumo-wave', 'Lumo waving', DESC + ', waving hello.')
@@ -583,7 +584,7 @@ def v_avatar_small(p):
           + '<ellipse cx="128" cy="404" rx="30" ry="18" fill="#FF9DB4" opacity=".7"/><ellipse cx="384" cy="404" rx="30" ry="18" fill="#FF9DB4" opacity=".7"/>'
           + f'<path fill="none" stroke="{INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" d="M232 412Q244 424 256 414Q268 424 280 412"/>'
           + '</g>')
-    p.raw(crown_group(0.4, (256, 176)).replace('stroke-width="8"', 'stroke-width="24"'))
+    p.raw(apple_group(0.4, (256, 176)).replace('stroke-width="8"', 'stroke-width="24"'))
 
 
 def build(only=None):

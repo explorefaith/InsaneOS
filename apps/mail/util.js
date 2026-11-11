@@ -1,6 +1,6 @@
 // util.js — small helpers for Mail: dates in the list, folder names, color categories, opening
 // an attachment the way Files would.
-import { t, formatDate, formatTime, weekdayName, openFileWithApps, revealPath } from '@lordos/sdk';
+import { t, formatDate, formatTime, weekdayName, openFileWithApps, revealPath } from '@insaneos/sdk';
 
 export const CATEGORY_COLORS = ['#ff453a', '#ff9f0a', '#ffd60a', '#30d158', '#0a84ff', '#bf5af2'];
 // labels are built at render time (they follow the language)
@@ -34,7 +34,7 @@ export function formatSize(n) {
 export const openPath = (path, name) => openFileWithApps(path, name);
 export { revealPath };
 
-// The same rule as lord-maild (mime_safe_filename): a sender-chosen attachment name becomes a
+// The same rule as insane-maild (mime_safe_filename): a sender-chosen attachment name becomes a
 // plain basename: no path parts, no leading dots, no control, bidi-override or FAT-reserved
 // characters, at most 200 bytes. Never empty.
 export function safeName(name) {

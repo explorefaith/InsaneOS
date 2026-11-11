@@ -1,6 +1,6 @@
 /* netconn_test.c — the components' network connectors (src/sec/netconn.c, 0.8.5):
  * request validation on both sides, the sockets the connector makes, the real connector process
- * (this binary re-executed with --net-connector, as lord-server is) and its fail-closed start. */
+ * (this binary re-executed with --net-connector, as insane-server is) and its fail-closed start. */
 #include "sec/netconn.h"
 
 #include <arpa/inet.h>
@@ -109,7 +109,7 @@ static void test_connector_start(void) {
     for (int i = 0; bad[i]; i++) {
         pid_t p = fork();
         if (p == 0) {
-            char *argv[] = { "lord-net-x", "--net-connector", (char *)bad[i], NULL };
+            char *argv[] = { "insane-net-x", "--net-connector", (char *)bad[i], NULL };
             _exit(netconn_main(3, argv));
         }
         int st;
@@ -121,7 +121,7 @@ static void test_connector_start(void) {
         close(3);
         int f = open("/dev/null", O_RDONLY);
         if (f != 3) dup2(f, 3);
-        char *argv[] = { "lord-net-mail", "--net-connector", "mail", NULL };
+        char *argv[] = { "insane-net-mail", "--net-connector", "mail", NULL };
         _exit(netconn_main(3, argv));
     }
     int st;
@@ -133,12 +133,12 @@ int main(int argc, char **argv) {
     if (argc > 1 && !strcmp(argv[1], "--net-connector")) return netconn_main(argc, argv);
     test_requests();
     test_connector_start();
-    unsetenv("LORDOS_SESSIOND");
+    unsetenv("INSANEOS_SESSIOND");
     test_sockets(0);
     /* in a "session" the sockets come from real connector processes (this binary re-executed);
-     * they can't be placed in a scope from here (no lord-sessiond for this process): with
-     * LORD_NETCONN_TEST_PLACED unset the test checks that the request fails closed */
-    setenv("LORDOS_SESSIOND", "1", 1);
+     * they can't be placed in a scope from here (no insane-sessiond for this process): with
+     * INSANE_NETCONN_TEST_PLACED unset the test checks that the request fails closed */
+    setenv("INSANEOS_SESSIOND", "1", 1);
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons(9) };
     inet_pton(AF_INET, "127.0.0.1", &a.sin_addr);
     int fd = netconn_socket(NC_MAIL, AF_INET, SOCK_STREAM, (struct sockaddr *)&a, sizeof a);

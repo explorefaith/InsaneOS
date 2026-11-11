@@ -1,24 +1,24 @@
 name: Bug report
-description: Something in LordOS doesn't work as it should.
+description: Something in InsaneOS doesn't work as it should.
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting a bug. **Security problems go privately to https://lordos.org/legal/security/, never here.**
+        Thanks for reporting a bug. **Security problems go privately to https://insaneos.org/legal/security/, never here.**
         Please don't include passwords, keys, email contents or other personal data.
   - type: input
     id: version
     attributes:
-      label: LordOS version
-      description: Open the About LordOS app and copy the version (for example "0.8.8 · Beta").
+      label: InsaneOS version
+      description: Open the About InsaneOS app and copy the version (for example "0.8.8 · Beta").
       placeholder: 0.8.8 · Beta
     validations:
       required: true
   - type: dropdown
     id: install
     attributes:
-      label: How did you install LordOS?
+      label: How did you install InsaneOS?
       options:
         - ISO (live or installed)
         - Raspberry Pi 5 image
@@ -59,7 +59,7 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Run `lordos-issue` in Terminal and paste the file it saves. Read it first, issues are public. If it isn't there, see CONTRIBUTING.md.
+      description: Run `insaneos-issue` in Terminal and paste the file it saves. Read it first, issues are public. If it isn't there, see CONTRIBUTING.md.
       render: text
   - type: checkboxes
     id: confirm
@@ -68,5 +68,5 @@ body:
       options:
         - label: This report contains no passwords, keys or personal data.
           required: true
-        - label: This is not a security vulnerability (those go to https://lordos.org/legal/security/).
+        - label: This is not a security vulnerability (those go to https://insaneos.org/legal/security/).
           required: true

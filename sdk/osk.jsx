@@ -6,7 +6,7 @@
 // Keys act on release (Backspace and Space on press, and they repeat while held). The rows are always
 // left to right: a keyboard doesn't mirror in Arabic or Hebrew, and each key shows the active layout.
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, mainDisplay, addListener } from '@lordos/runtime';
+import { View, Text, mainDisplay, addListener } from '@insaneos/runtime';
 import { useStore } from './store.js';
 import { shellTokens, useTheme } from './theme.js';
 import { t as tr } from './i18n.js';
@@ -76,7 +76,7 @@ export function OskPanel() {
   const rows = onLetters ? letterRows(st.labels, st.shift) : symbolRows(st.labels, st.page);
   const [comma, dot] = punctuation(st.labels);
   const pressShift = () => {
-    const now = lord.now();
+    const now = insane.now();
     const caps = now - lastShift.current < CAPS_MS;
     lastShift.current = now;
     osk.setShift(st.shift === 2 ? 0 : caps ? 2 : st.shift ? 0 : 1);

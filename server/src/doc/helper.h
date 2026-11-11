@@ -1,8 +1,8 @@
-/* helper.h — what the parts of the lord-doc helper share (helper.c, h_pdf.c, h_arc.c,
+/* helper.h — what the parts of the insane-doc helper share (helper.c, h_pdf.c, h_arc.c,
  * h_font.c, h_make.c). It runs already locked down: it doesn't open files by path, it only uses the fds
- * lord-server passed to it. */
-#ifndef LORD_DOC_HELPER_H
-#define LORD_DOC_HELPER_H
+ * insane-server passed to it. */
+#ifndef INSANE_DOC_HELPER_H
+#define INSANE_DOC_HELPER_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -33,8 +33,8 @@ int pdf_handle(const DocMsg *m, const JVal *args);
 int arc_handle(const DocMsg *m, const JVal *args);
 int font_handle(const DocMsg *m, const JVal *args);
 int make_handle(const DocMsg *m, const JVal *args);
-int ocr_handle(const DocMsg *m, const JVal *args);     /* lord-ocr only (h_ocr.c) */
-int tts_handle(const DocMsg *m, const JVal *args);     /* lord-tts only (h_tts.c) */
+int ocr_handle(const DocMsg *m, const JVal *args);     /* insane-ocr only (h_ocr.c) */
+int tts_handle(const DocMsg *m, const JVal *args);     /* insane-tts only (h_tts.c) */
 void pdf_thumb(const DocMsg *m, const JVal *args);     /* util session: thumbnail of a PDF */
 void pdf_warm(uint32_t id);
 

@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     }
     signal(SIGTERM, on_sig);
     signal(SIGINT, on_sig);
-    setenv("LORD_SS_DEBUG", "1", 0);
+    setenv("INSANE_SS_DEBUG", "1", 0);
     memback_init(&mb, locked);
     int fd = dbus_connect_session();
     if (fd < 0) { fprintf(stderr, "demo: no session bus\n"); return 1; }

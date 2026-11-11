@@ -1,11 +1,11 @@
-/* sess.c — what the monitor and the remote desktop share in lord-sessiond: accounts,
- * passwords, waits after failed attempts and the session list (one lord-server --headless
+/* sess.c — what the monitor and the remote desktop share in insane-sessiond: accounts,
+ * passwords, waits after failed attempts and the session list (one insane-server --headless
  * per user; see docs/SESSIONS.md).
  *
  * A session belongs to a single user and can be viewed from anywhere: the monitor and the browsers that
- * log in with that user connect to the same socket ($XDG_RUNTIME_DIR/lordos/remote.sock).
+ * log in with that user connect to the same socket ($XDG_RUNTIME_DIR/insaneos/remote.sock).
  * So that two places at once don't create two sessions of the same user, creation goes through a
- * per-user lock (/run/lordos/spawn-<uid>.lock). */
+ * per-user lock (/run/insaneos/spawn-<uid>.lock). */
 #include "sessiond.h"
 #include "../sec/cgroup.h"
 #include "rsec.h"
@@ -31,7 +31,7 @@
 #include <time.h>
 #include <unistd.h>
 
-static char log_prefix[96] = "lord-sessiond";
+static char log_prefix[96] = "insane-sessiond";
 char sd_gpu_env[24];
 char sd_cursor_env[24];
 char sd_main_display[64];
@@ -82,7 +82,7 @@ int sd_user_allowed(const struct passwd *pw, int remote) {
     /* from the network, stricter: never root's name or group, and a shell from /etc/shells */
     if (!strcmp(pw->pw_name, "root") || pw->pw_gid == 0 || !login_shell(pw->pw_shell)) return 0;
     if (!rd_conf.group_only) return 1;
-    struct group *g = getgrnam("lordos-remote");
+    struct group *g = getgrnam("insaneos-remote");
     if (!g) return 0;
     gid_t groups[256];
     int n = 256;
@@ -91,7 +91,7 @@ int sd_user_allowed(const struct passwd *pw, int remote) {
     return 0;
 }
 
-/* is it the autologin user (/etc/lordos/session.conf)? */
+/* is it the autologin user (/etc/insaneos/session.conf)? */
 static int is_autologin(const char *user) {
     FILE *f = fopen(SD_SESSION_CONF, "r");
     char line[128], u[40] = "";
@@ -116,13 +116,13 @@ void sd_dummy_init(void) {
         break;
     }
     endspent();
-    if (!dummy[0] && !crypt_gensalt_rn(NULL, 0, NULL, 0, dummy, sizeof dummy)) snprintf(dummy, sizeof dummy, "$6$lordos.dummy");
+    if (!dummy[0] && !crypt_gensalt_rn(NULL, 0, NULL, 0, dummy, sizeof dummy)) snprintf(dummy, sizeof dummy, "$6$insaneos.dummy");
 }
 
 static void waste(const char *pass) {
     struct crypt_data cd;
     memset(&cd, 0, sizeof cd);
-    const char *h = crypt_r(pass, dummy[0] ? dummy : "$6$lordos.dummy", &cd);
+    const char *h = crypt_r(pass, dummy[0] ? dummy : "$6$insaneos.dummy", &cd);
     volatile int x = h ? ct_equal(h, "*") : 0;
     (void)x;
     explicit_bzero(&cd, sizeof cd);
@@ -246,7 +246,7 @@ static int connect_path(const char *p) {
 
 int sd_session_connect(uid_t uid) {
     char p[108];
-    snprintf(p, sizeof p, "/run/user/%u/lordos/remote.sock", (unsigned)uid);
+    snprintf(p, sizeof p, "/run/user/%u/insaneos/remote.sock", (unsigned)uid);
     return connect_path(p);
 }
 
@@ -288,7 +288,7 @@ static int binary_ok(void) {
     return 1;
 }
 
-/* lord-server --headless as that user (starts as root and drops privileges with --user,
+/* insane-server --headless as that user (starts as root and drops privileges with --user,
  * same as the monitor's). The grandchild records itself in the shared list before exec. */
 static void spawn(const struct passwd *pw, const char *rt, const char *lang, int w, int h, int greeter) {
     char size[32], xdg[128], user[40], home[600];
@@ -319,7 +319,7 @@ static void spawn(const struct passwd *pw, const char *rt, const char *lang, int
         dup2(null, 0); dup2(null, 1); dup2(null, 2);
         for (int fd = 3; fd < 1024; fd++) close(fd);
         if (chdir(rd_conf.workdir)) { /* paths are absolute */ }
-        /* GPU: the session uses it while it's on the monitor; lordos.gpu=0 (or the service's LORD_GPU)
+        /* GPU: the session uses it while it's on the monitor; insaneos.gpu=0 (or the service's INSANE_GPU)
          * turns it off in all of them */
         char *env[10 + SD_TUNE_N];
         int ne = 0;
@@ -327,16 +327,16 @@ static void spawn(const struct passwd *pw, const char *rt, const char *lang, int
         env[ne++] = (char *)lang;
         env[ne++] = xdg;
         env[ne++] = home;
-        env[ne++] = "LORDOS_SESSIOND=1";
+        env[ne++] = "INSANEOS_SESSIOND=1";
         if (sd_gpu_env[0]) env[ne++] = sd_gpu_env;
         if (sd_cursor_env[0]) env[ne++] = sd_cursor_env;
-        if (sd_input_debug && !greeter) env[ne++] = "LORD_INPUT_DEBUG=1";   /* key latency trace, never the login screen */
-        if (greeter) env[ne++] = "LORD_GPU_DRAG=0";   /* no windows to drag there: no self-test at boot */
+        if (sd_input_debug && !greeter) env[ne++] = "INSANE_INPUT_DEBUG=1";   /* key latency trace, never the login screen */
+        if (greeter) env[ne++] = "INSANE_GPU_DRAG=0";   /* no windows to drag there: no self-test at boot */
         if (greeter && sd_main_display[0]) env[ne++] = sd_main_display;
         for (int i = 0; i < SD_TUNE_N && !greeter; i++) if (sd_tune_env[i][0]) env[ne++] = sd_tune_env[i];
         env[ne] = NULL;
         if (!greeter) cgroup_delegate_session(uid, pw->pw_gid);   /* cgroup subtree for the apps (docs/SESSIONS.md) */
-        /* real-time priority for the compositor's threads: lord-server takes it in par_init and lowers
+        /* real-time priority for the compositor's threads: insane-server takes it in par_init and lowers
          * the limit to 0 before it starts anything, so no app inherits it; a thread that runs 5 s
          * without blocking gets SIGXCPU and goes back to the normal policy (par.h) */
         struct rlimit rtp = { PAR_RT_PRIO, PAR_RT_PRIO }, rtt = { PAR_RT_TIME_US, RLIM_INFINITY };
@@ -378,7 +378,7 @@ int sd_session_get(const struct passwd *pw, int w, int h) {
             /* no logind session, or one whose service manager is still starting (autologin at
              * boot): /run/user/<uid> comes first, from user-runtime-dir@, and the session bus
              * socket a moment later, from user@. A session started before the bus has no Secret
-             * Service and no notification server for its whole life (lord-vault and notifyd
+             * Service and no notification server for its whole life (insane-vault and notifyd
              * connect once), and the first app asking for org.freedesktop.secrets gets
              * gnome-keyring by D-Bus activation when it is installed. "systemctl start" returns
              * once the manager is up (its dbus.socket listening); then wait for the socket. */
@@ -398,7 +398,7 @@ int sd_session_get(const struct passwd *pw, int w, int h) {
             sd_log("new session for %s (%dx%d)", pw->pw_name, w, h);
             spawn(pw, rt, lang, w, h, 0);
             fd = wait_socket(NULL, pw->pw_uid, 0);
-            if (fd < 0) sd_log("%s's session did not start (see ~/.cache/lordos/session.log)", pw->pw_name);
+            if (fd < 0) sd_log("%s's session did not start (see ~/.cache/insaneos/session.log)", pw->pw_name);
         }
     }
     if (lk >= 0) close(lk);
@@ -406,7 +406,7 @@ int sd_session_get(const struct passwd *pw, int w, int h) {
 }
 
 int sd_greeter_get(int w, int h) {
-    const char *sock = SD_GREETER_RUN "/lordos/remote.sock";
+    const char *sock = SD_GREETER_RUN "/insaneos/remote.sock";
     int fd = connect_path(sock);
     if (fd >= 0 || !binary_ok()) return fd;
     struct passwd *pw = sd_system_user(SD_GREETER_USER, "/var/lib/" SD_GREETER_USER);
@@ -424,7 +424,7 @@ int sd_greeter_get(int w, int h) {
     read_lang("/etc/default/locale", lang, sizeof lang);
     spawn(pw, SD_GREETER_RUN, lang, w, h, 1);
     fd = wait_socket(sock, 0, 1);
-    if (fd < 0) sd_log("the login screen did not start (see /var/lib/%s/.cache/lordos/greeter.log)", SD_GREETER_USER);
+    if (fd < 0) sd_log("the login screen did not start (see /var/lib/%s/.cache/insaneos/greeter.log)", SD_GREETER_USER);
     return fd;
 }
 

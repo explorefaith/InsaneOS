@@ -3,7 +3,7 @@
 # Machines' bench copy of the Cloud bench's (cloud-e2e, tools/cloud/e2e/ui.py), with the whole US keyboard for typing
 # into a guest (the VM window passes key codes through: the guest's layout, US in an installer, is the one that counts).
 # cmds: click:x,y dbl:x,y rclick:x,y move:x,y down:x,y up:x,y (drag: down, move…, up) wheel:x,y,steps combo:a+b key:code type:text wait:s grab:out.png
-#       keyring:PASSWORD   (RP_KEYRING, as lord-sessiond after a login: opens or creates the session's keyring)
+#       keyring:PASSWORD   (RP_KEYRING, as insane-sessiond after a login: opens or creates the session's keyring)
 # From ~/cloud-drv.py on VM 116 (the Cloud UI agent's), plus keyring and frames only when a grab is asked.
 import socket, struct, sys, time, threading, zlib
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM); s.connect(sys.argv[1])

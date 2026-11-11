@@ -15,8 +15,8 @@ the components below, each under its own license.
 ## Fetched at build time (`third_party/audiocpp`, ignored by git)
 
 `tools/tts/fetch-audiocpp.sh` puts audio.cpp at one pinned commit in `third_party/audiocpp`; `server/mk/tts.mk` builds
-its Pocket TTS family only, and the `lordos` package installs the libraries in `/usr/lib/lordos/lib/tts`. **lord-tts**
-(0.8.8.6, `docs/VOICE.md`) is the only binary that links them; `lord-server` never does. Unmodified.
+its Pocket TTS family only, and the `insaneos` package installs the libraries in `/usr/lib/insaneos/lib/tts`. **insane-tts**
+(0.8.8.6, `docs/VOICE.md`) is the only binary that links them; `insane-server` never does. Unmodified.
 
 | Component (version) | Used for | License |
 |---|---|---|
@@ -35,7 +35,7 @@ its Pocket TTS family only, and the `lordos` package installs the libraries in `
 | Inter (`assets/fonts/Inter-*.ttf`) | UI text | SIL OFL 1.1 (`assets/fonts/Inter-LICENSE.txt`) |
 | Plus Jakarta Sans 2.7.1 (`assets/fonts/PlusJakartaSans-ExtraBold.ttf`, `-Medium.ttf`) | the Insane OS wordmark: live text in the UI (fontFamily `brand`) and outlined in `assets/brand/*.svg` | SIL OFL 1.1 (`assets/fonts/PlusJakartaSans-LICENSE.txt`) |
 | JetBrains Mono (`assets/fonts/JetBrainsMono-*.ttf`) | terminal and code text | SIL OFL 1.1 (`assets/fonts/JetBrainsMono-LICENSE.txt`) |
-| Noto Sans Arabic, Devanagari, Thai and CJK SC, subset (`server/src/bench/fonts/`) | built into `lord-bench` for InsaneBench's shaping workload (subset by `tools/gen-lbfonts.py`) | SIL OFL 1.1 (`server/src/bench/fonts/OFL.txt`) |
+| Noto Sans Arabic, Devanagari, Thai and CJK SC, subset (`server/src/bench/fonts/`) | built into `insane-bench` for InsaneBench's shaping workload (subset by `tools/gen-lbfonts.py`) | SIL OFL 1.1 (`server/src/bench/fonts/OFL.txt`) |
 
 ### Local changes to bundled components
 
@@ -44,7 +44,7 @@ updated. Nothing else in `third_party/` differs from upstream.
 
 | Component (upstream version) | Change | Files | Why | Since |
 |---|---|---|---|---|
-| QuickJS 2025-04-26 (`third_party/quickjs/VERSION`) | Adds `size_t JS_GetMallocSize(JSRuntime *rt)`, which returns `rt->malloc_state.malloc_size`: the same `malloc_size` that `JS_ComputeMemoryUsage` reports, without walking every object, string and shape of the runtime. No existing function or structure changes. | `quickjs.c` (7 lines, just before `JS_ComputeMemoryUsage`), `quickjs.h` (its prototype, after `JS_ComputeMemoryUsage`'s) | `lord.stats()` (`f_stats` in `server/src/ui/js.c`) gives `jsKB` from it in O(1); About, Settings → General and System Information poll it while open, and the full walk grew with the number of objects. Checked equal to `JS_ComputeMemoryUsage`'s `malloc_size` on a runtime with 100,000 objects, a 50,000-entry Map and after GC | 0.8.6 |
+| QuickJS 2025-04-26 (`third_party/quickjs/VERSION`) | Adds `size_t JS_GetMallocSize(JSRuntime *rt)`, which returns `rt->malloc_state.malloc_size`: the same `malloc_size` that `JS_ComputeMemoryUsage` reports, without walking every object, string and shape of the runtime. No existing function or structure changes. | `quickjs.c` (7 lines, just before `JS_ComputeMemoryUsage`), `quickjs.h` (its prototype, after `JS_ComputeMemoryUsage`'s) | `insane.stats()` (`f_stats` in `server/src/ui/js.c`) gives `jsKB` from it in O(1); About, Settings → General and System Information poll it while open, and the full walk grew with the number of objects. Checked equal to `JS_ComputeMemoryUsage`'s `malloc_size` on a runtime with 100,000 objects, a 50,000-entry Map and after GC | 0.8.6 |
 
 ## Moving wallpapers
 
@@ -55,16 +55,16 @@ works; see `docs/WALLPAPERS.md`. The built-in clip is the project's own.
 ## Voices
 
 Downloaded on demand from the signed APT repository (Settings → AI → Voice), not in this repository and not on the ISO
-or the Raspberry Pi image: the packages `lordos-voice-<lang>[-hd]` (the models), `lordos-voice-<lang>-<voice>[-hd]`
-(one voice each) and `lordos-voice-previews` (a recorded sample of every voice), built by `tools/voice/mkdeb-voice.mjs`
-into `/usr/share/lordos/voice`. The voices offered and the license of each one's source are in `sdk/voicecatalog.js`
+or the Raspberry Pi image: the packages `insaneos-voice-<lang>[-hd]` (the models), `insaneos-voice-<lang>-<voice>[-hd]`
+(one voice each) and `insaneos-voice-previews` (a recorded sample of every voice), built by `tools/voice/mkdeb-voice.mjs`
+into `/usr/share/insaneos/voice`. The voices offered and the license of each one's source are in `sdk/voicecatalog.js`
 (`VOICES`, `SOURCE_LICENSES`); see `docs/VOICE.md`.
 
 | Data | Used for | License |
 |---|---|---|
 | Pocket TTS models by Kyutai (https://huggingface.co/kyutai/pocket-tts): the 6-layer models as audio.cpp's Q8_0 GGUF, the 24-layer HD models (`spanish_24l`, `portuguese_24l`, `english_2026-09_24l`) as Kyutai ships them | speech in Spanish, English and Portuguese | CC-BY-4.0 — Pocket TTS © Kyutai |
 | Kyutai's prepared voice embeddings (https://huggingface.co/kyutai/tts-voices): Kyutai's own voices (lola, juergen, rafael, estelle, giovanni, daan), Alba McKenna, VCTK and voice-zero | the 23 voices | CC-BY-4.0 (Kyutai, Alba McKenna, VCTK); CC0-1.0 (voice-zero) |
-| The recorded previews (`lordos-voice-previews`) | hearing a voice before downloading it | made with the models and voices above, under their licenses |
+| The recorded previews (`insaneos-voice-previews`) | hearing a voice before downloading it | made with the models and voices above, under their licenses |
 
 Kyutai forbids cloning a voice without the person's explicit consent, impersonation and presenting generated speech as
 a real recording; Insane OS shows that notice where voices are created. Voices whose recording does not allow
@@ -83,34 +83,34 @@ These are not part of this repository; they are installed from Debian.
 
 | Library | Linked by | License |
 |---|---|---|
-| libwayland-server / libwayland-client, libxkbcommon | lord-server | MIT |
-| Mesa (libgbm, libEGL, libGLESv2) | lord-server (GPU path) | MIT |
-| OpenSSL 3 | lord-sessiond, lord-maild | Apache-2.0 |
-| libsrtp2, usrsctp | lord-sessiond (the remote desktop's WebRTC video, 0.8.4) | BSD-3-Clause |
-| libcrypt | lord-sessiond | LGPL-2.1+ |
-| Poppler (glib), cairo, freetype, fontconfig | lord-doc | GPL-2.0-or-later / LGPL / FTL |
-| libarchive | lord-doc | BSD-2-Clause |
-| FFmpeg (libavcodec, libavformat, libavutil, libswscale, libswresample), libva | lord-media | LGPL-2.1+; Debian's build is GPL-2.0-or-later |
-| Tesseract (libtesseract5) and its English, Spanish, Portuguese, French and Italian data (`tesseract-ocr-*`) | lord-ocr (0.8.8.6: Screenshots' copy the text, the markup editor's Transcribe) | Apache-2.0 |
-| Vulkan loader (libvulkan1), OpenMP (libgomp1), the C++ runtime (libstdc++6) | lord-tts (0.8.8.6) | Apache-2.0 (Vulkan loader); GPL-3.0 with the GCC Runtime Library Exception |
+| libwayland-server / libwayland-client, libxkbcommon | insane-server | MIT |
+| Mesa (libgbm, libEGL, libGLESv2) | insane-server (GPU path) | MIT |
+| OpenSSL 3 | insane-sessiond, insane-maild | Apache-2.0 |
+| libsrtp2, usrsctp | insane-sessiond (the remote desktop's WebRTC video, 0.8.4) | BSD-3-Clause |
+| libcrypt | insane-sessiond | LGPL-2.1+ |
+| Poppler (glib), cairo, freetype, fontconfig | insane-doc | GPL-2.0-or-later / LGPL / FTL |
+| libarchive | insane-doc | BSD-2-Clause |
+| FFmpeg (libavcodec, libavformat, libavutil, libswscale, libswresample), libva | insane-media | LGPL-2.1+; Debian's build is GPL-2.0-or-later |
+| Tesseract (libtesseract5) and its English, Spanish, Portuguese, French and Italian data (`tesseract-ocr-*`) | insane-ocr (0.8.8.6: Screenshots' copy the text, the markup editor's Transcribe) | Apache-2.0 |
+| Vulkan loader (libvulkan1), OpenMP (libgomp1), the C++ runtime (libstdc++6) | insane-tts (0.8.8.6) | Apache-2.0 (Vulkan loader); GPL-3.0 with the GCC Runtime Library Exception |
 
-Note: `lord-doc` and `lord-media` are separate helper processes. Because they link Poppler and
+Note: `insane-doc` and `insane-media` are separate helper processes. Because they link Poppler and
 Debian's FFmpeg build, those two binaries as distributed are covered by the GPL; the MIT-licensed
-Insane OS source they are built from is GPL-compatible. `lord-server` itself does not link them.
-`lord-tts` links audio.cpp and ggml (above) in the same way: a separate sandboxed helper.
-On the Raspberry Pi image, and on a Pi updated to 0.8.7, `lord-media` runs on Raspberry Pi's build of FFmpeg (`+rpt`, the
+Insane OS source they are built from is GPL-compatible. `insane-server` itself does not link them.
+`insane-tts` links audio.cpp and ggml (above) in the same way: a separate sandboxed helper.
+On the Raspberry Pi image, and on a Pi updated to 0.8.7, `insane-media` runs on Raspberry Pi's build of FFmpeg (`+rpt`, the
 same package names), pinned from its archive for the Pi 5's hardware HEVC (`docs/WALLPAPERS.md`).
 
-These come with `lordos` for Files and the remote apps (0.8.7): **FreeRDP** (`libfreerdp3-3`, `libfreerdp-client3-3`, `libwinpr3-3`, Apache-2.0), **rclone** (MIT; since 0.8.8.5 rclone's official release binary v1.75.2, unmodified, in the package `lordos-rclone`, for Cloud and Connect to Server: its signed `SHA256SUMS` is checked against Nick Craig-Wood's key `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`; `/usr/share/doc/lordos-rclone/copyright` lists the license of every Go module linked in), **fuse3** (LGPL-2.1, GPL-2.0) and openssh-client (BSD). The Store's Disk Formats item, not preinstalled, brings **ntfs-3g** (GPL-2.0), **exfatprogs** (GPL-2.0), dosfstools (GPL-3.0) and, on amd64, **apfs-dkms** (GPL-2.0).
+These come with `insaneos` for Files and the remote apps (0.8.7): **FreeRDP** (`libfreerdp3-3`, `libfreerdp-client3-3`, `libwinpr3-3`, Apache-2.0), **rclone** (MIT; since 0.8.8.5 rclone's official release binary v1.75.2, unmodified, in the package `insaneos-rclone`, for Cloud and Connect to Server: its signed `SHA256SUMS` is checked against Nick Craig-Wood's key `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`; `/usr/share/doc/insaneos-rclone/copyright` lists the license of every Go module linked in), **fuse3** (LGPL-2.1, GPL-2.0) and openssh-client (BSD). The Store's Disk Formats item, not preinstalled, brings **ntfs-3g** (GPL-2.0), **exfatprogs** (GPL-2.0), dosfstools (GPL-3.0) and, on amd64, **apfs-dkms** (GPL-2.0).
 
-Machines (0.8.8.5) ships no virtualization engine: when it is first used it asks to install, from Debian, **QEMU** (`qemu-system-x86` or `qemu-system-arm`, `qemu-system-modules-opengl`, `qemu-utils`; GPL-2.0), **passt** (GPL-2.0-or-later) and the UEFI firmware **OVMF** or **AAVMF** (`ovmf`, `qemu-efi-aarch64`; BSD-2-Clause-Patent). `lord-vm` and `lord-vmdisplay` run them as separate programs and link none of them.
+Machines (0.8.8.5) ships no virtualization engine: when it is first used it asks to install, from Debian, **QEMU** (`qemu-system-x86` or `qemu-system-arm`, `qemu-system-modules-opengl`, `qemu-utils`; GPL-2.0), **passt** (GPL-2.0-or-later) and the UEFI firmware **OVMF** or **AAVMF** (`ovmf`, `qemu-efi-aarch64`; BSD-2-Clause-Patent). `insane-vm` and `insane-vmdisplay` run them as separate programs and link none of them.
 
 New on the images in 0.8.8 (installed from Debian, not linked; each keeps its own `/usr/share/doc/<package>/copyright`):
 
 | Package | Images | What for | License |
 |---|---|---|---|
-| `polkitd`, `pkexec` | both ISOs and the Raspberry Pi image; dependencies of `lordos` | administrator rights for Linux apps that run `pkexec`, answered by Insane OS's own prompt (`docs/PRIVACY.md`) | LGPL-2.0-or-later |
-| `libnss-mdns` | both ISOs and the Raspberry Pi image; recommended by `lordos` | `.local` names | LGPL-2.1-or-later |
+| `polkitd`, `pkexec` | both ISOs and the Raspberry Pi image; dependencies of `insaneos` | administrator rights for Linux apps that run `pkexec`, answered by Insane OS's own prompt (`docs/PRIVACY.md`) | LGPL-2.0-or-later |
+| `libnss-mdns` | both ISOs and the Raspberry Pi image; recommended by `insaneos` | `.local` names | LGPL-2.1-or-later |
 | `wireless-regdb` | both ISOs and the Raspberry Pi image | Wi-Fi's country rules for the kernel | ISC |
 | `firmware-brcm80211` | both ISOs (the Raspberry Pi image already had it, from Raspberry Pi's archive) | Broadcom Wi-Fi cards such as the BCM43602 | **non-free firmware** (Debian's `non-free-firmware`): Broadcom's binary licence, which allows redistribution unmodified; no source |
 
@@ -118,11 +118,11 @@ New on the images in 0.8.8.6 (installed from Debian, not linked):
 
 | Package | Images | What for | License |
 |---|---|---|---|
-| `libtesseract5`, `tesseract-ocr-eng`, `-spa`, `-por`, `-fra`, `-ita` | both ISOs and the Raspberry Pi image; `libtesseract5` and English are dependencies of `lordos` when it ships `lord-ocr`, the other four are Recommends | text recognition (lord-ocr, above) | Apache-2.0 |
-| `intel-microcode`, `amd64-microcode` | the amd64 ISO; a dependency of `lordos` on amd64 | the processor's microcode updates, loaded at boot | **non-free firmware** (Debian's `non-free-firmware`): Intel's and AMD's binary licences, which allow redistribution unmodified; no source |
+| `libtesseract5`, `tesseract-ocr-eng`, `-spa`, `-por`, `-fra`, `-ita` | both ISOs and the Raspberry Pi image; `libtesseract5` and English are dependencies of `insaneos` when it ships `insane-ocr`, the other four are Recommends | text recognition (insane-ocr, above) | Apache-2.0 |
+| `intel-microcode`, `amd64-microcode` | the amd64 ISO; a dependency of `insaneos` on amd64 | the processor's microcode updates, loaded at boot | **non-free firmware** (Debian's `non-free-firmware`): Intel's and AMD's binary licences, which allow redistribution unmodified; no source |
 
 ## Tools used to make website media (not shipped in Insane OS)
 
 | Tool | Used for | License |
 |---|---|---|
-| Kokoro-82M (model and voices, run with kokoro-onnx) | the English narration of the Insane OS Imager guide video on lordos.org/imager (voice `am_michael`) | Apache-2.0 |
+| Kokoro-82M (model and voices, run with kokoro-onnx) | the English narration of the Insane OS Imager guide video on insaneos.org/imager (voice `am_michael`) | Apache-2.0 |

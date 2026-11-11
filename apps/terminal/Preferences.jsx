@@ -5,7 +5,7 @@
 import {
   View, Text, TextInput, Toggle, Segmented, Stepper, Slider, Button, ScrollView, SidebarItem, SectionTitle, Hairline, GroupBox, ToolbarButton, ToolbarGroup,
   useStore, useTheme, fs, spacing, typeScale, direction, FilePicker, revealPath, errorText, t as T,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { PRESETS, DEFAULT_PROFILE, terminalSettings, saveTerminalSettings, schemeOf, allSchemes, newProfileId, profileName } from './profiles.js';
 import { reconfigureAll, patchWin } from './state.js';
@@ -54,7 +54,7 @@ const Heading = ({ t, children, top = 20 }) => (
 function useWidth(ref) {
   const [w, setW] = useState(0);
   useEffect(() => {
-    const read = () => { try { if (ref.current) { const x = lord.getLayout(ref.current.id)[2]; setW((o) => (Math.abs(o - x) > 1 ? x : o)); } } catch (e) { /* not laid out yet */ } };
+    const read = () => { try { if (ref.current) { const x = insane.getLayout(ref.current.id)[2]; setW((o) => (Math.abs(o - x) > 1 ? x : o)); } } catch (e) { /* not laid out yet */ } };
     read();
     const id = setInterval(read, 400);
     return () => clearInterval(id);
@@ -83,7 +83,7 @@ function SchemeCard({ t, id, scheme, selected, onClick }) {
     <View onClick={onClick} style={{ padding: 2, borderRadius: 10, border: `2px solid ${selected ? t.accent : 'transparent'}` }}>
       <View style={{ width: 128, height: 62, borderRadius: 7, padding: 8, backgroundColor: scheme.bg, border: `1px solid ${t.separator}`, overflow: 'hidden', direction: 'ltr' }}>
         <Text style={{ fontSize: 11, fontWeight: 600, color: scheme.fg, whiteSpace: 'nowrap', overflow: 'hidden' }}>{scheme.name}</Text>
-        <Text style={{ fontSize: 10, color: scheme.ansi[2], marginTop: 2, fontFamily: 'monospace' }}>lord@lordos <Text style={{ color: scheme.ansi[4] }}>~</Text></Text>
+        <Text style={{ fontSize: 10, color: scheme.ansi[2], marginTop: 2, fontFamily: 'monospace' }}>insane@insaneos <Text style={{ color: scheme.ansi[4] }}>~</Text></Text>
         <View style={{ flexDirection: 'row', marginTop: 6, gap: 2 }}>
           {scheme.ansi.slice(0, 8).map((c, i) => <View key={`${id}${i}`} style={{ width: 12, height: 6, borderRadius: 2, backgroundColor: c }} />)}
         </View>
@@ -172,7 +172,7 @@ function KeyMapEditor({ t, list, onChange }) {
 // ---- import from other terminal emulators ----
 
 function fontsApi() {
-  const list = lord.fonts.list();
+  const list = insane.fonts.list();
   const flat = (s) => s.replace(/[\s-]/g, '').toLowerCase();
   return {
     byPs(name) {
@@ -209,7 +209,7 @@ function readImport(path) {
     let data = null;
     try { data = parseConfig(text); } catch (e) { data = null; }
     if (data && Array.isArray(data.profiles)) {
-      return { kind: 'lordos', profiles: data.profiles.filter((x) => x && x.id).map((x) => ({ ...DEFAULT_PROFILE, ...x })),
+      return { kind: 'insaneos', profiles: data.profiles.filter((x) => x && x.id).map((x) => ({ ...DEFAULT_PROFILE, ...x })),
         schemes: Object.entries(data.schemes || {}).map(([id, sc]) => ({ ...sc, id })), keyMap: Array.isArray(data.keyMap) ? data.keyMap : [],
         warnings: [], defaultGuid: null };
     }
@@ -258,7 +258,7 @@ function ImportPanel({ t, onClose, onDone }) {
       if (!pick[np.id]) continue;
       // the same iTerm2 profile, or (a InsaneTerminal export) the same profile id: replaced, not duplicated
       let i = np.itermGuid ? profiles.findIndex((x) => x.itermGuid === np.itermGuid) : -1;
-      if (i < 0 && result.kind === 'lordos') i = profiles.findIndex((x) => x.id === np.id);
+      if (i < 0 && result.kind === 'insaneos') i = profiles.findIndex((x) => x.id === np.id);
       // the default profile is never replaced by one that types into the shell by itself (every new tab would run
       // it): that one comes in as a profile of its own, a menu away
       const types = typesInto(np).length > 0;
@@ -272,7 +272,7 @@ function ImportPanel({ t, onClose, onDone }) {
     }
     const schemes = { ...(cfg.schemes || {}) };
     for (const s of result.schemes) {
-      if (result.kind === 'lordos') { const { id, ...sc } = s; schemes[id] = sc; } else schemes[`it_${s.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`] = s;
+      if (result.kind === 'insaneos') { const { id, ...sc } = s; schemes[id] = sc; } else schemes[`it_${s.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`] = s;
     }
     const incoming = result.keyMap.filter((m) => withKeys || !typingKey(m));
     const keyMap = [...(cfg.keyMap || []).filter((m) => !incoming.some((k) => k.combo === m.combo)), ...incoming];
@@ -372,7 +372,7 @@ function ConfigFileSection({ t, onImport, onNotice }) {
   };
   const exportTo = (raw) => {
     setPicking(null);
-    try { lord.termconf.exportTo(homePath(raw), serializeConfig(st.data || {})); setError(null); onNotice(T('terminal.prefs.file.exported', { path: shortPath(homePath(raw)) })); }
+    try { insane.termconf.exportTo(homePath(raw), serializeConfig(st.data || {})); setError(null); onNotice(T('terminal.prefs.file.exported', { path: shortPath(homePath(raw)) })); }
     catch (e) { setError(errorText(e)); }
   };
   const Note = ({ children, bad }) => (
@@ -471,7 +471,7 @@ export function Preferences({ wid, onClose }) {
     save(cfg.profiles, { shortcuts: custom });
   };
 
-  const fontList = (() => { try { return lord.fonts.list(); } catch (e) { return []; } })();
+  const fontList = (() => { try { return insane.fonts.list(); } catch (e) { return []; } })();
   const families = [...new Set(fontList.filter((f) => !f.color).map((f) => f.family))];
   const monoFamilies = [...new Set(fontList.filter((f) => f.mono).map((f) => f.family))];
   const schemes = allSchemes();

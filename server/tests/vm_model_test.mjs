@@ -94,7 +94,7 @@ eq('wheel precise adds up', wheelSteps(0, -30, true), [0, 30]);
 eq('wheel precise step', wheelSteps(30, -30, true), [1, 20]);
 eq('wheel precise clamp', wheelSteps(0, 100000, true)[0], -32);
 eq('title', windowTitle('Debian', 'Running'), 'Debian — Running');
-eq('folder', folderOf('/home/a/Machines/Debian 13.lordvm'), 'Debian 13');
+eq('folder', folderOf('/home/a/Machines/Debian 13.insanevm'), 'Debian 13');
 // the memory budget at start: QEMU's overhead (384 MB with KVM, 640 MB emulated) counts for every machine
 const pi8 = { memMaxMb: 6144 };
 eq('limit kvm', memLimit({ memoryMb: 1024, accel: 'kvm' }), 1408);
@@ -139,8 +139,8 @@ eq('summary', summaryOf(sl, { a: { memBytes: 1073741824 } }, { ramMb: 4096, libF
 eq('summary without numbers', summaryOf([], {}, {}).memory, null);
 eq('doing shut down', doingOf({ state: 'stopped', reason: 'guest-shutdown' }), 'shutDown');
 eq('doing failed', doingOf({ state: 'crashed', reason: 'start-failed' }), 'crashed');
-eq('thumb', thumbSrc('/h/M/a.lordvm', 1700000000.5), '/h/M/a.lordvm/thumb.png#1700000000');
-eq('no thumb', thumbSrc('/h/M/a.lordvm', 0), '');
+eq('thumb', thumbSrc('/h/M/a.insanevm', 1700000000.5), '/h/M/a.insanevm/thumb.png#1700000000');
+eq('no thumb', thumbSrc('/h/M/a.insanevm', 0), '');
 
 // ---- Beta: suspend, Keep Running, closing ----
 eq('suspended state', stateView('stopped', 'suspended'), { key: 'suspended', tone: 'pause', active: false, why: null });
@@ -187,10 +187,10 @@ eq('agent tone', [agentTone(null, false), agentTone({ state: 'waiting' }, true),
 eq('clip ways', [clipTo('both'), clipTo('from-guest'), clipFrom('from-guest'), clipFrom('off')], [true, false, true, false]);
 
 // ---- unified diagnostics (diag.js) ----
-const LOG = ['2026-11-05T06:00:00.000Z lord-vm 1: machine old', '2026-11-05T06:00:01.000Z qemu: SIGSEGV failed',
-  '2026-11-05T06:11:31.745Z lord-vm 9: machine 3bf "x" (amd64, kvm, 1 vCPU, 512 MB, pc-q35-10.0)',
+const LOG = ['2026-11-05T06:00:00.000Z insane-vm 1: machine old', '2026-11-05T06:00:01.000Z qemu: SIGSEGV failed',
+  '2026-11-05T06:11:31.745Z insane-vm 9: machine 3bf "x" (amd64, kvm, 1 vCPU, 512 MB, pc-q35-10.0)',
   '2026-11-05T06:11:31.811Z recovery: an interrupted suspend was rolled back',
-  '2026-11-05T06:11:32.000Z cgroup: in app-lordos-lordos-vm-3bf.scope (memory.max 1024 MB, cpu 150%)',
+  '2026-11-05T06:11:32.000Z cgroup: in app-insaneos-insaneos-vm-3bf.scope (memory.max 1024 MB, cpu 150%)',
   '2026-11-05T06:11:32.100Z qemu: pid 5; sandbox: landlock-fs=1 landlock-net=1',
   '2026-11-05T06:11:32.200Z qemu: version 10.0.13 Debian',
   '2026-11-05T06:11:40.000Z note: the machine\'s network stopped: passt ended (signal 11)',
@@ -202,13 +202,13 @@ eq('diag fields', [lg.version, lg.sandbox, lg.cgroup.slice(0, 6), lg.started], [
 eq('diag network', lg.network.length, 1);
 eq('diag report', D.reportText({ name: 'X', id: 'i', arch: 'amd64', accel: 'kvm', vcpus: 1, memoryMb: 512, diskGb: 20, firmware: 'uefi', network: 'shared', state: 'running', reason: 'none', suspended: false }, lg, { snapshots: 2 }).split('\n').length, 10);
 
-// ---- a Clone's name inside the guest (6.3), as lord-vm checks it ----
+// ---- a Clone's name inside the guest (6.3), as insane-vm checks it ----
 eq('hostname ok', [M.hostnameValid('debian-13-clone'), M.hostnameValid('a'), M.hostnameValid('-a'), M.hostnameValid('a-'), M.hostnameValid('A'), M.hostnameValid('a.b'), M.hostnameValid('x'.repeat(64))],
   [true, true, false, false, false, false, false]);
 eq('hostname from name', [M.hostnameFrom('Debian 13 (test) '), M.hostnameFrom('Ñandú'), M.hostnameFrom('--')], ['debian-13-test', 'and', 'machine']);
 eq('clone hostname', [M.cloneHostname('Agent Test'), M.cloneHostname('x'.repeat(80)).length, M.hostnameValid(M.cloneHostname('x'.repeat(80)))], ['agent-test-clone', 63, true]);
 // ---- the network healing itself, in the Overview (6.5) ----
-const NET = ['2026-11-05T06:11:31.745Z lord-vm 9: machine 3bf "x" (amd64, kvm, 1 vCPU, 512 MB, pc-q35-10.0)',
+const NET = ['2026-11-05T06:11:31.745Z insane-vm 9: machine 3bf "x" (amd64, kvm, 1 vCPU, 512 MB, pc-q35-10.0)',
   '2026-11-05T06:12:00.000Z network: passt ended (signal 9): reconnecting',
   '2026-11-05T06:12:00.100Z network: passt 77 started (backend pst1)',
   '2026-11-05T06:12:00.200Z network: the network is back (passt restarted, 412 ms after it ended)',
@@ -219,12 +219,12 @@ eq('diag network not on stop', D.readLog(NET).problems.length, 0);
 const PLAN = '2026-11-05T10:00:00.000Z import: something\n{"kind":"vmx","name":"Work","blockers":[{"code":"saved-state"}],"notes":[{"code":"license"},{"code":"tpm"},{"code":"snapshots-flattened"},{"code":"zzz"}]}';
 const pl = M.parsePlan(PLAN);
 eq('plan parsed', [pl.kind, pl.name], ['vmx', 'Work']);
-eq('plan none', M.parsePlan('lord-vm: nope\n{"progress":1}'), null);
+eq('plan none', M.parsePlan('insane-vm: nope\n{"progress":1}'), null);
 eq('plan notes in order, unknown ones dropped', M.planNotes(pl), ['snapshots-flattened', 'tpm']);
 eq('plan blockers', M.planBlockers(pl), [{ code: 'saved-state', text: '' }]);
 const pr = M.importProgress('{"progress":12.5,"disk":1,"disks":2}\n2026 import: disk 2\n{"progress":61,"disk":2,"disks":2}\n{"progr');
 eq('import progress', [pr.pct, pr.disk, pr.disks, pr.done], [61, 2, 2, null]);
-eq('import done', M.importProgress('{"progress":100,"disk":1,"disks":1}\n{"imported":true,"dir":"/m/x.lordvm"}').done.dir, '/m/x.lordvm');
+eq('import done', M.importProgress('{"progress":100,"disk":1,"disks":1}\n{"imported":true,"dir":"/m/x.insanevm"}').done.dir, '/m/x.insanevm');
 eq('unique names', [M.uniqueName('Work', []), M.uniqueName('Work', ['Work']), M.uniqueName('Work', ['Work', 'Work 2']), M.uniqueName('  ', [])], ['Work', 'Work 2', 'Work 3', 'Imported machine']);
 
 // the library's toolbar: view, order, Show and search (0.8.8.7)

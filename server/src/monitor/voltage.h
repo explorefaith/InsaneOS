@@ -10,8 +10,8 @@
  * The Raspberry Pi 5's power chip needs root: `board` only says that the session may ask the rpi-pmic admin action.
  * Every number is checked as a strict integer in range; a file that isn't one is left out, never guessed. The root
  * folder is a parameter so tests can use fake trees. */
-#ifndef LORD_MON_VOLTAGE_H
-#define LORD_MON_VOLTAGE_H
+#ifndef INSANE_MON_VOLTAGE_H
+#define INSANE_MON_VOLTAGE_H
 
 #define VOLT_CHIPS    12
 #define VOLT_INPUTS   24                /* per chip */

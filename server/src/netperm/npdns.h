@@ -1,4 +1,4 @@
-/* npdns.h — where lord-netperm learns the names of addresses from (for domain rules). Only
+/* npdns.h — where insane-netperm learns the names of addresses from (for domain rules). Only
  * from responses produced by the system resolver (docs/FIREWALL.md, step 2,
  * "Where the names come from"):
  *
@@ -12,8 +12,8 @@
  *      isn't learned.
  *
  * Both sources deliver a complete DNS response message to cb, which passes it to dnsmap_learn. */
-#ifndef LORD_NP_DNS_H
-#define LORD_NP_DNS_H
+#ifndef INSANE_NP_DNS_H
+#define INSANE_NP_DNS_H
 
 #include <stddef.h>
 #include <stdint.h>

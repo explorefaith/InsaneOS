@@ -1,7 +1,7 @@
 {
   "isolated": "Veikia izoliuotai, atskirame procese",
   "linux": "Linux programa",
-  "lordos": "Insane OS programa",
+  "insaneos": "Insane OS programa",
   "package": "Įdiegta programa (.lpk)",
   "system": "Sistemos programa – Insane OS dalis, patikrinta kartu su ja",
   "title": "Apie {app}",

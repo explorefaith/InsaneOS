@@ -2,8 +2,8 @@
  * a plain letter must not take the pointer away: it asks for Ctrl+L, and only with the pointer on the
  * window (a lock that waits would hide the pointer later, when it walks in). It ends by itself, which
  * also covers a keyboard that went to sleep. */
-#ifndef LORD_TESTBENCH_LOCKKEY_H
-#define LORD_TESTBENCH_LOCKKEY_H
+#ifndef INSANE_TESTBENCH_LOCKKEY_H
+#define INSANE_TESTBENCH_LOCKKEY_H
 
 #include <linux/input-event-codes.h>
 

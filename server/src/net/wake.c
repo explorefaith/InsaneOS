@@ -2,7 +2,7 @@
  *
  * Some radios (issue #14: the built-in card of a 2015 laptop) lose their association while
  * asleep and come back with the link "up": wpa_supplicant and the kernel never notice, there is no
- * carrier change, and nothing reconnects until the person turns the card off and on. lord-netd hears
+ * carrier change, and nothing reconnects until the person turns the card off and on. insane-netd hears
  * the computer wake (logind's PrepareForSleep(false), or a jump of CLOCK_BOOTTIME over
  * CLOCK_MONOTONIC) and runs this for each Wi-Fi interface it manages:
  *

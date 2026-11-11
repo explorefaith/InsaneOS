@@ -1,6 +1,6 @@
 // icons.jsx — ícono de la app y glifos chicos de los encabezados del Monitor, dibujados con
 // View (sin fuentes de íconos) o en píxeles.
-import { View, Image } from '@lordos/sdk';
+import { View, Image } from '@insaneos/sdk';
 import { canvas, pack, dot } from './draw.js';
 
 // Ícono de la app: fondo oscuro con un gráfico verde de actividad (como el de TangoOS).

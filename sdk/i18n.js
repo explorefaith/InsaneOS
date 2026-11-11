@@ -8,7 +8,7 @@
 //
 // Strings live in JSON catalogs that the server reads at runtime:
 //   assets/locales/<language>/<namespace>.json            (bundled with Insane OS)
-//   ~/.local/share/lordos/locales/<language>/<namespace>.json   (the user's language packs)
+//   ~/.local/share/insaneos/locales/<language>/<namespace>.json   (the user's language packs)
 // The namespace is the first part of the key ('terminal', 'files', 'shell'…). A new
 // language is a folder with those files and a meta.json; no code changes are needed.
 // If a key is missing, the user's other preferred languages are tried in order (settings.languages),
@@ -69,7 +69,7 @@ function catalog(lang, ns) {
   if (cache.has(k)) return cache.get(k);
   let obj = null;
   try {
-    const txt = lord.locale.catalog(lang, ns);
+    const txt = insane.locale.catalog(lang, ns);
     obj = txt ? JSON.parse(txt) : null;
   } catch (e) { console.warn(`i18n: invalid catalog ${k}:`, e.message); }
   cache.set(k, obj);
@@ -81,7 +81,7 @@ function catalog(lang, ns) {
 // preferred language or English (docs/LANGUAGES.md).
 export function languages() {
   const out = [];
-  for (const l of lord.locale.languages()) {
+  for (const l of insane.locale.languages()) {
     let m = {};
     try { m = JSON.parse(l.meta); } catch (e) { continue; }
     metas.set(l.id, m);
@@ -101,9 +101,9 @@ function initial() {
   const s = settings.get().language;
   if (s) return s;
   try {
-    const l = lord.locale.get();
+    const l = insane.locale.get();
     const lang = (l.user.LANG || l.system.LANG || '').split(/[_.@]/)[0];
-    if (lang && lang !== 'C' && lord.locale.catalog(lang, 'shell')) return lang;
+    if (lang && lang !== 'C' && insane.locale.catalog(lang, 'shell')) return lang;
   } catch (e) { /* no region */ }
   return FALLBACK;
 }
@@ -114,7 +114,7 @@ function initial() {
 // en_US.UTF-8 doesn't turn a Spanish desktop's clock to AM/PM.
 let envLocale = null;
 function envRegion(lang) {
-  try { envLocale = envLocale || lord.locale.get(); return regionFromEnv(envLocale, lang); } catch (e) { return ''; }
+  try { envLocale = envLocale || insane.locale.get(); return regionFromEnv(envLocale, lang); } catch (e) { return ''; }
 }
 
 const LANG0 = initial();
@@ -125,20 +125,20 @@ export const locale = createStore({ lang: LANG0, region: settings.get().region |
 // mirrors the interface: rows, start alignment, menus.
 function applyNative(l) {
   try {
-    lord.text.setLanguage(l.lang);
-    lord.text.setDirection(dirOf(l) === 'rtl');
-  } catch (e) { /* server without lord.text */ }
+    insane.text.setLanguage(l.lang);
+    insane.text.setDirection(dirOf(l) === 'rtl');
+  } catch (e) { /* server without insane.text */ }
 }
 applyNative(locale.get());
 locale.subscribe(() => applyNative(locale.get()));
 
 // Direction of the interface ('rtl' in Arabic, Hebrew, Persian…) and of a standalone text (that of its
 // first strong character: an Arabic file name inside an English interface).
-// An isolated app (runtime/app-host.js) also gets the direction from lord-server with the language
+// An isolated app (runtime/app-host.js) also gets the direction from insane-server with the language
 // (`dir`), so it mirrors like the desktop even if it cannot read that language's meta.json.
 function dirOf(l) { return l.dir === 'rtl' || l.dir === 'ltr' ? l.dir : meta(l.lang).direction === 'rtl' ? 'rtl' : 'ltr'; }
 export const direction = () => dirOf(locale.get());
-export const textDirection = (s) => { try { return lord.text.direction(String(s ?? '')); } catch (e) { return 'ltr'; } };
+export const textDirection = (s) => { try { return insane.text.direction(String(s ?? '')); } catch (e) { return 'ltr'; } };
 
 settings.subscribe(() => {
   const s = settings.get();
@@ -198,7 +198,7 @@ export const appName = (app) => (app ? (find(`apps.${app.id}`)[0] ?? app.name) :
 const clock24 = () => settings.get().clock?.hour24 || 'auto';
 
 // glibc's formats for a region (sdk/regionformat.js), for a region whose language has no format.json.
-// An isolated app can't read them: lord-server publishes them with the language (`rf`, sdk/privacy.js).
+// An isolated app can't read them: insane-server publishes them with the language (`rf`, sdk/privacy.js).
 const glibcCache = new Map();
 export function regionData(region) {
   const l = locale.get();
@@ -206,7 +206,7 @@ export function regionData(region) {
   if (!region) return null;
   if (!glibcCache.has(region)) {
     let g = null;
-    try { g = typeof lord.locale.formats === 'function' ? fromGlibc(lord.locale.formats(region)) : null; } catch (e) { /* not generated */ }
+    try { g = typeof insane.locale.formats === 'function' ? fromGlibc(insane.locale.formats(region)) : null; } catch (e) { /* not generated */ }
     glibcCache.set(region, g);
   }
   return glibcCache.get(region);

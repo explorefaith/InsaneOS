@@ -1,4 +1,4 @@
-module lordos.test/probe
+module insaneos.test/probe
 
 go 1.22
 

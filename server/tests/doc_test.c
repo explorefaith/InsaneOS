@@ -1,14 +1,14 @@
-/* doc_test.c — test client for lord-doc (the document helper), without lord-server.
+/* doc_test.c — test client for insane-doc (the document helper), without insane-server.
  *
- *   doc-test <lord-doc> selftest                    what the confinement blocks (JSON with errno)
- *   doc-test <lord-doc> list <archive>
- *   doc-test <lord-doc> extract <archive> <folder>    (the folder must exist)
- *   doc-test <lord-doc> zip <out.zip> <paths…>
- *   doc-test <lord-doc> pdf <file.pdf> [width]      opens, renders page 1 and measures
- *   doc-test <lord-doc> font <file.ttf>
- *   doc-test <lord-ocr> selftest-ocr                what lord-ocr's confinement blocks
- *   doc-test <lord-ocr> ocr <file.pgm> [langs]      the text in a gray picture (P5)
- *   doc-test <lord-tts> selftest-tts <models> [gpu] what lord-tts's confinement blocks (on the CPU or the GPU)
+ *   doc-test <insane-doc> selftest                    what the confinement blocks (JSON with errno)
+ *   doc-test <insane-doc> list <archive>
+ *   doc-test <insane-doc> extract <archive> <folder>    (the folder must exist)
+ *   doc-test <insane-doc> zip <out.zip> <paths…>
+ *   doc-test <insane-doc> pdf <file.pdf> [width]      opens, renders page 1 and measures
+ *   doc-test <insane-doc> font <file.ttf>
+ *   doc-test <insane-ocr> selftest-ocr                what insane-ocr's confinement blocks
+ *   doc-test <insane-ocr> ocr <file.pgm> [langs]      the text in a gray picture (P5)
+ *   doc-test <insane-tts> selftest-tts <models> [gpu] what insane-tts's confinement blocks (on the CPU or the GPU)
  *
  * tests/doc_evil.sh uses it with malicious archives built by tests/make_evil_archives.py. */
 #include "doc/proto.h"
@@ -35,7 +35,7 @@ static double now_ms(void) {
 
 static int sock;
 static pid_t child;
-static int go_gpu;                         /* lord-tts: {"gpu":true} in DQ_INIT_GO */
+static int go_gpu;                         /* insane-tts: {"gpu":true} in DQ_INIT_GO */
 
 static void start(const char *helper, const char *mode, const int *fds, const char *const *roles, int n) {
     int sv[2];
@@ -43,7 +43,7 @@ static void start(const char *helper, const char *mode, const int *fds, const ch
     child = fork();
     if (!child) {
         dup2(sv[1], 3);
-        char *argv[] = { "lord-doc", NULL };
+        char *argv[] = { "insane-doc", NULL };
         execv(helper, argv);
         _exit(127);
     }
@@ -81,7 +81,7 @@ static int call(uint32_t op, const char *json, const int *fds, int nfds, int qui
 }
 
 int main(int argc, char **argv) {
-    if (argc < 3) { fprintf(stderr, "usage: doc-test <lord-doc> selftest|list|extract|zip|pdf|font …\n"); return 2; }
+    if (argc < 3) { fprintf(stderr, "usage: doc-test <insane-doc> selftest|list|extract|zip|pdf|font …\n"); return 2; }
     const char *helper = argv[1], *cmd = argv[2];
     int st = 0;
     if (!strcmp(cmd, "selftest")) {
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
         start(helper, "ocr", NULL, NULL, 0);
         st = call(DQ_SELFTEST, NULL, NULL, 0, 0) == DR_DONE ? 0 : 1;
     } else if (!strcmp(cmd, "ocr") && argc > 3) {
-        /* P5 → premultiplied ARGB32 in a memfd, as lord-server sends a screenshot */
+        /* P5 → premultiplied ARGB32 in a memfd, as insane-server sends a screenshot */
         FILE *f = fopen(argv[3], "rb");
         int w = 0, h = 0, max = 0;
         if (!f || fscanf(f, "P5 %d %d %d", &w, &h, &max) != 3 || w < 1 || h < 1 || w > 8192 || h > 8192 || max != 255) { fprintf(stderr, "not a P5 picture\n"); return 2; }

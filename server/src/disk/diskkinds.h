@@ -1,6 +1,6 @@
 /* diskkinds.h — what disk-mount mounts: blkid's name, the kernel's, whether it takes owner options, read-only. */
-#ifndef LORD_DISK_KINDS_H
-#define LORD_DISK_KINDS_H
+#ifndef INSANE_DISK_KINDS_H
+#define INSANE_DISK_KINDS_H
 
 static const struct { const char *udev, *kernel; int owner, ro; } DISK_KINDS[] = {
     { "vfat", "vfat", 1, 0 }, { "exfat", "exfat", 1, 0 }, { "ntfs", "ntfs3", 1, 0 }, { "ext4", "ext4", 0, 0 },

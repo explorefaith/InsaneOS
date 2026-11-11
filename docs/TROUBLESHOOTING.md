@@ -4,17 +4,17 @@
 
 Insane OS checks its own code (the themes, the login screen, the system apps) against a list signed with
 the Insane OS key before running it ([SIGNING.md](SIGNING.md), "Verified system code"). This message,
-or the recovery screen, means a file in `/usr/lib/lordos` no longer matches: a disk error, an edit by
+or the recovery screen, means a file in `/usr/lib/insaneos` no longer matches: a disk error, an edit by
 hand, or tampering. To see which files:
 
 ```sh
-sudo /usr/lib/lordos/bin/lord-server --check-code
+sudo /usr/lib/insaneos/bin/insane-server --check-code
 ```
 
 To repair it, reinstall the package (your files and settings are not touched):
 
 ```sh
-sudo apt install --reinstall lordos
+sudo apt install --reinstall insaneos
 ```
 
 ## What to attach to a bug report
@@ -23,10 +23,10 @@ Run this in a terminal (or, if the desktop doesn't start, on a text console with
 live system too):
 
 ```sh
-lordos-issue
+insaneos-issue
 ```
 
-It only reads and sends nothing. It saves `~/lordos-issue-<date>.txt` with the Insane OS version, the hardware (PCI and
+It only reads and sends nothing. It saves `~/insaneos-issue-<date>.txt` with the Insane OS version, the hardware (PCI and
 USB devices, CPU, memory, disks, displays, input devices, network, sound and drivers), an integrity check (Insane OS's
 signed code, each app's signature, changed files, kernel taint and software sources), failed services, firmware
 messages, the session's log and this boot's errors. Addresses, your user and computer names and home paths are
@@ -37,7 +37,7 @@ log and every package file; without it (or with `--no-root`) the report is short
 
 ## Virtual machines
 
-- **VirtualBox's default display (VMSVGA) shows no desktop.** Fixed in 0.8.8 ([#9](https://github.com/lordbasex/Insane OS/issues/9)):
+- **VirtualBox's default display (VMSVGA) shows no desktop.** Fixed in 0.8.8 ([#9](https://github.com/insaneos/Insane OS/issues/9)):
   the `vmwgfx` driver it needs is now loaded on VirtualBox too, so VMSVGA, VBoxSVGA and VBoxVGA all reach the desktop,
   with BIOS and with EFI ([ISO.md](ISO.md), "Firmware and displays"). On 0.8.7 or earlier, pick VBoxSVGA in the
   machine's display settings.
@@ -48,8 +48,8 @@ log and every package file; without it (or with `--no-root`) the report is short
 ## A Linux app asks for administrator rights
 
 Since 0.8.8, a Linux app that runs `pkexec` (for example a launcher updating itself) gets Insane OS's own password prompt,
-which names the app and the command; before, it stopped with error 127 ([#4](https://github.com/lordbasex/Insane OS/issues/4)).
-`/usr/bin/pkexec` is diverted to `lord-pkexec` ([PRIVACY.md](PRIVACY.md), "Authentication for Linux apps"). The prompt
+which names the app and the command; before, it stopped with error 127 ([#4](https://github.com/insaneos/Insane OS/issues/4)).
+`/usr/bin/pkexec` is diverted to `insane-pkexec` ([PRIVACY.md](PRIVACY.md), "Authentication for Linux apps"). The prompt
 takes a physical keyboard only, and programs that ask polkit over D-Bus directly still find no agent. After going
 back to a package older than 0.8.8, the diversion leaves a dangling link: remove it with `dpkg-divert --remove` by hand.
 
@@ -64,7 +64,7 @@ about two minutes.
 1. Get the script onto the machine (it is not part of the package):
 
    ```sh
-   curl -fsSLO https://raw.githubusercontent.com/lordbasex/Insane OS/main/tools/diag/keylag.sh
+   curl -fsSLO https://raw.githubusercontent.com/insaneos/Insane OS/main/tools/diag/keylag.sh
    ```
 
 2. Run it in the Insane OS Terminal: `sh keylag.sh`. It prints:
@@ -74,11 +74,11 @@ about two minutes.
    - how many times Chromium logged `The server has buggy presentation feedback` in this session.
 
    On Insane OS 0.8.0 and the 0.8.1 pre-release ISOs, that Chromium line on the GPU path is the bug
-   described below. To confirm it without the trace, reboot and add `lordos.gpu=0` to the kernel
+   described below. To confirm it without the trace, reboot and add `insaneos.gpu=0` to the kernel
    line for one boot. That forces CPU composition. Then type in Chromium again.
 
 3. On 0.8.1 or later, turn the trace on for one boot. In the boot menu, press `e`, add
-   `lordos.inputdebug=1` at the end of the line that starts with `linux`, and press Ctrl+X. On an
+   `insaneos.inputdebug=1` at the end of the line that starts with `linux`, and press Ctrl+X. On an
    installed system with a hidden menu, hold Shift (BIOS) or press Esc (UEFI) while it starts.
    Log in and run `sh keylag.sh` again. When it asks, click the slow app and type normally for
    30 seconds.
@@ -88,7 +88,7 @@ timestamp:
 
 | Stage | What happened |
 |---|---|
-| `rx` | `lord-server` read the key |
+| `rx` | `insane-server` read the key |
 | `flush` | the key was written to the app's socket (`wl_keyboard.key`) |
 | `commit` | the app sent its next frame (its answer: the glyph) |
 | `shown` | the page flip with that frame finished |
@@ -99,10 +99,10 @@ guest's kernel and then delivered in clumps.
 
 How to read it:
 
-- **`rx` high:** `lord-server`'s main loop is busy. Report it with the output.
+- **`rx` high:** `insane-server`'s main loop is busy. Report it with the output.
 - **`commit − flush` high:** the app itself is slow.
 - **`shown − commit` high:** frames reach the screen late, a compositor problem. Report it, and use
-  `lordos.gpu=0` until it is fixed.
+  `insaneos.gpu=0` until it is fixed.
 - **Everything under ~40 ms but typing still lags:** the delay is before the guest's kernel, in
   the hypervisor. On VMware, the reported fixes are on the host side (VMware's forums and
   [open-vm-tools#696](https://github.com/vmware/open-vm-tools/issues/696)):
@@ -122,10 +122,10 @@ The trace measures time. It is not a key log:
   never traced or counted: the theme, its text fields, the Terminal, the Passwords app, the
   keyring and admin prompts, the login and lock screens, isolated Insane OS apps and protected
   windows.
-- **Who can turn it on:** only `lord-sessiond` (root) passes `LORD_INPUT_DEBUG=1` to user
-  sessions, and only when the kernel line has `lordos.inputdebug=1` or the service sets
-  `LORD_INPUT_DEBUG=1`. There is no run-time switch, and the login screen never gets it.
-- **Where it goes:** its own file, `$XDG_RUNTIME_DIR/lordos-keylag.log`, created with mode 0600 in
+- **Who can turn it on:** only `insane-sessiond` (root) passes `INSANE_INPUT_DEBUG=1` to user
+  sessions, and only when the kernel line has `insaneos.inputdebug=1` or the service sets
+  `INSANE_INPUT_DEBUG=1`. There is no run-time switch, and the login screen never gets it.
+- **Where it goes:** its own file, `$XDG_RUNTIME_DIR/insaneos-keylag.log`, created with mode 0600 in
   the session's tmpfs and gone at logout. It is never written to the session log.
 - **How long it runs:** it stops by itself 120 s after the first traced key, or after 4000 lines.
   Log out and back in for a new one.
@@ -183,12 +183,12 @@ Other results:
 Everything is in `tools/diag/`:
 
 - **`keylag-inject.py`** (root) creates a uinput keyboard and types at known `CLOCK_MONOTONIC`
-  times. `lord-sessiond` lends the new device to the session through inotify.
+  times. `insane-sessiond` lends the new device to the session through inotify.
 - **`keylag-client.c`** prints when `wl_keyboard.key` arrived and when its frame was presented.
   Build commands are at the top of the file.
-- **`LORD_INPUT_DEBUG=1`** in a drop-in for `lordos.service`
-  (`[Service] Environment=LORD_INPUT_DEBUG=1`) turns the trace on in development VMs.
-- **`LORD_GPU=1`** in the same drop-in forces GPU composition (llvmpipe) on a display without 3D.
+- **`INSANE_INPUT_DEBUG=1`** in a drop-in for `insaneos.service`
+  (`[Service] Environment=INSANE_INPUT_DEBUG=1`) turns the trace on in development VMs.
+- **`INSANE_GPU=1`** in the same drop-in forces GPU composition (llvmpipe) on a display without 3D.
 
 ### open-vm-tools
 

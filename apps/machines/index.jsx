@@ -1,8 +1,8 @@
-// Machines (alpha) — other systems in windows, each machine supervised by lord-vm in its own sandbox and its picture
-// drawn by lord-vmdisplay into a media node (docs/VIRTUALIZATION.md, "Phase 1 implementation", The app). One window
+// Machines (alpha) — other systems in windows, each machine supervised by insane-vm in its own sandbox and its picture
+// drawn by insane-vmdisplay into a media node (docs/VIRTUALIZATION.md, "Phase 1 implementation", The app). One window
 // is the Control Center (library.jsx, with the New Machine assistant, Requirements and the Pi page); the same app
 // opened with args.machine is a machine's window, args.configure its Configure window, args.logs its logs.
-import { useAppWindow } from '@lordos/sdk';
+import { useAppWindow } from '@insaneos/sdk';
 import { Library, AppMark } from './library.jsx';
 import { MachineWindow } from './vmwindow.jsx';
 import { Configure } from './configure.jsx';

@@ -2,7 +2,7 @@ O Insane OS é gratuito e vai continuar gratuito. As doações ajudam o grupo iP
 
 ## Uma doação é voluntária
 
-Doar é totalmente opcional. Tudo no lordos.org e no Insane OS está disponível, quer você doe ou não.
+Doar é totalmente opcional. Tudo no insaneos.org e no Insane OS está disponível, quer você doe ou não.
 
 ## Não é uma compra
 
@@ -13,7 +13,7 @@ Uma doação é um presente, não um pagamento por bens ou serviços. Em troca d
 As doações são processadas inteiramente por terceiros:
 
 - **PayPal** (para `paypal@iperfex.com`), conforme os [termos do PayPal](https://www.paypal.com/legalhub/home) e a declaração de privacidade dele;
-- **Mercado Pago** (`link.mercadopago.com.ar/lordos`), conforme os [termos do Mercado Pago](https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194);
+- **Mercado Pago** (`link.mercadopago.com.ar/insaneos`), conforme os [termos do Mercado Pago](https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194);
 - **Binance**, quando estiver disponível, conforme os termos da Binance.
 
 Nunca vemos nem guardamos os dados do seu cartão ou da sua conta bancária. O processador pode cobrar tarifas, aplicar conversão de moeda ou recusar ou estornar um pagamento segundo as regras dele.

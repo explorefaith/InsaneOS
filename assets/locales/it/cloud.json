@@ -1,6 +1,6 @@
 {
   "title": "Cloud",
-  "unavailable": "Il Cloud non è disponibile in questa sessione: il suo motore (lordos-rclone) non è installato o non è in funzione.",
+  "unavailable": "Il Cloud non è disponibile in questa sessione: il suo motore (insaneos-rclone) non è installato o non è in funzione.",
   "addAccount": "Aggiungi account…",
   "accounts": "Account",
   "allAccounts": "Tutti gli account",

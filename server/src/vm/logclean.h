@@ -1,7 +1,7 @@
-/* logclean.h — a log shown in the Machines app (lord.vm.log): the serial console's escape sequences and control
+/* logclean.h — a log shown in the Machines app (insane.vm.log): the serial console's escape sequences and control
  * characters taken out, in place. Bounded by the string's own end: an ESC or a CSI cut off at the end stops there. */
-#ifndef LORD_VM_LOGCLEAN_H
-#define LORD_VM_LOGCLEAN_H
+#ifndef INSANE_VM_LOGCLEAN_H
+#define INSANE_VM_LOGCLEAN_H
 
 static inline void vm_log_clean(char *s) {
     char *w = s;

@@ -5,7 +5,7 @@ markdown notes that are read with formatting and a table of contents, accept ima
 and emoji, and can be placed on the desktop as sticky notes (widgets) that move and resize. They
 save themselves in the home folder.
 
-## Screenshots (VM 118, real lord-server)
+## Screenshots (VM 118, real insane-server)
 
 | | |
 |---|---|
@@ -31,7 +31,7 @@ Each note is a folder in `~/Notes/<note>/`:
 ```
 
 Before 0.7.0 the folder was `~/Notas`. On the first run Notes moves it to `~/Notes` (a rename
-in the home folder through `lord.fs`). If both folders exist, Notes uses `~/Notes` and leaves
+in the home folder through `insane.fs`). If both folders exist, Notes uses `~/Notes` and leaves
 `~/Notas` untouched; Search also falls back to `~/Notas` while `~/Notes` doesn't exist yet. If
 there is no Trash, a deleted note goes to `~/Notes/.trash`.
 
@@ -138,9 +138,9 @@ It is a generic layer, not just for notes:
 
 ## New server APIs
 
-- `lord.clipboard.imageData()` (`js_term.c`): the copied PNG as an `ArrayBuffer`, or `null`. The
-  app saves it with `lord.fs.write`, under its usual rules.
-- `lord.image.size(path)` (`js_sys.c`): the width and height of an image in the home folder, to
+- `insane.clipboard.imageData()` (`js_term.c`): the copied PNG as an `ArrayBuffer`, or `null`. The
+  app saves it with `insane.fs.write`, under its usual rules.
+- `insane.image.size(path)` (`js_sys.c`): the width and height of an image in the home folder, to
   show it at its size.
 
 ## Pending

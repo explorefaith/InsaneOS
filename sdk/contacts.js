@@ -1,4 +1,4 @@
-// contacts.js — Contacts (docs/MAIL.md): address books kept by lord-maild (local, or synced
+// contacts.js — Contacts (docs/MAIL.md): address books kept by insane-maild (local, or synced
 // with CardDAV). Mail autocompletes addresses from here and from the people you write to.
 //
 //   books.list() → [{ id, name, color, acct, acctName, kind: 'local'|'dav', count }]
@@ -8,12 +8,12 @@
 //        bday ('YYYY-MM-DD'), notes, cats: [], photo: bool, kind: 'individual'|'group', members: [uid] }]
 //   contacts.save(book, contact, { photo: 'keep' | 'remove' | path }) → uid
 //   contacts.remove(book, uid) / importFile(path, book)
-//   contacts.photo(book, uid, size) → image handle for <ContactPhoto> (decoded in lord-maild)
+//   contacts.photo(book, uid, size) → image handle for <ContactPhoto> (decoded in insane-maild)
 //   contacts.autocomplete(q) → [{ name, email, src: 'contacts'|'mail' }]
 //   displayName(c) / initials(c)
 //   <ContactPhoto contact size />            the photo or the initials on a colored circle
 import { createElement as h, useEffect, useRef, useState } from 'react';
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { mailRequest } from './mail.js';
 import { usePim } from './calendar.js';
 
@@ -77,8 +77,8 @@ export function ContactPhoto({ contact, size = 40 }) {
     return () => { live = false; };
   }, [contact?.uid, contact?.book, want, rev, size]);
   useEffect(() => {
-    if (ref.current && handle) lord.mail.bind(ref.current.id, handle);
-    return () => { if (handle) lord.mail.release(handle); };
+    if (ref.current && handle) insane.mail.bind(ref.current.id, handle);
+    return () => { if (handle) insane.mail.release(handle); };
   }, [handle]);
   const box = { width: size, height: size, borderRadius: size / 2, overflow: 'hidden' };
   if (want && handle) return h(View, { style: box }, h(Image, { ref, style: { width: size, height: size, objectFit: 'cover' } }));

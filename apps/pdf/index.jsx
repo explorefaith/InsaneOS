@@ -2,11 +2,11 @@
 // thumbnails and outline, search with highlighting, zoom and fit, rotate, select and copy text,
 // go to a page, links, forms, annotations (highlight, note and freehand) saved as a
 // copy, dark mode with the page inverted and printing with the system dialog.
-// Poppler runs in the confined lord-doc helper (see docs/DOCUMENTS.md); this app only asks.
+// Poppler runs in the confined insane-doc helper (see docs/DOCUMENTS.md); this app only asks.
 import {
   View, Text, TextInput, Button, useTheme, useAppWindow, useKeyboard, addListener, wm, fs, clipboard, pdf, print, DocImage, releaseImage,
   formatNumber, direction, t as tr, Toolbar, ToolbarButton, ToolbarGroup, ToolbarSpacer, SearchField, EmptyState,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageCache } from './cache.js';
 import { shown, toPage, rectToView, layoutPages, visibleRange } from './geometry.js';
@@ -95,7 +95,7 @@ export default function PdfViewer() {
   const [error, setError] = useState(null);
   const [needPass, setNeedPass] = useState(false);
   const [password, setPassword] = useState('');
-  const [rev, setRev] = useState(0);                  // something arrived from lord-doc: redraw
+  const [rev, setRev] = useState(0);                  // something arrived from insane-doc: redraw
   const [zoom, setZoom] = useState(saved?.zoom || 'width');   // number | 'width' | 'page'
   const [rot, setRot] = useState(0);
   const [mode, setMode] = useState(saved?.mode || 'continuous');   // 'continuous' | 'single'
@@ -166,7 +166,7 @@ export default function PdfViewer() {
 
   // ---- area size and scale ----
   useEffect(() => {
-    const measure = () => { if (area.current) { const l = lord.getLayout(area.current.id); if (l[2] !== view.w || l[3] !== view.h) setView({ w: l[2], h: l[3] }); } };
+    const measure = () => { if (area.current) { const l = insane.getLayout(area.current.id); if (l[2] !== view.w || l[3] !== view.h) setView({ w: l[2], h: l[3] }); } };
     measure();
     const id = setInterval(measure, 250);
     return () => clearInterval(id);
@@ -282,7 +282,7 @@ export default function PdfViewer() {
   const pageTop = (p) => (mode === 'single' ? Math.max(GAP, (view.h - shown(sizes[p], rot)[1] * scale) / 2) : lay.tops[p] - offset);
   const hitPage = (ev) => {
     if (!area.current) return null;
-    const [ax, ay] = lord.getLayout(area.current.id);
+    const [ax, ay] = insane.getLayout(area.current.id);
     const lx = ev.x - ax, ly = ev.y - ay;
     for (let p = first; p <= last; p++) {
       const [w, h] = shown(sizes[p], rot);

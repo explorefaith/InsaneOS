@@ -1,21 +1,21 @@
-/* doc.h — lord-server side of the lord-doc document helper (see proto.h).
+/* doc.h — insane-server side of the insane-doc document helper (see proto.h).
  *
- * A «session» is a lord-doc process: an open PDF, an extraction, a compression or the
+ * A «session» is a insane-doc process: an open PDF, an extraction, a compression or the
  * utilities helper (fonts, PDF for printing, images). Everything is asynchronous: a dedicated
  * thread talks to the helpers and leaves the results in a queue that JS reads with doc_poll()
- * (lord.doc.poll). The compositor never waits for a helper; if one hangs, it is killed when
+ * (insane.doc.poll). The compositor never waits for a helper; if one hangs, it is killed when
  * the request deadline expires, and if it crashes, its requests end with a "crash" error. */
-#ifndef LORD_DOC_DOC_H
-#define LORD_DOC_DOC_H
+#ifndef INSANE_DOC_DOC_H
+#define INSANE_DOC_DOC_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 typedef struct { int fd; const char *role; } DocInitFd;      /* role: "file" | "ro" | "rw" | "out" */
 
-/* Fixed path of the helper: <folder of this binary>/lord-doc. 0 if it exists. */
+/* Fixed path of the helper: <folder of this binary>/insane-doc. 0 if it exists. */
 int  doc_available(void);
-int  doc_ocr_available(void);             /* <folder of this binary>/lord-ocr: sessions of mode "ocr" */
+int  doc_ocr_available(void);             /* <folder of this binary>/insane-ocr: sessions of mode "ocr" */
 /* New session with these startup fds (doc_session keeps them, also on failure).
  * mode: "pdf" | "arc" | "util". Returns the id (> 0) or -1. */
 int  doc_session(const char *mode, DocInitFd *fds, int n);

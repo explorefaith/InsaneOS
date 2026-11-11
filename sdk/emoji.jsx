@@ -11,7 +11,7 @@
 //   emoji.name(character) → name in the UI language
 //   emoji.withTone(character, tone 0..5)             emoji.insert(text)   emoji.open() / close()
 import { createElement as h, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, addListener, screen } from '@lordos/runtime';
+import { View, Text, addListener, screen } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { useTheme } from './theme.js';
@@ -25,9 +25,9 @@ import { EMOJI_GROUPS, TONED } from './emojidata.js';
 
 const TONE_CP = [null, 0x1f3fb, 0x1f3fc, 0x1f3fd, 0x1f3fe, 0x1f3ff];
 let groupsCache = null;
-// Can an installed font draw it (lord.text.covered)? What none can would be a missing glyph box: it is left out
+// Can an installed font draw it (insane.text.covered)? What none can would be a missing glyph box: it is left out
 // (#56). Without that call (an isolated app), everything is shown.
-const drawable = (ch) => typeof lord === 'undefined' || typeof lord.text?.covered !== 'function' || lord.text.covered(ch);
+const drawable = (ch) => typeof insane === 'undefined' || typeof insane.text?.covered !== 'function' || insane.text.covered(ch);
 const groups = () => groupsCache || (groupsCache = EMOJI_GROUPS.map(([id, s]) => ({ id, list: s.split(' ').filter(drawable) })));
 const keyOf = (ch) => [...ch].map((c) => c.codePointAt(0).toString(16)).filter((x) => x !== 'fe0f').join('_');
 
@@ -36,7 +36,7 @@ const kwCache = new Map();
 function keywords(lang) {
   if (!kwCache.has(lang)) {
     let cat = {};
-    try { const txt = lord.locale.catalog(lang, 'emojikw'); cat = txt ? JSON.parse(txt) : {}; } catch (e) { cat = {}; }
+    try { const txt = insane.locale.catalog(lang, 'emojikw'); cat = txt ? JSON.parse(txt) : {}; } catch (e) { cat = {}; }
     const norm = {};
     for (const [k, v] of Object.entries(cat)) norm[k] = v;
     kwCache.set(lang, norm);
@@ -103,13 +103,13 @@ export const emoji = {
     setTimeout(() => {
       if (to?.text || to?.ime) {
         // same as what an input method commits (js.c ime_commit): a key with that text
-        globalThis.__lordKey(0, 1, text, text, '', 0);
-        globalThis.__lordKey(0, 0, text, text, '', 0);
+        globalThis.__insaneKey(0, 1, text, text, '', 0);
+        globalThis.__insaneKey(0, 0, text, text, '', 0);
         return;
       }
-      if (to?.linux && typeof lord.wayland !== 'undefined' && lord.wayland.hasKeyboard()) {
+      if (to?.linux && typeof insane.wayland !== 'undefined' && insane.wayland.hasKeyboard()) {
         clipboard.set(text);
-        if (lord.wayland.paste()) return;
+        if (insane.wayland.paste()) return;
       }
       clipboard.set(text);
       toast.set(t('emoji.copied', { text }));

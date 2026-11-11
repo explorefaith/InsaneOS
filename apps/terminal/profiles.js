@@ -1,13 +1,13 @@
 // profiles.js — Terminal profiles and color schemes.
-// They live in the Terminal's own file, ~/.config/lordos/terminal.json or the one the user chose (config.js).
-import { t } from '@lordos/sdk';
+// They live in the Terminal's own file, ~/.config/insaneos/terminal.json or the one the user chose (config.js).
+import { t } from '@insaneos/sdk';
 import { termConfig, loadTermConfig, saveTermConfig } from './config.js';
 
 const ansi = (s) => s.split(' ').map((h) => `#${h}`);
 
 // Bundled schemes: a classic default and some popular ones.
 export const PRESETS = {
-  lordos: { name: 'Insane OS', fg: '#e5e5ea', bg: '#1c1c1f', cursor: '#0a84ff', cursorText: '#ffffff', selection: '#3a5a8c', selectionText: '#ffffff',
+  insaneos: { name: 'Insane OS', fg: '#e5e5ea', bg: '#1c1c1f', cursor: '#0a84ff', cursorText: '#ffffff', selection: '#3a5a8c', selectionText: '#ffffff',
     ansi: ansi('2c2c30 ff453a 32d74b ffd60a 0a84ff bf5af2 64d2ff d1d1d6 636366 ff6961 30db5b ffd426 409cff da8fff 70d7ff ffffff') },
   iterm: { name: 'Classic', fg: '#c7c7c7', bg: '#000000', cursor: '#c7c7c7', cursorText: '#000000', selection: '#b5d5ff', selectionText: '#000000',
     ansi: ansi('000000 c91b00 00c200 c7c400 2225c4 ca30c7 00c5c7 c7c7c7 686868 ff6e67 5ffa68 fffc67 6871ff ff77ff 60fdff ffffff') },
@@ -44,7 +44,7 @@ export const PRESETS = {
 export const DEFAULT_PROFILE = {
   id: 'default',
   name: '',                  // '' = "Predeterminado" en el idioma de la interfaz
-  colors: 'lordos',          // id de PRESETS o 'custom'
+  colors: 'insaneos',          // id de PRESETS o 'custom'
   custom: null,              // esquema propio cuando colors === 'custom'
   fontSize: 13,
   lineSpacing: 1.0,
@@ -107,11 +107,11 @@ export const getProfile = (id) => {
 
 // Esquemas incluidos + los importados (terminal.schemes en los ajustes).
 export const allSchemes = () => ({ ...PRESETS, ...(terminalSettings().schemes || {}) });
-export const schemeOf = (p) => (p.colors === 'custom' && p.custom ? p.custom : allSchemes()[p.colors] || PRESETS.lordos);
+export const schemeOf = (p) => (p.colors === 'custom' && p.custom ? p.custom : allSchemes()[p.colors] || PRESETS.insaneos);
 
 const hex = (c) => parseInt(String(c).replace('#', '').slice(0, 6), 16) || 0;
 
-// Perfil → configuración nativa de lord.term.configure().
+// Perfil → configuración nativa de insane.term.configure().
 export function toConfig(p, extra = {}) {
   const s = schemeOf(p);
   const cfg = {

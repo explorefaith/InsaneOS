@@ -1,4 +1,4 @@
-// debian.js — the Debian part of the Store. It reads our own index (lord.pkg, no root;
+// debian.js — the Debian part of the Store. It reads our own index (insane.pkg, no root;
 // server/src/pkg) and makes changes through the administration helper (pkg-update, pkg-install,
 // pkg-remove, pkg-upgrade, pkg-install-file). Before changing anything it shows the plan: what is
 // installed, upgraded or removed, and how much is downloaded and used. See docs/PACKAGES.md.
@@ -6,16 +6,16 @@ import { createElement as h, useEffect, useState } from 'react';
 import {
   View, Text, Image, Button, EmptyState, GroupBox, useTheme, useStore, createStore, admin, formatBytes, formatDate,
   refreshApps, launchApp, useLauncherApps, LetterIcon, typeScale, spacing, direction, t, locale, errorText, statusText,
-  Markdown, Toggle, InsaneLogo, session, lordosUpdate, restartNeeded, updatePrefs, setUpdatePrefs,
-} from '@lordos/sdk';
+  Markdown, Toggle, InsaneLogo, session, insaneosUpdate, restartNeeded, updatePrefs, setUpdatePrefs,
+} from '@insaneos/sdk';
 import { Suggested } from './suggested.js';
 import { Card, CardGrid, Facts, Pill, Shelf } from './ui.js';
 import { sysPkgKey, snapshotDate } from './syspkg.js';
 import { AdminRescue, isNotAdmin } from './rescue.js';
 import { search } from './search.js';
 
-const available = () => typeof lord.pkg !== 'undefined';
-const ready = () => available() && lord.pkg.available();
+const available = () => typeof insane.pkg !== 'undefined';
+const ready = () => available() && insane.pkg.available();
 const lang2 = () => (locale.get().lang || 'en').split('-')[0];
 
 // Shared state: generation (changes when the index or what is installed changes) and the running job.
@@ -43,7 +43,7 @@ function runJob(action, arg, title) {
 
 export const useDebian = () => {
   const s = useStore(state);
-  const upgrades = ready() ? lord.pkg.upgrades() : [];
+  const upgrades = ready() ? insane.pkg.upgrades() : [];
   return { ...s, upgrades };
 };
 
@@ -63,7 +63,7 @@ const Header = ({ th, children }) => h(Text, { style: { fontSize: typeScale.body
 const titleStyle = (th) => ({ fontSize: typeScale.largeTitle, fontWeight: 600, color: th.text });
 
 function PkgIcon({ app, name, size = 48 }) {
-  const icon = app?.icon || (available() ? lord.pkg.icon(name) : null);
+  const icon = app?.icon || (available() ? insane.pkg.icon(name) : null);
   if (icon) return h(Image, { src: icon, style: { width: size, height: size, objectFit: 'contain' } });
   return h(LetterIcon, { size, name: app?.name || name });
 }
@@ -122,7 +122,7 @@ function Details({ name, onBack, onRemoved, extras = [] }) {
   const th = useTheme();
   const { gen, job } = useStore(state);
   const [plan, setPlan] = useState(null);
-  const info = ready() ? lord.pkg.info(name, { lang: lang2() }) : null;
+  const info = ready() ? insane.pkg.info(name, { lang: lang2() }) : null;
   useEffect(() => setPlan(null), [name, gen]);
   const launcher = useLauncherApps();
   if (!info) return h(Text, { style: { color: th.textDim } }, t('store.debian.notFound', { name }));
@@ -131,8 +131,8 @@ function Details({ name, onBack, onRemoved, extras = [] }) {
   // the matching installed desktop app (for "Open")
   const desk = app && launcher.find((a) => a.kind === 'linux' && (`${a.desktopId}.desktop` === app.id || a.desktopId === app.id));
   const ask = (p) => setPlan(p);
-  const doInstall = () => ask({ kind: 'install', p: lord.pkg.plan({ install: [name, ...extras] }) });
-  const doRemove = () => ask({ kind: 'remove', p: lord.pkg.plan({ remove: [name] }) });
+  const doInstall = () => ask({ kind: 'install', p: insane.pkg.plan({ install: [name, ...extras] }) });
+  const doRemove = () => ask({ kind: 'remove', p: insane.pkg.plan({ remove: [name] }) });
   const confirm = () => {
     const extra = plan.p.items.some((i) => i.action === 'remove' && !i.requested);
     if (plan.kind === 'install') runJob('pkg-install', [name, ...extras, ...(extra ? ['--allow-remove'] : [])].join(' '), t('store.job.install', { name: app?.name || name }));
@@ -213,7 +213,7 @@ function StoreGlyph() {
 }
 
 export const CATS = ['AudioVideo', 'Development', 'Education', 'Game', 'Graphics', 'Network', 'Office', 'Science', 'System', 'Utility'];
-const categoryCounts = () => (ready() ? lord.pkg.categories() : {});
+const categoryCounts = () => (ready() ? insane.pkg.categories() : {});
 
 // No index yet (or no engine): say so, with the button that fetches the lists.
 function NoIndex() {
@@ -227,7 +227,7 @@ function NoIndex() {
 // Search results: apps as cards, other packages as rows.
 function Results({ q, onOpen, more, hide = [] }) {
   const th = useTheme();
-  const res = lord.pkg.search(q, { limit: 60, lang: lang2() }).filter((r) => !hide.includes(r.name));
+  const res = insane.pkg.search(q, { limit: 60, lang: lang2() }).filter((r) => !hide.includes(r.name));
   const apps = res.filter((r) => r.app), others = res.filter((r) => !r.app);
   return h(View, { style: { gap: spacing.l } },
     h(Progress),
@@ -258,7 +258,7 @@ function Discover({ query, onOpen, onCategory, top, hide }) {
     h(Progress),
     top,
     ...CATS.filter((c) => counts[c]).map((c) => h(Shelf, { key: c, title: t(`store.cat.${c}`), more: t('store.seeAll', { count: counts[c] }), onMore: () => onCategory(c) },
-      h(Grid, { items: lord.pkg.apps({ category: c, limit: 4, lang: lang2() }), onOpen }))));
+      h(Grid, { items: insane.pkg.apps({ category: c, limit: 4, lang: lang2() }), onOpen }))));
 }
 
 // Store → For this computer: the hardware suggestions on their own page.
@@ -271,7 +271,7 @@ function Category({ cat, query, onOpen }) {
   const { gen } = useStore(state);
   void gen;
   if (!ready()) return h(NoIndex);
-  const all = lord.pkg.apps({ category: cat, limit: 2000, lang: lang2() });
+  const all = insane.pkg.apps({ category: cat, limit: 2000, lang: lang2() });
   const q = query.trim();
   const list = q ? search(all, q, (a) => ({ names: [a.name, a.package], texts: [a.summary] })) : all;
   return h(View, { style: { gap: spacing.l } },
@@ -292,7 +292,7 @@ function InsaneCard({ up }) {
   const long = lines.length > 14;
   const confirm = () => {
     const extra = plan.items.some((i) => i.action === 'remove' && !i.requested);
-    runJob('pkg-install', extra ? 'lordos --allow-remove' : 'lordos', t('store.system.updateJob', { version: up.version }));
+    runJob('pkg-install', extra ? 'insaneos --allow-remove' : 'insaneos', t('store.system.updateJob', { version: up.version }));
     setPlan(null);
   };
   return h(View, { style: boxStyle(th, { gap: spacing.m }) },
@@ -303,7 +303,7 @@ function InsaneCard({ up }) {
         h(Text, { style: { fontSize: typeScale.callout, color: th.textDim, textAlign: 'start' } },
           t('store.system.availableDetail', { installed: up.installed, size: formatBytes(up.size || 0) }))),
       h(Button, { primary: true, label: t('store.system.update'), disabled: !isAdmin || !!job,
-        onClick: () => isAdmin && !job && setPlan(lord.pkg.plan({ install: ['lordos'] })) })),
+        onClick: () => isAdmin && !job && setPlan(insane.pkg.plan({ install: ['insaneos'] })) })),
     !isAdmin && h(Text, { style: { fontSize: typeScale.caption, color: '#ff9f0a', textAlign: 'start' } }, t('store.debian.needAdmin')),
     plan && h(View, { style: { gap: spacing.s } },
       h(PlanView, { plan }),
@@ -328,7 +328,7 @@ function RestartCard({ need }) {
   if (later) return null;
   const canRestart = typeof session.canPower === 'function' && session.canPower();
   const kernel = need.packages.some((p) => p.startsWith('linux-image'));
-  const what = need.packages.includes('lordos') ? t('store.restart.lordos') : kernel ? t('store.restart.kernel') : t('store.restart.other');
+  const what = need.packages.includes('insaneos') ? t('store.restart.insaneos') : kernel ? t('store.restart.kernel') : t('store.restart.other');
   return h(View, { style: boxStyle(th, { flexDirection: 'row', alignItems: 'center', gap: spacing.l, borderColor: th.accent }) },
     h(View, { style: { width: 36, height: 36, borderRadius: 18, backgroundColor: th.accent, alignItems: 'center', justifyContent: 'center' } },
       h(Text, { style: { fontSize: 20, color: '#fff', lineHeight: 36 } }, '⟳')),
@@ -347,9 +347,9 @@ function Updates() {
   const [prefs, setPrefs] = useState(updatePrefs);
   void gen;
   if (!ready()) return h(NoIndex);
-  const ups = lord.pkg.upgrades();
-  const own = lordosUpdate(lang2());
-  const others = ups.filter((u) => u.name !== 'lordos');
+  const ups = insane.pkg.upgrades();
+  const own = insaneosUpdate(lang2());
+  const others = ups.filter((u) => u.name !== 'insaneos');
   const need = !job ? restartNeeded() : null;
   const auto = (on) => { setUpdatePrefs({ autoCheck: on }); setPrefs(updatePrefs()); };
   return h(View, { style: { gap: 12 } },
@@ -357,7 +357,7 @@ function Updates() {
       h(View, { style: { flex: 1 } }),
       h(Button, { label: t('store.debian.update'), disabled: !!job, onClick: () => !job && runJob('pkg-update', '', t('store.job.update')) }),
       ups.length ? h(Button, { primary: !own?.available, label: t('store.updates.all'), disabled: !!job,
-        onClick: () => !job && setPlan(lord.pkg.plan({ upgrade: true })) }) : null),
+        onClick: () => !job && setPlan(insane.pkg.plan({ upgrade: true })) }) : null),
     h(Progress),
     need ? h(RestartCard, { need }) : null,
     plan && h(View, { style: boxStyle(th) },
@@ -392,7 +392,7 @@ function Status() {
   const th = useTheme();
   useStore(state);
   if (!ready()) return null;
-  const at = lord.pkg.lastUpdate();
+  const at = insane.pkg.lastUpdate();
   return h(Text, { style: { fontSize: 11, color: th.textDim, lineHeight: 1.35 } },
     at ? t('store.debian.lastUpdate', { date: formatDate(new Date(at * 1000), 'short') }) : '');
 }
@@ -401,7 +401,7 @@ function Status() {
 function packageOfApp(a) {
   if (!ready()) return null;
   const want = new Set([a.desktopId, `${a.desktopId}.desktop`]);
-  return lord.pkg.installed({}).find((p) => p.app && want.has(p.app.id))?.name || null;
+  return insane.pkg.installed({}).find((p) => p.app && want.has(p.app.id))?.name || null;
 }
 
 export const debian = {

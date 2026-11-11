@@ -1,7 +1,7 @@
 /* proc_admin.h — the root helper's process actions for the Monitor (administrators only; see
  * proc_admin.c and docs/MONITOR.md, "Process actions"). */
-#ifndef LORD_PROC_ADMIN_H
-#define LORD_PROC_ADMIN_H
+#ifndef INSANE_PROC_ADMIN_H
+#define INSANE_PROC_ADMIN_H
 
 #include "../admin.h"
 

@@ -2,7 +2,7 @@ Insane OS is free and will stay free. Donations help the iPERFEX group keep buil
 
 ## A donation is voluntary
 
-Donating is entirely optional. Everything on lordos.org and in Insane OS is available whether you donate or not.
+Donating is entirely optional. Everything on insaneos.org and in Insane OS is available whether you donate or not.
 
 ## Not a purchase
 
@@ -13,7 +13,7 @@ A donation is a gift, not a payment for goods or services. In exchange for it yo
 Donations are processed entirely by third parties:
 
 - **PayPal** (to `paypal@iperfex.com`), under [PayPal's terms](https://www.paypal.com/legalhub/home) and privacy statement;
-- **Mercado Pago** (`link.mercadopago.com.ar/lordos`), under [Mercado Pago's terms](https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194);
+- **Mercado Pago** (`link.mercadopago.com.ar/insaneos`), under [Mercado Pago's terms](https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194);
 - **Binance**, when it becomes available, under Binance's terms.
 
 We never see or store your card or bank details. The processor may charge fees, apply currency conversion, or refuse or reverse a payment under its own rules.

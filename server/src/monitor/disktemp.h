@@ -2,10 +2,10 @@
  * docs/MONITOR.md, "Disk temperature and health").
  *
  * NVMe (also an M.2 drive on a Raspberry Pi 5 HAT) has a sensor from the nvme driver itself; SATA
- * disks get one from the drivetemp module (loaded at boot by the lordos package). microSD/eMMC cards,
+ * disks get one from the drivetemp module (loaded at boot by the insaneos package). microSD/eMMC cards,
  * virtual disks and anything else have none: the caller shows "No sensor", never a made-up value. */
-#ifndef LORD_DISKTEMP_H
-#define LORD_DISKTEMP_H
+#ifndef INSANE_DISKTEMP_H
+#define INSANE_DISKTEMP_H
 
 #include <limits.h>
 #include <stddef.h>

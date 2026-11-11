@@ -18,7 +18,7 @@ static const char *user(void) {
     static char name[64];
     if (!name[0]) {
         struct passwd *pw = getpwuid(getuid());
-        snprintf(name, sizeof name, "%s", pw ? pw->pw_name : "lord");
+        snprintf(name, sizeof name, "%s", pw ? pw->pw_name : "insane");
     }
     return name;
 }

@@ -69,6 +69,6 @@
   "type.other": "altro",
   "type.work": "lavoro",
   "unavailable": "I contatti non sono disponibili",
-  "unavailableHint": "Il servizio di posta e calendario (lord-maild) non è in esecuzione o non è installato.",
+  "unavailableHint": "Il servizio di posta e calendario (insane-maild) non è in esecuzione o non è installato.",
   "untitledGroup": "Gruppo senza nome"
 }

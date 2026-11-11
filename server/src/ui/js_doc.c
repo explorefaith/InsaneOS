@@ -1,7 +1,7 @@
-/* js_doc.c — lord.doc: PDF, archives, fonts and images through the confined lord-doc helper
+/* js_doc.c — insane.doc: PDF, archives, fonts and images through the confined insane-doc helper
  * (server/src/doc, see docs/DOCUMENTS.md). Here we only validate paths and arguments and open
- * the files; neither Poppler nor libarchive is loaded into lord-server. Everything is asynchronous: each
- * function returns ids and the results arrive with lord.doc.poll().
+ * the files; neither Poppler nor libarchive is loaded into insane-server. Everything is asynchronous: each
+ * function returns ids and the results arrive with insane.doc.poll().
  *
  *   available()                              is the helper there?
  *   openPdf(path) / openBlob(blob)           → sid (session with the PDF; then request(sid, 'open'))
@@ -444,15 +444,15 @@ static const JSCFunctionListEntry doc_funcs[] = {
     JS_CFUNC_DEF("stats", 0, f_stats),
 };
 
-void js_doc_register(JSContext *c, JSValue lord) {
+void js_doc_register(JSContext *c, JSValue insane) {
     /* the helper reads Insane OS's fonts for Quick Preview and the samples */
     const char *assets = js_sys_assets();
-    if (assets && !getenv("LORD_DOC_FONTS")) {
+    if (assets && !getenv("INSANE_DOC_FONTS")) {
         char p[PATH_MAX];
         snprintf(p, sizeof p, "%s/fonts", assets);
-        setenv("LORD_DOC_FONTS", p, 0);
+        setenv("INSANE_DOC_FONTS", p, 0);
     }
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, doc_funcs, sizeof doc_funcs / sizeof doc_funcs[0]);
-    JS_SetPropertyStr(c, lord, "doc", o);
+    JS_SetPropertyStr(c, insane, "doc", o);
 }

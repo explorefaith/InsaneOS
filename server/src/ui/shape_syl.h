@@ -1,7 +1,7 @@
 /* shape_syl.h — common pieces of the syllable-based shapers (Khmer, Myanmar, USE): syllable
  * grammars, HarfBuzz-style normalization and run assembly. See shape_syl.c. */
-#ifndef LORD_SHAPE_SYL_H
-#define LORD_SHAPE_SYL_H
+#ifndef INSANE_SHAPE_SYL_H
+#define INSANE_SHAPE_SYL_H
 
 #include <stdint.h>
 

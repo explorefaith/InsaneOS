@@ -1,9 +1,9 @@
-// ClaudeBar.jsx — connecting Claude Code to the Terminal's footer (claude.js): it puts lord-claude-status in
+// ClaudeBar.jsx — connecting Claude Code to the Terminal's footer (claude.js): it puts insane-claude-status in
 // front of the user's status line command in ~/.claude/settings.json, after asking, so the footer gets the
 // context and the plan's limits; what Claude Code's own status line shows doesn't change. The file is changed
-// only when it reads as JSON, everything else in it is kept, and the previous one is kept as settings.json.lordos-backup.
+// only when it reads as JSON, everything else in it is kept, and the previous one is kept as settings.json.insaneos-backup.
 // When it is already connected, the same bar offers to disconnect (the original command back).
-import { View, Text, useTheme, t as T } from '@lordos/sdk';
+import { View, Text, useTheme, t as T } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { patchMeta, toast } from './state.js';
 import { settingsFile, parseSettings, isConnected, connectSettings, disconnectSettings } from './claude.js';
@@ -11,11 +11,11 @@ import { settingsFile, parseSettings, isConnected, connectSettings, disconnectSe
 export function ClaudeBar({ sid, wid }) {
   const th = useTheme();
   const [s, setS] = useState(undefined);              // the settings, null when they can't be read as JSON
-  const home = lord.fs.home();
+  const home = insane.fs.home();
   const file = settingsFile(home);
   useEffect(() => {
     let text = '';
-    try { text = lord.fs.read(file); } catch (e) { text = ''; }
+    try { text = insane.fs.read(file); } catch (e) { text = ''; }
     setS({ text, obj: parseSettings(text) });
   }, []);
   const close = () => patchMeta(sid, { claudeConnect: false });
@@ -24,11 +24,11 @@ export function ClaudeBar({ sid, wid }) {
   const apply = () => {
     const next = connected ? disconnectSettings(s.obj) : connectSettings(s.obj);
     try {
-      lord.fs.mkdir(`${home}/.claude`);
+      insane.fs.mkdir(`${home}/.claude`);
     } catch (e) { /* already there */ }
     try {
-      if (s.text) lord.fs.write(`${file}.lordos-backup`, s.text);
-      lord.fs.write(file, `${JSON.stringify(next, null, 2)}\n`);
+      if (s.text) insane.fs.write(`${file}.insaneos-backup`, s.text);
+      insane.fs.write(file, `${JSON.stringify(next, null, 2)}\n`);
       toast(wid, T(connected ? 'terminal.claude.disconnected' : 'terminal.claude.connected'));
     } catch (e) { toast(wid, T('terminal.claude.writeFailed')); }
     close();

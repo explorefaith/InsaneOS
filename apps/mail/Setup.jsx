@@ -1,7 +1,7 @@
 // Setup.jsx — adding and managing accounts: the setup sheet (our provider table, app
 // passwords, manual servers, CalDAV/CardDAV), the certificate warning, the password prompt and
 // the accounts panel. Passwords go to the system keyring (Passwords), never to a file.
-import { View, Text, useTheme, useStore, Button, TextInput, Segmented, Toggle, ScrollView, t, mailAccounts, mailStatus, mailConfig, autoconfig, OAUTH_PROVIDERS, DAV_PRESETS, davPreset } from '@lordos/sdk';
+import { View, Text, useTheme, useStore, Button, TextInput, Segmented, Toggle, ScrollView, t, mailAccounts, mailStatus, mailConfig, autoconfig, OAUTH_PROVIDERS, DAV_PRESETS, davPreset } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 
 export function Sheet({ children, onClose, width = 460 }) {
@@ -347,7 +347,7 @@ export function AccountsPanel({ onClose, onAdd, onPassword, initial = null, conf
   useEffect(() => { setSig(a?.signature || ''); }, [sel]);
   const refresh = () => setList(mailAccounts.list());
   const cfg = mailConfig.get();
-  // Removing: the account leaves the file, its password leaves the keyring, and lord-maild deletes
+  // Removing: the account leaves the file, its password leaves the keyring, and insane-maild deletes
   // what it had downloaded (mail, calendars, contacts). Nothing is deleted on the server.
   const remove = async () => {
     setBusy(true);

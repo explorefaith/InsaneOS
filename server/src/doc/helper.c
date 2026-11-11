@@ -1,9 +1,9 @@
-/* helper.c — lord-doc: lord-server's document helper (see proto.h and docs/DOCUMENTS.md).
+/* helper.c — insane-doc: insane-server's document helper (see proto.h and docs/DOCUMENTS.md).
  *
- * lord-server (doc.c) launches it from a fixed path (next to its own binary), with no arguments and
+ * insane-server (doc.c) launches it from a fixed path (next to its own binary), with no arguments and
  * with the channel on fd 3. It runs as the user, and before reading a single byte of a document:
- *   - it dies if lord-server dies (PR_SET_PDEATHSIG) and leaves no core;
- *   - memory limit (RLIMIT_AS) and its own cgroup (lordos-doc.scope) if possible;
+ *   - it dies if insane-server dies (PR_SET_PDEATHSIG) and leaves no core;
+ *   - memory limit (RLIMIT_AS) and its own cgroup (insaneos-doc.scope) if possible;
  *   - it receives the fds it will use (DQ_INIT_FD) and locks itself down (DQ_INIT_GO) with the common module
  *     sandbox_apply_helper (server/src/sec/sandbox.c):
  *       Landlock: read-only access to /usr and the fonts; write access only below the destination
@@ -41,7 +41,7 @@
 Slot hslots[DOC_INIT_FDS];
 int hnslots;
 static const char *mode = "";
-#ifdef LORD_HELPER_TTS
+#ifdef INSANE_HELPER_TTS
 static int tts_gpu;                     /* {"gpu":true} in DQ_INIT_GO: the render node in the sandbox */
 #endif
 
@@ -86,7 +86,7 @@ void reply_image_fd(uint32_t id, int fd, int w, int h, const char *extra) {
 }
 
 void reply_image(uint32_t id, const uint32_t *px, int w, int h, const char *extra) {
-    int fd = doc_memfd_new("lord-doc-img", (size_t)w * h * 4);
+    int fd = doc_memfd_new("insane-doc-img", (size_t)w * h * 4);
     if (fd < 0) { reply_err(id, "memory", ""); return; }
     size_t len = (size_t)w * h * 4, off = 0;
     const char *p = (const char *)px;
@@ -130,9 +130,9 @@ void invert_lightness(uint32_t *px, size_t n) {
 static void lockdown(void) {
     static const char *ro[20];
     int n = 0;
-    ro[n++] = "/usr";                      /* libraries, poppler-data, fonts, locales; lord-ocr: the tessdata */
-#ifdef LORD_HELPER_TTS
-    /* lord-tts on the GPU: the Vulkan loader and Mesa find the card in /sys and open its render node themselves */
+    ro[n++] = "/usr";                      /* libraries, poppler-data, fonts, locales; insane-ocr: the tessdata */
+#ifdef INSANE_HELPER_TTS
+    /* insane-tts on the GPU: the Vulkan loader and Mesa find the card in /sys and open its render node themselves */
     static char renders[4][32];
     static const char *devs[5];
     int nd = 0;
@@ -167,7 +167,7 @@ static void lockdown(void) {
         }
     }
 #endif
-#if !defined(LORD_HELPER_OCR) && !defined(LORD_HELPER_TTS)
+#if !defined(INSANE_HELPER_OCR) && !defined(INSANE_HELPER_TTS)
     static char extra[3][1024];
     ro[n++] = "/etc/fonts";
     ro[n++] = "/var/cache/fontconfig";
@@ -176,14 +176,14 @@ static void lockdown(void) {
         static const char *const rel[] = { ".local/share/fonts", ".fonts", ".cache/fontconfig" };
         for (int i = 0; i < 3; i++) { snprintf(extra[i], sizeof extra[i], "%s/%s", home, rel[i]); ro[n++] = extra[i]; }
     }
-    const char *assets = getenv("LORD_DOC_FONTS");
+    const char *assets = getenv("INSANE_DOC_FONTS");
     if (assets && assets[0] == '/') ro[n++] = assets;
 #endif
     ro[n] = NULL;
     static const int sys[] = {
         SYS_mkdirat, SYS_symlinkat, SYS_linkat, SYS_unlinkat, SYS_fchmod, SYS_utimensat, SYS_fstatfs, SYS_eventfd2,
         SYS_pipe2, SYS_getcwd, SYS_umask, SYS_fadvise64, SYS_memfd_create, SYS_ftruncate, SYS_readlinkat,
-#ifdef LORD_HELPER_TTS
+#ifdef INSANE_HELPER_TTS
         /* audio.cpp unpacks a model's files with std::filesystem (in its own cache folder, the only one it can write) */
         SYS_renameat, SYS_renameat2, SYS_sched_getaffinity,
 #ifdef SYS_mkdir
@@ -201,18 +201,18 @@ static void lockdown(void) {
         else if (!strcmp(hslots[i].role, "ro")) rofd[nro++] = hslots[i].fd;
     }
     rofd[nro] = rwfd[nrw] = -1;
-#ifdef LORD_HELPER_OCR
-    SandboxHelperCfg cfg = { .name = "lordos-ocr", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024,
-#elif defined(LORD_HELPER_TTS)
-    SandboxHelperCfg cfg = { .name = "lordos-tts", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 4096,
+#ifdef INSANE_HELPER_OCR
+    SandboxHelperCfg cfg = { .name = "insaneos-ocr", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024,
+#elif defined(INSANE_HELPER_TTS)
+    SandboxHelperCfg cfg = { .name = "insaneos-tts", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 4096,
                              .allow_ioctl_classes = tts_gpu ? SANDBOX_IOCTL_DRM : 0, .dev_files = devs,
                              .list_dirs = tts_gpu ? (const char *const[]){ "/dev/dri", NULL } : NULL,
 #else
-    SandboxHelperCfg cfg = { .name = "lordos-doc", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024,
+    SandboxHelperCfg cfg = { .name = "insaneos-doc", .ro_paths = ro, .extra_syscalls = sys, .mem_max_mb = 1024,
 #endif
                              .ro_dir_fds = rofd, .rw_dir_fds = rwfd };
     int mask = sandbox_apply_helper(&cfg);
-    if (getenv("LORD_DOC_DEBUG")) fprintf(stderr, "lord-doc[%d]: modo=%s caja=%#x fds=%d\n", getpid(), mode, (unsigned)mask, hnslots);
+    if (getenv("INSANE_DOC_DEBUG")) fprintf(stderr, "insane-doc[%d]: modo=%s caja=%#x fds=%d\n", getpid(), mode, (unsigned)mask, hnslots);
 }
 
 /* ---- startup and loop ---- */
@@ -235,9 +235,9 @@ static void selftest(uint32_t id) {
     fd = open("/etc/shadow", O_RDONLY);
     jb_printf(&b, ",\"shadow\":%d", fd >= 0 ? 0 : errno);
     if (fd >= 0) close(fd);
-    fd = open("/tmp/lord-doc-selftest", O_WRONLY | O_CREAT, 0600);
+    fd = open("/tmp/insane-doc-selftest", O_WRONLY | O_CREAT, 0600);
     jb_printf(&b, ",\"write_tmp\":%d", fd >= 0 ? 0 : errno);
-    if (fd >= 0) { close(fd); unlink("/tmp/lord-doc-selftest"); }
+    if (fd >= 0) { close(fd); unlink("/tmp/insane-doc-selftest"); }
     int s4 = socket(AF_INET, SOCK_STREAM, 0);
     jb_printf(&b, ",\"inet\":%d", s4 >= 0 ? 0 : errno);
     if (s4 >= 0) close(s4);
@@ -257,8 +257,8 @@ static void selftest(uint32_t id) {
     fd = open("/usr/share/fonts", O_RDONLY | O_DIRECTORY);
     jb_printf(&b, ",\"fonts_ok\":%d", fd >= 0 ? 0 : errno);
     if (fd >= 0) close(fd);
-#ifdef LORD_HELPER_TTS
-    /* on the GPU: the render node opens, the display's node (lord-server's) doesn't, nor writing the models */
+#ifdef INSANE_HELPER_TTS
+    /* on the GPU: the render node opens, the display's node (insane-server's) doesn't, nor writing the models */
     fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
     jb_printf(&b, ",\"card0\":%d", fd >= 0 ? 0 : errno);
     if (fd >= 0) close(fd);
@@ -266,9 +266,9 @@ static void selftest(uint32_t id) {
     jb_printf(&b, ",\"render_ok\":%d", fd >= 0 ? 0 : errno);
     if (fd >= 0) close(fd);
     for (int i = 0; i < hnslots; i++) if (!strcmp(hslots[i].role, "ro")) {
-        int w = openat(hslots[i].fd, "lord-tts-selftest", O_WRONLY | O_CREAT | O_CLOEXEC, 0600);
+        int w = openat(hslots[i].fd, "insane-tts-selftest", O_WRONLY | O_CREAT | O_CLOEXEC, 0600);
         jb_printf(&b, ",\"write_models\":%d", w >= 0 ? 0 : errno);
-        if (w >= 0) { close(w); unlinkat(hslots[i].fd, "lord-tts-selftest", 0); }
+        if (w >= 0) { close(w); unlinkat(hslots[i].fd, "insane-tts-selftest", 0); }
         break;
     }
 #endif
@@ -288,11 +288,11 @@ static int handle(const DocMsg *m) {
     static const JVal empty = { .type = J_OBJ };
     if (!args) args = &empty;
     int done = 0;
-#ifdef LORD_HELPER_OCR
-    /* lord-ocr: the same loop and lockdown with Tesseract only (h_ocr.c) */
+#ifdef INSANE_HELPER_OCR
+    /* insane-ocr: the same loop and lockdown with Tesseract only (h_ocr.c) */
     if (!strcmp(mode, "ocr")) done = ocr_handle(m, args);
-#elif defined(LORD_HELPER_TTS)
-    /* lord-tts: the same loop and lockdown with Pocket TTS only (h_tts.c) */
+#elif defined(INSANE_HELPER_TTS)
+    /* insane-tts: the same loop and lockdown with Pocket TTS only (h_tts.c) */
     if (!strcmp(mode, "tts")) done = tts_handle(m, args);
 #else
     if (!strcmp(mode, "pdf")) done = pdf_handle(m, args);
@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
     prctl(PR_SET_DUMPABLE, 0);
     struct rlimit core = { 0, 0 };
     setrlimit(RLIMIT_CORE, &core);
-#ifdef LORD_HELPER_TTS
+#ifdef INSANE_HELPER_TTS
     /* address space, not memory: the model, ggml's thread pool and the Vulkan driver reserve far more than they use
      * (the memory itself is capped by the cgroup, mem_max_mb) */
     struct rlimit as = { (rlim_t)16384 << 20, (rlim_t)16384 << 20 };
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
 #endif
     setrlimit(RLIMIT_AS, &as);
     struct stat st;
-    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "lord-doc: lo lanza lord-server\n"); return 2; }
+    if (fstat(SOCK, &st) || !S_ISSOCK(st.st_mode)) { fprintf(stderr, "insane-doc: lo lanza insane-server\n"); return 2; }
     syscall(SYS_close_range, SOCK + 1, ~0U, 0);
     signal(SIGPIPE, SIG_IGN);
     /* archive names in UTF-8 (libarchive converts according to the locale) */
@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
             if (m.json && !json_parse(m.json, m.len, &d, NULL, 0)) {
                 const char *s = json_str(d.root, "mode");
                 if (s) snprintf(mbuf, sizeof mbuf, "%s", s);
-#ifdef LORD_HELPER_TTS
+#ifdef INSANE_HELPER_TTS
                 const JVal *g = json_get(d.root, "gpu");
                 tts_gpu = g && g->type == J_BOOL && g->num != 0;
 #endif

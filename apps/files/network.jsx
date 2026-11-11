@@ -1,7 +1,7 @@
-// network.jsx — Files → Network: what is on the local network, found by itself. lord.lan (sdk/lan.js)
+// network.jsx — Files → Network: what is on the local network, found by itself. insane.lan (sdk/lan.js)
 // does one bounded pass while this page is open; a share is mounted by the closed share-mount
 // action and then browsed like any disk. See docs/FILES.md, "Network".
-import { View, FormFields, Text, Button, ScrollView, TextInput, Toggle, useTheme, lan, spacing, typeScale, t as tr, CloudGlyph } from '@lordos/sdk';
+import { View, FormFields, Text, Button, ScrollView, TextInput, Toggle, useTheme, lan, spacing, typeScale, t as tr, CloudGlyph } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { FolderGlyph, DriveGlyph } from './glyphs.jsx';
 import { WAY_ORDER as ORDER, isShareFs, foundHosts, shareKind } from './netplaces.js';
@@ -45,7 +45,7 @@ function kinds(h) {
 }
 
 // Connecting: who connects, then the folders that server shows them, so nobody has to know a share's name. It's only
-// asked for when the server can't list them. The password goes to lord-lan for the list, to the action for the mount
+// asked for when the server can't list them. The password goes to insane-lan for the list, to the action for the mount
 // and, only if asked, to the keyring.
 export function ConnectSheet({ ask, onClose, onMounted }) {
   const t = useTheme();
@@ -217,7 +217,7 @@ export function RemoteSheet({ ask, onClose, onMounted, onStore, onTerminal }) {
   );
 }
 
-// The local network as a place like any folder: one entry per computer, in the same views (index.jsx). lord.lan runs while
+// The local network as a place like any folder: one entry per computer, in the same views (index.jsx). insane.lan runs while
 // the place is open and stops when it closes.
 export function useLan(active, setMsg) {
   const [st, setSt] = useState(() => (lan.available() ? lan.poll() : { hosts: [] }));

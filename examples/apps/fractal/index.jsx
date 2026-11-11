@@ -1,6 +1,6 @@
 // Fractal — installable sample app (.lpk): the Mandelbrot set computed by a WebAssembly
 // module (src/mandel.c → assets/mandel.wasm) and drawn with <Image pixels>.
-import { View, Text, Image, Button, useTheme, t, loadWasm, formatNumber } from '@lordos/sdk';
+import { View, Text, Image, Button, useTheme, t, loadWasm, formatNumber } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const W = 640, H = 420, MAX = 256;
@@ -32,7 +32,7 @@ export default function Fractal() {
   }, [view]);
 
   const zoom = (e, f) => {
-    const [lx, ly] = lord.getLayout(img.current.id);    // position inside the image
+    const [lx, ly] = insane.getLayout(img.current.id);    // position inside the image
     const x = e.x - lx, y = e.y - ly;
     setView((v) => ({ cx: v.cx + (x - W / 2) * v.scale, cy: v.cy + (y - H / 2) * v.scale, scale: v.scale * f }));
   };
@@ -45,7 +45,7 @@ export default function Fractal() {
     if (e.phase !== 'update' || !(e.scale > 0)) return;
     const f = pinchK.current / e.scale;
     pinchK.current = e.scale;
-    const [lx, ly] = lord.getLayout(img.current.id);
+    const [lx, ly] = insane.getLayout(img.current.id);
     const x = e.x - lx, y = e.y - ly;
     setView((v) => ({ cx: v.cx + (x - W / 2) * v.scale * (1 - f), cy: v.cy + (y - H / 2) * v.scale * (1 - f), scale: v.scale * f }));
   };

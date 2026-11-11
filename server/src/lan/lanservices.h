@@ -1,7 +1,7 @@
 /* lanservices.h — the DNS-SD service types Files → Network asks for, and what each one is called
  * in the interface (a key of files.net.kind.*). */
-#ifndef LORD_LAN_SERVICES_H
-#define LORD_LAN_SERVICES_H
+#ifndef INSANE_LAN_SERVICES_H
+#define INSANE_LAN_SERVICES_H
 
 static const struct { const char *type, *kind; } lan_services[] = {
     { "_smb._tcp", "smb" }, { "_nfs._tcp", "nfs" }, { "_afpovertcp._tcp", "afp" }, { "_webdav._tcp", "webdav" },

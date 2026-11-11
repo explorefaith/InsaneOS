@@ -1,18 +1,18 @@
 name: Hardware report
-description: Share what LordOS found on your computer (made with System Information → Report → Share on GitHub).
+description: Share what InsaneOS found on your computer (made with System Information → Report → Share on GitHub).
 title: "Hardware report: "
 labels: ["hardware-report"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for sharing how LordOS runs on your hardware. **System Information → Report → Share on GitHub** fills in this form for you and saves the report file to your Documents folder.
+        Thanks for sharing how InsaneOS runs on your hardware. **System Information → Report → Share on GitHub** fills in this form for you and saves the report file to your Documents folder.
 
-        The report holds the hardware, the drivers, what works and, if you ran it, LordBench's numbers. It never holds serial numbers, addresses, user or computer names, network names or your files. Reports and this issue are public.
+        The report holds the hardware, the drivers, what works and, if you ran it, InsaneBench's numbers. It never holds serial numbers, addresses, user or computer names, network names or your files. Reports and this issue are public.
   - type: input
-    id: lordos
+    id: insaneos
     attributes:
-      label: LordOS version
+      label: InsaneOS version
       description: Filled in by System Information.
       placeholder: 0.8.7-beta
     validations:
@@ -29,7 +29,7 @@ body:
     id: report
     attributes:
       label: Report file
-      description: Drag the `lordos-hwreport-….json` file from your Documents folder here (don't paste its text, and don't edit it). A check runs automatically and answers in a comment.
+      description: Drag the `insaneos-hwreport-….json` file from your Documents folder here (don't paste its text, and don't edit it). A check runs automatically and answers in a comment.
       placeholder: Drop the .json file here
     validations:
       required: true

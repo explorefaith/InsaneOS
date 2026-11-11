@@ -1,6 +1,6 @@
 {
   "title": "Cloud",
-  "unavailable": "Cloud isn't available in this session: its engine (lordos-rclone) isn't installed or isn't running.",
+  "unavailable": "Cloud isn't available in this session: its engine (insaneos-rclone) isn't installed or isn't running.",
   "addAccount": "Add Account…",
   "accounts": "Accounts",
   "allAccounts": "All accounts",

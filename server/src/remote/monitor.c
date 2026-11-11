@@ -1,9 +1,9 @@
-/* monitor.c — the monitor in lord-sessiond: lends the screen to ONE session at a time.
+/* monitor.c — the monitor in insane-sessiond: lends the screen to ONE session at a time.
  *
- * Like logind with "session devices": lord-sessiond (root) opens the video card and the
+ * Like logind with "session devices": insane-sessiond (root) opens the video card and the
  * keyboard and mouse, and passes the fds to the session that has to be shown (RP_DISPLAY over the
  * session socket, with SCM_RIGHTS). The session draws straight on the card, like a
- * regular lord-server: GPU composition if available (Mesa), direct full-screen scanout
+ * regular insane-server: GPU composition if available (Mesa), direct full-screen scanout
  * and hardware cursor. To switch sessions:
  *   1. the one leaving is notified (RP_UNDISPLAY);
  *   2. its input devices are revoked (EVIOCREVOKE: its fds stop working);
@@ -60,7 +60,7 @@ static int useful(int fd) {
 }
 
 /* Nothing can be shown. The caller reports it on tty1 (sessiond.c tell_no_display); the file makes the
- * boot splash end for real instead of keeping its last picture over that message (lordos-splash). */
+ * boot splash end for real instead of keeping its last picture over that message (insaneos-splash). */
 static int no_display(void) {
     mkdir(SD_RUN_DIR, 0755);
     int fd = open(SD_NO_DISPLAY, O_WRONLY | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0644);
@@ -70,7 +70,7 @@ static int no_display(void) {
 
 int sd_mon_open(void) {
     /* On ARM boards the display driver can show up well after boot (on a Raspberry Pi 5's first
-     * boot vc4 may come after lordos.service has started): wait up to 30 s for a card with KMS
+     * boot vc4 may come after insaneos.service has started): wait up to 30 s for a card with KMS
      * before giving up, instead of falling back to the text console for good. */
     int tries = 0, none;
     unlink(SD_NO_DISPLAY);
@@ -80,11 +80,11 @@ int sd_mon_open(void) {
         nanosleep(&ts, NULL);
         tries++;
     }
-    /* A card that opens but has no KMS (a render-only GPU) can't show anything either: lord-server
+    /* A card that opens but has no KMS (a render-only GPU) can't show anything either: insane-server
      * would fail on it, quietly, once per attempt, while this process and the unit look fine. */
     if (none) {
         sd_log("no usable display driver: no /dev/dri/card* with connectors and CRTCs after 30 s, the login screen will not start "
-               "(lspci -k shows the graphics driver; once it is fixed, restart lordos.service)");
+               "(lspci -k shows the graphics driver; once it is fixed, restart insaneos.service)");
         return no_display();
     }
     sd_log("display: %s%s", card, tries ? " (after waiting)" : "");

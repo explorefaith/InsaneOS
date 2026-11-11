@@ -1,7 +1,7 @@
 /* bidi.h — Unicode bidirectional algorithm (UAX #9) for text that mixes
  * left-to-right scripts (Latin, CJK) with right-to-left ones (Arabic, Hebrew). See bidi.c. */
-#ifndef LORD_BIDI_H
-#define LORD_BIDI_H
+#ifndef INSANE_BIDI_H
+#define INSANE_BIDI_H
 
 #include <stdint.h>
 

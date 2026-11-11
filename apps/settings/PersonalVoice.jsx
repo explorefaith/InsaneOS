@@ -11,15 +11,15 @@
 //   name    the voice's name; the phrases joined into one WAV (silence trimmed, at most 30 s) → voices/<name>.wav
 //   done    try it; it is the voice in use for the language
 //
-// Recordings go to ~/.cache/lordos/voice (lord-media, the microphone permission) and are read back here; only the
-// joined WAV is kept, in ~/.local/share/lordos/voice/voices, never uploaded. lord-media never writes over a file, so
+// Recordings go to ~/.cache/insaneos/voice (insane-media, the microphone permission) and are read back here; only the
+// joined WAV is kept, in ~/.local/share/insaneos/voice/voices, never uploaded. insane-media never writes over a file, so
 // every take has its own name (takeName); once read, or let go, what it heard is wiped. Every way out of a recording
 // (done, too noisy, a silent microphone, Cancel, closing the sheet, an error) goes through release(): the microphone
 // is let go and the sheet is as it was, so trying again works as the first time did.
 import {
   View, Text, Button, Toggle, TextInput, Layer, useTheme, useLocale, useAppWindow, wm, media, usePlayer, spacing, typeScale, fs,
   addOwnVoice, ownVoiceName, tryVoice, parseWav, roomCheck, takeName, trimSilence, joinPhrases, phraseDone, errorText,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const PHRASES = 6;
@@ -29,7 +29,7 @@ const IDEAS = 3;
 const ROOM_MS = 3000;
 const PHRASE_MAX_MS = 15000;
 const MIN_CLIP_MS = 800;
-const CACHE = '.cache/lordos/voice';
+const CACHE = '.cache/insaneos/voice';
 const SILENT_MIC_MS = 4000;               // nothing from the microphone this long: it isn't working
 // violet (low) to light blue (high), as the player's wave (sdk/voiceplayer.jsx)
 const COLORS = ['#7c5cff', '#9159fa', '#a657f3', '#bb57ea', '#d058dd', '#e45ccc', '#f062b8', '#f46c9a', '#f5807c', '#f59a5f', '#e9b64a',
@@ -51,7 +51,7 @@ function wipe(file) {
   try { fs.stat(file); fs.write(file, ''); } catch (e) { /* never written */ }
 }
 
-// let a recording go: lord-media finishes the file it was writing ("done" or "closed" follows), then it's wiped
+// let a recording go: insane-media finishes the file it was writing ("done" or "closed" follows), then it's wiped
 const LET_GO_MS = 5000;
 function discard(id, file) {
   media.close(id);
@@ -94,7 +94,7 @@ export function PersonalVoiceSheet({ lang, onClose }) {
   const takes = useRef(0);
   const alive = useRef(true);               // the sheet is still open
   const home = fs.home();
-  useEffect(() => { for (const d of ['.cache', '.cache/lordos', CACHE]) { try { fs.mkdir(d); } catch (e) { /* there */ } } }, []);
+  useEffect(() => { for (const d of ['.cache', '.cache/insaneos', CACHE]) { try { fs.mkdir(d); } catch (e) { /* there */ } } }, []);
 
   // the recording in progress, if any, is let go (the microphone with it) and forgotten
   const release = () => {

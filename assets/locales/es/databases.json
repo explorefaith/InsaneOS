@@ -5,7 +5,7 @@
   "quickHint": "Conecta una vez; queda en Recientes, no en los favoritos",
   "favorites": "FAVORITOS",
   "recent": "RECIENTES",
-  "unavailable": "El ayudante de bases de datos (lord-sql) no está instalado en este sistema, así que Bases de datos todavía no puede conectarse. Los favoritos y la importación siguen funcionando.",
+  "unavailable": "El ayudante de bases de datos (insane-sql) no está instalado en este sistema, así que Bases de datos todavía no puede conectarse. Los favoritos y la importación siguen funcionando.",
   "later": "Llega en una versión futura de Bases de datos.",
   "loading": "Cargando…",
   "cancel": "Cancelar",
@@ -432,7 +432,7 @@
     "one": "{count} entrada desde la conexión a las {time} · el registro queda en memoria y se borra al desconectar",
     "other": "{count} entradas desde la conexión a las {time} · el registro queda en memoria y se borra al desconectar"
   },
-  "err.unavailable": "El ayudante de bases de datos (lord-sql) no está instalado o no puede iniciar.",
+  "err.unavailable": "El ayudante de bases de datos (insane-sql) no está instalado o no puede iniciar.",
   "err.notfound": "Ese favorito ya no está guardado. Guardalo de nuevo y conectá.",
   "err.dns": "No se encontró el nombre del servidor. {message}",
   "err.connect": "El servidor no aceptó la conexión: revisá el host, el puerto y la red. {message}",

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { keyringTrouble, askUnlock, authAfterStatus } from '../../sdk/mailauthmodel.js';
 
-// the SDK's short keyring codes (sdk/vault.js KR_SHORT, and lord-vault's own on the session side)
+// the SDK's short keyring codes (sdk/vault.js KR_SHORT, and insane-vault's own on the session side)
 assert.equal(keyringTrouble(undefined), null);
 assert.equal(keyringTrouble(''), null);
 assert.equal(keyringTrouble('locked'), 'locked');           // automatic login: it exists, the prompt opens it

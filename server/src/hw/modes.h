@@ -1,8 +1,8 @@
 /* modes.h — KMS mode helpers for Settings → Displays: exact refresh rate, picking a mode by
  * resolution and refresh, and the list of resolutions a connector offers. Pure functions over
  * struct drm_mode_modeinfo (kernel uapi), unit-tested in tests/modes_test.c. */
-#ifndef LORD_HW_MODES_H
-#define LORD_HW_MODES_H
+#ifndef INSANE_HW_MODES_H
+#define INSANE_HW_MODES_H
 
 #include <stdint.h>
 #include <drm/drm.h>

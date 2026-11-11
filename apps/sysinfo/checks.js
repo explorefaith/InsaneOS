@@ -4,13 +4,13 @@
 //   configured  the mechanism is present (a kernel feature, a service running, an owner);
 //   effective   something was tried and gave the right answer;
 //   measured    a number, shown as it is (no pass or fail in this version).
-// Part 1 (0.8.5) has only what lord-server can see itself; the probe app that tries what must fail
+// Part 1 (0.8.5) has only what insane-server can see itself; the probe app that tries what must fail
 // (sandbox, firewall) is part 2. The thresholds are constants here: this file is bundled into the
 // theme, which is signed with the release key (code-manifest.json), so they are signed too.
 //
 // evaluate(ctx) → rows { id, paper, level, state, note, vars }, state 'pass' | 'warn' | 'fail' |
-// 'info' | 'unknown'. ctx: { report: lord.sysinfo.report(), facts: lord.sysinfo.facts(),
-// code: codeStatus(), remote: remote.status() or null, stats: lord.stats() or null }. Pure: tested
+// 'info' | 'unknown'. ctx: { report: insane.sysinfo.report(), facts: insane.sysinfo.facts(),
+// code: codeStatus(), remote: remote.status() or null, stats: insane.stats() or null }. Pure: tested
 // by server/tests/sysinfo_model_test.mjs.
 
 export const LIMITS = {
@@ -25,7 +25,7 @@ export function evaluate(ctx) {
   const r = c.report || {}, f = c.facts || {}, sw = r.software || {}, s = r.session || {};
   const out = [];
 
-  // lord-server runs as the user, never as root (§2.2)
+  // insane-server runs as the user, never as root (§2.2)
   if (f.uid == null || f.uid < 0) out.push(row('serverUser', '§2.2', 'configured', 'unknown'));
   else out.push(row('serverUser', '§2.2', 'configured', f.uid > 0 && f.euid > 0 ? 'pass' : 'fail', f.uid > 0 && f.euid > 0 ? 'serverUserOk' : 'serverUserRoot', { uid: f.uid }));
 
@@ -36,11 +36,11 @@ export function evaluate(ctx) {
   else if (ll > 0) out.push(row('landlock', '§6.4', 'configured', 'warn', 'landlockOld', { abi: ll, min: LIMITS.landlockAbi }));
   else out.push(row('landlock', '§6.4', 'configured', 'fail', 'landlockNone'));
 
-  // the per-app firewall (§6.6): lord-netperm running, and the kernel pieces its programs need
+  // the per-app firewall (§6.6): insane-netperm running, and the kernel pieces its programs need
   const kc = sw.kernelConfig || {};
   const services = sw.services || {};
-  if (services['lord-netperm'] == null) out.push(row('netperm', '§6.6', 'configured', 'unknown'));
-  else if (!services['lord-netperm']) out.push(row('netperm', '§6.6', 'configured', 'fail', 'netpermOff'));
+  if (services['insane-netperm'] == null) out.push(row('netperm', '§6.6', 'configured', 'unknown'));
+  else if (!services['insane-netperm']) out.push(row('netperm', '§6.6', 'configured', 'fail', 'netpermOff'));
   else if (kc.CONFIG_CGROUP_BPF === 'n' || !sw.bpfLsm) out.push(row('netperm', '§6.6', 'configured', 'warn', !sw.bpfLsm ? 'netpermNoLsm' : 'netpermNoCgroupBpf'));
   else out.push(row('netperm', '§6.6', 'configured', 'pass', 'netpermOk'));
 
@@ -59,9 +59,9 @@ export function evaluate(ctx) {
   else out.push(row('remoteClosed', '§11.4', 'effective', listening ? 'fail' : 'pass', listening ? 'remoteOffListening' : 'remoteOffClosed', { port: LIMITS.remotePort }));
 
   // the session's cgroup tree belongs to root (§11.4): an app can't leave its scope
-  // (only Insane OS's own tree counts: a lord-server started from a terminal sits in that terminal's cgroup)
+  // (only Insane OS's own tree counts: a insane-server started from a terminal sits in that terminal's cgroup)
   if (f.leafRoot == null || f.parentRoot == null) out.push(row('cgroups', '§11.4', 'configured', 'unknown'));
-  else if (!/\/lordos-session-\d+\/server$/.test(f.cgroup || '')) out.push(row('cgroups', '§11.4', 'configured', 'info', 'cgroupsNotSession'));
+  else if (!/\/insaneos-session-\d+\/server$/.test(f.cgroup || '')) out.push(row('cgroups', '§11.4', 'configured', 'info', 'cgroupsNotSession'));
   else out.push(row('cgroups', '§11.4', 'configured', f.leafRoot && f.parentRoot ? 'pass' : 'fail',
     f.leafRoot && f.parentRoot ? 'cgroupsOk' : 'cgroupsUser', { scopes: f.appScopes || 0 }));
 
@@ -78,7 +78,7 @@ export function evaluate(ctx) {
 }
 
 // ---- part 2: the Sandbox Probe (apps/sysprobe, server/src/app/probe.c) ----
-// result: lord.sysinfo.probe() → { probe: { v, sandbox, tries: [{ id, denied, errno }] },
+// result: insane.sysinfo.probe() → { probe: { v, sandbox, tries: [{ id, denied, errno }] },
 //   proc: { noNewPrivs, seccomp, capEff, cgroup, memoryMax }, at }.
 
 const KERNEL = ['fsHome', 'fsSystem', 'cgroupEscape', 'netInet', 'netUnix', 'ptrace', 'userns', 'mount', 'exec'];
@@ -111,7 +111,7 @@ export function evaluateProbe(result) {
   out.push(row('broker', '§6.5', 'effective', b.length ? 'fail' : 'pass', b.length ? 'sandboxLeaks' : 'brokerOk', b.length ? { list: b.join(', ') } : { count: BROKER.length }));
 
   // its own scope with a memory cap (§6.4: memory.max 512 MB)
-  const scoped = /\/app-lordos-lpk-sysprobe\.scope$/.test(proc.cgroup || '');
+  const scoped = /\/app-insaneos-lpk-sysprobe\.scope$/.test(proc.cgroup || '');
   const mb = /^\d+$/.test(proc.memoryMax || '') ? Math.round(+proc.memoryMax / 1048576) : null;
   if (!proc.cgroup) out.push(row('appScope', '§6.4', 'configured', 'unknown'));
   else out.push(row('appScope', '§6.4', 'configured', scoped && mb ? 'pass' : 'warn', scoped ? (mb ? 'scopeOk' : 'scopeNoCap') : 'scopeMissing', { mb: mb || 0 }));
@@ -123,10 +123,10 @@ export const PENDING = ['netpermEffective'];
 // Before the probe has run.
 export const PROBE_CHECKS = ['appSandbox', 'helperSandbox', 'broker', 'appScope'];
 
-// ---- the Test Bench's last report (lordos-testbench, ~/.local/state/lordos/testbench.json) ----
+// ---- the Test Bench's last report (insaneos-testbench, ~/.local/state/insaneos/testbench.json) ----
 // The Wayland checklist (§3.4), the 3D renderer, whether frames are presented and input-to-screen latency.
 export function evaluateBench(b) {
-  if (!b || b.tool !== 'lordos-testbench' || !Array.isArray(b.checks)) return null;
+  if (!b || b.tool !== 'insaneos-testbench' || !Array.isArray(b.checks)) return null;
   const out = [];
   const fails = b.checks.filter((c) => c && c.state === 'fail');
   const passes = b.checks.filter((c) => c && c.state === 'pass').length;

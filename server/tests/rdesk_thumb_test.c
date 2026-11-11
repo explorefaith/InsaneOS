@@ -47,7 +47,7 @@ int main(void) {
     CHECK(rd_thumb_save("relative", "dev1", px, w, h, 640) == -1);
     CHECK(rd_thumb_save(home, "dev1", px, w, h, 640) == 0);
     char path[512], dir[512];
-    snprintf(dir, sizeof dir, "%s/.local/share/lordos/remote-desk/thumbs", home);
+    snprintf(dir, sizeof dir, "%s/.local/share/insaneos/remote-desk/thumbs", home);
     snprintf(path, sizeof path, "%s/dev1.png", dir);
     struct stat st;
     CHECK(!stat(dir, &st) && S_ISDIR(st.st_mode) && (st.st_mode & 0777) == 0700);
@@ -72,7 +72,7 @@ int main(void) {
     CHECK(rd_thumb_remove(home, "../x") == -1);
     /* a link where the folder goes is not followed */
     char cmd[1200];
-    snprintf(cmd, sizeof cmd, "rm -rf '%s/.local/share/lordos/remote-desk/thumbs' && mkdir -p '%s/elsewhere' && ln -s '%s/elsewhere' '%s/.local/share/lordos/remote-desk/thumbs'", home, home, home, home);
+    snprintf(cmd, sizeof cmd, "rm -rf '%s/.local/share/insaneos/remote-desk/thumbs' && mkdir -p '%s/elsewhere' && ln -s '%s/elsewhere' '%s/.local/share/insaneos/remote-desk/thumbs'", home, home, home, home);
     CHECK(!system(cmd));
     CHECK(rd_thumb_save(home, "dev2", px, w, h, 640) == -1);
     snprintf(path, sizeof path, "%s/elsewhere/dev2.png", home);

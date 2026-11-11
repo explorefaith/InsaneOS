@@ -9,7 +9,7 @@
 #   goes back to the Insane OS frame with «Use system title bar and borders» (Settings → Appearance).
 # - Firefox ESR: its own bar too (the user changes it in Customize Toolbar > Title Bar).
 # The GTK themes, the video extension and the video settings (the video-optimize action) come with
-# the lordos package; installed systems get these two defaults from migration 005.
+# the insaneos package; installed systems get these two defaults from migration 005.
 set -eu
 R=${1:?usage: browser-defaults.sh <root>}
 [ -d "$R/etc" ] || { echo "browser-defaults.sh: $R is not a system tree" >&2; exit 1; }
@@ -26,5 +26,5 @@ if [ -d "$R/usr/lib/firefox-esr" ] || [ -d "$R/etc/firefox-esr" ]; then
     install -d "$R/etc/firefox-esr"
     printf '%s\n' '// Insane OS: Firefox draws its own bar, with the window buttons in Insane OS'"'"'s order (see' \
       '// docs/WAYLAND.md); 0 gives it the Insane OS frame instead (Customize Toolbar > Title Bar).' \
-      'pref("browser.tabs.inTitlebar", 1);' > "$R/etc/firefox-esr/lordos.js"
+      'pref("browser.tabs.inTitlebar", 1);' > "$R/etc/firefox-esr/insaneos.js"
 fi

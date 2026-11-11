@@ -7,26 +7,26 @@
 //   node tools/web/downloads.mjs [out.json]      (GITHUB_TOKEN is used when set; not needed)
 //
 // web/build.mjs runs this on every build and falls back to the committed file when GitHub can't be
-// reached; the result is also published as https://lordos.org/downloads.json.
+// reached; the result is also published as https://insaneos.org/downloads.json.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const REPO = 'lordbasex/Insane OS';
+const REPO = 'insaneos/Insane OS';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // kind → file name pattern; the first group is the version written in the file name
 export const KINDS = {
-  'iso-amd64': /^lordos-live-([0-9][0-9.]*)-amd64\.iso$/,
-  'iso-arm64': /^lordos-live-([0-9][0-9.]*)-arm64\.iso$/,
-  'ova-amd64': /^lordos-([0-9][0-9.]*)-amd64\.ova$/,
-  'rpi5': /^lordos-([0-9][0-9.]*)-rpi5-arm64\.img\.xz$/,
-  'deb-amd64': /^lordos_([0-9][0-9.]*)_amd64\.deb$/,
-  'deb-arm64': /^lordos_([0-9][0-9.]*)_arm64\.deb$/,
-  'hwdata': /^lordos-hwdata_([0-9][0-9.]*)_all\.deb$/,
-  'imager-mac': /^lordos_imager_([0-9][0-9.]*)_universal\.dmg$/,
-  'imager-win': /^lordos_imager_([0-9][0-9.]*)_x64_setup\.exe$/,
-  'imager-linux': /^lordos_imager_([0-9][0-9.]*)_amd64\.deb$/,
+  'iso-amd64': /^insaneos-live-([0-9][0-9.]*)-amd64\.iso$/,
+  'iso-arm64': /^insaneos-live-([0-9][0-9.]*)-arm64\.iso$/,
+  'ova-amd64': /^insaneos-([0-9][0-9.]*)-amd64\.ova$/,
+  'rpi5': /^insaneos-([0-9][0-9.]*)-rpi5-arm64\.img\.xz$/,
+  'deb-amd64': /^insaneos_([0-9][0-9.]*)_amd64\.deb$/,
+  'deb-arm64': /^insaneos_([0-9][0-9.]*)_arm64\.deb$/,
+  'hwdata': /^insaneos-hwdata_([0-9][0-9.]*)_all\.deb$/,
+  'imager-mac': /^insaneos_imager_([0-9][0-9.]*)_universal\.dmg$/,
+  'imager-win': /^insaneos_imager_([0-9][0-9.]*)_x64_setup\.exe$/,
+  'imager-linux': /^insaneos_imager_([0-9][0-9.]*)_amd64\.deb$/,
 };
 
 // Picks, per kind, the file from the most recently published release (drafts never count).
@@ -52,7 +52,7 @@ export function pick(releases) {
 }
 
 export async function fetchReleases({ timeoutMs = 15000 } = {}) {
-  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'lordos-site-build' };
+  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'insaneos-site-build' };
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   const all = [];
   for (let page = 1; page <= 5; page++) {

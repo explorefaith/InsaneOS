@@ -81,7 +81,7 @@
   "today": "Oggi",
   "toggleSidebar": "Mostra o nascondi i calendari",
   "unavailable": "I calendari non sono disponibili",
-  "unavailableHint": "Il servizio di posta e calendario (lord-maild) non è in esecuzione o non è installato.",
+  "unavailableHint": "Il servizio di posta e calendario (insane-maild) non è in esecuzione o non è installato.",
   "untitled": "Nuovo evento",
   "view.day": "Giorno",
   "view.month": "Mese",

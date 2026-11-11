@@ -6,12 +6,12 @@ import {
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
   usePowerProfiles, admin,
   panelLeft, inBar,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 // Four wallpapers fit in the tile: the current one and a few from the collection (all of them are
 // in Settings → Wallpaper, which «Change Wallpaper…» opens).
-const QUICK = ['lumo-celestial', 'crystal-crown', 'royal-flow', 'event-horizon', 'aurora'];
+const QUICK = ['lumo-celestial', 'crystal-apple', 'royal-flow', 'event-horizon', 'aurora'];
 function quickWallpapers(list, cur) {
   const current = findWallpaper(list, cur);
   const rest = QUICK.map((id) => list.find((w) => w.id === id)).filter((w) => w && w !== current);
@@ -40,14 +40,14 @@ function OptimizeTile({ t }) {
 }
 
 // Power mode (macOS's Low Power Mode): performance / balanced / power-saver through
-// power-profiles-daemon (lord.power, sdk/hardware.jsx). Hidden when ppd isn't there.
+// power-profiles-daemon (insane.power, sdk/hardware.jsx). Hidden when ppd isn't there.
 function PowerTile({ t }) {
   const profiles = usePowerProfiles();
   const list = profiles?.profiles?.length ? profiles.profiles : null;
   const active = profiles?.activeProfile || null;
   if (!list || !active) return null;
   const label = (p) => tOptional(`shell.cc.power.${p}`) || (p === 'power-saver' ? 'Low Power' : p === 'performance' ? 'Performance' : 'Balanced');
-  const pick = (p) => { try { lord.power.setProfile(p); } catch (e) { console.log(`power: ${e.message}`); } };
+  const pick = (p) => { try { insane.power.setProfile(p); } catch (e) { console.log(`power: ${e.message}`); } };
   return (
     <Tile t={t} style={{ gap: 8 }}>
       <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tOptional('shell.cc.power.title') || 'Power Mode'}</Text>
@@ -182,7 +182,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   const [s, set] = useSettings();
   const p = menuBarPrefs(s);
   let ifs = [];
-  try { ifs = typeof lord.net !== 'undefined' ? lord.net.interfaces() : []; } catch (e) { ifs = []; }
+  try { ifs = typeof insane.net !== 'undefined' ? insane.net.interfaces() : []; } catch (e) { ifs = []; }
   const radios = p.ccWifi ? ifs.filter((i) => i.type === 'wifi') : [];
   const bt = useBluetooth();
   const btShown = p.ccBluetooth && !!bt?.adapter;
@@ -216,7 +216,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       <OptimizeTile t={t} />
       <SoundTile t={t} />
       <NowPlayingTile />
-      {p.ccNetwork && typeof lord.net !== 'undefined' ? <NetTile t={t} onClose={onClose} ifs={ifs} /> : null}
+      {p.ccNetwork && typeof insane.net !== 'undefined' ? <NetTile t={t} onClose={onClose} ifs={ifs} /> : null}
       {radios.length || btShown ? (
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {radios.length ? <WifiTile t={t} onClose={onClose} radios={radios} /> : null}

@@ -1,9 +1,9 @@
-# 🍎 macOS-স্টাইল Feature Ideas — LordOS-এর আসল codebase অনুযায়ী
+# 🍎 macOS-স্টাইল Feature Ideas — InsaneOS-এর আসল codebase অনুযায়ী
 
 ## 🆕 Round 2 আইডিয়া (নতুন খোঁজা — আগের তালিকায় ছিল না)
 
 ### 🟢 সহজ
-| # | Feature | macOS-এ যা | LordOS-এ কী আছে বলে সহজ |
+| # | Feature | macOS-এ যা | InsaneOS-এ কী আছে বলে সহজ |
 |---|---|---|---|
 | N1 | **Per-app output routing UI** | Audio MIDI Setup | API আছে (`sound.move('input', app, to)`) — শুধু Sound Settings-এ dropdown |
 | N2 | **Power chime** | চার্জার লাগালে টুং | sound engine + battery event (আমার smooth.js-এ ৫ লাইন) |
@@ -28,7 +28,7 @@
 ### 🔴 বড়
 | # | Feature | নোট |
 |---|---|---|
-| N16 | **Network Time Machine** | অন্য LordOS/ NAS-এ backup (backup + lan মডিউল মিলিয়ে) |
+| N16 | **Network Time Machine** | অন্য InsaneOS/ NAS-এ backup (backup + lan মডিউল মিলিয়ে) |
 | N17 | **Disk encryption UI** (FileVault) | LUKS — installer লেভেল, ঝুঁকিপূর্ণ, সাবধানে |
 | N18 | **Android Sidecar** (ট্যাবলেট সেকেন্ড মনিটর) | virtio/wl output over network — বড় প্রজেক্ট |
 
@@ -44,7 +44,7 @@
 
 ## ⚡ তোমার OS-এ already আছে (macOS-এর সমতুল্য — দোখার দরকার নেই)
 
-| macOS | LordOS-এ |
+| macOS | InsaneOS-এ |
 |---|---|
 | Launchpad | Launchpad ✅ |
 | Dock (magnify) | Magnifying Dock ✅ |
@@ -79,7 +79,7 @@
 6. ✅ **Dark Mode auto-schedule** — বানানো হয়েছে
 7. ✅ **Menu bar system widget** — বানানো হয়েছে (CPU% · temp)
 8. 🟡 **Screenshot thumbnail drag** — thumbnail আগেই আছে; drag = Phase 2 (DnD protocol)
-9. ✅ **Text replacement** — বানানো হয়েছে (LordOS অ্যাপে; Linux apps Phase 2)
+9. ✅ **Text replacement** — বানানো হয়েছে (InsaneOS অ্যাপে; Linux apps Phase 2)
 
 ## 🟡 মাঝারি — compositor-এ C কাজ লাগবে
 
@@ -89,7 +89,7 @@
 14. **Stage Manager** — বাঁ দিকে recent windows-এর stack, একটা focus করা
 15. **Snap preview overlay** — window ধরে edge-এ নিলে half/quarter highlight দেখিয়ে drop (basic snap আছে, preview + quarter যোগ)
 16. **App Exposé** — Dock icon-এ long-press → ওই অ্যাপের সব window spread
-17. **Universal Clipboard** — LAN-এর অন্য LordOS/Mac-এ copy, এখানে paste (lord-lan আছে, sync protocol লাগবে)
+17. **Universal Clipboard** — LAN-এর অন্য InsaneOS/Mac-এ copy, এখানে paste (insane-lan আছে, sync protocol লাগবে)
 18. **AirDrop-স্টাইল share** — কাছের ডিভাইসে ফাইল (share module আছে, UI সাজালেই)
 19. **Per-app volume mixer** — Control Center-এ প্রতি-অ্যাপ volume (PipeWire সাপোর্ট করে)
 20. **Window shake to grow** — এক window ঝাঁকালে বাকিগুলো সরে যায় (upstream এর shake-to-find cursor আছে, window-ভার্সন নেই)
@@ -98,8 +98,8 @@
 
 21. **Full Dictation (mic → text)** — whisper.cpp দিয়ে (Store-এ whisper আছে); ❖❖ দুবার চাপলে বলা লেখা হবে — লোকাল, প্রাইভেট
 22. **Spotlight Pro** — ফাইলের ভেতরের লেখাও খোঁজা (content index) — indexer service লাগবে
-23. **Find My LordOS** — ল্যাপটপ চুরি/হারালে জায়গা জানা — অ্যাকাউন্ট + সার্ভিস লাগবে
-24. **Phone integration** — Android-এর জন্য KDE-Connect-স্টাইল (SMS, file, notification sync) — LordOS নিজে বানাতে পারে
+23. **Find My InsaneOS** — ল্যাপটপ চুরি/হারালে জায়গা জানা — অ্যাকাউন্ট + সার্ভিস লাগবে
+24. **Phone integration** — Android-এর জন্য KDE-Connect-স্টাইল (SMS, file, notification sync) — InsaneOS নিজে বানাতে পারে
 
 ---
 

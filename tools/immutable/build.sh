@@ -8,7 +8,7 @@
 #   usr slot B + its dm-verity hash partition     (empty until the first update)
 #   root (ext4): /etc, /var, /home — the only writable part, kept across updates
 # and the update artifacts (usr image, verity hash, UKI, signed SHA256SUMS) that
-# /usr/lib/lordos/immutable/update installs into the other slot.
+# /usr/lib/insaneos/immutable/update installs into the other slot.
 #
 # The payload is a minimal Debian 13 with systemd, NOT the Insane OS desktop yet (see docs/IMMUTABLE.md,
 # "The prototype"). Updates are signed with a throwaway test key made in the work folder, never with
@@ -20,7 +20,7 @@
 #   sudo tools/immutable/build.sh disk    [work] <version>  # disk.raw with <version> in slot A
 #   sudo tools/immutable/build.sh publish [work] <v>...     # signed SHA256SUMS over those releases
 #   sudo tools/immutable/build.sh all     [work]            # base, releases 1, 2 and 3 (bad), disk 1, publish 1 2
-# Default work folder: /var/tmp/lordos-immutable. Versions are plain integers here (1, 2, 3).
+# Default work folder: /var/tmp/insaneos-immutable. Versions are plain integers here (1, 2, 3).
 # Packages it needs: see docs/IMMUTABLE.md, "Building the prototype".
 set -eu
 
@@ -28,7 +28,7 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 CMD=${1:-}
 [ $# -gt 0 ] && shift
-WORK=/var/tmp/lordos-immutable
+WORK=/var/tmp/insaneos-immutable
 case "${1:-}" in /*) WORK=$1; shift ;; esac
 MIRROR=${MIRROR:-http://deb.debian.org/debian}
 SUITE=trixie
@@ -93,8 +93,8 @@ EOF
     echo "$KVER" > "$WORK/kver"
 
     say "configuration (kernel $KVER)"
-    echo lordos-immutable > "$BASE/etc/hostname"
-    printf '127.0.0.1 localhost\n127.0.1.1 lordos-immutable\n' > "$BASE/etc/hosts"
+    echo insaneos-immutable > "$BASE/etc/hostname"
+    printf '127.0.0.1 localhost\n127.0.1.1 insaneos-immutable\n' > "$BASE/etc/hosts"
     : > "$BASE/etc/machine-id"
     # PROTOTYPE ONLY: root logs in on the serial console without a password, for the scripted demo
     mkdir -p "$BASE/etc/systemd/system/serial-getty@ttyS0.service.d"
@@ -106,18 +106,18 @@ EOF
     chroot "$BASE" systemctl enable systemd-networkd systemd-resolved >/dev/null 2>&1 || true
     # the ESP is mounted at /efi (systemd-bless-boot and the updater look there)
     mkdir -p "$BASE/efi"
-    printf 'PARTLABEL=lordos-esp /efi vfat umask=0077,x-systemd.automount 0 2\n' > "$BASE/etc/fstab"
+    printf 'PARTLABEL=insaneos-esp /efi vfat umask=0077,x-systemd.automount 0 2\n' > "$BASE/etc/fstab"
 
     # Insane OS's pieces: updater, health check (boot assessment), the update key
-    install -D -m 0755 "$HERE/files/update" "$BASE/usr/lib/lordos/immutable/update"
-    install -D -m 0755 "$HERE/files/health-check" "$BASE/usr/lib/lordos/immutable/health-check"
-    install -D -m 0644 "$HERE/files/lordos-health.service" "$BASE/usr/lib/systemd/system/lordos-health.service"
-    install -D -m 0644 "$HERE/files/lordos-health-failed.service" "$BASE/usr/lib/systemd/system/lordos-health-failed.service"
-    install -D -m 0644 "$KEYS/update-keyring.gpg" "$BASE/usr/share/lordos/immutable/update-keyring.gpg"
+    install -D -m 0755 "$HERE/files/update" "$BASE/usr/lib/insaneos/immutable/update"
+    install -D -m 0755 "$HERE/files/health-check" "$BASE/usr/lib/insaneos/immutable/health-check"
+    install -D -m 0644 "$HERE/files/insaneos-health.service" "$BASE/usr/lib/systemd/system/insaneos-health.service"
+    install -D -m 0644 "$HERE/files/insaneos-health-failed.service" "$BASE/usr/lib/systemd/system/insaneos-health-failed.service"
+    install -D -m 0644 "$KEYS/update-keyring.gpg" "$BASE/usr/share/insaneos/immutable/update-keyring.gpg"
     # enabled from /usr (a vendor .requires link), not /etc: a unit a later release adds is
     # enabled by that release's image alone
     mkdir -p "$BASE/usr/lib/systemd/system/boot-complete.target.requires"
-    ln -sf ../lordos-health.service "$BASE/usr/lib/systemd/system/boot-complete.target.requires/lordos-health.service"
+    ln -sf ../insaneos-health.service "$BASE/usr/lib/systemd/system/boot-complete.target.requires/insaneos-health.service"
     ln -sf ../systemd-boot-check-no-failures.service \
         "$BASE/usr/lib/systemd/system/boot-complete.target.requires/systemd-boot-check-no-failures.service"
 
@@ -125,7 +125,7 @@ EOF
     chroot "$BASE" dracut --force --no-hostonly --kver "$KVER" \
         --add "systemd systemd-veritysetup dm" --omit "plymouth" \
         --add-drivers "erofs dm-verity ext4 vfat virtio_blk virtio_scsi virtio_pci sd_mod nvme ahci" \
-        /boot/initrd.lordos > "$WORK/dracut.log" 2>&1 || { tail -30 "$WORK/dracut.log"; exit 1; }
+        /boot/initrd.insaneos > "$WORK/dracut.log" 2>&1 || { tail -30 "$WORK/dracut.log"; exit 1; }
     umount_base
     trap - EXIT
     # factory copy of /etc: what a release ships as defaults, for the three-way /etc merge
@@ -146,20 +146,20 @@ cmd_release() {
     cp -a "$BASE/usr" "$T/usr"
     # identity of this image version (os-release IMAGE_ID / IMAGE_VERSION, as systemd expects)
     sed -i '/^IMAGE_ID=/d;/^IMAGE_VERSION=/d' "$T/usr/lib/os-release"
-    printf 'IMAGE_ID=lordos-immutable\nIMAGE_VERSION=%s\n' "$V" >> "$T/usr/lib/os-release"
+    printf 'IMAGE_ID=insaneos-immutable\nIMAGE_VERSION=%s\n' "$V" >> "$T/usr/lib/os-release"
     printf 'Insane OS immutable prototype, image version %s, built %s\n' "$V" "$(date -u +%FT%TZ)" \
-        > "$T/usr/lib/lordos/immutable/VERSION"
-    if [ "$BAD" = bad ]; then : > "$T/usr/lib/lordos/immutable/simulate-broken-release"; fi
+        > "$T/usr/lib/insaneos/immutable/VERSION"
+    if [ "$BAD" = bad ]; then : > "$T/usr/lib/insaneos/immutable/simulate-broken-release"; fi
 
     # read-only EROFS (lz4hc: fast to decompress on low-end CPUs), fixed timestamps and UUID so the
     # same tree gives the same bytes
     mkfs.erofs -zlz4hc,12 -T0 -U "6c6f7264-6f73-4000-8000-$(printf %012d "$V")" \
-        "$R/lordos_usr_$V.erofs" "$T/usr" > "$WORK/erofs-$V.log" 2>&1 || { tail "$WORK/erofs-$V.log"; exit 1; }
-    veritysetup format "$R/lordos_usr_$V.erofs" "$R/lordos_usr_$V.verity" \
-        --root-hash-file="$R/lordos_usr_$V.roothash" > "$WORK/verity-$V.log"
-    H=$(cat "$R/lordos_usr_$V.roothash")
+        "$R/insaneos_usr_$V.erofs" "$T/usr" > "$WORK/erofs-$V.log" 2>&1 || { tail "$WORK/erofs-$V.log"; exit 1; }
+    veritysetup format "$R/insaneos_usr_$V.erofs" "$R/insaneos_usr_$V.verity" \
+        --root-hash-file="$R/insaneos_usr_$V.roothash" > "$WORK/verity-$V.log"
+    H=$(cat "$R/insaneos_usr_$V.roothash")
     U1=$(uuid_of "$H"); U2=$(uuid_of "$(echo "$H" | cut -c33-64)")
-    D=$(stat -c %s "$R/lordos_usr_$V.erofs"); HS=$(stat -c %s "$R/lordos_usr_$V.verity")
+    D=$(stat -c %s "$R/insaneos_usr_$V.erofs"); HS=$(stat -c %s "$R/insaneos_usr_$V.verity")
     [ "$D" -le $((SLOT_MB * 1048576)) ] && [ "$HS" -le $((HASH_MB * 1048576)) ] \
         || { echo "build.sh: release $V does not fit the slots ($D / $HS bytes)" >&2; exit 1; }
 
@@ -167,19 +167,19 @@ cmd_release() {
     # devices are found by the partition UUIDs derived from it, so the UKI picks its own slot.
     CMDLINE="usrhash=$H systemd.verity_usr_data=PARTUUID=$U1 systemd.verity_usr_hash=PARTUUID=$U2"
     CMDLINE="$CMDLINE mount.usr=/dev/mapper/usr mount.usrfstype=erofs mount.usrflags=ro"
-    CMDLINE="$CMDLINE root=PARTLABEL=lordos-root rw console=ttyS0,115200 panic=10 rd.emergency=reboot rd.shell=0"
-    ukify build --linux="$BASE/boot/vmlinuz-$KVER" --initrd="$BASE/boot/initrd.lordos" \
+    CMDLINE="$CMDLINE root=PARTLABEL=insaneos-root rw console=ttyS0,115200 panic=10 rd.emergency=reboot rd.shell=0"
+    ukify build --linux="$BASE/boot/vmlinuz-$KVER" --initrd="$BASE/boot/initrd.insaneos" \
         --cmdline="$CMDLINE" --os-release="@$T/usr/lib/os-release" --uname="$KVER" \
-        --output="$R/lordos_$V.efi" > "$WORK/ukify-$V.log" 2>&1 || { tail "$WORK/ukify-$V.log"; exit 1; }
+        --output="$R/insaneos_$V.efi" > "$WORK/ukify-$V.log" 2>&1 || { tail "$WORK/ukify-$V.log"; exit 1; }
     rm -rf "$T"
-    say "release $V: usr $(du -h "$R/lordos_usr_$V.erofs" | cut -f1), verity $(du -h "$R/lordos_usr_$V.verity" | cut -f1), UKI $(du -h "$R/lordos_$V.efi" | cut -f1), usrhash $H"
+    say "release $V: usr $(du -h "$R/insaneos_usr_$V.erofs" | cut -f1), verity $(du -h "$R/insaneos_usr_$V.verity" | cut -f1), UKI $(du -h "$R/insaneos_$V.efi" | cut -f1), usrhash $H"
 }
 
 cmd_disk() {
     V=${1:?version}
     R="$OUT/$V"
-    [ -s "$R/lordos_$V.efi" ] || { echo "build.sh: run 'release $V' first" >&2; exit 1; }
-    H=$(cat "$R/lordos_usr_$V.roothash")
+    [ -s "$R/insaneos_$V.efi" ] || { echo "build.sh: run 'release $V' first" >&2; exit 1; }
+    H=$(cat "$R/insaneos_usr_$V.roothash")
     U1=$(uuid_of "$H"); U2=$(uuid_of "$(echo "$H" | cut -c33-64)")
     S="$WORK/stage"; DEF="$WORK/repart.d"
     rm -rf "$S" "$DEF"; mkdir -p "$S/esp/EFI/BOOT" "$S/esp/EFI/systemd" "$S/esp/EFI/Linux" "$S/esp/loader" "$S/rootpart" "$DEF"
@@ -188,14 +188,14 @@ cmd_disk() {
     cp /usr/lib/systemd/boot/efi/systemd-bootx64.efi "$S/esp/EFI/systemd/systemd-bootx64.efi"
     printf 'timeout 3\neditor no\nauto-entries no\nauto-firmware no\n' > "$S/esp/loader/loader.conf"
     # the factory image's own version is already known good: no boot counter
-    cp "$R/lordos_$V.efi" "$S/esp/EFI/Linux/lordos_$V.efi"
+    cp "$R/insaneos_$V.efi" "$S/esp/EFI/Linux/insaneos_$V.efi"
     # root partition: everything but /usr; merged-/usr symlinks (Debian 13 is merged-/usr only)
     (cd "$BASE" && tar --exclude=./usr/* --exclude=./proc/* --exclude=./sys/* --exclude=./dev/* \
         --exclude=./run/* --exclude=./boot/* -cf - .) | tar -C "$S/rootpart" -xf -
     cat > "$DEF/10-esp.conf" <<EOF
 [Partition]
 Type=esp
-Label=lordos-esp
+Label=insaneos-esp
 Format=vfat
 CopyFiles=/esp:/
 SizeMinBytes=512M
@@ -204,18 +204,18 @@ EOF
     cat > "$DEF/20-usr-a.conf" <<EOF
 [Partition]
 Type=usr
-Label=lordos_usr_$V
+Label=insaneos_usr_$V
 UUID=$U1
-CopyBlocks=$R/lordos_usr_$V.erofs
+CopyBlocks=$R/insaneos_usr_$V.erofs
 SizeMinBytes=${SLOT_MB}M
 SizeMaxBytes=${SLOT_MB}M
 EOF
     cat > "$DEF/21-usr-a-verity.conf" <<EOF
 [Partition]
 Type=usr-verity
-Label=lordos_usr_v_$V
+Label=insaneos_usr_v_$V
 UUID=$U2
-CopyBlocks=$R/lordos_usr_$V.verity
+CopyBlocks=$R/insaneos_usr_$V.verity
 SizeMinBytes=${HASH_MB}M
 SizeMaxBytes=${HASH_MB}M
 EOF
@@ -236,7 +236,7 @@ EOF
     cat > "$DEF/40-root.conf" <<EOF
 [Partition]
 Type=root
-Label=lordos-root
+Label=insaneos-root
 Format=ext4
 CopyFiles=/rootpart:/
 SizeMinBytes=${ROOT_MB}M
@@ -254,11 +254,11 @@ cmd_publish() {
     P="$OUT/updates"
     rm -rf "$P"; mkdir -p "$P"
     for V in "$@"; do
-        [ -s "$OUT/$V/lordos_$V.efi" ] || { echo "build.sh: no release $V" >&2; exit 1; }
-        cp "$OUT/$V"/lordos_* "$P/"
+        [ -s "$OUT/$V/insaneos_$V.efi" ] || { echo "build.sh: no release $V" >&2; exit 1; }
+        cp "$OUT/$V"/insaneos_* "$P/"
     done
-    chmod 0644 "$P"/lordos_*
-    (cd "$P" && sha256sum lordos_* > SHA256SUMS)
+    chmod 0644 "$P"/insaneos_*
+    (cd "$P" && sha256sum insaneos_* > SHA256SUMS)
     GNUPGHOME="$KEYS/gnupg"; export GNUPGHOME
     gpg --batch --yes --detach-sign --output "$P/SHA256SUMS.gpg" "$P/SHA256SUMS"
     gpgv --keyring "$KEYS/update-keyring.gpg" "$P/SHA256SUMS.gpg" "$P/SHA256SUMS" 2>&1 | tail -1

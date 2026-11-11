@@ -20,12 +20,12 @@
  *                           Progress: "LOG progress <phase> <done> <total>", phases partition,
  *                           copy, configure, bootloader.
  *   install-account <json>  the OVA image's first boot: same plan without disk, mode and swap. It only
- *                           works while /etc/lordos/first-account exists (tools/iso/build-ova.sh), and
+ *                           works while /etc/insaneos/first-account exists (tools/iso/build-ova.sh), and
  *                           does the install-run steps that make the person's account on the running
- *                           system; the setup account goes at the next boot (lordos-live-prep)
+ *                           system; the setup account goes at the next boot (insaneos-live-prep)
  *   install-reboot          reboots (only on the live system or after install-account, to finish the wizard)
  *
- * The unattended install (lord-autoinstall, autoinstall.c, docs/UNATTENDED.md) calls install-run's own code with
+ * The unattended install (insane-autoinstall, autoinstall.c, docs/UNATTENDED.md) calls install-run's own code with
  * install_set_unattended(1) and three more fields, refused from anywhere else: passwordHash (a crypt(3) hash
  * the maintainer made, instead of password), sshKey (one authorized_keys line for the user) and autologin.
  *
@@ -72,11 +72,11 @@
 
 #define LIVE_MEDIUM "/run/live/medium"
 #define SQUASHFS    LIVE_MEDIUM "/live/filesystem.squashfs"
-#define TARGET      "/run/lordos-install/target"
+#define TARGET      "/run/insaneos-install/target"
 #define MIN_DISK    FSP_MIN_BYTES              /* 8 GiB */
-/* The OVA's first boot: pending, then done (lordos-live-prep removes the setup account and this file) */
-#define FIRST_ACCOUNT       "/etc/lordos/first-account"
-#define FIRST_ACCOUNT_DONE  "/etc/lordos/first-account.done"
+/* The OVA's first boot: pending, then done (insaneos-live-prep removes the setup account and this file) */
+#define FIRST_ACCOUNT       "/etc/insaneos/first-account"
+#define FIRST_ACCOUNT_DONE  "/etc/insaneos/first-account.done"
 
 /* What the architecture decides. x86-64: a BIOS boot partition and grub for both firmwares; arm64 is
  * UEFI only. The root partition's GPT type is the architecture's own (Linux root, x86-64 or ARM64). */
@@ -129,7 +129,7 @@ static void json_str(FILE *f, const char *s) {
 
 static int write_file(const char *path, const char *text, mode_t mode) {
     char tmp[PATH_MAX];
-    snprintf(tmp, sizeof tmp, "%s.lordos-tmp", path);
+    snprintf(tmp, sizeof tmp, "%s.insaneos-tmp", path);
     int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, mode);
     if (fd < 0) return -1;
     size_t n = strlen(text), off = 0;
@@ -350,7 +350,7 @@ int install_hash_ok(const char *h) {
     for (const char *p = h; *p; p++) if (!isalnum((unsigned char)*p) && !strchr("./$", *p)) return 0;
     struct crypt_data cd;
     memset(&cd, 0, sizeof cd);
-    const char *out = crypt_r("lordos-hash-check", h, &cd);
+    const char *out = crypt_r("insaneos-hash-check", h, &cd);
     int ok = out && out[0] == '$' && !strncmp(out, h, 3);
     explicit_bzero(&cd, sizeof cd);
     return ok;
@@ -464,7 +464,7 @@ static int parse_plan(const char *s, Plan *pl) {
         } else if (!strncmp(p, "false", 5)) { if (!strcmp(key, "autologin")) pl->has_extra = 1; p += 5; }
         else return -1;
     }
-    /* the unattended fields come only from lord-autoinstall; the interface can't send them */
+    /* the unattended fields come only from insane-autoinstall; the interface can't send them */
     if (pl->has_extra && !unattended) return -1;
     return ok ? 0 : -1;
 }
@@ -511,7 +511,7 @@ static const char *validate_person(Plan *pl) {
     if (!re_user(pl->user)) return "install.badUser";
     for (int i = 0; reserved[i]; i++) if (!strcmp(pl->user, reserved[i])) return "install.userReserved";
     struct passwd *pw = getpwnam(pl->user);
-    if (pw && (strcmp(pl->user, "lordos") || is_first_account())) return "install.userTaken";
+    if (pw && (strcmp(pl->user, "insaneos") || is_first_account())) return "install.userTaken";
     for (const unsigned char *p = (const unsigned char *)pl->fullname; *p; p++) if (*p < 0x20 || *p == ':' || *p == ',' || *p == 0x7f) return "install.badFullName";
     if (!pl->password[0] && !pl->password_hash[0]) return "install.noPassword";
     if (pl->password_hash[0] && (pl->password[0] || !install_hash_ok(pl->password_hash))) return "install.badPasswordHash";
@@ -768,11 +768,11 @@ static const char *setup_person(Plan *pl, int *step, int steps) {
     explicit_bzero(pl->password, sizeof pl->password);
     mkdir(TARGET "/var/lib/systemd/linger", 0755);
     { char p[PATH_MAX]; snprintf(p, sizeof p, TARGET "/var/lib/systemd/linger/%s", pl->user); write_file(p, "", 0644); }
-    mkdir(TARGET "/etc/lordos", 0755);
-    /* lord-sessiond (docs/SESSIONS.md): the user logs in through the login screen; autologin
+    mkdir(TARGET "/etc/insaneos", 0755);
+    /* insane-sessiond (docs/SESSIONS.md): the user logs in through the login screen; autologin
      * is turned on in Settings → Users (AUTOLOGIN=). USER= is for the pre-M8
-     * lordos-session. */
-    writef(TARGET "/etc/lordos/session.conf", 0644, "# Written by the Insane OS installer. See docs/SESSIONS.md\n"
+     * insaneos-session. */
+    writef(TARGET "/etc/insaneos/session.conf", 0644, "# Written by the Insane OS installer. See docs/SESSIONS.md\n"
            "# AUTOLOGIN=user logs in automatically at boot; empty: login screen\nAUTOLOGIN=%s\nUSER=%s\n", pl->autologin ? pl->user : "", pl->user);
     progress("configure", ++*step, steps);
 
@@ -808,10 +808,10 @@ static const char *setup_person(Plan *pl, int *step, int steps) {
       snprintf(p, sizeof p, TARGET "/home/%s/.config", pl->user); mkdir(p, 0755);
       int may = lstat(p, &cst) == 0 && S_ISDIR(cst.st_mode);
       if (may && lchown(p, uid, gid)) admin_log("install.chownWarning", NULL);
-      snprintf(p, sizeof p, TARGET "/home/%s/.config/lordos", pl->user);
+      snprintf(p, sizeof p, TARGET "/home/%s/.config/insaneos", pl->user);
       if (may) { mkdir(p, 0755); may = lstat(p, &cst) == 0 && S_ISDIR(cst.st_mode); }
       if (may && lchown(p, uid, gid)) admin_log("install.chownWarning", NULL);
-      snprintf(p, sizeof p, TARGET "/home/%s/.config/lordos/settings.json", pl->user);
+      snprintf(p, sizeof p, TARGET "/home/%s/.config/insaneos/settings.json", pl->user);
       if (may && (!had_home || access(p, F_OK))) {
           writef(p, 0644, "{\n  \"language\": \"%s\",\n  \"keyboards\": [{ \"layout\": \"%s\", \"variant\": \"%s\" }],\n  \"keyboardIndex\": 0\n}\n", pl->lang, pl->kblayout, pl->kbvariant);
           if (lchown(p, uid, gid)) admin_log("install.chownWarning", NULL);
@@ -896,7 +896,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     { const char *const a[] = { "/usr/sbin/mkfs.ext4", "-F", "-q", "-L", "Insane OS", root, NULL }; if (run(a)) FAIL("install.formatRootFailed"); }
     progress("partition", 3, 4);
     }
-    mkdir("/run/lordos-install", 0700);
+    mkdir("/run/insaneos-install", 0700);
     mkdir(TARGET, 0755);
     umount_target();
     if (mount(root, TARGET, "ext4", 0, NULL)) FAIL("install.mountFailed", "path", root, "errno", lerr_errno(errno));
@@ -942,11 +942,11 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     progress("configure", ++step, steps);
 
     /* drop the live-only bits: live-boot, the test user and its passwordless sudo */
-    unlink(TARGET "/etc/sudoers.d/lordos-live");
-    unlink(TARGET "/var/lib/systemd/linger/lordos");
-    unlink(TARGET "/etc/sysctl.d/50-lordos-ping.conf.dpkg-old");
+    unlink(TARGET "/etc/sudoers.d/insaneos-live");
+    unlink(TARGET "/var/lib/systemd/linger/insaneos");
+    unlink(TARGET "/etc/sysctl.d/50-insaneos-ping.conf.dpkg-old");
     { const char *const a[] = { "/usr/bin/dpkg", "--purge", "live-boot", "live-boot-initramfs-tools", NULL }; in_target(a); }
-    { const char *const a[] = { "/usr/sbin/userdel", "-r", "lordos", NULL }; in_target(a); }
+    { const char *const a[] = { "/usr/sbin/userdel", "-r", "insaneos", NULL }; in_target(a); }
     /* mode manual: /home goes on its partition only now, after the live user's folder is gone, so
      * that removal can never reach a kept /home */
     if (manual && mres.dev[MP_HOME][0]) {
@@ -972,8 +972,8 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
     { const char *const a[] = { "/usr/bin/systemd-machine-id-setup", NULL }; in_target(a); }
     /* the boot menu theme and the boot splash (docs/ISO.md, "Boot splash and boot menu"): the theme
      * and Plymouth come in the copied system; without them, the plain menu and text boot as before */
-    int splash = access(TARGET "/usr/bin/plymouth", X_OK) == 0 && access(TARGET "/usr/share/plymouth/themes/lordos/lordos.plymouth", R_OK) == 0;
-    int theme = access(TARGET "/usr/share/grub/themes/lordos/theme.txt", R_OK) == 0;
+    int splash = access(TARGET "/usr/bin/plymouth", X_OK) == 0 && access(TARGET "/usr/share/plymouth/themes/insaneos/insaneos.plymouth", R_OK) == 0;
+    int theme = access(TARGET "/usr/share/grub/themes/insaneos/theme.txt", R_OK) == 0;
     /* beside another system: a menu with time to choose, and that system in it when os-prober came
      * in the image */
     int prober = shared && access(TARGET "/usr/bin/os-prober", X_OK) == 0;
@@ -984,7 +984,7 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
            shared ? 5 : 2,
            splash ? "splash vt.global_cursor_default=0 " : "",
            prober ? "false" : "true",
-           theme ? "GRUB_TERMINAL_OUTPUT=gfxterm\nGRUB_THEME=/usr/share/grub/themes/lordos/theme.txt\n" : "");
+           theme ? "GRUB_TERMINAL_OUTPUT=gfxterm\nGRUB_THEME=/usr/share/grub/themes/insaneos/theme.txt\n" : "");
     progress("configure", ++step, steps);
     { const char *const a[] = { "/usr/sbin/update-initramfs", "-u", "-k", "all", NULL }; if (in_target(a)) FAIL("install.initramfsFailed"); }
     progress("configure", ++step, steps);
@@ -1042,9 +1042,9 @@ void install_act_run(const AdminReq *r, const char *arg, size_t len) {
 
 /* The OVA's first boot. No disk and no copy: the system is already there, and the person's account is
  * made in it with install-run's own steps. TARGET is the running system (a private bind mount, so
- * nothing else needs mounting: these steps only touch /etc and /home). lordos, the setup account the
+ * nothing else needs mounting: these steps only touch /etc and /home). insaneos, the setup account the
  * session runs as, can't be removed from inside it: it loses what lets it log in here and
- * lordos-live-prep removes it on the next boot. */
+ * insaneos-live-prep removes it on the next boot. */
 void install_act_account(const AdminReq *r, const char *arg, size_t len) {
     (void)r; (void)len;
     Plan pl;
@@ -1053,7 +1053,7 @@ void install_act_account(const AdminReq *r, const char *arg, size_t len) {
     const char *why = validate_person(&pl);
     if (why) { explicit_bzero(&pl, sizeof pl); admin_err(why, NULL); return; }
     admin_log("install.creatingAccount", "user", pl.user, NULL);
-    mkdir("/run/lordos-install", 0700);
+    mkdir("/run/insaneos-install", 0700);
     mkdir(TARGET, 0755);
     umount_target();
     if (mount("/", TARGET, NULL, MS_BIND, NULL) || mount(NULL, TARGET, NULL, MS_PRIVATE, NULL))
@@ -1068,7 +1068,7 @@ void install_act_account(const AdminReq *r, const char *arg, size_t len) {
         FAIL(why);
     }
     /* last, and in this order: until the first file is written the setup still logs in */
-    unlink("/var/lib/systemd/linger/lordos");
+    unlink("/var/lib/systemd/linger/insaneos");
     if (write_file(FIRST_ACCOUNT_DONE, "", 0644) || unlink(FIRST_ACCOUNT)) FAIL("sys.writeFailed", "path", FIRST_ACCOUNT);
     umount_target();
     explicit_bzero(&pl, sizeof pl);
@@ -1076,7 +1076,7 @@ void install_act_account(const AdminReq *r, const char *arg, size_t len) {
 }
 
 /* Reboots without waiting around: a separate process (outlives the helper, which dies with
- * lord-server when the session shuts down) asks systemd to reboot without blocking (--no-block) and, if
+ * insane-server when the session shuts down) asks systemd to reboot without blocking (--no-block) and, if
  * after 20 s the system is still alive and nobody killed it, does sync + reboot(2). */
 void install_act_reboot(const AdminReq *r, const char *arg, size_t len) {
     (void)r; (void)arg; (void)len;
@@ -1087,7 +1087,7 @@ void install_act_reboot(const AdminReq *r, const char *arg, size_t len) {
         setsid();
         if (fork() != 0) _exit(0);
         signal(SIGHUP, SIG_IGN);            /* SIGTERM stays default: if systemd sends it, shutdown is already underway */
-        prctl(PR_SET_NAME, "lordos-reboot");
+        prctl(PR_SET_NAME, "insaneos-reboot");
         int null = open("/dev/null", O_RDWR);
         if (null >= 0) { dup2(null, 0); dup2(null, 1); dup2(null, 2); }
         syscall(SYS_close_range, 3, ~0u, 0);

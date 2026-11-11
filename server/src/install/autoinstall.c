@@ -1,9 +1,9 @@
-/* autoinstall.c — lord-autoinstall, the unattended install from the live ISO (docs/UNATTENDED.md).
+/* autoinstall.c — insane-autoinstall, the unattended install from the live ISO (docs/UNATTENDED.md).
  *
- * The boot menu's "Install automatically" entry (lordos.auto=1, never the default) starts
- * lordos-autoinstall.service before the login screen. This program then:
+ * The boot menu's "Install automatically" entry (insaneos.auto=1, never the default) starts
+ * insaneos-autoinstall.service before the login screen. This program then:
  *
- *   1. looks for lordos-auto.conf on a file system labelled LORDOSAUTO (a small second disk, USB stick
+ *   1. looks for insaneos-auto.conf on a file system labelled INSANEOSAUTO (a small second disk, USB stick
  *      or ISO; never the disk it installs to), mounted read-only;
  *   2. reads it: key = value lines, every key known, every value checked;
  *   3. checks the target: the disk named by `disk` has to exist, be installable (install-disks' own list)
@@ -13,10 +13,10 @@
  *   5. reboots, powers off or stops, as `after` says.
  *
  * Anything missing or wrong stops it before any disk is touched: the live system then starts as usual
- * and the reason is on the console and in the journal (journalctl -u lordos-autoinstall).
+ * and the reason is on the console and in the journal (journalctl -u insaneos-autoinstall).
  *
- *   lord-autoinstall                 the service (needs lordos.auto=1 on the kernel command line)
- *   lord-autoinstall --check FILE    reads FILE and checks it and the disk, installs nothing
+ *   insane-autoinstall                 the service (needs insaneos.auto=1 on the kernel command line)
+ *   insane-autoinstall --check FILE    reads FILE and checks it and the disk, installs nothing
  *
  * admin_say and admin_run* are this program's own: what install.c reports goes to standard output. */
 #ifndef _GNU_SOURCE
@@ -39,10 +39,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define CONF_LABEL  "LORDOSAUTO"
-#define CONF_NAME   "lordos-auto.conf"
-#define CONF_MOUNT  "/run/lordos-auto/media"
-#define RESULT      "/run/lordos-auto/result"
+#define CONF_LABEL  "INSANEOSAUTO"
+#define CONF_NAME   "insaneos-auto.conf"
+#define CONF_MOUNT  "/run/insaneos-auto/media"
+#define RESULT      "/run/insaneos-auto/result"
 #define CONF_MAX    16384
 
 /* ---- the admin helper's interface, for install.c ---- */
@@ -56,7 +56,7 @@ void admin_say(const char *kind, const char *fmt, ...) {
     vsnprintf(last_line, sizeof last_line, fmt, ap);
     va_end(ap);
     snprintf(last_kind, sizeof last_kind, "%s", kind);
-    printf("lordos-auto: %s %s\n", kind, last_line);
+    printf("insaneos-auto: %s %s\n", kind, last_line);
     fflush(stdout);
 }
 void admin_event(const char *fmt, ...) { (void)fmt; }
@@ -118,7 +118,7 @@ static int fail(const char *fmt, ...) {
     va_start(ap, fmt);
     vsnprintf(m, sizeof m, fmt, ap);
     va_end(ap);
-    printf("lordos-auto: STOP %s. Nothing was changed on any disk.\n", m);
+    printf("insaneos-auto: STOP %s. Nothing was changed on any disk.\n", m);
     fflush(stdout);
     FILE *f = fopen(RESULT, "w");
     if (f) { fprintf(f, "STOP %s\n", m); fclose(f); }
@@ -225,16 +225,16 @@ __attribute__((unused)) static void json_str(FILE *f, const char *s) {
 
 /* Everything that can be checked before touching anything; fills the free-space region in mode free. */
 static int check(Conf *c, const char *conf_dev, unsigned long long *free_start, unsigned long long *free_end) {
-    if (!c->disk[0]) return fail("lordos-auto.conf names no disk");
+    if (!c->disk[0]) return fail("insaneos-auto.conf names no disk");
     for (const char *p = c->disk; *p; p++) if (!isalnum((unsigned char)*p)) return fail("the disk name \"%s\" isn't a plain device name", c->disk);
-    if (!c->has_disk_bytes) return fail("lordos-auto.conf has no disk_bytes (the disk's exact size, so no other disk is ever erased)");
+    if (!c->has_disk_bytes) return fail("insaneos-auto.conf has no disk_bytes (the disk's exact size, so no other disk is ever erased)");
     unsigned long long size = disk_size(c->disk);
     if (!size) return fail("there is no disk /dev/%s on this computer", c->disk);
-    if (size != c->disk_bytes) return fail("/dev/%s has %llu bytes, lordos-auto.conf expects %llu", c->disk, size, c->disk_bytes);
+    if (size != c->disk_bytes) return fail("/dev/%s has %llu bytes, insaneos-auto.conf expects %llu", c->disk, size, c->disk_bytes);
     if (conf_dev) {
         char parent[64];
         parent_disk(conf_dev, parent, sizeof parent);
-        if (!strcmp(parent, c->disk)) return fail("/dev/%s holds lordos-auto.conf itself", c->disk);
+        if (!strcmp(parent, c->disk)) return fail("/dev/%s holds insaneos-auto.conf itself", c->disk);
     }
     if (strcmp(c->mode, "erase") && strcmp(c->mode, "free")) return fail("mode is \"%s\": erase or free", c->mode);
     if (!strcmp(c->mode, "erase") && !yes(c->erase)) return fail("mode erase wipes /dev/%s: say so with erase = yes", c->disk);
@@ -273,15 +273,15 @@ __attribute__((unused)) static int cmdline_auto(void) {
     if (!fgets(line, sizeof line, f)) line[0] = 0;
     fclose(f);
     for (char *save = NULL, *t = strtok_r(line, " \n", &save); t; t = strtok_r(NULL, " \n", &save))
-        if (!strcmp(t, "lordos.auto=1")) return 1;
+        if (!strcmp(t, "insaneos.auto=1")) return 1;
     return 0;
 }
 
-/* Mounts the LORDOSAUTO file system read-only and returns its device, or NULL. */
+/* Mounts the INSANEOSAUTO file system read-only and returns its device, or NULL. */
 __attribute__((unused)) static const char *mount_conf(void) {
     static char dev[PATH_MAX];
     if (!realpath("/dev/disk/by-label/" CONF_LABEL, dev)) return NULL;
-    mkdir("/run/lordos-auto", 0700);
+    mkdir("/run/insaneos-auto", 0700);
     mkdir(CONF_MOUNT, 0700);
     umount2(CONF_MOUNT, MNT_DETACH);
     static const char *const fs[] = { "vfat", "iso9660", "ext4", NULL };
@@ -294,9 +294,9 @@ __attribute__((unused)) static const char *mount_conf(void) {
 int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IOLBF, 0);
     const char *check_only = argc == 3 && !strcmp(argv[1], "--check") ? argv[2] : NULL;
-    if (argc > 1 && !check_only) { fprintf(stderr, "usage: lord-autoinstall [--check lordos-auto.conf]\n"); return 2; }
-    if (geteuid() != 0) { fprintf(stderr, "lord-autoinstall: run as root\n"); return 2; }
-    mkdir("/run/lordos-auto", 0700);
+    if (argc > 1 && !check_only) { fprintf(stderr, "usage: insane-autoinstall [--check insaneos-auto.conf]\n"); return 2; }
+    if (geteuid() != 0) { fprintf(stderr, "insane-autoinstall: run as root\n"); return 2; }
+    mkdir("/run/insaneos-auto", 0700);
 
     const char *conf_dev = NULL;
     char path[PATH_MAX];
@@ -304,7 +304,7 @@ int main(int argc, char **argv) {
     else {
         if (!cmdline_auto()) return fail("the computer wasn't started with the boot menu's Install automatically entry");
         if (access("/run/live/medium/live/filesystem.squashfs", R_OK)) return fail("this isn't the live system");
-        printf("lordos-auto: looking for %s on a disk labelled %s\n", CONF_NAME, CONF_LABEL);
+        printf("insaneos-auto: looking for %s on a disk labelled %s\n", CONF_NAME, CONF_LABEL);
         for (int i = 0; i < 20 && !(conf_dev = mount_conf()); i++) sleep(1);     /* a USB stick may come late */
         if (!conf_dev) return fail("no file system labelled %s was found", CONF_LABEL);
         snprintf(path, sizeof path, CONF_MOUNT "/" CONF_NAME);
@@ -318,14 +318,14 @@ int main(int argc, char **argv) {
     const char *why = parse_conf(text, &c, &ln);
     explicit_bzero(text, strlen(text));
     free(text);
-    if (why) return fail("lordos-auto.conf, line %d: %s", ln, why);
+    if (why) return fail("insaneos-auto.conf, line %d: %s", ln, why);
     unsigned long long fs = 0, fe = 0;
     if (check(&c, conf_dev, &fs, &fe)) return 1;
-    printf("lordos-auto: the plan: %s install on /dev/%s (%llu bytes), user %s, computer %s, %s, %s, %s, keyboard %s%s%s, "
+    printf("insaneos-auto: the plan: %s install on /dev/%s (%llu bytes), user %s, computer %s, %s, %s, %s, keyboard %s%s%s, "
            "swap %ld MiB, automatic login %s, SSH key %s, then %s\n",
            c.mode, c.disk, c.disk_bytes, c.user, c.hostname, c.lang, c.locale, c.timezone, c.keyboard,
            c.keyboard_variant[0] ? " " : "", c.keyboard_variant, c.swap, c.autologin, c.ssh_key[0] ? "yes" : "no", c.after);
-    if (check_only) { printf("lordos-auto: CHECK OK, nothing installed\n"); return 0; }
+    if (check_only) { printf("insaneos-auto: CHECK OK, nothing installed\n"); return 0; }
 
     char *json = NULL;
     size_t jl = 0;
@@ -349,7 +349,7 @@ int main(int argc, char **argv) {
     fprintf(j, "}");
     fclose(j);
 
-    printf("lordos-auto: installing; this takes a few minutes\n");
+    printf("insaneos-auto: installing; this takes a few minutes\n");
     install_set_unattended(1);
     AdminReq req = { .id = 1, .user = "root", .home = "/root", .uid = 0, .gid = 0, .admin = 1 };
     install_act_run(&req, json, jl);
@@ -360,11 +360,11 @@ int main(int argc, char **argv) {
     int ok = !strcmp(last_kind, "OK");
     FILE *f = fopen(RESULT, "w");
     if (f) { fprintf(f, "%s %s\n", ok ? "DONE" : "FAILED", last_line); fclose(f); }
-    if (!ok) { printf("lordos-auto: FAILED %s\n", last_line); return 1; }
-    printf("lordos-auto: DONE, Insane OS is installed on /dev/%s\n", c.disk);
+    if (!ok) { printf("insaneos-auto: FAILED %s\n", last_line); return 1; }
+    printf("insaneos-auto: DONE, Insane OS is installed on /dev/%s\n", c.disk);
     sync();
     if (!strcmp(c.after, "stay")) return 0;
-    printf("lordos-auto: %s in 10 seconds\n", !strcmp(c.after, "reboot") ? "restarting" : "powering off");
+    printf("insaneos-auto: %s in 10 seconds\n", !strcmp(c.after, "reboot") ? "restarting" : "powering off");
     sleep(10);
     sync();
     const char *const a[] = { "/usr/bin/systemctl", !strcmp(c.after, "reboot") ? "reboot" : "poweroff", NULL };

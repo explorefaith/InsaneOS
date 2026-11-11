@@ -20,7 +20,7 @@
 #include <linux/openat2.h>
 #endif
 
-/* tools/release/lordos-release.pub.pem: the last 32 bytes of its DER (SubjectPublicKeyInfo).
+/* tools/release/insaneos-release.pub.pem: the last 32 bytes of its DER (SubjectPublicKeyInfo).
  * codesig_test checks that they match the PEM file. */
 const uint8_t codesig_release_key[32] = {
     0xf1, 0xca, 0xb0, 0x0f, 0x31, 0xfe, 0x65, 0x53, 0x1d, 0x06, 0xa3, 0x63, 0x0b, 0x7d, 0x78, 0xd5,
@@ -191,7 +191,7 @@ static double now_ms(void) {
 }
 
 int codesig_release_build(void) {
-#ifdef LORD_CODE_RELEASE
+#ifdef INSANE_CODE_RELEASE
     return 1;
 #else
     return 0;
@@ -287,11 +287,11 @@ done:
 }
 
 const uint8_t *codesig_key(void) {
-#ifdef LORD_CODE_PUBKEY_HEX
+#ifdef INSANE_CODE_PUBKEY_HEX
     /* a test build with a throwaway key (make CODE_PUBKEY=<hex>, docs/SIGNING.md); never a release */
     static uint8_t k[32];
     static int done;
-    if (!done) { done = 1; if (hex_decode(LORD_CODE_PUBKEY_HEX, k, 32)) memset(k, 0, 32); }
+    if (!done) { done = 1; if (hex_decode(INSANE_CODE_PUBKEY_HEX, k, 32)) memset(k, 0, 32); }
     return k;
 #else
     return codesig_release_key;

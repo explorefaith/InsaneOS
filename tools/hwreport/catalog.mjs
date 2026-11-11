@@ -1,9 +1,9 @@
 // catalog.mjs — the tested-hardware catalogue (0.8.7, docs/BENCHMARK.md "0.8.7 — Community hardware reports").
 // From a folder of accepted reports it builds:
-//   (a) the model of lordos.org/hardware (web/build.mjs renders it, en/es/pt, with renderSections below), and
+//   (a) the model of insaneos.org/hardware (web/build.mjs renders it, en/es/pt, with renderSections below), and
 //   (b) the compact snapshot System Information's Compatibility panel reads (assets/hwreport/snapshot.json,
-//       shipped in the lordos package and signed on the maintainer's machine with tools/release/sign-hwsnapshot.sh;
-//       lord-server verifies it in C, server/src/sysreport/hwsnap.c, before JS sees it).
+//       shipped in the insaneos package and signed on the maintainer's machine with tools/release/sign-hwsnapshot.sh;
+//       insane-server verifies it in C, server/src/sysreport/hwsnap.c, before JS sees it).
 //
 //   node tools/hwreport/catalog.mjs [--reports <dir>] [--snapshot <out.json>] [--check]
 //
@@ -59,7 +59,7 @@ export function buildSnapshot(entries) {
   let generated = '';
   for (const { report } of entries) {
     if (report.createdAt > generated) generated = report.createdAt;
-    const v = base(report.lordos);
+    const v = base(report.insaneos);
     if (!v) continue;
     const states = Object.fromEntries((report.compatibility || []).map((c) => [c.id, c.state]));
     for (const d of deviceKeys(report.system)) {
@@ -67,13 +67,13 @@ export function buildSnapshot(entries) {
       if (!['works', 'limits', 'no'].includes(st)) continue;
       const id = `${d.key}\u0000${d.component}\u0000${v}`;
       let e = map.get(id);
-      if (!e) map.set(id, (e = { key: d.key, component: d.component, name: d.name, lordos: v, works: 0, limits: 0, no: 0, reports: 0, references: 0 }));
+      if (!e) map.set(id, (e = { key: d.key, component: d.component, name: d.name, insaneos: v, works: 0, limits: 0, no: 0, reports: 0, references: 0 }));
       e[st]++;
       e.reports++;
       if (report.source === 'reference') e.references++;
     }
   }
-  const devices = [...map.values()].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.component < b.component ? -1 : a.component > b.component ? 1 : cmpVer(a.lordos, b.lordos)));
+  const devices = [...map.values()].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.component < b.component ? -1 : a.component > b.component ? 1 : cmpVer(a.insaneos, b.insaneos)));
   return { format: SNAPSHOT_FORMAT, version: 1, generated, reports: entries.length, devices };
 }
 export const snapshotText = (snap) => `${JSON.stringify(snap)}\n`;
@@ -91,7 +91,7 @@ export function buildModel(entries) {
     const perf = PERF.filter(([, id]) => res[id]).map(([cat, id, unit]) => ({ cat, id, unit, value: res[id].value }));
     if (desk['desk.fps']) perf.push({ cat: 'desktop', id: 'desk.fps', unit: 'fps', value: desk['desk.fps'].value });
     const m = {
-      id: file.replace(/\.json$/, ''), source: report.source, issue, lordos: report.lordos, live: report.live,
+      id: file.replace(/\.json$/, ''), source: report.source, issue, insaneos: report.insaneos, live: report.live,
       name: machineLabel(report), kind: reportKind(report), arch: (s.cpu && s.cpu.arch) || '',
       cpu: cpuShort(s.cpu && s.cpu.model), threads: (s.cpu && s.cpu.threads) || 0,
       memGB: s.memory && s.memory.totalKB ? Math.round(s.memory.totalKB / 1048576) : null,
@@ -106,11 +106,11 @@ export function buildModel(entries) {
       const e = gpus.get(key) || { key, name: m.gpu, driver: g.driver, vendor: gpuVendor(report), works: 0, limits: 0, no: 0, versions: [] };
       const st = compat.gpu && compat.gpu.state;
       if (e[st] != null) e[st]++;
-      if (!e.versions.includes(report.lordos)) e.versions.push(report.lordos);
+      if (!e.versions.includes(report.insaneos)) e.versions.push(report.insaneos);
       gpus.set(key, e);
     }
     for (const [id, c] of Object.entries(compat)) {
-      if (c.state === 'limits' || c.state === 'no') problems.push({ machine: m.name, id, state: c.state, note: c.note, lordos: report.lordos, fixedIn: fixedIn[id] || null, source: report.source, issue });
+      if (c.state === 'limits' || c.state === 'no') problems.push({ machine: m.name, id, state: c.state, note: c.note, insaneos: report.insaneos, fixedIn: fixedIn[id] || null, source: report.source, issue });
     }
   }
   const order = { reference: 0, community: 1 };
@@ -129,7 +129,7 @@ export function renderSections(model, t, esc, issueUrl) {
   const fmt = (v) => (v >= 100 ? Math.round(v).toLocaleString('en-US') : String(Math.round(v * 10) / 10));
   const machines = model.machines.map((m) => `<article class="hw-card">
 <h3>${esc(m.name)}</h3>
-<p class="hw-meta">${esc((t.kind && t.kind[m.kind]) || m.kind)} · ${esc(m.arch)} · Insane OS ${esc(m.lordos)}${m.live ? ` · ${esc(t.live)}` : ''} · ${src(m)}</p>
+<p class="hw-meta">${esc((t.kind && t.kind[m.kind]) || m.kind)} · ${esc(m.arch)} · Insane OS ${esc(m.insaneos)}${m.live ? ` · ${esc(t.live)}` : ''} · ${src(m)}</p>
 <dl class="hw-dl">
 <dt>${esc(t.cpu)}</dt><dd>${esc(m.cpu)}${m.threads ? ` (${m.threads} ${esc(t.threads)})` : ''}</dd>
 <dt>${esc(t.gpu)}</dt><dd>${esc(m.gpu)}${m.driver ? ` <code>${esc(m.driver)}</code>` : ''}</dd>
@@ -141,7 +141,7 @@ ${m.perf.length ? `<p class="hw-perf">${m.perf.map((p) => `<span>${esc((t.perf &
 </article>`).join('\n');
   const gpuRows = model.gpus.map((g) => `<tr><td>${esc(g.name)}</td><td><code>${esc(g.driver)}</code></td><td>${g.works ? st('works') : g.limits ? st('limits') : st('no')}</td><td>${esc(g.versions.join(', '))}</td></tr>`).join('\n');
   const note = (k) => (k && t.notes && t.notes[k] ? ` ${esc(t.notes[k])}` : '');
-  const probRows = model.problems.map((p) => `<tr><td>${esc(p.machine)}</td><td>${comp(p.id)}</td><td>${st(p.state)}${note(p.note)}</td><td>${esc(p.lordos)}</td><td>${p.fixedIn ? esc(p.fixedIn) : '—'}</td></tr>`).join('\n');
+  const probRows = model.problems.map((p) => `<tr><td>${esc(p.machine)}</td><td>${comp(p.id)}</td><td>${st(p.state)}${note(p.note)}</td><td>${esc(p.insaneos)}</td><td>${p.fixedIn ? esc(p.fixedIn) : '—'}</td></tr>`).join('\n');
   return {
     machines,
     gpus: `<div class="hw-table"><table><thead><tr><th>${esc(t.gpu)}</th><th>${esc(t.driver)}</th><th>${esc(t.stateHead)}</th><th>${esc(t.versions)}</th></tr></thead><tbody>${gpuRows}</tbody></table></div>`,

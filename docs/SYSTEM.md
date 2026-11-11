@@ -38,12 +38,12 @@ The Insane OS disk utility, like GNOME Disks.
 | `server/src/disk/disk_admin.c` | The helper's `disk-*` actions (root) |
 | `server/src/disk/smartctl_admin.c`, `smartctl.c` | The helper's `smart-*` actions (smartmontools, root) and their pure checks |
 | `sdk/smart.js`, `sdk/smartparse.js` | `smart.info/health/test/abort/install`, the summaries the Monitor shows, and smartctl's JSON turned into one model |
-| `server/src/ui/js_disk.c`, `sdk/disks.js` | `lord.disks.list()`, `tools()`, `watch(on)`; in the SDK, `useDisks()` and `disks` |
+| `server/src/ui/js_disk.c`, `sdk/disks.js` | `insane.disks.list()`, `tools()`, `watch(on)`; in the SDK, `useDisks()` and `disks` |
 | `apps/disks/` | The app: `index.jsx`, `health.jsx` (SMART), `dialogs.jsx` (format, rename, erase, bootable USB), `icons.jsx` |
 
-**Notifications without polling.** While the app is open (`useDisks`), `lord.disks.watch(true)`
-opens an epoll with two things. That single fd goes into the `lord-server` main loop (`main.c`),
-and JS gets `__lordDisks('change')`, coalesced into one every 150 ms. Closing the app closes
+**Notifications without polling.** While the app is open (`useDisks`), `insane.disks.watch(true)`
+opens an epoll with two things. That single fd goes into the `insane-server` main loop (`main.c`),
+and JS gets `__insaneDisks('change')`, coalesced into one every 150 ms. Closing the app closes
 everything.
 
 - `/proc/self/mountinfo`, which signals `POLLPRI` when mounts change.
@@ -130,8 +130,8 @@ and `disk-eject` or `disk-unmount` from its ⏏ (`FILES.md`).
 - **Keeping the desktop smooth:** zero erase and image copy lower their priority (`nice 10` and
   best-effort `ioprio` 7). The copy uses `O_DIRECT` so it does not fill the page cache with dirty
   pages. The erase calls `fdatasync` every half second.
-- **Cancelling.** The job leaves `/run/lordos/disk-<disk>.job` with its pid and uid.
-  `disk-cancel` checks that the pid is a `lord-admin` (not a recycled pid) and that the request
+- **Cancelling.** The job leaves `/run/insaneos/disk-<disk>.job` with its pid and uid.
+  `disk-cancel` checks that the pid is a `insane-admin` (not a recycled pid) and that the request
   comes from the same user or an administrator.
 - **The app's confirmation:** everything that erases (format, erase, bootable USB) ends in the same
   step.
@@ -202,7 +202,7 @@ self-tests, the error log, the SCT temperature history, the drive database that 
 vendor's attributes, USB bridges — is what Debian's **smartmontools** (`smartctl`) already does well,
 so 0.8.2 uses it instead of growing our own:
 
-- **Installed on first use.** If `/usr/sbin/smartctl` is missing (`lord.disks.tools().smartctl`),
+- **Installed on first use.** If `/usr/sbin/smartctl` is missing (`insane.disks.tools().smartctl`),
   the card offers **Install smartmontools**, which goes through the Store's package engine
   (`admin.run('pkg-install', 'smartmontools')`, fetching the package lists first if there are none),
   exactly like Settings → Sharing installs the SSH server. Only an administrator can. Once installed,
@@ -255,8 +255,8 @@ enables `smartmontools.service`, which starts at the next boot (on VM 119 it was
 started right after the install). Debian's default configuration checks each disk every 30
 minutes with `-n standby` (a resting disk is not woken) and mails root, which goes nowhere on a
 desktop. Insane OS's own notices (`MONITOR.md`) don't need it, so since 0.8.3 it stays off: the
-`lordos` package ships `/usr/lib/systemd/system/smartmontools.service.d/lordos.conf` with
-`ConditionPathExists=/etc/lordos/smartd-enabled`, and migration `004-0.8.3-smartd-off.sh` stops a
+`insaneos` package ships `/usr/lib/systemd/system/smartmontools.service.d/insaneos.conf` with
+`ConditionPathExists=/etc/insaneos/smartd-enabled`, and migration `004-0.8.3-smartd-off.sh` stops a
 smartd already running from an earlier install. An administrator who wants it creates that file
 and runs `systemctl start smartmontools`.
 
@@ -265,7 +265,7 @@ and runs `systemctl start smartmontools`.
 | | |
 |---|---|
 | Reading SMART (QEMU SATA, ATA PASS-THROUGH: 3 commands) | **0.4–0.6 ms** in the helper (`OK <ms>`); with the round trip through the helper, less than a frame |
-| `lord.disks.list()` (4 disks, 5 partitions) | ~3 ms (100 lists in 0.58 s including the test process start; the start alone, 1.3 ms) |
+| `insane.disks.list()` (4 disks, 5 partitions) | ~3 ms (100 lists in 0.58 s including the test process start; the start alone, 1.3 ms) |
 | Change notifications with the app closed | no fd and no timer |
 | 300 MB image to an emulated USB stick (`dummy_hcd` + `g_mass_storage`) | 4.8–5.6 s writing (56–65 MB/s, with SHA-256 on the fly), plus the verification; 10.3 s in total |
 | Our own SHA-256 | ~150 MB/s (4.1 s of CPU for 2 × 300 MB) |
@@ -275,8 +275,8 @@ and runs `systemctl start smartmontools`.
 ```sh
 make -C server build/smart-test && ./server/build/smart-test   # `make -C server test` runs it too
 make -C server build/disk-cli
-./server/build/disk-cli list                         # the same as lord.disks.list()
-sudo ./server/build/disk-cli -u lord -n disk-format 'sdc\nexfat\nPendrive'   # -n: as a non-administrator
+./server/build/disk-cli list                         # the same as insane.disks.list()
+sudo ./server/build/disk-cli -u insane -n disk-format 'sdc\nexfat\nPendrive'   # -n: as a non-administrator
 ```
 
 `disk-cli` runs the actions with an `admin_say` that prints. It is for manual testing: it needs
@@ -342,7 +342,7 @@ modules. Since 0.8.7 `disk-mount` refuses FAT, exFAT, NTFS, HFS+ and APFS withou
 ## Backups (`apps/backup`)
 
 Scheduled backups of the home folder to an external disk or a folder. The
-engine is our own code (no rsync) and runs **as the user**, inside `lord-server`: backing up the
+engine is our own code (no rsync) and runs **as the user**, inside `insane-server`: backing up the
 home folder needs no root, so no new action was added to `admin.c`.
 
 | | |
@@ -379,8 +379,8 @@ home folder needs no root, so no new action was added to `admin.c`.
 - **Symbolic links** are stored as links (their text) and never followed. The walk uses `lstat`
   and opens with `O_NOFOLLOW`; it does not cross into other filesystems (a disk mounted inside the
   home folder) and skips fifos, sockets and devices.
-- **Exclusions:** always `.cache`, `.local/share/Trash`, `.local/share/lordos/apps`,
-  `.local/share/lordos/trash` and `.thumbnails`; the `Insane OS-Backups` folder itself when the
+- **Exclusions:** always `.cache`, `.local/share/Trash`, `.local/share/insaneos/apps`,
+  `.local/share/insaneos/trash` and `.thumbnails`; the `Insane OS-Backups` folder itself when the
   destination is inside the home folder (by device and inode); and the folders the user adds
   (validated relative paths: no `..`, leading `/` or control characters).
 
@@ -407,9 +407,9 @@ In the **Backups** tab: snapshots by day, the tree of each one (with real sizes)
   next to it as "name (restored).ext" (then "… 2", "… 3"; the suffix is translated). With
   "Replace if it exists" it is replaced (written to a temporary file and renamed). If it is
   identical, nothing happens.
-- **The same rules as `lord.fs`:** it only writes in the home folder and the user's disks
+- **The same rules as `insane.fs`:** it only writes in the home folder and the user's disks
   (`fsops_allowed`, on the resolved folder), never in protected places (`fsops_protected`:
-  `~/.local/share/applications`, `~/.config/autostart`, `~/.local/share/lordos/apps`,
+  `~/.local/share/applications`, `~/.config/autostart`, `~/.local/share/insaneos/apps`,
   `settings.json`, `permisos.json`, `backup.json`, and also `firewall.json`, the blocklists, the
   Mail accounts and cache and the Passwords vaults, the whole list in `server/src/fsops.c`). A `.desktop` file planted in a backup is not
   restored, not even through a link in the home folder that points to a protected folder.
@@ -421,7 +421,7 @@ In the **Backups** tab: snapshots by day, the tree of each one (with real sizes)
 
 ### Scheduling, priority and battery (`server/src/backup/backup.c`)
 
-- **A `lord-server` thread**, not a separate process, so no new way to run programs is added. The
+- **A `insane-server` thread**, not a separate process, so no new way to run programs is added. The
   thread sets **nice 19** (`setpriority` on its own tid) and **idle I/O** (`ioprio_set`, class 3)
   and blocks all signals. What it copies is dropped from the page cache
   (`posix_fadvise(DONTNEED)`), so it does not evict what the desktop uses.
@@ -432,16 +432,16 @@ In the **Backups** tab: snapshots by day, the tree of each one (with real sizes)
   source is connected (`/sys/class/power_supply`), the backup does not start, or pauses between
   files, and checks again every 60 s. While copying, the battery is read every 2 s.
 - **The status is pushed to JS:** an `eventfd` in the main loop (`backup_fd`/`backup_dispatch`)
-  calls `__lordBackup(status)` when something changes (at most twice a second with progress). The
+  calls `__insaneBackup(status)` when something changes (at most twice a second with progress). The
   app never polls.
 - **Notifications** (`sdk/notify.js`), even with the app closed: when a backup fails; when a "Back
   Up Now" run succeeds; when a restore finishes; and once per session when backups are encrypted
   and locked.
-- **Configuration:** `~/.config/lordos/backup.json` (`dest`, `interval`:
+- **Configuration:** `~/.config/insaneos/backup.json` (`dest`, `interval`:
   `hourly|daily|weekly|manual`, `pauseOnBattery`, `encrypt`, `exclude`). Only
-  `lord.backup.configure` writes it, and it validates the destination (real path, inside the
-  `lord.fs` roots, writable). It is on the `fsops_protected` list: it decides where the data goes,
-  so an app cannot change it with `lord.fs.write`.
+  `insane.backup.configure` writes it, and it validates the destination (real path, inside the
+  `insane.fs` roots, writable). It is on the `fsops_protected` list: it decides where the data goes,
+  so an app cannot change it with `insane.fs.write`.
 - Errors that reach the UI as codes (`wrong-passphrase`, `not-encrypted`, `plain-backups-exist`,
   `setup-failed`, `no-destination`, `locked`, `interrupted`) are translated by the app
   (`backup.err.*`); other engine messages are in English.
@@ -469,7 +469,7 @@ With Monocypher 4.0.2 (vendored in `third_party/monocypher`, the same copy Passw
 - **Pending:** storing the passphrase in the session keyring (Passwords) so scheduled backups do
   not wait for the user to type it.
 
-### API (`lord.backup`, `server/src/ui/js_backup.c`; in the SDK, `backup` and `useBackup()`)
+### API (`insane.backup`, `server/src/ui/js_backup.c`; in the SDK, `backup` and `useBackup()`)
 
 | Call | |
 |---|---|
@@ -510,7 +510,7 @@ Measured on VM 119 (4 vCPU Xeon Silver 4108, virtio disk on SSD), backing up the
 `ioprio` only has an effect with a scheduler that honours it (`mq-deadline`, BFQ); with `none`
 (NVMe and the VM, by default) what protects the desktop is nice 19, dropping the page cache and
 the thread not competing with the compositor for CPU (wakeup p99 of 2 ms at most). Setting
-`LORD_BACKUP_NOPRIO=1` in the session environment turns off nice and ioprio, for measuring only.
+`INSANE_BACKUP_NOPRIO=1` in the session environment turns off nice and ioprio, for measuring only.
 
 ### Pending
 
@@ -531,7 +531,7 @@ Insane OS's log viewer.
     `adm`) it is read like the user's own; otherwise an administrator gets it through the closed
     action `logs-system`; anyone else is told it needs an administrator;
   - **Kernel:** the kernel's messages (`_TRANSPORT=kernel`) from the readable journal;
-  - **Insane OS:** the session's own logs, `~/.cache/lordos/<name>.log` (`session.log`,
+  - **Insane OS:** the session's own logs, `~/.cache/insaneos/<name>.log` (`session.log`,
     `greeter.log`…).
 - **Filters:** level (all, info and above, warnings and above, errors), time range (15 min, 1 hour,
   24 h, everything), process or unit (`[A-Za-z0-9@._:-]`, the same check as the C side), and free-text
@@ -548,7 +548,7 @@ Insane OS's log viewer.
 
 No libsystemd and no `journalctl`. The files are read with `pread` and a small block cache, never
 `mmap`: journald can shrink or rewrite a file and `mmap` would turn that into `SIGBUS` inside
-lord-server.
+insane-server.
 
 - **Format:** header `LPKSHHRH`, the entry-array chain, ENTRY and DATA objects, in both the regular
   and the **compact** layout (Debian 13's systemd 257 writes compact files). Fields used: `MESSAGE`,
@@ -564,7 +564,7 @@ lord-server.
 
 ### Permissions
 
-- **The user's own logs** are read by lord-server **as the user**: the kernel and journald's ACLs
+- **The user's own logs** are read by insane-server **as the user**: the kernel and journald's ACLs
   decide. `user-<uid>.journal` is readable by its owner; the system journal only by
   `systemd-journal`/`adm`.
 - **System logs for administrators** go through `logs-system` (`server/src/logs/logs_admin.c`,
@@ -574,18 +574,18 @@ lord-server.
     characters), `limit` 1–5000;
   - the paths don't come from the user: `/var/log/journal/<machine-id>/system*.journal*`;
   - it runs no program; it streams one JSON `LOG` line per entry and `OK <n>`.
-- `lord.logs.tail(name)` only reads `~/.cache/lordos/<name>.log` with a validated name.
+- `insane.logs.tail(name)` only reads `~/.cache/insaneos/<name>.log` with a validated name.
 
 ### Live follow without polling
 
-`lord.logs.follow(true)` adds inotify watches on the journal directories and `~/.cache/lordos`.
-Queries run in a lord-server thread; the thread and inotify share one epoll fd in the main loop
+`insane.logs.follow(true)` adds inotify watches on the journal directories and `~/.cache/insaneos`.
+Queries run in a insane-server thread; the thread and inotify share one epoll fd in the main loop
 (`logs_fd()`), so the compositor never waits for a read. When something changes, JS gets
-`__lordLogs('journal')` or `__lordLogs('file', name)` and asks only for the entries after the
+`__insaneLogs('journal')` or `__insaneLogs('file', name)` and asks only for the entries after the
 newest one it has (at most about once a second). With the app closed there is no watch and no
 thread work.
 
-### API (`lord.logs`, `sdk/logs.js`)
+### API (`insane.logs`, `sdk/logs.js`)
 
 | Call | Returns |
 |---|---|
@@ -618,11 +618,11 @@ thread work.
 | | |
 |---|---|
 | ![my logs](logs.png) | ![system](logs-system.png) |
-| My logs: the user's journal, read as the user (164 entries in 5 ms) | System, 24 h, through `logs-system` (lord is in `sudo` but not in `adm`): 3000 entries in 109 ms, with the detail of an entry |
+| My logs: the user's journal, read as the user (164 entries in 5 ms) | System, 24 h, through `logs-system` (insane is in `sudo` but not in `adm`): 3000 entries in 109 ms, with the detail of an entry |
 | ![search](logs-search.png) | ![live](logs-live.png) |
-| Search "lord-netd": its DHCP renewals every ~4.5 min (T1 of a 10 min lease) | Live: `logger` lines sent over ssh after the view opened (7 and 8) appear without reloading |
+| Search "insane-netd": its DHCP renewals every ~4.5 min (T1 of a 10 min lease) | Live: `logger` lines sent over ssh after the view opened (7 and 8) appear without reloading |
 
-Export of the "lord-netd" view: `~/Documentos/Registros-20261018-035235.txt`, 203 lines.
+Export of the "insane-netd" view: `~/Documentos/Registros-20261018-035235.txt`, 203 lines.
 
 ### Pending
 
@@ -653,12 +653,12 @@ the `Date` of the whole theme (the bar, the other apps). Instead:
 - **Validated:** zone names only allow `[A-Za-z0-9/_+-]`, no `..` and no leading `/`; the real path
   (tzdata uses links) must stay inside `/usr/share/zoneinfo/`; regular files up to 1 MB; every count
   and index in the file is checked before reading.
-- **JS:** `lord.time.zoneOffset(zone, unixSeconds)` → `{ offset, abbr, dst }` or `null`
-  (`server/src/ui/js_help.c`, which adds it to the `lord.time` object created by `js_sys.c`).
+- **JS:** `insane.time.zoneOffset(zone, unixSeconds)` → `{ offset, abbr, dst }` or `null`
+  (`server/src/ui/js_help.c`, which adds it to the `insane.time` object created by `js_sys.c`).
 - **Test** (`make -C server test` → `build/tzif-test`, `tests/tzif_test.c`): POSIX rules at known
   instants (Europe, Australia, the US, Nepal, zones without DST), a TZif v2 built inside the test
   with **every truncated prefix** (each must fail without over-reading) and an invalid type index,
-  and a comparison against glibc (`localtime_r` with `TZ`) in 24 tricky zones (Lord Howe, Chatham,
+  and a comparison against glibc (`localtime_r` with `TZ`) in 24 tricky zones (Insane Howe, Chatham,
   Casablanca, Gaza, Santiago, Kathmandu, St Johns…) every ~3 days from 1970 to 2045:
   **216,168 instants, 0 differences** on VM 119.
 
@@ -666,21 +666,21 @@ the `Date` of the whole theme (the bar, the other apps). Instead:
 
 Alarms, the timer and the stopwatch live in the SDK, not in the window: `startShell` calls
 `startAlarms()` once per session. So they ring with Clock closed and also with the session in the
-background (fast user switching, or viewed only from the browser): the `lord-server` session keeps
+background (fast user switching, or viewed only from the browser): the `insane-server` session keeps
 running, and so does its JS.
 
 - **Storage:** `settings.clock = { alarms: [{ id, h, m, days, label, on, snooze, fired }],
-  cities: [...] }` in `~/.config/lordos/settings.json`. `fired` is the instant it last rang, so it
+  cities: [...] }` in `~/.config/insaneos/settings.json`. `fired` is the instant it last rang, so it
   does not ring again when the session restarts.
 - **No polling:** a single `setTimeout` until the next thing due (alarm, snooze or end of the
   timer). It is re-armed when the alarms change (settings subscription).
-- **Clock changes and suspend:** `lord-server` timers use `CLOCK_MONOTONIC`, which does not advance
+- **Clock changes and suspend:** `insane-server` timers use `CLOCK_MONOTONIC`, which does not advance
   while suspended. So the wait is cut into slices —1 minute if something is due within the hour,
   10 minutes otherwise— and each wake-up recomputes with the real time. Anything that should have
   rung less than 10 minutes ago still rings; older ones are dropped (yesterday's alarm does not ring
   after a long suspend). With no alarms and no timer there is no timer at all.
 - **When it rings:** a sticky [notification](#session-notifications-sdknotifyjs) with "Stop" and
-  "Snooze 9 min", plus the `notify` sound from `lord.sound.play` every 2.5 s for one minute or until
+  "Snooze 9 min", plus the `notify` sound from `insane.sound.play` every 2.5 s for one minute or until
   the notification is touched. One-time alarms switch themselves off. The timer notifies the same
   way, with "Repeat".
 - **Menu bar:** `registerStatusItem('clock', …)` shows ⏱ with the time left on the timer (redrawn
@@ -699,7 +699,7 @@ An item with a panel (Cleaner, the network item, a third-party app's menu) place
 the panel opens toward the middle of the button's display (`sdk/statusplace.js`), below a bar at the
 top (Insane Flow's menu bar, a Classic taskbar moved to the top) and above the Classic taskbar at the
 bottom, its default. Before 0.8.8.4 they always opened below, so on the bottom taskbar only their top
-edge showed under the bar ([#29](https://github.com/lordbasex/Insane OS/issues/29)). `classic` draws
+edge showed under the bar ([#29](https://github.com/insaneos/Insane OS/issues/29)). `classic` draws
 the items 40 px tall, as tall as its buttons, so a panel clears the bar. Tested by
 `server/tests/statusplace_test.mjs`.
 
@@ -709,13 +709,13 @@ Insane OS had no notifications (only the short clipboard toast). Now there is on
 mounted by `startShell`, so it shows with any theme:
 
 ```js
-import { notify, dismissNotification, notifyHistory } from '@lordos/sdk';
+import { notify, dismissNotification, notifyHistory } from '@insaneos/sdk';
 const id = notify({
   app: 'backup',                       // its icon and name (appName) in the banner
   title: t('backup.notify.doneTitle'), // texts arrive already translated
   body: '1234 files',
   actions: [{ id: 'open', label: t('backup.notify.open'), primary: true, run: () => wm.open('backup') }],
-  sound: true,                         // the "notify" sound (lord.sound.play)
+  sound: true,                         // the "notify" sound (insane.sound.play)
   sticky: false, timeout: 6000,        // sticky: stays until an action or the × is pressed
   onClose: (reason) => {},             // 'closed', 'action' or the action id
 });
@@ -774,14 +774,14 @@ Markdown text…
 language; each article is read in the interface language and, if that file is missing, in English.
 To add a language, copy the `en` folder and translate.
 
-### Reading: `lord.help` (`server/src/ui/js_help.c`)
+### Reading: `insane.help` (`server/src/ui/js_help.c`)
 
 | Call | Returns |
 |---|---|
-| `lord.help.list(lang)` | `[{ id, title, app, section, order, keywords }]` (each `.md` header) |
-| `lord.help.read(lang, id)` | the article text or `null` |
+| `insane.help.list(lang)` | `[{ id, title, app, section, order, keywords }]` (each `.md` header) |
+| `insane.help.read(lang, id)` | the article text or `null` |
 
-Read-only, like `lord.locale.catalog`: language and id only allow `[a-z0-9-]` (no dots or
+Read-only, like `insane.locale.catalog`: language and id only allow `[a-z0-9-]` (no dots or
 slashes), so nothing outside `<assets>/help/` can be reached; `O_NOFOLLOW`, regular files up to
 256 KB. In the SDK, `help` (`sdk/help.js`): `list`, `read`, `search`, `open(id)`, `startTour()` and
 `link(url)`.

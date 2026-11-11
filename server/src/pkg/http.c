@@ -3,7 +3,7 @@
  * The child (nobody) speaks HTTP: GET with Host, keep-alive, redirects (up to 5; http:// may go to
  * https://, https:// never back to http://), Content-Length, chunked or until the connection closes,
  * If-Modified-Since, and a 30 s maximum time without data. An https:// URL (0.8.5): the child connects
- * the TCP socket itself and hands it to lord-tls (src/tls/tlsproxy.c: fixed path next to lord-server,
+ * the TCP socket itself and hands it to insane-tls (src/tls/tlsproxy.c: fixed path next to insane-server,
  * no arguments, empty environment, the helpers' sandbox), which verifies the server's certificate and
  * host name and relays plain HTTP over a socketpair; the HTTP code below is the same for both. It sends the parent messages over the pipe:
  *   [type 1 byte][item 4][length 4][data]   type H = "status date length", D = data, E = end
@@ -72,8 +72,8 @@ void http_format_date(int64_t t, char *out, size_t n) {
 
 typedef struct {
     int fd;
-    int tls;                            /* fd is lord-tls's plaintext end (an https:// connection) */
-    pid_t helper;                       /* lord-tls, or 0 */
+    int tls;                            /* fd is insane-tls's plaintext end (an https:// connection) */
+    pid_t helper;                       /* insane-tls, or 0 */
     char host[256], port[8];
     char buf[16384];
     size_t pos, len;
@@ -122,7 +122,7 @@ static void conn_close(Conn *c) {
     c->helper = 0;
 }
 
-/* lord-tls: next to this binary (lord-server), root's and not writable by others */
+/* insane-tls: next to this binary (insane-server), root's and not writable by others */
 static int tls_helper_path(char *out, size_t cap) {
     char exe[PATH_MAX];
     ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
@@ -131,13 +131,13 @@ static int tls_helper_path(char *out, size_t cap) {
     char *slash = strrchr(exe, '/');
     if (!slash) return -1;
     *slash = 0;
-    if ((size_t)snprintf(out, cap, "%s/lord-tls", exe) >= cap) return -1;
+    if ((size_t)snprintf(out, cap, "%s/insane-tls", exe) >= cap) return -1;
     struct stat st;
     if (stat(out, &st) || !S_ISREG(st.st_mode) || (st.st_mode & 022) || (st.st_uid != 0 && st.st_uid != getuid())) return -1;
     return 0;
 }
 
-/* Wraps the connected TCP socket `tcp` in TLS: lord-tls gets it as fd 3 and a socketpair as fd 4,
+/* Wraps the connected TCP socket `tcp` in TLS: insane-tls gets it as fd 3 and a socketpair as fd 4,
  * reads "<host>\n" and answers '1' when the certificate checks out. Returns the plaintext end, or -1. */
 static int tls_start(Conn *c, int tcp, const char *host, char *err, size_t errlen) {
     char path[PATH_MAX];
@@ -150,7 +150,7 @@ static int tls_start(Conn *c, int tcp, const char *host, char *err, size_t errle
         int a = fcntl(tcp, F_DUPFD, 10), b = fcntl(sp[1], F_DUPFD, 10);
         if (a < 0 || b < 0 || dup2(a, 3) != 3 || dup2(b, 4) != 4) _exit(127);
         syscall(SYS_close_range, 5, ~0u, 0);
-        const char *const argv[] = { "lord-tls", NULL };
+        const char *const argv[] = { "insane-tls", NULL };
         char *const envp[] = { NULL };
         execve(path, (char *const *)argv, envp);
         _exit(127);
@@ -328,7 +328,7 @@ static void get_one(Conn *c, const FetchItem *it, uint32_t idx, uint64_t from) {
         int retry = c->fd >= 0;             /* a reused connection may have been closed */
     again:
         if (conn_open(c, host, port, tls, err, sizeof err)) break;
-        /* '+' as %2B, as apt does: an S3 origin (lordos.org) reads a bare '+' as a space, so
+        /* '+' as %2B, as apt does: an S3 origin (insaneos.org) reads a bare '+' as a space, so
          * pool/rpi/k/kms++-utils/… would be a 404 */
         char epath[3 * sizeof url];         /* every byte of the URL could be a '+' */
         size_t en = 0;
@@ -449,7 +449,7 @@ out:
 
 /* Switches to nobody: no groups, unable to go back to root. */
 static int drop_to_nobody(void) {
-#ifdef LORD_HTTP_TEST                   /* tests/http_resume_test.c, as an ordinary user: nothing to drop */
+#ifdef INSANE_HTTP_TEST                   /* tests/http_resume_test.c, as an ordinary user: nothing to drop */
     if (geteuid() != 0) return chdir("/");
 #endif
     struct passwd *pw = getpwnam("nobody");
@@ -476,7 +476,7 @@ static int read_full(int fd, void *buf, size_t n) {
     return 0;
 }
 
-int fetch_batch(FetchItem *items, int n, FetchProgress cb, void *ud) { return fetch_batch_in(items, n, cb, ud, "lordos-net-store.scope"); }
+int fetch_batch(FetchItem *items, int n, FetchProgress cb, void *ud) { return fetch_batch_in(items, n, cb, ud, "insaneos-net-store.scope"); }
 
 int fetch_batch_in(FetchItem *items, int n, FetchProgress cb, void *ud, const char *scope) {
     if (n <= 0) return 0;
@@ -508,10 +508,10 @@ int fetch_batch_in(FetchItem *items, int n, FetchProgress cb, void *ud, const ch
         syscall(SYS_close_range, 4, ~0u, 0);
         signal(SIGPIPE, SIG_IGN);
         prctl(PR_SET_PDEATHSIG, SIGKILL);
-        /* (0.8.5) in lordos-net-store.scope, so the Store and the updates are their own app for the
-         * firewall and Monitor → Network (lordos:store); Machines' downloads in lordos-net-machines.scope
-         * (0.8.9, lordos:machines); outside a Insane OS session, where it is */
-        if (getenv("LORDOS_SESSIOND")) cgroup_enter_root(scope);
+        /* (0.8.5) in insaneos-net-store.scope, so the Store and the updates are their own app for the
+         * firewall and Monitor → Network (insaneos:store); Machines' downloads in insaneos-net-machines.scope
+         * (0.8.9, insaneos:machines); outside a Insane OS session, where it is */
+        if (getenv("INSANEOS_SESSIOND")) cgroup_enter_root(scope);
         if (drop_to_nobody()) _exit(2);
         static Conn c;
         c.fd = -1; c.out = 3; c.tls = 0; c.helper = 0; c.ndead = 0;

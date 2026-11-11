@@ -1,13 +1,13 @@
 // ui.jsx — small pieces of Passwords: category and item icons, sheets (dialogs), the strength
 // bar, a QR code image, a multi-line field, a file picker and pop-up menus. Spacing, type and
 // controls follow docs/DESIGN.md; icons are drawn (glyphs.jsx), never color emoji.
-import { View, Text, Image, useTheme, useStore, createStore, Button, ScrollView, TextInput, ToolbarButton, takeTextFocus, releaseTextFocus, fs, t, Overlay, FilePicker as SysFilePicker } from '@lordos/sdk';
+import { View, Text, Image, useTheme, useStore, createStore, Button, ScrollView, TextInput, ToolbarButton, takeTextFocus, releaseTextFocus, fs, t, Overlay, FilePicker as SysFilePicker } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { builtinById } from './templates.js';
 import { appMode } from './api.js';
 import { Glyph, Tile, iconKind, tint } from './glyphs.jsx';
 
-// A picked file is a path (shell: lord-server opens it, validated like lord.fs) or { fd, name }
+// A picked file is a path (shell: insane-server opens it, validated like insane.fs) or { fd, name }
 // (app process: the system dialog opened it). fileReq builds the request options for either.
 export function fileReq(...items) {
   const files = [], fds = [];
@@ -179,7 +179,7 @@ export function StrengthBar({ score, bits }) {
   );
 }
 
-// ---- QR code (hex rows from lord-vault → pixels) ----
+// ---- QR code (hex rows from insane-vault → pixels) ----
 
 export function QrImage({ qr, scale = 5 }) {
   if (!qr || !qr.size) return null;
@@ -210,7 +210,7 @@ export function TextArea({ value, onChange, placeholder, minHeight = 90, mono, s
   useEffect(() => () => releaseTextFocus(token), []);
   const onKey = (e) => {
     const { value: v, onChange: set } = latest.current;
-    if (e.ctrl && e.base === 'v') { try { set(v + lord.clipboard.get()); } catch (err) { /* no clipboard permission */ } return; }
+    if (e.ctrl && e.base === 'v') { try { set(v + insane.clipboard.get()); } catch (err) { /* no clipboard permission */ } return; }
     if (e.key === 'Backspace') set([...v].slice(0, -1).join(''));
     else if (e.key === 'Enter') set(`${v}\n`);
     else if (e.key === 'Tab') set(`${v}  `);
@@ -229,14 +229,14 @@ export function TextArea({ value, onChange, placeholder, minHeight = 90, mono, s
 
 // ---- pick a file (home folder and the user's disks: USB sticks) ----
 
-// The system file dialog everywhere: in the app process the powerbox (lord-server draws it and hands over
+// The system file dialog everywhere: in the app process the powerbox (insane-server draws it and hands over
 // only the chosen file's fd), in the shell the same dialog drawn like Files (sdk/filepicker.jsx), over
 // the whole window. `inline` is kept for the callers: the dialog covers the window either way.
 export function FilePicker({ title, save, suggest = '', onPick, onClose, filter }) {
   useEffect(() => {
     if (!appMode) return;
     let r = null;
-    try { r = lord.broker.pick(save ? 1 : 0, suggest || ''); } catch (e) { r = null; }
+    try { r = insane.broker.pick(save ? 1 : 0, suggest || ''); } catch (e) { r = null; }
     if (r && r.fd >= 0) onPick({ fd: r.fd, name: r.name }); else onClose();
   }, []);
   const key = useRef(null);

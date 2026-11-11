@@ -38,7 +38,7 @@ def main():
     dev = struct.pack("80sHHHHi", b"keylag virtual keyboard", 3, 0x1234, 0x5678, 1, 0) + b"\0" * (4 * 64 * 4)
     os.write(fd, dev)
     fcntl.ioctl(fd, UI_DEV_CREATE)
-    time.sleep(2.0)                 # lord-sessiond sees it (inotify) and lends it to the session
+    time.sleep(2.0)                 # insane-sessiond sees it (inotify) and lends it to the session
     try:
         for i in range(count):
             code = LETTERS[i % len(LETTERS)]

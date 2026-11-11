@@ -3,8 +3,8 @@
  * These are pure functions (they don't touch the disk) so they can be tested on their own (tests/arcpath_test.c). The
  * helper (h_arc.c) also opens each folder with O_NOFOLLOW from the destination fd, creates the
  * files with O_EXCL and runs under Landlock with write access only below that folder: three layers. */
-#ifndef LORD_DOC_ARCPATH_H
-#define LORD_DOC_ARCPATH_H
+#ifndef INSANE_DOC_ARCPATH_H
+#define INSANE_DOC_ARCPATH_H
 
 #include <stddef.h>
 

@@ -1,8 +1,8 @@
 /* snd.h — Insane OS sound: our own PipeWire client over the PulseAudio protocol that
- * pipewire-pulse serves (see snd.c and docs/SOUND.md). Runs inside lord-server, as the
+ * pipewire-pulse serves (see snd.c and docs/SOUND.md). Runs inside insane-server, as the
  * session user. */
-#ifndef LORD_SND_H
-#define LORD_SND_H
+#ifndef INSANE_SND_H
+#define INSANE_SND_H
 
 #include <stdint.h>
 

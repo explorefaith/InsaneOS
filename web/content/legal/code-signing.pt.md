@@ -5,24 +5,24 @@ O Insane OS assina o que publica para que você possa confirmar que um arquivo v
 Cada arquivo de uma versão no GitHub (a imagem ISO, a imagem para Raspberry Pi 5 e o pacote `.deb`) aparece com o seu SHA-256 num arquivo chamado `SHA256SUMS`. O `SHA256SUMS` é assinado com a **chave de versões do Insane OS**:
 
 - `SHA256SUMS.sig` é o base64 da assinatura **Ed25519** de 64 bytes sobre os bytes exatos do `SHA256SUMS`.
-- Chave pública: [lordos-release.pub.pem](/lordos-release.pub.pem), também no repositório como [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/Insane OS/blob/main/tools/release/lordos-release.pub.pem).
+- Chave pública: [insaneos-release.pub.pem](/insaneos-release.pub.pem), também no repositório como [`tools/release/insaneos-release.pub.pem`](https://github.com/insaneos/Insane OS/blob/main/tools/release/insaneos-release.pub.pem).
 - Impressão digital (SHA-256 da chave pública em DER):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
-O script de instalação para Debian (`lordos.org/install.sh`) traz a mesma chave pública embutida. Ele confere a assinatura antes de baixar o `.deb`, depois confere o `.deb` contra o `SHA256SUMS`, e não instala nada se alguma das verificações falhar.
+O script de instalação para Debian (`insaneos.org/install.sh`) traz a mesma chave pública embutida. Ele confere a assinatura antes de baixar o `.deb`, depois confere o `.deb` contra o `SHA256SUMS`, e não instala nada se alguma das verificações falhar.
 
 Para conferir um download manualmente, com o OpenSSL 3, na pasta onde você salvou os arquivos:
 
 ```
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 ```
 
 O primeiro comando decodifica a assinatura, o segundo precisa mostrar `Signature Verified Successfully` e o terceiro precisa mostrar `OK` para cada arquivo que você baixou. Para conferir a própria chave, compare a impressão digital dela com a de cima:
 
 ```
-openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum
+openssl pkey -pubin -in insaneos-release.pub.pem -outform DER | sha256sum
 ```
 
 ## Apps do Insane OS (.lpk) e a Loja
@@ -73,7 +73,7 @@ No Raspberry Pi 5, o kernel e o firmware vêm do arquivo do Raspberry Pi (`archi
 Se algum dia suspeitarmos que uma chave privada foi exposta, vamos:
 
 1. parar de usá-la e **revogá-la**: para os pacotes `.lpk`, pela lista de revogação do catálogo assinado; para as versões, removendo-a do script de instalação;
-2. criar uma **chave nova** e anunciar a impressão digital dela no lordos.org (nesta página e na [Política de segurança](/legal/security/)) e no GitHub;
+2. criar uma **chave nova** e anunciar a impressão digital dela no insaneos.org (nesta página e na [Política de segurança](/legal/security/)) e no GitHub;
 3. **assinar de novo** as versões e os pacotes afetados com a chave nova, e publicar um aviso explicando o que aconteceu e o que você deve conferir.
 
 Se a impressão digital que você vê não coincidir com a desta página, não instale o arquivo. Avise-nos pelo [nosso formulário de contato](https://www.iperfex.com/contacto/?lang=pt), com "Security" no assunto.

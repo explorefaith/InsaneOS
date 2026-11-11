@@ -1,18 +1,18 @@
-/* js_wm.c — lord.wm: window dragging in C (grab.c, docs/WINDOWS.md).
+/* js_wm.c — insane.wm: window dragging in C (grab.c, docs/WINDOWS.md).
  *
- *   lord.wm.grab(node, edges, { inset, minW, minH, maxW, maxH, minTop }) → bool
+ *   insane.wm.grab(node, edges, { inset, minW, minH, maxW, maxH, minTop }) → bool
  *       edges 0 = move; 1 top, 2 bottom, 4 left, 8 right (like xdg_toplevel.resize).
- *       Only with a button held down; lord-server tracks it until it is released.
- *   lord.wm.cancel()                 also stops a scripted move
- *   lord.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) → bool
+ *       Only with a button held down; insane-server tracks it until it is released.
+ *   insane.wm.cancel()                 also stops a scripted move
+ *   insane.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) → bool
  *       InsaneBench's desktop scene (docs/BENCHMARK.md): the node moves along a figure of eight, rx × ry px,
  *       one turn every periodMs (500–60000), one step per frame through the drag's own path (grab.c),
  *       with no button held; pointer input or cancel() stops it. No end notice: the scene's window closes.
- *   lord.wm.pointer() → { x, y, active, edges }: the pointer now and the drag in progress (no
+ *   insane.wm.pointer() → { x, y, active, edges }: the pointer now and the drag in progress (no
  *       arguments, read only). The theme polls it while a window moves, for the snapping preview.
- * On release: __lordWm('end', { node, edges, dx, dy, dw, dh }) with the node's change.
+ * On release: __insaneWm('end', { node, edges, dx, dy, dw, dh }) with the node's change.
  *
- *   lord.portal.set({ dark, accent: '#rrggbb', accentName, buttons })
+ *   insane.portal.set({ dark, accent: '#rrggbb', accentName, buttons })
  *       what GTK, GNOME and Qt apps read through org.freedesktop.portal.Settings (portal.c). */
 #include "js_wm.h"
 #include "grab.h"
@@ -69,7 +69,7 @@ static JSValue f_grab(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     return JS_NewBool(c, grab_begin(node, edges, &lim) == 0);
 }
 
-/* InsaneBench's scene: lord.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) */
+/* InsaneBench's scene: insane.wm.script(node, { rx, ry, periodMs, inset, minTop, areas }) */
 static JSValue f_script(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     int32_t node = 0;
@@ -109,7 +109,7 @@ static int get_word(JSContext *c, JSValueConst o, const char *k, char *out, size
     return ok;
 }
 
-/* lord.wm.nodePid(node) → the Wayland client pid of that window's toplevel, 0 when there is
+/* insane.wm.nodePid(node) → the Wayland client pid of that window's toplevel, 0 when there is
  * none (native windows, X11 ones, our own process). The shell reports the pids of the windows
  * on screen so the pressure-freeze helper only ever stops real background processes. */
 static JSValue f_nodepid(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -150,20 +150,20 @@ static const JSCFunctionListEntry wm_funcs[] = {
     JS_CFUNC_DEF("nodePid", 1, f_nodepid),
 };
 
-void js_wm_register(JSContext *c, JSValue lord) {
+void js_wm_register(JSContext *c, JSValue insane) {
     wctx = c;
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, wm_funcs, sizeof wm_funcs / sizeof wm_funcs[0]);
-    JS_SetPropertyStr(c, lord, "wm", o);
+    JS_SetPropertyStr(c, insane, "wm", o);
     JSValue p = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, p, portal_funcs, sizeof portal_funcs / sizeof portal_funcs[0]);
-    JS_SetPropertyStr(c, lord, "portal", p);
+    JS_SetPropertyStr(c, insane, "portal", p);
 }
 
 void js_wm_end(int node, int edges, float dx, float dy, float dw, float dh) {
     JSContext *c = wctx;
     if (!c) return;
-    JSValue g = JS_GetGlobalObject(c), f = JS_GetPropertyStr(c, g, "__lordWm");
+    JSValue g = JS_GetGlobalObject(c), f = JS_GetPropertyStr(c, g, "__insaneWm");
     if (JS_IsFunction(c, f)) {
         JSValue d = JS_NewObject(c);
         JS_SetPropertyStr(c, d, "node", JS_NewInt32(c, node));
@@ -177,7 +177,7 @@ void js_wm_end(int node, int edges, float dx, float dy, float dw, float dh) {
         if (JS_IsException(r)) {
             JSValue e = JS_GetException(c);
             const char *m = JS_ToCString(c, e);
-            fprintf(stderr, "js: __lordWm: %s\n", m ? m : "(exception)");
+            fprintf(stderr, "js: __insaneWm: %s\n", m ? m : "(exception)");
             if (m) JS_FreeCString(c, m);
             JS_FreeValue(c, e);
         }

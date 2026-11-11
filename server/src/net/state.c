@@ -1,4 +1,4 @@
-/* state.c — network state without root, for lord-server: interfaces, addresses, routes,
+/* state.c — network state without root, for insane-server: interfaces, addresses, routes,
  * counters (rtnetlink dumps), DNS, who manages each interface, and change notifications. */
 #include "net.h"
 #include "netpriv.h"
@@ -257,12 +257,12 @@ char *net_interfaces_json(void) {
         const char *type = link_type(k);
         char conf[128];
         snprintf(conf, sizeof conf, NET_IF_DIR "/%s.conf", k->name);
-        const char *managed = managed_by_system(k->name) ? "system" : access(conf, F_OK) == 0 ? "lordos" : "none";
+        const char *managed = managed_by_system(k->name) ? "system" : access(conf, F_OK) == 0 ? "insaneos" : "none";
         if (!strcmp(type, "wireguard") || !strcmp(type, "tun")) {
             /* those of Insane OS's VPNs */
             char meta[128];
             snprintf(meta, sizeof meta, NET_RUN_DIR "/vpn/%s", k->name);
-            if (access(meta, F_OK) == 0) managed = "lordos";
+            if (access(meta, F_OK) == 0) managed = "insaneos";
         }
         char master[IFNAMSIZ] = "";
         if (k->master) if_indextoname((unsigned)k->master, master);

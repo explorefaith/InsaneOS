@@ -85,7 +85,7 @@ void rl_expire(RlTable *t, double now) {
 }
 
 int rl_format(const RlTable *t, double now, char *out, size_t n) {
-    int k = snprintf(out, n, "# lord-sessiond: remote desktop lockout (key fails last_fail strikes last_strike until). Do not edit.\n");
+    int k = snprintf(out, n, "# insane-sessiond: remote desktop lockout (key fails last_fail strikes last_strike until). Do not edit.\n");
     if (k < 0 || (size_t)k >= n) return -1;
     size_t o = (size_t)k;
     for (int i = 0; i < RL_MAX; i++) {

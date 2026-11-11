@@ -1,4 +1,4 @@
-// ocr.js — Screenshots' "copy the text" (media.ocr, the lord-ocr helper), the pure part
+// ocr.js — Screenshots' "copy the text" (media.ocr, the insane-ocr helper), the pure part
 // (server/tests/screenshots_model_test.mjs): which Tesseract languages to read with, and how the text is cleaned.
 
 // The interface's languages (settings.languages, "es", "pt-BR"…) as Tesseract's data names, first (they win where

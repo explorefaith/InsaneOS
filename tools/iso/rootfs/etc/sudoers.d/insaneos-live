@@ -1,0 +1,2 @@
+# Live ISO: the test user has passwordless sudo.
+insaneos ALL=(ALL) NOPASSWD: ALL

@@ -1,5 +1,5 @@
-/* rdeskhelper.c — lord-rdesk: one remote desktop connection. It runs in a scope of its own (firewall app
- * desktop:lordos-rdesk), connects, drops into the helper sandbox, and only ever draws into the shared picture. The
+/* rdeskhelper.c — insane-rdesk: one remote desktop connection. It runs in a scope of its own (firewall app
+ * desktop:insaneos-rdesk), connects, drops into the helper sandbox, and only ever draws into the shared picture. The
  * engine shows that picture; there is no window, toolkit or display connection here. */
 #include "proto.h"
 #include "rfb.h"
@@ -28,7 +28,7 @@
 
 extern ARingHdr *rd_audio_ring;     /* rdesksnd.c */
 
-/* the audio ring lord-server sends after the job, mapped before the sandbox; NULL if it isn't one */
+/* the audio ring insane-server sends after the job, mapped before the sandbox; NULL if it isn't one */
 static ARingHdr *take_audio_ring(void) {
     RdMsg m;
     int fd = -1;
@@ -43,7 +43,7 @@ static ARingHdr *take_audio_ring(void) {
     if (m.type == RD_AUDIO_SHM && !fstat(fd, &st) && st.st_size > AR_HDR && st.st_size <= AR_HDR + (1 << 22)) {
         void *p = mmap(NULL, (size_t)st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         h = p == MAP_FAILED ? NULL : p;
-        /* a ring of the size lord-server says, inside the mapping, a power of two */
+        /* a ring of the size insane-server says, inside the mapping, a power of two */
         if (h && (h->magic != AR_MAGIC || h->size == 0 || (h->size & (h->size - 1)) || ar_bytes(h->size) > (size_t)st.st_size)) { munmap(p, (size_t)st.st_size); h = NULL; }
     }
     close(fd);
@@ -58,7 +58,7 @@ void rd_send(uint32_t type, int a, int b, int c, const char *text) {
     send(CH, &m, sizeof m, MSG_NOSIGNAL);
 }
 
-/* the picture for this size: asks lord-server and waits for the memfd */
+/* the picture for this size: asks insane-server and waits for the memfd */
 uint32_t *rd_picture(int w, int h) {
     static uint32_t *map;
     static size_t len;
@@ -154,7 +154,7 @@ int main(void) {
     if (sound == RD_SOUND_HERE && !(rd_audio_ring = take_audio_ring())) sound = RD_SOUND_NONE;
     int sock = dial(host, port ? port : rdp ? 3389 : 5900);
     if (sock < 0) { rd_send(RD_STATE, sock == -2 ? RS_NOTFOUND : RS_UNREACHABLE, 0, 0, NULL); return 1; }
-    /* it stays in the scope lord-server placed it in, with that scope's memory limits. connected: no new sockets and no files from here on. RDP's library keeps /etc/ssl and its own crypto config */
+    /* it stays in the scope insane-server placed it in, with that scope's memory limits. connected: no new sockets and no files from here on. RDP's library keeps /etc/ssl and its own crypto config */
     RdView view = { .w = (int)json_num(d.root, "w", 0), .h = (int)json_num(d.root, "h", 0), .admin = json_num(d.root, "admin", 0) > 0,
                     .scale = (int)json_num(d.root, "scale", 0), .sound = sound, .depth = (int)json_num(d.root, "depth", 32) };
     int rofds[9], rwfds[9], nro = 0, nrw = 0;

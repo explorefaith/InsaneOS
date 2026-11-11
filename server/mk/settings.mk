@@ -1,6 +1,6 @@
 # Settings' hardware pages (src/hw, docs/SETTINGS.md): displays (EDID, modes, Night Light),
 # Bluetooth (BlueZ over our own D-Bus client), battery and power, date and time, default apps.
-# Objects are added to lord-server as extra prerequisites ($^ in its link rule takes them).
+# Objects are added to insane-server as extra prerequisites ($^ in its link rule takes them).
 HW_SRC := src/hw/edid.c src/hw/modes.c src/hw/night.c src/hw/mimeapps.c src/hw/power.c src/hw/jbuf.c src/hw/display.c src/hw/accel.c \
           src/hw/uevent.c src/hw/sysbus.c src/hw/bt.c src/hw/ppd.c src/hw/hw.c src/hw/hw_admin.c src/bench/boottest.c src/hw/defaults.c src/hw/notifyd.c src/hw/hwscan.c src/hw/brframe.c src/hw/pkagent.c src/hw/pkfield.c src/hw/sleeplock.c src/ui/js_hw.c \
           src/sysreport/sysreport.c src/sysreport/sysreport_out.c src/sysreport/periph.c src/sysreport/ids.c src/sysreport/smbios.c src/sysreport/facts.c src/sysreport/hwsnap.c src/hw/rpifw.c \
@@ -8,7 +8,7 @@ HW_SRC := src/hw/edid.c src/hw/modes.c src/hw/night.c src/hw/mimeapps.c src/hw/p
 HW_HDR := $(wildcard src/hw/*.h) src/apps.h $(wildcard src/sysreport/*.h) $(wildcard src/fan/*.h) src/ui/js_hw.h src/ui/js_fan.h src/kms.h src/vault/dbus.h
 HW_OBJ := $(HW_SRC:src/%.c=build/obj/%.o)
 $(HW_OBJ): $(HW_HDR)
-build/lord-server: $(HW_OBJ)
+build/insane-server: $(HW_OBJ)
 # pure parts: EDID, mode selection, gamma/temperature/sun math, mimeapps.list and globs2, power_supply,
 # and the admin actions' validators
 test: build/settings-hw-test
@@ -52,10 +52,10 @@ build/pkfield-test: tests/pkfield_test.c src/hw/pkfield.c src/hw/pkfield.h
 	@mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/pkfield_test.c src/hw/pkfield.c
 	./$@ || { rm -f $@; exit 1; }
-all: build/lord-pkexec
-build/lord-pkexec: src/hw/lord_pkexec.c
+all: build/insane-pkexec
+build/insane-pkexec: src/hw/insane_pkexec.c
 	@mkdir -p build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ src/hw/lord_pkexec.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ src/hw/insane_pkexec.c
 # automatic rotation (accel.c, issue #60): the mount matrix, the orientation with hysteresis, the
 # debounce, and finding the screen's accelerometer in a fake sysfs/udev tree; `build/accel-test --live`
 # reads this machine's

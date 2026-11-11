@@ -1,6 +1,6 @@
 /* apps.h — installed Linux apps (.desktop files) and their launcher (see apps.c). */
-#ifndef LORD_APPS_H
-#define LORD_APPS_H
+#ifndef INSANE_APPS_H
+#define INSANE_APPS_H
 
 #include <limits.h>
 #include <stddef.h>
@@ -30,7 +30,7 @@ int apps_launch(const char *id);
 int apps_launch_with(const char *id, const char *path);
 int apps_launch_uri(const char *id, const char *uri);    /* vnc:// or rdp:// for the app that declares the scheme */
 /* The app that opens files of a MIME type, as apps_launch_with(id = "") picks it: out gets its desktop
- * id ("firefox-esr.desktop", or the user's "lordos-<app>.desktop"). Order: [Default Applications] of
+ * id ("firefox-esr.desktop", or the user's "insaneos-<app>.desktop"). Order: [Default Applications] of
  * the mimeapps.list files (the user's first, then the system's: /etc/xdg,
  * /usr/local/share/applications, /usr/share/applications, then defaults.list), then their [Added
  * Associations], then the installed apps whose MimeType declares the type, in mimeinfo.cache order

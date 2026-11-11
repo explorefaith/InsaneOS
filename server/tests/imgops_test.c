@@ -1,7 +1,7 @@
 /* imgops_test.c — the image editor's pixel operations (src/media/imgops.c, issue #30): clipping of
  * a selection, the solid-fill and pixelate redactions (nothing of the original left inside, nothing
  * touched outside), resize (sizes, flat colors stay exact, area average when shrinking, transparency
- * kept), quarter turns (every pixel lands where lord-media's edit job puts it) and the rounded corners
+ * kept), quarter turns (every pixel lands where insane-media's edit job puts it) and the rounded corners
  * of a window capture (issue #70).
  *
  *   make -C server build/imgops-test && server/build/imgops-test

@@ -49,10 +49,10 @@
         "es": "Dejá activado Preparar el primer arranque y la placa arranca lista. Todo se puede cambiar después en Ajustes.",
         "pt": "Deixe Preparar o primeiro boot ligado e a placa já inicia pronta. Tudo pode ser mudado depois em Ajustes." },
       { "box": [431, 398, 1123, 46],
-        "en": "The computer name is how you'll find the board on your network: lordos-pi.local.",
-        "say": "The computer name is how you'll find the board on your network: lord O S pie dot local.",
-        "es": "El nombre de la computadora es cómo vas a encontrar la placa en tu red: lordos-pi.local.",
-        "pt": "O nome do computador é como você vai achar a placa na sua rede: lordos-pi.local." }
+        "en": "The computer name is how you'll find the board on your network: insaneos-pi.local.",
+        "say": "The computer name is how you'll find the board on your network: insane O S pie dot local.",
+        "es": "El nombre de la computadora es cómo vas a encontrar la placa en tu red: insaneos-pi.local.",
+        "pt": "O nome do computador é como você vai achar a placa na sua rede: insaneos-pi.local." }
     ]},
     { "id": "user", "shot": "06-tab-user", "step": 4, "title": "User", "cues": [
       { "box": [550, 276, 83, 46],

@@ -38,7 +38,7 @@ static int write_atomic(const char *path, const char *text) {
 }
 
 /* For tests only: a folder that stands for "/" when the system files are read (the fake XDG trees of
- * tests/defaults_test.c). Empty in lord-server: nothing else sets it. */
+ * tests/defaults_test.c). Empty in insane-server: nothing else sets it. */
 static char sysroot[256];
 void defaults_set_root(const char *root) { snprintf(sysroot, sizeof sysroot, "%s", root && root[0] == '/' ? root : ""); }
 const char *defaults_root(void) { return sysroot; }

@@ -2,14 +2,14 @@
 // pill, the featured banner, the facts row of an app page and the sidebar glyphs. Data comes from the
 // pages (debian.js, ai.js, index.jsx); these pieces only draw.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text, Image, useTheme, useStore, settings, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Image, useTheme, useStore, settings, typeScale, spacing } from '@insaneos/sdk';
 
 export const CARD_BASIS = 250;
 const CARD_HEIGHT = 148;     // two lines of summary and the foot, so the action keeps the card's padding
 
 // Sidebar glyphs: monochrome symbols drawn in the accent color (docs/DESIGN.md, "Icons").
 export const GLYPH = {
-  discover: '✦', suggested: '◫', installed: '▣', updates: '↻', lordos: '◆', ai: '✧', commercial: '★', remote: '⇄', suites: '❖',
+  discover: '✦', suggested: '◫', installed: '▣', updates: '↻', insaneos: '◆', ai: '✧', commercial: '★', remote: '⇄', suites: '❖',
   AudioVideo: '♪', Development: '⌘', Education: 'ⓘ', Game: '♟', Graphics: '◐', Network: '⇄', Office: '▤',
   Science: '⚛', System: '⚙', Utility: '⚒',
 };

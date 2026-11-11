@@ -6,7 +6,7 @@
 import {
   View, Text, Image, MediaView, ScrollView, fs, FilePicker, Toggle, Terminal, Overlay, term, addListener, media, screen, openFileWithApps, useAppWindow, useWindowState, useStore, wm, windows, clipboard, notify, revealPath,
   t as tr,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { stateView, actionsFor, toPicture, guestSize, refreshRate, wheelSteps, budgetCheck, CTRL_ALT_DEL, windowTitle, closeChoice, resolutions, agentLines, agentTone, clipTo, clipFrom, thumbSrc, AGENT_CAPS, mountCommand } from './model.js';
 import { readMeta, writeMeta } from './meta.js';
@@ -14,7 +14,7 @@ import { usePal, has, Btn, IconBtn, IconMenuBtn, BarGroup, BarSep, icons, StateD
 import { openConfigure, openLogs, openSnapshots } from './library.jsx';
 
 const BAR = 48;
-const now = () => (typeof lord !== 'undefined' && lord.now ? lord.now() : Date.now());
+const now = () => (typeof insane !== 'undefined' && insane.now ? insane.now() : Date.now());
 const THUMB_MS = 5000;
 // what changes the screen (frames don't: the media node repaints by itself)
 const jobKey = (j) => (j ? `${j.kind}.${j.status}.${j.pct}` : '');
@@ -54,7 +54,7 @@ function AgentPop({ ctl, onClose }) {
   const g = ctl.st?.agent, cfg = ctl.cfg || {};
   useEffect(() => {
     menus.open++;
-    const a = addListener('pointerdown', (e) => { const n = ref.current; if (!n) return; const [lx, ly, w, h] = lord.getLayout(n.id); if (e.x < lx || e.x > lx + w || e.y < ly || e.y > ly + h) onClose(); });
+    const a = addListener('pointerdown', (e) => { const n = ref.current; if (!n) return; const [lx, ly, w, h] = insane.getLayout(n.id); if (e.x < lx || e.x > lx + w || e.y < ly || e.y > ly + h) onClose(); });
     const b = addListener('keydown', (e) => { if (e.key === 'Escape') onClose(); });
     return () => { menus.open--; a(); b(); };
   }, []);
@@ -74,8 +74,8 @@ function AgentPop({ ctl, onClose }) {
       ))}
       {on ? (
         <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
-          <Btn label={g.install === 1 ? tr('machines.agent.installing') : tr('machines.agent.installHelper')} disabled={g.install === 1} onClick={() => lord.vm.agent(ctl.sid, 'install')} style={{ height: 28 }} />
-          <Btn label={tr('machines.agent.timesync')} onClick={() => lord.vm.agent(ctl.sid, 'timesync')} style={{ height: 28 }} />
+          <Btn label={g.install === 1 ? tr('machines.agent.installing') : tr('machines.agent.installHelper')} disabled={g.install === 1} onClick={() => insane.vm.agent(ctl.sid, 'install')} style={{ height: 28 }} />
+          <Btn label={tr('machines.agent.timesync')} onClick={() => insane.vm.agent(ctl.sid, 'timesync')} style={{ height: 28 }} />
         </View>
       ) : null}
       {g?.install === 2 ? <Text style={{ fontSize: 12, color: p.dim, textAlign: 'start' }}>{tr('machines.agent.installed')}</Text> : null}
@@ -103,7 +103,7 @@ function Tools({ ctl, floating }) {
     ...['both', 'to-guest', 'from-guest', 'off'].map((x) => ({ label: tr(`machines.cfg.clip.${x}`), checked: clip === x, disabled: true })),
     '-',
     g?.state === 'connected' && clipOn && !(g.caps & AGENT_CAPS.clipboard)
-      ? { label: g.install === 1 ? tr('machines.agent.installing') : tr('machines.agent.installHelper'), disabled: g.install === 1, onClick: () => lord.vm.agent(ctl.sid, 'install') } : null,
+      ? { label: g.install === 1 ? tr('machines.agent.installing') : tr('machines.agent.installHelper'), disabled: g.install === 1, onClick: () => insane.vm.agent(ctl.sid, 'install') } : null,
     { label: tr('machines.tb.clipChange'), onClick: () => ctl.configure('sharing') },
   ];
   // shared folders (6.7): each one opens in Files; the mount command for a Linux guest is a click away
@@ -278,7 +278,7 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
   const [name, setName] = useState(name0);
   const [iso, setIso] = useState('');
   const [pickCd, setPickCd] = useState(false);
-  const [cdWant, setCdWant] = useState(null);       // the disc asked for while lord-vm changes it
+  const [cdWant, setCdWant] = useState(null);       // the disc asked for while insane-vm changes it
   const [cdErr, setCdErr] = useState('');
   const snapJobs = useRef([]);
   // the Shell (6.18): the guest's serial console in a terminal pane under the picture; the keyboard goes to whichever
@@ -304,16 +304,16 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
 
   const begin = (opts) => {
     if (!has()) { setErr(tr('machines.noBackend')); return; }
-    const m = lord.vm.list().find((x) => x.dir === dir);
+    const m = insane.vm.list().find((x) => x.dir === dir);
     if (!m) { setErr(tr('machines.win.gone')); return; }
     setName(m.name); setIso(m.iso || '');
     setLog('');
     const active = stateView(m.state, m.reason).active;
     if (!active) {
-      const b = budgetCheck(lord.vm.list(), m, lord.vm.host());
+      const b = budgetCheck(insane.vm.list(), m, insane.vm.host());
       if (!b.ok) { setErr(tr('machines.win.noMemory', { need: b.need, free: b.free })); return; }
     }
-    const id = active ? lord.vm.attach(dir) : lord.vm.start(dir, opts || {});
+    const id = active ? insane.vm.attach(dir) : insane.vm.start(dir, opts || {});
     if (!id) { setErr(active ? tr('machines.win.cantAttach') : vmRefusal(tr('machines.win.cantStart'))); return; }
     sized.current = { last: null, want: null, at: 0, rate: false, thumb: 0 };
     setErr(''); setSt(null); setSid(id);
@@ -322,53 +322,53 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
   useEffect(() => { if (!sid && !st && !err) begin(loadvm ? { loadvm } : undefined); }, []);
   const stRef = useRef(st);
   stRef.current = st;
-  // the window went away (not a remount): let go of the machine; one this window started is shut down by lord-vm
-  useEffect(() => () => { if (sid && !windows.get().some((w) => w.id === winId)) lord.vm.close(sid); }, [sid]);
+  // the window went away (not a remount): let go of the machine; one this window started is shut down by insane-vm
+  useEffect(() => () => { if (sid && !windows.get().some((w) => w.id === winId)) insane.vm.close(sid); }, [sid]);
 
   useEffect(() => {
     if (!sid) return undefined;
     const timer = setInterval(() => {
-      const q = lord.vm.poll(sid);
+      const q = insane.vm.poll(sid);
       if (!q) return;
       setSt((prev) => (same(prev, q) ? prev : q));
-      snapJobs.current = snapJobs.current.filter((j) => { const r = lord.vm.job(j); if (r?.done && !r.ok) notify({ app: 'machines', label: tr('machines.title'), title: tr('machines.snap.failed'), body: r.out.trim().split('\n').pop() || '', sound: false }); return r && !r.done; });
+      snapJobs.current = snapJobs.current.filter((j) => { const r = insane.vm.job(j); if (r?.done && !r.ok) notify({ app: 'machines', label: tr('machines.title'), title: tr('machines.snap.failed'), body: r.out.trim().split('\n').pop() || '', sound: false }); return r && !r.done; });
       if (q.cd === 2 || q.cd === 3) setCdWant((w) => { if (w !== null) { if (q.cd === 2) setIso(w); else setCdErr(q.cdMessage || '?'); } return null; });
       const z = sized.current;
-      if (q.display === 'up' && !z.rate) { z.rate = true; try { lord.vm.rate(sid, refreshRate(lord.display.list())); } catch (e) { lord.vm.rate(sid, 60); } }
+      if (q.display === 'up' && !z.rate) { z.rate = true; try { insane.vm.rate(sid, refreshRate(insane.display.list())); } catch (e) { insane.vm.rate(sid, 60); } }
       // the window's size, to the guest after it stayed the same for 400 ms (unless a fixed resolution was chosen)
       if (q.display === 'up' && box.current && followRef.current) {
-        const want = guestSize(lord.getLayout(box.current.id), z.last);
+        const want = guestSize(insane.getLayout(box.current.id), z.last);
         if (!want) z.want = null;
         else if (!z.want || z.want[0] !== want[0] || z.want[1] !== want[1]) { z.want = want; z.at = now(); }
-        else if (now() - z.at > 400) { lord.vm.resize(sid, want[0], want[1]); z.last = want; z.want = null; }
+        else if (now() - z.at > 400) { insane.vm.resize(sid, want[0], want[1]); z.last = want; z.want = null; }
       }
       // the card picture in the library, every few seconds while it runs
-      if (q.display === 'up' && q.state === 'running' && now() - z.thumb > THUMB_MS) { z.thumb = now(); lord.vm.snapshot(sid); }
+      if (q.display === 'up' && q.state === 'running' && now() - z.thumb > THUMB_MS) { z.thumb = now(); insane.vm.snapshot(sid); }
       if (q.ended) {
-        lord.vm.close(sid);
+        insane.vm.close(sid);
         setSid(0);
         if (closingRef.current) { setClosing(false); wm.close(winId, true); return; }
-        // an unattended install ended with the installer's restart: lord-vm took the installer and the seed disk away,
+        // an unattended install ended with the installer's restart: insane-vm took the installer and the seed disk away,
         // so starting again is the installed system (3.9, "Unattended install")
         if (q.state === 'stopped' && q.reason === 'installed') { setTimeout(() => begin(), 300); return; }
-        if (q.state !== 'stopped' || !['guest-shutdown', 'host-shutdown', 'poweroff', 'installed'].includes(q.reason)) setLog(lord.vm.log(dir, 'vm', 16384));
+        if (q.state !== 'stopped' || !['guest-shutdown', 'host-shutdown', 'poweroff', 'installed'].includes(q.reason)) setLog(insane.vm.log(dir, 'vm', 16384));
       }
     }, 16);
     return () => clearInterval(timer);
   }, [sid]);
 
   // Closing the window (5.3): Suspend, Shut Down or Keep Running, asked unless the machine's Configure says which. A
-  // shutdown resumes a paused machine first, so it can hear the power button; Keep Running tells lord-vm to stay when
+  // shutdown resumes a paused machine first, so it can hear the power button; Keep Running tells insane-vm to stay when
   // this window lets go of it.
   const finish = (how) => {
     const s = sidRef.current;
     setAskClose(false);
     if (!s) { wm.close(winId, true); return; }
-    if (how === 'keep') { lord.vm.cmd(s, 'keep'); lord.vm.close(s); setSid(0); wm.close(winId, true); return; }
+    if (how === 'keep') { insane.vm.cmd(s, 'keep'); insane.vm.close(s); setSid(0); wm.close(winId, true); return; }
     setClosing(how);
-    if (how === 'suspend') { lord.vm.cmd(s, 'suspend'); return; }
-    if (stRef.current?.state === 'paused') lord.vm.cmd(s, 'resume');
-    lord.vm.cmd(s, 'shutdown');
+    if (how === 'suspend') { insane.vm.cmd(s, 'suspend'); return; }
+    if (stRef.current?.state === 'paused') insane.vm.cmd(s, 'resume');
+    insane.vm.cmd(s, 'shutdown');
   };
   useEffect(() => wm.setCloseGuard(winId, () => {
     const s = sidRef.current;
@@ -380,7 +380,7 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
     return false;
   }), [winId]);
 
-  // lord-vm's notices (VM_NOTICE): the network going and coming back (6.5), a Clone's new identity (6.3); the good news
+  // insane-vm's notices (VM_NOTICE): the network going and coming back (6.5), a Clone's new identity (6.3); the good news
   // goes away by itself
   const [noticeGone, setNoticeGone] = useState(0);
   useEffect(() => {
@@ -401,7 +401,7 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
   // keyboard while in front; everything held is let go of on blur
   const live = !!sid && st?.display === 'up' && (st.state === 'running' || st.state === 'paused') && !closing && !askClose && !(shell && shellKeys) && !pickCd;
   // the console's stream, asked for once the pane is open on a running machine
-  useEffect(() => { if (shell && sid && !st?.console && (st?.state === 'running' || st?.state === 'paused')) lord.vm.console(sid); }, [shell, sid, st?.state, !!st?.console]);
+  useEffect(() => { if (shell && sid && !st?.console && (st?.state === 'running' || st?.state === 'paused')) insane.vm.console(sid); }, [shell, sid, st?.state, !!st?.console]);
   useEffect(() => {
     if (!shell || !shellKeys || !focused || !st?.console) return undefined;
     const id = st.console;
@@ -414,63 +414,63 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
     });
   }, [shell, shellKeys, focused, st?.console]);
   useEffect(() => {
-    if (!live || !focused) { if (sid) { lord.vm.release(sid); buttons.current.clear(); } return undefined; }
+    if (!live || !focused) { if (sid) { insane.vm.release(sid); buttons.current.clear(); } return undefined; }
     // a key pressed while one of the window's menus is open is the menu's, down and up (Esc closes it)
     const kept = new Set();
     const ka = addListener('keydown', (e) => {
       if (!(e.code > 0)) return;
       if (menus.open > 0 || kept.has(e.code)) { kept.add(e.code); return; }
-      lord.vm.key(sid, e.code, 1);
+      insane.vm.key(sid, e.code, 1);
     });
     const kb = addListener('keyup', (e) => {
       if (!(e.code > 0)) return;
       if (kept.delete(e.code)) return;
-      lord.vm.key(sid, e.code, 0);
+      insane.vm.key(sid, e.code, 0);
     });
-    const kc = addListener('pointerup', (e) => { if (buttons.current.has(e.button)) { buttons.current.delete(e.button); lord.vm.button(sid, e.button, 0); } });
-    return () => { ka(); kb(); kc(); lord.vm.release(sid); buttons.current.clear(); };
+    const kc = addListener('pointerup', (e) => { if (buttons.current.has(e.button)) { buttons.current.delete(e.button); insane.vm.button(sid, e.button, 0); } });
+    return () => { ka(); kb(); kc(); insane.vm.release(sid); buttons.current.clear(); };
   }, [live, focused, sid]);
 
-  const at = (e) => (box.current && st?.w ? toPicture(e.x, e.y, lord.getLayout(box.current.id), st.w, st.h) : null);
-  const move = (e) => { const q = live && at(e); if (q) lord.vm.motion(sid, q[0], q[1]); };
-  const down = (e) => { if (!live) return; move(e); buttons.current.add(e.button); lord.vm.button(sid, e.button, 1); };
+  const at = (e) => (box.current && st?.w ? toPicture(e.x, e.y, insane.getLayout(box.current.id), st.w, st.h) : null);
+  const move = (e) => { const q = live && at(e); if (q) insane.vm.motion(sid, q[0], q[1]); };
+  const down = (e) => { if (!live) return; move(e); buttons.current.add(e.button); insane.vm.button(sid, e.button, 1); };
   const onWheel = (e) => {
     if (!live) return;
     move(e);
     const [n, rest] = wheelSteps(wheel.current, e.deltaY || 0, !!e.precise);
     wheel.current = rest;
-    if (n) lord.vm.wheel(sid, n, 0);
+    if (n) insane.vm.wheel(sid, n, 0);
   };
-  const cmd = (c) => { if (sid) { if (c === 'shutdown' && st?.state === 'running') lord.vm.snapshot(sid); lord.vm.cmd(sid, c); } };
+  const cmd = (c) => { if (sid) { if (c === 'shutdown' && st?.state === 'running') insane.vm.snapshot(sid); insane.vm.cmd(sid, c); } };
   const cad = () => {
     if (!sid) return;
-    CTRL_ALT_DEL.forEach((k) => lord.vm.key(sid, k, 1));
-    [...CTRL_ALT_DEL].reverse().forEach((k) => lord.vm.key(sid, k, 0));
+    CTRL_ALT_DEL.forEach((k) => insane.vm.key(sid, k, 1));
+    [...CTRL_ALT_DEL].reverse().forEach((k) => insane.vm.key(sid, k, 0));
   };
   const full = useStore(windows, (ws) => !!ws.find((w) => w.id === winId)?.fullscreen);
   const m0 = { dir, name, id: winId.split('#vm-')[1] };
   const shot = () => {
-    const path = sid ? lord.vm.screenshot(sid) : '';
+    const path = sid ? insane.vm.screenshot(sid) : '';
     notify({ app: 'machines', label: tr('machines.title'), title: path ? tr('machines.tb.shotSaved') : tr('machines.tb.shotFailed'), body: path ? path.split('/').pop() : '', sound: false,
       actions: path ? [{ id: 'show', label: tr('machines.cmd.showInFiles'), run: () => revealPath(path) }] : [] });
   };
-  // a long request of lord-vm's in progress (suspend, resume, a snapshot): its card, and no second one
+  // a long request of insane-vm's in progress (suspend, resume, a snapshot): its card, and no second one
   const job = st?.job?.status === 'running' ? st.job : null;
   const busy = !!job;
-  // the CD/DVD drive while the machine runs (lord-vm changes the disc through QMP; machine.json follows)
+  // the CD/DVD drive while the machine runs (insane-vm changes the disc through QMP; machine.json follows)
   const cdOk = !!sid && (st?.state === 'running' || st?.state === 'paused') && cdWant === null;
-  const cdTo = (path) => { setCdErr(''); if (lord.vm.cdrom(sid, path || null)) setCdWant(path); else setCdErr(tr('machines.tb.cdRefused')); };
-  // Take Snapshot from the window: named by time, with the live picture; lord-vm reports it as a VM_JOB
+  const cdTo = (path) => { setCdErr(''); if (insane.vm.cdrom(sid, path || null)) setCdWant(path); else setCdErr(tr('machines.tb.cdRefused')); };
+  // Take Snapshot from the window: named by time, with the live picture; insane-vm reports it as a VM_JOB
   const snapNow = () => {
     const d = new Date();
-    const r = lord.vm.snapTake(dir, tr('machines.snap.atTime', { time: `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}` }), sid);
+    const r = insane.vm.snapTake(dir, tr('machines.snap.atTime', { time: `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}` }), sid);
     if (!r) notify({ app: 'machines', label: tr('machines.title'), title: tr('machines.snap.failed'), body: '', sound: false });
     else snapJobs.current.push(r.job);
   };
   // Record (6.20): the machine's own picture into ~/Pictures/Screenshots, no screen permission; a second click stops it
   const record = () => {
     if (rec) { media.stop(rec.id); return; }
-    const id = sid ? lord.vm.record(sid) : 0;
+    const id = sid ? insane.vm.record(sid) : 0;
     if (!id) { notify({ app: 'machines', label: tr('machines.title'), title: tr('machines.tb.recordFailed'), body: '', sound: false }); return; }
     setRec({ id, at: now() });
     const off = media.on(id, (type, d) => {
@@ -489,23 +489,23 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
   // guest's picture is re-encoded on this side before any app sees it
   const cfgRef = useRef({});
   const [cfg, setCfg] = useState({});
-  useEffect(() => { if (!has()) return; const m = lord.vm.list().find((x) => x.dir === dir); if (m) { cfgRef.current = m; setCfg({ agent: m.agent, clipboard: m.clipboard, shares: m.shares || [] }); } }, [sid, st?.state]);
+  useEffect(() => { if (!has()) return; const m = insane.vm.list().find((x) => x.dir === dir); if (m) { cfgRef.current = m; setCfg({ agent: m.agent, clipboard: m.clipboard, shares: m.shares || [] }); } }, [sid, st?.state]);
   const clipSent = useRef('');
   useEffect(() => {
     if (!focused || !sid || !clipTo(cfg.clipboard) || st?.agent?.state === undefined) return;
     if (!(st?.agent?.caps & 32)) return;
-    if (lord.vm.clipboardSendHost) { lord.vm.clipboardSendHost(sid); return; }
+    if (insane.vm.clipboardSendHost) { insane.vm.clipboardSendHost(sid); return; }
     const text = clipboard.get();
-    if (text && text !== clipSent.current && lord.vm.clipboardSend(sid, text)) clipSent.current = text;
+    if (text && text !== clipSent.current && insane.vm.clipboardSend(sid, text)) clipSent.current = text;
   }, [focused, sid, cfg.clipboard, st?.agent?.caps]);
   const clipSeen = useRef(0);
   useEffect(() => {
     if (!sid || !st?.clipIn || st.clipIn === clipSeen.current) return;
     clipSeen.current = st.clipIn;
     if (!clipFrom(cfg.clipboard)) return;
-    const kind = lord.vm.clipboardApply ? lord.vm.clipboardApply(sid) : 'text';
+    const kind = insane.vm.clipboardApply ? insane.vm.clipboardApply(sid) : 'text';
     if (kind !== 'text') return;
-    const text = lord.vm.clipboardTake(sid);
+    const text = insane.vm.clipboardTake(sid);
     if (text) { clipSent.current = text; clipboard.set(text, { origin: 'machines' }); }
   }, [st?.clipIn]);
   const ctl = {
@@ -515,7 +515,7 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
     st, a, full, follow, cmd,
     setFull: (on) => wm.setFullscreen(winId, on),
     setFollow: (on) => { setFollow(on); sized.current.last = null; },
-    fixed: (w, h) => { setFollow(false); if (sid) lord.vm.resize(sid, w, h); },
+    fixed: (w, h) => { setFollow(false); if (sid) insane.vm.resize(sid, w, h); },
     logs: () => openLogs(m0),
     configure: (section) => openConfigure(m0, section),
     begin: () => begin(),
@@ -580,7 +580,7 @@ export function MachineWindow({ dir, name: name0, loadvm }) {
   } else if (!st || st.state === 'starting' || (st.display !== 'up' && st.display !== 'none' && st.display !== 'lost' && (st.state === 'running' || st.state === 'paused'))) {
     card = <Card title={tr('machines.win.starting', { name })} text={tr('machines.win.startingHint')} />;
   } else if (st.display === 'lost') {
-    card = <Card title={tr('machines.win.lost')} text={tr('machines.win.lostHint')} actions={[<Btn key="d" primary label={tr('machines.win.reconnect')} onClick={() => lord.vm.cmd(sid, 'display')} />]} />;
+    card = <Card title={tr('machines.win.lost')} text={tr('machines.win.lostHint')} actions={[<Btn key="d" primary label={tr('machines.win.reconnect')} onClick={() => insane.vm.cmd(sid, 'display')} />]} />;
   } else if (st.display === 'none') card = <Card title={tr('machines.win.noDisplay')} text={tr('machines.win.noDisplayHint')} />;
   else if (st.state === 'stopping') card = <Card title={tr('machines.state.stopping')} text={tr('machines.win.shuttingDownHint')} />;
 

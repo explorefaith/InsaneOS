@@ -1,7 +1,7 @@
 // state.js — estado de la Terminal fuera de React: ventanas → pestañas → árbol de paneles
 // → sesiones. Vive a nivel de módulo para que minimizar una ventana (que desmonta su
 // contenido) no pierda pestañas ni shells; al cerrar la ventana se cierran sus sesiones.
-import { createStore, wm, term, clipboard, windows as wmWindows, workArea, t as T } from '@lordos/sdk';
+import { createStore, wm, term, clipboard, windows as wmWindows, workArea, t as T } from '@insaneos/sdk';
 import { getProfile, terminalSettings, saveTerminalSettings, toConfig, profileName } from './profiles.js';
 
 export const meta = createStore({});      // sid → { profile, title, cwd, process, busy, badge, bell, activity, flash, lastExit }
@@ -75,7 +75,7 @@ export function configureSession(sid) {
 
 function startDir(p, reuseFrom) {
   if (p.workingDir === 'home') return undefined;
-  if (p.workingDir === 'custom' && p.customDir) return p.customDir.replace(/^~/, lord.fs.home());
+  if (p.workingDir === 'custom' && p.customDir) return p.customDir.replace(/^~/, insane.fs.home());
   if (reuseFrom == null) return undefined;
   const info = term.info(reuseFrom);
   return info?.cwd || undefined;
@@ -432,7 +432,7 @@ term.onAny((sid, type, data) => {
       if (p) setSessionProfile(sid, p.id);
       break;
     }
-    case 'copy': clipboard.remember(lord.clipboard.get()); toast(wid, T('terminal.toast.copied')); break;
+    case 'copy': clipboard.remember(insane.clipboard.get()); toast(wid, T('terminal.toast.copied')); break;
     case 'command': {
       const m = meta.get()[sid] || {};
       patchMeta(sid, { lastExit: Number(data) });
@@ -485,8 +485,8 @@ term.onAny((sid, type, data) => {
 let localInfo = null;
 function autoProfile(sid, cwd, wid) {
   const m = meta.get()[sid] || {};
-  const home = lord.fs.home();
-  if (!localInfo) localInfo = lord.system.info();
+  const home = insane.fs.home();
+  if (!localInfo) localInfo = insane.system.info();
   const localHost = localInfo.hostname;
   const [hu, hh] = (m.host || '').includes('@') ? m.host.split('@') : [null, m.host || ''];
   const user = hu || (!hh || hh === localHost ? localInfo.user : '');
@@ -546,11 +546,11 @@ export function toggleHotkeyWindow() {
   wm.focus(id);
 }
 
-// ---- sesiones que sobreviven (cambio de tema o reinicio de lord-server) ----
+// ---- sesiones que sobreviven (cambio de tema o reinicio de insane-server) ----
 //
 // La disposición viva (ventanas → pestañas → paneles, con la clave del guardián de cada
 // sesión) se guarda en terminal.live. Cuando el módulo arranca y ya hay sesiones abiertas
-// —porque se cambió de tema o porque lord-server se reinició y las recuperó de sus
+// —porque se cambió de tema o porque insane-server se reinició y las recuperó de sus
 // guardianes (server/src/term/hold.c)— se vuelven a abrir las mismas ventanas.
 
 let lastLive = '';

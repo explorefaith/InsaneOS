@@ -1,17 +1,17 @@
-/* js_fan.c — lord.fan: Settings → Cooling and Monitor talk to lord-fand (docs/FANS.md).
+/* js_fan.c — insane.fan: Settings → Cooling and Monitor talk to insane-fand (docs/FANS.md).
  *
- *   lord.fan.status()            the daemon's status object, or null if it is not running
- *   lord.fan.setProfile(name)    auto|quiet|balanced|performance|always|custom   → '' or an error code
- *   lord.fan.setCurve(points)    [[°C, %], ...] (1..8 points, 30..90 °C rising, 0..100 % never falling)
- *   lord.fan.force(v)            'on' | 'off' | minutes (1..1440)
- *   lord.fan.setGpuFan(n, v)     an amdgpu card's fan by hand (0.8.8.6): n from status().gpuFans, v 'auto' or a
- *                                percentage 0..100 (lord-fand keeps it within 30..100 and gives it back to the card
+ *   insane.fan.status()            the daemon's status object, or null if it is not running
+ *   insane.fan.setProfile(name)    auto|quiet|balanced|performance|always|custom   → '' or an error code
+ *   insane.fan.setCurve(points)    [[°C, %], ...] (1..8 points, 30..90 °C rising, 0..100 % never falling)
+ *   insane.fan.force(v)            'on' | 'off' | minutes (1..1440)
+ *   insane.fan.setGpuFan(n, v)     an amdgpu card's fan by hand (0.8.8.6): n from status().gpuFans, v 'auto' or a
+ *                                percentage 0..100 (insane-fand keeps it within 30..100 and gives it back to the card
  *                                above 85 °C, on errors and when this session ends)
- *   lord.fan.caseConfig()        'argon-one-v5' | 'none' | null (not a Insane OS Raspberry Pi image)
+ *   insane.fan.caseConfig()        'argon-one-v5' | 'none' | null (not a Insane OS Raspberry Pi image)
  *
- * Everything is validated here and again in lord-fand (which also checks that the user is an
- * administrator). The requests are one short line over /run/lordos/fand.sock; the daemon answers
- * at once, and a call never waits more than FAN_WAIT_MS. LORD_FAND_SOCK and LORD_FAN_CASE_FILE
+ * Everything is validated here and again in insane-fand (which also checks that the user is an
+ * administrator). The requests are one short line over /run/insaneos/fand.sock; the daemon answers
+ * at once, and a call never waits more than FAN_WAIT_MS. INSANE_FAND_SOCK and INSANE_FAN_CASE_FILE
  * point elsewhere for tests and screenshots (they only change what this user's session reads). */
 #include "js_fan.h"
 #include "js_err.h"
@@ -28,9 +28,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#define FAN_SOCK      "/run/lordos/fand.sock"
-#define FAN_CASE_FILE "/boot/firmware/lordos-case.txt"
-#define FAN_CASE_NOTE "/var/lib/lordos/case"
+#define FAN_SOCK      "/run/insaneos/fand.sock"
+#define FAN_CASE_FILE "/boot/firmware/insaneos-case.txt"
+#define FAN_CASE_NOTE "/var/lib/insaneos/case"
 #define FAN_WAIT_MS   300
 #define FAN_REPLY_MAX 8192
 
@@ -43,7 +43,7 @@ static long long ms_now(void) {
 /* Sends one request line and reads the whole answer. Returns its length, -1 if the daemon is not
  * there or too slow. */
 static int fan_ask(const char *req, char *out, size_t n) {
-    const char *path = getenv("LORD_FAND_SOCK");
+    const char *path = getenv("INSANE_FAND_SOCK");
     if (!path || !*path) path = FAN_SOCK;
     struct sockaddr_un a = { .sun_family = AF_UNIX };
     if (strlen(path) >= sizeof a.sun_path) return -1;
@@ -174,7 +174,7 @@ static JSValue f_set_gpu_fan(JSContext *c, JSValueConst t, int argc, JSValueCons
 
 static JSValue f_case(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
-    const char *path = getenv("LORD_FAN_CASE_FILE");
+    const char *path = getenv("INSANE_FAN_CASE_FILE");
     if (!path || !*path) {                      /* the boot partition is root's alone: the helper leaves a copy */
         char id[32];
         int fd = open(FAN_CASE_NOTE, O_RDONLY | O_CLOEXEC);
@@ -202,8 +202,8 @@ static const JSCFunctionListEntry fan_funcs[] = {
     JS_CFUNC_DEF("caseConfig", 0, f_case),
 };
 
-void js_fan_register(JSContext *c, JSValue lord) {
+void js_fan_register(JSContext *c, JSValue insane) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, fan_funcs, sizeof fan_funcs / sizeof fan_funcs[0]);
-    JS_SetPropertyStr(c, lord, "fan", o);
+    JS_SetPropertyStr(c, insane, "fan", o);
 }

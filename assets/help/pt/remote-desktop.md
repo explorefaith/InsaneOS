@@ -17,7 +17,7 @@ De outro computador da sua rede você pode usar o Insane OS com um navegador, se
 
 - Com **o mesmo usuário** você vê e controla a mesma sessão que está no monitor.
 - Com **outro usuário**, essa pessoa tem a própria área de trabalho, ao mesmo tempo.
-- Nos Ajustes você escolhe quem pode entrar (todos ou só o grupo `lordos-remote`) e vê quem está
+- Nos Ajustes você escolhe quem pode entrar (todos ou só o grupo `insaneos-remote`) e vê quem está
   conectado, com um botão para desconectar.
 
 Funciona antes de alguém entrar no computador. As tentativas erradas esperam cada vez mais. As

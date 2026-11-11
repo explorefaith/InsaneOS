@@ -17,7 +17,7 @@
 // wake-up looks at the real time: if it jumped (clock change, suspend), everything is recomputed.
 // Anything that should have rung less than 10 minutes ago still rings; older ones are dropped.
 import { createElement as h } from 'react';
-import { View, Text } from '@lordos/runtime';
+import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { settings } from './settings.js';
 import { t, formatTime } from './i18n.js';

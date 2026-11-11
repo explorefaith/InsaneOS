@@ -1,5 +1,5 @@
 // Panes.jsx — un panel de terminal y el árbol de paneles divididos.
-import { View, Text, Terminal, addListener, term, clipboard, useStore, wm, fs, ime, openUrl, t as T } from '@lordos/sdk';
+import { View, Text, Terminal, addListener, term, clipboard, useStore, wm, fs, ime, openUrl, t as T } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { meta, setRatio, focusPane, toast } from './state.js';
 import { tmuxFocus } from './tmux.js';
@@ -23,7 +23,7 @@ function openLink(wid, sid, url) {
   if (path.startsWith('/') && (path === home || path.startsWith(`${home}/`))) {
     const rel = path.slice(home.length + 1);
     let dir = rel;
-    try { lord.fs.list(rel || '.'); } catch (e) { dir = fs.parent(rel); }
+    try { insane.fs.list(rel || '.'); } catch (e) { dir = fs.parent(rel); }
     wm.open('files', { args: { path: dir ? `${home}/${dir}` : home } });
     return;
   }
@@ -49,7 +49,7 @@ export function TermPane({ wid, sid, active, windowFocused, multi, onContextMenu
       if (!ref.current) return null;
       const info = term.info(sid);
       if (!info) return null;
-      const [x, y] = lord.getLayout(ref.current.id);
+      const [x, y] = insane.getLayout(ref.current.id);
       return { x: x + info.padding + info.cursorX * info.cellWidth, y: y + info.padding + info.cursorY * info.cellHeight, h: info.cellHeight };
     });
     return () => ime.detach(token);
@@ -63,7 +63,7 @@ export function TermPane({ wid, sid, active, windowFocused, multi, onContextMenu
   }, [m.flash]);
 
   useEffect(() => {
-    const local = (e) => { const [x, y] = lord.getLayout(ref.current.id); return { x: e.x - x, y: e.y - y }; };
+    const local = (e) => { const [x, y] = insane.getLayout(ref.current.id); return { x: e.x - x, y: e.y - y }; };
     const offMove = addListener('pointermove', (e) => {
       if (!dragging.current || !ref.current) return;
       const l = local(e);
@@ -73,7 +73,7 @@ export function TermPane({ wid, sid, active, windowFocused, multi, onContextMenu
       if (!dragging.current || !ref.current) return;
       dragging.current = false;
       const l = local(e);
-      if (term.mouse(sid, 'up', l.x, l.y, e.button, e.mods) === 3) clipboard.remember(lord.clipboard.get());
+      if (term.mouse(sid, 'up', l.x, l.y, e.button, e.mods) === 3) clipboard.remember(insane.clipboard.get());
     });
     return () => { offMove(); offUp(); };
   }, [sid]);
@@ -142,7 +142,7 @@ function Split({ wid, tab, node, render, color, bg }) {
   useEffect(() => {
     const offMove = addListener('pointermove', (e) => {
       if (!drag.current || !ref.current) return;
-      const [x, y, w, h] = lord.getLayout(ref.current.id);
+      const [x, y, w, h] = insane.getLayout(ref.current.id);
       setRatio(wid, tab.id, node.id, node.dir === 'row' ? (e.x - x) / w : (e.y - y) / h);
     });
     const offUp = addListener('pointerup', () => { drag.current = false; });

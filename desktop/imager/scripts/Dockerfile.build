@@ -1,4 +1,4 @@
-# The LordOS Imager's Linux and Windows builds, from a Debian 13 container (docs/IMAGER.md,
+# The InsaneOS Imager's Linux and Windows builds, from a Debian 13 container (docs/IMAGER.md,
 # "Building the desktop downloads"). Linux: Tauri's WebKitGTK stack. Windows: cargo-xwin (the MSVC
 # runtime and SDK headers, downloaded by xwin under their license) with clang and lld, and NSIS for
 # the installer.

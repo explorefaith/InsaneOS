@@ -39,15 +39,15 @@ network (section 4.4), and per-person sharing invitations (rclone has no API for
 
 ## 2. What we already have
 
-- `rclone` and `fuse3` are dependencies of `lordos` since 0.8.7: Files' Connect to Server mounts sftp, ftp, ftps and WebDAV with
+- `rclone` and `fuse3` are dependencies of `insaneos` since 0.8.7: Files' Connect to Server mounts sftp, ftp, ftps and WebDAV with
   `rclone mount` (`server/src/lan/rconnect.c`, docs/FILES.md, "Connect to Server"). The configuration is a memfd, the password
-  obscured, nothing on a command line or in the environment; rclone runs in scope `app-lordos-lordos-rclone.scope`, firewall app
-  `desktop:lordos-rclone`.
+  obscured, nothing on a command line or in the environment; rclone runs in scope `app-insaneos-insaneos-rclone.scope`, firewall app
+  `desktop:insaneos-rclone`.
 - Files already treats `fuse.rclone` mounts as network volumes (`apps/files/network.jsx`, `sdk/filepickermodel.js`,
   `fsops_share_fs`), with an eject button, pins in Locations and reconnect on click.
 - rclone is credited in `THIRD_PARTY.md` (MIT). Cloud adds it to Settings → General → About → Open source, with its copyright and
   license text.
-- Backups has its engine in `lord-server` (`server/src/backup/`): hard-linked snapshots, retention, encryption, battery rules,
+- Backups has its engine in `insane-server` (`server/src/backup/`): hard-linked snapshots, retention, encryption, battery rules,
   restore (docs/SYSTEM.md, "Backups").
 
 ## 3. rclone: which one, and how it runs
@@ -57,9 +57,9 @@ network (section 4.4), and per-person sharing invitations (rclone has no API for
 Debian 13 has rclone **1.60.1** (Reported: packages.debian.org, trixie 1.60.1+dfsg-4), from 2022. Too old for this design: the VFS
 upload queue in rc, bisync over rc and several providers' current APIs are newer. rclone has no apt repository of its own.
 
-**Decided:** a package of our own, `lordos-rclone`, built from the upstream release tag's source with Go (reproducible, `-trimpath`,
-both architectures), signed and published in Insane OS's apt repository like `lordos-hwdata`. It installs to
-`/usr/lib/lordos/rclone/rclone`, so it never fights Debian's `/usr/bin/rclone`. `lordos` depends on it, so it is preinstalled and
+**Decided:** a package of our own, `insaneos-rclone`, built from the upstream release tag's source with Go (reproducible, `-trimpath`,
+both architectures), signed and published in Insane OS's apt repository like `insaneos-hwdata`. It installs to
+`/usr/lib/insaneos/rclone/rclone`, so it never fights Debian's `/usr/bin/rclone`. `insaneos` depends on it, so it is preinstalled and
 comes with updates. Connect to Server moves to the same binary (`RCLONE` in `rconnect.c`). Which upstream version: the newest stable
 release when 0.8.8.5 is built, at least the one that has every rc call in section 5 (To test, Phase 0).
 
@@ -69,27 +69,27 @@ other `.deb` of the release.
 
 ### 3.2 One daemon per session, no port
 
-`lord-cloudd` is not a new program: it is `rclone rcd` started by `lord-server` for the session user, in its own scope
-`app-lordos-lordos-cloud.scope`, firewall app `desktop:lordos-cloud` (reserved like `desktop:lordos-rclone`, `app_scope_reserved`).
+`insane-cloudd` is not a new program: it is `rclone rcd` started by `insane-server` for the session user, in its own scope
+`app-insaneos-insaneos-cloud.scope`, firewall app `desktop:insaneos-cloud` (reserved like `desktop:insaneos-rclone`, `app_scope_reserved`).
 It starts when the session has at least one account (or the provider list or a sign-in needs it), stops 2 minutes after the
 last account goes, and ends with the session.
 
-**As built (Phase 1):** not a systemd user unit but a child of `lord-server`'s cloud thread, the way Connect to Server starts
+**As built (Phase 1):** not a systemd user unit but a child of `insane-server`'s cloud thread, the way Connect to Server starts
 `rclone mount` (`server/src/cloud/cloud.c`, `daemon_start`): fixed argv and a fixed environment (HOME, PATH, LANG,
-XDG_RUNTIME_DIR, USER), umask 077, `nice 10`, idle I/O, `PR_SET_PDEATHSIG` (rclone unmounts and ends if `lord-server` dies),
-scope through lord-sessiond with `memory.high` 512 MB. Its log is `~/.cache/lordos/cloud.log` (NOTICE level; over 4 MB it
+XDG_RUNTIME_DIR, USER), umask 077, `nice 10`, idle I/O, `PR_SET_PDEATHSIG` (rclone unmounts and ends if `insane-server` dies),
+scope through insane-sessiond with `memory.high` 512 MB. Its log is `~/.cache/insaneos/cloud.log` (NOTICE level; over 4 MB it
 becomes `cloud.old` at the next start), which the Logs app shows. A unit's `ProtectSystem=`/`BindPaths=` sandbox (4.5) is not
 there: the scope and the socket are the boundary.
 
-- **Listens on a Unix socket only**: `$XDG_RUNTIME_DIR/lordos/cloud/rc.sock`, folder 0700, socket 0600. No TCP, not even
+- **Listens on a Unix socket only**: `$XDG_RUNTIME_DIR/insaneos/cloud/rc.sock`, folder 0700, socket 0600. No TCP, not even
   loopback: any local program of any user can open a loopback port, and rclone's rc is all or nothing (4.1). Whether `rcd`
   listens on a Unix socket in the version we ship is the first thing Phase 0 checks (rclone's documentation shows the client's
   `--unix-socket`; the server side is To test). If it can't, the fallback is a loopback port chosen at random, with a 32-byte
-  random user and password per start passed through a memfd, and the firewall allowing only `lord-server`'s connections to it.
+  random user and password per start passed through a memfd, and the firewall allowing only `insane-server`'s connections to it.
 - **Authentication even on the socket**: a random user and password per start, so `--rc-no-auth` is never used. As built:
   not `--rc-user`/`--rc-pass` (the command line is readable by every user) but `--rc-htpasswd /proc/self/fd/3`, a memfd with
-  one bcrypt line (cost 4: the password is 32 random bytes); `lord-server` keeps the password in memory for Basic auth.
-- **Configuration**: rclone's is in memory only (`--config ""`). `~/.config/lordos/cloud/rclone.conf` (0600) is Insane OS's own
+  one bcrypt line (cost 4: the password is 32 random bytes); `insane-server` keeps the password in memory for Basic auth.
+- **Configuration**: rclone's is in memory only (`--config ""`). `~/.config/insaneos/cloud/rclone.conf` (0600) is Insane OS's own
   record of each account's type and non-secret options, with **no secrets in it**: tokens and passwords are in the keyring
   (section 6) and given to rclone per account through `config/create` at each start, kept in its memory.
 - **Restart**: Settings → Cloud → Service → **Restart** (and automatically after a crash, at most 5 times a minute, as Machines'
@@ -101,7 +101,7 @@ there: the scope and the socket are the boundary.
 ### 3.3 Mounts
 
 Each account is mounted with `mount/mount` at `~/Cloud/<Account name>` (a folder of the home, so every app and the file pickers
-see it), `--vfs-cache-mode full`, the cache in `~/.cache/lordos/cloud/` (rclone's layout: `vfs/<id>/` for the data,
+see it), `--vfs-cache-mode full`, the cache in `~/.cache/insaneos/cloud/` (rclone's layout: `vfs/<id>/` for the data,
 `vfsMeta/<id>/` for what is present), a listing kept an hour (`--dir-cache-time 1h`) and the provider's changes polled every
 minute where rclone has them (`--poll-interval 1m`); the options are `cloud_mount_opts` in `cloud_pure.c`. Section 7 covers
 how files on demand are built on it, 7.3 how browsing stays fast. The account's id is `c` and 8 hex
@@ -119,10 +119,10 @@ maintainer's first idea (an on/off switch, loopback by default) was replaced by 
 
 ### 4.2 The interface never talks to rclone
 
-JavaScript has no way to reach the socket. `lord-server` (`server/src/cloud/`) is the only client and exposes `lord.cloud` with a
+JavaScript has no way to reach the socket. `insane-server` (`server/src/cloud/`) is the only client and exposes `insane.cloud` with a
 **closed list** of operations, each with checked arguments:
 
-| `lord.cloud` | rc call | Arguments checked |
+| `insane.cloud` | rc call | Arguments checked |
 |---|---|---|
 | `providers()` | `config/providers` | none; filtered to the list in 6.1 |
 | `add(kind, name, fields)` | `config/create` | kind in the list; field names in that provider's schema; values without control characters |
@@ -134,20 +134,20 @@ JavaScript has no way to reach the socket. `lord-server` (`server/src/cloud/`) i
 | `keep(id, path)`, `free(id, path)` | section 7 | path inside the account's mount |
 | `restart()` | systemctl restart of the unit | none |
 
-Files themselves are read and written through the mount, with `lord.fs` and its usual rules (`fsops_allowed`), not through rc.
+Files themselves are read and written through the mount, with `insane.fs` and its usual rules (`fsops_allowed`), not through rc.
 `core/command`, `config/dump`, `config/show`, `operations/*` outside the list, `rc/*` and `options/set` are never called; a test
 proves the C client can't send them (the method name comes from a fixed table, never from JS).
 
 ### 4.3 Tokens and passwords
 
-- OAuth tokens, passwords and keys go to the keyring (`lord.keyring`, the same store as Mail and Remote Desk), one item per
+- OAuth tokens, passwords and keys go to the keyring (`insane.keyring`, the same store as Mail and Remote Desk), one item per
   account. `rclone.conf` holds only the account's type and non-secret options.
-- At each start `lord-server` reads them from the keyring and gives them to rclone with `config/create`/`config/update` over the
-  socket. When rclone refreshes an OAuth token, `lord-server` reads the new one (`config/get` for that one remote, over the socket)
+- At each start `insane-server` reads them from the keyring and gives them to rclone with `config/create`/`config/update` over the
+  socket. When rclone refreshes an OAuth token, `insane-server` reads the new one (`config/get` for that one remote, over the socket)
   and writes it back to the keyring. As built: rclone's configuration is in memory (`--config ""`), so there is no file for a
-  refreshed token to land in; `lord-server` compares each OAuth account's secrets every 5 minutes and saves them when they
+  refreshed token to land in; `insane-server` compares each OAuth account's secrets every 5 minutes and saves them when they
   changed. The keyring item is owner `cloud`, service `cloud:<id>`, its secret a JSON object of rclone's secret options as
-  `config/get` gives them (passwords obscured by rclone), asked of `lord-vault` on `lord-server`'s own channel
+  `config/get` gives them (passwords obscured by rclone), asked of `insane-vault` on `insane-server`'s own channel
   (`vc_request_wait`, `server/src/cloud/cloud_kr.c`), so JavaScript never sees it. Which options are secret comes from rclone's
   own schema (`IsPassword` or `Sensitive`), plus `token` and `client_secret`. If the keyring can't take them (locked) they wait
   in memory and are retried every 30 s; with no keyring at all the account says `cloud.noKeyring`.
@@ -162,7 +162,7 @@ firewall row. Not in 0.8.8.5.
 ### 4.5 Sandbox
 
 rclone needs the network and the user's files under `~/Cloud` and its cache, nothing else. The unit runs with
-`ProtectSystem=strict`, `ProtectHome=tmpfs` plus `BindPaths=` for `~/Cloud`, `~/.cache/lordos/cloud`, `~/.config/lordos/cloud` and
+`ProtectSystem=strict`, `ProtectHome=tmpfs` plus `BindPaths=` for `~/Cloud`, `~/.cache/insaneos/cloud`, `~/.config/insaneos/cloud` and
 the runtime folder, `PrivateTmp`, `NoNewPrivileges`, `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK`, and
 `SystemCallFilter=@system-service`. FUSE needs `/dev/fuse` and `fusermount3` (setuid); To test which of these a user unit can
 keep while mounting.
@@ -196,7 +196,7 @@ not offered.
 ### 6.2 Signing in with the browser
 
 1. The person picks a provider and names the account ("Work", "Personal"; the name becomes the folder in `~/Cloud`).
-2. `lord-server` starts `rclone authorize <type> e30 --auth-no-open-browser` in the cloud scope, reads the authorization URL from its
+2. `insane-server` starts `rclone authorize <type> e30 --auth-no-open-browser` in the cloud scope, reads the authorization URL from its
    log, and opens it in the default browser itself; the token comes back on stdout and goes to `config/create` as `config_token`.
    `e30` is `{}` as a config blob: with it rclone prints every option the sign-in set (base64 of a JSON object), not the token
    alone. pCloud needs that (#71): its redirect names the API host of the account's region (`eapi.pcloud.com` in Europe), saved
@@ -207,19 +207,19 @@ not offered.
    `127.0.0.1:53682`, which only lives during the sign-in.
 3. The token goes to the keyring (4.3), the account is mounted, and Files shows it.
 
-Client IDs (decided 2026-11-06): **0.8.8.5 uses rclone's own built-in OAuth client IDs.** `lordos-rclone` is upstream rclone,
+Client IDs (decided 2026-11-06): **0.8.8.5 uses rclone's own built-in OAuth client IDs.** `insaneos-rclone` is upstream rclone,
 unpatched, so the person is signing in to rclone, exactly as with Debian's or any distribution's rclone package. Nothing hides it:
 the provider's consent page names rclone, and the sign-in sheet says so ("Signing in uses rclone, the open source engine Insane OS
 uses for Cloud. The provider's page will ask you to allow rclone."). rclone's IDs are shared by every rclone user, and some
 providers rate-limit them (Reported: rclone's docs recommend your own ID for the largest drive). So each account has, under
 Advanced, **Use my own client ID** (client ID and secret, to the keyring), and later Insane OS can register its own apps (owner
-account iPERFEX, identity lordos.org: name Insane OS, home page and privacy policy on lordos.org) and ship them in
-`assets/cloud/oauth.json`, read by `lord-server`, without changing anything else.
+account iPERFEX, identity insaneos.org: name Insane OS, home page and privacy policy on insaneos.org) and ship them in
+`assets/cloud/oauth.json`, read by `insane-server`, without changing anything else.
 
 Redirect address (decided 2026-11-06): the sign-in returns to rclone on `127.0.0.1:53682` on the person's own computer, the
-loopback redirect that RFC 8252 recommends for native apps. A relay on our domain (auth.lordos.org or a page of lordos.org) is
+loopback redirect that RFC 8252 recommends for native apps. A relay on our domain (auth.insaneos.org or a page of insaneos.org) is
 not used: rclone's own apps only accept their registered loopback address; the code would pass through a server of ours (logs,
-outages, a phishing target) for no gain; and auth.lordos.org is the blog's Cognito domain, which signs people in to the blog but
+outages, a phishing target) for no gain; and auth.insaneos.org is the blog's Cognito domain, which signs people in to the blog but
 doesn't hand out a provider's file tokens. **Ruled out for good** by the maintainer for those risks: a provider that refuses
 loopback addresses is simply not offered.
 
@@ -253,18 +253,18 @@ Context menu on files and folders of an account: **Keep on This Computer** / **F
 - rclone's VFS with `--vfs-cache-mode full` already fetches on open and keeps what was read; uploads changed files after
   `--vfs-write-back 5s`.
 - **Insane OS decides what stays**, not rclone: the mount runs with `--vfs-cache-max-age 100y` and no `--vfs-cache-max-size`, so
-  rclone never evicts on its own. `lord-server`'s cloud manager evicts instead:
+  rclone never evicts on its own. `insane-server`'s cloud manager evicts instead:
   - **Free Up Space** on a file or folder: for each clean file (not open, not in `vfs/queue`, not kept), the cached copy is
     dropped. How: rclone has no evict call (Reported); Phase 0 tests dropping the cache file and its metadata in
     `vfsMeta` while the mount runs and reading it again, against `vfs/forget`. If it isn't safe, eviction happens by restarting
     that account's mount with a size limit for one pass.
   - **Automatic**: when the disk holding the home has less than the threshold free (Settings → Cloud → "Free up space when this
     computer has less than 10 GB free", 5 to 100 GB, on by default), the least recently used clean, not kept files go first.
-  - **Keep on This Computer**: the path goes in `~/.config/lordos/cloud/keep.json`; the manager reads the files once to bring them
+  - **Keep on This Computer**: the path goes in `~/.config/insaneos/cloud/keep.json`; the manager reads the files once to bring them
     down (low priority, paused on battery like Backups), watches the folder for new ones (`vfs/refresh` + polling the remote
     every 5 minutes, or the provider's change notifications where rclone has them), and never evicts them.
-- **Status per file**: `lord-server` reads the VFS cache metadata (which ranges of a file are present) and `vfs/queue` (what waits
-  to upload), and Files gets the status with `lord.cloud.status(paths)` for the visible rows only, pushed again on change.
+- **Status per file**: `insane-server` reads the VFS cache metadata (which ranges of a file are present) and `vfs/queue` (what waits
+  to upload), and Files gets the status with `insane.cloud.status(paths)` for the visible rows only, pushed again on change.
 - **Offline**: with no network, cached and kept files open; the rest say "Not on this computer, and the cloud can't be reached".
   Changes wait in the queue and go up when the network comes back; the menu bar item says how many wait.
 - **Conflicts**: a file changed here and in the cloud while offline: the cloud's version keeps the name, ours is saved next to it
@@ -277,7 +277,7 @@ folder from the provider the first time the folder is read and again on the firs
 (`--dir-cache-time`, 5 minutes by default), and whoever reads waits for that round trip; while it lists one folder again
 (`vfs/refresh` of that folder) a reader of that folder waits too. A listing of the whole tree (`recursive`) holds nothing
 while it walks. Measured with `tests/cloud_harness.c` against `rclone serve webdav` 250 ms away (2040 files and 40 folders),
-listing as `lord.fs.list` does, lordos-rclone 1.75.2 (2026-11-08, amd64; one round trip is 250 ms there, a real provider's
+listing as `insane.fs.list` does, insaneos-rclone 1.75.2 (2026-11-08, amd64; one round trip is 250 ms there, a real provider's
 listing of a large folder takes seconds):
 
 | | Before | After |
@@ -322,7 +322,7 @@ the list in 4.2: it would read the whole account; To decide whether to offer it 
 **Share Link…** opens a sheet: the link (`operations/publiclink`), **Copy**, an expiry where the provider supports one (`expire`:
 1 day, 7 days, 30 days, never), and **Stop Sharing** (`unlink`) where the provider supports it. Providers without public links
 show **Open on Website** instead. The links made from Insane OS are listed in Settings → Cloud → the account → **Shared Links**, from
-`~/.config/lordos/cloud/links.json` (rclone can't list links), each with Copy and Stop Sharing.
+`~/.config/insaneos/cloud/links.json` (rclone can't list links), each with Copy and Stop Sharing.
 
 ## 10. Backups to Cloud
 
@@ -376,8 +376,8 @@ Camera and Photos; a cloud's shared-with-me folder where the provider exposes it
 
 | Phase | Ships | Done when |
 |---|---|---|
-| **0, Proof** | `lordos-rclone` built on both architectures; `rcd` on a Unix socket; every rc call in section 5 answered; eviction while mounted (7.2); OAuth through `config/create` states; token refresh and the keyring | Each To test above is Measured, in section 15 |
-| **1, Core** | `server/src/cloud/` with `lord.cloud`, the unit, Settings → Cloud, accounts with sign-in, space, mounts, Files' Cloud section with status glyphs, Keep / Free Up Space, links, menu bar item | An account of each kind (OAuth drive, WebDAV, S3, SFTP) added, browsed, files opened offline, links made, on amd64 and the Pi. **Core built** (branch `cloud-core`): WebDAV end to end on both architectures (section 15); a real OAuth account, S3 and SFTP still to run; the interface is branch `cloud-ui` |
+| **0, Proof** | `insaneos-rclone` built on both architectures; `rcd` on a Unix socket; every rc call in section 5 answered; eviction while mounted (7.2); OAuth through `config/create` states; token refresh and the keyring | Each To test above is Measured, in section 15 |
+| **1, Core** | `server/src/cloud/` with `insane.cloud`, the unit, Settings → Cloud, accounts with sign-in, space, mounts, Files' Cloud section with status glyphs, Keep / Free Up Space, links, menu bar item | An account of each kind (OAuth drive, WebDAV, S3, SFTP) added, browsed, files opened offline, links made, on amd64 and the Pi. **Core built** (branch `cloud-core`): WebDAV end to end on both architectures (section 15); a real OAuth account, S3 and SFTP still to run; the interface is branch `cloud-ui` |
 | **2, Backups** | Cloud destination, manifests, versions, crypt, restore | Backup, restore of a file and of everything, a kill in the middle recovered, encrypted names seen on the provider |
 | **3, Release** | Docs, screenshots, translations, tests (section 16), THIRD_PARTY and About | `make test` and the release gates pass on both architectures |
 
@@ -391,7 +391,7 @@ results on both architectures unless a number says otherwise.
 
 | Question | Result |
 |---|---|
-| `rcd` on a Unix socket | **Measured, works**: `--rc-addr unix:///…/rc.sock`. No TCP listener at all (`ss -ltnp`). The socket is created with the umask (0775 here), so the 0700 folder is what protects it; `lord-server` also sets umask 077 for the unit |
+| `rcd` on a Unix socket | **Measured, works**: `--rc-addr unix:///…/rc.sock`. No TCP listener at all (`ss -ltnp`). The socket is created with the umask (0775 here), so the 0700 folder is what protects it; `insane-server` also sets umask 077 for the unit |
 | Auth on the socket | **Measured**: without `--rc-user`/`--rc-pass` a call that touches a remote gets 401 |
 | Every rc call in section 5 | **Measured, all present**, plus `vfs/list` and `sync/bisync`. `core/command` and `config/dump` are present too, as expected: 4.2's closed table is what keeps them out |
 | `config/create` for WebDAV with `obscure` | **Measured**: the password lands obscured in `rclone.conf`; 4.3 still moves it to the keyring |
@@ -400,24 +400,24 @@ results on both architectures unless a number says otherwise.
 | Upload queue | **Measured**: a write through the mount shows in `vfs/queue` (name, size, delay, tries) and reaches the server after `WriteBack` (5 s) |
 | `operations/about` | WebDAV without quota answers `{}`: section 8's "used only" case |
 | `operations/publiclink` | WebDAV: "doesn't support public links", the error 9 turns into **Open on Website** |
-| OAuth through rc `config/create` (non-interactive) | Answers a state machine whose first question is `config_is_local`. **Decided instead:** `lord-server` runs `rclone authorize <type> --auth-no-open-browser` in the cloud scope, reads the URL from its log line ("Please go to the following link: http://127.0.0.1:53682/auth?state=…"), opens it in the default browser itself, and gets the token from stdout; then `config/create` with `config_token`. **Measured** up to the URL with Dropbox; the token step needs a real account (Phase 1) |
+| OAuth through rc `config/create` (non-interactive) | Answers a state machine whose first question is `config_is_local`. **Decided instead:** `insane-server` runs `rclone authorize <type> --auth-no-open-browser` in the cloud scope, reads the URL from its log line ("Please go to the following link: http://127.0.0.1:53682/auth?state=…"), opens it in the default browser itself, and gets the token from stdout; then `config/create` with `config_token`. **Measured** up to the URL with Dropbox; the token step needs a real account (Phase 1) |
 | `core/bwlimit` | **Measured**: up and down separately (`1M:2M`) |
 | Memory | `rcd` with one mount: RSS 77 MB (amd64), 81 MB (Pi) |
 | Binary | 86 MB (amd64), 79 MB (arm64) with every backend. To decide in packaging: build tags to leave out backends 6.1 doesn't offer |
-| Token refresh written back to `--config` | Moot as built: `--config ""` keeps it in memory, and `lord-server` saves a changed token to the keyring (4.3). To test with a real OAuth account |
+| Token refresh written back to `--config` | Moot as built: `--config ""` keeps it in memory, and `insane-server` saves a changed token to the keyring (4.3). To test with a real OAuth account |
 
 ### Phase 1: the core (2026-11-06)
 
 Built on branch `cloud-core`: `server/src/cloud/` (`cloud_pure.c` the closed method table and every check, `cloud_rc.c` the
 client, `cloud.c` the thread, daemon and accounts, `cloud_files.c` status, eviction and Keep, `cloud_kr.c` the keyring),
-`server/src/ui/js_cloud.c` (`lord.cloud`), `sdk/cloud.js`, `tools/iso/mkdeb-rclone.sh` (`lordos-rclone_1.75.2-1_amd64.deb`
+`server/src/ui/js_cloud.c` (`insane.cloud`), `sdk/cloud.js`, `tools/iso/mkdeb-rclone.sh` (`insaneos-rclone_1.75.2-1_amd64.deb`
 and `_arm64.deb`, 21 MB and 18 MB, built on VM 116 in 4 min 17 s for both). Measured on VM 116 (amd64) and the Pi 5 (arm64):
 
 | What | Result |
 |---|---|
 | `cloud_test` (unit, ASan and UBSan) | 1526 checks pass on both: the 21-method table and that 30 dangerous names (`core/command`, `config/dump`, `options/set`, `operations/delete`, `sync/sync`…) are not in it, header injection refused, HTTP answers (length, chunked, cut short), names and paths under `~/Cloud` (`..`, `//`, C1 controls, bad UTF-8, a sibling `~/Cloudy`), the provider and website tables (no other operating system's names; `https` only for an account's own address), `authorize`'s address and token, the status merge, eviction (LRU, never kept, changed, waiting or open), and on a real cache tree in a throwaway home: Free Up Space, a file open by a process refused, links and keep files read back without bad entries, files 0600 in a 0700 folder |
-| `tests/cloud_integration.sh` against `rclone serve webdav` | 70 checks pass on amd64 and on the Pi: no TCP listener of `rcd`, the rc folder 0700 and socket for the user only, no password or `RCLONE_RC_*` on the command line or in the environment, 401 for `config/dump`, `core/command` and `operations/list` without credentials, another local user can't connect, `rclone.conf` and every file in `~/.config/lordos/cloud` without the password; add, mount, a 5 MB file read whole, Free Up Space while closed and refused while open, a write going up and refused as pending, Pause holding an upload 11 s and Resume sending it, Keep bringing a freed file down, WebDAV links answered `unsupported`, Restart and a `kill -9` restarted by itself (files read after both), add with the same name updating the account, rename, remove (unmounted, cache and keyring item gone, nothing deleted on the server), `rclone` gone with the session |
-| Eviction while a file is open | Refused (`reason: open`): rclone's `vfs/stats` `inUse` > 0 makes `lord-server` look for the file among this user's open descriptors (`/proc/*/fd`), and also treats a file used in the last 10 s as open, because rclone keeps a closed file's handle 5 s (`HandleCaching`) |
+| `tests/cloud_integration.sh` against `rclone serve webdav` | 70 checks pass on amd64 and on the Pi: no TCP listener of `rcd`, the rc folder 0700 and socket for the user only, no password or `RCLONE_RC_*` on the command line or in the environment, 401 for `config/dump`, `core/command` and `operations/list` without credentials, another local user can't connect, `rclone.conf` and every file in `~/.config/insaneos/cloud` without the password; add, mount, a 5 MB file read whole, Free Up Space while closed and refused while open, a write going up and refused as pending, Pause holding an upload 11 s and Resume sending it, Keep bringing a freed file down, WebDAV links answered `unsupported`, Restart and a `kill -9` restarted by itself (files read after both), add with the same name updating the account, rename, remove (unmounted, cache and keyring item gone, nothing deleted on the server), `rclone` gone with the session |
+| Eviction while a file is open | Refused (`reason: open`): rclone's `vfs/stats` `inUse` > 0 makes `insane-server` look for the file among this user's open descriptors (`/proc/*/fd`), and also treats a file used in the last 10 s as open, because rclone keeps a closed file's handle 5 s (`HandleCaching`) |
 | Pause per account | rclone has no per-remote pause: what waits in `vfs/queue` gets its expiry pushed to 10⁹ s (`vfs/queue-set-expiry`) every second while paused, and back to 0 on Resume. Downloads of files being opened are never paused; Keep's downloads are |
 | A sign-in's address | `rclone authorize` prints it on stderr within milliseconds; `beginSignIn` waits for it up to 2 s, so `url` is there at once in practice |
 | An own client ID | `RCLONE_<KIND>_CLIENT_ID`/`_CLIENT_SECRET` in `authorize`'s environment: **measured**, the provider's address carries that `client_id` |
@@ -437,19 +437,19 @@ and `_arm64.deb`, 21 MB and 18 MB, built on VM 116 in 4 min 17 s for both). Meas
 
 Built so far (section 15, "Phase 1: the core"): `server/tests/cloud_test.c` (in `make test`, `mk/cloud.mk`) and
 `server/tests/cloud_integration.sh <build dir> <rclone binary>`, which drives `build/cloud-harness` (the same `src/cloud`
-code with the keyring replaced by files and the browser by a line on stdout; `LORDOS_CLOUD_RCLONE` names the binary in that
+code with the keyring replaced by files and the browser by a line on stdout; `INSANEOS_CLOUD_RCLONE` names the binary in that
 test build only, `-DCLOUD_TEST`) against a local `rclone serve webdav`. MinIO, conflicts, Backups and the load tests are not
 written yet.
 
-## 17. The `lord.cloud` contract (Phase 1)
+## 17. The `insane.cloud` contract (Phase 1)
 
-The interface and `lord-server` meet here; Settings, Files, the menu bar item and Backups use only this. Calls are synchronous
-and return at once (long work runs in `lord-server`'s cloud thread); every change is pushed as one state object through
-`__lordCloud(state)` (an eventfd in the main loop, at most twice a second, like `__lordBackup`), wrapped by `sdk/cloud.js` as
+The interface and `insane-server` meet here; Settings, Files, the menu bar item and Backups use only this. Calls are synchronous
+and return at once (long work runs in `insane-server`'s cloud thread); every change is pushed as one state object through
+`__insaneCloud(state)` (an eventfd in the main loop, at most twice a second, like `__insaneBackup`), wrapped by `sdk/cloud.js` as
 `useCloud()` and `cloud.*`.
 
 ```
-cloud.available()            → bool (lordos-rclone installed)
+cloud.available()            → bool (insaneos-rclone installed)
 cloud.state()                → State (the last one pushed)
 cloud.providers()            → [{ kind, label, group: 'oauth'|'server'|'object'|'crypt', hint,
                                   fields: [{ name, label, secret, required, default, examples: [..] }] }]
@@ -488,7 +488,7 @@ Errors are codes (`errors.json` keys `cloud.*`), never rclone's text, except `me
 
 ### 17.1 As built (branch `cloud-core`)
 
-`sdk/cloud.js` exports `cloud`, `useCloud()` and `cloudState`; `__lordCloud(state)` replaces the store's state. What the
+`sdk/cloud.js` exports `cloud`, `useCloud()` and `cloudState`; `__insaneCloud(state)` replaces the store's state. What the
 contract above leaves open, and the few places the core differs from it:
 
 - **Times** are milliseconds since the epoch (`expiresAt`, `recent[].at`, `links()[].made` and `expires`, `null` for never);
@@ -498,7 +498,7 @@ contract above leaves open, and the few places the core differs from it:
   follows, so call it again from `useCloud()`. Fields: rclone's non-advanced options of that backend, minus the ones a preset
   sets (Nextcloud's `vendor`…); `label` is the first line of rclone's help, in English; OAuth kinds have `fields: []`.
 - `beginSignIn` waits up to 2 s for rclone's address, so `url` is set at once in practice; if not, it is `null` and comes in
-  `state.signin.url`. `lord-server` opens it in the default browser itself (the launcher's `x-scheme-handler/http` app);
+  `state.signin.url`. `insane-server` opens it in the default browser itself (the launcher's `x-scheme-handler/http` app);
   `openSignInPage(id)` opens it again and returns whether it could (`sdk/cloud.js` falls back to the session's opener).
   `signin.account` names the account once the token came. `cancelSignIn` of a finished sign-in clears `signin` to `null`.
 - **Sign In Again / new credentials** (asked by the interface, 2026-11-06): `beginSignIn(kind, name)` or `add(kind, name,
@@ -506,8 +506,8 @@ contract above leaves open, and the few places the core differs from it:
   folder, the new token or fields merged into its remote with `config/update`, unmounted and mounted again, the keyring item
   replaced. `add` answers `{ id }` with the existing id; required fields aren't required then, and an empty value keeps the
   old one. The name of an account of another kind is `cloud.nameTaken`.
-- `link` and `unlink` reach the provider, so `lord.cloud.link/unlink` return `{ req }` and the answer comes through
-  `__lordCloudReply(req, result)`; **`cloud.link()` and `cloud.unlink()` in the SDK return a Promise** of `{ url }`,
+- `link` and `unlink` reach the provider, so `insane.cloud.link/unlink` return `{ req }` and the answer comes through
+  `__insaneCloudReply(req, result)`; **`cloud.link()` and `cloud.unlink()` in the SDK return a Promise** of `{ url }`,
   `{ ok }` or `{ error }`. A provider without links answers `{ error: 'unsupported' }` (also at once when the account's
   `linksSupported` is already known to be false).
 - `remove` with changes waiting answers `{ error: 'pending', files }`; `{ discardPending: true }` removes anyway.
@@ -522,7 +522,7 @@ contract above leaves open, and the few places the core differs from it:
   `about` has `used` always and the others only when the provider gives them.
 - `pause(null)` / `resume(null)`: Pause All (`options.pauseAll`); `resume(null)` also resumes each account.
 - `pauseOnMetered` is kept but does nothing yet: Insane OS's network service doesn't say whether a network is metered.
-- `showLog()` opens Logs on `~/.cache/lordos/cloud.log` (`wm.open('logs', { args: { file: 'cloud.log' } })`; Logs reads
+- `showLog()` opens Logs on `~/.cache/insaneos/cloud.log` (`wm.open('logs', { args: { file: 'cloud.log' } })`; Logs reads
   `args.file` since this branch).
 - Not in the core: per-account options (`setAccountOptions`, `account.options`: rclone's bandwidth limit is one for the
   whole daemon, and there is no metered information to act on) and `State.conflicts`: rclone's VFS uploads the last version
@@ -536,13 +536,13 @@ MenuBar, States; Backups is Phase 2), against section 17 only.
 
 | Where | What |
 |---|---|
-| `sdk/cloud.js` | the thin wrapper of section 17: `cloud.*`, `useCloud()`, `cloudState`; `__lordCloud(state)` only stores the state |
+| `sdk/cloud.js` | the thin wrapper of section 17: `cloud.*`, `useCloud()`, `cloudState`; `__insaneCloud(state)` only stores the state |
 | `sdk/cloudmodel.js` | everything that decides without a screen: status → glyph, space bars and rings, provider groups and search, names, menus, the sidebar, the menu bar glyph, notifications (`transitions`) |
 | `sdk/cloudglyphs.js`, `sdk/cloudui.jsx` | the mocks' glyphs and rings drawn as pixels (the engine has no paths or conic gradients), cached so a row that doesn't change isn't uploaded again |
 | `sdk/cloudstatus.jsx` | the menu bar item and its panel, the notifications from state changes, `startCloud()` in `startShell` |
 | `apps/settings/Cloud.jsx` | Settings → Cloud, the account page and the sheets |
 | `apps/files/cloud.jsx` | Files' Cloud section, status, menu items, Share Link, Get Info, the offline message (docs/FILES.md, "Cloud") |
-| `sdk/cloudmock.js` | a development stand-in for `lord.cloud`, used only when `lord.cloud` is missing and settings.json has `"cloudDevMock": true` (or `"states"`, which a few seconds in turns on a sign-in request, a full account with changes waiting, a conflict and an offline account) |
+| `sdk/cloudmock.js` | a development stand-in for `insane.cloud`, used only when `insane.cloud` is missing and settings.json has `"cloudDevMock": true` (or `"states"`, which a few seconds in turns on a sign-in request, a full account with changes waiting, a conflict and an offline account) |
 | `server/tests/cloud_model_test.mjs` | 169 checks (with section 19's), in `run_suites.sh`: the model, the glyph pixels, the file dialog's places, the mock against section 17's shape, every text in the five catalogs, and that Cloud's screens use no one-sided physical edge (right to left) |
 
 Decisions taken while building it:
@@ -558,9 +558,9 @@ Decisions taken while building it:
   the kind, accents folded. The name proposed is Personal, then Work, then the provider's label (not changed once typed).
 - **Credentials**: a field's label is ours for the usual rclone option names (`url`, `user`, `pass`, `endpoint`,
   `access_key_id`…, translated), else the provider list's own; a field with two to four examples (a preset, a service)
-  is a segmented control, the rest text fields; secrets are masked. lord-server's error for a field outlines it.
+  is a segmented control, the rest text fields; secrets are masked. insane-server's error for a field outlines it.
 - **Sign In Again**: an OAuth account calls `beginSignIn(kind, <its name>, { clientId?, clientSecret? })` again; any
-  other opens its credentials form and calls `add(kind, <its name>, fields)`. **lord-server must treat a sign-in or an
+  other opens its credentials form and calls `add(kind, <its name>, fields)`. **insane-server must treat a sign-in or an
   add for an existing account's name as updating that account**, not as a second one.
 - **Files on demand** off is `keep([mount])`, on is `unkeep([mount])`; the ready sheet's "Keep everything on this
   computer" is the same, and its "Show in Files" switch is `settings.cloudHidden` (Files and the file dialog leave
@@ -599,7 +599,7 @@ was really checked end to end. Today:
 |---|---|
 | `webdav` | `cloud_integration.sh` and `cloud_providers_check.sh` against `rclone serve webdav`, VM 116 (amd64), 13/13 |
 | `sftp` | `cloud_providers_check.sh` against the machine's own OpenSSH `sshd` on 127.0.0.1, a throwaway user and key (`key_pem`), 14/14; SFTP has no links |
-| `s3` | `cloud_providers_check.sh` against `rclone serve s3` (one bucket, access key and secret), 13/13; links not confirmed: the stand-in's links are `http://` and `lord-server` keeps only `https` ones (`cloud_url_ok`), which a real S3 service gives |
+| `s3` | `cloud_providers_check.sh` against `rclone serve s3` (one bucket, access key and secret), 13/13; links not confirmed: the stand-in's links are `http://` and `insane-server` keeps only `https` ones (`cloud_url_ok`), which a real S3 service gives |
 
 `server/tests/cloud_providers_check.sh <build> <rclone> [webdav] [sftp] [s3]` runs Check This Account's steps through
 `build/cloud-harness` (the same `src/cloud`), with the files checked on the server's side too: 40/40 on VM 116 with rclone
@@ -626,18 +626,18 @@ account's **Advanced** for every browser sign-in account; a verified provider ke
 ### 19.3 Check This Account
 
 On the account's page: a box of its own for a provider not verified yet, under **Advanced** for a verified one (to report
-a problem). `sdk/cloudcheck.js` runs it with `lord.fs` and `cloud.*` only, each step with its result and time:
+a problem). `sdk/cloudcheck.js` runs it with `insane.fs` and `cloud.*` only, each step with its result and time:
 
 1. **Space information**: `refreshAbout`, then the state's `about` (skipped when the provider tells none).
 2. **List the account** (its root).
-3. **Make a check folder** `.lordos-check-<random>` (in object storage the root lists buckets: inside the first one, or a
-   new bucket `lordos-check-<random>` when there is none).
+3. **Make a check folder** `.insaneos-check-<random>` (in object storage the root lists buckets: inside the first one, or a
+   new bucket `insaneos-check-<random>` when there is none).
 4. **Write 1 MiB** of random bytes.
 5. **Send it up**: its status goes to on this computer (going up seen on the way), 2 minutes at most.
 6. **Free Up Space** on it (tried again while rclone still holds it open).
 7. **Bring it back, same contents**: read through the mount, compared by hash.
 8. **Make a link** and stop sharing it, where the account has links.
-9. **Delete the check folder**: `lord.fs` has no delete, so the folder moves out of the cloud (a move job) into a
+9. **Delete the check folder**: `insane.fs` has no delete, so the folder moves out of the cloud (a move job) into a
    scratch folder of the home, which goes to the Trash and out of it. Runs even when an earlier step failed.
 10. **Delete it in the cloud**: gone from a fresh listing and nothing of it waiting to go up, 1 minute at most.
 
@@ -650,7 +650,7 @@ the totals. No account name, email, file names but the check's, links or tokens.
 
 `.github/ISSUE_TEMPLATE/cloud-provider.yml` is an issue form (label `cloud-provider`): provider, does it work (yes, partly,
 no), the report, Insane OS version, anything else. **Tell Us on GitHub** opens
-`https://github.com/lordbasex/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud provider: <label>&provider=<label>&version=…&report=…`
+`https://github.com/insaneos/Insane OS/issues/new?template=cloud-provider.yml&title=Cloud provider: <label>&provider=<label>&version=…&report=…`
 (every value URL-encoded) in the default browser; the report is cut at a line, with "[truncated]", so the address stays
 under 7000 characters. From the Add Account sheet's line the same address goes without a report. A maintainer who
 confirms a report adds the kind to `providers.json` with `"evidence": "issue #N"`.
@@ -678,10 +678,10 @@ confirms a report adds the kind to `providers.json` with `"evidence": "issue #N"
 6. **Delete in the cloud.** Move to Trash on a path under `~/Cloud/<account>` must not create `.Trash-1000` in the cloud:
    `cloud.delete(paths)` → Promise removes them through the mount (the provider keeps its own trash where it has one); Files
    asks first ("Delete from <provider>? It goes to <provider>'s trash" / "It can't be undone" when the provider has none).
-7. **`lordos-rclone` repackages rclone's official release binary**: `tools/iso/mkdeb-rclone.sh` downloads the release's
+7. **`insaneos-rclone` repackages rclone's official release binary**: `tools/iso/mkdeb-rclone.sh` downloads the release's
    `.zip` and `SHA256SUMS`, verifies the PGP signature with Nick Craig-Wood's key (fingerprint
    `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`, pinned in the script, key file in `packaging/keys/`), checks the hash, and puts
-   the unmodified binary in `/usr/lib/lordos/rclone/rclone`. It is published in Insane OS's own apt repository with each release
+   the unmodified binary in `/usr/lib/insaneos/rclone/rclone`. It is published in Insane OS's own apt repository with each release
    (rclone has no apt repository of its own), so Store → Updates and `apt` keep it current. No Go on the build host.
 
 ### 18.1 The interface of 17.2 (items 1 to 6)
@@ -704,14 +704,14 @@ confirms a report adds the kind to `providers.json` with `"evidence": "issue #N"
 - **Empty Trash** on the account's page when `account.trashSupported`: a confirmation ("can't be undone"), then
   `cloud.emptyTrash(id)` with a spinner and the result. Without it, a provider with trashed bytes keeps the website link.
 - **Measure** where the provider gives no total: a button with "Measuring lists every file once"; while it runs a
-  spinner and **Cancel** (`cloud.cancelMeasure(id)` when lord-server has it; otherwise the answer is just ignored),
+  spinner and **Cancel** (`cloud.cancelMeasure(id)` when insane-server has it; otherwise the answer is just ignored),
   then "<used> used, measured <date time>" from `about.measuredAt`, also in the overview's account row.
 - **Delete in the cloud.** Move to Trash in Files (the menu, ❖⌫ and Delete, dragging onto the Trash) splits what is
   chosen (`splitTrash`): local items go to the Trash as before; each account's items are asked about ("Delete from
   <provider>?" with "It goes to its trash on <provider>." or "<provider> has no trash: it can't be undone.") and go to
-  `cloud.delete(paths)`, never `lord.fs.trash`, so no `.Trash-<uid>` folder is made in the cloud and Restore isn't
+  `cloud.delete(paths)`, never `insane.fs.trash`, so no `.Trash-<uid>` folder is made in the cloud and Restore isn't
   offered. An account's own folder is never deleted this way. Check This Account (19.3) still moves its own folder out
-  through `lord.fs`; with `cloud.delete` in every server it can use that instead.
+  through `insane.fs`; with `cloud.delete` in every server it can use that instead.
 - The dev mock (`sdk/cloudmock.js`) answers all of it: providers after 0.9 s (`"cloudDevMock": "providersFail"` to see
   the failure), a 6-digit code asked when adding the phone maker's drive, Empty Trash, a 4 s Measure that can be
   stopped, delete.
@@ -730,12 +730,12 @@ the sign-in page opened more than once. Now:
   Account sheet closes when the sign-in starts, so Settings can go behind the browser.
 - One start: every sign-in goes through `startSignIn`, which ignores a second start while one runs, shows again a sign-in
   already waiting for the same account instead of starting another, and cancels one for another account first. Nothing
-  in the interface opens the page on start (lord-server does); `cloud.openSignInPage` runs only from its button, and the
-  SDK's fallback opener only when lord-server couldn't open it.
+  in the interface opens the page on start (insane-server does); `cloud.openSignInPage` runs only from its button, and the
+  SDK's fallback opener only when insane-server couldn't open it.
 
 ### 17.2 As built (branch `cloud-core`, 2026-11-06)
 
-1. **Providers.** `lord.cloud.providers()` answers `{ req }` and the list comes through `__lordCloudReply`; `cloud.providers()`
+1. **Providers.** `insane.cloud.providers()` answers `{ req }` and the list comes through `__insaneCloudReply`; `cloud.providers()`
    is a Promise. Each call runs `config/providers` (rclone is started if it isn't running). Left out: `alias`, `archive`,
    `cache`, `chunker`, `combine`, `compress`, `hasher`, `http`, `local`, `memory`, `union`, `tardigrade`, every backend rclone
    marks `Hide`, and every name another backend lists in its `Aliases`. `kind` is rclone's `Prefix` (`gcs`, `oos`), and
@@ -774,7 +774,7 @@ the sign-in page opened more than once. Now:
    removes through the mount: a file or link with `unlink`, a folder with everything in it (`nftw` with `FTW_PHYS` and
    `FTW_MOUNT`: links are not followed, and it never leaves the mount). **Measured:** a file and a folder with a subfolder
    gone on the WebDAV server, no `.Trash` folder made, a path outside `~/Cloud`, the account's folder and a `..` path refused.
-7. **`lordos-rclone`** repackages `rclone-v1.75.2-linux-<arch>.zip` from downloads.rclone.org: `SHA256SUMS` must carry a good
+7. **`insaneos-rclone`** repackages `rclone-v1.75.2-linux-<arch>.zip` from downloads.rclone.org: `SHA256SUMS` must carry a good
    signature by exactly `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA` (`packaging/keys/rclone-release-<fingerprint>.asc`, from
    keys.openpgp.org, the same key as rclone.org/KEYS), the zip must have the hash it lists, the binary goes in unmodified
    (`cmp` equal to the zip's), and on the build's own architecture it must say `rclone v1.75.2`. The copyright file is
@@ -792,7 +792,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
    are behind it shows `state: 'locked'` and `error: 'cloud.keyringLocked'` (`cloud.noKeyring` when there is none) while
    `service.running` stays true, and an action on it (measure, links, Empty Trash, delete) answers `cloud.keyringLocked`
    instead of `cloud.notRunning`; an account that isn't connected for another reason answers `cloud.notConnected`.
-   `lord-server` hears lord-vault's own `{"ev":"unlocked","v":"login"}` event (`vc_set_event_hook`, `cloud_kr_watch`) and
+   `insane-server` hears insane-vault's own `{"ev":"unlocked","v":"login"}` event (`vc_set_event_hook`, `cloud_kr_watch`) and
    connects the waiting accounts at once, with no polling; `cloud.retry(id|null)` does the same on demand (call it after
    unlocking from the interface), and `refreshAbout(id)` of an account that isn't connected also retries it. The only timer
    left is a fallback every 10 minutes. **Measured** (`cloud_integration.sh`, the keyring stand-in locked): the account says
@@ -821,7 +821,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
   file, plus its passphrase); WebDAV Address, preset, User, Password; S3 Provider, Endpoint, Region, Access key, Secret key;
   FTP and SMB alike; any other kind its required options and those without a default. The rest is under **Advanced
   options** (closed): a short label (the first clause of rclone's help), the control, rclone's whole help dimmed and the
-  option's name. Only a password is masked (`isPassword`, which lord-server now gives per field with its `type`; rclone's
+  option's name. Only a password is masked (`isPassword`, which insane-server now gives per field with its `type`; rclone's
   `Sensitive` host and user stay plain text), yes/no options are switches, rclone's choices menus. The form's body scrolls
   inside the Settings window between its title and Back / Connect.
 - **The account page** uses the width: Settings gives Cloud a 980-pixel column; two balanced columns from 900 pixels
@@ -849,7 +849,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
   date the link stops working (`expires`), and `cloud.certUntrusted`, `cloud.unreachable`, `cloud.badAddress`,
   `cloud.notConnected`, `cloud.keyringLocked`, `cloud.noKeyring`, `cloud.notRunning`, `cloud.notFound`, `cloud.badKind` their
   own texts (`errorVars`, `errorMessage`). An error of `add` or of a later step shows under the credentials form, the field it
-  belongs to outlined (lord-server's `field`, else by the code: an address for unreachable and bad address, the password
+  belongs to outlined (insane-server's `field`, else by the code: an address for unreachable and bad address, the password
   for a failed sign-in), with everything typed kept.
 - **Provider names**: an account's line uses the provider list's short label (asked once in the background when the pane
   opens), else rclone's description cut before "including"; it is cut with an ellipsis where it doesn't fit.
@@ -875,10 +875,10 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
     (B6: a password changed on the server shows `cloud.authFailed` without a restart).
 14. **Who the server is (B9, B6; `cloud_trust.c`).** As Connect to Server: SFTP keys read with `ssh-keyscan`, a new one
     answered as `{ question: { state, kind: 'hostKey', host, port, fingerprint } }`; `answer(state, 'trust')` keeps it in
-    `~/.config/lordos/cloud/known_hosts/<id>` (0600) and rclone always gets `known_hosts_file` pointing there (no more "No host
+    `~/.config/insaneos/cloud/known_hosts/<id>` (0600) and rclone always gets `known_hosts_file` pointing there (no more "No host
     key validation"); a changed key answers `{ error: 'cloud.hostKeyChanged', old, new }`. An https address (WebDAV, S3's
     endpoint…) whose certificate the system doesn't trust answers `{ question: { state, kind: 'certificate', host, port,
-    fingerprint, subject, issuer } }`; trusted, it is kept in `~/.config/lordos/cloud/certs/<id>.pem` (0600) and given to that
+    fingerprint, subject, issuer } }`; trusted, it is kept in `~/.config/insaneos/cloud/certs/<id>.pem` (0600) and given to that
     account alone as rclone's `override.ca_cert` (measured: another account on the same server is asked again;
     `no_check_certificate` is never used); a changed one answers `{ error: 'cloud.certChanged', old, new }`; one that doesn't
     name the host is `cloud.certUntrusted`. Any other answer than `trust` is `cloud.notTrusted`. `ssh-keyscan`, `ssh-keygen`
@@ -906,7 +906,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
   date the link stops working (`expires`), and `cloud.certUntrusted`, `cloud.unreachable`, `cloud.badAddress`,
   `cloud.notConnected`, `cloud.keyringLocked`, `cloud.noKeyring`, `cloud.notRunning`, `cloud.notFound`, `cloud.badKind` their
   own texts (`errorVars`, `errorMessage`). An error of `add` or of a later step shows under the credentials form, the field it
-  belongs to outlined (lord-server's `field`, else by the code: an address for unreachable and bad address, the password
+  belongs to outlined (insane-server's `field`, else by the code: an address for unreachable and bad address, the password
   for a failed sign-in), with everything typed kept.
 - **Provider names**: an account's line uses the provider list's short label (asked once in the background when the pane
   opens), else rclone's description cut before "including"; it is cut with an ellipsis where it doesn't fit.
@@ -923,7 +923,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
 - **U6**: WebDAV's presets list plain WebDAV ("other") first and choose it by default (`presetField`).
 - **U7**: while `service.running` is false every account says "Not connected: the cloud service isn't running" (dim with
   "!" in Files' sidebar), and the overview starts with the service's own message, **Restart** and **Show Log**.
-- The server form no longer promises a fingerprint prompt; the trust step (18.4) shows only when lord-server asks.
+- The server form no longer promises a fingerprint prompt; the trust step (18.4) shows only when insane-server asks.
 
 ### 18.6 The e2e re-run (U9, U10)
 
@@ -941,12 +941,12 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
     file not on this computer fails in about 8.6 s instead of more than 200 s (measured; uploads are retried by the VFS queue
     anyway). A transfer that fails for the network lists the account at once; a listing that can't reach the server sets
     `error: 'cloud.unreachable'` and `state: 'offline'`, retried every 30 s, and `ok` again when it answers. On the interface's
-    thread `lord.fs.read` of a cloud file not on this computer, of an account offline, locked, not mounted or with the
-    service down, fails at once with `cloud.offline` (`cloud_read_would_block`); what is here still opens. `lord.fs.du` on a
+    thread `insane.fs.read` of a cloud file not on this computer, of an account offline, locked, not mounted or with the
+    service down, fails at once with `cloud.offline` (`cloud_read_would_block`); what is here still opens. `insane.fs.du` on a
     cloud, network or FUSE folder answers at once with `remote: true` and no size (the UI shows the provider's), and
-    `lord.fs.search` there finds nothing for now (N2 is to make it work off the interface's thread). `lord.fs.list` of a folder
+    `insane.fs.search` there finds nothing for now (N2 is to make it work off the interface's thread). `insane.fs.list` of a folder
     rclone hasn't listed lately can still wait for rclone's timeouts (about 8 s) while offline: not changed.
-20. **Logout (B11).** `lord-server` stops Cloud after closing the apps: every account unmounted (a busy one lazily), rclone
+20. **Logout (B11).** `insane-server` stops Cloud after closing the apps: every account unmounted (a busy one lazily), rclone
     asked to quit, up to 15 s, and anything still mounted detached. Measured: the session ended with a file open in the
     mount leaves nothing in `/proc/self/mounts`.
 21. **Messages (U5)** shown under Get Info are rclone's words with HTML tags dropped, white space collapsed, at most 200 bytes.
@@ -962,7 +962,7 @@ The closed rc method table has 25 methods now: `operations/cleanup`, `operations
     the cloud's version would have been overwritten (measured), and rclone has no way to drop a pending upload. If the copy
     fails the file stays held and is tried again. Limits: a server change that keeps the size and gives no modtime or hash
     (plain WebDAV) can't be seen; a change made in the second between the check and the upload is lost.
-24. **lord.fs.list** stops at 5000 entries per folder without saying so (`js_sys.c` `f_fs_list`): not changed here; it is a
+24. **insane.fs.list** stops at 5000 entries per folder without saying so (`js_sys.c` `f_fs_list`): not changed here; it is a
     bound of the interface's thread, not Cloud's.
 
 The closed rc method table has 27 methods now (`operations/list`, `operations/stat`, `operations/copyfile` added).
@@ -987,7 +987,7 @@ The closed rc method table has 27 methods now (`operations/list`, `operations/st
 31. **Search inside a cloud folder (N2).** `cloud.search(path, needle)` → Promise `{ hits: [{ path, dir, size, mtime }],
     complete }`: a thread of its own walks the mount (through rclone's directory cache) with a budget of 15 s, 50 000
     entries, 16 levels and 500 hits, names matched without case. Chosen over a recursive `operations/list` with a filter:
-    the walk sees exactly what Files shows and its cost is bounded here. `lord.fs.search` still answers nothing for a cloud
+    the walk sees exactly what Files shows and its cost is bounded here. `insane.fs.search` still answers nothing for a cloud
     folder; Files calls `cloud.search` there.
 
 ### 18.7 The interface of 17.2 items 19 to 31
@@ -1000,11 +1000,11 @@ The closed rc method table has 27 methods now (`operations/list`, `operations/st
   Files.
 - **Opening a file only in the cloud** while its account is offline, locked or not mounted shows the offline message
   (`cantOpen`). A host-key question with `warning: 'cloud.hostKeyOther'` shows that warning above the fingerprint.
-- **Get Info** of a folder on a cloud or network mount: `lord.fs.du` answers `{ remote: true }`, so the size is the
+- **Get Info** of a folder on a cloud or network mount: `insane.fs.du` answers `{ remote: true }`, so the size is the
   listing's when known, else "—"; it never stays on "Calculating…".
 - **Links** show the expiry the provider answered (`{ url, expires }`); S3 offers only 1 day and 7 days.
 - **5000 entries**: a cloud folder whose listing came back with exactly 5000 says "Showing the first 5,000 items" in the
-  status bar (`lord.fs.list`'s bound, item 24).
+  status bar (`insane.fs.list`'s bound, item 24).
 32. **Every upload attempt goes through the conflict rule (B18).** rclone's VFS retries a failed upload by itself (every
     10 s); now an item whose attempt failed (`tries > 0`) is held again (expiry pushed far out), its "looked at" mark dropped,
     and the account listed at once. While the account is offline every waiting file is held, and the check itself holds

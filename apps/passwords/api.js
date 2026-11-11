@@ -1,14 +1,14 @@
-// api.js — estado de la app Contraseñas y los pedidos a lord-vault (por @lordos/sdk vaultRequest).
-// Lo descifrado vive en lord-vault; acá llega solo lo que se muestra: la lista liviana (sin
+// api.js — estado de la app Contraseñas y los pedidos a insane-vault (por @insaneos/sdk vaultRequest).
+// Lo descifrado vive en insane-vault; acá llega solo lo que se muestra: la lista liviana (sin
 // secretos), la entrada abierta (los ocultos sin valor) y un valor cuando el usuario lo pide
 // (mostrar, copiar, editar). Ver docs/PASSWORDS.md.
-import { createStore, vaultRequest, onVaultEvent, clipboard, t } from '@lordos/sdk';
+import { createStore, vaultRequest, onVaultEvent, clipboard, t } from '@insaneos/sdk';
 
 export const APP_ID = 'passwords';
 
-// true when this UI runs as its own sandboxed process (lord-server --app passwords) with a direct
-// channel to lord-vault; false in the shell (in-process fallback). See docs/PASSWORDS.md.
-export const appMode = typeof lord !== 'undefined' && !!(lord.vault && lord.vault.appMode);
+// true when this UI runs as its own sandboxed process (insane-server --app passwords) with a direct
+// channel to insane-vault; false in the shell (in-process fallback). See docs/PASSWORDS.md.
+export const appMode = typeof insane !== 'undefined' && !!(insane.vault && insane.vault.appMode);
 
 export const app = createStore({
   phase: 'loading',          // loading | none | locked | unlocked | unavailable
@@ -47,7 +47,7 @@ export async function reloadLogin() {
   } catch (e) { app.set((s) => ({ ...s, login: { entries: [], unlocked: false } })); }
 }
 
-// reemplaza/agrega un ítem de la lista con lo que devolvió lord-vault
+// reemplaza/agrega un ítem de la lista con lo que devolvió insane-vault
 export function upsertItem(item) {
   if (!item) return;
   app.set((s) => {
@@ -72,15 +72,15 @@ let clearTimer = null, clearAt = 0;
 export function copySecret(value, label) {
   const secs = Number(app.get().meta?.clip ?? 30) || 30;
   if (appMode) {
-    // app process: lord-server marks it sensitive and clears it after `secs` if unchanged
-    lord.clipboard.set(value, { secure: true, clearAfter: secs });
+    // app process: insane-server marks it sensitive and clears it after `secs` if unchanged
+    insane.clipboard.set(value, { secure: true, clearAfter: secs });
   } else {
     clipboard.set(value, { secure: true, origin: APP_ID });
     if (clearTimer) clearTimeout(clearTimer);
     clearAt = Date.now() + secs * 1000;
     clearTimer = setTimeout(() => {
       clearTimer = null;
-      try { if (lord.clipboard.get() === value) clipboard.set('', { secure: true, origin: APP_ID }); } catch (e) { /* */ }
+      try { if (insane.clipboard.get() === value) clipboard.set('', { secure: true, origin: APP_ID }); } catch (e) { /* */ }
     }, secs * 1000);
   }
   watchCopy(label, true, value, secs);
@@ -92,14 +92,14 @@ export function copyText(value, label) {
 }
 
 // What became of the copy just made: a secret's countdown (st.clip, with Keep), and a warning when something
-// replaced it right away (another app, a machine sharing its clipboard). In app mode lord-server says only
-// whether our own copy is still there (lord.clipboard.status), never what the clipboard holds.
+// replaced it right away (another app, a machine sharing its clipboard). In app mode insane-server says only
+// whether our own copy is still there (insane.clipboard.status), never what the clipboard holds.
 const SOON_MS = 3000;
 let watch = null;
 function copyState(w) {
-  if (appMode) return lord.clipboard.status ? lord.clipboard.status(false) : null;
+  if (appMode) return insane.clipboard.status ? insane.clipboard.status(false) : null;
   let cur = null;
-  try { cur = lord.clipboard.get(); } catch (e) { return null; }
+  try { cur = insane.clipboard.get(); } catch (e) { return null; }
   if (cur === w.value) return { state: 'mine', left: w.secret && clearTimer ? Math.max(0, Math.ceil((clearAt - Date.now()) / 1000)) : 0 };
   return { state: w.secret && !clearTimer && cur === '' ? 'cleared' : 'replaced', left: 0 };
 }
@@ -131,7 +131,7 @@ function watchCopy(label, secret, value, secs) {
 export function keepCopy() {
   const w = watch;
   if (!w) return;
-  if (appMode) { if (lord.clipboard.status) lord.clipboard.status(true); }
+  if (appMode) { if (insane.clipboard.status) insane.clipboard.status(true); }
   else if (clearTimer) { clearTimeout(clearTimer); clearTimer = null; }
   stopWatch();
   toast(t('passwords.clip.kept', { what: w.label }));
@@ -158,7 +158,7 @@ export async function setTags(tags) {
   app.set((s) => ({ ...s, tags }));
 }
 
-// Eventos de lord-vault: bloqueo (automático, pantalla), cambios desde otro lado, toque de la llave
+// Eventos de insane-vault: bloqueo (automático, pantalla), cambios desde otro lado, toque de la llave
 let wired = false;
 export function wireEvents() {
   if (wired) return;
@@ -171,7 +171,7 @@ export function wireEvents() {
   });
 }
 
-// Mensaje legible para un código de error de lord-vault
+// Mensaje legible para un código de error de insane-vault
 export function errorText(code) {
   const known = ['bad-key', 'locked', 'not-found', 'corrupt', 'truncated', 'not-a-vault', 'unsupported-version', 'no-device', 'keyfile-read',
     'keyfile-short', 'keyfile-write', 'unknown-format', 'bad-password', 'encrypted-export', 'unsupported-cipher', 'unsupported-kdf',

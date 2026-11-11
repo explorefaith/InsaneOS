@@ -5,14 +5,14 @@
 // What needs root is only the closed admin actions imager-fetch, imager-fetch-cancel,
 // imager-cache-clear and imager-write (server/src/imager/imager_admin.c), plus disk-mount,
 // disk-unmount, disk-eject and disk-cancel (the Disks app's). The first-run file goes onto the
-// card's boot partition through lord.fs, mounted for the user like any USB stick.
+// card's boot partition through insane.fs, mounted for the user like any USB stick.
 import { createElement as h } from 'react';
-import { admin, disks, fs, settings, keyboard, sound, notify, t, FilePicker, createStore, useStore } from '@lordos/sdk';
+import { admin, disks, fs, settings, keyboard, sound, notify, t, FilePicker, createStore, useStore } from '@insaneos/sdk';
 import zonesData from './data/zones.json';
 import layoutsData from './data/layouts.json';
 
-const CACHE = '.cache/lordos/imager';
-const has = () => typeof lord !== 'undefined' && !!lord.imager;
+const CACHE = '.cache/insaneos/imager';
+const has = () => typeof insane !== 'undefined' && !!insane.imager;
 
 // progress phase=<p> done=<n> total=<n>
 function progressOf(line) {
@@ -50,7 +50,7 @@ export const platform = {
   watchDrives(fn) { return disks.watch(fn); },
   hiddenDriveCount() { return disks.list().filter((d) => !d.removable || d.system).length; },
 
-  // ---- releases and downloads (curl as the user, in ~/.cache/lordos/imager) ----
+  // ---- releases and downloads (curl as the user, in ~/.cache/insaneos/imager) ----
   cacheDir: () => `${fs.home()}/${CACHE}`,
   cachePath: (tag, name) => `${fs.home()}/${CACHE}/${tag}/${name}`,
   async releases() {
@@ -66,7 +66,7 @@ export const platform = {
   },
   cancelDownload() { return admin.run('imager-fetch-cancel', '', null, { quiet: true }).catch(() => {}); },
   readText(path) { return fs.read(path); },
-  checkSums: (sums, sig) => (has() ? lord.imager.checkSums(sums, sig) : { ok: false }),
+  checkSums: (sums, sig) => (has() ? insane.imager.checkSums(sums, sig) : { ok: false }),
 
   // ---- a file of the user's own ----
   async pickImage() {
@@ -79,7 +79,7 @@ export const platform = {
     const path = await pick(/\.(img|img\.xz|iso)$/i, t('imager.image.pickTitle'), start);
     return path ? this.imageInfo(path) : null;
   },
-  imageInfo: (path) => (has() ? lord.imager.imageInfo(path) : null),
+  imageInfo: (path) => (has() ? insane.imager.imageInfo(path) : null),
   async pickKeyFile() {
     let start = '';
     try { if (fs.stat('.ssh')?.dir) start = '.ssh'; } catch { /* the home folder */ }
@@ -94,8 +94,8 @@ export const platform = {
   },
 
   // ---- secrets: derived here, only the results go into the file ----
-  async hashPassword(p) { return has() ? lord.imager.hashPassword(p) : null; },
-  async wifiPsk(ssid, p) { return has() ? lord.imager.wifiPsk(ssid, p) : null; },
+  async hashPassword(p) { return has() ? insane.imager.hashPassword(p) : null; },
+  async wifiPsk(ssid, p) { return has() ? insane.imager.wifiPsk(ssid, p) : null; },
 
   // ---- writing ----
   async write({ drive, image }, onProgress) {
@@ -125,7 +125,7 @@ export const platform = {
     const kb = keyboard.active?.() || {};
     const lang = ['en', 'es', 'pt', 'fr', 'it'].includes(s.language) ? s.language : 'en';
     let zone = '';
-    try { zone = lord.time.zone() || ''; } catch { /* keep empty */ }
+    try { zone = insane.time.zone() || ''; } catch { /* keep empty */ }
     const region = (s.region || '').split('_')[1] || '';
     return { lang, timezone: zone, keyboard: kb.layout || '', variant: kb.variant || '', country: /^[A-Z]{2}$/.test(region) ? region : '' };
   },
@@ -133,8 +133,8 @@ export const platform = {
   // the same lists the image ships (Debian 13 tzdata and xkb-data; apps/imager/data)
   layouts: () => layoutsData.layouts,
   async scanWifi() {
-    if (typeof lord === 'undefined' || !lord.net) return null;
-    const radio = (lord.net.interfaces() || []).find((i) => i.type === 'wifi');
+    if (typeof insane === 'undefined' || !insane.net) return null;
+    const radio = (insane.net.interfaces() || []).find((i) => i.type === 'wifi');
     if (!radio) return null;
     const found = [];
     await admin.run('net-wifi-scan', radio.name, (line) => { try { found.push(JSON.parse(line)); } catch { /* text */ } }, { quiet: true });
@@ -145,8 +145,8 @@ export const platform = {
   // ---- the app's own options and profiles (settings.json "imager"; profiles never hold secrets) ----
   loadOptions() { return settings.get().imager || {}; },
   saveOptions(o) { settings.set((s) => ({ ...s, imager: { ...(s.imager || {}), ...o } })); },
-  loadProfiles() { try { const p = JSON.parse(fs.read('.config/lordos/imager-profiles.json')); return Array.isArray(p) ? p : []; } catch { return []; } },
-  saveProfiles(list) { fs.mkdir('.config/lordos'); fs.write('.config/lordos/imager-profiles.json', JSON.stringify(list, null, 2)); },
+  loadProfiles() { try { const p = JSON.parse(fs.read('.config/insaneos/imager-profiles.json')); return Array.isArray(p) ? p : []; } catch { return []; } },
+  saveProfiles(list) { fs.mkdir('.config/insaneos'); fs.write('.config/insaneos/imager-profiles.json', JSON.stringify(list, null, 2)); },
   cacheSize() { try { return fs.du(CACHE, 200)?.size || 0; } catch { return 0; } },
   async clearCache() { await admin.run('imager-cache-clear', '', null, { quiet: true }); },
   // the language and theme follow Insane OS; updates come with Insane OS itself

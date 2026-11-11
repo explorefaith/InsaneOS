@@ -2,8 +2,8 @@
 // Log Out, Restart… and Shut Down… did nothing. The menu is a portal into the popover layer, so its rows
 // were not inside the start menu's node: the start menu's «press outside» listener closed it on the
 // press, the menu went with it, and the release found no row to click. Bundles
-// tests/classic_startmenu_power_scene.mjs with esbuild (as the theme is built) over a stub `lord` that
-// records lord.session calls, runs it, and reads its checks. Needs node and the repository's
+// tests/classic_startmenu_power_scene.mjs with esbuild (as the theme is built) over a stub `insane` that
+// records insane.session calls, runs it, and reads its checks. Needs node and the repository's
 // node_modules (esbuild, react, react-reconciler).
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
@@ -19,19 +19,19 @@ let esbuild = null;
 for (const p of nodePaths) { try { esbuild = createRequire(path.join(p, 'x.js'))('esbuild'); break; } catch (e) { /* next */ } }
 if (!esbuild) { console.log('needs node_modules (esbuild)'); process.exit(1); }
 
-// The native namespaces the SDK, the runtime and the theme use (lord.<ns>.<fn>(…)): absent in the stub, so
+// The native namespaces the SDK, the runtime and the theme use (insane.<ns>.<fn>(…)): absent in the stub, so
 // the SDK takes its «not available» path for each, as in a session without that service.
 const NS = new Set();
 for (const d of ['sdk', 'runtime', 'themes/classic', 'themes/classic/components']) {
   for (const f of readdirSync(path.join(root, d))) {
     if (!/\.(m?js|jsx)$/.test(f)) continue;
-    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/lord\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
+    for (const m of readFileSync(path.join(root, d, f), 'utf8').matchAll(/insane\.([A-Za-z_]+)\.[A-Za-z_]+\(/g)) NS.add(m[1]);
   }
 }
 
-// A stub lord: nodes, their styles and texts; a managed session whose lock and switchUser are recorded;
+// A stub insane: nodes, their styles and texts; a managed session whose lock and switchUser are recorded;
 // any other native call is a no-op.
-const MOCK = `globalThis.__lordTest = (() => {
+const MOCK = `globalThis.__insaneTest = (() => {
   const styles = new Map(), texts = new Map(), parents = new Map(), calls = [];
   let nextId = 1;
   const base = {
@@ -51,17 +51,17 @@ const MOCK = `globalThis.__lordTest = (() => {
   };
   for (const ns of ${JSON.stringify([...NS])}) if (!(ns in base)) base[ns] = undefined;
   const noop = () => undefined;
-  globalThis.lord = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
+  globalThis.insane = new Proxy(base, { get: (o, k) => (k in o ? o[k] : typeof k === 'string' ? noop : undefined) });
   return { styles, texts, parents, calls };
 })();`;
 
-const dir = mkdtempSync(path.join(tmpdir(), 'lord-classic-power-'));
+const dir = mkdtempSync(path.join(tmpdir(), 'insane-classic-power-'));
 let bad = 0, n = 0;
 try {
   const out = await esbuild.build({
     entryPoints: [path.join(here, 'classic_startmenu_power_scene.mjs')], bundle: true, write: false, format: 'esm',
     platform: 'node', target: 'es2022', nodePaths, logLevel: 'error', jsx: 'automatic',
-    alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js'), '@lordos/sdk': path.join(root, 'sdk', 'index.js') },
+    alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js'), '@insaneos/sdk': path.join(root, 'sdk', 'index.js') },
     define: { 'process.env.NODE_ENV': '"production"' },
     banner: { js: MOCK },
   });

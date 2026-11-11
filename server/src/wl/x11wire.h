@@ -2,8 +2,8 @@
  * speaks with Xwayland. Our own code, no libxcb/libX11 (dependency policy, docs/ARCHITECTURE.md):
  * request encoding, packet framing, the connection setup reply and the ICCCM/EWMH properties the
  * window manager reads. Pure functions with no I/O, tested by tests/xwm_test.c. */
-#ifndef LORD_X11WIRE_H
-#define LORD_X11WIRE_H
+#ifndef INSANE_X11WIRE_H
+#define INSANE_X11WIRE_H
 
 #include <stddef.h>
 #include <stdint.h>

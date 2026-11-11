@@ -1,6 +1,6 @@
 /* thumb.h — Remote Desk's card pictures (thumb.c, docs/FILES.md "Remote desktop"). */
-#ifndef LORD_RDESK_THUMB_H
-#define LORD_RDESK_THUMB_H
+#ifndef INSANE_RDESK_THUMB_H
+#define INSANE_RDESK_THUMB_H
 
 #include <stdint.h>
 
@@ -10,7 +10,7 @@
 int rd_thumb_id_ok(const char *id);
 /* BGRA w×h → RGB at most maxw wide (box filter); malloc'd, *ow × *oh. NULL on bad input or no memory. */
 unsigned char *rd_thumb_scale(const uint32_t *px, int w, int h, int maxw, int *ow, int *oh);
-/* writes <home>/.local/share/lordos/remote-desk/thumbs/<id>.png (replaced atomically). 0 written. */
+/* writes <home>/.local/share/insaneos/remote-desk/thumbs/<id>.png (replaced atomically). 0 written. */
 int rd_thumb_save(const char *home, const char *id, const uint32_t *px, int w, int h, int maxw);
 /* removes it; 0 also when there was none */
 int rd_thumb_remove(const char *home, const char *id);

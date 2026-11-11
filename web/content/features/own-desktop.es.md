@@ -14,11 +14,11 @@ Acá conviene ser preciso, porque es fácil exagerar con "propio".
 
 **Escrito para Insane OS (en este repositorio):**
 
-- **El servidor gráfico y compositor Wayland** (`lord-server`, en C). Configura los modos de pantalla directamente con la interfaz DRM/KMS del kernel, sin libdrm; lee teclados, mouse, touchpads y pantallas táctiles desde evdev, sin libinput; compone cada ventana; y habla el protocolo Wayland con las apps de Linux.
-- **El motor de interfaz.** El escritorio y las apps nativas están escritos en JavaScript con React. Corren sobre QuickJS (un motor de JavaScript chico, incluido como código fuente) dentro de `lord-server`, con un árbol de nodos nativo, un motor de layout flexbox, un rasterizador 2D y un motor de texto escritos en C. Detrás de la interfaz no hay ningún motor de navegador web.
+- **El servidor gráfico y compositor Wayland** (`insane-server`, en C). Configura los modos de pantalla directamente con la interfaz DRM/KMS del kernel, sin libdrm; lee teclados, mouse, touchpads y pantallas táctiles desde evdev, sin libinput; compone cada ventana; y habla el protocolo Wayland con las apps de Linux.
+- **El motor de interfaz.** El escritorio y las apps nativas están escritos en JavaScript con React. Corren sobre QuickJS (un motor de JavaScript chico, incluido como código fuente) dentro de `insane-server`, con un árbol de nodos nativo, un motor de layout flexbox, un rasterizador 2D y un motor de texto escritos en C. Detrás de la interfaz no hay ningún motor de navegador web.
 - **Las apps nativas:** Archivos, Ajustes, Terminal, Tienda, Mail, Calendario, Contactos, Recordatorios, Contraseñas, Monitor, Fotos, Reproductor, Visor de PDF, Discos, Copias de seguridad y el resto, todas apps React sobre el mismo motor.
-- **Los servicios de seguridad:** el lanzador de la caja de arena de las apps, el broker de permisos, el almacén de permisos por app, el servicio de firewall (`lord-netperm`), la firma de paquetes y la bóveda de contraseñas (`lord-vault`).
-- **Servicios del sistema** como el gestor de sesiones y la pantalla de ingreso (`lord-sessiond`), el servicio de red (`lord-netd`) y el de ventiladores (`lord-fand`).
+- **Los servicios de seguridad:** el lanzador de la caja de arena de las apps, el broker de permisos, el almacén de permisos por app, el servicio de firewall (`insane-netperm`), la firma de paquetes y la bóveda de contraseñas (`insane-vault`).
+- **Servicios del sistema** como el gestor de sesiones y la pantalla de ingreso (`insane-sessiond`), el servicio de red (`insane-netd`) y el de ventiladores (`insane-fand`).
 
 **Reutilizado de Debian y del mundo del software libre:**
 
@@ -35,12 +35,12 @@ La regla que sigue el proyecto está escrita en `docs/ARCHITECTURE.md`: dentro d
 
 Esto es lo que pasa cuando pasás el mouse por el Dock, paso a paso:
 
-1. El kernel entrega un evento de entrada por evdev. `lord-server` lo lee y busca qué nodo de la interfaz está bajo el puntero.
+1. El kernel entrega un evento de entrada por evdev. `insane-server` lo lee y busca qué nodo de la interfaz está bajo el puntero.
 2. Llama al manejador de eventos de JavaScript. React actualiza su estado y le avisa al motor qué nodos cambiaron: un estilo, un hijo, un texto.
 3. El motor recalcula el layout y calcula la región dañada: solo la parte de la pantalla que de verdad cambió.
 4. Repinta solo esa región, la copia al buffer trasero, dibuja el cursor y cambia de página en el siguiente refresco vertical.
 
-Si hay una GPU con aceleración 3D, la composición pasa por Mesa (GBM, EGL y GLES2). Si no la hay, o si el único renderizador es uno por software, el trabajo lo hace el camino por CPU. El camino por CPU siempre tiene que seguir funcionando: es una regla firme del código (`LORD_GPU=0` lo fuerza), y la entrada "modo seguro" de grub lo usa.
+Si hay una GPU con aceleración 3D, la composición pasa por Mesa (GBM, EGL y GLES2). Si no la hay, o si el único renderizador es uno por software, el trabajo lo hace el camino por CPU. El camino por CPU siempre tiene que seguir funcionando: es una regla firme del código (`INSANE_GPU=0` lo fuerza), y la entrada "modo seguro" de grub lo usa.
 
 [[diagram:frame]]
 
@@ -48,8 +48,8 @@ Si hay una GPU con aceleración 3D, la composición pasa por Mesa (GBM, EGL y GL
 
 En un escritorio Insane OS hay tres tipos de ventanas, y se conectan en capas distintas:
 
-- **Las apps incluidas y el tema** (barra de menú, Dock, Archivos, Ajustes…) corren dentro del contexto de JavaScript del propio `lord-server`, sobre el motor de interfaz. Las excepciones son Contraseñas y, desde 0.8.2, Mail, Calendario, Contactos y Recordatorios, que corren como procesos aislados igual que las apps `.lpk`.
-- **Las apps `.lpk` instaladas** corren cada una como un proceso aparte (`lord-server --app <id>`, el mismo binario en "modo app"). Ese proceso tiene su propia copia del motor de interfaz, se encierra en una caja de arena y dibuja en un buffer de memoria compartida, que le pasa al compositor como un cliente Wayland común.
+- **Las apps incluidas y el tema** (barra de menú, Dock, Archivos, Ajustes…) corren dentro del contexto de JavaScript del propio `insane-server`, sobre el motor de interfaz. Las excepciones son Contraseñas y, desde 0.8.2, Mail, Calendario, Contactos y Recordatorios, que corren como procesos aislados igual que las apps `.lpk`.
+- **Las apps `.lpk` instaladas** corren cada una como un proceso aparte (`insane-server --app <id>`, el mismo binario en "modo app"). Ese proceso tiene su propia copia del motor de interfaz, se encierra en una caja de arena y dibuja en un buffer de memoria compartida, que le pasa al compositor como un cliente Wayland común.
 - **Las apps de Linux** (GTK, Qt, Chromium, Firefox…) se conectan al socket Wayland del compositor. Se dibujan solas; el tema les pone su marco de ventana alrededor.
 
 O sea que el compositor es el punto de encuentro. El motor de interfaz lo usan la interfaz y las apps propias de Insane OS, no las apps de Linux.
@@ -61,8 +61,8 @@ O sea que el compositor es el punto de encuentro. El motor de interfaz lo usan l
 Insane OS apunta a máquinas modestas. Algunas mediciones reales de los registros de prueba del proyecto:
 
 - La ISO de la prueba final, en reposo un minuto después de ingresar, en una VM de 4 GB y 4 núcleos: **465 MB de RAM usados** por todo el sistema en la sesión live y **487 MB** en el sistema instalado, con la CPU **99 % ociosa**. El arranque tardó 16,3 s (`docs/ISO.md`, "Final ISO test").
-- En una Raspberry Pi 5 (16 GB) en la pantalla de ingreso, sin monitor: `lord-server` con **36 MB de RSS** y 0,6 % de CPU (`docs/RASPBERRY.md`).
-- Cuando la máquina no tiene una placa con 3D, `lord-server` ni siquiera carga Mesa y se queda en unos 32 MB de RSS (`docs/GPU.md`).
+- En una Raspberry Pi 5 (16 GB) en la pantalla de ingreso, sin monitor: `insane-server` con **36 MB de RSS** y 0,6 % de CPU (`docs/RASPBERRY.md`).
+- Cuando la máquina no tiene una placa con 3D, `insane-server` ni siquiera carga Mesa y se queda en unos 32 MB de RSS (`docs/GPU.md`).
 - Desde 0.8.5 la pantalla de ingreso ya no queda en memoria detrás de tu sesión: se cierra 10 segundos después de que una sesión toma la pantalla y vuelve a arrancar en pocos milisegundos cuando bloqueás o cambiás de usuario. En una VM de VMware todo el sistema pasó de **603 a 548 MB** en uso, y bloquear la pantalla pasó de 903 ms a **141 ms**.
 - En placas de video virtuales que completan cada cambio de cuadro al instante (`vmwgfx`, de VMware), 0.8.5 ajusta los cuadros a la frecuencia de la pantalla en vez de dibujar 500–580 por segundo: **59,8 cuadros por segundo** a 60 Hz, percentil 99 de 18,4 ms. El tiempo de cada arranque se muestra en Acerca de Insane OS → Tiempo de inicio y se guarda para comparar versiones (`docs/RESULTS.md`).
 - **En la 0.8.6, medido en compilaciones previas:** en una Raspberry Pi 5 con un monitor de 1920×1080, la prueba de escritorio de InsaneBench mueve una ventana con un cuadrado que gira adentro a **59,8–60 cuadros por segundo** (53–58 antes del trabajo sobre el cuadro de una ventana que se arrastra, que deja cada píxel igual), y a unos 31 (30,5–31,1) mientras todos los núcleos están ocupados con una carga de baja prioridad (24–25 antes; `docs/BENCHMARK.md`). Dibujar la ventana que se arrastra en el chip gráfico y pintar el cuadro siguiente mientras el anterior espera la pantalla también se midieron ahí y estaban apagados por defecto en la 0.8.6: lo primero era exacto pero no dio una ganancia medible, lo segundo dio 33–36 cuadros por segundo con carga pero el puntero llegó a la pantalla 17–29 ms más tarde. En la 0.8.7 lo primero cubre todo el arrastre y está encendido por defecto (ver los límites más abajo).
@@ -115,22 +115,22 @@ El compositor maneja varias pantallas a la vez, extendidas o en espejo, y dibuja
 ## Límites honestos
 
 - **Las GPU reales de PC todavía no están verificadas.** El camino por GPU corre en la V3D de la Raspberry Pi 5 y en la GPU virtual de VMware (SVGA3D), y se probó con el renderizador por software de Mesa en máquinas virtuales. Falta probar en placas AMD y Nvidia reales (`docs/GPU.md`).
-- **GPU drag, encendido por defecto en la 0.8.7, está verificado solo en V3D y SVGA3D.** En una Raspberry Pi 5, en arrastres reales, reduce a la mitad el CPU de la sesión sin carga y lleva una carga de memoria de 29 a 35 cuadros por segundo. En cualquier otra GPU solo lo protege su autoprueba, y `LORD_GPU_DRAG=0` lo apaga (`docs/GPU.md`).
+- **GPU drag, encendido por defecto en la 0.8.7, está verificado solo en V3D y SVGA3D.** En una Raspberry Pi 5, en arrastres reales, reduce a la mitad el CPU de la sesión sin carga y lleva una carga de memoria de 29 a 35 cuadros por segundo. En cualquier otra GPU solo lo protege su autoprueba, y `INSANE_GPU_DRAG=0` lo apaga (`docs/GPU.md`).
 - **Las pantallas múltiples se probaron con dos salidas virtuales**, no con monitores reales, paneles de notebook ni hubs DisplayPort (`docs/DISPLAYS.md`). En el desarrollo de la 0.8.8.6, una PC con una Radeon RX 580 y tres monitores trajo dos arreglos (el tamaño del cursor por hardware y la pantalla de inicio de sesión en la pantalla principal elegida); otras placas, paneles de notebook y hubs no se probaron.
 - **La Raspberry Pi 5 solo se probó con un monitor HDMI.** Desde la 0.8.4.1 la imagen muestra la pantalla de ingreso y el escritorio en un monitor HDMI desde el primer arranque, y InsaneBench la midió así; dos monitores y 4K todavía no se probaron en la placa (`docs/RASPBERRY.md`).
 - **En la Raspberry Pi 5 una app ocupada todavía reduce a la mitad los cuadros por segundo del escritorio:** unos 31 en vez de 60 en la prueba de escritorio de InsaneBench mientras todos los núcleos están ocupados. Con esa carga el chip gráfico tarda 14–16 ms por cuadro en vez de 1,5, sin bajar su frecuencia ni por temperatura; en la 0.8.7, una medición puso la causa en la memoria: 28 ms por cuadro con cuatro núcleos leyendo memoria, 1,4 ms con cuatro núcleos solo girando. Cuánto de eso puede evitar el compositor sigue abierto (`docs/GPU.md`).
-- **Los fondos en movimiento copian cada cuadro en su camino a la pantalla.** En la Raspberry Pi 5, en la pantalla de inicio de sesión, a 1080p y 60 cuadros por segundo, `lord-media` usó el 41 % de un núcleo y `lord-server` el 147 %; un camino sin esa copia está planeado para una versión posterior. El decodificador por hardware de la Pi 5 maneja solo HEVC, así que los clips H.264, VP9 y AV1 no se reproducen ahí.
+- **Los fondos en movimiento copian cada cuadro en su camino a la pantalla.** En la Raspberry Pi 5, en la pantalla de inicio de sesión, a 1080p y 60 cuadros por segundo, `insane-media` usó el 41 % de un núcleo y `insane-server` el 147 %; un camino sin esa copia está planeado para una versión posterior. El decodificador por hardware de la Pi 5 maneja solo HEVC, así que los clips H.264, VP9 y AV1 no se reproducen ahí.
 - **Cambiar de tema cierra y vuelve a abrir las ventanas de Insane OS,** y el texto sin guardar se pierde, sin aviso.
 - **Las apps X11 funcionan con Xwayland desde 0.8.3,** nítidas solo al 100 % de escala y pudiendo verse entre sí, como en cualquier escritorio X11. Arrastrar y soltar entre apps de Linux y los métodos de entrada de Insane OS dentro de apps de Linux están pendientes (`docs/WAYLAND.md`).
 - **La accesibilidad está mayormente por delante:** hoy hay un ajuste de "reducir movimiento", un teclado en pantalla y, desde la 0.8.8.6, leer en voz alta y Voz en tiempo real; un lector de pantalla, el zoom y el alto contraste están en la hoja de ruta.
 
 ## Leé el código
 
-- [docs/ARCHITECTURE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/ARCHITECTURE.md): las capas y la política de dependencias
-- [server/src/kms.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/kms.c): modos de pantalla con ioctls de DRM, sin libdrm
-- [server/src/input.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/input.c): entrada por evdev
-- [server/src/gpu/gpu.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/gpu/gpu.c): composición opcional en GPU con Mesa
-- [server/src/ui/layout.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/layout.c) y [server/src/ui/paint.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/paint.c): layout y pintado
-- [runtime/index.js](https://github.com/lordbasex/Insane OS/blob/main/runtime/index.js): el renderizador de React para el motor nativo
-- [server/src/wl/wl.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/wl/wl.c): el compositor Wayland
-- [docs/GPU.md](https://github.com/lordbasex/Insane OS/blob/main/docs/GPU.md), [docs/DISPLAYS.md](https://github.com/lordbasex/Insane OS/blob/main/docs/DISPLAYS.md), [docs/ISO.md](https://github.com/lordbasex/Insane OS/blob/main/docs/ISO.md)
+- [docs/ARCHITECTURE.md](https://github.com/insaneos/Insane OS/blob/main/docs/ARCHITECTURE.md): las capas y la política de dependencias
+- [server/src/kms.c](https://github.com/insaneos/Insane OS/blob/main/server/src/kms.c): modos de pantalla con ioctls de DRM, sin libdrm
+- [server/src/input.c](https://github.com/insaneos/Insane OS/blob/main/server/src/input.c): entrada por evdev
+- [server/src/gpu/gpu.c](https://github.com/insaneos/Insane OS/blob/main/server/src/gpu/gpu.c): composición opcional en GPU con Mesa
+- [server/src/ui/layout.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/layout.c) y [server/src/ui/paint.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/paint.c): layout y pintado
+- [runtime/index.js](https://github.com/insaneos/Insane OS/blob/main/runtime/index.js): el renderizador de React para el motor nativo
+- [server/src/wl/wl.c](https://github.com/insaneos/Insane OS/blob/main/server/src/wl/wl.c): el compositor Wayland
+- [docs/GPU.md](https://github.com/insaneos/Insane OS/blob/main/docs/GPU.md), [docs/DISPLAYS.md](https://github.com/insaneos/Insane OS/blob/main/docs/DISPLAYS.md), [docs/ISO.md](https://github.com/insaneos/Insane OS/blob/main/docs/ISO.md)

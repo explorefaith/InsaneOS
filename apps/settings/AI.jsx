@@ -1,14 +1,14 @@
 // Settings → AI: reading aloud (docs/VOICE.md). Voice: on or off, the ❖Esc shortcut, the small player (settings.voice,
 // sdk/voice.js) and where speech is made (voice.json's backend). Per language: the standard and HD models and the
 // voices (sdk/voicecatalog.js), each heard from its recorded sample before downloading it, downloaded and removed as
-// signed lordos-voice-* packages (sdk/voicemanager.js), the one used chosen; and the person's own voices, recorded
+// signed insaneos-voice-* packages (sdk/voicemanager.js), the one used chosen; and the person's own voices, recorded
 // with the microphone or taken from a file, cloned by the model (CloneSheet).
 import {
   View, Text, Button, Toggle, Segmented, TextInput, Layer, FilePicker, useTheme, useLocale, useSettings, useStore, useAppWindow,
   wm, media, formatBytes, spacing, typeScale, VOICE_DEFAULTS, speakAvailable, previewVoice, tryVoice, player as voicePlayer,
   VOICE_LANGS, VOICES, voiceLabel, voicePackage, modelPackage, hasVoice, PREVIEWS_PACKAGE, scanVoices, installVoices, removeVoices,
   packagesFor, voiceConf, setVoiceConf, addOwnVoice, removeOwnVoice, ownVoiceName, takeName, errorText, fs, tOptional,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, Note } from './ui.jsx';
 import { PersonalVoiceSheet } from './PersonalVoice.jsx';
@@ -16,8 +16,8 @@ import { PersonalVoiceSheet } from './PersonalVoice.jsx';
 const BACKENDS = ['auto', 'cpu', 'gpu'];
 const QUALITIES = ['auto', 'standard', 'hd'];
 const size = (mb) => formatBytes(mb * 1e6);
-// the recorded samples (lordos-voice-previews), where say looks for them: the person's voice folder, then the system's
-const hasPreviews = () => [`${fs.home()}/.local/share/lordos/voice`, '/usr/share/lordos/voice']
+// the recorded samples (insaneos-voice-previews), where say looks for them: the person's voice folder, then the system's
+const hasPreviews = () => [`${fs.home()}/.local/share/insaneos/voice`, '/usr/share/insaneos/voice']
   .some((root) => { try { return !!fs.stat(`${root}/previews/es/lola.wav`); } catch (e) { return false; } });
 
 export function AISettings() {
@@ -170,7 +170,7 @@ export function AISettings() {
 
 // ---- a voice from a recording the person already has (the guided recording is PersonalVoice.jsx) ----
 
-const CACHE = '.cache/lordos/voice';
+const CACHE = '.cache/insaneos/voice';
 const MAX_MS = 30000;
 const MIN_MS = 3000;
 
@@ -180,13 +180,13 @@ function CloneSheet({ onClose }) {
   const win = useAppWindow();
   const [name, setName] = useState('');
   const [consent, setConsent] = useState(false);
-  const [wav, setWav] = useState(null);           // the clip, a WAV in ~/.cache/lordos/voice
+  const [wav, setWav] = useState(null);           // the clip, a WAV in ~/.cache/insaneos/voice
   const [picking, setPicking] = useState(true);
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { for (const d of ['.cache', '.cache/lordos', CACHE]) { try { fs.mkdir(d); } catch (e) { /* there */ } } }, []);
+  useEffect(() => { for (const d of ['.cache', '.cache/insaneos', CACHE]) { try { fs.mkdir(d); } catch (e) { /* there */ } } }, []);
 
-  // any audio file → a WAV of its first 30 s (lord-media, sandboxed), checked for length
+  // any audio file → a WAV of its first 30 s (insane-media, sandboxed), checked for length
   const convert = async (path) => {
     setBusy(true);
     setErr(null);
@@ -194,7 +194,7 @@ function CloneSheet({ onClose }) {
       const info = await media.probe(path).catch(() => null);
       const ms = info && Number.isFinite(info.duration) && info.duration > 0 ? info.duration : null;   // milliseconds (lm_image.c)
       if (ms !== null && ms < MIN_MS) throw new Error(tr('settings.ai.clone.tooShort'));
-      // a new name each time: lord-media never writes over a file, and a fixed one made the second try fail (and keep
+      // a new name each time: insane-media never writes over a file, and a fixed one made the second try fail (and keep
       // the first clip)
       const out = `${fs.home()}/${CACHE}/${takeName('clone', Date.now(), 0)}`;
       const r = await media.transcode('settings', path, out, { format: 'wav', from: 0, to: MAX_MS });

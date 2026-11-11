@@ -7,7 +7,7 @@
 // Insane OS y cada panel de tmux un panel nativo. Dividir, cerrar o abrir pestañas en esa
 // ventana se traduce a comandos de tmux, y el tamaño de la ventana se le informa con
 // refresh-client. Esc en la puerta desconecta (detach); la sesión de tmux sigue viva.
-import { term, wm, windows as wmWindows, t as T } from '@lordos/sdk';
+import { term, wm, windows as wmWindows, t as T } from '@insaneos/sdk';
 import {
   meta, patchMeta, patchWin, getWin, leaves, nextId, configureSession, removeSession, toast, openWindowWithTabs, findSession,
 } from './state.js';
@@ -249,5 +249,5 @@ export function tmuxFocus(sid) {
   if (c) send(c, `select-pane -t %${m.tmuxPane}`);
 }
 
-// Sesiones recuperadas tras reiniciar lord-server que seguían en modo control.
+// Sesiones recuperadas tras reiniciar insane-server que seguían en modo control.
 setTimeout(() => { for (const sid of term.list()) if (term.info(sid)?.tmux) start(sid, true); }, 0);

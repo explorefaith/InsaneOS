@@ -11,12 +11,12 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
-// the same virtual '@lordos/apps' module as tools/build-theme.mjs
+// the same virtual '@insaneos/apps' module as tools/build-theme.mjs
 const appsPlugin = {
-  name: 'lordos-apps',
+  name: 'insaneos-apps',
   setup(b) {
-    b.onResolve({ filter: /^@lordos\/apps$/ }, () => ({ path: 'apps', namespace: 'lordos-apps' }));
-    b.onLoad({ filter: /.*/, namespace: 'lordos-apps' }, () => {
+    b.onResolve({ filter: /^@insaneos\/apps$/ }, () => ({ path: 'apps', namespace: 'insaneos-apps' }));
+    b.onLoad({ filter: /.*/, namespace: 'insaneos-apps' }, () => {
       const dir = path.join(root, 'apps');
       const ids = fs.readdirSync(dir).filter((d) => fs.existsSync(path.join(dir, d, 'manifest.json'))).sort();
       const lines = ids.map((id, i) => {
@@ -49,11 +49,11 @@ const t0 = Date.now();
 const out = path.join(root, 'themes/default/theme.vm-e2e.bundle.js');
 await build({
   entryPoints: ['e2e-entry'], outfile: out, bundle: true, format: 'iife', target: 'es2020', minify: true, jsx: 'automatic',
-  alias: { '@lordos/runtime': path.join(root, 'runtime', 'index.js'), '@lordos/sdk': path.join(root, 'sdk', 'index.js') },
+  alias: { '@insaneos/runtime': path.join(root, 'runtime', 'index.js'), '@insaneos/sdk': path.join(root, 'sdk', 'index.js') },
   plugins: [entry, appsPlugin], define: { 'process.env.NODE_ENV': '"production"' }, logLevel: 'warning',
 });
-// lord-server loads only code listed in code-manifest.json (docs/SIGNING.md): session.sh install puts this bundle in
-// place of themes/default/theme.bundle.js in /opt/lordos-e2e and this manifest (the same, with that one entry changed)
+// insane-server loads only code listed in code-manifest.json (docs/SIGNING.md): session.sh install puts this bundle in
+// place of themes/default/theme.bundle.js in /opt/insaneos-e2e and this manifest (the same, with that one entry changed)
 // in place of code-manifest.json. The bench's copy is unsigned, like any development checkout.
 const data = fs.readFileSync(out);
 const man = fs.readFileSync(path.join(root, 'code-manifest.json'), 'utf8').replace(

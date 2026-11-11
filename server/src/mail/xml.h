@@ -1,4 +1,4 @@
-/* xml.h — in-house XML reader for WebDAV (CalDAV and CardDAV) in lord-maild (see docs/MAIL.md).
+/* xml.h — in-house XML reader for WebDAV (CalDAV and CardDAV) in insane-maild (see docs/MAIL.md).
  *
  * Understands namespaces (xmlns and xmlns:p), so elements are looked up by (namespace, name)
  * regardless of the prefix the server chose ("d:", "D:", none). It is strict and bounded:
@@ -7,8 +7,8 @@
  *   - maximum depth MX_MAX_DEPTH, MX_MAX_NODES elements, input of up to MX_MAX_INPUT;
  *   - every index is checked against the length: it never reads outside the input.
  * The test (tests/mail_test.c) exercises it with randomly mutated inputs. */
-#ifndef LORD_MAIL_XML_H
-#define LORD_MAIL_XML_H
+#ifndef INSANE_MAIL_XML_H
+#define INSANE_MAIL_XML_H
 
 #include <stddef.h>
 

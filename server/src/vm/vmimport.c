@@ -4,7 +4,7 @@
  * an app writes 16 bytes into its SMBIOS type 1 table and states an SMBIOS version. The guest decodes them: Linux
  * (dmidecode, /sys/class/dmi/id/product_uuid) swaps the first three fields when the table says 2.6 or later and not
  * before; Windows always reads them little-endian. QEMU writes the UUID it is given little-endian in a table of a newer
- * version, so both kinds of guest read back exactly the -uuid string. Hence: lord-vm's -uuid is the string the guest
+ * version, so both kinds of guest read back exactly the -uuid string. Hence: insane-vm's -uuid is the string the guest
  * read on the source.
  *   - VMware-style .vmx: the bytes are uuid.bios in the order written. The table is 2.7 with acpi.smbiosVersion2.7 =
  *     "TRUE", or, when the key is absent, for virtualHW.version 13 and later; 2.4 before (Reported: the vendor's

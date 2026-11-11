@@ -5,10 +5,10 @@
  * ("prepared": painted into the display's scene), and at N's flip only the upload, the GPU's draw and the
  * page flip of that frame remain. main.c keeps the per-display state; the rules are here, without I/O, so
  * tests/fpipe_test.c can check them. */
-#ifndef LORD_FPIPE_H
-#define LORD_FPIPE_H
+#ifndef INSANE_FPIPE_H
+#define INSANE_FPIPE_H
 
-/* LORD_PIPELINE, read once at startup: 1 auto (on while frames are heavy, fpipe_note), 2 always, anything
+/* INSANE_PIPELINE, read once at startup: 1 auto (on while frames are heavy, fpipe_note), 2 always, anything
  * else (and unset) off: every frame is built after the flip, as before 0.8.6. Off by default since the
  * Raspberry Pi 5 run of 2026-10-29: auto gave 2-5 more frames a second under an all-core load but 17-29 ms
  * more pointer latency, and engaged even alone at 60 fps (docs/GPU.md, "The frame pipeline"). */

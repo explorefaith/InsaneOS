@@ -6,12 +6,12 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../../.." && pwd)
-docker build -t lordos-imager-build -f "$here/Dockerfile.build" "$here"
-docker run --rm -v "$repo:/src" -v lordos-imager-cargo:/opt/cargo/registry \
-  -v lordos-imager-nm-linux:/src/desktop/imager/node_modules -v lordos-imager-target-linux:/build \
-  -e CARGO_TARGET_DIR=/build -w /src/desktop/imager lordos-imager-build sh -c '
+docker build -t insaneos-imager-build -f "$here/Dockerfile.build" "$here"
+docker run --rm -v "$repo:/src" -v insaneos-imager-cargo:/opt/cargo/registry \
+  -v insaneos-imager-nm-linux:/src/desktop/imager/node_modules -v insaneos-imager-target-linux:/build \
+  -e CARGO_TARGET_DIR=/build -w /src/desktop/imager insaneos-imager-build sh -c '
     set -e
     npm ci --no-audit --no-fund && node build-web.mjs
     npx tauri build --bundles deb
-    mkdir -p target/linux && cp /build/release/lordos-imager target/linux/ && for f in /build/release/bundle/deb/*.deb; do v=$(cat VERSION); cp "$f" "target/linux/lordos_imager_${v}_amd64.deb"; done
+    mkdir -p target/linux && cp /build/release/insaneos-imager target/linux/ && for f in /build/release/bundle/deb/*.deb; do v=$(cat VERSION); cp "$f" "target/linux/insaneos_imager_${v}_amd64.deb"; done
     ls -la target/linux/'

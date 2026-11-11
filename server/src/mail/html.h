@@ -19,8 +19,8 @@
  * 1×1 or 2×2 ones (tracking pixels) are counted in "trackers" and never shown.
  * Deceptive links: if the visible text looks like a web address and its domain is not the href's
  * (or the href contains user@, an IP or an odd scheme), the link is emitted with "w". */
-#ifndef LORD_MAIL_HTML_H
-#define LORD_MAIL_HTML_H
+#ifndef INSANE_MAIL_HTML_H
+#define INSANE_MAIL_HTML_H
 
 #include <stddef.h>
 

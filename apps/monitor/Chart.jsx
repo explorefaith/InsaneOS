@@ -2,7 +2,7 @@
 // eje Y, cruz y globo al pasar el mouse, y pausa mientras el mouse está encima.
 // Se dibuja en píxeles (<Image pixels>) al ancho real de la caja; siempre de izquierda a
 // derecha (el tiempo no se espeja en RTL).
-import { View, Text, Image, useTheme, useLocale } from '@lordos/sdk';
+import { View, Text, Image, useTheme, useLocale } from '@insaneos/sdk';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { canvas, drawArea, niceMax } from './draw.js';
 
@@ -16,7 +16,7 @@ export const Chart = memo(function Chart({ series, height = 120, max, format, ti
   // ancho real: se mide después de cada dibujo (barato: lee la caja del motor)
   useEffect(() => {
     if (!box.current) return;
-    const nw = Math.round(lord.getLayout(box.current.id)[2]);
+    const nw = Math.round(insane.getLayout(box.current.id)[2]);
     if (nw > 0 && Math.abs(nw - w) > 1) setW(nw);
   });
   const data = frozen || { series, times };

@@ -5,7 +5,7 @@
   "quickHint": "Connects once; it is kept under Recent, not in the favorites",
   "favorites": "FAVORITES",
   "recent": "RECENT",
-  "unavailable": "The database helper (lord-sql) isn't installed on this system, so Databases can't connect yet. Favorites and the import still work.",
+  "unavailable": "The database helper (insane-sql) isn't installed on this system, so Databases can't connect yet. Favorites and the import still work.",
   "later": "Coming in a later version of Databases.",
   "loading": "Loading…",
   "cancel": "Cancel",
@@ -432,7 +432,7 @@
     "one": "{count} entry since connecting at {time} · the log stays in memory and is cleared when you disconnect",
     "other": "{count} entries since connecting at {time} · the log stays in memory and is cleared when you disconnect"
   },
-  "err.unavailable": "The database helper (lord-sql) isn't installed or can't start.",
+  "err.unavailable": "The database helper (insane-sql) isn't installed or can't start.",
   "err.notfound": "That favorite isn't saved anymore. Save it again and connect.",
   "err.dns": "The server's name couldn't be found. {message}",
   "err.connect": "The server didn't accept the connection: check the host, the port and the network. {message}",

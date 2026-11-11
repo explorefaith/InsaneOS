@@ -3,9 +3,9 @@
 #
 #   tests/lock_e2e.sh idle|sleep <outdir> [server dir]
 #
-# A session lord-server and a login screen (--headless, as lord-sessiond starts them, LORDOS_SESSIOND=1)
+# A session insane-server and a login screen (--headless, as insane-sessiond starts them, INSANEOS_SESSIOND=1)
 # with "Require password after the display turns off: Immediately"; the monitor is a vkms card that
-# build/lock-seat (tests/lock_seat.c, run as root) lends the way lord-sessiond does; the system bus is a
+# build/lock-seat (tests/lock_seat.c, run as root) lends the way insane-sessiond does; the system bus is a
 # private dbus-daemon where tests/fake_logind.py plays logind's sleep.
 #   idle   the display turns off after 8 s without input: the session must ask to lock (dark) at once
 #   sleep  display off after 10 min, so only the sleep can lock: logind's PrepareForSleep(true) at 8 s
@@ -13,7 +13,7 @@
 #          sleep must wait (the delay inhibitor) until the monitor was taken
 # LOCK_DELAY=-1 (Never) or a delay longer than the test is the control: no lock may come (exit 3).
 # Pictures: <outdir>/<mode>-1-desktop.bmp, -2-lock.bmp (and -3-lock-woken.bmp after an idle lock);
-# the steps in <outdir>/<mode>.log. Needs make build/lord-server build/lock-seat and the JS bundles.
+# the steps in <outdir>/<mode>.log. Needs make build/insane-server build/lock-seat and the JS bundles.
 set -u
 MODE=${1:?idle or sleep}
 OUT=${2:?outdir}
@@ -23,11 +23,11 @@ OUT=$(cd "$OUT" && pwd)
 T=$(mktemp -d /tmp/lock-e2e.XXXXXX)
 LOG="$OUT/$MODE.log"
 : > "$LOG"
-mkdir -p "$T/rt" "$T/grt" "$T/home/.config/lordos" "$T/ghome"
+mkdir -p "$T/rt" "$T/grt" "$T/home/.config/insaneos" "$T/ghome"
 chmod 700 "$T/rt" "$T/grt"
 if [ "$MODE" = idle ]; then OFF=8; SLEEP_AT=999; else OFF=600; SLEEP_AT=8; fi
 # LOCK_DELAY: "Require password after the display turns off" in seconds (0 Immediately, -1 Never)
-printf '{"power":{"offAC":%d,"offBattery":%d,"lockDelay":%d,"sleepAC":0,"sleepBattery":0}}\n' "$OFF" "$OFF" "${LOCK_DELAY:-0}" > "$T/home/.config/lordos/settings.json"
+printf '{"power":{"offAC":%d,"offBattery":%d,"lockDelay":%d,"sleepAC":0,"sleepBattery":0}}\n' "$OFF" "$OFF" "${LOCK_DELAY:-0}" > "$T/home/.config/insaneos/settings.json"
 
 cleanup() {
     for p in ${PIDS:-}; do kill "$p" 2>/dev/null; done
@@ -37,7 +37,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # the monitor: a vkms card nobody else uses; without vkms (Debian's kernel has none) no card at all, the
-# frames in memory standing for the screen (LORD_IDLE_HEADLESS=1, development only)
+# frames in memory standing for the screen (INSANE_IDLE_HEADLESS=1, development only)
 CARD=-
 HEADLESS=
 if sudo modprobe vkms 2>/dev/null; then
@@ -45,7 +45,7 @@ if sudo modprobe vkms 2>/dev/null; then
         [ "$(basename "$(readlink -f "$c/device/driver")")" = vkms ] && CARD=/dev/dri/$(basename "$c")
     done
 fi
-[ "$CARD" = - ] && HEADLESS=LORD_IDLE_HEADLESS=1
+[ "$CARD" = - ] && HEADLESS=INSANE_IDLE_HEADLESS=1
 echo "monitor: $CARD ${HEADLESS:-(vkms)}" >> "$LOG"
 
 # the system bus and logind
@@ -58,25 +58,25 @@ sleep 0.5
 
 run() {   # run <runtime dir> <home> <log> <args...>
     rt=$1; home=$2; slog=$3; shift 3
-    env -i PATH=/usr/bin:/bin HOME="$home" XDG_RUNTIME_DIR="$rt" LANG=en_US.UTF-8 LORDOS_SESSIOND=1 LORD_GPU=0 $HEADLESS \
+    env -i PATH=/usr/bin:/bin HOME="$home" XDG_RUNTIME_DIR="$rt" LANG=en_US.UTF-8 INSANEOS_SESSIOND=1 INSANE_GPU=0 $HEADLESS \
         DBUS_SYSTEM_BUS_ADDRESS="unix:path=$T/bus" \
-        "$SRV/build/lord-server" --headless 1280x800 --fonts "$SRV/../assets/fonts" --shell "$SRV/../assets/shell" --timeout 90 "$@" > "$slog" 2>&1 &
+        "$SRV/build/insane-server" --headless 1280x800 --fonts "$SRV/../assets/fonts" --shell "$SRV/../assets/shell" --timeout 90 "$@" > "$slog" 2>&1 &
     PIDS="$PIDS $!"
 }
 run "$T/rt" "$T/home" "$OUT/$MODE-session.log" --theme "$SRV/../themes/default/theme.bundle.js"
 run "$T/grt" "$T/ghome" "$OUT/$MODE-greeter.log" --greeter --theme "$SRV/../themes/greeter/theme.bundle.js"
 for i in $(seq 100); do
-    [ -S "$T/rt/lordos/remote.sock" ] && [ -S "$T/grt/lordos/remote.sock" ] && break
+    [ -S "$T/rt/insaneos/remote.sock" ] && [ -S "$T/grt/insaneos/remote.sock" ] && break
     sleep 0.2
 done
 sleep 3     # the themes start
 
-sudo "$SRV/build/lock-seat" "$T/rt/lordos/remote.sock" "$T/grt/lordos/remote.sock" "$CARD" "$OUT/$MODE" 20000 500 >> "$LOG" 2>&1
+sudo "$SRV/build/lock-seat" "$T/rt/insaneos/remote.sock" "$T/grt/insaneos/remote.sock" "$CARD" "$OUT/$MODE" 20000 500 >> "$LOG" 2>&1
 RC=$?
 sleep 5     # logind's wake
-# lord-server writes its log to ~/.cache/lordos when its output is not a terminal
-cp "$T/home/.cache/lordos/session.log" "$OUT/$MODE-session.log" 2>/dev/null
-cp "$T/ghome/.cache/lordos/greeter.log" "$OUT/$MODE-greeter.log" 2>/dev/null
+# insane-server writes its log to ~/.cache/insaneos when its output is not a terminal
+cp "$T/home/.cache/insaneos/session.log" "$OUT/$MODE-session.log" 2>/dev/null
+cp "$T/ghome/.cache/insaneos/greeter.log" "$OUT/$MODE-greeter.log" 2>/dev/null
 grep -h -E "^sleep:|^monitor:|sysbus" "$OUT/$MODE-session.log" | sed 's/^/session: /' >> "$LOG"
 cat "$LOG"
 for p in $PIDS; do kill "$p" 2>/dev/null; done

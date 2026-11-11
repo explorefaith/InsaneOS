@@ -1,10 +1,10 @@
 // Settings → Users: the machine's accounts (docs/SESSIONS.md). Reads the list without root
-// (lord.users) and makes changes through the administration helper: user-add, user-del, user-passwd,
+// (insane.users) and makes changes through the administration helper: user-add, user-del, user-passwd,
 // user-admin, user-avatar, user-autologin. Passwords travel only in the action's argument
 // (never in argv) and with quiet, so they do not end up in the "in progress" notice.
 import {
   View, Text, Image, Button, Toggle, TextInput, useTheme, useLocale, admin, useSystemInfo, remote, fs, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, FieldRow, Note, Message, Actions } from './ui.jsx';
 
@@ -35,7 +35,7 @@ export function UserAvatar({ user, size = 40 }) {
   );
 }
 
-const listUsers = () => (typeof lord.users === 'undefined' ? { users: [], autologin: '' } : lord.users.list());
+const listUsers = () => (typeof insane.users === 'undefined' ? { users: [], autologin: '' } : insane.users.list());
 
 export function UsersSettings() {
   const t = useTheme();

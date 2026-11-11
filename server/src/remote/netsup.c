@@ -1,15 +1,15 @@
-/* netsup.c — lord-sessiond supervises lord-netd, the system network (docs/NETWORK.md, "The network
- * belongs to the system"; the process itself is admin.c built with LORD_NETD plus net/netd.c).
+/* netsup.c — insane-sessiond supervises insane-netd, the system network (docs/NETWORK.md, "The network
+ * belongs to the system"; the process itself is admin.c built with INSANE_NETD plus net/netd.c).
  *
  *   - Started at boot, before the greeter, so there is a network (and an IP) before anyone logs
  *     in, and the remote desktop is reachable.
- *   - Fixed path: <lord-sessiond's directory>/lord-netd, root-owned and not writable by others
- *     (unless insecure_dev, as for lord-server). No arguments and a minimal environment.
+ *   - Fixed path: <insane-sessiond's directory>/insane-netd, root-owned and not writable by others
+ *     (unless insecure_dev, as for insane-server). No arguments and a minimal environment.
  *   - If it exits, it is started again with a growing delay (1, 2, 4… up to 30 s).
- *   - Restarting lord-sessiond (KillMode=process) doesn't cut the network: lord-netd keeps running
- *     and the new lord-sessiond adopts it (a pidfd on the pid in /run/lordos/netd.pid), no polling.
- *   - Leaves /run/lordos/netd.enabled: with that mark, the sessions' helpers never bring the
- *     network up themselves (while lord-netd restarts, the action answers with an error). */
+ *   - Restarting insane-sessiond (KillMode=process) doesn't cut the network: insane-netd keeps running
+ *     and the new insane-sessiond adopts it (a pidfd on the pid in /run/insaneos/netd.pid), no polling.
+ *   - Leaves /run/insaneos/netd.enabled: with that mark, the sessions' helpers never bring the
+ *     network up themselves (while insane-netd restarts, the action answers with an error). */
 #include "sessiond.h"
 #include "../sec/cgroup.h"
 
@@ -28,8 +28,8 @@
 #define NETD_PIDFILE SD_RUN_DIR "/netd.pid"
 #define NETD_MARK    SD_RUN_DIR "/netd.enabled"
 
-static pid_t child = -1;                /* lord-netd as our child */
-static int pidfd = -1;                  /* an adopted one (from an earlier lord-sessiond) */
+static pid_t child = -1;                /* insane-netd as our child */
+static int pidfd = -1;                  /* an adopted one (from an earlier insane-sessiond) */
 static double next_try;                 /* when to start it again */
 static int fails;
 static double started;                  /* when it was started or adopted (if it lasted, the delay goes back to 1 s) */
@@ -39,16 +39,16 @@ static void netd_path(void) {
     if (path[0]) return;
     snprintf(path, sizeof path, "%s", rd_conf.server);
     char *slash = strrchr(path, '/');
-    if (slash) snprintf(slash + 1, sizeof path - (size_t)(slash + 1 - path), "lord-netd");
+    if (slash) snprintf(slash + 1, sizeof path - (size_t)(slash + 1 - path), "insane-netd");
 }
 
-/* Is a lord-netd from an earlier lord-sessiond still alive? */
+/* Is a insane-netd from an earlier insane-sessiond still alive? */
 static int adopt(void) {
     FILE *f = fopen(NETD_PIDFILE, "r");
     int p = 0;
     if (f) { if (fscanf(f, "%d", &p) != 1) p = 0; fclose(f); }
     if (p <= 1) return -1;
-    /* the pidfile is root's; the process must be root's and named lord-netd (prctl). /proc/<pid>/exe
+    /* the pidfile is root's; the process must be root's and named insane-netd (prctl). /proc/<pid>/exe
      * is not compared: if the binary was updated while running, it points to another name */
     char proc[64], comm[32] = "";
     struct stat st;
@@ -60,13 +60,13 @@ static int adopt(void) {
     if (!fgets(comm, sizeof comm, f)) comm[0] = 0;
     fclose(f);
     comm[strcspn(comm, "\n")] = 0;
-    if (strcmp(comm, "lord-netd")) return -1;
+    if (strcmp(comm, "insane-netd")) return -1;
     int fd = (int)syscall(SYS_pidfd_open, p, 0);
     if (fd < 0) return -1;
     fcntl(fd, F_SETFD, FD_CLOEXEC);
     pidfd = fd;
     started = rd_now();
-    sd_log("lord-netd still running (pid %d): the network was not interrupted", p);
+    sd_log("insane-netd still running (pid %d): the network was not interrupted", p);
     return 0;
 }
 
@@ -95,7 +95,7 @@ void sd_netd_start(void) {
         signal(SIGPIPE, SIG_DFL);
         signal(SIGTERM, SIG_DFL);
         signal(SIGHUP, SIG_DFL);
-        setsid();                               /* does not die with lord-sessiond (KillMode=process) */
+        setsid();                               /* does not die with insane-sessiond (KillMode=process) */
         cgroup_service_leaf("netd");            /* its own leaf: Monitor → Network counts its traffic (0.8.5) */
         char *const argv[] = { path, NULL };
         char *const env[] = { "PATH=/usr/sbin:/usr/bin:/sbin:/bin", "LANG=C.UTF-8", NULL };
@@ -105,7 +105,7 @@ void sd_netd_start(void) {
     if (p < 0) { next_try = rd_now() + 5; return; }
     child = p;
     started = rd_now();
-    sd_log("lord-netd started (pid %d)", (int)p);
+    sd_log("insane-netd started (pid %d)", (int)p);
 }
 
 int sd_netd_fd(void) { return pidfd; }
@@ -115,7 +115,7 @@ static void schedule(const char *why) {
     double wait = fails < 5 ? (double)(1 << fails) : 30;
     fails++;
     next_try = rd_now() + wait;
-    sd_log("lord-netd %s: restarting in %.0f s", why, wait);
+    sd_log("insane-netd %s: restarting in %.0f s", why, wait);
 }
 
 void sd_netd_event(void) {                      /* the adopted one's pidfd says it exited */

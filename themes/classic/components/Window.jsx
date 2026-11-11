@@ -7,7 +7,7 @@
 // Insane Classic has no global menu bar: an app that declares menus (File, Edit, View, Go…; the same
 // ones Insane Flow shows on top, useAppMenus) gets them in a strip under its title bar, with Window and
 // Help, as desktop apps do on a taskbar layout. Apps without menus of their own get no strip.
-import { View, Text, Layer, addListener, wm, AppHost, windowTitle, WindowShell, windowIcon, snapZoneAt, screen, useMenusWithSpeech, getApp, appGroup, windowMenuItems, moveToDesktopItems, solidOver, t as tr } from '@lordos/sdk';
+import { View, Text, Layer, addListener, wm, AppHost, windowTitle, WindowShell, windowIcon, snapZoneAt, screen, useMenusWithSpeech, getApp, appGroup, windowMenuItems, moveToDesktopItems, solidOver, t as tr } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { MinimizeGlyph, MaximizeGlyph, RestoreGlyph, CloseGlyph, LayoutGlyph } from '../glyphs.jsx';
 import { Menu } from './Menu.jsx';
@@ -33,7 +33,7 @@ function MenuStrip({ t, win, focused, menus }) {
   const at = (i) => {
     const n = refs.current[i];
     if (!n) return null;
-    const [x, y, , h] = lord.getLayout(n.id);
+    const [x, y, , h] = insane.getLayout(n.id);
     return { i, x, y: y + h + 2 };
   };
   return (
@@ -186,7 +186,7 @@ export function Window({ win, t, focused, app }) {
   const Icon = windowIcon(win);
   const openLayouts = () => {
     if (!maxRef.current) return;
-    const [x, y, w, h] = lord.getLayout(maxRef.current.id);
+    const [x, y, w, h] = insane.getLayout(maxRef.current.id);
     setLayouts({ x: x + w / 2 - BTN_W / 2, y: y + h + 4 });
   };
   const enterMax = () => { clearTimeout(leaveTimer.current); clearTimeout(hoverTimer.current); hoverTimer.current = setTimeout(openLayouts, 550); };

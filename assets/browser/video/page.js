@@ -3,14 +3,14 @@
 // 1. Holds back VP9 and/or AV1: the media element, MediaSource and the Media Capabilities API answer
 //    "not supported" for them, so the site's player picks H.264, which costs far less to decode in
 //    software. Which ones arrives from stutter.js (which can read the policy; this world can't) as a
-//    'lordos-video-codecs' event on the document, detail "vp9,av1", "vp9", "av1" or "", a few
+//    'insaneos-video-codecs' event on the document, detail "vp9,av1", "vp9", "av1" or "", a few
 //    milliseconds after the page starts: long before the site's player loads and asks.
-// 2. Lowers the player's quality one step when stutter.js asks for it (a 'lordos-video-lower' event)
-//    and answers with 'lordos-video-lowered' (detail: the new quality, or '').
+// 2. Lowers the player's quality one step when stutter.js asks for it (a 'insaneos-video-lower' event)
+//    and answers with 'insaneos-video-lowered' (detail: the new quality, or '').
 // The page itself could send those events too; it would only change what it is told about itself.
 (() => {
   const patterns = [];
-  document.addEventListener('lordos-video-codecs', (e) => {
+  document.addEventListener('insaneos-video-codecs', (e) => {
     const list = typeof e.detail === 'string' ? e.detail.split(',') : [];
     patterns.length = 0;
     if (list.includes('vp9')) patterns.push(/vp0?9/i);
@@ -71,9 +71,9 @@
     return LABEL[next] || next;
   }
 
-  document.addEventListener('lordos-video-lower', () => {
+  document.addEventListener('insaneos-video-lower', () => {
     let q = '';
     try { q = lower(); } catch (e) { q = ''; }
-    document.dispatchEvent(new CustomEvent('lordos-video-lowered', { detail: q }));
+    document.dispatchEvent(new CustomEvent('insaneos-video-lowered', { detail: q }));
   });
 })();

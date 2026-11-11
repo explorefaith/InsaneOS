@@ -115,9 +115,9 @@
             "pt": "Servidor gráfico e compositor Wayland do Insane OS"
           },
           "sub": {
-            "en": "lord-server, in C: KMS without libdrm, evdev without libinput, composition on CPU or GPU. Linux apps and isolated .lpk apps connect here as Wayland clients",
-            "es": "lord-server, en C: KMS sin libdrm, evdev sin libinput, composición en CPU o GPU. Las apps de Linux y las .lpk aisladas se conectan acá como clientes Wayland",
-            "pt": "lord-server, em C: KMS sem libdrm, evdev sem libinput, composição na CPU ou GPU. Apps Linux e apps .lpk isolados se conectam aqui como clientes Wayland"
+            "en": "insane-server, in C: KMS without libdrm, evdev without libinput, composition on CPU or GPU. Linux apps and isolated .lpk apps connect here as Wayland clients",
+            "es": "insane-server, en C: KMS sin libdrm, evdev sin libinput, composición en CPU o GPU. Las apps de Linux y las .lpk aisladas se conectan acá como clientes Wayland",
+            "pt": "insane-server, em C: KMS sem libdrm, evdev sem libinput, composição na CPU ou GPU. Apps Linux e apps .lpk isolados se conectam aqui como clientes Wayland"
           },
           "tone": "ours"
         },

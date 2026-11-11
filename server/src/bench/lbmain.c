@@ -1,17 +1,17 @@
-/* lbmain.c — lord-bench, InsaneBench's helper (docs/BENCHMARK.md, "0.8.6 — InsaneBench").
+/* lbmain.c — insane-bench, InsaneBench's helper (docs/BENCHMARK.md, "0.8.6 — InsaneBench").
  *
- * lord-server (lbrun.c) launches it from a fixed path next to its own binary, with no arguments, the
+ * insane-server (lbrun.c) launches it from a fixed path next to its own binary, with no arguments, the
  * channel on fd 3 and a minimal environment. The first message (LbGo) says what to run and brings at
- * most two fds lord-server opened: the GPU's render node and a scratch file for the storage test. Then,
+ * most two fds insane-server opened: the GPU's render node and a scratch file for the storage test. Then,
  * before any work, it locks itself in with sandbox_apply_helper (sec/sandbox.c, the same as
- * lord-doc's and lord-media's): no network, no exec, no new files, read-only system libraries for Mesa,
+ * insane-doc's and insane-media's): no network, no exec, no new files, read-only system libraries for Mesa,
  * DRM ioctls only on the fd it was given. Right after that it checks its own lock-in (the helper-sandbox
  * self-test, sandbox_tries: things that must fail). It answers only with fixed-size LbMsg records
- * (lbproto.h); lord-server checks each one, watches temperatures and throttling, and kills it to stop. */
+ * (lbproto.h); insane-server checks each one, watches temperatures and throttling, and kills it to stop. */
 #include "lbproto.h"
 #include "lbwork.h"
 #include "lbui.h"
-#ifdef LORD_GPU
+#ifdef INSANE_GPU
 #include "lbgpu.h"
 #endif
 #include "../sec/sandbox.h"
@@ -33,7 +33,7 @@
 
 static void send_msg(uint32_t kind, int id, double value, double aux) {
     LbMsg m = { LB_MAGIC, kind, (uint32_t)id, 0, value, aux };
-    if (send(SOCK, &m, sizeof m, MSG_NOSIGNAL) != (ssize_t)sizeof m) _exit(1);   /* lord-server is gone */
+    if (send(SOCK, &m, sizeof m, MSG_NOSIGNAL) != (ssize_t)sizeof m) _exit(1);   /* insane-server is gone */
 }
 
 /* runs a measurement `reps` times and reports the median with its spread */
@@ -60,7 +60,7 @@ static double w_shape(void *c) { Ctx *x = c; return lb_shape(x->threads, x->secs
 static double w_copy(void *c)  { Ctx *x = c; return lb_mem_copy(x->threads, x->mb, x->secs); }
 static double w_triad(void *c) { Ctx *x = c; return lb_mem_triad(x->threads, x->mb, x->secs); }
 static double w_lat(void *c)   { Ctx *x = c; return lb_mem_latency(x->mb, x->hops); }
-#ifdef LORD_GPU
+#ifdef INSANE_GPU
 static double w_scene(void *c)  { return lb_gpu_scene(((Ctx *)c)->secs); }
 static double w_fill(void *c)   { return lb_gpu_fill(((Ctx *)c)->secs); }
 static double w_upload(void *c) { return lb_gpu_upload(((Ctx *)c)->secs); }
@@ -114,11 +114,11 @@ static void skip_all(int from, int to, int why) {
 
 int main(int argc, char **argv) {
     (void)argv;
-    if (argc != 1) { fprintf(stderr, "lord-bench: launched by lord-server (no arguments)\n"); return 2; }
+    if (argc != 1) { fprintf(stderr, "insane-bench: launched by insane-server (no arguments)\n"); return 2; }
     signal(SIGPIPE, SIG_IGN);
     prctl(PR_SET_PDEATHSIG, SIGKILL);
     if (getppid() == 1) return 1;
-    prctl(PR_SET_NAME, "lord-bench");
+    prctl(PR_SET_NAME, "insane-bench");
 #ifdef SYS_close_range
     syscall(SYS_close_range, SOCK + 1, ~0U, 0);
 #endif
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     /* Mesa's loader names the GPU behind the render node it got through libdrm, which lists /dev/dri and, for a
      * GPU that isn't on PCI (the Raspberry Pi 5's v3d), reads its device tree node; without them "MESA-LOADER:
      * failed to retrieve device information" and no GPU tests (found on the Pi 5, 0.8.6). Read-only: a device
-     * opened here gets no ioctls (Landlock's IOCTL_DEV, ABI 5 and later), only the fd lord-server passed does */
+     * opened here gets no ioctls (Landlock's IOCTL_DEV, ABI 5 and later), only the fd insane-server passed does */
     static const char *const ro[] = { "/usr/lib", "/usr/lib64", "/lib", "/lib64", "/usr/share", "/etc/ld.so.cache",
                                       "/sys/dev/char", "/sys/devices", "/sys/firmware/devicetree", "/dev/dri", NULL };
     static const int extra[] = { SYS_getcpu, SYS_kcmp, SYS_membarrier, SYS_sched_getparam, SYS_sched_getscheduler,
@@ -164,13 +164,13 @@ int main(int argc, char **argv) {
                                  SYS_futex_waitv,
 #endif
                                  -1 };
-    SandboxHelperCfg cfg = { .name = "lordos-bench", .ro_paths = ro, .extra_syscalls = extra,
+    SandboxHelperCfg cfg = { .name = "insaneos-bench", .ro_paths = ro, .extra_syscalls = extra,
                              .allow_ioctl_classes = gpu_fd >= 0 ? SANDBOX_IOCTL_DRM | SANDBOX_IOCTL_DMABUF : 0,
                              .mem_max_mb = 2048 };
     int mask = sandbox_apply_helper(&cfg);
     sandbox_tries();
 
-    if (go.mode == LB_MODE_LOAD) {              /* desktop impact: only the load, while lord-server records frames */
+    if (go.mode == LB_MODE_LOAD) {              /* desktop impact: only the load, while insane-server records frames */
         Sus s = { 0, 0, 0 };
         if (go.sustained_s >= 5 && go.sustained_s <= 120) lb_sustained(threads, go.sustained_s, 1, on_sample, &s);
         send_msg(LB_MSG_DONE, 0, 0, mask < 0 ? 0 : mask);
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
     Ctx lat = { 1, 0, 64, full ? 10000000 : 2000000 };
     measure(LB_MEM_LAT, reps, w_lat, &lat);
 
-#ifdef LORD_GPU
+#ifdef INSANE_GPU
     if (gpu_fd >= 0) {
         BenchGlInfo gi;
         if (lb_gpu_open(gpu_fd, &gi) == 0) {

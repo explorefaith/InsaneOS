@@ -4,19 +4,19 @@
 # (on an x86-64 machine, tools/iso/build-arm64.sh runs this script in an arm64 chroot). See docs/ISO.md.
 #
 # Usage (as root, on Debian 13, from the root of the already built repository):
-#   make -C server -j"$(nproc)"          # lord-server and lord-sessiond (needs libssl-dev, freerdp3-dev, libsrtp2-dev and libusrsctp-dev: the remote desktop is WebRTC only; clang for lord-netperm's BPF)
+#   make -C server -j"$(nproc)"          # insane-server and insane-sessiond (needs libssl-dev, freerdp3-dev, libsrtp2-dev and libusrsctp-dev: the remote desktop is WebRTC only; clang for insane-netperm's BPF)
 #   (the themes: npm run build on the development machine; the .bundle.js files travel with the tree)
-#   sudo tools/iso/build.sh [work folder]   # default /var/tmp/lordos-iso
+#   sudo tools/iso/build.sh [work folder]   # default /var/tmp/insaneos-iso
 #
-# Result: <work>/out/lordos-live-<version>-<arch>.iso, lordos_<version>_<arch>.deb and
-# lordos-hwdata_<snapshot date>_all.deb (the signed tested-hardware snapshot, which lordos depends on)
+# Result: <work>/out/insaneos-live-<version>-<arch>.iso, insaneos_<version>_<arch>.deb and
+# insaneos-hwdata_<snapshot date>_all.deb (the signed tested-hardware snapshot, which insaneos depends on)
 set -eu
 
 [ "$(id -u)" = 0 ] || { echo "build.sh: run as root (sudo)" >&2; exit 1; }
 ROOT=$(pwd)
 [ -f "$ROOT/package.json" ] && [ -d "$ROOT/server" ] || { echo "build.sh: run from the repository root" >&2; exit 1; }
 VERSION=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -1)
-WORK=${1:-/var/tmp/lordos-iso}
+WORK=${1:-/var/tmp/insaneos-iso}
 MIRROR=${MIRROR:-http://deb.debian.org/debian}
 SUITE=trixie
 CH="$WORK/chroot"
@@ -32,8 +32,8 @@ case "$ARCH" in
     arm64) PKG_KERNEL=linux-image-arm64; PKGS_GRUB="grub-efi-arm64-bin"; GRUB_DIR=arm64-efi; SQUASHFS_BCJ=""; PKGS_MICROCODE="" ;;
     *) echo "build.sh: Insane OS builds a live ISO for amd64 and arm64, not $ARCH" >&2; exit 1 ;;
 esac
-ISO="$OUT/lordos-live-$VERSION-$ARCH.iso"
-DEB="$OUT/lordos_${VERSION}_$ARCH.deb"
+ISO="$OUT/insaneos-live-$VERSION-$ARCH.iso"
+DEB="$OUT/insaneos_${VERSION}_$ARCH.deb"
 T0=$(date +%s)
 
 for t in debootstrap mksquashfs xorriso grub-mkrescue mformat dpkg-deb; do
@@ -44,11 +44,11 @@ done
 # Live system packages. Insane OS does not use GNOME or KDE: only what is below (xwayland only for X11 apps).
 PKGS_BASE="$PKG_KERNEL initramfs-tools live-boot live-boot-initramfs-tools systemd-sysv udev kmod dbus dbus-user-session sudo locales tzdata
  iproute2 iputils-ping less nano ca-certificates apt dpkg passwd procps"
-# command-line tools, the same in the ISO and the Raspberry Pi image (also Recommends of the lordos package)
+# command-line tools, the same in the ISO and the Raspberry Pi image (also Recommends of the insaneos package)
 . "$ROOT/tools/iso/packages-tools.sh"
 # gsettings-desktop-schemas: without it GTK 3 apps can't read gtk-theme from the keyfile backend
-# lord-server writes, and they draw light Adwaita instead of Insane OS / Insane OS-dark (docs/WAYLAND.md)
-PKGS_LORDOS="libwayland-server0 libwayland-client0 libxkbcommon0 xkb-data pipewire pipewire-pulse pipewire-alsa wireplumber rtkit polkitd pkexec
+# insane-server writes, and they draw light Adwaita instead of Insane OS / Insane OS-dark (docs/WAYLAND.md)
+PKGS_INSANEOS="libwayland-server0 libwayland-client0 libxkbcommon0 xkb-data pipewire pipewire-pulse pipewire-alsa wireplumber rtkit polkitd pkexec
  alsa-ucm-conf wpasupplicant openvpn fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji libthai-data
  skkdic rime-data-pinyin-simp fonts-dejavu-core
  libpoppler-glib8t64 libarchive13t64 poppler-data cups avahi-daemon libnss-mdns
@@ -64,7 +64,7 @@ PKGS_APPS="foot featherpad qt6-wayland chromium firefox-esr"
 # the disk installer (server/src/install): partition, format, copy and grub (UEFI and BIOS on amd64, UEFI on
 # arm64). efibootmgr and os-prober are for installing in free space: the boot entry and the other system's menu entry
 PKGS_INSTALLER="gdisk dosfstools e2fsprogs squashfs-tools util-linux grub-common grub2-common efibootmgr os-prober $PKGS_GRUB"
-# the boot splash (the Insane OS Plymouth theme comes in the lordos package; plymouth-label draws the
+# the boot splash (the Insane OS Plymouth theme comes in the insaneos package; plymouth-label draws the
 # password prompt's text for encrypted disks)
 PKGS_SPLASH="plymouth plymouth-label"
 # guest tools for VMware virtual machines (power operations from the hypervisor, time sync, guest IP
@@ -85,14 +85,14 @@ umount_all
 rm -rf "$CH" "$IMG"
 mkdir -p "$CH" "$IMG/live" "$IMG/boot/grub" "$OUT"
 
-# 1. the Insane OS packages: lordos and the tested-hardware snapshot it depends on (docs/BENCHMARK.md)
+# 1. the Insane OS packages: insaneos and the tested-hardware snapshot it depends on (docs/BENCHMARK.md)
 sh tools/iso/mkdeb.sh "$DEB"
 HWDEB=$(sh tools/iso/mkdeb-hwdata.sh "$OUT")
 echo "   $(basename "$HWDEB")"
 # rclone for Cloud (docs/CLOUD.md 3.1): rclone's signed release binary, repackaged by tools/iso/mkdeb-rclone.sh <folder> <arch>; RCLONE_DEB names it,
-# else the newest lordos-rclone_*_<arch>.deb in the output folder
-RCDEB=${RCLONE_DEB:-$(ls "$OUT"/lordos-rclone_*_"$ARCH".deb 2>/dev/null | sort -V | tail -n 1)}
-[ -f "$RCDEB" ] || { echo "no lordos-rclone_<version>_$ARCH.deb: build it with tools/iso/mkdeb-rclone.sh $OUT $ARCH (downloads and checks rclone's signed release), or set RCLONE_DEB" >&2; exit 1; }
+# else the newest insaneos-rclone_*_<arch>.deb in the output folder
+RCDEB=${RCLONE_DEB:-$(ls "$OUT"/insaneos-rclone_*_"$ARCH".deb 2>/dev/null | sort -V | tail -n 1)}
+[ -f "$RCDEB" ] || { echo "no insaneos-rclone_<version>_$ARCH.deb: build it with tools/iso/mkdeb-rclone.sh $OUT $ARCH (downloads and checks rclone's signed release), or set RCLONE_DEB" >&2; exit 1; }
 echo "   $(basename "$RCDEB")"
 
 # 2. sistema base
@@ -105,11 +105,11 @@ deb $MIRROR $SUITE main contrib non-free non-free-firmware
 deb $MIRROR $SUITE-updates main contrib non-free non-free-firmware
 deb http://security.debian.org/debian-security $SUITE-security main contrib non-free non-free-firmware
 EOF
-echo lordos-live > "$CH/etc/hostname"
+echo insaneos-live > "$CH/etc/hostname"
 # networking is handled by Insane OS (its own DHCP): no ifupdown or system interfaces (live-boot writes
-# its own on boot; lordos-live-prep resets it to just lo)
+# its own on boot; insaneos-live-prep resets it to just lo)
 mkdir -p "$CH/etc/network"; printf 'auto lo\niface lo inet loopback\n' > "$CH/etc/network/interfaces"
-printf '127.0.0.1\tlocalhost\n127.0.1.1\tlordos-live\n::1\tlocalhost ip6-localhost ip6-loopback\n' > "$CH/etc/hosts"
+printf '127.0.0.1\tlocalhost\n127.0.1.1\tinsaneos-live\n::1\tlocalhost ip6-localhost ip6-loopback\n' > "$CH/etc/hosts"
 # no systemd-resolved: Insane OS networking writes /etc/resolv.conf (a regular file, not a symlink)
 rm -f "$CH/etc/resolv.conf"; cp /etc/resolv.conf "$CH/etc/resolv.conf" 2>/dev/null || : > "$CH/etc/resolv.conf"
 # keep dpkg from starting services inside the chroot
@@ -122,18 +122,18 @@ in_ch() { chroot "$CH" env DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 PATH=/usr
 echo "== paquetes"
 in_ch apt-get update -q > "$WORK/apt.log" 2>&1
 # shellcheck disable=SC2086
-in_ch apt-get install -y -q --no-install-recommends $PKGS_BASE $PKGS_TOOLS $PKGS_LORDOS $PKGS_FIRMWARE $PKGS_MICROCODE $PKGS_GPU $PKGS_APPS $PKGS_INSTALLER $PKGS_SPLASH $PKGS_VM $PKGS_SSH \
+in_ch apt-get install -y -q --no-install-recommends $PKGS_BASE $PKGS_TOOLS $PKGS_INSANEOS $PKGS_FIRMWARE $PKGS_MICROCODE $PKGS_GPU $PKGS_APPS $PKGS_INSTALLER $PKGS_SPLASH $PKGS_VM $PKGS_SSH \
     >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
-cp "$DEB" "$CH/tmp/lordos.deb"
-cp "$HWDEB" "$CH/tmp/lordos-hwdata.deb"
-cp "$RCDEB" "$CH/tmp/lordos-rclone.deb"
-in_ch apt-get install -y -q --no-install-recommends /tmp/lordos-hwdata.deb /tmp/lordos-rclone.deb /tmp/lordos.deb >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
+cp "$DEB" "$CH/tmp/insaneos.deb"
+cp "$HWDEB" "$CH/tmp/insaneos-hwdata.deb"
+cp "$RCDEB" "$CH/tmp/insaneos-rclone.deb"
+in_ch apt-get install -y -q --no-install-recommends /tmp/insaneos-hwdata.deb /tmp/insaneos-rclone.deb /tmp/insaneos.deb >> "$WORK/apt.log" 2>&1 || { tail -30 "$WORK/apt.log"; exit 1; }
 # the browsers' defaults (their own bar with Insane OS's window buttons), shared with the Pi image
 sh tools/iso/browser-defaults.sh "$CH"
-install -D -m 644 tools/iso/rootfs/etc/wireplumber/wireplumber.conf.d/lordos-bluez.conf "$CH/etc/wireplumber/wireplumber.conf.d/lordos-bluez.conf"
-install -D -m 644 tools/iso/rootfs/etc/wireplumber/wireplumber.conf.d/lordos-volume.conf "$CH/etc/wireplumber/wireplumber.conf.d/lordos-volume.conf"
-install -D -m 644 tools/iso/rootfs/etc/pipewire/pipewire-pulse.conf.d/lordos-no-modules.conf "$CH/etc/pipewire/pipewire-pulse.conf.d/lordos-no-modules.conf"
-rm -f "$CH/tmp/lordos.deb" "$CH/tmp/lordos-hwdata.deb" "$CH/tmp/lordos-rclone.deb"
+install -D -m 644 tools/iso/rootfs/etc/wireplumber/wireplumber.conf.d/insaneos-bluez.conf "$CH/etc/wireplumber/wireplumber.conf.d/insaneos-bluez.conf"
+install -D -m 644 tools/iso/rootfs/etc/wireplumber/wireplumber.conf.d/insaneos-volume.conf "$CH/etc/wireplumber/wireplumber.conf.d/insaneos-volume.conf"
+install -D -m 644 tools/iso/rootfs/etc/pipewire/pipewire-pulse.conf.d/insaneos-no-modules.conf "$CH/etc/pipewire/pipewire-pulse.conf.d/insaneos-no-modules.conf"
+rm -f "$CH/tmp/insaneos.deb" "$CH/tmp/insaneos-hwdata.deb" "$CH/tmp/insaneos-rclone.deb"
 # SSH off, and no host keys in the image: every computer installed from this ISO would share them
 # (Remote login makes its own with ssh-keygen -A when turned on)
 rm -f "$CH/etc/ssh/ssh_host_"*
@@ -151,40 +151,40 @@ fr_FR.UTF-8 UTF-8
 it_IT.UTF-8 UTF-8
 EOF
 in_ch locale-gen > /dev/null
-echo 'LANG=en_US.UTF-8' > "$CH/etc/default/locale"     # English by default (lordos-live-prep switches it)
+echo 'LANG=en_US.UTF-8' > "$CH/etc/default/locale"     # English by default (insaneos-live-prep switches it)
 ln -sf /usr/share/zoneinfo/UTC "$CH/etc/localtime"; echo UTC > "$CH/etc/timezone"
 
 # ping without root (in the live system the executable's cap_net_raw capability does not survive)
-echo 'net.ipv4.ping_group_range = 0 2147483647' > "$CH/etc/sysctl.d/50-lordos-ping.conf"
+echo 'net.ipv4.ping_group_range = 0 2147483647' > "$CH/etc/sysctl.d/50-insaneos-ping.conf"
 
-# live session user: no password, passwordless sudo. Logs in automatically (lord-sessiond
+# live session user: no password, passwordless sudo. Logs in automatically (insane-sessiond
 # autologin); locking the screen unlocks again with the empty password (only on the monitor and
 # only for the autologin user; see docs/SESSIONS.md)
-in_ch useradd -m -s /bin/bash -c "Insane OS" -G sudo,audio,video,input,render,lpadmin,pipewire,plugdev lordos
-in_ch passwd -d lordos > /dev/null
-mkdir -p "$CH/etc/lordos"
-printf '# Live ISO: logs in automatically as the lordos user. The installed system uses the login screen.\nAUTOLOGIN=lordos\n' > "$CH/etc/lordos/session.conf"
-# the login screen's system user (lord-sessiond also creates it if missing)
-in_ch useradd --system --home-dir /var/lib/lordos-greeter --create-home --shell /usr/sbin/nologin --comment Insane OS lordos-greeter
-in_ch usermod -aG render,video lordos-greeter
-install -m 440 tools/iso/rootfs/etc/sudoers.d/lordos-live "$CH/etc/sudoers.d/lordos-live"
-mkdir -p "$CH/var/lib/systemd/linger"; : > "$CH/var/lib/systemd/linger/lordos"
+in_ch useradd -m -s /bin/bash -c "Insane OS" -G sudo,audio,video,input,render,lpadmin,pipewire,plugdev insaneos
+in_ch passwd -d insaneos > /dev/null
+mkdir -p "$CH/etc/insaneos"
+printf '# Live ISO: logs in automatically as the insaneos user. The installed system uses the login screen.\nAUTOLOGIN=insaneos\n' > "$CH/etc/insaneos/session.conf"
+# the login screen's system user (insane-sessiond also creates it if missing)
+in_ch useradd --system --home-dir /var/lib/insaneos-greeter --create-home --shell /usr/sbin/nologin --comment Insane OS insaneos-greeter
+in_ch usermod -aG render,video insaneos-greeter
+install -m 440 tools/iso/rootfs/etc/sudoers.d/insaneos-live "$CH/etc/sudoers.d/insaneos-live"
+mkdir -p "$CH/var/lib/systemd/linger"; : > "$CH/var/lib/systemd/linger/insaneos"
 # user PipeWire (the packages already enable the global units; just in case)
 in_ch systemctl --global enable pipewire.socket pipewire-pulse.socket wireplumber.service > /dev/null 2>&1 || true
 # Insane OS on tty1 instead of the text login; the other consoles remain (Ctrl+Alt+F2)
-in_ch systemctl enable lordos.service > /dev/null
-in_ch systemctl enable lord-netperm.service > /dev/null
-in_ch systemctl enable lord-fand.service > /dev/null     # fans by temperature (docs/FANS.md)
+in_ch systemctl enable insaneos.service > /dev/null
+in_ch systemctl enable insane-netperm.service > /dev/null
+in_ch systemctl enable insane-fand.service > /dev/null     # fans by temperature (docs/FANS.md)
 # bluetoothd from boot, so a paired mouse or keyboard reconnects at the login screen (bluez's postinst does
 # it too; made sure, as on the Pi; docs/SETTINGS.md, "Bluetooth")
 in_ch systemctl enable bluetooth.service > /dev/null
-in_ch systemctl enable lordos-autoinstall.service > /dev/null   # runs only with lordos.auto=1 (docs/UNATTENDED.md)
+in_ch systemctl enable insaneos-autoinstall.service > /dev/null   # runs only with insaneos.auto=1 (docs/UNATTENDED.md)
 in_ch systemctl mask getty@tty1.service > /dev/null
 # the boot splash: the Insane OS theme (the initramfs below is built with it); docs/ISO.md, "Boot splash"
-in_ch plymouth-set-default-theme lordos
+in_ch plymouth-set-default-theme insaneos
 # quiet and faster boot
 in_ch systemctl mask systemd-networkd-wait-online.service > /dev/null 2>&1 || true
-printf 'root:lordos\n' | in_ch chpasswd     # emergency console: root / lordos (documented)
+printf 'root:insaneos\n' | in_ch chpasswd     # emergency console: root / insaneos (documented)
 
 rm -f "$CH/usr/sbin/policy-rc.d"
 in_ch apt-get clean
@@ -210,8 +210,8 @@ mksquashfs "$CH" "$IMG/live/filesystem.squashfs" -comp xz $SQUASHFS_BCJ -b 1M -n
 
 # 5. grub (BIOS + UEFI in the same hybrid ISO on amd64; UEFI on arm64: grub-mkrescue builds for the
 # platforms it finds in /usr/lib/grub). GRUB menus are English; the entries with a
-# language name pass lordos.lang to lordos-live-prep (English is the default).
-# The Insane OS boot menu theme (dark, small crown, rounded selection); "safe mode" boots
+# language name pass insaneos.lang to insaneos-live-prep (English is the default).
+# The Insane OS boot menu theme (dark, small apple, rounded selection); "safe mode" boots
 # without the splash (text), the other entries with it.
 # Legacy BIOS (0.8.0 bug): the theme's terminal font was Inter, a proportional font, and GRUB's
 # gfxterm corrupts its own memory with it at 640x480, the mode "auto" falls back to on BIOS (VBE)
@@ -219,8 +219,8 @@ mksquashfs "$CH" "$IMG/live/filesystem.squashfs" -comp xz $SQUASHFS_BCJ -b 1M -n
 # timeout fired, QEMU hung at the menu. The theme now uses GRUB's fixed-width Unifont for the
 # terminal, and BIOS asks for 1024x768 or 800x600 first (the theme's layout fits; 640x480 still
 # works). UEFI is unchanged (GOP, native mode). docs/ISO.md, "Firmware and displays".
-install -d "$IMG/boot/grub/themes/lordos"
-install -m 644 tools/iso/grub/lordos/theme.txt tools/iso/grub/lordos/*.png tools/iso/grub/lordos/*.pf2 "$IMG/boot/grub/themes/lordos/"
+install -d "$IMG/boot/grub/themes/insaneos"
+install -m 644 tools/iso/grub/insaneos/theme.txt tools/iso/grub/insaneos/*.png tools/iso/grub/insaneos/*.pf2 "$IMG/boot/grub/themes/insaneos/"
 cat > "$IMG/boot/grub/grub.cfg" <<EOF
 set default=0
 set timeout=5
@@ -235,46 +235,46 @@ else
 fi
 set gfxpayload=keep
 terminal_output gfxterm
-loadfont /boot/grub/themes/lordos/inter-regular-14.pf2
-loadfont /boot/grub/themes/lordos/inter-regular-16.pf2
-loadfont /boot/grub/themes/lordos/inter-semibold-16.pf2
-set theme=/boot/grub/themes/lordos/theme.txt
+loadfont /boot/grub/themes/insaneos/inter-regular-14.pf2
+loadfont /boot/grub/themes/insaneos/inter-regular-16.pf2
+loadfont /boot/grub/themes/insaneos/inter-semibold-16.pf2
+set theme=/boot/grub/themes/insaneos/theme.txt
 menuentry "Insane OS $VERSION (live)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 lordos.lang=en
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 insaneos.lang=en
     initrd /live/initrd.img
 }
 menuentry "Check this computer (nothing is installed)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 lordos.check=1 lordos.lang=en
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 insaneos.check=1 insaneos.lang=en
     initrd /live/initrd.img
 }
 menuentry "Insane OS $VERSION (safe mode: no GPU)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 nosplash lordos.gpu=0 lordos.lang=en
+    linux /live/vmlinuz boot=live components quiet loglevel=3 nosplash insaneos.gpu=0 insaneos.lang=en
     initrd /live/initrd.img
 }
 menuentry "Insane OS $VERSION (Español)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 lordos.lang=es
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 insaneos.lang=es
     initrd /live/initrd.img
 }
 menuentry "Insane OS $VERSION (Português)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 lordos.lang=pt
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 insaneos.lang=pt
     initrd /live/initrd.img
 }
 menuentry "Insane OS $VERSION (Français)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 lordos.lang=fr
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 insaneos.lang=fr
     initrd /live/initrd.img
 }
 menuentry "Insane OS $VERSION (copy to RAM: the USB drive can be removed)" {
-    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 toram lordos.lang=en
+    linux /live/vmlinuz boot=live components quiet loglevel=3 splash vt.global_cursor_default=0 toram insaneos.lang=en
     initrd /live/initrd.img
 }
-menuentry "Install automatically (lordos-auto.conf: erases the disk it names)" {
-    linux /live/vmlinuz boot=live components loglevel=3 nosplash lordos.auto=1 lordos.lang=en console=tty1 console=ttyS0,115200
+menuentry "Install automatically (insaneos-auto.conf: erases the disk it names)" {
+    linux /live/vmlinuz boot=live components loglevel=3 nosplash insaneos.auto=1 insaneos.lang=en console=tty1 console=ttyS0,115200
     initrd /live/initrd.img
 }
 EOF
 echo "== ISO"
 rm -f "$ISO"
-grub-mkrescue -o "$ISO" "$IMG" -- -volid LORDOS_LIVE > "$WORK/grub-mkrescue.log" 2>&1 || { tail -20 "$WORK/grub-mkrescue.log"; exit 1; }
+grub-mkrescue -o "$ISO" "$IMG" -- -volid INSANEOS_LIVE > "$WORK/grub-mkrescue.log" 2>&1 || { tail -20 "$WORK/grub-mkrescue.log"; exit 1; }
 (cd "$OUT" && sha256sum "$(basename "$ISO")" > "$(basename "$ISO").sha256")
 
 T1=$(date +%s)

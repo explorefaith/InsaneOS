@@ -1,4 +1,4 @@
-/* sqlc_test.c — lord-server's side of Databases (src/sql/sqlc.c) without a server: the favorites.json validator
+/* sqlc_test.c — insane-server's side of Databases (src/sql/sqlc.c) without a server: the favorites.json validator
  * (no key that could hold a secret, anywhere; ports, hosts, ids, sizes, types), the lookup with its defaults, the
  * Unix socket rule, and saving / reading the file in a throwaway home (0600, a refused file leaves the old one).
  *
@@ -141,7 +141,7 @@ static void test_socket(void) {
     CHECK(!sql_socket_ok("/run/user/1000/bus", NULL), "session bus");
     CHECK(!sql_socket_ok("/run/dbus/system_bus_socket", NULL), "system bus");
     CHECK(!sql_socket_ok("/run/systemd/private", NULL), "systemd");
-    CHECK(!sql_socket_ok("/run/lordos/cgroup.sock", NULL), "Insane OS's own");
+    CHECK(!sql_socket_ok("/run/insaneos/cgroup.sock", NULL), "Insane OS's own");
     CHECK(!sql_socket_ok("/tmp/.X11-unix/X0", NULL), "X11");
     CHECK(!sql_socket_ok("/srv/rt/wayland-0", "/srv/rt/"), "runtime dir");
     CHECK(sql_socket_ok("/run/userdata/mysql.sock", NULL), "a prefix is not a folder");
@@ -160,7 +160,7 @@ static void test_files(void) {
     struct stat st;
     CHECK(!stat(sql_favorites_path(), &st) && (st.st_mode & 0777) == 0600, "0600");
     char d2[600];
-    snprintf(d2, sizeof d2, "%s/.config/lordos/databases", dir);
+    snprintf(d2, sizeof d2, "%s/.config/insaneos/databases", dir);
     CHECK(!stat(d2, &st) && (st.st_mode & 0777) == 0700, "folder 0700");
     s = sql_favorites_read(&n);
     CHECK(s && n == strlen(SAMPLE) && !memcmp(s, SAMPLE, n), "read back");
@@ -176,7 +176,7 @@ static void test_files(void) {
 }
 
 int main(void) {
-    unsetenv("LORDOS_SESSIOND");
+    unsetenv("INSANEOS_SESSIOND");
     test_validator();
     test_find();
     test_socket();

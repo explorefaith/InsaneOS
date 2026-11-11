@@ -6,10 +6,10 @@
 //   const list = useLauncherApps();      // [{ id, name, Icon, kind, comment, categories }]
 //   launchApp(list[0].id);
 //
-// Linux apps are launched with lord.apps.launch(id): the server only accepts the id of an
+// Linux apps are launched with insane.apps.launch(id): the server only accepts the id of an
 // installed .desktop and runs its Exec line with no arguments and no shell (see server/src/apps.c).
 import { createElement as h, useEffect } from 'react';
-import { View, Text, Image } from '@lordos/runtime';
+import { View, Text, Image } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { locale, appName } from './i18n.js';
 import { errorText } from './errors.js';
@@ -43,8 +43,8 @@ export function iconFromFile(path, name) {
 const linux = createStore([]);
 
 function readLinux() {
-  if (typeof lord.apps === 'undefined' || typeof lord.apps.linux !== 'function') return [];   // not in app mode
-  return lord.apps.linux(locale.get().lang).map((a) => ({
+  if (typeof insane.apps === 'undefined' || typeof insane.apps.linux !== 'function') return [];   // not in app mode
+  return insane.apps.linux(locale.get().lang).map((a) => ({
     ...a, id: DESKTOP + a.id, desktopId: a.id, kind: 'linux', Icon: iconFromFile(a.icon, a.name),
   }));
 }
@@ -65,7 +65,7 @@ export function useLauncherApps() {
   useEffect(refreshApps, []);    // an app installed outside the Store (a terminal, another app's installer) shows the next time a list opens
   useStore(locale);
   useStore(appRegistry);
-  const own = listApps().map((a) => ({ ...a, kind: a.package ? 'package' : 'lordos', name: appName(a) }));
+  const own = listApps().map((a) => ({ ...a, kind: a.package ? 'package' : 'insaneos', name: appName(a) }));
   return [...own, ...lin].sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -84,24 +84,24 @@ export function appCategory(a) {
 
 export function launchApp(id) {
   if (isLinuxApp(id)) {
-    const ok = lord.apps.launch(String(id).slice(DESKTOP.length));
+    const ok = insane.apps.launch(String(id).slice(DESKTOP.length));
     // refused for a reason the user can act on (e.g. its restrictions need a newer kernel)
-    const code = !ok && typeof lord.apps.lastError === 'function' ? lord.apps.lastError() : '';
+    const code = !ok && typeof insane.apps.lastError === 'function' ? insane.apps.lastError() : '';
     if (code) notify({ app: 'settings', title: errorText(code) });
     return ok;
   }
-  // An installed .lpk app runs as its own isolated process (lord-server --app <id>), if the
+  // An installed .lpk app runs as its own isolated process (insane-server --app <id>), if the
   // server supports it; it reaches the desktop as a Wayland window with app_id = its id. Otherwise it
   // falls back to in-process mode (compatibility). See docs/PRIVACY.md.
   const app = registryApp(id);
-  if (app && app.package && typeof lord.apps !== 'undefined' && typeof lord.apps.launchPackage === 'function')
-    return lord.apps.launchPackage(id);
+  if (app && app.package && typeof insane.apps !== 'undefined' && typeof insane.apps.launchPackage === 'function')
+    return insane.apps.launchPackage(id);
   // a built-in app that runs as its own sandboxed process (manifest "process": "isolated")
-  if (app && app.isolated && typeof lord.apps !== 'undefined' && typeof lord.apps.launchPackage === 'function') {
+  if (app && app.isolated && typeof insane.apps !== 'undefined' && typeof insane.apps.launchPackage === 'function') {
     const running = windows.get().filter((w) => w.args?.pkg && w.args?.appId === id);
     if (running.length) { wm.focus(running[running.length - 1].id); return true; }
-    if (globalThis.__lordTiming && lord.now) console.log(`timing: ${id} isolated launch at ${lord.now().toFixed(1)} ms (monotonic)`);
-    if (lord.apps.launchPackage(id)) return true;
+    if (globalThis.__insaneTiming && insane.now) console.log(`timing: ${id} isolated launch at ${insane.now().toFixed(1)} ms (monotonic)`);
+    if (insane.apps.launchPackage(id)) return true;
   }
   return wm.open(id) != null;
 }
@@ -157,7 +157,7 @@ export function windowAppName(w) {
 export function windowIcon(w, getApp) {
   const appId = w?.args?.appId;
   if (String(w?.id).startsWith('linux#')) {
-    // an isolated .lpk app (lord-server --app) arrives as a Wayland window with app_id = its id
+    // an isolated .lpk app (insane-server --app) arrives as a Wayland window with app_id = its id
     const pkg = appId ? registryApp(appId) : null;
     if (pkg && (pkg.package || pkg.isolated) && pkg.Icon) return pkg.Icon;
     const a = linuxAppFor(appId);

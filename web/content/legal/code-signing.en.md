@@ -5,24 +5,24 @@ Insane OS signs what it publishes so that you can tell a file comes from the pro
 Every file of a GitHub release (the ISO image, the Raspberry Pi 5 image and the `.deb` package) is listed with its SHA-256 in a file called `SHA256SUMS`. `SHA256SUMS` is signed with the **Insane OS release key**:
 
 - `SHA256SUMS.sig` is the base64 of the 64-byte **Ed25519** signature over the exact bytes of `SHA256SUMS`.
-- Public key: [lordos-release.pub.pem](/lordos-release.pub.pem), also in the repository as [`tools/release/lordos-release.pub.pem`](https://github.com/lordbasex/Insane OS/blob/main/tools/release/lordos-release.pub.pem).
+- Public key: [insaneos-release.pub.pem](/insaneos-release.pub.pem), also in the repository as [`tools/release/insaneos-release.pub.pem`](https://github.com/insaneos/Insane OS/blob/main/tools/release/insaneos-release.pub.pem).
 - Fingerprint (SHA-256 of the DER public key):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
-The Debian installer script (`lordos.org/install.sh`) carries the same public key inside it. It checks the signature before downloading the `.deb`, then checks the `.deb` against `SHA256SUMS`, and refuses to install if either check fails.
+The Debian installer script (`insaneos.org/install.sh`) carries the same public key inside it. It checks the signature before downloading the `.deb`, then checks the `.deb` against `SHA256SUMS`, and refuses to install if either check fails.
 
 To check a download by hand, with OpenSSL 3, in the folder where you saved the files:
 
 ```
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 ```
 
 The first command decodes the signature, the second must print `Signature Verified Successfully`, and the third must print `OK` for each file you downloaded. To check the key itself, compare its fingerprint with the one above:
 
 ```
-openssl pkey -pubin -in lordos-release.pub.pem -outform DER | sha256sum
+openssl pkey -pubin -in insaneos-release.pub.pem -outform DER | sha256sum
 ```
 
 ## Insane OS apps (.lpk) and the Store
@@ -73,7 +73,7 @@ On the Raspberry Pi 5, the kernel and firmware come from the Raspberry Pi archiv
 If we ever suspect that a private key was exposed, we will:
 
 1. stop using it and **revoke** it: for `.lpk` packages, through the revocation list of the signed catalog; for releases, by removing it from the installer script;
-2. create a **new key** and announce its fingerprint on lordos.org (on this page and the [Security policy](/legal/security/)) and on GitHub;
+2. create a **new key** and announce its fingerprint on insaneos.org (on this page and the [Security policy](/legal/security/)) and on GitHub;
 3. **re-sign** the affected releases and packages with the new key, and publish an advisory explaining what happened and what you should check.
 
 A fingerprint that doesn't match the one on this page means you should not install the file. Tell us through [our contact form](https://www.iperfex.com/contacto/?lang=en), with "Security" in the subject.

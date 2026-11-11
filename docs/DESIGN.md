@@ -88,7 +88,7 @@ the Recorder draw their empty-state icons. `↻ ⤮ ♪ ◫ ▣ ☺ ≡` render 
   `textDim`), centered. At most one primary button.
   For an outcome worth a little warmth (an error or an unavailable service, "everything is up to
   date") pass `mascot` instead of the icon: `mascot="confused"`, `"celebrate"`, `"shield"` or
-  `"wave"` draws Lumo at 112 px (`sdk/mascot.js`, docs/LORDOS-BRAND.md). Not in "nothing selected"
+  `"wave"` draws Lumo at 112 px (`sdk/mascot.js`, docs/INSANEOS-BRAND.md). Not in "nothing selected"
   panes, and never more than one Lumo per view.
 - **Dialogs and sheets:** 20 px padding, title 15/600, body 13 with `lineHeight: 1.4`, buttons at
   the end of the last row with 12 px above them. The default action is `primary`.
@@ -98,7 +98,7 @@ the Recorder draw their empty-state icons. `↻ ⤮ ♪ ◫ ▣ ☺ ≡` render 
 - **Media bar:** the Player's now-playing bar spans the whole window: cover and title at the
   start, the transport (buttons above a progress row) in a 380 px center column, the volume at
   the end. Under 720 px it keeps only the cover and the transport. Measure the box after layout
-  (`lord.getLayout(ref.current.id)[2]`) to adapt columns and widths (Player, Recorder waveform).
+  (`insane.getLayout(ref.current.id)[2]`) to adapt columns and widths (Player, Recorder waveform).
 - **Viewfinder apps (Camera):** always dark, whatever the theme; mode switch as two words with
   the current one in yellow, a 60 px shutter centered between two `flex: 1` columns.
 - **Wizards (Installer):** step list in the sidebar (numbered circles, the current row
@@ -208,7 +208,7 @@ Inter, the Insane OS wallpapers and Insane OS names, no assets or names from any
   menus of their own get no strip. Help holds About <app>; the Window menu is the same in both themes
   (`windowMenuItems`, `sdk/windowmenu.js`: Minimize, Zoom, Fill, Center, Move & Resize, Move to
   <display>, Bring All to Front and the open windows), and the app menu and Force Quit come from
-  `sdk/appcontrol.js` (Insane Flow shows them under the app's name and in the crown menu).
+  `sdk/appcontrol.js` (Insane Flow shows them under the app's name and in the apple menu).
 - **Taskbar:** 48 px (56 px wide on the left or right), a translucent material with the theme's
   blur (none with Transparency off). Buttons are 40 × 40 with a 6 px radius; the running app has a
   short pill below its icon, longer and in the accent color when it is in front. Tooltips after
@@ -251,7 +251,7 @@ Every scrolling area uses the SDK's `ScrollView`, which draws an **overlay scrol
   mode). With **Reduce motion** it shows and hides without the fade.
 - **Hit-testing:** while shown, a 14 px strip at the edge over the thumb takes the pointer, so the
   thumb can be dragged; while hidden it has `pointerEvents: 'none'` and clicks reach the content.
-  The fade changes only the thumb's opacity with `lord.setStyle` (no React render per frame).
+  The fade changes only the thumb's opacity with `insane.setStyle` (no React render per frame).
 - **Direction and themes:** the bar is on the end edge (`end`), so on the left in right-to-left
   languages. The theme styles it with the optional tokens `scrollThumb`, `scrollThumbHover`,
   `scrollRadius` and `scrollThumbBorder` (a pill in Insane Flow; the Insane Classic theme's is squarer and
@@ -279,7 +279,7 @@ the faded opacity, RTL). Screenshots: `scrollbars-network-{light,dark}-{hidden,s
 Check every pass on the VM with:
 
 - **light and dark** mode;
-- **RTL** (Arabic test pack `docs/packs/lordos-lang-ar.json`). The engine mirrors rows. Content
+- **RTL** (Arabic test pack `docs/packs/insaneos-lang-ar.json`). The engine mirrors rows. Content
   that is itself left to right keeps `direction: 'ltr'` (calculator keypad, code, sliders, page
   geometry), and user text follows its own direction with `textDirection(text)` (a Spanish note in
   an Arabic UI still reads left to right);
@@ -307,7 +307,7 @@ Check every pass on the VM with:
   (`left`/`right` and `margin*Left`/`Right` stay physical, as in CSS).
 - **Scale and rotate:** `transform: [{ scale: pressed ? 0.96 : 1 }]` for a press effect,
   `transform: 'rotate(…deg)'` for a spinner; layout doesn't change and clicks follow what is painted.
-  lord-server paints the subtree once into a cached raster and composites it, so animating the scale
+  insane-server paints the subtree once into a cached raster and composites it, so animating the scale
   is cheap (the Dock's minimize effect does it on a whole window: `engine-dock-minimize.png`).
 - **`flex: 0`** is React Native's: the box keeps its `width`/`height` and doesn't grow or shrink (it
   used to mean a zero basis, which collapsed a box with a `width`). `flex: 1` and a `width` on the same

@@ -1,7 +1,7 @@
 /* text_test.c — renders text with the UI engine (text.c + textlayout.c) into a
  * PPM image, headless. Useful for checking bidi, Arabic, CJK and font fallback.
  *   build/text-test out.ppm "text" ["text"…]
- *   LORD_WRAP=220 build/text-test …   instead, each text in a 220 px box (line breaking)
+ *   INSANE_WRAP=220 build/text-test …   instead, each text in a 220 px box (line breaking)
  * Fallback fonts are looked up as in Insane OS (/usr/share/fonts, ~/.fonts…). */
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,11 +15,11 @@ void text_layout_dump(const char *s, int font, float size);
 
 int main(int argc, char **argv) {
     if (argc < 3) { fprintf(stderr, "usage: text-test out.ppm \"text\"…\n"); return 2; }
-    const char *dir = getenv("LORD_FONTS") ? getenv("LORD_FONTS") : "../assets/fonts";
+    const char *dir = getenv("INSANE_FONTS") ? getenv("INSANE_FONTS") : "../assets/fonts";
     fonts_set_builtin_dir(dir);
     if (text_init(dir)) return 1;
-    if (getenv("LORD_DUMP")) { for (int i = 2; i < argc; i++) text_layout_dump(argv[i], 0, 18); return 0; }
-    int wrap = getenv("LORD_WRAP") ? atoi(getenv("LORD_WRAP")) : 0;
+    if (getenv("INSANE_DUMP")) { for (int i = 2; i < argc; i++) text_layout_dump(argv[i], 0, 18); return 0; }
+    int wrap = getenv("INSANE_WRAP") ? atoi(getenv("INSANE_WRAP")) : 0;
     int W = 640, LH = 34, H = wrap ? 8 + (argc - 2) * 180 : LH * (argc - 2) * 2 + 8;
     uint32_t *px = malloc(sizeof *px * (size_t)W * (size_t)H);
     Canvas c;

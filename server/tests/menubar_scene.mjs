@@ -1,10 +1,10 @@
 // menubar_scene.mjs — the scene of tests/menubar_test.mjs (not run by itself), issue #58: Insane Flow's Control Center
 // and clock panel and the shared output list, rendered through runtime/index.js and the real SDK with the shell's
-// layers on, over a stub `lord` (the bundle's banner) with two sound outputs. It turns the choices of Settings →
+// layers on, over a stub `insane` (the bundle's banner) with two sound outputs. It turns the choices of Settings →
 // Desktop & Dock → Menu Bar / Control Center on and off and reads what is drawn. Prints one line per check: "ok
 // <name>" or "FAIL <name> <detail>".
 import React from 'react';
-import * as rt from '@lordos/runtime';
+import * as rt from '@insaneos/runtime';
 import { enableShellLayers } from '../../sdk/layers.js';
 import { settings } from '../../sdk/settings.js';
 import { SoundOutputList } from '../../sdk/soundoutputs.js';
@@ -13,18 +13,18 @@ import { NotificationCenter } from '../../themes/default/components/Notification
 import { makeTheme } from '../../themes/default/tokens.js';
 import { ThemeProvider, monthName } from '../../sdk/index.js';
 
-const { texts, parents, removed, calls } = globalThis.__lordTest;
+const { texts, parents, removed, calls } = globalThis.__insaneTest;
 const h = React.createElement;
 const flush = async () => { for (let i = 0; i < 20; i++) await new Promise((res) => setImmediate(res)); };
 const check = (name, got, want) => console.log(got === want ? `ok ${name}` : `FAIL ${name} got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
 const click = async (id) => {
-  globalThis.__lordEvent('down', id, 10, 10, 0); await flush();
-  globalThis.__lordEvent('up', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('down', id, 10, 10, 0); await flush();
+  globalThis.__insaneEvent('up', id, 10, 10, 0); await flush();
 };
 // a node is on screen when neither it nor any node above it left the tree
 const attached = (id) => { for (let n = id; n; n = parents.get(n)) if (removed.has(n)) return false; return parents.has(id); };
 const shown = (s) => { for (const [id, v] of texts) if (v === s && attached(id)) return true; return false; };
-// the <Text> that shows s now (lord-server hits it, not its raw text node)
+// the <Text> that shows s now (insane-server hits it, not its raw text node)
 const textNode = (s) => { let r = 0; for (const [id, v] of texts) if (v === s && attached(id)) r = parents.get(id) || 0; return r; };
 
 enableShellLayers();

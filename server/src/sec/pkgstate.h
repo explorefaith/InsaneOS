@@ -1,8 +1,8 @@
 /* pkgstate.h — state of installed .lpk apps: the original package kept at install time,
  * "Modified by you" (comparing with the original's hashes), "Restore original",
  * "Share my version" and the update rule (same key). See docs/SIGNING.md. */
-#ifndef LORD_SEC_PKGSTATE_H
-#define LORD_SEC_PKGSTATE_H
+#ifndef INSANE_SEC_PKGSTATE_H
+#define INSANE_SEC_PKGSTATE_H
 
 #include "sign.h"
 #include <stddef.h>
@@ -19,7 +19,7 @@ typedef struct {
     char error[160];                    /* the original doesn't verify (shouldn't happen) */
 } PkgStatus;
 
-/* ~/.local/share/lordos/apps/.orig/<id>.lpk */
+/* ~/.local/share/insaneos/apps/.orig/<id>.lpk */
 int pkg_original_path(const char *id, char *out, size_t n);
 /* Copies the freshly installed .lpk as the original (atomically). */
 int pkg_keep_original(const char *id, const char *lpk_path);
@@ -39,7 +39,7 @@ int pkg_restore(const char *id, char *err, size_t n);
  * (with basedOn), signed with the user's own key, into out_path (doesn't overwrite). */
 int pkg_share(const char *id, const char *manifest, size_t mlen, const char *out_path, char *err, size_t n);
 
-/* The user's own key (~/.local/share/lordos/keys/user.json, 0600): created the first time. */
+/* The user's own key (~/.local/share/insaneos/keys/user.json, 0600): created the first time. */
 int pkg_user_key(uint8_t seed[32], char pubhex[65], char name[128]);
 
 #endif

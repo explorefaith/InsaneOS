@@ -1,7 +1,7 @@
-/* fs_walk_cli.c — lord.fs's Recents and search walks (src/fsops.c) on their own, for tests/cloud_integration.sh: they must
+/* fs_walk_cli.c — insane.fs's Recents and search walks (src/fsops.c) on their own, for tests/cloud_integration.sh: they must
  * come back at once even with a cloud mount under the home folder whose server doesn't answer.
  *   build/fs-walk recent | search NEEDLE      (HOME is the home folder) → one line per hit, then "hits N ms M"
- *   build/fs-walk rename FROM TO              lord.fs's rename (fsops_rename): "ok" or the error code line */
+ *   build/fs-walk rename FROM TO              insane.fs's rename (fsops_rename): "ok" or the error code line */
 #include "../src/fsops.h"
 
 #include <stdio.h>

@@ -1,6 +1,6 @@
 // About <app> (the app menu's first item, sdk/appcontrol.js): the app's icon, name, its own version
 // (manifest "version"; a package's version), where it comes from and whether it runs isolated.
-import { View, Text, useTheme, useAppWindow, useLauncherApps, getApp, wm, typeScale, isSystemApp, appName, t as tr } from '@lordos/sdk';
+import { View, Text, useTheme, useAppWindow, useLauncherApps, getApp, wm, typeScale, isSystemApp, appName, t as tr } from '@insaneos/sdk';
 import { useEffect } from 'react';
 
 export function Icon({ size }) {
@@ -21,7 +21,7 @@ export default function AppAbout() {
   const name = a ? a.name : own ? appName(own) : key;
   useEffect(() => { if (id) wm.setTitle(id, tr('appabout.title', { app: name })); }, [id, name]);
   const AppIcon = a?.Icon || own?.Icon;
-  const kind = !a ? '' : a.kind === 'linux' ? tr('appabout.linux') : a.package ? tr('appabout.package') : isSystemApp(a.id) ? tr('appabout.system') : tr('appabout.lordos');
+  const kind = !a ? '' : a.kind === 'linux' ? tr('appabout.linux') : a.package ? tr('appabout.package') : isSystemApp(a.id) ? tr('appabout.system') : tr('appabout.insaneos');
   const isolated = !!(own?.isolated || own?.package);
   const version = own?.version || a?.version || '';
   const desc = a?.comment || own?.description || a?.genericName || '';

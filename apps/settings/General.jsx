@@ -1,8 +1,8 @@
 // Settings → General (machine and software details) and Updates (Debian and Insane OS).
 import {
-  View, Text, Button, useTheme, useLocale, useSystemInfo, useServerStats, lordosVersion, screen, formatBytes, formatDuration, formatNumber,
+  View, Text, Button, useTheme, useLocale, useSystemInfo, useServerStats, insaneosVersion, screen, formatBytes, formatDuration, formatNumber,
   admin, wm, InsaneLogo, InsaneWordmark, spacing, typeScale,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useState, version as reactVersion } from 'react';
 import { Stack, Section, ValueRow, Note, Message, Actions } from './ui.jsx';
 
@@ -21,12 +21,12 @@ export function General() {
   const info = useSystemInfo(5000);
   const st = useServerStats(3000);
   const cpu = info.cpu.replace(/\(R\)|\(TM\)|CPU|Processor/g, '').replace(/\s+/g, ' ').trim();
-  const ver = lordosVersion(info);
+  const ver = insaneosVersion(info);
   return (
     <Stack>
       <View style={{ alignItems: 'center', gap: spacing.xs, paddingTop: spacing.xs }}>
         <InsaneLogo size={72} />
-        <View style={{ marginTop: spacing.s }}><InsaneWordmark size={typeScale.largeTitle} crown={false} /></View>
+        <View style={{ marginTop: spacing.s }}><InsaneWordmark size={typeScale.largeTitle} apple={false} /></View>
         <Text style={{ fontSize: typeScale.callout, color: t.textDim }}>{ver.channel ? tr('about.versionChannel', { v: ver.version, channel: ver.channel }) : tr('about.version', { v: ver.version })}</Text>
         <Text style={{ fontSize: typeScale.caption, color: t.textDim }}>{`${info.hostname} · ${info.os}`}</Text>
       </View>
@@ -43,7 +43,7 @@ export function General() {
         ver.build ? [tr('about.buildLabel'), ver.build] : null,
         [tr('about.os'), info.os],
         [tr('about.kernel'), `${info.kernel} (${info.arch})`],
-        [tr('about.server'), 'lord-server (C · DRM/KMS · evdev · Wayland)'],
+        [tr('about.server'), 'insane-server (C · DRM/KMS · evdev · Wayland)'],
         [tr('about.engine'), `QuickJS + React ${reactVersion}`],
         [tr('about.ram'), `${formatNumber(st.rssKB / 1024, 1)} MB (JS ${formatNumber(st.jsKB / 1024, 1)} MB)`],
       ]} />
@@ -55,9 +55,9 @@ export function Updates() {
   const { t: tr, formatDate } = useLocale();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
-  const pkg = typeof lord.pkg !== 'undefined' && lord.pkg.available();
-  const ups = pkg ? lord.pkg.upgrades() : [];
-  const at = pkg ? lord.pkg.lastUpdate() : 0;
+  const pkg = typeof insane.pkg !== 'undefined' && insane.pkg.available();
+  const ups = pkg ? insane.pkg.upgrades() : [];
+  const at = pkg ? insane.pkg.lastUpdate() : 0;
   const check = () => {
     setBusy(true);
     admin.run('pkg-update').then(() => setMsg({ ok: true, text: tr('settings.updates.checked') }), (e) => setMsg({ ok: false, text: e.message }))

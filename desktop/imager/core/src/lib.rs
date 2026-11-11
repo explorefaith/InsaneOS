@@ -1,9 +1,9 @@
-//! LordOS Imager core: what the desktop app (`macos`, `windows`, `linux`) does below its UI. The rules are
+//! InsaneOS Imager core: what the desktop app (`macos`, `windows`, `linux`) does below its UI. The rules are
 //! the native imager's (server/src/imager/, docs/IMAGER.md), written again in Rust and checked
 //! against the same test vectors:
 //!
 //! - [`sums`]: `SHA256SUMS.sig` is base64 of the Ed25519 signature over the exact bytes of
-//!   `SHA256SUMS`, made with the LordOS release key ([`RELEASE_KEY`], fingerprint `c7155b8e…`);
+//!   `SHA256SUMS`, made with the InsaneOS release key ([`RELEASE_KEY`], fingerprint `c7155b8e…`);
 //! - [`xzinfo`]: the uncompressed size of an `.img.xz`, from its index, before anything is erased;
 //! - [`write`]: image → device, hashing what goes out, reading it back to compare, wiping the
 //!   ends of the device when it fails or is cancelled;
@@ -15,7 +15,7 @@ pub mod sums;
 pub mod write;
 pub mod xzinfo;
 
-/// The LordOS release key (tools/release/lordos-release.pub.pem), raw 32 bytes. Its SHA-256
+/// The InsaneOS release key (tools/release/insaneos-release.pub.pem), raw 32 bytes. Its SHA-256
 /// fingerprint over the DER form is c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e
 /// (checked in tests).
 pub const RELEASE_KEY: [u8; 32] = [

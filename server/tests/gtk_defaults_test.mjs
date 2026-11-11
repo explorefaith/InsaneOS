@@ -1,7 +1,7 @@
 // gtk_defaults_test.mjs — the window-button layout GTK apps get when the session can't give its own
-// (#52; assets/gtk/90_lordos.gschema.override and settings.ini, installed by tools/iso/mkdeb.sh). The
+// (#52; assets/gtk/90_insaneos.gschema.override and settings.ini, installed by tools/iso/mkdeb.sh). The
 // three places that name the default layout must agree: the schema override, settings.ini, the SDK's
-// default (sdk/theme.js) and lord-server's portal (ui/portal.c). With glib-compile-schemas, gsettings
+// default (sdk/theme.js) and insane-server's portal (ui/portal.c). With glib-compile-schemas, gsettings
 // and Debian's org.gnome.desktop.wm.preferences schema, the override is also compiled in a temporary
 // folder and read back the way GLib reads it.
 //
@@ -25,7 +25,7 @@ const WANT = 'close,minimize,maximize:';
 // a GTK layout: names left of the colon go on the left; only GTK's button names
 const LAYOUT_RE = /^(?:(?:appmenu|menu|icon|minimize|maximize|close|spacer)(?:,(?=[a-z]))?)*:(?:(?:appmenu|menu|icon|minimize|maximize|close|spacer)(?:,(?=[a-z]))?)*$/;
 
-const ov = read('assets/gtk/90_lordos.gschema.override');
+const ov = read('assets/gtk/90_insaneos.gschema.override');
 const groups = {};
 let group = null;
 for (const raw of ov.split('\n')) {
@@ -54,7 +54,7 @@ eq('Insane Classic asks for a valid layout', !!(classic && LAYOUT_RE.test(classi
 eq('the default is a valid layout', LAYOUT_RE.test(WANT), true);
 
 const mk = read('tools/iso/mkdeb.sh');
-for (const dst of ['/usr/share/glib-2.0/schemas/90_lordos.gschema.override', '/etc/gtk-3.0/settings.ini', '/etc/gtk-4.0/settings.ini'])
+for (const dst of ['/usr/share/glib-2.0/schemas/90_insaneos.gschema.override', '/etc/gtk-3.0/settings.ini', '/etc/gtk-4.0/settings.ini'])
   eq(`mkdeb.sh installs ${dst}`, mk.includes(`"$PKG${dst}"`), true);
 
 // compiled the way GLib's dpkg trigger compiles it, next to Debian's schema
@@ -71,7 +71,7 @@ if (!fs.existsSync(SYS) || !fs.existsSync(ENUMS) || !has('glib-compile-schemas')
     const get = () => execFileSync('gsettings', ['get', 'org.gnome.desktop.wm.preferences', 'button-layout'], { env, encoding: 'utf8' }).trim();
     execFileSync('glib-compile-schemas', ['--strict', tmp], { stdio: 'pipe' });
     eq('without the override: Debian\'s lone close button', get(), "'appmenu:close'");
-    fs.copyFileSync(path.join(REPO, 'assets/gtk/90_lordos.gschema.override'), path.join(tmp, '90_lordos.gschema.override'));
+    fs.copyFileSync(path.join(REPO, 'assets/gtk/90_insaneos.gschema.override'), path.join(tmp, '90_insaneos.gschema.override'));
     const out = execFileSync('glib-compile-schemas', ['--strict', tmp], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     eq('the override compiles without warnings', out.trim(), '');
     eq('with the override: Insane Flow\'s layout', get(), `'${WANT}'`);

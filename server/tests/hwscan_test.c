@@ -6,7 +6,7 @@
  *   build/hwscan-test dump [root]              the facts JSON of a tree, or of this machine
  *   build/hwscan-test fixture <dir> <kind>     writes a fake tree (vmware, virtualbox, nvidia,
  *                                              printer, scanner, rpi5, qemu, firmware, demo) for
- *                                              LORD_HWSCAN_ROOT (screenshots and manual tests) */
+ *                                              INSANE_HWSCAN_ROOT (screenshots and manual tests) */
 #include "hw/hwscan.h"
 #include "sec/json.h"
 
@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
     if (argc == 4 && !strcmp(argv[1], "fixture")) {
         mkdirs(argv[2]);
         tree(argv[2], argv[3]);
-        printf("fixture %s in %s (run lord-server with LORD_HWSCAN_ROOT=%s)\n", argv[3], argv[2], argv[2]);
+        printf("fixture %s in %s (run insane-server with INSANE_HWSCAN_ROOT=%s)\n", argv[3], argv[2], argv[2]);
         return 0;
     }
     parse_tests();

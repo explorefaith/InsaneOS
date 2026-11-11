@@ -1,13 +1,13 @@
 // Packages and signs Insane OS apps (.lpk = tar.gz; see docs/NATIVE-APPS.md and docs/SIGNING.md).
 //
 //   node tools/lpk.mjs <folder> [output.lpk] [--key key.json | --unsigned]
-//       packages the app; signs it with --key, with $LPK_KEY or with ~/.config/lordos/lpk-key.json
+//       packages the app; signs it with --key, with $LPK_KEY or with ~/.config/insaneos/lpk-key.json
 //       (if it exists). Without a key the result is «Unsigned» (still with contenido.json, to detect damage).
 //   node tools/lpk.mjs tree <folder> <output folder> --key key.json [--companion binary]
-//       a signed unpacked tree for /usr/lib/lordos-apps/<id>/ (a packaged app, installed by a .deb; docs/GO-LINK.md):
+//       a signed unpacked tree for /usr/lib/insaneos-apps/<id>/ (a packaged app, installed by a .deb; docs/GO-LINK.md):
 //       the only form that may declare "companion", screen-share or remote-input. Its key must be a Verified author's.
 //   node tools/lpk.mjs keygen [--name "Name"] [--out file]
-//       creates an Ed25519 key pair (default ~/.config/lordos/lpk-key.json, mode 600).
+//       creates an Ed25519 key pair (default ~/.config/insaneos/lpk-key.json, mode 600).
 //   node tools/lpk.mjs sign <package.lpk> --key key.json [output.lpk]
 //       re-signs a package (with a new contenido.json).
 //   node tools/lpk.mjs verify <package.lpk>
@@ -16,7 +16,7 @@
 //       writes signed catalog.json + catalog.sig (only valid with an official Insane OS key).
 //
 // An app folder has manifest.json and index.jsx like the ones in apps/, and optionally
-// icon.png, locales/<language>.json and assets/. React, @lordos/sdk and @lordos/runtime are NOT included.
+// icon.png, locales/<language>.json and assets/. React, @insaneos/sdk and @insaneos/runtime are NOT included.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -27,7 +27,7 @@ const argv = process.argv.slice(2);
 const flag = (name) => { const i = argv.indexOf(name); if (i < 0) return undefined; const v = argv[i + 1]; argv.splice(i, 2); return v; };
 const bool = (name) => { const i = argv.indexOf(name); if (i < 0) return false; argv.splice(i, 1); return true; };
 const die = (msg) => { console.error(`lpk: ${msg}`); process.exit(1); };
-const DEFAULT_KEY = path.join(os.homedir(), '.config', 'lordos', 'lpk-key.json');
+const DEFAULT_KEY = path.join(os.homedir(), '.config', 'insaneos', 'lpk-key.json');
 
 // ---- Ed25519 keys (32-byte seed in hex, like pkgstate.c) ----
 const PKCS8 = Buffer.from('302e020100300506032b657004220420', 'hex');
@@ -131,17 +131,17 @@ async function assemble(dir, packaged) {
 
   // Shared modules are taken from the theme (or from the app's process) at run time.
   const sharedPlugin = {
-    name: 'lordos-shared',
+    name: 'insaneos-shared',
     setup(b) {
-      b.onResolve({ filter: /^(react|react\/jsx-runtime|@lordos\/sdk|@lordos\/runtime)$/ }, (a) => ({ path: a.path, namespace: 'lordos-shared' }));
-      b.onLoad({ filter: /.*/, namespace: 'lordos-shared' }, (a) => ({
-        contents: `module.exports = globalThis.__lordos.require(${JSON.stringify(a.path)});`, loader: 'js',
+      b.onResolve({ filter: /^(react|react\/jsx-runtime|@insaneos\/sdk|@insaneos\/runtime)$/ }, (a) => ({ path: a.path, namespace: 'insaneos-shared' }));
+      b.onLoad({ filter: /.*/, namespace: 'insaneos-shared' }, (a) => ({
+        contents: `module.exports = globalThis.__insaneos.require(${JSON.stringify(a.path)});`, loader: 'js',
       }));
     },
   };
   const result = await build({
     entryPoints: [path.join(dir, 'index.jsx')],
-    bundle: true, write: false, format: 'iife', globalName: '__lordosApp', target: 'es2020', minify: true,
+    bundle: true, write: false, format: 'iife', globalName: '__insaneosApp', target: 'es2020', minify: true,
     jsx: 'automatic', plugins: [sharedPlugin], define: { 'process.env.NODE_ENV': '"production"' }, logLevel: 'warning',
   });
   const appJs = result.outputFiles[0].contents;

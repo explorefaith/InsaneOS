@@ -10,7 +10,7 @@
 //   openSwitcher(hold, back)  hold: the modifier's bit in e.mods (8 ❖, 2 ⌥); back: start backwards
 //   cycleAppWindows(back)     the next window of the app in front (❖`)
 import { createElement as h } from 'react';
-import { View, Text, Surface, mainDisplay, displayFor } from '@lordos/runtime';
+import { View, Text, Surface, mainDisplay, displayFor } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { useTheme } from './theme.js';
 import { Layer } from './layers.js';
@@ -63,7 +63,7 @@ function listApps() {
 }
 
 export function openSwitcher(hold, back = false) {
-  if (typeof lord !== 'undefined' && lord.wayland?.fullscreen?.()) return;    // a fullscreen app is presented above every layer
+  if (typeof insane !== 'undefined' && insane.wayland?.fullscreen?.()) return;    // a fullscreen app is presented above every layer
   const items = listApps();
   if (!items.length) return;
   const top = wm.get(wm.focused());

@@ -21,7 +21,7 @@
 static int fails, checks;
 #define CHECK(c) do { checks++; if (!(c)) { fails++; fprintf(stderr, "%s:%d: failed: %s\n", __FILE__, __LINE__, #c); } } while (0)
 
-#define NAMES_APP "lordos"      /* where lord-netperm keeps what it learns from the resolver */
+#define NAMES_APP "insaneos"      /* where insane-netperm keeps what it learns from the resolver */
 
 static uint64_t rng = 0x9e3779b97f4a7c15ull;
 static uint32_t rnd(void) { rng ^= rng << 13; rng ^= rng >> 7; rng ^= rng << 17; return (uint32_t)(rng >> 16); }
@@ -323,7 +323,7 @@ static const char *const IPS[] = { "10.1.2.3", "10.1.2.4", "10.1.9.9", "10.9.9.9
                                    "2001:db8:1::5", "2001:db8:1::6", "2001:db8:2::1", "fe80::1", "2a00::1",
                                    "::ffff:10.1.2.3", "::ffff:8.8.8.8", "::1" };
 #define NIPS (int)(sizeof IPS / sizeof IPS[0])
-static const char *const APPS[] = { "lordos", "desktop:a", "desktop:b", "lpk:c" };
+static const char *const APPS[] = { "insaneos", "desktop:a", "desktop:b", "lpk:c" };
 #define NAPPS (int)(sizeof APPS / sizeof APPS[0])
 
 static void random_rule(FwStore *s, const char *app) {
@@ -424,8 +424,8 @@ static void bench(void) {
 }
 
 /* The device and Bluetooth restrictions (cgroup/dev, cgroup/lsm_socket_create): which majors each
- * one covers, that they reach the compiled policy of Linux apps but never lord-server's own
- * ("lordos"), and that they don't change any network decision. */
+ * one covers, that they reach the compiled policy of Linux apps but never insane-server's own
+ * ("insaneos"), and that they don't change any network decision. */
 static void device_cases(void) {
     const uint32_t HID = 242;
     CHECK(np_dev_restriction(NP_DEV_CHAR, 81, HID) == NP_R_NO_CAMERA);          /* /dev/video* */
@@ -444,7 +444,7 @@ static void device_cases(void) {
     FwStore *s = fw_store_new();
     DnsMap *names = dnsmap_new(0);
     fw_set_restricted(s, "desktop:cam", FW_R_NO_CAMERA | FW_R_NO_USB | FW_R_NO_BLUETOOTH | FW_R_NO_FILES | FW_R_NO_MIC);
-    fw_set_restricted(s, "lordos", FW_R_NO_CAMERA | FW_R_NO_USB | FW_R_NO_BLUETOOTH | FW_R_NO_INTERNET);
+    fw_set_restricted(s, "insaneos", FW_R_NO_CAMERA | FW_R_NO_USB | FW_R_NO_BLUETOOTH | FW_R_NO_INTERNET);
     NpCompiled c = compile(s, "desktop:cam", names, 1000);
     CHECK(c.app.flags == (NP_R_NO_CAMERA | NP_R_NO_USB | NP_R_NO_BLUETOOTH | NP_R_NO_MIC));  /* files aren't the kernel's */
     uint8_t a[16];
@@ -454,8 +454,8 @@ static void device_cases(void) {
     CHECK(same(s, names, &c, "desktop:cam", FW_OUT, FW_PROTO_TCP, fam, a, 443, 1000, &ref, &got));
     CHECK(got.verdict == NP_V_ALLOW);                                           /* the network is untouched */
     np_compiled_free(&c);
-    c = compile(s, "lordos", names, 1000);
-    CHECK(c.app.flags == NP_R_NO_INTERNET);                                     /* lord-server keeps its devices */
+    c = compile(s, "insaneos", names, 1000);
+    CHECK(c.app.flags == NP_R_NO_INTERNET);                                     /* insane-server keeps its devices */
     np_compiled_free(&c);
     fw_store_free(s);
     dnsmap_free(names);

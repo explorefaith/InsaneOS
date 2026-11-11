@@ -1,12 +1,12 @@
 // MapView.jsx — world map of the Network tab, as in per-app network monitors: vector land
-// (dibujada por lord-server en otro hilo: lord.monitor.map / mapFrame, server/src/monitor/map.c),
+// (dibujada por insane-server en otro hilo: insane.monitor.map / mapFrame, server/src/monitor/map.c),
 // un arco desde "Este equipo" a cada país con conexiones, un punto por país y etiquetas en
 // píldora. Rueda: zoom hacia el cursor; arrastrar: mover; doble clic: acercar; botones +, − y
 // "ver todo". Clic en un punto o en un arco: elige ese lugar.
 //
 // Mientras llega el cuadro nuevo se muestra el anterior corrido (y escalado, si cambió el zoom),
 // así que mover y acercar no esperan al dibujo. Las etiquetas son texto del motor: siempre nítidas.
-import { View, Text, Image, useTheme, useLocale, addListener, formatNumber, tOptional, useAppWindow, useStore, useWindowHidden, settings } from '@lordos/sdk';
+import { View, Text, Image, useTheme, useLocale, addListener, formatNumber, tOptional, useAppWindow, useStore, useWindowHidden, settings } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseColor, canvas, dot } from './draw.js';
 import { COUNTRY_LL } from './countries.js';
@@ -15,7 +15,7 @@ import { C, useCardStyle } from './index.jsx';
 // ---- traffic direction on the arcs ----
 // Dots travel along each arc while bytes move: sent (orange) from "This computer" to the place,
 // received (green) back. More dots and faster the higher the rate; an idle arc has none and is
-// drawn dimmed (map.c). The dots are engine views moved with lord.setStyle (no React render per
+// drawn dimmed (map.c). The dots are engine views moved with insane.setStyle (no React render per
 // frame) at FLOW_FPS with the window in front and FLOW_FPS_BEHIND behind it, only for arcs on
 // screen and at most FLOW_ARCS of them; the timer stops with the window minimized, while the map
 // moves and when nothing moves. Each dot is a small ready-made image, and each frame repaints only
@@ -66,14 +66,14 @@ function FlowLayer({ arcs, w, h, paused }) {
     if (!animate) return undefined;
     let tm = null;
     const step = () => {
-      const now = lord.now();
+      const now = insane.now();
       for (const d of dots) {
         const node = nodes.current.get(d.key);
         if (node == null) continue;
         const [x, y, on] = place(d, now);
         try {
-          lord.setStyle(node, 'left', on ? x : -20);
-          lord.setStyle(node, 'top', on ? y : -20);
+          insane.setStyle(node, 'left', on ? x : -20);
+          insane.setStyle(node, 'top', on ? y : -20);
         } catch (e) { /* the node went away */ }
       }
       tm = setTimeout(step, 1000 / fps);
@@ -103,7 +103,7 @@ function FlowLayer({ arcs, w, h, paused }) {
     });
     return <>{out}</>;
   }
-  const now = lord.now();
+  const now = insane.now();
   return (
     <>
       {dots.map((d) => {
@@ -144,7 +144,7 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
   // tamaño real de la caja (llena la columna)
   useEffect(() => {
     if (!box.current) return;
-    const l = lord.getLayout(box.current.id);
+    const l = insane.getLayout(box.current.id);
     const nw = Math.round(l[2]), nh = Math.round(l[3]);
     if (nw > 0 && nh > 0 && (Math.abs(nw - w) > 1 || Math.abs(nh - h) > 1)) setSize([nw, nh]);
   });
@@ -208,7 +208,7 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
   const movingAt = useRef(0), lastReq = useRef(0);
   const [settle, setSettle] = useState(0);
   const [moving, setMoving] = useState(false);       // sin etiquetas mientras se mueve
-  const markMoving = () => { movingAt.current = lord.now(); if (!moving) setMoving(true); };
+  const markMoving = () => { movingAt.current = insane.now(); if (!moving) setMoving(true); };
   const latest = useRef(null);
   latest.current = { w, h, colors, home, dots, arcs };
   const frameRef = useRef(null);
@@ -217,13 +217,13 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
   // pide un cuadro de la vista vv (q: resolución) y lo va a buscar cuando esté listo
   const requestMap = (vv, q) => {
     const { w: ww, h: hh, colors: cc, home: hm, dots: dd, arcs: aa } = latest.current;
-    lastReq.current = lord.now();
-    pending.current = lord.monitor.map({ width: Math.round(ww * q), height: Math.round(hh * q), lon: vv.lon - ww / 2 / vv.ppd,
+    lastReq.current = insane.now();
+    pending.current = insane.monitor.map({ width: Math.round(ww * q), height: Math.round(hh * q), lon: vv.lon - ww / 2 / vv.ppd,
       lat: vv.lat + hh / 2 / vv.ppd, ppd: vv.ppd * q, ...cc, home: hm || null, dots: dd.map((d) => ({ lon: d.lon, lat: d.lat, r: d.r, sel: d.sel, idle: d.idle })),
       arcs: aa.map((a) => ({ lon: a.lon, lat: a.lat, lift: a.lift, color: rgba(a.color, 1), sel: a.sel, idle: a.idle })) });
     clearTimeout(pollT.current);
     const poll = () => {
-      const f = lord.monitor.mapFrame();
+      const f = insane.monitor.mapFrame();
       if (f) setFrame({ ...f, pixels: { width: f.width, height: f.height, data: f.data } });
       if (!f || f.seq < pending.current) pollT.current = setTimeout(poll, 12);
     };
@@ -231,8 +231,8 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
   };
   useEffect(() => () => clearTimeout(pollT.current), []);
   useEffect(() => {
-    if (!v || !w || !h || typeof lord.monitor?.map !== 'function') return undefined;
-    const now = lord.now();
+    if (!v || !w || !h || typeof insane.monitor?.map !== 'function') return undefined;
+    const now = insane.now();
     const busy = now - movingAt.current < 150;
     const settleTimer = busy ? setTimeout(() => { setSettle((n) => n + 1); setMoving(false); }, 170) : null;
     if (busy && now - lastReq.current < 100) return () => clearTimeout(settleTimer);
@@ -302,11 +302,11 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
       const pp = panPending.current;
       pp.dx += e.deltaX;
       pp.dy += e.deltaY;
-      // Sin pasar por React: se corre la imagen del último cuadro (lord.setStyle) y cada 100 ms se pide
+      // Sin pasar por React: se corre la imagen del último cuadro (insane.setStyle) y cada 100 ms se pide
       // otro; la vista se confirma en React cuando el movimiento se detiene (etiquetas de vuelta).
       // a lo sumo ~30 veces por segundo (cada cuadro cuesta pintar toda la tarjeta del mapa)
       if (!pp.raf) pp.raf = setTimeout(() => requestAnimationFrame(() => {
-        pp.at = lord.now();
+        pp.at = insane.now();
         const { dx, dy } = pp;
         pp.dx = pp.dy = 0;
         pp.raf = 0;
@@ -314,17 +314,17 @@ export function MapView({ places, home, selected, onSelect, geoOn, fitKey }) {
         if (!c) return;
         const nv = clampView({ lon: c.lon + dx / c.ppd, lat: c.lat - dy / c.ppd, ppd: c.ppd }, w, h);
         live.current = nv;
-        movingAt.current = lord.now();
+        movingAt.current = insane.now();
         const fr = frameRef.current;
         if (fr && imgRef.current) {
           const b = imgBox(nv, fr);
-          lord.setStyle(imgRef.current.id, 'left', b.left);
-          lord.setStyle(imgRef.current.id, 'top', b.top);
+          insane.setStyle(imgRef.current.id, 'left', b.left);
+          insane.setStyle(imgRef.current.id, 'top', b.top);
         }
-        if (typeof lord.monitor?.map === 'function' && lord.now() - lastReq.current >= 100) requestMap(nv, 1);
+        if (typeof insane.monitor?.map === 'function' && insane.now() - lastReq.current >= 100) requestMap(nv, 1);
         clearTimeout(pp.settle);
         pp.settle = setTimeout(() => { const f = live.current; live.current = null; if (f) setView(f); setMoving(false); }, 170);
-      }), Math.max(0, 33 - (lord.now() - (pp.at || 0))));
+      }), Math.max(0, 33 - (insane.now() - (pp.at || 0))));
       return;
     }
     if (e.precise && !e.notches) return;

@@ -3,10 +3,10 @@
  * was replaced by something else, and how long a secret has left. Never what the clipboard holds: an
  * app without the clipboard permission learns only about its own copy, and only for a short while: the first
  * 3 s after it, or until its secret is cleared (and 5 s more); then "none", so it can't watch the clipboard.
- * Pure logic (no lord-server state): the caller passes the clipboard's generation, which changes with every
+ * Pure logic (no insane-server state): the caller passes the clipboard's generation, which changes with every
  * copy, text or picture, and the text's own generation. */
-#ifndef LORD_BROKERCLIP_H
-#define LORD_BROKERCLIP_H
+#ifndef INSANE_BROKERCLIP_H
+#define INSANE_BROKERCLIP_H
 
 enum { BCLIP_NONE, BCLIP_MINE, BCLIP_CLEARED, BCLIP_REPLACED };
 

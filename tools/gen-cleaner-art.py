@@ -10,7 +10,7 @@ SRC.mkdir(parents=True, exist_ok=True)
 OUT.mkdir(parents=True, exist_ok=True)
 
 DEFS = '''<defs>
-<linearGradient id="crown" x1="0" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".45" stop-color="#f7c04d"/><stop offset="1" stop-color="#c9761f"/></linearGradient>
+<linearGradient id="apple" x1="0" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".45" stop-color="#f7c04d"/><stop offset="1" stop-color="#c9761f"/></linearGradient>
 <linearGradient id="band" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9761f"/><stop offset=".45" stop-color="#ffe19a"/><stop offset="1" stop-color="#c9761f"/></linearGradient>
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1A8"/><stop offset=".5" stop-color="#FFD60A"/><stop offset="1" stop-color="#E08A00"/></linearGradient>
 <radialGradient id="gem" cx=".35" cy=".3"><stop offset="0" stop-color="#f7d9ff"/><stop offset=".6" stop-color="#a13be0"/><stop offset="1" stop-color="#5a1aa8"/></radialGradient>
@@ -42,10 +42,10 @@ def disc(cy, rx, ry, h, fill):
             f'<ellipse cx="{220-rx*.28}" cy="{cy-ry*.3}" rx="{rx*.5}" ry="{ry*.4}" fill="url(#gloss)"/>')
 
 
-CROWN = ('<g filter="url(#lift)">'
-         # the far side of the crown: its inside shows, so it reads as a ring and not as a cut-out
+APPLE = ('<g filter="url(#lift)">'
+         # the far side of the apple: its inside shows, so it reads as a ring and not as a cut-out
          '<ellipse cx="220" cy="236" rx="132" ry="30" fill="#6b3410"/><path d="M104 232L132 150l44 44 44-78 44 78 44-44 28 82z" fill="#8a4a16"/>'
-         '<path d="M92 240L60 96l90 74 70-136 70 136 90-74-32 144Q220 300 92 240z" fill="url(#crown)"/>'
+         '<path d="M92 240L60 96l90 74 70-136 70 136 90-74-32 144Q220 300 92 240z" fill="url(#apple)"/>'
          # each point lit on one side and shaded on the other
          '<path d="M220 34l-70 136 70 96z" fill="#fff" opacity=".3"/><path d="M220 34l70 136-70 96z" fill="#8a4210" opacity=".3"/>'
          '<path d="M60 96l90 74-26 84-32-14z" fill="#fff" opacity=".16"/><path d="M380 96l-90 74 26 84 32-14z" fill="#8a4210" opacity=".34"/>'
@@ -59,32 +59,32 @@ CROWN = ('<g filter="url(#lift)">'
          '<circle cx="136" cy="262" r="11" fill="url(#gemc)"/><circle cx="304" cy="262" r="11" fill="url(#gemc)"/><circle cx="220" cy="284" r="13" fill="url(#gem)"/>'
          '<circle cx="132" cy="258" r="3.5" fill="#fff"/><circle cx="300" cy="258" r="3.5" fill="#fff"/><circle cx="215" cy="279" r="4" fill="#fff"/></g>')
 ART = {
- 'scan': disc(344, 112, 24, 30, 'plinth') + disc(316, 84, 17, 16, 'plinth') + '<ellipse cx="220" cy="312" rx="96" ry="13" fill="#060920" opacity=".55" filter="url(#contact)"/>' + CROWN,
+ 'scan': disc(344, 112, 24, 30, 'plinth') + disc(316, 84, 17, 16, 'plinth') + '<ellipse cx="220" cy="312" rx="96" ry="13" fill="#060920" opacity=".55" filter="url(#contact)"/>' + APPLE,
  'cleanup': '<g transform="rotate(24 220 210)" filter="url(#lift)">'
    '<rect x="208" y="28" width="24" height="232" rx="12" fill="url(#steel)"/><rect x="212" y="34" width="6" height="210" rx="3" fill="#fff" opacity=".6"/>'
    '<rect x="174" y="236" width="92" height="42" rx="12" fill="url(#band)"/><rect x="182" y="240" width="76" height="12" rx="6" fill="url(#gloss)"/>'
-   '<path d="M176 272H264L300 378Q220 402 140 378Z" fill="url(#crown)"/>'
+   '<path d="M176 272H264L300 378Q220 402 140 378Z" fill="url(#apple)"/>'
    '<path d="M196 278L176 382M220 278V392M244 278L264 382" stroke="#9A4F12" stroke-width="4" stroke-linecap="round" opacity=".5"/>'
    '<path d="M186 278L164 366Q176 340 200 282Z" fill="#fff" opacity=".42"/></g>' + spark(112, 112, 16) + spark(84, 214, 9, .85) + spark(330, 92, 11, .9),
  'large': '<g filter="url(#lift)"><rect x="96" y="120" width="160" height="210" rx="20" fill="url(#deep)"/><rect x="134" y="84" width="170" height="226" rx="22" fill="url(#steel)"/>'
    '<rect x="134" y="84" width="170" height="90" rx="22" fill="url(#gloss)"/><rect x="160" y="120" width="96" height="12" rx="6" fill="#39467e"/><rect x="160" y="148" width="118" height="9" rx="4.5" fill="#7a86c0"/><rect x="160" y="168" width="84" height="9" rx="4.5" fill="#7a86c0"/>'
-   '<circle cx="254" cy="240" r="72" fill="url(#lens)" stroke="url(#crown)" stroke-width="16"/><ellipse cx="232" cy="214" rx="26" ry="15" fill="#fff" opacity=".55"/>'
-   '<path d="M308 294l58 58" stroke="url(#crown)" stroke-width="24" stroke-linecap="round"/></g>' + spark(84, 80, 13) + spark(380, 150, 10, .9),
+   '<circle cx="254" cy="240" r="72" fill="url(#lens)" stroke="url(#apple)" stroke-width="16"/><ellipse cx="232" cy="214" rx="26" ry="15" fill="#fff" opacity=".55"/>'
+   '<path d="M308 294l58 58" stroke="url(#apple)" stroke-width="24" stroke-linecap="round"/></g>' + spark(84, 80, 13) + spark(380, 150, 10, .9),
  'storage': disc(306, 136, 40, 44, 'cyan') + disc(226, 136, 40, 44, 'violet') + disc(146, 136, 40, 44, 'steel')
    + '<ellipse cx="220" cy="146" rx="46" ry="13" fill="url(#deep)"/><ellipse cx="220" cy="143" rx="16" ry="5" fill="url(#gold)"/>' + spark(372, 92, 13) + spark(68, 118, 9, .85),
  'duplicates': '<g filter="url(#lift)"><rect x="82" y="86" width="186" height="240" rx="26" transform="rotate(-9 175 206)" fill="url(#violet)"/>'
    '<g transform="rotate(5 250 216)"><rect x="150" y="104" width="196" height="252" rx="26" fill="url(#steel)"/>'
    '<rect x="150" y="104" width="196" height="96" rx="26" fill="url(#gloss)"/>'
    '<rect x="178" y="140" width="96" height="14" rx="7" fill="#39467e"/><rect x="178" y="170" width="140" height="10" rx="5" fill="#7a86c0"/><rect x="178" y="192" width="118" height="10" rx="5" fill="#7a86c0"/>'
-   '<circle cx="248" cy="282" r="44" fill="url(#crown)"/><path d="M226 282l16 16 30-34" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></g></g>' + spark(72, 70, 13) + spark(372, 84, 10, .9),
+   '<circle cx="248" cy="282" r="44" fill="url(#apple)"/><path d="M226 282l16 16 30-34" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></g></g>' + spark(72, 70, 13) + spark(372, 84, 10, .9),
  'activity': disc(346, 92, 20, 22, 'plinth') + '<g filter="url(#lift)"><circle cx="220" cy="186" r="134" fill="url(#steel)"/><circle cx="220" cy="186" r="108" fill="url(#deep)"/>'
    '<ellipse cx="192" cy="118" rx="76" ry="38" fill="url(#gloss)" opacity=".55"/>'
    + ''.join(f'<rect x="216" y="88" width="8" height="20" rx="4" fill="#7fe3ff" opacity=".85" transform="rotate({a} 220 186)"/>' for a in range(0, 360, 30))
-   + '<rect x="214" y="122" width="12" height="74" rx="6" fill="#fff"/><rect x="214" y="180" width="12" height="62" rx="6" fill="url(#crown)" transform="rotate(118 220 186)"/><circle cx="220" cy="186" r="13" fill="url(#crown)"/></g>' + spark(376, 116, 11) + spark(66, 128, 8, .85),
+   + '<rect x="214" y="122" width="12" height="74" rx="6" fill="#fff"/><rect x="214" y="180" width="12" height="62" rx="6" fill="url(#apple)" transform="rotate(118 220 186)"/><circle cx="220" cy="186" r="13" fill="url(#apple)"/></g>' + spark(376, 116, 11) + spark(66, 128, 8, .85),
  'settings': '<g filter="url(#lift)"><path d="M220 44L348 92V206C348 288 296 344 220 374C144 344 92 288 92 206V92Z" fill="url(#steel)"/>'
    '<path d="M220 76L320 114V206C320 272 280 318 220 344C160 318 120 272 120 206V114Z" fill="url(#deep)"/>'
    '<path d="M220 76L320 114V170Q222 200 120 150V114Z" fill="url(#gloss)" opacity=".4"/>'
-   '<path d="M170 208l36 36 66-74" fill="none" stroke="url(#crown)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></g>' + spark(380, 96, 12) + spark(58, 160, 9, .85),
+   '<path d="M170 208l36 36 66-74" fill="none" stroke="url(#apple)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></g>' + spark(380, 96, 12) + spark(58, 160, 9, .85),
 }
 
 # each object sits inside a thick piece of glass of its own shape

@@ -1,7 +1,7 @@
 // share.js — the shell's side of the screen-sharing API (server/src/remote/share.c, docs/SCREEN-SHARING.md).
 //
 // The system draws both things here, never the app: the permission prompt, and the indicator with its Stop.
-// lord-server sends no frame until <ShareBadge /> says it is on screen (lord.share.shown), and a share ends if
+// insane-server sends no frame until <ShareBadge /> says it is on screen (insane.share.shown), and a share ends if
 // it leaves. The decisions live in a root-owned file, written by the share-grant admin action; a Linux app's
 // grant is tied to its program.
 //
@@ -9,7 +9,7 @@
 //   share.grants()          → [{ id, exe, perm, state }]
 //   share.set(id, perm, state, exe) / share.forget(id) / share.stop()
 import { createElement as h, useEffect } from 'react';
-import { View, Text, screen } from '@lordos/runtime';
+import { View, Text, screen } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { t } from './i18n.js';
 import { admin } from './admin.js';
@@ -17,7 +17,7 @@ import { appName } from './i18n.js';
 import { getApp } from './windows.js';
 import { shareAppId, shareAskList, staleGrants } from './sharemodel.js';
 
-const api = () => typeof lord !== 'undefined' && lord.share;
+const api = () => typeof insane !== 'undefined' && insane.share;
 export const shareHolder = createStore(null);
 const shareAsk = createStore(null);       // { token, app, exe, name, perms: [...], step }
 export const shareRev = createStore(0);   // goes up when the grants change (Settings → Privacy)
@@ -38,7 +38,7 @@ export function sweepShareGrants(lpkIds, desktopIds) {
   for (const id of staleGrants(share.grants(), lpkIds, desktopIds)) share.forget(id).catch(() => { /* next session */ });
 }
 
-globalThis.__lordShare = (json) => {
+globalThis.__insaneShare = (json) => {
   let e;
   try { e = JSON.parse(json); } catch (err) { return; }
   if (e.t === 'ask') {
@@ -55,18 +55,18 @@ globalThis.__lordShare = (json) => {
 };
 
 export const share = {
-  grants: () => { try { return api() ? lord.share.grants() : []; } catch (e) { return []; } },
+  grants: () => { try { return api() ? insane.share.grants() : []; } catch (e) { return []; } },
   async set(id, perm, state, exe) {
     await admin.run('share-grant', `${id} ${perm} ${state}${exe ? ` ${exe}` : ''}`, undefined, { quiet: true });
-    if (api()) lord.share.reload();
+    if (api()) insane.share.reload();
     shareRev.set((v) => v + 1);
   },
   async forget(id) {
     await admin.run('share-forget', id, undefined, { quiet: true });
-    if (api()) lord.share.reload();
+    if (api()) insane.share.reload();
     shareRev.set((v) => v + 1);
   },
-  stop: () => (api() ? lord.share.stop() : false),
+  stop: () => (api() ? insane.share.stop() : false),
 };
 
 // One pill per display, in the notification layer, above fullscreen windows. Unlike the remote desktop's
@@ -76,8 +76,8 @@ export function ShareBadge() {
   const token = c ? c.token : 0;
   useEffect(() => {
     if (!token || !api()) return undefined;
-    lord.share.shown(token);
-    return () => { if (lord.share.status()?.token === token) lord.share.hidden(); };
+    insane.share.shown(token);
+    return () => { if (insane.share.status()?.token === token) insane.share.hidden(); };
   }, [token]);
   if (!c) return null;
   const list = screen.displays?.length ? screen.displays : [{ x: 0, y: 0, w: screen.width }];
@@ -101,7 +101,7 @@ async function answer(a, allow) {
   // no to the picture ends it; the input is a question of its own
   if (allow && a.step + 1 < a.perms.length) { shareAsk.set({ ...a, step: a.step + 1 }); return; }
   shareAsk.set(null);
-  if (api()) lord.share.answer(a.token);        // the root-owned file decides, not this call
+  if (api()) insane.share.answer(a.token);        // the root-owned file decides, not this call
 }
 
 export function SharePrompt() {

@@ -19,8 +19,8 @@
  * Lookups: hash table of apps; per app, a hash table of exact domains, a suffix table for
  * wildcards (the name's labels are walked from right to left), a binary prefix trie per family
  * for addresses and networks. Everything is O(1) or O(key length). */
-#ifndef LORD_FW_RULES_H
-#define LORD_FW_RULES_H
+#ifndef INSANE_FW_RULES_H
+#define INSANE_FW_RULES_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -48,7 +48,7 @@ typedef enum {
 } FwDstKind;
 
 /* Restrictions of an app in the "Restricted apps" list. The network ones are applied by fw_decide
- * (and, in the kernel, by lord-netperm). The others are checked with fw_blocks, through
+ * (and, in the kernel, by insane-netperm). The others are checked with fw_blocks, through
  * sec/restrict.h, where the resource is handed out (docs/FIREWALL.md, "Non-network
  * restrictions"): the broker for isolated apps, js_media.c and sdk/notify.js for built-in apps. */
 enum {
@@ -115,28 +115,28 @@ typedef struct FwStore FwStore;
 FwStore *fw_store_new(void);
 void     fw_store_free(FwStore *s);
 
-/* Canonical id: "lordos", "desktop:<id>", "lpk:<id>" or an absolute executable path. cgroup
- * scopes are translated: app-lordos-lpk-<id>.scope → lpk:<id>, app-lordos-<id>.scope →
+/* Canonical id: "insaneos", "desktop:<id>", "lpk:<id>" or an absolute executable path. cgroup
+ * scopes are translated: app-insaneos-lpk-<id>.scope → lpk:<id>, app-insaneos-<id>.scope →
  * desktop:<id>. 0 ok, -1 if it isn't a valid id (empty, too long, odd characters). */
 int fw_app_canon(const char *in, char *out, size_t n);
 
 /* (0.8.5) Insane OS's own components that use the network, each in its own scope
- * lordos-net-<name>.scope so the kernel enforces their rules (docs/MONITOR.md, "Native apps as
- * their own rows"): their firewall id is "lordos:<name>". 1 if name is one of them. */
+ * insaneos-net-<name>.scope so the kernel enforces their rules (docs/MONITOR.md, "Native apps as
+ * their own rows"): their firewall id is "insaneos:<name>". 1 if name is one of them. */
 #define FW_COMPONENTS { "mail", "store", "print", "terminal", "lists", "lan", "machines", "sql", NULL }
 int fw_component_ok(const char *name);
-/* "lordos-net-<name>.scope" of a known component → "lordos:<name>" in app. 0 ok, -1 otherwise. */
+/* "insaneos-net-<name>.scope" of a known component → "insaneos:<name>" in app. 0 ok, -1 otherwise. */
 int fw_component_scope(const char *scope, char *app, size_t n);
-/* (0.8.8.6) A running virtual machine's scope, "app-lordos-lordos-vm-<id>.scope" (vm/lordvm.c; the id is
+/* (0.8.8.6) A running virtual machine's scope, "app-insaneos-insaneos-vm-<id>.scope" (vm/insanevm.c; the id is
  * the machine's lowercase UUID, and the prefix is reserved: sec/cgroup.h app_scope_reserved). Its QEMU and
- * passt make the guest's sockets, so the guest's traffic is the Machines component's, lordos:machines,
- * with the same rules as the image downloads (lordos-net-machines.scope). 0 and the machine's id in id
+ * passt make the guest's sockets, so the guest's traffic is the Machines component's, insaneos:machines,
+ * with the same rules as the image downloads (insaneos-net-machines.scope). 0 and the machine's id in id
  * (optional, n bytes) if scope is one, -1 otherwise. */
-#define FW_VM_SCOPE_PREFIX "app-lordos-lordos-vm-"
+#define FW_VM_SCOPE_PREFIX "app-insaneos-insaneos-vm-"
 int fw_vm_scope(const char *scope, char *id, size_t n);
-/* The firewall app of a session scope, the one translation lord-netperm and Monitor share:
- * lordos-net-<name>.scope → lordos:<name>, a machine's scope → lordos:machines,
- * app-lordos-lpk-<id>.scope → lpk:<id>, app-lordos-<id>.scope → desktop:<id>. 0 ok, -1 otherwise. */
+/* The firewall app of a session scope, the one translation insane-netperm and Monitor share:
+ * insaneos-net-<name>.scope → insaneos:<name>, a machine's scope → insaneos:machines,
+ * app-insaneos-lpk-<id>.scope → lpk:<id>, app-insaneos-<id>.scope → desktop:<id>. 0 ok, -1 otherwise. */
 int fw_scope_app(const char *scope, char *app, size_t n);
 
 /* Destination as text ("any", "lan", "internet", "example.com", "*.example.com", "10.0.0.0/8",
@@ -190,7 +190,7 @@ uint32_t    fw_flag_from_name(const char *name);            /* 0 if it doesn't e
 char *fw_to_json(const FwStore *s, size_t *len);
 /* Replaces the contents of s with those of the JSON. If anything fails validation, s stays the same and err says what. */
 int   fw_from_json(FwStore *s, const char *text, size_t len, char *err, size_t errlen);
-/* Per-user file (~/.config/lordos/firewall.json): atomic write with mode 0600. */
+/* Per-user file (~/.config/insaneos/firewall.json): atomic write with mode 0600. */
 int   fw_save(const FwStore *s, const char *path);
 int   fw_load(FwStore *s, const char *path, char *err, size_t errlen);
 

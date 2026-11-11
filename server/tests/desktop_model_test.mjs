@@ -210,7 +210,7 @@ eq('index clamped', [moveDesktopTo([1, 2, 3], 1, 99), moveDesktopTo([1, 2, 3], 3
   eq('hit', [hitRect({ x: 1, y: 1, w: 2, h: 2 }, 2, 2), hitRect({ x: 1, y: 1, w: 2, h: 2 }, 3, 2), hitRect(null, 0, 0)], [true, false, false]);
 }
 
-// lord.setStyle takes native properties only: a CSS transform there is `js: unsupported style 'transform'`
+// insane.setStyle takes native properties only: a CSS transform there is `js: unsupported style 'transform'`
 // and does nothing (the Desktops animation's slide)
 {
   const fs = await import('node:fs');

@@ -1,12 +1,12 @@
 /* cloud.c — see cloud.h and docs/CLOUD.md. The accounts, the rclone daemon and the thread that drives both.
  *
- *   ~/.config/lordos/cloud/accounts.json   id, name, kind, created, paused; the options (bandwidth, battery, space)
- *   ~/.config/lordos/cloud/rclone.conf     each account's type and non-secret options (0600, no secret in it)
- *   ~/.config/lordos/cloud/keep.json       Keep on This Computer, per account
- *   ~/.config/lordos/cloud/links.json      the links made from Insane OS (rclone can't list them)
- *   ~/.cache/lordos/cloud/                 rclone's VFS cache (vfs/<id>/, vfsMeta/<id>/)
- *   ~/.cache/lordos/cloud.log              rclone's log (the Logs app shows it)
- *   $XDG_RUNTIME_DIR/lordos/cloud/rc.sock  the rc socket, in a 0700 folder
+ *   ~/.config/insaneos/cloud/accounts.json   id, name, kind, created, paused; the options (bandwidth, battery, space)
+ *   ~/.config/insaneos/cloud/rclone.conf     each account's type and non-secret options (0600, no secret in it)
+ *   ~/.config/insaneos/cloud/keep.json       Keep on This Computer, per account
+ *   ~/.config/insaneos/cloud/links.json      the links made from Insane OS (rclone can't list them)
+ *   ~/.cache/insaneos/cloud/                 rclone's VFS cache (vfs/<id>/, vfsMeta/<id>/)
+ *   ~/.cache/insaneos/cloud.log              rclone's log (the Logs app shows it)
+ *   $XDG_RUNTIME_DIR/insaneos/cloud/rc.sock  the rc socket, in a 0700 folder
  *
  * The secrets of an account (token, password, key) are one keyring item, "cloud:<id>", a JSON object of rclone
  * options exactly as config/get gives them (passwords obscured by rclone). At each start of rclone they go to it
@@ -254,7 +254,7 @@ static int on_battery(void) {
     return dis && !mains;
 }
 
-/* ---- the files in ~/.config/lordos/cloud ---- */
+/* ---- the files in ~/.config/insaneos/cloud ---- */
 
 static void path_in(char *out, size_t n, const char *name) { cl_pf(out, n, "%s/%s", cl_cfg, name); }
 
@@ -505,7 +505,7 @@ const char *cloud_log_name(void) { return LOG_NAME; }
 
 static const char *rclone_bin(void) {
 #ifdef CLOUD_TEST
-    const char *e = getenv("LORDOS_CLOUD_RCLONE");       /* test builds only */
+    const char *e = getenv("INSANEOS_CLOUD_RCLONE");       /* test builds only */
     if (e && e[0] == '/') return e;
 #endif
     return CLOUD_RCLONE;
@@ -517,7 +517,7 @@ static void child_common(void) {
     sigset_t none;
     sigemptyset(&none);
     sigprocmask(SIG_SETMASK, &none, NULL);
-    prctl(PR_SET_PDEATHSIG, SIGTERM);       /* lord-server gone: rclone unmounts and ends */
+    prctl(PR_SET_PDEATHSIG, SIGTERM);       /* insane-server gone: rclone unmounts and ends */
     umask(077);
     setpriority(PRIO_PROCESS, 0, 10);
     syscall(SYS_ioprio_set, 1 /* IOPRIO_WHO_PROCESS */, 0, 3 << 13 /* IOPRIO_CLASS_IDLE */);
@@ -616,7 +616,7 @@ static int daemon_start(void) {
     if (!cloud_available()) { cpy(dmn.error, sizeof dmn.error, "cloud.unavailable"); return -1; }
     const char *xdg = getenv("XDG_RUNTIME_DIR");
     if (!xdg || xdg[0] != '/') { cpy(dmn.error, sizeof dmn.error, "cloud.noRuntimeDir"); return -1; }
-    cl_pf(rt_dir, sizeof rt_dir, "%s/lordos/cloud", xdg);
+    cl_pf(rt_dir, sizeof rt_dir, "%s/insaneos/cloud", xdg);
     mkdirs(rt_dir, 0700);
     struct stat st;
     if (lstat(rt_dir, &st) || !S_ISDIR(st.st_mode) || st.st_uid != getuid()) { cpy(dmn.error, sizeof dmn.error, "cloud.noRuntimeDir"); return -1; }
@@ -636,7 +636,7 @@ static int daemon_start(void) {
     int ll = cl_pf(line, sizeof line, "%s:%s\n", user, h);
     explicit_bzero(cd, sizeof *cd);
     free(cd);
-    int mfd = (int)syscall(SYS_memfd_create, "lordos-cloud-htpasswd", 1u /* MFD_CLOEXEC */);
+    int mfd = (int)syscall(SYS_memfd_create, "insaneos-cloud-htpasswd", 1u /* MFD_CLOEXEC */);
     if (mfd < 0 || write(mfd, line, (size_t)ll) != ll) { if (mfd >= 0) close(mfd); cpy(dmn.error, sizeof dmn.error, "cloud.startFailed"); return -1; }
     lseek(mfd, 0, SEEK_SET);
     cl_pf(up, sizeof up, "%s:%s", user, pass);
@@ -646,10 +646,10 @@ static int daemon_start(void) {
     cl_pf(addr, sizeof addr, "unix://%s", sock);
     cl_pf(cache, sizeof cache, "%s", cl_cache);
     mkdirs(cache, 0700);
-    cl_pf(log_path, sizeof log_path, "%s/.cache/lordos/" LOG_NAME, cl_home);
+    cl_pf(log_path, sizeof log_path, "%s/.cache/insaneos/" LOG_NAME, cl_home);
     if (!stat(log_path, &st) && st.st_size > LOG_MAX) {
         char old[PATH_MAX + 8];
-        cl_pf(old, sizeof old, "%s/.cache/lordos/cloud.old", cl_home);
+        cl_pf(old, sizeof old, "%s/.cache/insaneos/cloud.old", cl_home);
         rename(log_path, old);
     }
     char *argv[] = { "rclone", "rcd", "--rc-addr", addr, "--rc-htpasswd", "/proc/self/fd/3", "--config", "", "--cache-dir", cache,
@@ -670,7 +670,7 @@ static int daemon_start(void) {
         syscall(SYS_close_range, 4, ~0u, 0);
         child_common();
         CgroupLimits lim = { .mem_high_mb = 512, .mem_max_mb = 0, .cpu_percent = 0 };
-        if (cgroup_enter("app-lordos-" CLOUD_SCOPE ".scope", &lim) && getenv("LORDOS_SESSIOND")) _exit(126);
+        if (cgroup_enter("app-insaneos-" CLOUD_SCOPE ".scope", &lim) && getenv("INSANEOS_SESSIOND")) _exit(126);
         execve(bin, argv, env);
         _exit(127);
     }
@@ -1633,7 +1633,7 @@ static void job_answer(Job *j) {
     int waiting = a && a->pending_req;
     pthread_mutex_unlock(&cl_mu);
     if (!a || !waiting || !cl_running) { post_reply(j->req, err_json(!a ? "cloud.notFound" : !cl_running ? "cloud.notRunning" : "cloud.noQuestion")); return; }
-    if (!strcmp(j->a, "lordos-trust")) {
+    if (!strcmp(j->a, "insaneos-trust")) {
         /* a host key or a certificate the person was shown (cloud_trust.c) */
         int yes = j->b && (!strcmp(j->b, "trust") || !strcmp(j->b, "accept") || !strcmp(j->b, "yes") || !strcmp(j->b, "true"));
         pthread_mutex_lock(&cl_mu);
@@ -1994,7 +1994,7 @@ static pid_t spawn_authorize(const CloudKind *k, const char *cid, const char *cs
         dup2(null, 0); dup2(o[1], 1); dup2(e[1], 2);
         syscall(SYS_close_range, 3, ~0u, 0);
         child_common();
-        if (app_scope_enter(CLOUD_SCOPE) && getenv("LORDOS_SESSIOND")) _exit(126);
+        if (app_scope_enter(CLOUD_SCOPE) && getenv("INSANEOS_SESSIOND")) _exit(126);
         sandbox_exec_child(1);              /* the system read-only, nothing written; the network for the redirect */
         execve(bin, argv, env);
         _exit(127);
@@ -2755,8 +2755,8 @@ int cloud_start(const char *home_dir, const CloudSecrets *sec) {
     secrets = sec;
     cpy(cl_home, sizeof cl_home, home_dir);
     cl_pf(cl_root, sizeof cl_root, "%s/Cloud", cl_home);
-    cl_pf(cl_cache, sizeof cl_cache, "%s/.cache/lordos/cloud", cl_home);
-    cl_pf(cl_cfg, sizeof cl_cfg, "%s/.config/lordos/cloud", cl_home);
+    cl_pf(cl_cache, sizeof cl_cache, "%s/.cache/insaneos/cloud", cl_home);
+    cl_pf(cl_cfg, sizeof cl_cfg, "%s/.config/insaneos/cloud", cl_home);
     mkdirs(cl_cfg, 0700);
     si.fo = si.fe = -1;
     load_all();

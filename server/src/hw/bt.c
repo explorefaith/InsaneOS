@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define BLUEZ "org.bluez"
-#define AGENT_PATH "/org/lordos/BluetoothAgent"
+#define AGENT_PATH "/org/insaneos/BluetoothAgent"
 #define AGENT_IFACE "org.bluez.Agent1"
 
 static BtModel model;

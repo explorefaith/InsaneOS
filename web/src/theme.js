@@ -2,7 +2,7 @@
 // CSP forbids inline scripts). "auto" (no data-theme) follows prefers-color-scheme.
 (function () {
   var r = document.documentElement, t = null;
-  try { t = localStorage.getItem('lordos-theme'); } catch (e) { /* storage blocked */ }
+  try { t = localStorage.getItem('insaneos-theme'); } catch (e) { /* storage blocked */ }
   if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t);
   r.className += ' jt';
 })();

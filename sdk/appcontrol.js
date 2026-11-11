@@ -4,12 +4,12 @@
 //   appMenuItems(winId)    the app menu: About <app>, Settings…, Hide <app>, Hide Others, Show All, Quit <app>
 //   runningApps()          every app with a window, for Force Quit
 //   forceQuit(key)         ends an app that stopped answering (see below)
-//   recentItems(n)         the recent files as menu items (Recent Items in the crown menu)
-//   storeUpdates()         how many package updates are waiting (the crown menu's Store item)
+//   recentItems(n)         the recent files as menu items (Recent Items in the apple menu)
+//   storeUpdates()         how many package updates are waiting (the apple menu's Store item)
 //
 //   hideApp, hideOthers, toggleShowDesktop, appSettingsItem   what the keyboard shortcuts call too
 //
-// Insane Flow shows the app menu under the app's name in its menu bar and the rest in the crown menu;
+// Insane Flow shows the app menu under the app's name in its menu bar and the rest in the apple menu;
 // Insane Classic offers About in each window's Help menu. About <app> and Force Quit are system windows
 // of their own (apps/appabout, apps/forcequit), the same in every theme.
 import { windows, wm, getApp, appMenus, onActiveDesktop, activeDesktop } from './windows.js';
@@ -101,7 +101,7 @@ export function runningApps() {
 }
 
 // Force Quit, without asking the app: a Linux app's or an isolated app's process gets SIGKILL from
-// lord-server (lord.wayland.kill: only its own client of this user, never lord-server; an X11 window
+// insane-server (insane.wayland.kill: only its own client of this user, never insane-server; an X11 window
 // is asked to close instead, since every X11 app shares Xwayland); a built-in app that runs inside
 // the session closes without its close guard. Returns '' or an error code.
 export function forceQuit(key) {
@@ -112,9 +112,9 @@ export function forceQuit(key) {
   for (const w of g.windows) {
     const sid = w.args?.surface;
     if (String(w.id).startsWith('linux#') && sid > 0) {
-      if (w.args?.x11) { lord.wayland.close(sid); err = err || 'app.forceQuitX11'; continue; }
+      if (w.args?.x11) { insane.wayland.close(sid); err = err || 'app.forceQuitX11'; continue; }
       if (killed.size && w.args?.pkg) continue;            // one process for all of an isolated app's windows
-      const e = typeof lord.wayland.kill === 'function' ? lord.wayland.kill(sid) : 'app.forceQuitFailed';
+      const e = typeof insane.wayland.kill === 'function' ? insane.wayland.kill(sid) : 'app.forceQuitFailed';
       if (e) err = err || e; else killed.add(sid);
     } else wm.close(w.id, true);
   }
@@ -129,5 +129,5 @@ export function recentItems(n = 10) {
 }
 
 export function storeUpdates() {
-  try { return typeof lord !== 'undefined' && lord.pkg && typeof lord.pkg.upgrades === 'function' ? (lord.pkg.upgrades() || []).length : 0; } catch (e) { return 0; }
+  try { return typeof insane !== 'undefined' && insane.pkg && typeof insane.pkg.upgrades === 'function' ? (insane.pkg.upgrades() || []).length : 0; } catch (e) { return 0; }
 }

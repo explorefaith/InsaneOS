@@ -1,9 +1,9 @@
 {
-  "name": "lordos",
+  "name": "insaneos",
   "private": true,
   "version": "0.8.8.6",
-  "description": "Insane OS — React themes and apps for lord-server",
-  "lordos": {
+  "description": "Insane OS — React themes and apps for insane-server",
+  "insaneos": {
     "channel": "beta",
     "media": "0.8.8",
     "imager": "0.8.6"

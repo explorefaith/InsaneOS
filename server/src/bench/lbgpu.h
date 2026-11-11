@@ -1,6 +1,6 @@
 /* lbgpu.h — InsaneBench's GPU workloads, offscreen on a render node fd (lbgpu.c). */
-#ifndef LORD_BENCH_LBGPU_H
-#define LORD_BENCH_LBGPU_H
+#ifndef INSANE_BENCH_LBGPU_H
+#define INSANE_BENCH_LBGPU_H
 
 #include "glscene.h"
 

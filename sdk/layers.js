@@ -3,7 +3,7 @@
 // The engine's zIndex only orders siblings, so a menu drawn inside the menu bar can never rise
 // above a Dock drawn after it. Instead every shell surface goes into a named layer: a root node of
 // the screen's size (runtime/index.js `layerContainer`) that the content enters through a React
-// portal. Paint order and hit testing follow the same order (lord-server's hit test walks the
+// portal. Paint order and hit testing follow the same order (insane-server's hit test walks the
 // children in paint order, and a layer is `pointerEvents: 'box-none'`: it never takes a click
 // itself), so a click on a menu over the Dock goes to the menu.
 //
@@ -24,7 +24,7 @@
 //                 layer, sheets and prompts included, and the selection works whatever is open
 //
 // Inside one layer, what opened last is on top. The lock screen and the login screen are another
-// session (lord-sessiond), above all of this.
+// session (insane-sessiond), above all of this.
 //
 //   <Layer name="popover">…</Layer>          a shell surface (themes, startShell)
 //   <Overlay anchor={ref} onClose={…}>…</Overlay>
@@ -35,7 +35,7 @@
 //       (the app's surface is the window, so it is clipped to it). Clicking outside or Escape
 //       calls onClose.
 import { createElement as h, Fragment, useContext, useEffect, useRef } from 'react';
-import { View, layerContainer, createPortal, addListener } from '@lordos/runtime';
+import { View, layerContainer, createPortal, addListener } from '@insaneos/runtime';
 import { AppWindowContext } from './components.jsx';
 import { direction } from './i18n.js';
 
@@ -61,7 +61,7 @@ const insideOf = (inst, ref) => {
   for (let n = inst; n; n = n.parent) if (n === ref) return true;
   return false;
 };
-const boxOf = (inst) => { try { return inst ? lord.getLayout(inst.id) : null; } catch (e) { return null; } };
+const boxOf = (inst) => { try { return inst ? insane.getLayout(inst.id) : null; } catch (e) { return null; } };
 
 export function Overlay({ anchor, children, onClose, layer = 'popover' }) {
   const win = useContext(AppWindowContext);

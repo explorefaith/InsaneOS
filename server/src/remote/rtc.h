@@ -4,8 +4,8 @@
  * responder, ICE restarts, DTLS-SRTP (OpenSSL), SRTP (libsrtp2), the data channels over SCTP (usrsctp),
  * RTP for the session's encoded video and Opus audio, and an optional TURN relay over UDP, TCP or TLS.
  * The WebRTC peer is the only way the remote desktop shows the screen: there is no other path. */
-#ifndef LORD_REMOTE_RTC_H
-#define LORD_REMOTE_RTC_H
+#ifndef INSANE_REMOTE_RTC_H
+#define INSANE_REMOTE_RTC_H
 
 #include <poll.h>
 #include <stddef.h>
@@ -54,8 +54,8 @@ typedef struct {
     uint8_t turn_key[16];
     char turn_realm[256];
     unsigned max_kbps;
-    /* ICE over TCP: lord-sessiond's root connection child hands us, over this listening socket (root's
-     * /run/lordos/rtc/<route>, created before the bridge dropped root), each TCP connection to the
+    /* ICE over TCP: insane-sessiond's root connection child hands us, over this listening socket (root's
+     * /run/insaneos/rtc/<route>, created before the bridge dropped root), each TCP connection to the
      * remote desktop port whose first ICE check names our route; -1: no ICE-TCP */
     int ice_lfd;
     char route[9];                      /* 8 characters [A-Za-z0-9]: the start of every ufrag we use */

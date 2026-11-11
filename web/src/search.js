@@ -67,7 +67,7 @@
   });
   list.addEventListener('click', function (e) { if (e.target.closest('a')) dlg.close(); });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
-  window.__lordSearch = {
+  window.__insaneSearch = {
     open: function () {
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
       box.value = ''; run(); box.focus(); load();

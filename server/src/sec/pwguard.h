@@ -3,7 +3,7 @@
  *
  * Linux apps talk to PipeWire directly (natively, or through pipewire-pulse), so the kernel's
  * device rules don't cover the microphone (PipeWire opens the sound card, not the app) nor a
- * camera that PipeWire serves. lord-server keeps one connection of its own to the session's
+ * camera that PipeWire serves. insane-server keeps one connection of its own to the session's
  * PipeWire, on the manager socket ($XDG_RUNTIME_DIR/pipewire-0-manager), with our own
  * implementation of the native protocol (no libpipewire). For every PipeWire client it works out
  * the app (the PID's cgroup → the launcher's scope → desktop:<id>) and, if that app is
@@ -13,7 +13,7 @@
  *     see nor link them), and every other client (so it can't change anyone's permissions);
  *   - destroys every capture stream that client creates (Stream/Input/Audio, Stream/Input/Video),
  *     as soon as it appears.
- * The rules are lord.fw's store (the one Settings edits), read every second: a restriction set or
+ * The rules are insane.fw's store (the one Settings edits), read every second: a restriction set or
  * lifted on a running app applies within a second, without restarting it. Nothing is written to a
  * file the apps could change.
  *
@@ -21,8 +21,8 @@
  * clients. Apps using the PulseAudio API all reach PipeWire through pipewire-pulse's process, so
  * for those the PID is the application.process.id the app itself reported to pipewire-pulse (see
  * the documentation for what that means). */
-#ifndef LORD_SEC_PWGUARD_H
-#define LORD_SEC_PWGUARD_H
+#ifndef INSANE_SEC_PWGUARD_H
+#define INSANE_SEC_PWGUARD_H
 
 #include <stddef.h>
 #include <stdint.h>

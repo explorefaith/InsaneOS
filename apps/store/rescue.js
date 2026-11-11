@@ -3,7 +3,7 @@
 // with the root password, the session user joins `sudo`, effective after a restart. The helper decides
 // everything again and takes no user name. The password stays in this field and goes in one request.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text, Button, TextInput, useTheme, admin, session, typeScale, spacing, t } from '@lordos/sdk';
+import { View, Text, Button, TextInput, useTheme, admin, session, typeScale, spacing, t } from '@insaneos/sdk';
 
 export const isNotAdmin = (e) => e?.code === 'admin.notAdmin';
 

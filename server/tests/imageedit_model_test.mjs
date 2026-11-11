@@ -117,7 +117,7 @@ eq('PNG: saved in place', png.replace, true);
 eq('PNG: format', png.format, 'png');
 eq('PNG: copy name', png.copy(), '/home/u/Pictures/Screenshots/Screenshot 1 (edited).png');
 eq('PNG: second copy', png.copy(2), '/home/u/Pictures/Screenshots/Screenshot 1 (edited 2).png');
-eq('PNG: hidden temporary file next to it', png.temp, '/home/u/Pictures/Screenshots/.Screenshot 1.lordos-edit-42.png');
+eq('PNG: hidden temporary file next to it', png.temp, '/home/u/Pictures/Screenshots/.Screenshot 1.insaneos-edit-42.png');
 const jpg = M.savePlan('/home/u/a.b.JPG', 'edited', 1);
 eq('JPEG: in place, as JPEG', [jpg.replace, jpg.format, jpg.copy()], [true, 'jpeg', '/home/u/a.b (edited).jpg']);
 eq('.jpeg keeps its extension', M.savePlan('/x/p.jpeg', 'e').copy(), '/x/p (e).jpeg');

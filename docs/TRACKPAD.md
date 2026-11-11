@@ -49,8 +49,8 @@ but badly.
 | `server/src/wl/wl_input.c` | For Wayland apps: `zwp_pointer_gestures_v1`, `wl_pointer` fine scrolling and `wl_touch` |
 | `server/src/input.c` | Detects the device and creates its `TpDevice` |
 | `server/src/main.c` | Minimal: touchpad events go to the driver, and timers to the loop |
-| `server/src/ui/js_input.c` | `lord.input.devices()`, `config()`, `configure(obj)` |
-| `runtime/events.js` | `__lordGesture` → fine `onWheel`, `onPinch`, `onSwipe` |
+| `server/src/ui/js_input.c` | `insane.input.devices()`, `config()`, `configure(obj)` |
+| `runtime/events.js` | `__insaneGesture` → fine `onWheel`, `onPinch`, `onSwipe` |
 | `sdk/trackpad.js` | Applies settings live, and the desktop actions on swipe |
 | `apps/settings/Trackpad.jsx` | Settings → Mouse & Trackpad |
 | `tests/touchpad-sim/` | Touchpad simulated with uinput, and the scripted gestures |
@@ -74,8 +74,8 @@ but badly.
 - **More fingers than contacts:** if the device reports more fingers than contacts
   (`BTN_TOOL_TRIPLETAP` with 2 slots), counting goes by `BTN_TOOL_*`.
 
-`lord-sessiond` lends them just like mice (see `SESSIONS.md`). The session log
-(`~/.cache/lordos/session.log`) says what it found:
+`insane-sessiond` lends them just like mice (see `SESSIONS.md`). The session log
+(`~/.cache/insaneos/session.log`) says what it found:
 
 ```
 tp: Insane OS SynPS/2 Synaptics TouchPad (simulado): touchpad (clickpad), 105×87 mm, 5 contacts
@@ -106,7 +106,7 @@ On every `SYN_REPORT` the driver looks at the contacts in millimeters.
   typing, so Ctrl+click still works. A touch that began after the last key is **released** once
   that time passes with no other key: it moves the pointer without lifting the finger, but it can't
   tap. Before 0.8.8.4 it stayed ignored until the finger lifted: pressing Space in Files to close
-  the Quick Preview and touching right after left the pointer stuck ([#34](https://github.com/lordbasex/Insane OS/issues/34)).
+  the Quick Preview and touching right after left the pointer stuck ([#34](https://github.com/insaneos/Insane OS/issues/34)).
 - **Pinned fingers:** pressing (or releasing) a clickpad pushes the finger a little. The fingers
   that are down are pinned at that moment and don't move the pointer until they move 1.5 mm on
   purpose, so a click doesn't nudge the pointer.
@@ -226,8 +226,8 @@ on):
 ## Settings → Mouse & Trackpad
 
 It's in the Language & Keyboard group and, since 0.8.8, always shows, with or without a touchpad (before, it was
-Trackpad and appeared only with one). It's saved in `settings.trackpad` (`~/.config/lordos/settings.json`) and applied
-live: `sdk/trackpad.js` calls `lord.input.configure`. Since 0.8.8.4 it has one section per device.
+Trackpad and appeared only with one). It's saved in `settings.trackpad` (`~/.config/insaneos/settings.json`) and applied
+live: `sdk/trackpad.js` calls `insane.input.configure`. Since 0.8.8.4 it has one section per device.
 
 **Pointer**, for every device:
 
@@ -336,7 +336,7 @@ checks what it recognizes. There are 67 checks:
 `# caps` lines (id, slots, touch size, pressure, name) so the replay applies the same quirks.
 
 `build/tp-test --dump NAME` prints one of the bcm5974 sequences, and `build/tp-test --live DEV SECS`
-opens a device like lord-server does (`tp_open`) and prints what the driver made of it; `DEV` can
+opens a device like insane-server does (`tp_open`) and prints what the driver made of it; `DEV` can
 be the name of a device about to appear, which it grabs on arrival:
 
 ```sh
@@ -345,7 +345,7 @@ sudo ./build/tp-test --live bcm5974 4 &
 sudo tpsim play-file --bcm5974 --wait 1 click-jump.ev      # a bcm5974-like uinput device
 ```
 
-If a session is on the monitor, `lord-sessiond` lends it the new device too; when it grabs it
+If a session is on the monitor, `insane-sessiond` lends it the new device too; when it grabs it
 first, the gestures reach that desktop (the reader then says `EVIOCGRAB: another reader got it
 first`). Do this with no session on the monitor.
 
@@ -373,13 +373,13 @@ The device imitates a laptop Synaptics clickpad:
 
 Gestures run at 80 Hz.
 
-Since `lord-sessiond` lends the devices when showing the session, the simulated one has to exist
-beforehand. In VM 123 a test service creates it before `lordos.service` (see `VM-SETUP.md`).
+Since `insane-sessiond` lends the devices when showing the session, the simulated one has to exist
+beforehand. In VM 123 a test service creates it before `insaneos.service` (see `VM-SETUP.md`).
 
 ## Hotplug, wheels and isolated apps
 
 - **Plugging and unplugging:** a touchpad, keyboard or mouse plugged in while the session is on the
-  display works right away (`lord-sessiond` detects it with inotify and passes it the fd, see
+  display works right away (`insane-sessiond` detects it with inotify and passes it the fd, see
   `SESSIONS.md`). Unplugging it closes only that device; the session doesn't leave the screen.
 - **High-resolution and horizontal wheel:**
   - `REL_WHEEL_HI_RES` and `REL_HWHEEL_HI_RES` (or `REL_HWHEEL`) go as fine scrolling;
@@ -406,7 +406,7 @@ beforehand. In VM 123 a test service creates it before `lordos.service` (see `VM
 At first it cost 57.5 % CPU. The changes:
 
 - **The app:**
-  - while moving, it shifts the last frame's image with `lord.setStyle`, without going through
+  - while moving, it shifts the last frame's image with `insane.setStyle`, without going through
     React, at most 30 times per second;
   - it asks for a new frame every 100 ms (at half resolution if the zoom changed) and the good one
     once it's still;
@@ -453,7 +453,7 @@ tp: scroll: 19 frames, average latency 2.94 ms, max 30.17 ms (read → JS/Waylan
 
 The maximum is a frame that was being drawn on the CPU at that exact moment.
 
-**`lord-server` CPU** (`~/cpu.sh`, % of one core, with the Monitor open):
+**`insane-server` CPU** (`~/cpu.sh`, % of one core, with the Monitor open):
 
 | What | CPU |
 |---|---|
@@ -509,7 +509,7 @@ The maximum is a frame that was being drawn on the CPU at that exact moment.
   themselves; Insane OS's is for the theme's interface).
 - **CPU compositing:** each frame copies the bounding box of what changed to the graphics card's
   buffer (`present_cpu` in `main.c`); copying only the separate damaged rectangles is written but
-  off by default (`LORD_DAMAGE=multi`), and would further lower the cost of panning the map.
+  off by default (`INSANE_DAMAGE=multi`), and would further lower the cost of panning the map.
 - **Missing gestures:**
   - drag lock (tap and drag that continues when the finger lifts for a moment);
   - edge scrolling for single-finger touchpads;

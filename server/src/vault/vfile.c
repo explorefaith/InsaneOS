@@ -64,7 +64,7 @@ int vf_argon2id(const uint8_t *pass, size_t plen, const uint8_t salt[16], const 
 
 void vf_keyfile_hash(const uint8_t *data, size_t len, uint8_t out[32]) {
     crypto_blake2b_ctx c;
-    crypto_blake2b_keyed_init(&c, 32, (const uint8_t *)"lordos-vault:keyfile-hash", 25);
+    crypto_blake2b_keyed_init(&c, 32, (const uint8_t *)"insaneos-vault:keyfile-hash", 25);
     crypto_blake2b_update(&c, data, len);
     crypto_blake2b_final(&c, out);
 }
@@ -121,21 +121,21 @@ static int slot_kek(const VSlot *s, const VFactors *f, uint8_t kek[32]) {
     case VS_PASSKEY:
         if (!f->password || !f->keyfile) return 1;
         if (vf_argon2id((const uint8_t *)f->password, strlen(f->password), s->salt, &s->p, a)) return -1;
-        blake_kdf(a, 32, "lordos-vault:passkey", f->keyfile, 32, kek);
+        blake_kdf(a, 32, "insaneos-vault:passkey", f->keyfile, 32, kek);
         sm_wipe(a, sizeof a);
         return 0;
     case VS_KEYFILE:
         if (!f->keyfile) return 1;
-        blake_kdf(f->keyfile, 32, "lordos-vault:keyfile", s->salt, 16, kek);
+        blake_kdf(f->keyfile, 32, "insaneos-vault:keyfile", s->salt, 16, kek);
         return 0;
     case VS_FIDO2:
         if (!f->fido) return 1;
-        blake_kdf(f->fido, 32, "lordos-vault:fido2", s->salt, 16, kek);
+        blake_kdf(f->fido, 32, "insaneos-vault:fido2", s->salt, 16, kek);
         return 0;
     case VS_RECOVERY: {
         uint8_t r[25];
         if (!f->recovery || recovery_bytes(f->recovery, r)) return 1;
-        blake_kdf(r, 25, "lordos-vault:recovery", s->salt, 16, kek);
+        blake_kdf(r, 25, "insaneos-vault:recovery", s->salt, 16, kek);
         sm_wipe(r, sizeof r);
         return 0;
     }
@@ -358,7 +358,7 @@ int vf_read_body(const uint8_t *d, size_t len, const VHeader *h, const uint8_t v
     uint8_t *pt = sm_alloc(h->body_len + 1);
     if (!pt) return VF_ENOMEM;
     uint8_t bk[32];
-    subkey(vk, "lordos-vault:body", bk);
+    subkey(vk, "insaneos-vault:body", bk);
     int r = crypto_aead_unlock(pt, mac, bk, nonce, d, h->hlen, ct, h->body_len);
     sm_wipe(bk, sizeof bk);
     if (r) { sm_free(pt); return VF_ECORRUPT; }
@@ -377,7 +377,7 @@ static void att_ad(const uint8_t vault_id[16], const uint8_t id[16], uint8_t ad[
 int vf_att_seal(const uint8_t vk[32], const uint8_t vault_id[16], const uint8_t id[16], const uint8_t *plain, size_t len,
                 uint8_t *cipher, uint8_t nonce[24], uint8_t mac[16]) {
     uint8_t ak[32], ad[40];
-    subkey(vk, "lordos-vault:attachment", ak);
+    subkey(vk, "insaneos-vault:attachment", ak);
     att_ad(vault_id, id, ad);
     vc_random(nonce, 24);
     crypto_aead_lock(cipher, mac, ak, nonce, ad, 40, plain, len);
@@ -388,7 +388,7 @@ int vf_att_seal(const uint8_t vk[32], const uint8_t vault_id[16], const uint8_t 
 int vf_att_open(const uint8_t vk[32], const uint8_t vault_id[16], const uint8_t id[16], const uint8_t *cipher, size_t len,
                 const uint8_t nonce[24], const uint8_t mac[16], uint8_t *plain) {
     uint8_t ak[32], ad[40];
-    subkey(vk, "lordos-vault:attachment", ak);
+    subkey(vk, "insaneos-vault:attachment", ak);
     att_ad(vault_id, id, ad);
     int r = crypto_aead_unlock(plain, mac, ak, nonce, ad, 40, cipher, len);
     sm_wipe(ak, sizeof ak);
@@ -429,7 +429,7 @@ int vf_write_fd(int fd, VHeader *h, const uint8_t vk[32], const uint8_t *plain, 
     if (!ct) return VF_ENOMEM;
     uint8_t nonce[24], mac[16], bk[32], lenb[8];
     vc_random(nonce, 24);
-    subkey(vk, "lordos-vault:body", bk);
+    subkey(vk, "insaneos-vault:body", bk);
     crypto_aead_lock(ct, mac, bk, nonce, hdr, hl, plain, plen);
     sm_wipe(bk, sizeof bk);
     put64(lenb, plen);

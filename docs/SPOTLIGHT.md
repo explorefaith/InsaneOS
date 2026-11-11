@@ -40,10 +40,10 @@ Sections are ordered by their best result; the calculator always goes on top.
 | Apps | `useLauncherApps()`: Insane OS, `.lpk` packages and Linux apps | `launchApp` |
 | Settings | the Settings sections and their translated keywords (`settings.keywords.*`) | `wm.open('settings', { args: { section } })` |
 | Actions | dark or light mode; log out | the action |
-| Files | name in the home folder: the server's `lord.fs.search` (up to 6 levels); if unavailable, our own walk in chunks (4 levels, 5000 entries, no hidden files) | folders in Files, text in the Editor, the rest in Files with the file selected |
+| Files | name in the home folder: the server's `insane.fs.search` (up to 6 levels); if unavailable, our own walk in chunks (4 levels, 5000 entries, no hidden files) | folders in Files, text in the Editor, the rest in Files with the file selected |
 | Notes | `~/Notes/*/nota.md` (title from the Notes app's YAML header, and the content); the section only appears if the Notes app is present | `wm.open('notes', { args: { slug } })` |
 | Clipboard | texts from the history | copies again |
-| Store | `lord.pkg.search`: only AppStream apps that aren't installed, up to 5 | `wm.open('store', { args: { search } })` |
+| Store | `insane.pkg.search`: only AppStream apps that aren't installed, up to 5 | `wm.open('store', { args: { search } })` |
 | Help | the Help articles, through `registerSpotlightSource` (`sdk/help.js`; see `SYSTEM.md`, "Help") | the article in Help |
 
 **Relevance:**
@@ -51,7 +51,7 @@ Sections are ordered by their best result; the calculator always goes on top.
 - The description and the keywords only count if the text really appears, and they weigh less.
 - Files are compared without the extension.
 - What is opened often moves up, and usage loses weight after 30 days. It is stored in
-  `~/.local/share/lordos/spotlight.json` (the last 300 entries).
+  `~/.local/share/insaneos/spotlight.json` (the last 300 entries).
 
 **Preview (on the right):**
 - the app's icon;
@@ -66,7 +66,7 @@ Sections are ordered by their best result; the calculator always goes on top.
 | | |
 |---|---|
 | ![full](clipboard-full-panel.png) | ![quick](clipboard-quick-panel.png) |
-| ❖⇧V: filters with counters, color swatch, code in monospace, image preview and actions | ❖V: the latest items, after restarting lord-server (the pinned link is on top) |
+| ❖⇧V: filters with counters, color swatch, code in monospace, image preview and actions | ❖V: the latest items, after restarting insane-server (the pinned link is on top) |
 | ![paste](clipboard-paste.png) | ![settings](clipboard-settings.png) |
 | Chosen with ❖V and the 8 key: «360» was pasted into the Settings search box, which had focus | Settings → Clipboard |
 
@@ -85,7 +85,7 @@ and the time.
 - **Paste.** Choosing something copies it again and pastes it where you were:
   - into the Insane OS text field that had focus;
   - or into the frontmost Linux app, with a Ctrl+V that the compositor sends only to that app
-    (`lord.wayland.paste`).
+    (`insane.wayland.paste`).
 
   If there was nowhere to paste, it stays copied and says so.
 - **Kind of each entry** (`clipboardKind`):
@@ -98,15 +98,15 @@ and the time.
 ### Where it is stored
 
 - **Files:**
-  - `~/.local/share/lordos/clipboard/history.json`, with the entries;
+  - `~/.local/share/insaneos/clipboard/history.json`, with the entries;
   - `img-*.png` next to it, with the images.
 - **How images are stored:** the compositor leaves the latest image in
-  `$XDG_RUNTIME_DIR/lordos/clip-N.png`, which is lost on reboot. That's why
-  `lord.clipboard.saveImage(path)` copies it to the home folder. It validates the path with the
-  same rules as `lord.fs.write`: inside the home folder and never in the protected folders.
-- **Copying an image again:** `lord.clipboard.useImage(path)` only accepts those two places, the
+  `$XDG_RUNTIME_DIR/insaneos/clip-N.png`, which is lost on reboot. That's why
+  `insane.clipboard.saveImage(path)` copies it to the home folder. It validates the path with the
+  same rules as `insane.fs.write`: inside the home folder and never in the protected folders.
+- **Copying an image again:** `insane.clipboard.useImage(path)` only accepts those two places, the
   compositor's previews and the history's images.
-- **Deleting:** `lord.clipboard.deleteSaved(name)` deletes only `img-*.png` names in that folder.
+- **Deleting:** `insane.clipboard.deleteSaved(name)` deletes only `img-*.png` names in that folder.
   There is no general file deletion.
 - **Settings → Clipboard:**
 
@@ -127,22 +127,22 @@ Sensitive content never enters the history, but it can still be pasted:
 
 - **Linux apps that mark the copy as secret.** They offer the `x-kde-passwordManagerHint`
   format, the KDE and GNOME convention used by KeePassXC and other password managers. The
-  compositor detects it (`wl.c`), and `lord.clipboard.state()` answers `sensitive: true`.
+  compositor detects it (`wl.c`), and `insane.clipboard.state()` answers `sensitive: true`.
 - **Insane OS.** `clipboard.set(text, { secure: true })` copies without saving. `TextInput`'s
   `secure` fields (passwords) don't allow copying.
 - **Apps excluded in Settings.** They don't end up in the history.
 
-`lord.clipboard.state()` also returns `origin`: the app_id of the Linux app that copied,
-`terminal` or `lordos`.
+`insane.clipboard.state()` also returns `origin`: the app_id of the Linux app that copied,
+`terminal` or `insaneos`.
 
-### Tested (VM 119 `lordos-spot`)
+### Tested (VM 119 `insaneos-spot`)
 
 - **Copies from a Wayland app** with `wl-copy` (`wl-clipboard`, for the tests only): a link, a
   color, a path, code, text and two PNG images. Each one got its kind, and the images were saved
   as `img-*.png`.
 - **Secret:** `tests/clip_secret.c` offers text + `x-kde-passwordManagerHint`, like KeePassXC.
   The text could be pasted with `wl-paste` and didn't end up in `history.json`.
-- **Restart:** after restarting lord-server, the history was still there, with the pinned items
+- **Restart:** after restarting insane-server, the history was still there, with the pinned items
   on top.
 - **Full panel:** filters, pin and delete work.
 - **Paste:** ❖V and the 8 key pasted into a Insane OS text field.

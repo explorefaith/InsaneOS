@@ -1,6 +1,6 @@
-// The way every section acts: a plan built in lord-server, a confirmation short enough to read, the
+// The way every section acts: a plan built in insane-server, a confirmation short enough to read, the
 // execution, and a result that leads with a summary.
-import { View, Text, addListener, cleaner, t as tr, formatBytes, formatNumber, revealPath, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, addListener, cleaner, t as tr, formatBytes, formatNumber, revealPath, typeScale, spacing } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Label, Glass, GlassButton, PagedList, Enter, CountUp, useLoop, usePal } from './ui.jsx';
 
@@ -57,7 +57,7 @@ export function AskDialog({ title, note, okLabel, onOk, onCancel }) {
 function Pulse() {
   const p = usePal();
   const ring = useRef(null);
-  useLoop((t) => { if (ring.current) { const x = (t % 2.6) / 2.6, s = 1 + (1 - (1 - x) ** 2) * 0.55; lord.setStyle(ring.current.id, 'scaleX', s); lord.setStyle(ring.current.id, 'scaleY', s); lord.setStyle(ring.current.id, 'opacity', 0.7 * (1 - x)); } });
+  useLoop((t) => { if (ring.current) { const x = (t % 2.6) / 2.6, s = 1 + (1 - (1 - x) ** 2) * 0.55; insane.setStyle(ring.current.id, 'scaleX', s); insane.setStyle(ring.current.id, 'scaleY', s); insane.setStyle(ring.current.id, 'opacity', 0.7 * (1 - x)); } });
   return (
     <Enter x={0} y={14} style={{ width: 112, height: 112, alignItems: 'center', justifyContent: 'center' }}>
       <View ref={ring} style={{ position: 'absolute', left: 0, top: 0, width: 112, height: 112, borderRadius: 56, border: `2px solid ${p.accent}`, opacity: 0 }} />

@@ -2,14 +2,14 @@
 
 Another computer on the local network opens `https://<machine IP>:5673` in a browser and logs in
 with a user and password of the machine. Nothing needs to be installed: no extra programs, no
-plugins, no third-party remote desktop protocol. It's part of `lord-sessiond`
+plugins, no third-party remote desktop protocol. It's part of `insane-sessiond`
 ([SESSIONS.md](SESSIONS.md)), the same process that handles the monitor's login screen.
 
-The port is **5673**, which spells "LORD" on a phone keypad.
+The port is **5673**, which spells "INSANE" on a phone keypad.
 
 - **With the same user that's on the monitor:** you see and drive **the same session**. Both
   sides move the mouse and type at the same time. The monitor shows the notice
-  «Remote desktop: lord · 192.168.x.x».
+  «Remote desktop: insane · 192.168.x.x».
 - **With another user:** they get **their own desktop**, running at the same time in the
   background.
 - **If the session was already open:** it's resumed (including one somebody left on the monitor
@@ -41,17 +41,17 @@ the desktop while the monitor shows the login screen. A user switch doesn't cut 
   actions.
 - The URL built from the LAN IPv4 addresses and the certificate's SHA-256 fingerprint, to compare
   with the one the browser shows.
-- **Who can connect:** all users, or only the `lordos-remote` group (`remote-config`;
+- **Who can connect:** all users, or only the `insaneos-remote` group (`remote-config`;
   `remote-member` adds users to or removes them from the group).
 - **Who can connect** and **Blocked addresses**: see [Blocked and allowed
   addresses](#blocked-and-allowed-addresses).
 - **Connected now:** user, IP, whether they're watching this screen or their own desktop, and for
-  how long, with a «Disconnect» button (`remote-kick`, only pids from lord-sessiond's list).
+  how long, with a «Disconnect» button (`remote-kick`, only pids from insane-sessiond's list).
 - **Connection:** STUN servers and a TURN relay reached over UDP, TCP or TLS (`remote-ice`); see
   [Video (WebRTC)](#video-webrtc). There is no switch: WebRTC is the only way the remote desktop works.
 
-The actions change `/etc/lordos/remote/config` (`enabled=`, `port=`, `allow=`) and send SIGHUP to
-lord-sessiond. Turning remote off cuts the connections, but the sessions stay open, as with RDP.
+The actions change `/etc/insaneos/remote/config` (`enabled=`, `port=`, `allow=`) and send SIGHUP to
+insane-sessiond. Turning remote off cuts the connections, but the sessions stay open, as with RDP.
 
 Without a screen, the same file is written by the Raspberry Pi image's `remote-desktop` switch file
 (`RASPBERRY.md`) and by the Debian installer's `--remote-desktop` option for servers and VPS
@@ -80,7 +80,7 @@ takes the initials of the name being typed.
     the check began (unknown accounts spend the same `crypt` work on a dummy hash).
 - **Lockout:** 3 failed sign-ins block the address (see [Blocked and allowed
   addresses](#blocked-and-allowed-addresses)). The old growing per-address waits stay as well.
-- **Cookie** `__Host-lordos_remote`: 32 random bytes, `Secure; HttpOnly; SameSite=Strict; Path=/`,
+- **Cookie** `__Host-insaneos_remote`: 32 random bytes, `Secure; HttpOnly; SameSite=Strict; Path=/`,
   12 hours. Only its SHA-256 is kept, with a digest of the account's shadow hash: changing or
   locking the password ends it. Locking the screen ends every cookie of that user. Signing out is a
   `POST /logout` from the page.
@@ -102,8 +102,8 @@ takes the initials of the name being typed.
 - IPv6 addresses count per **/64** (a host has a whole /64 to hop through).
 - The answer to the third failure is the sign-in page with the "blocked" message; after that the
   address is closed right after `accept()`, before any TLS work.
-- Blocks are kept in `/var/lib/lordos/remote/blocklist` (root, 0600, folder 0700) and survive a
-  restart of `lord-sessiond` or of the computer.
+- Blocks are kept in `/var/lib/insaneos/remote/blocklist` (root, 0600, folder 0700) and survive a
+  restart of `insane-sessiond` or of the computer.
 - A successful sign-in clears that address's count. **Accounts are never locked** (anybody could
   lock you out); repeated failures for one user name, from any address, only slow it down: none for
   the first 4, then 1, 2, 4 and at most 8 s before checking.
@@ -114,7 +114,7 @@ takes the initials of the name being typed.
 
 ![The notification on the desktop](remote-desktop-block-notice.png)
 
-**Who can connect** (Settings → Sharing, `net=` in `/etc/lordos/remote/config`):
+**Who can connect** (Settings → Sharing, `net=` in `/etc/insaneos/remote/config`):
 
 - **Local network** (the default): private ranges (10/8, 172.16/12, 192.168/16, 100.64/10),
   loopback, link-local and IPv6 unique-local, plus connections over a VPN of this computer: only
@@ -134,7 +134,7 @@ takes the initials of the name being typed.
 - **Temporarily blocked:** the lockout's blocks with the time left, **Unblock** and **Block
   permanently** (moves it to the blocklist).
 
-The lists live in `/etc/lordos/remote/access` (root, 0600): `allow <cidr>` and `block <cidr>`, at
+The lists live in `/etc/insaneos/remote/access` (root, 0600): `allow <cidr>` and `block <cidr>`, at
 most 64 of each. Networks are IPv4 /8–/32 or IPv6 /16–/128; host bits are cleared. The same lists,
 the clients and the failed sign-ins are also in Monitor → Network ([MONITOR.md](MONITOR.md),
 "Remote desktop").
@@ -150,9 +150,9 @@ the clients and the failed sign-ins are also in Monitor → Network ([MONITOR.md
 |------------------------|---------------------|-----------------------------------------------------------------|
 | `remote-config`        | `net=lan\|list\|any` | the mode (with the existing `allow=`, `port=` lines)            |
 | `remote-block`         | `<cidr>`            | adds a manual block to `access`                                 |
-| `remote-unblock`       | `<cidr>`            | removes manual blocks inside it and appends `unblock <cidr>` to `/var/lib/lordos/remote/requests` (root 0600, `flock`); `lord-sessiond` lifts the lockout blocks inside it on SIGHUP |
+| `remote-unblock`       | `<cidr>`            | removes manual blocks inside it and appends `unblock <cidr>` to `/var/lib/insaneos/remote/requests` (root 0600, `flock`); `insane-sessiond` lifts the lockout blocks inside it on SIGHUP |
 | `remote-allow`         | `add\|del <cidr>`    | the allowlist                                                   |
-| `remote-failures`      | none                | read-only: the recent failed sign-ins as code lines (`remote.failure key= count= first= last= user=`), from `/run/lordos/remote-failures` (root 0600); for Monitor |
+| `remote-failures`      | none                | read-only: the recent failed sign-ins as code lines (`remote.failure key= count= first= last= user=`), from `/run/insaneos/remote-failures` (root 0600); for Monitor |
 
 Unblocking from Settings forgets that address's history (its next block is 15 minutes again).
 
@@ -187,7 +187,7 @@ Text (JSON):
   - the bridge passes them to the session as `RP_SCROLL` and `RP_PINCH`, with clamped values;
 - `k{c,d}`, with evdev codes derived from `KeyboardEvent.code`, so the session applies the
   layout. `d` is 0 released, 1 pressed, 2 a repeat (`KeyboardEvent.repeat`). Each key goes down
-  once and up once: lord-server keeps the keys each viewer holds (`sw_held_key`), turns a second
+  once and up once: insane-server keeps the keys each viewer holds (`sw_held_key`), turns a second
   press into a repeat, drops a release of a key it never saw go down, and releases what is still held
   when the viewer goes. xkbcommon counts presses of a modifier, so before this a Ctrl held on
   Windows (whose browsers repeat a held Ctrl) stayed on after its release, even after the browser
@@ -255,9 +255,9 @@ primaries, sRGB transfer) so the browser shows the same colors as the tiles: the
 difference between both over the whole screen is 0.1 levels. The bridge makes the PNG straight from
 the session's rectangle (`enc.c`, the only image code left); it keeps no copy of the screen.
 
-**One encoder per session.** The session's `lord-server` renders as always; the frame the remote
+**One encoder per session.** The session's `insane-server` renders as always; the frame the remote
 desktop sees (protected windows in black, from `media_composed`, or the GPU's read-back) goes to a
-live encoder: `lord-media` in `MK_STREAM` mode, through a sealed memfd of 3 slots, like the screen
+live encoder: `insane-media` in `MK_STREAM` mode, through a sealed memfd of 3 slots, like the screen
 recording. It uses H.264 with VA-API when the card encodes it, else libx264 (`ultrafast`,
 `zerolatency`, CRF 22 with a bit-rate cap, and the deblocking filter that `ultrafast` turns off), or VP8 with libvpx (`realtime`) for browsers without
 H.264. Every viewer of the session gets the same encoded frames over the session socket
@@ -268,7 +268,7 @@ The browser's estimate (REMB) is a ceiling only when it falls by more than 15 % 
 it only grows with what the browser receives, so as a fixed ceiling it kept a new connection near
 3 Mbit/s for about three minutes (video in blocks); now a LAN reaches the top in about 10 s. A viewer that falls more than
 3 MB behind skips frames until the next keyframe; a lost frame (PLI, FIR) asks for one, and the
-current screen is encoded again for it. Two users means two sessions, two `lord-server`s and two
+current screen is encoded again for it. Two users means two sessions, two `insane-server`s and two
 encoders, each as its own user.
 
 **The frame rate follows the viewer's screen.** The page measures its screen's refresh rate with
@@ -293,7 +293,7 @@ paints over it.
 **The GPU keeps composing.** Until 0.8.3 a remote viewer switched the session to CPU composition.
 Now `gpu_frame` reads the composed frame back (`gpu_read_next`) once, for the encoder and the tiles,
 and the screen keeps its GPU composition. Only two cases still use the CPU path: protected windows on
-screen (they are painted black in a CPU copy of the scene) and screen recording. `LORD_REMOTE_GPU=0`
+screen (they are painted black in a CPU copy of the scene) and screen recording. `INSANE_REMOTE_GPU=0`
 forces the CPU path. While the remote desktop reads frames back, a fullscreen app is composed rather
 than scanned out directly.
 
@@ -320,7 +320,7 @@ than scanned out directly.
   Over TLS the relay's certificate must be valid for its name (or its IP address) under the system's
   certificate authorities, or match a pinned SHA-256 fingerprint (`turn_fp=`, for a relay with a
   certificate of its own); anything else is refused and logged ("self-signed certificate"). The
-  password is kept in `/etc/lordos/remote/turn.key` (root 0600), read by the connection's root process
+  password is kept in `/etc/insaneos/remote/turn.key` (root 0600), read by the connection's root process
   right before the bridge drops root and handed over in memory; after the relay's first answer only
   its MD5 key remains (a new peer of the same connection gets that key, never the password), and it
   is never logged, written to the config or sent to the browser (the browser is not given the relay).
@@ -337,7 +337,7 @@ the rate and connection limits, all before any parsing). Then:
    MESSAGE-INTEGRITY attribute (`rw_ice_route`), and takes the first 8 characters of the user name:
    the **route**. Our ICE user fragment is always `<route><4 random>`; the route is random per
    connection and only ever travels inside the authenticated TLS WebSocket.
-2. It connects to `/run/lordos/rtc/<route>` (a folder only root can enter, 0700) and hands over the
+2. It connects to `/run/insaneos/rtc/<route>` (a folder only root can enter, 0700) and hands over the
    TCP socket and the frame it read (`SCM_RIGHTS`); then it exits. An unknown route, a malformed
    frame or anything that isn't such a check: the connection is closed.
 3. That listening socket was created by the connection's root process before its bridge dropped
@@ -427,9 +427,9 @@ alone can't redirect the stream, over UDP or TCP.
 
 The WebRTC peer lives in the bridge, which already dropped root (see Process and privileges): its
 UDP sockets, its TURN connection and its TLS are created after the drop, as the user; the only
-socket it gets from root is the ICE-TCP handoff listener. `lord-sessiond` links libsrtp2 and
-usrsctp (Debian packages; `make` requires them for `lord-sessiond`, and the package depends on
-`libsrtp2-1` and `libusrsctp2`); `lord-server` links neither; FFmpeg stays only in `lord-media`.
+socket it gets from root is the ICE-TCP handoff listener. `insane-sessiond` links libsrtp2 and
+usrsctp (Debian packages; `make` requires them for `insane-sessiond`, and the package depends on
+`libsrtp2-1` and `libusrsctp2`); `insane-server` links neither; FFmpeg stays only in `insane-media`.
 
 **Admin action:**
 
@@ -471,7 +471,7 @@ WebRTC-only build:
 
 What stays as it is: ICE-lite answers checks from any allowed address that knows the credentials
 (they only travel inside the authenticated TLS WebSocket), as fast as they come; a relay sees the
-traffic's size and timing; the encoder, `lord-media`, parses only our own frames (in its sandbox, as
+traffic's size and timing; the encoder, `insane-media`, parses only our own frames (in its sandbox, as
 for recording).
 
 ### Measurements (0.8.4, video)
@@ -481,7 +481,7 @@ LAN; a window dragged in circles for 16 s; CPU per process from `/proc`, traffic
 `main` at the time (video with the image path behind it), "after" this WebRTC-only build, measured
 the same hour in the same way.
 
-| Situation | | Frames/s | Network | lord-server | encoder | bridge(s) |
+| Situation | | Frames/s | Network | insane-server | encoder | bridge(s) |
 |---|---|---|---|---|---|---|
 | idle, 1 viewer | before | — | 0.09 Mbit/s | 2 % | 2 % | 1 % |
 | | after | — | 0.06–0.13 Mbit/s | 2–3 % | 2 % | 1 % |
@@ -534,7 +534,7 @@ YouTube in Chromium inside the session, watched over the remote desktop:
 |---|---|---|---|
 | 1080p, 24 fps | real time | under 1 % | 25–26 of 60 fps |
 | 1080p, 24 fps, AV1 (17 s read from the player's statistics, 12:08:18 → 12:08:35) | 386 frames, 23–24 fps | 0 new | 26 with the video alone, 38–54 when the sidebar's animated preview and the statistics graphs also change |
-| 1080p, 60 fps, AV1 (before the pool) | 38–44 fps | about 1 in 3 | lord-server saturated |
+| 1080p, 60 fps, AV1 (before the pool) | 38–44 fps | about 1 in 3 | insane-server saturated |
 
 - **The bar counts screen updates, not the video's frames:** a 24 fps video alone gives about 26; anything
   else that moves adds to it. It reached what changed in every case above.
@@ -546,24 +546,24 @@ YouTube in Chromium inside the session, watched over the remote desktop:
 
 ## Process and privileges
 
-1. `lord-sessiond` (root) accepts the connection. Refused addresses (blocked, not allowed, too many
+1. `insane-sessiond` (root) accepts the connection. Refused addresses (blocked, not allowed, too many
    connections) are closed there, before TLS. Otherwise a child handles it (48 at most, 8 per
    address; 32 signed-in browsers).
 2. That child does TLS and reads one request under a 15 s deadline (a 90 s alarm backs it up). With
    a valid cookie, `/ws` finds the user's session or creates it (`sess.c`, with the same lock as
    the monitor).
-3. **It forks the bridge, which drops root for good:** it unmaps `lord-sessiond`'s shared memory,
+3. **It forks the bridge, which drops root for good:** it unmaps `insane-sessiond`'s shared memory,
    closes every descriptor but the TLS socket, the session socket, a pipe to its parent and the
-   ICE-TCP handoff listener (`/run/lordos/rtc/<route>`, see [ICE over TCP](#ice-over-tcp)), clears
+   ICE-TCP handoff listener (`/run/insaneos/rtc/<route>`, see [ICE over TCP](#ice-over-tcp)), clears
    the environment, then `initgroups`, `setresgid`, `setresuid`, checks that the real, effective
    and saved ids are the user's and that it can't get root back, sets `no_new_privs`, not dumpable,
    and dies with its parent. TLS, compression and the bridge run as the user. The root parent keeps
    nothing of the connection: it only waits, and when the bridge reports that the session was
    locked, it ends every cookie of that user.
 
-OpenSSL (TLS) is only in `lord-sessiond`; `lord-server` doesn't link it. The certificate is
+OpenSSL (TLS) is only in `insane-sessiond`; `insane-server` doesn't link it. The certificate is
 self-signed P-256, with CN equal to the machine name and ten years of validity. It's in
-`/etc/lordos/remote/cert.pem` (`key.pem` 0600) and is created the first time remote is turned on.
+`/etc/insaneos/remote/cert.pem` (`key.pem` 0600) and is created the first time remote is turned on.
 
 ## Threats
 
@@ -597,11 +597,11 @@ listed after the table.
 | # | Severity | What | Fix | Test |
 |---|----------|------|-----|------|
 | 1 | High | The 32-connection cap only counted signed-in browsers: any host could open unlimited connections, each a root child that waited up to 15 s per read (forever if bytes trickled in). | A child per connection only if the address is allowed, not blocked, within 20 new connections then 2/s, under 8 open from it and 48 in all; 15 s for handshake + request, 90 s alarm. | 14 parallel connections: 8 served; 60 quick requests: 8 served, 52 refused; one header byte per second: cut at 16.1 s; TCP without a TLS handshake: cut at 15.0 s. |
-| 2 | High | After dropping root the bridge still had `lord-sessiond`'s shared memory mapped read-write: it could forge a cookie for any other user, erase blocks, hold the lock (freezing the root process) or plant a pid that root later signalled when remote was turned off (`kill(-1)` = every process). | The bridge is forked after the handshake and unmaps it; root only signals pids from its own private list. | `/proc` of a live bridge: uid 1003 (real, effective, saved), no shared mapping, fds 0–2 + socket + session + pipe, `NoNewPrivs 1`. |
+| 2 | High | After dropping root the bridge still had `insane-sessiond`'s shared memory mapped read-write: it could forge a cookie for any other user, erase blocks, hold the lock (freezing the root process) or plant a pid that root later signalled when remote was turned off (`kill(-1)` = every process). | The bridge is forked after the handshake and unmaps it; root only signals pids from its own private list. | `/proc` of a live bridge: uid 1003 (real, effective, saved), no shared mapping, fds 0–2 + socket + session + pipe, `NoNewPrivs 1`. |
 | 3 | Medium | User enumeration by timing: an unknown or refused account returned before `crypt`, a wrong password after it. | Dummy hash with the same algorithm and cost; every failure answered 1.25 s after the check began. | 8–24 tries each: unknown 1254.2 ms, existing user with a wrong password 1254.1 ms, `root` 1254.6 ms, a system account 1254.8 ms (medians). |
-| 4 | Medium | No lockout (only growing waits, in a 64-entry table an attacker could cycle); no restriction on where connections came from. | Lockout per address (/64 for IPv6), 15 min → 1 h → 24 h, persistent; local network only by default; manual lists. | 3 wrong → blocked page, 4th refused before TLS; still blocked after restarting `lord-sessiond`; unblocked from Settings; "only these addresses" refused the Pi and served the listed Mac. |
+| 4 | Medium | No lockout (only growing waits, in a 64-entry table an attacker could cycle); no restriction on where connections came from. | Lockout per address (/64 for IPv6), 15 min → 1 h → 24 h, persistent; local network only by default; manual lists. | 3 wrong → blocked page, 4th refused before TLS; still blocked after restarting `insane-sessiond`; unblocked from Settings; "only these addresses" refused the Pi and served the listed Mac. |
 | 5 | Medium | A request without `Origin` passed the same-origin check; logout was a `GET` (any site could sign you out). | `Origin` required and equal to `https://` + `Host` on `/login`, `/logout`, `/ws`; `Sec-Fetch-Site` must agree; logout is a `POST`. | foreign `Origin`, `http://` origin, none, `cross-site`: 403; `GET /logout`: 405. |
-| 6 | Medium | Cookie: matched by substring (`xlordos_remote=` counted), no `__Host-` prefix (another service on the same host could plant one), kept in clear in shared memory, unaffected by a password change. | `__Host-lordos_remote`, exact parse, two of them refused, only SHA-256 stored, bound to the shadow hash, the old cookie dropped at sign-in. | forged, old name, duplicated: 403; after `chpasswd` and after logout: 303 to the sign-in page / 403 on `/ws`. |
+| 6 | Medium | Cookie: matched by substring (`xinsaneos_remote=` counted), no `__Host-` prefix (another service on the same host could plant one), kept in clear in shared memory, unaffected by a password change. | `__Host-insaneos_remote`, exact parse, two of them refused, only SHA-256 stored, bound to the shadow hash, the old cookie dropped at sign-in. | forged, old name, duplicated: 403; after `chpasswd` and after logout: 303 to the sign-in page / 403 on `/ws`. |
 | 7 | Medium | Locking the screen ended only the cookie of the browsers connected at that moment; a browser signed in earlier could come back to the session. | Lock ends every cookie of that user (the root process for a lock on the monitor, the bridge's root parent otherwise). | a second, unconnected cookie: 200 before the lock, refused after. |
 | 8 | Low | HTTP parser: last duplicate header won, `Content-Length` read with `atol`, `Transfer-Encoding` ignored, bare LF, folding, any method served pages, bytes after the body accepted. | `rs_parse_head`: strict request line, 40 headers, 8 KB head, duplicates refused, `Transfer-Encoding` → 501, 4 KB body, one request per connection, method per path. | 22 malformed requests answered 400/405/413/414/415/431/501 as expected. |
 | 9 | Low | Form parser: first duplicate won, `%00` cut the value, long values truncated silently, unknown fields ignored, no `Content-Type` check, 256-byte password limit. | `rs_parse_login`: exactly `user` and `pass`, strict `%XX`, user name rules, password 1–1024 bytes, no NUL; form type required; no query on `/login`. | 33-character name, 1025-byte password, `%00`: refused (and counted); duplicate/unknown field, `%zz`: 400; `text/plain`: 415. |
@@ -611,18 +611,18 @@ listed after the table.
 | 13 | Low | CSP allowed inline scripts; no `Permissions-Policy`, COOP or CORP. | Hash-based CSP, `form-action`, `base-uri`, the rest of the headers. `Referrer-Policy` stays `same-origin`: with `no-referrer` browsers send `Origin: null` on the page's own form. | header dump; Chrome sign-in works under the CSP. |
 | 14 | Low | Accounts: shells matched by substring only, root-group accounts allowed, `/etc/nologin`, forced password change and expired passwords ignored. | Shell from `/etc/shells`, no gid 0, never `root`, the shadow aging rules. | `root` refused like a wrong password. |
 | 15 | Low | Log injection: `Origin`/`Host` logged raw (a bare LF forged a journal line); attempted names logged only when valid. | Everything logged is cleaned to printable ASCII; attempted names logged sanitized. | journal check. |
-| 16 | Info | The privilege drop didn't check saved ids or groups, kept the environment and every inherited descriptor, and the bridge outlived `lord-sessiond` (the parent-death signal is cleared by `setuid`). | See "Process and privileges". | `/proc` check above. |
+| 16 | Info | The privilege drop didn't check saved ids or groups, kept the environment and every inherited descriptor, and the bridge outlived `insane-sessiond` (the parent-death signal is cleared by `setuid`). | See "Process and privileges". | `/proc` check above. |
 | 17 | Info | After a failure the user name went into the URL (`/?e=1&u=…`): a password typed into the user field ended up in the history. | The page keeps the name in `sessionStorage` and clears the address bar. | browser check. |
 | 18 | High | (Found in review of this branch.) "Local network" counted any interface named `ppp*`, `tun*` or `wg*` as a VPN, so a public address arriving over a PPPoE uplink (`ppp0`) or any tunnel passed the default. | Only Insane OS's own VPN interface names (with the dash), only to that interface's address, and only from inside its subnet or its point-to-point peer. | unit tests: `ppp0` with a public peer refused; `wg-home` with an in-subnet peer accepted and a public one refused; `/0` subnets refused. |
 
 **Greeter and lock.** A remote browser can't unlock the monitor: the monitor shows the login
-screen (a separate `lord-server` as `lordos-greeter`), and the session only reaches `lord-sessiond`
+screen (a separate `insane-server` as `insaneos-greeter`), and the session only reaches `insane-sessiond`
 through the seat connection, whose requests are lock, switch user and power. Signing in from the
 browser resumes the user's session in the background, never on the monitor. Locking the monitor
 ends the remote viewers and every remote cookie of that user; a browser must sign in again with the
 password. Locking from the browser does the same.
 
-**What stays as it is.** `lord-sessiond` reads `/etc/shadow` itself instead of PAM (no PAM stack
+**What stays as it is.** `insane-sessiond` reads `/etc/shadow` itself instead of PAM (no PAM stack
 to configure; the account rules PAM would apply are listed under Login). The certificate is
 self-signed: compare the fingerprint the first time. An attacker on the LAN with many addresses
 gets 2 tries per address; the per-account slowdown limits that. Two-step sign-in is a proposal in
@@ -642,7 +642,7 @@ scan; headers; lock. All results are in the table.
 ## Sound
 
 The session's sound reaches the browser with the video (see [Video (WebRTC)](#video-webrtc)): the
-session's `lord-server` records the monitor of the default output from PipeWire itself (the same
+session's `insane-server` records the monitor of the default output from PipeWire itself (the same
 `maudio.c` stream as the screen recorder's microphone, `@DEFAULT_MONITOR@`, mono 48 kHz) into a
 shared-memory ring, and the live encoder makes Opus of it (20 ms frames, 64 kbit/s, low delay). The
 page starts muted (browsers only play sound after a click): the first click or key in the session
@@ -685,11 +685,11 @@ standard OpenSSH server (`openssh-server`), not something of our own.
   `KillMode=process`); new ones are refused and port 22 closes, also after a reboot.
 - **How to connect:** when it's on, the page shows `ssh <your user>@<address>` for each LAN IPv4
   address and for the machine name, and the **ED25519 host key fingerprint** (`SHA256:…`, computed
-  by `lord-server` from `/etc/ssh/ssh_host_ed25519_key.pub`, the same as
+  by `insane-server` from `/etc/ssh/ssh_host_ed25519_key.pub`, the same as
   `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`). Compare it with the one `ssh` shows the
   first time it connects.
 - **Who can log in:** all users with a password (the default), or **only administrators**
-  (`ssh-allow admins` writes `/etc/ssh/sshd_config.d/11-lordos-allow.conf` with
+  (`ssh-allow admins` writes `/etc/ssh/sshd_config.d/11-insaneos-allow.conf` with
   `AllowGroups sudo admin wheel`, checks it with `sshd -t` and reloads the server; `ssh-allow all`
   removes it). **Root never logs in.**
 - **Raspberry Pi:** the image's `ssh` switch file on the boot partition keeps working
@@ -701,7 +701,7 @@ standard OpenSSH server (`openssh-server`), not something of our own.
 
 ### Safe defaults
 
-The `lordos` package ships `/etc/ssh/sshd_config.d/10-lordos.conf`, read only once
+The `insaneos` package ships `/etc/ssh/sshd_config.d/10-insaneos.conf`, read only once
 `openssh-server` is installed. Debian's `sshd_config` includes that folder at the top and `sshd`
 keeps the first value it reads, so it wins over the rest:
 
@@ -723,13 +723,13 @@ The privileged part is two closed actions of the admin helper (`server/src/remot
 | `ssh-allow`             | `all` or `admins` | writes or removes the fixed `AllowGroups` drop-in, `sshd -t`, `systemctl try-reload-or-restart` |
 
 Nothing the user types reaches a command line or sshd's configuration, and no package is installed
-by these actions: that stays in the package engine. `lord-server` only reads the state
-(`lord.ssh.status()` in `server/src/ui/js_sys.c`: the unit files, `/proc/*/comm` for a root
+by these actions: that stays in the package engine. `insane-server` only reads the state
+(`insane.ssh.status()` in `server/src/ui/js_sys.c`: the unit files, `/proc/*/comm` for a root
 `sshd`, the drop-in and the public host key), and doesn't run anything.
 
 ### Firewall
 
-Nothing to open. `lord-netperm`'s per-app rules apply to programs started from a Insane OS session
+Nothing to open. `insane-netperm`'s per-app rules apply to programs started from a Insane OS session
 (they live in its cgroup tree); `sshd` is a system service in `system.slice/ssh.service`, so the
 rules never block it, and Insane OS adds no system-wide packet filter. If you run your own (nftables,
 a router), allow TCP port 22 from the local network only. As with remote desktop, to use it from
@@ -744,10 +744,10 @@ the internet, use a VPN instead of opening the port.
 - From another machine: key login, password login and `scp` worked; `root` was refused
   (`sshd -T`: `permitrootlogin no`, `passwordauthentication yes`).
 - «Only administrators»: `bob` (not in sudo) was refused («none of user's groups are listed in
-  AllowGroups»), `lord` logged in. Back to «All users» removed the drop-in.
+  AllowGroups»), `insane` logged in. Back to «All users» removed the drop-in.
 - Reboot with it on: still enabled and listening. Turned off: `ssh.service` disabled and
   inactive, port 22 closed, and still closed after another reboot.
-- A standard user (lord taken out of `sudo` for the test): the page shows the administrator note
+- A standard user (insane taken out of `sudo` for the test): the page shows the administrator note
   and the switch does nothing; the server stayed off.
 
 ## Files
@@ -760,16 +760,16 @@ the internet, use a VPN instead of opening the port.
 | `server/src/remote/enc.c`             | PNG for the lossless refresh and cursor images (stb_image_write, vendored in third_party/stb) |
 | `server/src/remote/rtc.c`             | the WebRTC peer in the bridge: ICE-lite over UDP and TCP, ICE restarts, STUN server, DTLS-SRTP, SCTP data channels, RTP, TURN client over UDP/TCP/TLS |
 | `server/src/remote/rtcwire.c`         | strict SDP, candidate, STUN/TURN, RTCP and data channel parsers, ICE-TCP framing and routing; RTP payloaders (tested and fuzzed) |
-| `server/src/media/mstream.c`          | the session's shared live encoder (lord-server side)        |
-| `server/src/media/helper/lm_stream.c` | the live encoder in `lord-media` (H.264/VP8, Opus)          |
+| `server/src/media/mstream.c`          | the session's shared live encoder (insane-server side)        |
+| `server/src/media/helper/lm_stream.c` | the live encoder in `insane-media` (H.264/VP8, Opus)          |
 | `server/src/remote/login.html`, `client.html` | pages (embedded in the binary)                      |
 | `server/src/remote/remote_admin.c`    | `remote-*` actions                                         |
 | `server/src/remote/ssh_admin.c`       | `ssh-*` actions (remote login)                             |
-| `tools/iso/rootfs/etc/ssh/sshd_config.d/10-lordos.conf` | sshd defaults shipped by the `lordos` package |
+| `tools/iso/rootfs/etc/ssh/sshd_config.d/10-insaneos.conf` | sshd defaults shipped by the `insaneos` package |
 | `apps/settings/Sharing.jsx`, `sdk/remote.js` | Settings → Sharing and the notice on the monitor    |
-| `/etc/lordos/remote/`                 | `config`, `access`, `cert.pem`, `key.pem`, `fingerprint`, `turn.key` (root 0600) |
-| `/var/lib/lordos/remote/`             | `blocklist`, `requests` (root only)                        |
-| `/run/lordos/rtc/`                    | one ICE-TCP handoff socket per connection, named by its route (root 0700) |
+| `/etc/insaneos/remote/`                 | `config`, `access`, `cert.pem`, `key.pem`, `fingerprint`, `turn.key` (root 0600) |
+| `/var/lib/insaneos/remote/`             | `blocklist`, `requests` (root only)                        |
+| `/run/insaneos/rtc/`                    | one ICE-TCP handoff socket per connection, named by its route (root 0700) |
 
 ## Screenshots
 
@@ -784,8 +784,8 @@ the internet, use a VPN instead of opening the port.
 ## Root over SSH (advanced, 0.8.5)
 
 Off by default. Settings → Sharing → **Advanced: root over SSH** offers three modes: **Off** (the shipped
-`10-lordos.conf` keeps `PermitRootLogin no`), **Keys only** (`PermitRootLogin prohibit-password`) and
-**Key or password** (`PermitRootLogin yes`), written as `/etc/ssh/sshd_config.d/05-lordos-root.conf`
+`10-insaneos.conf` keeps `PermitRootLogin no`), **Keys only** (`PermitRootLogin prohibit-password`) and
+**Key or password** (`PermitRootLogin yes`), written as `/etc/ssh/sshd_config.d/05-insaneos-root.conf`
 (sshd keeps the first value it reads, and 05 comes first), checked with `sshd -t` and reloaded. Root's
 allowed public keys are listed with their SHA-256 fingerprints; a key is pasted or imported from a `.pub`
 file and validated in C before it reaches `/root/.ssh/authorized_keys` (no options, a known key type, a

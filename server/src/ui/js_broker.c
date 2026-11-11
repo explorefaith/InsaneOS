@@ -1,7 +1,7 @@
-/* js_broker.c — el objeto `lord` del proceso de una app .lpk aislada (ver js_broker.h).
+/* js_broker.c — el objeto `insane` del proceso de una app .lpk aislada (ver js_broker.h).
  *
  * Dibujar es local (las primitivas createNode/setStyle… las registra js.c). Todo lo demás
- * (fs, portapapeles, permisos, dispositivos) va por el broker a lord-server, que verifica el
+ * (fs, portapapeles, permisos, dispositivos) va por el broker a insane-server, que verifica el
  * permiso de cada llamada. Así la API del SDK para quien escribe la app no cambia. */
 #include "js_broker.h"
 #include "../sec/broker.h"
@@ -46,7 +46,7 @@ static char *pkg_read(const char *rel, size_t max, size_t *len);
 static struct { char *buf; size_t len; } queued[32];
 static int nqueued;
 static void queue_event(const char *p, size_t n) {
-    /* lord-maild replies (js_brokermail.c) are taken at once: never dropped while an RPC waits */
+    /* insane-maild replies (js_brokermail.c) are taken at once: never dropped while an RPC waits */
     if (n > 5 && !memcmp(p, "mail", 5)) { js_brokermail_chunk(p + 5, n - 5); return; }
     if (nqueued >= 32) return;
     char *b = malloc(n + 1);
@@ -72,7 +72,7 @@ static int rpc_fds(int op, const void *payload, uint32_t len, const int *fds, in
     struct iovec iov[2] = { { &h, sizeof h }, { (void *)payload, len } };
     struct msghdr m = { .msg_iov = iov, .msg_iovlen = len ? 2 : 1 };
     char cbuf[CMSG_SPACE(16 * sizeof(int))];
-    if (nfds) {                                             /* files for lord-maild (BOP_MAIL) */
+    if (nfds) {                                             /* files for insane-maild (BOP_MAIL) */
         memset(cbuf, 0, sizeof cbuf);
         m.msg_control = cbuf;
         m.msg_controllen = CMSG_SPACE((size_t)nfds * sizeof(int));
@@ -108,7 +108,7 @@ static int rpc(int op, const void *payload, uint32_t len, int *status, char **ou
 }
 
 /* Un evento: "tipo\0json". El teclado se aplica acá (keyboard.c); el resto va a JS
- * (__lordBrokerEvent: tokens del tema, idioma, estado completo). */
+ * (__insaneBrokerEvent: tokens del tema, idioma, estado completo). */
 /* The layout itself comes from the compositor's keymap (wl_keyboard.keymap, appclient.c):
  * kb_set() here would run inside the sandbox, where xkbcommon cannot read its rules. Only the
  * active group is taken from the broker. */
@@ -129,7 +129,7 @@ static void dispatch_event(const char *buf, size_t n) {
     const char *kind = buf, *json = nul + 1;
     size_t jl = n - (size_t)(json - buf);
     if (!strcmp(kind, "cam")) { js_brokercam_event(json, jl); return; }     /* camera frames (js_brokercam.c) */
-    if (!strcmp(kind, "mail")) { js_brokermail_chunk(json, jl); return; }  /* lord-maild replies (js_brokermail.c) */
+    if (!strcmp(kind, "mail")) { js_brokermail_chunk(json, jl); return; }  /* insane-maild replies (js_brokermail.c) */
     if (!strcmp(kind, "keyboard")) { apply_keyboard(json, jl); return; }
     if (!strcmp(kind, "state")) {                    /* resincronizar: teclado acá, el resto a JS */
         JDoc d;
@@ -188,7 +188,7 @@ int js_broker_wants_network(void) {
     return perm_get(app_id, PERM_NETWORK) == PERM_ALLOW;
 }
 
-/* ---- lord.fs (carpeta de datos de la app, por el broker) ---- */
+/* ---- insane.fs (carpeta de datos de la app, por el broker) ---- */
 
 static JSValue f_fs_home(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -247,7 +247,7 @@ static JSValue f_fs_list(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     return JS_IsException(v) ? (JS_FreeValue(c, JS_GetException(c)), JS_NewArray(c)) : v;
 }
 
-/* ---- lord.clipboard ---- */
+/* ---- insane.clipboard ---- */
 
 static JSValue f_clip_get(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -268,8 +268,8 @@ static JSValue f_clip_set(JSContext *c, JSValueConst t, int argc, JSValueConst *
     size_t sl = 0;
     const char *s = JS_ToCStringLen(c, &sl, argv[0]);
     int st;
-    /* lord.clipboard.set(text, { secure, clearAfter }): a secret (Passwords) is marked sensitive and
-     * cleared by lord-server after clearAfter seconds if it is still there */
+    /* insane.clipboard.set(text, { secure, clearAfter }): a secret (Passwords) is marked sensitive and
+     * cleared by insane-server after clearAfter seconds if it is still there */
     int secure = 0, clear_after = 0;
     if (argc > 1 && JS_IsObject(argv[1])) {
         JSValue v = JS_GetPropertyStr(c, argv[1], "secure");
@@ -295,7 +295,7 @@ static JSValue f_clip_set(JSContext *c, JSValueConst t, int argc, JSValueConst *
     return JS_UNDEFINED;
 }
 
-/* lord.clipboard.status(keep) → { state: 'mine' | 'cleared' | 'replaced' | 'none', left }: whether this app's own
+/* insane.clipboard.status(keep) → { state: 'mine' | 'cleared' | 'replaced' | 'none', left }: whether this app's own
  * last copy is still on the clipboard and how long a secret has left (never the clipboard's text); keep = true
  * cancels the clearing of its secret (BOP_CLIP_STATUS, sec/brokerclip.c) */
 static JSValue f_clip_status(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
@@ -320,7 +320,7 @@ static JSValue f_clip_status(JSContext *c, JSValueConst t, int argc, JSValueCons
     return o;
 }
 
-/* For js_vault.c (Passwords in app mode): lord-server opens the FIDO2 key for lord-vault after the
+/* For js_vault.c (Passwords in app mode): insane-server opens the FIDO2 key for insane-vault after the
  * `usb` permission. 0 and the device name, or -1 with err ("denied", "no-device"…). */
 int js_broker_vault_fido(char *name, size_t n, char *err, size_t en) {
     int st = BST_ERROR; char *out = NULL; uint32_t len = 0;
@@ -332,7 +332,7 @@ int js_broker_vault_fido(char *name, size_t n, char *err, size_t en) {
     return -1;
 }
 
-/* ---- lord.broker: pedir un permiso (aviso del sistema) y marcar un dispositivo en uso ---- */
+/* ---- insane.broker: pedir un permiso (aviso del sistema) y marcar un dispositivo en uso ---- */
 
 /* RPC que recibe un fd por SCM_RIGHTS (powerbox). Devuelve el fd, o -1; name el nombre elegido. */
 static int rpc_fd(int op, const void *payload, uint32_t len, char *name, size_t nn) {
@@ -386,9 +386,9 @@ int js_broker_send(int op, const void *payload, uint32_t len) {
     return sendmsg(broker_fd, &m, MSG_NOSIGNAL | MSG_DONTWAIT) < 0 ? -1 : 0;
 }
 
-/* lord.broker.pick(save, nombreSugerido) → { fd, name } | null (el diálogo lo dibuja lord-server) */
+/* insane.broker.pick(save, nombreSugerido) → { fd, name } | null (el diálogo lo dibuja insane-server) */
 /* ---- the companion (a packaged app only; broker.h, app/companion.c) ----
- * One socket message is one JSON text, 64 KB at most. What arrives goes to __lordBrokerEvent("companion", data). */
+ * One socket message is one JSON text, 64 KB at most. What arrives goes to __insaneBrokerEvent("companion", data). */
 #define COMPANION_MSG (64 * 1024)
 static int comp_fd = -1;
 
@@ -412,7 +412,7 @@ void js_broker_companion_read(void) {
     }
 }
 
-/* lord.broker.companion() → true if lord-server took the request; the answer comes as a companion event. */
+/* insane.broker.companion() → true if insane-server took the request; the answer comes as a companion event. */
 static JSValue f_broker_companion(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
     if (comp_fd >= 0) return JS_TRUE;
@@ -423,7 +423,7 @@ static JSValue f_broker_companion(JSContext *c, JSValueConst t, int argc, JSValu
     return JS_TRUE;
 }
 
-/* lord.broker.companionSend(text) → false if it isn't running, or can't take it now. */
+/* insane.broker.companionSend(text) → false if it isn't running, or can't take it now. */
 static JSValue f_broker_companion_send(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     size_t n = 0;
@@ -434,7 +434,7 @@ static JSValue f_broker_companion_send(JSContext *c, JSValueConst t, int argc, J
     return JS_NewBool(c, ok);
 }
 
-/* lord.broker.statusItem(json) → false if refused; "" takes it off. lord-server validates and rewrites it. */
+/* insane.broker.statusItem(json) → false if refused; "" takes it off. insane-server validates and rewrites it. */
 static JSValue f_broker_status_item(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc;
     size_t n = 0;
@@ -494,7 +494,7 @@ static JSValue f_fd_write(JSContext *c, JSValueConst t, int argc, JSValueConst *
     if (dyn) JS_FreeCString(c, dyn);
     return JS_NewBool(c, data && w == len);
 }
-/* lord.broker.fdSize(fd) → bytes of a file the app holds (from the system file dialog), or -1 */
+/* insane.broker.fdSize(fd) → bytes of a file the app holds (from the system file dialog), or -1 */
 static JSValue f_fd_size(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     int32_t fd = -1;
@@ -521,7 +521,7 @@ static JSValue f_broker_request(JSContext *c, JSValueConst t, int argc, JSValueC
     free(out);
     return JS_NewBool(c, allow);
 }
-/* Micrófono: pide el anillo a lord-server (con consentimiento), lo mapea de solo lectura y lee el
+/* Micrófono: pide el anillo a insane-server (con consentimiento), lo mapea de solo lectura y lee el
  * nivel. La app nunca abre PipeWire ni toca el fd del dispositivo. */
 #include <sys/mman.h>
 #include "../media/aring.h"
@@ -553,7 +553,7 @@ static JSValue f_mic_stop(JSContext *c, JSValueConst t, int argc, JSValueConst *
     int st; rpc(BOP_MIC, "0", 1, &st, NULL, NULL);
     return JS_UNDEFINED;
 }
-/* lord.broker.micLevel() → RMS (0..1) de lo nuevo desde la última llamada (como un ring broadcast:
+/* insane.broker.micLevel() → RMS (0..1) de lo nuevo desde la última llamada (como un ring broadcast:
  * lee con su propio cursor, nunca rpos; detecta overrun por wpos). */
 static JSValue f_mic_level(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -571,8 +571,8 @@ static JSValue f_mic_level(JSContext *c, JSValueConst t, int argc, JSValueConst 
     return JS_NewFloat64(c, rms);
 }
 
-/* lord.broker.openApp(app, json, newWindow) → true: a system app opens another one with args
- * (Mail → Calendar, Contacts → a new message). lord-server allows it only between Mail, Calendar,
+/* insane.broker.openApp(app, json, newWindow) → true: a system app opens another one with args
+ * (Mail → Calendar, Contacts → a new message). insane-server allows it only between Mail, Calendar,
  * Contacts and Reminders, and only small args without paths (sec/brokermail.c). */
 static JSValue f_broker_open_app(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -604,7 +604,7 @@ static JSValue f_broker_menus(JSContext *c, JSValueConst t, int argc, JSValueCon
     if (json) JS_FreeCString(c, json);
     return JS_UNDEFINED;
 }
-/* lord.broker.textFocus(on, y, h): tells the session a field took or lost focus. A hint only. */
+/* insane.broker.textFocus(on, y, h): tells the session a field took or lost focus. A hint only. */
 static JSValue f_broker_text_focus(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     int32_t y = -1, h = 0;
@@ -627,7 +627,7 @@ static JSValue f_broker_device(JSContext *c, JSValueConst t, int argc, JSValueCo
     return JS_UNDEFINED;
 }
 
-/* lord.broker.state() → { theme, locale, keyboard }: el estado actual, al arrancar. El teclado se
+/* insane.broker.state() → { theme, locale, keyboard }: el estado actual, al arrancar. El teclado se
  * aplica acá mismo; tema e idioma los aplica el app host. */
 static JSValue f_broker_state(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -645,7 +645,7 @@ static JSValue f_broker_state(JSContext *c, JSValueConst t, int argc, JSValueCon
     return r;
 }
 
-/* ---- lord.locale (solo lectura): catálogos de Insane OS (assets/locales, solo lectura por Landlock)
+/* ---- insane.locale (solo lectura): catálogos de Insane OS (assets/locales, solo lectura por Landlock)
  * y los de la propia app (locales/<idioma>.json del paquete) ---- */
 
 static int safe_name(const char *s) {
@@ -681,7 +681,7 @@ static JSValue f_locale_catalog(JSContext *c, JSValueConst t, int argc, JSValueC
         } else {                                      /* paquetes de idioma del usuario primero, como en la sesión */
             char path[PATH_MAX + 128];
             const char *home = getenv("HOME");
-            snprintf(path, sizeof path, "%s/.local/share/lordos/locales/%s/%s.json", home ? home : "/nonexistent", lang, ns);
+            snprintf(path, sizeof path, "%s/.local/share/insaneos/locales/%s/%s.json", home ? home : "/nonexistent", lang, ns);
             txt = read_path(path, 1 << 20, &len);
             if (!txt) {
                 snprintf(path, sizeof path, "%s/locales/%s/%s.json", js_sys_assets(), lang, ns);
@@ -702,7 +702,7 @@ static JSValue f_locale_languages(JSContext *c, JSValueConst t, int argc, JSValu
     for (int user = 0; user < 2; user++) {
     char root[PATH_MAX + 64];
     const char *home = getenv("HOME");
-    if (user) snprintf(root, sizeof root, "%s/.local/share/lordos/locales", home ? home : "/nonexistent");
+    if (user) snprintf(root, sizeof root, "%s/.local/share/insaneos/locales", home ? home : "/nonexistent");
     else snprintf(root, sizeof root, "%s/locales", js_sys_assets());
     DIR *d = opendir(root);
     struct dirent *e;
@@ -734,7 +734,7 @@ static JSValue f_locale_get(JSContext *c, JSValueConst t, int argc, JSValueConst
     return o;
 }
 
-/* ---- lord.perms.get (consulta local: la app solo conoce lo suyo como «ask») ---- */
+/* ---- insane.perms.get (consulta local: la app solo conoce lo suyo como «ask») ---- */
 static JSValue f_perm_get(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv; return JS_NewString(c, "ask");
 }
@@ -745,11 +745,11 @@ static JSValue f_perm_names(JSContext *c, JSValueConst t, int argc, JSValueConst
     return a;
 }
 
-/* ---- lord.settings: la app no tiene ajustes del sistema ---- */
+/* ---- insane.settings: la app no tiene ajustes del sistema ---- */
 static JSValue f_settings_load(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) { (void)c; (void)t; (void)argc; (void)argv; return JS_NULL; }
 static JSValue f_settings_save(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) { (void)c; (void)t; (void)argc; (void)argv; return JS_UNDEFINED; }
 
-/* ---- lord.apps.packageFile / loadPackage: la app lee SUS propios archivos (la carpeta del
+/* ---- insane.apps.packageFile / loadPackage: la app lee SUS propios archivos (la carpeta del
  * paquete es de solo lectura por Landlock; no hace falta el broker) ---- */
 static char *pkg_read(const char *rel, size_t max, size_t *len) {
     /* usa la carpeta del paquete fijada antes de la caja de arena (no lpk_root(), que haría
@@ -779,7 +779,7 @@ static JSValue f_pkg_file(JSContext *c, JSValueConst t, int argc, JSValueConst *
     return v;
 }
 
-/* lord.loadApp(): evalúa app.js y devuelve globalThis.__lordosApp. */
+/* insane.loadApp(): evalúa app.js y devuelve globalThis.__insaneosApp. */
 static JSValue f_load_app(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
     size_t len = 0;
@@ -801,7 +801,7 @@ static JSValue f_load_app(JSContext *c, JSValueConst t, int argc, JSValueConst *
     free(src);
     if (JS_IsException(r)) return r;
     JS_FreeValue(c, r);
-    JSValue g = JS_GetGlobalObject(c), app = JS_GetPropertyStr(c, g, "__lordosApp");
+    JSValue g = JS_GetGlobalObject(c), app = JS_GetPropertyStr(c, g, "__insaneosApp");
     JS_FreeValue(c, g);
     return app;
 }
@@ -831,19 +831,19 @@ static void add_obj(JSContext *c, JSValue p, const char *name, const JSCFunction
     JS_SetPropertyStr(c, p, name, o);
 }
 
-void js_broker_register(JSContext *c, JSValue lord, const char *id) {
+void js_broker_register(JSContext *c, JSValue insane, const char *id) {
     snprintf(app_id, sizeof app_id, "%s", id);
     broker_connect();
-    add_obj(c, lord, "fs", fs_funcs, sizeof fs_funcs / sizeof fs_funcs[0]);
-    add_obj(c, lord, "clipboard", clip_funcs, sizeof clip_funcs / sizeof clip_funcs[0]);
-    add_obj(c, lord, "broker", broker_funcs, sizeof broker_funcs / sizeof broker_funcs[0]);
-    add_obj(c, lord, "perms", perms_funcs, sizeof perms_funcs / sizeof perms_funcs[0]);
-    add_obj(c, lord, "settings", settings_funcs, sizeof settings_funcs / sizeof settings_funcs[0]);
-    add_obj(c, lord, "apps", apps_funcs, sizeof apps_funcs / sizeof apps_funcs[0]);
-    add_obj(c, lord, "locale", locale_funcs, sizeof locale_funcs / sizeof locale_funcs[0]);
-    JS_SetPropertyStr(c, lord, "appId", JS_NewString(c, id));
-    JS_SetPropertyStr(c, lord, "loadApp", JS_NewCFunction(c, f_load_app, "loadApp", 0));
-    app_windows_register(c, lord);           /* several windows per isolated app */
-    js_brokercam_register(c, lord);          /* lord.media: the camera through lord-server (js_brokercam.c) */
-    js_brokermail_register(c, lord, id);     /* lord.mail: system Mail, Calendar, Contacts, Reminders (js_brokermail.c) */
+    add_obj(c, insane, "fs", fs_funcs, sizeof fs_funcs / sizeof fs_funcs[0]);
+    add_obj(c, insane, "clipboard", clip_funcs, sizeof clip_funcs / sizeof clip_funcs[0]);
+    add_obj(c, insane, "broker", broker_funcs, sizeof broker_funcs / sizeof broker_funcs[0]);
+    add_obj(c, insane, "perms", perms_funcs, sizeof perms_funcs / sizeof perms_funcs[0]);
+    add_obj(c, insane, "settings", settings_funcs, sizeof settings_funcs / sizeof settings_funcs[0]);
+    add_obj(c, insane, "apps", apps_funcs, sizeof apps_funcs / sizeof apps_funcs[0]);
+    add_obj(c, insane, "locale", locale_funcs, sizeof locale_funcs / sizeof locale_funcs[0]);
+    JS_SetPropertyStr(c, insane, "appId", JS_NewString(c, id));
+    JS_SetPropertyStr(c, insane, "loadApp", JS_NewCFunction(c, f_load_app, "loadApp", 0));
+    app_windows_register(c, insane);           /* several windows per isolated app */
+    js_brokercam_register(c, insane);          /* insane.media: the camera through insane-server (js_brokercam.c) */
+    js_brokermail_register(c, insane, id);     /* insane.mail: system Mail, Calendar, Contacts, Reminders (js_brokermail.c) */
 }

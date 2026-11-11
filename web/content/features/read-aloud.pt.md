@@ -40,9 +40,9 @@ A gravação fica na sua conta, neste computador. **Usar uma gravação…** faz
 
 ## Como ele protege você
 
-- **O motor está trancado.** A fala é feita pelo `lord-tts`, um pequeno ajudante que roda no sandbox de ajudantes do Insane OS: sem rede, sem sockets, sem iniciar programas, e só pode escrever na sua própria pasta de cache. Ele é o único programa que liga as bibliotecas de fala. Quando usa a placa de vídeo, só pode abrir o nó de render da placa, nunca a tela que o `lord-server` controla.
-- **Seu texto nunca vai numa linha de comando.** O `lord-server` inicia o `lord-say` a partir de um caminho fixo, com argumentos fixos, e lhe passa o texto como um arquivo em memória selado. A única coisa que a interface pode escolher é um nome de voz, conferido em C.
-- **Salvar não pode ser desviado.** O `lord-server` confere a pasta que você escolheu, cria o arquivo ali e o renomeia quando o áudio termina, então o `say` nunca vê um caminho.
+- **O motor está trancado.** A fala é feita pelo `insane-tts`, um pequeno ajudante que roda no sandbox de ajudantes do Insane OS: sem rede, sem sockets, sem iniciar programas, e só pode escrever na sua própria pasta de cache. Ele é o único programa que liga as bibliotecas de fala. Quando usa a placa de vídeo, só pode abrir o nó de render da placa, nunca a tela que o `insane-server` controla.
+- **Seu texto nunca vai numa linha de comando.** O `insane-server` inicia o `insane-say` a partir de um caminho fixo, com argumentos fixos, e lhe passa o texto como um arquivo em memória selado. A única coisa que a interface pode escolher é um nome de voz, conferido em C.
+- **Salvar não pode ser desviado.** O `insane-server` confere a pasta que você escolheu, cria o arquivo ali e o renomeia quando o áudio termina, então o `say` nunca vê um caminho.
 - **A seleção de um app Linux fica com ele.** O desktop só a lê enquanto esse app tem o teclado, e ela nunca chega ao JavaScript.
 - **Apps isolados não podem usar.** Apps `.lpk` instalados não têm API de voz.
 
@@ -59,10 +59,10 @@ Medido num PC, um Intel i9-10900 com uma Radeon RX 580: cerca de 10 segundos de 
 
 ## Leia o código
 
-- [docs/VOICE.md](https://github.com/lordbasex/Insane OS/blob/main/docs/VOICE.md): o projeto, os modelos, as vozes e os testes
-- [server/src/doc/h_tts.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/doc/h_tts.c): o `lord-tts`, o motor em sandbox
-- [server/src/tts/speak.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/tts/speak.c): como o `lord-server` inicia o `lord-say`
-- [server/src/ui/js_voice.c](https://github.com/lordbasex/Insane OS/blob/main/server/src/ui/js_voice.c): a API `lord.voice`
-- [apps/settings/PersonalVoice.jsx](https://github.com/lordbasex/Insane OS/blob/main/apps/settings/PersonalVoice.jsx) e [sdk/livespeech.jsx](https://github.com/lordbasex/Insane OS/blob/main/sdk/livespeech.jsx): Voz pessoal e Fala ao vivo
+- [docs/VOICE.md](https://github.com/insaneos/Insane OS/blob/main/docs/VOICE.md): o projeto, os modelos, as vozes e os testes
+- [server/src/doc/h_tts.c](https://github.com/insaneos/Insane OS/blob/main/server/src/doc/h_tts.c): o `insane-tts`, o motor em sandbox
+- [server/src/tts/speak.c](https://github.com/insaneos/Insane OS/blob/main/server/src/tts/speak.c): como o `insane-server` inicia o `insane-say`
+- [server/src/ui/js_voice.c](https://github.com/insaneos/Insane OS/blob/main/server/src/ui/js_voice.c): a API `insane.voice`
+- [apps/settings/PersonalVoice.jsx](https://github.com/insaneos/Insane OS/blob/main/apps/settings/PersonalVoice.jsx) e [sdk/livespeech.jsx](https://github.com/insaneos/Insane OS/blob/main/sdk/livespeech.jsx): Voz pessoal e Fala ao vivo
 
 A fala vem do Pocket TTS da Kyutai (pesos do modelo sob CC-BY-4.0), rodado pelo audio.cpp (Apache-2.0) e seu ggml (MIT).

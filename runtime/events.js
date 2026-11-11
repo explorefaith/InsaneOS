@@ -1,4 +1,4 @@
-// events.js — mouse and keyboard events sent by lord-server, with DOM-style bubbling.
+// events.js — mouse and keyboard events sent by insane-server, with DOM-style bubbling.
 // Props: onMouseDown, onMouseUp, onClick, onDoubleClick, onContextMenu, onMouseMove,
 // onMouseEnter, onMouseLeave, onWheel, onPinch, onSwipe.
 // keepFocus on a View: a press inside it is not a click elsewhere: the global 'pointerdown' listeners
@@ -52,7 +52,7 @@ function makeEvent(type, target, x, y, button, extra) {
     stopped: false,
     stopPropagation() { this.stopped = true; },
     // Coordinates relative to an instance's box (e.g. ev.local(ev.currentTarget)).
-    local(inst) { const [lx, ly] = lord.getLayout(inst.id); return { x: x - lx, y: y - ly }; },
+    local(inst) { const [lx, ly] = insane.getLayout(inst.id); return { x: x - lx, y: y - ly }; },
   };
 }
 
@@ -65,7 +65,7 @@ function run(p, fn) {
   try { fn(); } catch (e) { console.error('evento:', e); } finally { priority = DefaultEventPriority; }
 }
 
-globalThis.__lordEvent = (type, id, x, y, button) => {
+globalThis.__insaneEvent = (type, id, x, y, button) => {
   const chain = chainOf(id);
   const target = chain[0] || null;
   const fire = (set, ev) => { for (const fn of listeners[set]) fn(ev); };
@@ -98,7 +98,7 @@ globalThis.__lordEvent = (type, id, x, y, button) => {
     if (button === 2) { dispatch(common, 'onContextMenu', makeEvent('contextmenu', target, x, y, button)); return; }
     if (button !== 0) return;
     dispatch(common, 'onClick', makeEvent('click', target, x, y, button));
-    const now = lord.now();
+    const now = insane.now();
     if (lastClick.target === target && now - lastClick.time < 450) {
       dispatch(common, 'onDoubleClick', makeEvent('dblclick', target, x, y, button));
       lastClick = { target: null, time: 0 };
@@ -111,7 +111,7 @@ globalThis.__lordEvent = (type, id, x, y, button) => {
 
 // With libxkbcommon (server/src/keyboard.c) the server already sends the translated key; if no
 // XKB layout is loaded only the code and value arrive and keymap.js is used as a fallback.
-globalThis.__lordKey = (code, value, key, chr, base, flags) => {
+globalThis.__insaneKey = (code, value, key, chr, base, flags) => {
   const ev = key === undefined ? translate(code, value) : nativeKey(code, value, key, chr, base, flags);
   // each listener on its own: one that throws doesn't take the key from the others (a text field)
   run(DiscreteEventPriority, () => {
@@ -130,7 +130,7 @@ globalThis.__lordKey = (code, value, key, chr, base, flags) => {
 // During a gesture the target stays fixed (the node under the pointer when it started).
 const latched = { scroll: null, pinch: null, swipe: null };
 let wheelAcc = 0;
-globalThis.__lordGesture = (kind, phase, id, x, y, a, b, c, d) => run(ContinuousEventPriority, () => {
+globalThis.__insaneGesture = (kind, phase, id, x, y, a, b, c, d) => run(ContinuousEventPriority, () => {
   // a wheel (source 1) has no phases: each event goes to the current node
   if (phase === 'begin' || !latched[kind] || (kind === 'scroll' && c === 1)) latched[kind] = chainOf(id);
   const chain = latched[kind];

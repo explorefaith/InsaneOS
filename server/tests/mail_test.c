@@ -1,4 +1,4 @@
-/* mail_test.c — parsers of lord-maild (docs/MAIL.md): IMAP responses, MIME (multipart,
+/* mail_test.c — parsers of insane-maild (docs/MAIL.md): IMAP responses, MIME (multipart,
  * encodings, charsets), the HTML sanitizer against hostile input, iCalendar and vCard, and the
  * WebDAV XML reader. Every parser is also fed thousands of randomly mutated inputs (a small
  * deterministic fuzzer); run under -fsanitize=address,undefined in `make mail-asan`. */
@@ -131,7 +131,7 @@ static void test_imap(void) {
 static const char *MSG1 =
     "Return-Path: <x@y>\r\n"
     "From: =?ISO-8859-1?Q?Jos=E9_P=E9rez?= <jose@example.com>\r\n"
-    "To: \"Ana, la jefa\" <ana@lordos.test>, beto@lordos.test (Beto B.), Grupo: c@d.e, f@g.h;\r\n"
+    "To: \"Ana, la jefa\" <ana@insaneos.test>, beto@insaneos.test (Beto B.), Grupo: c@d.e, f@g.h;\r\n"
     "Subject: =?UTF-8?B?UmU6IFJlOiBQcmVzdXB1ZXN0byDwn5iA?=\r\n"
     "  =?UTF-8?Q?_final?=\r\n"
     "Date: Fri, 17 Oct 2026 14:05:00 -0300\r\n"
@@ -187,7 +187,7 @@ static void test_mime(void) {
     mime_header(h, hl, "To", v, sizeof v);
     int n = mime_addrs(v, a, 8);
     CHECK(n == 4);
-    if (n == 4) { CHECKS(a[0].name, "Ana, la jefa"); CHECKS(a[1].email, "beto@lordos.test"); CHECKS(a[1].name, "Beto B."); CHECKS(a[2].email, "c@d.e"); CHECKS(a[3].email, "f@g.h"); }
+    if (n == 4) { CHECKS(a[0].name, "Ana, la jefa"); CHECKS(a[1].email, "beto@insaneos.test"); CHECKS(a[1].name, "Beto B."); CHECKS(a[2].email, "c@d.e"); CHECKS(a[3].email, "f@g.h"); }
     mime_header(h, hl, "Date", v, sizeof v);
     CHECK(mime_date(v) == 1792256700);
     CHECK(mime_date("17 Oct 2026 17:05:00 GMT") == 1792256700);
@@ -579,13 +579,13 @@ static const char *ICS =
     "SUMMARY:Revisi\\u00f3n\\, trimestral\\; Q4\r\nLOCATION:Sala 3\r\n"
     "DESCRIPTION:Primera l\\nSegunda l\r\n  y m\xc3\xa1s\r\n"
     "RRULE:FREQ=WEEKLY;BYDAY=TU,TH;COUNT=6\r\nEXDATE;TZID=Europe/Madrid:20261022T100000\r\n"
-    "ORGANIZER;CN=\"Jefa, Ana\":mailto:ana@lordos.test\r\n"
-    "ATTENDEE;CN=Beto;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:Beto@lordos.test\r\n"
+    "ORGANIZER;CN=\"Jefa, Ana\":mailto:ana@insaneos.test\r\n"
+    "ATTENDEE;CN=Beto;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:Beto@insaneos.test\r\n"
     "BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-PT15M\r\nEND:VALARM\r\n"
     "BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER;RELATED=START:-P1D\r\nEND:VALARM\r\n"
     "END:VEVENT\r\n"
     "BEGIN:VEVENT\r\nUID:allday\r\nDTSTART;VALUE=DATE:20261231\r\nSUMMARY:Fin de a\xc3\xb1o\r\nEND:VEVENT\r\n"
-    "BEGIN:VTODO\r\nUID:todo-1\r\nSUMMARY:Comprar pan\r\nDUE;VALUE=DATE:20261019\r\nPRIORITY:1\r\nX-LORDOS-FLAGGED:1\r\n"
+    "BEGIN:VTODO\r\nUID:todo-1\r\nSUMMARY:Comprar pan\r\nDUE;VALUE=DATE:20261019\r\nPRIORITY:1\r\nX-INSANEOS-FLAGGED:1\r\n"
     "STATUS:NEEDS-ACTION\r\nEND:VTODO\r\n"
     "BEGIN:VEVENT\r\nUID:monthly\r\nDTSTART:20260131T120000Z\r\nDURATION:PT1H\r\nRRULE:FREQ=MONTHLY;BYDAY=-1FR;UNTIL=20260701T000000Z\r\nEND:VEVENT\r\n"
     "BEGIN:VEVENT\r\nUID:win\r\nDTSTART;TZID=Pacific Standard Time:20260701T090000\r\nDTEND;TZID=Pacific Standard Time:20260701T100000\r\nEND:VEVENT\r\n"
@@ -611,9 +611,9 @@ static void test_ical(void) {
     CHECK(e->end - e->start == 5400);
     CHECK(e->sequence == 2);
     CHECK(e->nalarms == 2 && e->alarms[0] == 15 && e->alarms[1] == 1440);
-    CHECKS(e->organizer, "ana@lordos.test");
+    CHECKS(e->organizer, "ana@insaneos.test");
     CHECKS(e->organizer_name, "Jefa, Ana");
-    CHECK(e->natt == 1 && !strcmp(e->att[0].email, "beto@lordos.test") && e->att[0].rsvp);
+    CHECK(e->natt == 1 && !strcmp(e->att[0].email, "beto@insaneos.test") && e->att[0].rsvp);
     nocc = 0;
     int k = ical_expand(e, 1792000000, 1800000000, 64, add_occ, NULL);
     CHECK(k == 5);                              /* 6 by COUNT, one EXDATE */
@@ -638,7 +638,7 @@ static void test_ical(void) {
     jb_free(&jb);
 
     size_t rl;
-    char *reply = ical_reply(e, "beto@lordos.test", "Beto", "ACCEPTED", &rl);
+    char *reply = ical_reply(e, "beto@insaneos.test", "Beto", "ACCEPTED", &rl);
     CHECK(reply && strstr(reply, "METHOD:REPLY") && strstr(reply, "PARTSTAT=ACCEPTED") && strstr(reply, "UID:evt-1@example.com"));
     IcEvent *re;
     char m2[24];
@@ -707,7 +707,7 @@ static void test_ical(void) {
 static const char *VCF =
     "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:urn:uuid:c-1\r\nFN:José Pérez\r\nN:Pérez;José;María;Dr.;\r\n"
     "ORG:Insane OS;Ingeniería\r\nTITLE:Jefe\\, técnico\r\n"
-    "item1.EMAIL;TYPE=INTERNET,WORK,pref:jose@lordos.test\r\nEMAIL;TYPE=HOME:jose@casa.test\r\n"
+    "item1.EMAIL;TYPE=INTERNET,WORK,pref:jose@insaneos.test\r\nEMAIL;TYPE=HOME:jose@casa.test\r\n"
     "TEL;TYPE=CELL:+54 11 5555-0000\r\nTEL;TYPE=WORK,VOICE:+54 11 4444-0000\r\n"
     "ADR;TYPE=HOME:;Depto 4;Calle Falsa 123;Springfield;BA;1000;Argentina\r\n"
     "BDAY:1990-05-17\r\nNOTE:Primera\\nSegunda\r\nCATEGORIES:Amigos,Trabajo\r\n"
@@ -786,7 +786,7 @@ static void test_vcard(void) {
 /* ---- message view: tricky messages (issue #18) ----
  * Builds the reply JSON the way msgview.c's msg_open_cached does (subject, first text/plain by
  * length, sanitized text/html, text from the HTML when there is no plain part) and checks it with
- * the parser lord-server's mailc.c uses to re-validate lord-maild's replies. Before the fix a
+ * the parser insane-server's mailc.c uses to re-validate insane-maild's replies. Before the fix a
  * newsletter with a few nested tables went past json_parse's 32 levels and Mail showed "bad-json". */
 
 static char *view_json(const char *raw, size_t len, size_t *olen) {

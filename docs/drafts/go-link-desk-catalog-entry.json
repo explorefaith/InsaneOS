@@ -1,7 +1,7 @@
 {
   "_status": "Prepared, not published. Not part of apt/catalog.json until the maintainer publishes a signed release: fill the version, URLs and hashes, then move the entry into apps. See docs/GO-LINK.md section 9.",
   "id": "go-link-desk",
-  "package": "go-link-desk-lordos",
+  "package": "go-link-desk-insaneos",
   "name": "Desk go-link",
   "summary": {
     "en": "Remote desktop, peer to peer: a 9-digit code, no open ports, and each visitor accepted at the computer",
@@ -19,8 +19,8 @@
     "type": "deb",
     "version": "VERSION",
     "files": {
-      "amd64": { "url": "https://desk.go-link.org/lordos/VERSION/go-link-desk-lordos_VERSION_amd64.deb", "sha256": "SHA256_OF_THE_PUBLISHED_FILE" },
-      "arm64": { "url": "https://desk.go-link.org/lordos/VERSION/go-link-desk-lordos_VERSION_arm64.deb", "sha256": "SHA256_OF_THE_PUBLISHED_FILE" }
+      "amd64": { "url": "https://desk.go-link.org/insaneos/VERSION/go-link-desk-insaneos_VERSION_amd64.deb", "sha256": "SHA256_OF_THE_PUBLISHED_FILE" },
+      "arm64": { "url": "https://desk.go-link.org/insaneos/VERSION/go-link-desk-insaneos_VERSION_arm64.deb", "sha256": "SHA256_OF_THE_PUBLISHED_FILE" }
     }
   }
 }

@@ -1,64 +1,64 @@
-/* js_hw.c — lord.display, lord.power, lord.bt, lord.mime and lord.timedate for Settings'
+/* js_hw.c — insane.display, insane.power, insane.bt, insane.mime and insane.timedate for Settings'
  * hardware pages (src/hw, docs/SETTINGS.md). Every input is validated here; nothing runs a
  * program (root work goes through the admin helper's closed actions, hw/hw_admin.c). Notices
- * arrive in JS as __lordHw(kind, data).
+ * arrive in JS as __insaneHw(kind, data).
  *
- *   lord.display.list()                         outputs, modes, Night Light, backlight
- *   lord.display.apply(conn, w, h, mHz, rot, scale)   live (queued between frames); scale in % (100–300,
+ *   insane.display.list()                         outputs, modes, Night Light, backlight
+ *   insane.display.apply(conn, w, h, mHz, rot, scale)   live (queued between frames); scale in % (100–300,
  *                                               25 % steps); true if accepted
- *   lord.display.arrange(conn, x, y, apply)     drop a display at global logical (x, y): { x, y } snapped
- *   lord.display.setMirror(on) / setMain(conn) / setCaptureAll(on)   (docs/DISPLAYS.md)
- *   lord.display.save(conn)                     keep the current configuration of every display
- *   lord.display.setTemperature(K) / temperature()
- *   lord.display.sun(zone, y, m, d)             { rise, set } minutes UTC, or null
- *   lord.display.setIdle(offS, lockS, sleepS) / wake()
- *   lord.power.state() / profiles() / setProfile(p) / buttons()
- *   lord.bt.state() / power(on) / discover(on) / pair(path) / connect(path) / disconnect(path)
+ *   insane.display.arrange(conn, x, y, apply)     drop a display at global logical (x, y): { x, y } snapped
+ *   insane.display.setMirror(on) / setMain(conn) / setCaptureAll(on)   (docs/DISPLAYS.md)
+ *   insane.display.save(conn)                     keep the current configuration of every display
+ *   insane.display.setTemperature(K) / temperature()
+ *   insane.display.sun(zone, y, m, d)             { rise, set } minutes UTC, or null
+ *   insane.display.setIdle(offS, lockS, sleepS) / wake()
+ *   insane.power.state() / profiles() / setProfile(p) / buttons()
+ *   insane.bt.state() / power(on) / discover(on) / pair(path) / connect(path) / disconnect(path)
  *          / forget(path) / answer(id, accept, value)
- *   lord.mime.get(mime) / set(mime, id) / guess(path) / terminal() / setTerminal(id)
- *   lord.mime.resolve(mime)                     { id, explicit, source }: the app launchWith('') uses
- *   lord.mime.unset(mime)                       back to the automatic choice
- *   lord.timedate.refresh()                     answer as __lordHw('timedate', …)
- *   lord.notifyd.closed(id, reason) / action(id, key)   back to the Linux app that notified
- *   lord.hwinfo.scan()                          read-only hardware facts for the Store's suggestions
+ *   insane.mime.get(mime) / set(mime, id) / guess(path) / terminal() / setTerminal(id)
+ *   insane.mime.resolve(mime)                     { id, explicit, source }: the app launchWith('') uses
+ *   insane.mime.unset(mime)                       back to the automatic choice
+ *   insane.timedate.refresh()                     answer as __insaneHw('timedate', …)
+ *   insane.notifyd.closed(id, reason) / action(id, key)   back to the Linux app that notified
+ *   insane.hwinfo.scan()                          read-only hardware facts for the Store's suggestions
  *                                               (hw/hwscan.c: DMI, device tree, PCI/USB IDs, virtio
  *                                               ports, missing firmware when the kernel log is readable)
- *   lord.sysinfo.report()                       System Information (sysreport/: the same report as
- *                                               lordos-sysreport, no serials, addresses or names) plus
+ *   insane.sysinfo.report()                       System Information (sysreport/: the same report as
+ *                                               insaneos-sysreport, no serials, addresses or names) plus
  *                                               session: how this session composes the screen and its
- *                                               GPU context (gpu/gpu.h gpu_info, lord_composition)
- *   lord.sysinfo.facts()                        the Checks tab's facts (sysreport/facts.c): lord-server's
+ *                                               GPU context (gpu/gpu.h gpu_info, insane_composition)
+ *   insane.sysinfo.facts()                        the Checks tab's facts (sysreport/facts.c): insane-server's
  *                                               uid/euid, its cgroup and who owns it, app scopes, and
  *                                               whether anything listens on the remote desktop's port
- *   lord.sysinfo.probe()                        the last sandbox probe's result (sec/brokersrv.c, BOP_PROBE:
+ *   insane.sysinfo.probe()                        the last sandbox probe's result (sec/brokersrv.c, BOP_PROBE:
  *                                               the system package `sysprobe`, app/probe.c), or null
- *   lord.sysinfo.markdown()                     the same report as Markdown, as lordos-sysreport prints it,
+ *   insane.sysinfo.markdown()                     the same report as Markdown, as insaneos-sysreport prints it,
  *                                               with a "This session" section (System Information's Report tab)
- *   lord.sysinfo.peripherals()                  (0.8.7) keyboards, mice, receivers and other devices on this machine's USB
+ *   insane.sysinfo.peripherals()                  (0.8.7) keyboards, mice, receivers and other devices on this machine's USB
  *                                               and input buses (sysreport/periph.c), for the Hardware tab only: their
  *                                               names can carry a person's, so it is not part of report() or markdown()
- *   lord.sysinfo.community()                    (0.8.7) the tested-hardware catalogue's snapshot for the Compatibility
+ *   insane.sysinfo.community()                    (0.8.7) the tested-hardware catalogue's snapshot for the Compatibility
  *                                               panel: { state, snapshot } where snapshot is given only when
  *                                               <assets>/hwreport/snapshot.json is signed with the key this build
  *                                               trusts and well formed (sysreport/hwsnap.c); no arguments, no path
  *                                               from JS; state 'ok' | 'missing' | 'unsigned' | 'bad-signature' | 'invalid'
- *   lord.sysinfo.bench.start(mode, sustainedS) / poll() / cancel() / saved(which) / boots()
- *                                               InsaneBench (bench/lbrun.c, the lord-bench helper): mode
- *                                               'quick' | 'full' (then video in lord-media) | 'desktop'
+ *   insane.sysinfo.bench.start(mode, sustainedS) / poll() / cancel() / saved(which) / boots()
+ *                                               InsaneBench (bench/lbrun.c, the insane-bench helper): mode
+ *                                               'quick' | 'full' (then video in insane-media) | 'desktop'
  *                                               (the compositor's frame times, alone and under load);
  *                                               poll() → {state, step, progress, result}; saved(0|1) the
  *                                               last or previous peak result, saved(2|3) the desktop ones;
- *                                               boots() the boot times per Insane OS version (lord-sessiond's history);
+ *                                               boots() the boot times per Insane OS version (insane-sessiond's history);
  *                                               bootTest() the boot time test's state or null (bench/boottest.h;
  *                                               started and stopped with the boot-test admin actions)
- *   lord.fan.status() / setProfile(p) / setCurve(pts) / force(v) / caseConfig()   (js_fan.c, lord-fand)
- *   lord.browserFrame.apply(on, which)          Settings → Appearance → "Browsers: tabs in the title bar":
+ *   insane.fan.status() / setProfile(p) / setCurve(pts) / force(v) / caseConfig()   (js_fan.c, insane-fand)
+ *   insane.browserFrame.apply(on, which)          Settings → Appearance → "Browsers: tabs in the title bar":
  *                                               one preference in the user's Chromium/Firefox profiles
  *                                               (hw/brframe.c); which = 'all' | 'chromium' | 'firefox';
  *                                               { chromium: {…}, firefox: {…} } counts
- *   lord.browserFrame.tidy()                    removes Insane OS's Firefox user.js line once Firefox read it
- *   lord.browserFrame.chromiumRunning()         Chromium's profile folder is in use
- *   lord.browserFrame.state()                   { chromiumOn, chromiumOff }: profiles with each frame
+ *   insane.browserFrame.tidy()                    removes Insane OS's Firefox user.js line once Firefox read it
+ *   insane.browserFrame.chromiumRunning()         Chromium's profile folder is in use
+ *   insane.browserFrame.state()                   { chromiumOn, chromiumOff }: profiles with each frame
  */
 #include "js_hw.h"
 #include "js_fan.h"
@@ -79,7 +79,7 @@
 #include "../bench/lbrun.h"
 #include "../bench/boottest.h"
 #include "../sec/broker.h"
-#include "lord_version.h"           /* build/gen: the version for the report */
+#include "insane_version.h"           /* build/gen: the version for the report */
 #include "../hw/mimeapps.h"
 #include "../hw/notifyd.h"
 #include "../hw/pkagent.h"
@@ -115,7 +115,7 @@ static int arg_str(JSContext *c, JSValueConst v, char *out, size_t max) {
     return ok ? 0 : -1;
 }
 
-/* ---- lord.display ---- */
+/* ---- insane.display ---- */
 
 static JSValue f_display_list(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -237,7 +237,7 @@ static const JSCFunctionListEntry display_funcs[] = {
     JS_CFUNC_DEF("blank", 0, f_display_blank),
 };
 
-/* ---- lord.power ---- */
+/* ---- insane.power ---- */
 
 static JSValue f_power_state(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -263,7 +263,7 @@ static JSValue f_power_set_profile(JSContext *c, JSValueConst t, int argc, JSVal
 static JSValue f_power_buttons(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
     char power[16] = "poweroff", lid[16] = "suspend", lidac[16] = "", buf[1024];
-    const char *files[] = { "/etc/systemd/logind.conf", "/etc/systemd/logind.conf.d/lordos.conf" };
+    const char *files[] = { "/etc/systemd/logind.conf", "/etc/systemd/logind.conf.d/insaneos.conf" };
     for (int f = 0; f < 2; f++) {
         int fd = open(files[f], O_RDONLY | O_CLOEXEC);
         if (fd < 0) continue;
@@ -293,7 +293,7 @@ static const JSCFunctionListEntry power_funcs[] = {
     JS_CFUNC_DEF("buttons", 0, f_power_buttons),
 };
 
-/* ---- lord.bt ---- */
+/* ---- insane.bt ---- */
 
 static JSValue f_bt_state(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
@@ -334,7 +334,7 @@ static const JSCFunctionListEntry polkit_funcs[] = {
     JS_CFUNC_DEF("cancel", 1, f_polkit_cancel),
 };
 
-/* lord.portal.chosen(id, paths | null): the answer to an app's file dialog (ui/portal.c). */
+/* insane.portal.chosen(id, paths | null): the answer to an app's file dialog (ui/portal.c). */
 #define PORTAL_MAX_PATHS 256
 static JSValue f_portal_chosen(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -375,7 +375,7 @@ static const JSCFunctionListEntry bt_funcs[] = {
     JS_CFUNC_DEF("answer", 3, f_bt_answer),
 };
 
-/* ---- lord.mime ---- */
+/* ---- insane.mime ---- */
 
 static JSValue f_mime_get(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -391,7 +391,7 @@ static JSValue f_mime_set(JSContext *c, JSValueConst t, int argc, JSValueConst *
     return JS_NewBool(c, mime_valid(mime) && desktop_id_valid(id) && defaults_set(mime, id) == 0);
 }
 
-/* lord.mime.resolve(mime) → { id: 'x.desktop', explicit, source: 'user'|'system'|'declared' } or
+/* insane.mime.resolve(mime) → { id: 'x.desktop', explicit, source: 'user'|'system'|'declared' } or
  * null: the app launchWith('', …) uses (apps_default_for); explicit only for the user's own choice. */
 static JSValue f_mime_resolve(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -406,7 +406,7 @@ static JSValue f_mime_resolve(JSContext *c, JSValueConst t, int argc, JSValueCon
     return o;
 }
 
-/* lord.mime.unset(mime): the user's choice for that type is removed (back to automatic). */
+/* insane.mime.unset(mime): the user's choice for that type is removed (back to automatic). */
 static JSValue f_mime_unset(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     char mime[MIME_MAX];
@@ -444,7 +444,7 @@ static const JSCFunctionListEntry mime_funcs[] = {
     JS_CFUNC_DEF("setTerminal", 1, f_mime_set_terminal),
 };
 
-/* ---- lord.timedate ---- */
+/* ---- insane.timedate ---- */
 
 static JSValue f_td_refresh(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)c; (void)t; (void)argc; (void)argv;
@@ -454,7 +454,7 @@ static JSValue f_td_refresh(JSContext *c, JSValueConst t, int argc, JSValueConst
 
 static const JSCFunctionListEntry td_funcs[] = { JS_CFUNC_DEF("refresh", 0, f_td_refresh) };
 
-/* ---- lord.notifyd (Linux apps' notifications, hw/notifyd.c) ---- */
+/* ---- insane.notifyd (Linux apps' notifications, hw/notifyd.c) ---- */
 
 static JSValue f_nd_closed(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
@@ -473,13 +473,13 @@ static JSValue f_nd_action(JSContext *c, JSValueConst t, int argc, JSValueConst 
 
 static const JSCFunctionListEntry nd_funcs[] = { JS_CFUNC_DEF("closed", 2, f_nd_closed), JS_CFUNC_DEF("action", 2, f_nd_action) };
 
-/* ---- lord.hwinfo (the Store's "Suggested for your computer", docs/PACKAGES.md) ---- */
+/* ---- insane.hwinfo (the Store's "Suggested for your computer", docs/PACKAGES.md) ---- */
 
-/* LORD_HWSCAN_ROOT (development and screenshots only): read a fake tree instead of the real
+/* INSANE_HWSCAN_ROOT (development and screenshots only): read a fake tree instead of the real
  * system; the facts then say fixture: true and the Store marks them as test data. Only an absolute
  * path without ".." is taken. */
 static const char *hwscan_root(void) {
-    const char *r = getenv("LORD_HWSCAN_ROOT");
+    const char *r = getenv("INSANE_HWSCAN_ROOT");
     if (!r || r[0] != '/' || strstr(r, "..") || strlen(r) > 200) return "";
     return r;
 }
@@ -491,14 +491,14 @@ static JSValue f_hwinfo_scan(JSContext *c, JSValueConst t, int argc, JSValueCons
 
 static const JSCFunctionListEntry hwinfo_funcs[] = { JS_CFUNC_DEF("scan", 0, f_hwinfo_scan) };
 
-/* ---- lord.sysinfo (System Information, docs/BENCHMARK.md) ---- */
+/* ---- insane.sysinfo (System Information, docs/BENCHMARK.md) ---- */
 
 /* The report of this machine (or of the development fixture), with Insane OS's version; NULL on OOM. */
 static SysReport *sysinfo_collect(void) {
     SysReport *r = malloc(sizeof *r);
     if (!r) return NULL;
     sysreport_collect(r, hwscan_root(), NULL, NULL);      /* the same development fixtures as the Store's */
-    snprintf(r->sw.lordos, sizeof r->sw.lordos, "%s%s%s", LORD_VERSION, LORD_CHANNEL[0] ? "-" : "", LORD_CHANNEL);
+    snprintf(r->sw.insaneos, sizeof r->sw.insaneos, "%s%s%s", INSANE_VERSION, INSANE_CHANNEL[0] ? "-" : "", INSANE_CHANNEL);
     return r;
 }
 
@@ -513,7 +513,7 @@ static JSValue f_sysinfo_report(JSContext *c, JSValueConst t, int argc, JSValueC
     GpuInfo g;
     gpu_info(&g);
     JSValue s = JS_NewObject(c);
-    JS_SetPropertyStr(c, s, "composition", JS_NewString(c, lord_composition()));
+    JS_SetPropertyStr(c, s, "composition", JS_NewString(c, insane_composition()));
     JS_SetPropertyStr(c, s, "gpuInit", JS_NewString(c, g.why));
     JS_SetPropertyStr(c, s, "renderer", JS_NewString(c, g.renderer));
     JS_SetPropertyStr(c, s, "renderNode", JS_NewString(c, g.render_node));
@@ -532,7 +532,7 @@ static JSValue f_sysinfo_markdown(JSContext *c, JSValueConst t, int argc, JSValu
     if (!md) return JS_NULL;
     GpuInfo g;
     gpu_info(&g);
-    const char *comp = lord_composition();
+    const char *comp = insane_composition();
     char sess[512];
     if (!strcmp(comp, "gpu"))
         snprintf(sess, sizeof sess, "\n## This session\n\nThe screen is composed on the GPU (%s); %lu frames shown by direct scanout since the session started.\n",
@@ -599,7 +599,7 @@ static JSValue f_sysinfo_community(JSContext *c, JSValueConst t, int argc, JSVal
     return o;
 }
 
-/* ---- lord.sysinfo.bench (InsaneBench) ---- */
+/* ---- insane.sysinfo.bench (InsaneBench) ---- */
 
 /* what a result records about this session: how the screen is composed and each active display's
  * connector, mode, refresh, scale and rotation (no names, vendors or identities) */
@@ -607,7 +607,7 @@ static char *bench_session_json(JSContext *c) {
     GpuInfo g;
     gpu_info(&g);
     JSValue o = JS_NewObject(c);
-    JS_SetPropertyStr(c, o, "composition", JS_NewString(c, lord_composition()));
+    JS_SetPropertyStr(c, o, "composition", JS_NewString(c, insane_composition()));
     JS_SetPropertyStr(c, o, "gpuInit", JS_NewString(c, g.why ? g.why : ""));
     JS_SetPropertyStr(c, o, "renderer", JS_NewString(c, g.renderer ? g.renderer : ""));
     JSValue outs = JS_NewArray(c);
@@ -673,7 +673,7 @@ static JSValue f_bench_saved(JSContext *c, JSValueConst t, int argc, JSValueCons
 
 static JSValue f_bench_boots(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t; (void)argc; (void)argv;
-    return json_or_null(c, lbrun_boot_history("/var/lib/lordos/boot-times.jsonl"));
+    return json_or_null(c, lbrun_boot_history("/var/lib/insaneos/boot-times.jsonl"));
 }
 
 /* the boot time test's state (bench/boottest.h): {total, left, at} while one is set, else null */
@@ -711,7 +711,7 @@ static const JSCFunctionListEntry sysinfo_funcs[] = {
     JS_CFUNC_DEF("community", 0, f_sysinfo_community),
 };
 
-/* ---- lord.browserFrame (Settings → Appearance; hw/brframe.c, docs/WAYLAND.md) ---- */
+/* ---- insane.browserFrame (Settings → Appearance; hw/brframe.c, docs/WAYLAND.md) ---- */
 
 /* The folders are fixed: $XDG_CONFIG_HOME (absolute) or ~/.config, and ~ for the legacy ~/.mozilla. */
 static int brf_dirs(char *cfg, size_t n, const char **home) {
@@ -770,28 +770,28 @@ static const JSCFunctionListEntry brf_funcs[] = {
     JS_CFUNC_DEF("chromiumRunning", 0, f_brf_running),
 };
 
-static void add(JSContext *c, JSValue lord, const char *name, const JSCFunctionListEntry *f, int n) {
+static void add(JSContext *c, JSValue insane, const char *name, const JSCFunctionListEntry *f, int n) {
     JSValue o = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, o, f, n);
-    JS_SetPropertyStr(c, lord, name, o);
+    JS_SetPropertyStr(c, insane, name, o);
 }
 
-void js_hw_register(JSContext *c, JSValue lord) {
-    add(c, lord, "display", display_funcs, sizeof display_funcs / sizeof display_funcs[0]);
-    add(c, lord, "power", power_funcs, sizeof power_funcs / sizeof power_funcs[0]);
-    add(c, lord, "bt", bt_funcs, sizeof bt_funcs / sizeof bt_funcs[0]);
-    add(c, lord, "polkit", polkit_funcs, sizeof polkit_funcs / sizeof polkit_funcs[0]);
-    add(c, lord, "portal", portal_funcs, sizeof portal_funcs / sizeof portal_funcs[0]);
-    add(c, lord, "mime", mime_funcs, sizeof mime_funcs / sizeof mime_funcs[0]);
-    add(c, lord, "timedate", td_funcs, sizeof td_funcs / sizeof td_funcs[0]);
-    add(c, lord, "notifyd", nd_funcs, sizeof nd_funcs / sizeof nd_funcs[0]);
-    add(c, lord, "hwinfo", hwinfo_funcs, sizeof hwinfo_funcs / sizeof hwinfo_funcs[0]);
-    add(c, lord, "sysinfo", sysinfo_funcs, sizeof sysinfo_funcs / sizeof sysinfo_funcs[0]);
-    JSValue si = JS_GetPropertyStr(c, lord, "sysinfo");
+void js_hw_register(JSContext *c, JSValue insane) {
+    add(c, insane, "display", display_funcs, sizeof display_funcs / sizeof display_funcs[0]);
+    add(c, insane, "power", power_funcs, sizeof power_funcs / sizeof power_funcs[0]);
+    add(c, insane, "bt", bt_funcs, sizeof bt_funcs / sizeof bt_funcs[0]);
+    add(c, insane, "polkit", polkit_funcs, sizeof polkit_funcs / sizeof polkit_funcs[0]);
+    add(c, insane, "portal", portal_funcs, sizeof portal_funcs / sizeof portal_funcs[0]);
+    add(c, insane, "mime", mime_funcs, sizeof mime_funcs / sizeof mime_funcs[0]);
+    add(c, insane, "timedate", td_funcs, sizeof td_funcs / sizeof td_funcs[0]);
+    add(c, insane, "notifyd", nd_funcs, sizeof nd_funcs / sizeof nd_funcs[0]);
+    add(c, insane, "hwinfo", hwinfo_funcs, sizeof hwinfo_funcs / sizeof hwinfo_funcs[0]);
+    add(c, insane, "sysinfo", sysinfo_funcs, sizeof sysinfo_funcs / sizeof sysinfo_funcs[0]);
+    JSValue si = JS_GetPropertyStr(c, insane, "sysinfo");
     JSValue bo = JS_NewObject(c);
     JS_SetPropertyFunctionList(c, bo, bench_funcs, sizeof bench_funcs / sizeof bench_funcs[0]);
     JS_SetPropertyStr(c, si, "bench", bo);
     JS_FreeValue(c, si);
-    add(c, lord, "browserFrame", brf_funcs, sizeof brf_funcs / sizeof brf_funcs[0]);
-    js_fan_register(c, lord);           /* lord.fan: Settings → Cooling and Monitor (js_fan.c) */
+    add(c, insane, "browserFrame", brf_funcs, sizeof brf_funcs / sizeof brf_funcs[0]);
+    js_fan_register(c, insane);           /* insane.fan: Settings → Cooling and Monitor (js_fan.c) */
 }

@@ -1,6 +1,6 @@
 /* users_admin.h — the machine's users (Settings → Users), in the administration helper. */
-#ifndef LORD_USERS_ADMIN_H
-#define LORD_USERS_ADMIN_H
+#ifndef INSANE_USERS_ADMIN_H
+#define INSANE_USERS_ADMIN_H
 
 #include "../admin.h"
 

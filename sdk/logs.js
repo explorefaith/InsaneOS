@@ -1,7 +1,7 @@
-// logs.js — logs for the Logs app (lord.logs, server/src/ui/js_logs.c; docs/SYSTEM.md).
+// logs.js — logs for the Logs app (insane.logs, server/src/ui/js_logs.c; docs/SYSTEM.md).
 //
 //   await logs.query({ scope: 'user'|'system', since, until, prio, kernel, match, grep, limit })
-//        → [{ t (µs), s, p, pid, uid, k, id, u, b, m }]  (read by a lord-server thread, as the
+//        → [{ t (µs), s, p, pid, uid, k, id, u, b, m }]  (read by a insane-server thread, as the
 //          user: their journal, and the system one only if their group allows it)
 //   await logs.system(query)      the same for the system journal, through the helper's
 //                                 logs-system action (administrators only)
@@ -12,13 +12,13 @@ import { admin } from './admin.js';
 const pending = new Map();
 const listeners = new Set();
 
-globalThis.__lordLogs = (kind, id, name) => {
+globalThis.__insaneLogs = (kind, id, name) => {
   if (kind === 'result') {
     const p = pending.get(id);
-    if (!p) { try { lord.logs.take(id); } catch (e) { /* nobody asked for it */ } return; }
+    if (!p) { try { insane.logs.take(id); } catch (e) { /* nobody asked for it */ } return; }
     pending.delete(id);
     let r = null;
-    try { r = lord.logs.take(id); } catch (e) { p.reject(e); return; }
+    try { r = insane.logs.take(id); } catch (e) { p.reject(e); return; }
     p.resolve(r || []);
     return;
   }
@@ -35,15 +35,15 @@ function queryText(q) {
 }
 
 export const logs = {
-  available: () => !!(globalThis.lord && lord.logs),
-  sources: () => lord.logs.sources(),
-  files: () => lord.logs.files(),
-  tail: (name, bytes) => lord.logs.tail(name, bytes),
-  follow: (on) => lord.logs.follow(!!on),
+  available: () => !!(globalThis.insane && insane.logs),
+  sources: () => insane.logs.sources(),
+  files: () => insane.logs.files(),
+  tail: (name, bytes) => insane.logs.tail(name, bytes),
+  follow: (on) => insane.logs.follow(!!on),
   onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   query(q) {
     return new Promise((resolve, reject) => {
-      try { pending.set(lord.logs.query(q), { resolve, reject }); } catch (e) { reject(e); }
+      try { pending.set(insane.logs.query(q), { resolve, reject }); } catch (e) { reject(e); }
     });
   },
   // unit or process names valid for filtering (the same check as the C side)

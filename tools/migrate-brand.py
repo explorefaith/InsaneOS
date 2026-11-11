@@ -4,10 +4,10 @@ migrate-brand.py — rebrand "Insane OS" → "Insane OS" across the tree.
 
 Scope (what the rebrand covers): every user-visible string, component name, comment and
 doc mention. NOT touched (deliberately — URLs, data paths and internal logic stay):
-  • lowercase identifiers/paths: ~/.config/lordos, /usr/lib/lordos, lord-*, org.lordos.*, app-lordos-*
-  • URLs: lordos.org
-  • environment variables: LORD_*
-  • the lowercase JS global object: lord.*
+  • lowercase identifiers/paths: ~/.config/insaneos, /usr/lib/insaneos, insane-*, org.insaneos.*, app-insaneos-*
+  • URLs: insaneos.org
+  • environment variables: INSANE_*
+  • the lowercase JS global object: insane.*
   • generated files: *.bundle.js, code-manifest.json, package-lock.json, assets/icons/*.png
 """
 import os, re, sys
@@ -55,11 +55,11 @@ def main():
                 open(path, 'w', encoding='utf-8').write(new)
                 changed += 1
             touched += 1
-            # report any remaining brand words for manual review (e.g. standalone "Lord ")
-            for m in set(re.findall(r'Lord[A-Za-z]*', new)):
+            # report any remaining brand words for manual review (e.g. standalone "Insane ")
+            for m in set(re.findall(r'Insane[A-Za-z]*', new)):
                 leftovers.setdefault(m, []).append(os.path.relpath(path, REPO))
     print(f'files touched: {touched}, changed: {changed}')
-    print('remaining "Lord*" words (manual review):')
+    print('remaining "Insane*" words (manual review):')
     for word, paths in sorted(leftovers.items()):
         print(f'  {word}: {len(paths)} file(s), e.g. {paths[0]}')
 

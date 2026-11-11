@@ -1,20 +1,20 @@
-/* idx.h — Insane OS's compact package index (/var/lib/lordos/pkg/index.bin).
+/* idx.h — Insane OS's compact package index (/var/lib/insaneos/pkg/index.bin).
  *
  * The root helper builds it in pkg-update from the already verified Packages, Translation-en and
- * DEP-11; lord-server (no root) opens it with mmap: nothing is copied into memory until it's
+ * DEP-11; insane-server (no root) opens it with mmap: nothing is copied into memory until it's
  * used. Everything is 32-bit little-endian integers and offsets into the string block
  * (string 0 is ""). Packages are sorted by name and, within a name, from the newest version
  * to the oldest. Long descriptions go in their own block at the end, in the same file (it's
  * replaced whole with rename: there's never half an index). */
-#ifndef LORD_PKG_IDX_H
-#define LORD_PKG_IDX_H
+#ifndef INSANE_PKG_IDX_H
+#define INSANE_PKG_IDX_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 #define IDX_MAGIC "LPKIDX4"
-#define PKG_DIR "/var/lib/lordos/pkg"
-#define PKG_CACHE "/var/cache/lordos/pkg"
+#define PKG_DIR "/var/lib/insaneos/pkg"
+#define PKG_CACHE "/var/cache/insaneos/pkg"
 
 enum { IF_ESSENTIAL = 1, IF_PROTECTED = 2, IF_MA_SAME = 4, IF_MA_FOREIGN = 8, IF_MA_ALLOWED = 16 };
 enum { PRIO_UNKNOWN, PRIO_REQUIRED, PRIO_IMPORTANT, PRIO_STANDARD, PRIO_OPTIONAL, PRIO_EXTRA };
@@ -52,7 +52,7 @@ typedef struct {
     char arch[16];                      /* native architecture it was built with */
 } IdxHeader;
 
-/* ---- reading (lord-server and the helper) ---- */
+/* ---- reading (insane-server and the helper) ---- */
 
 typedef struct {
     const IdxHeader *h;

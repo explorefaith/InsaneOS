@@ -42,30 +42,30 @@ export const ThemeContext = createContext(DEFAULT_TOKENS);
 export const shellTokens = createStore(null);
 
 // Isolated .lpk apps (another process) receive these same tokens live through the broker
-// (lord.broker.publish, see docs/PRIVACY.md). Only the theme publishes them, not the app host.
+// (insane.broker.publish, see docs/PRIVACY.md). Only the theme publishes them, not the app host.
 let published = '';
 function publishTokens(value) {
   try {
-    if (typeof lord === 'undefined' || !lord.broker || typeof lord.broker.publish !== 'function') return;
+    if (typeof insane === 'undefined' || !insane.broker || typeof insane.broker.publish !== 'function') return;
     const json = JSON.stringify(value, (k, v) => (typeof v === 'function' ? undefined : v));
-    if (json !== published) { published = json; lord.broker.publish('theme', json); }
+    if (json !== published) { published = json; insane.broker.publish('theme', json); }
   } catch (e) { /* non-serializable tokens */ }
 }
 
 // Linux apps (GTK, GNOME, Qt) read the mode, accent and title-bar button order through
-// org.freedesktop.portal.Settings, served by lord-server (ui/portal.c). gtkButtons is the
+// org.freedesktop.portal.Settings, served by insane-server (ui/portal.c). gtkButtons is the
 // GTK order: traffic lights on the left, or buttons on the right in a taskbar-style theme.
 const GNOME_ACCENTS = { azul: 'blue', violeta: 'purple', rosa: 'pink', naranja: 'orange', verde: 'green', grafito: 'slate',
   rojo: 'red', amarillo: 'yellow', turquesa: 'teal', celeste: 'blue' };
 let portalSent = '';
 function syncPortal(value) {
   try {
-    if (typeof lord === 'undefined' || !lord.portal) return;
+    if (typeof insane === 'undefined' || !insane.portal) return;
     const name = settings.get().accent || '';
     const msg = { dark: value.mode !== 'light', accent: /^#[0-9a-f]{6}$/i.test(value.accent) ? value.accent : '#0a84ff',
       accentName: GNOME_ACCENTS[name] || 'blue', buttons: value.gtkButtons || 'close,minimize,maximize:' };
     const json = JSON.stringify(msg);
-    if (json !== portalSent) { portalSent = json; lord.portal.set(msg); }
+    if (json !== portalSent) { portalSent = json; insane.portal.set(msg); }
   } catch (e) { /* no portal */ }
 }
 

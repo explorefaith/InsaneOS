@@ -3,8 +3,8 @@
  * predefined and numeric entities (&#N; &#xN;), CDATA, comments and processing
  * instructions. Never expands declared entities: a <!DOCTYPE is an error (no "billion
  * laughs" or external entities). Maximum depth 256. */
-#ifndef LORD_VAULT_XMLMINI_H
-#define LORD_VAULT_XMLMINI_H
+#ifndef INSANE_VAULT_XMLMINI_H
+#define INSANE_VAULT_XMLMINI_H
 
 #include <stddef.h>
 

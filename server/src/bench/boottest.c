@@ -14,7 +14,7 @@ static int valid(const BootTest *b) {
 
 int bt_format(const BootTest *b, char *out, unsigned n) {
     if (!valid(b)) return -1;
-    int k = snprintf(out, n, "lordos-boot-test 1\ntotal %d\nleft %d\nat %lld\n", b->total, b->left, b->at);
+    int k = snprintf(out, n, "insaneos-boot-test 1\ntotal %d\nleft %d\nat %lld\n", b->total, b->left, b->at);
     return k > 0 && (unsigned)k < n ? 0 : -1;
 }
 
@@ -36,7 +36,7 @@ static int field(const char **p, const char *key, long long max, long long *v) {
 }
 
 int bt_parse(const char *text, BootTest *b) {
-    static const char head[] = "lordos-boot-test 1\n";
+    static const char head[] = "insaneos-boot-test 1\n";
     if (!text || strncmp(text, head, sizeof head - 1)) return -1;
     const char *p = text + sizeof head - 1;
     long long total, left, at;

@@ -8,8 +8,8 @@
 //   statusItem.clear()
 //   statusItem.onSelect((id) => …)
 //
-// A home .lpk gets no companion: lord-server refuses, whatever its manifest says. The status item needs the
-// `status-item` permission; the shell draws it from this description, and lord-server checks every field.
+// A home .lpk gets no companion: insane-server refuses, whatever its manifest says. The status item needs the
+// `status-item` permission; the shell draws it from this description, and insane-server checks every field.
 const fns = new Set(), picks = new Set();
 const early = [];                         // said before the app's first listener: it starts before the app mounts
 
@@ -27,11 +27,11 @@ export const companion = {
     for (const d of early.splice(0)) fn(d);
     return off;
   },
-  send: (value) => lord.broker.companionSend(JSON.stringify(value)),
+  send: (value) => insane.broker.companionSend(JSON.stringify(value)),
   start(manifest) {
     try {
-      if ((manifest?.permissions || []).includes('network')) lord.broker.request('network');
-      if (!lord.broker.companion()) companionEvent({ companion: 'refused', code: 'companion.none' });
+      if ((manifest?.permissions || []).includes('network')) insane.broker.request('network');
+      if (!insane.broker.companion()) companionEvent({ companion: 'refused', code: 'companion.none' });
     } catch (e) { companionEvent({ companion: 'refused', code: e?.code || 'companion.none' }); }
   },
 };
@@ -39,10 +39,10 @@ export const companion = {
 export const statusItem = {
   set(spec) {
     try {
-      if (!lord.broker.request('status-item')) return false;
-      return lord.broker.statusItem(JSON.stringify(spec));
+      if (!insane.broker.request('status-item')) return false;
+      return insane.broker.statusItem(JSON.stringify(spec));
     } catch (e) { return false; }
   },
-  clear: () => lord.broker.statusItem(''),
+  clear: () => insane.broker.statusItem(''),
   onSelect: (fn) => listen(picks, fn),
 };

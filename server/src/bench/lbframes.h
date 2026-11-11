@@ -1,10 +1,10 @@
 /* lbframes.h — InsaneBench's compositor frame recorder (docs/BENCHMARK.md, "Frame times against the refresh
- * budget"). While a recording is on, lord-server's main loop (main.c) reports the work of every frame it
+ * budget"). While a recording is on, insane-server's main loop (main.c) reports the work of every frame it
  * builds (layout, paint and present, ms) and every frame the main display shows (the page flip's time, or
  * the end of the frame without a monitor); InsaneBench's thread (lbrun.c) starts and stops the recording
  * and gets the statistics. Off, each call is one atomic read. */
-#ifndef LORD_BENCH_LBFRAMES_H
-#define LORD_BENCH_LBFRAMES_H
+#ifndef INSANE_BENCH_LBFRAMES_H
+#define INSANE_BENCH_LBFRAMES_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -44,7 +44,7 @@ int  lbf_end(LbFrameStats *st);
  * main.c fills one LbPhase for each frame the main display gets, when it is submitted (lbf_phase_built: at
  * the end of render(), or for a frame the pipeline prepared, right after its submission), and completes it at
  * that frame's presentation (lbf_phase_shown). Times are CLOCK_MONOTONIC ns, 0 =
- * unknown. All measured by lord-server itself; nothing comes from a helper. Two recorders take them:
+ * unknown. All measured by insane-server itself; nothing comes from a helper. Two recorders take them:
  * InsaneBench's (lbf_begin/lbf_end, lbf_phases) and the scripted drag's (lbf_drag_begin/lbf_drag_end), for
  * its "drag (scripted):" line. Off, each call is one atomic read. */
 #define LBF_GDRAG_R 8                       /* GDRAG_R_N (ui/ui.h), checked in main.c */
@@ -78,7 +78,7 @@ typedef struct {
 typedef struct { double p50, p99; } LbPct;
 typedef struct {
     int n;                              /* frames with their phases */
-    LbPct wake;                         /* the flip to lord-server running (frames started by a flip) */
+    LbPct wake;                         /* the flip to insane-server running (frames started by a flip) */
     LbPct pre;                          /* that wake to render(): input, InsaneBench's scripted step, JS */
     LbPct paint, up, gdragup, swap, submit_call;
     LbPct build;                        /* render() */

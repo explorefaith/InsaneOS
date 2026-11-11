@@ -6,13 +6,13 @@ Insane OS's own code (the desktop environment, the display server and Wayland co
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense and/or sell copies of it, subject to including the copyright notice and the permission notice in all copies or substantial portions of the software. The software is provided "as is", without warranty of any kind.
 
-This is a summary; the [full text of the license](https://github.com/lordbasex/Insane OS/blob/main/LICENSE) is the one that applies.
+This is a summary; the [full text of the license](https://github.com/insaneos/Insane OS/blob/main/LICENSE) is the one that applies.
 
-The MIT license covers the code. It doesn't grant rights to the Insane OS name, the crown logo or Lumo, the mascot: see the [Trademark and brand policy](/legal/trademark/).
+The MIT license covers the code. It doesn't grant rights to the Insane OS name, the apple logo or Lumo, the mascot: see the [Trademark and brand policy](/legal/trademark/).
 
 ## Third-party components bundled with Insane OS
 
-These components live in the Insane OS repository (`third_party/` and `assets/`) and keep their own licenses. The complete list is in [THIRD_PARTY.md](https://github.com/lordbasex/Insane OS/blob/main/THIRD_PARTY.md).
+These components live in the Insane OS repository (`third_party/` and `assets/`) and keep their own licenses. The complete list is in [THIRD_PARTY.md](https://github.com/insaneos/Insane OS/blob/main/THIRD_PARTY.md).
 
 | Component | Used for | License |
 |---|---|---|
@@ -40,12 +40,12 @@ Insane OS is built on Debian. The base system, the Linux kernel, Mesa, PipeWire,
 
 On an installed system, every package's copyright and license is in `/usr/share/doc/<package>/copyright`. The source code of Debian packages is available from Debian ([sources.debian.org](https://sources.debian.org)).
 
-Insane OS links some system libraries dynamically: libwayland and libxkbcommon (MIT), Mesa (MIT), OpenSSL 3 (Apache-2.0), libcrypt (LGPL-2.1+), Poppler, cairo, FreeType and fontconfig (GPL-2.0-or-later, LGPL, FTL), libarchive (BSD-2-Clause) and FFmpeg and libva (LGPL-2.1+; Debian's FFmpeg build is GPL-2.0-or-later). The `lord-doc` and `lord-media` helpers link Poppler and Debian's FFmpeg, so those two binaries, as distributed, are covered by the GPL; the MIT-licensed Insane OS source they are built from is compatible with it.
+Insane OS links some system libraries dynamically: libwayland and libxkbcommon (MIT), Mesa (MIT), OpenSSL 3 (Apache-2.0), libcrypt (LGPL-2.1+), Poppler, cairo, FreeType and fontconfig (GPL-2.0-or-later, LGPL, FTL), libarchive (BSD-2-Clause) and FFmpeg and libva (LGPL-2.1+; Debian's FFmpeg build is GPL-2.0-or-later). The `insane-doc` and `insane-media` helpers link Poppler and Debian's FFmpeg, so those two binaries, as distributed, are covered by the GPL; the MIT-licensed Insane OS source they are built from is compatible with it.
 
-Since 0.8.7 `lordos` also depends on FreeRDP (Apache-2.0), rclone (MIT), fuse3 (LGPL-2.1, GPL-2.0) and the OpenSSH client (BSD). The Store's Disk Formats item, not preinstalled, brings ntfs-3g and exfatprogs (GPL-2.0), dosfstools (GPL-3.0) and, on amd64, apfs-dkms (GPL-2.0). Moving wallpapers are public domain, CC0, CC BY and CC BY-SA, with credits in Settings and in their repository.
+Since 0.8.7 `insaneos` also depends on FreeRDP (Apache-2.0), rclone (MIT), fuse3 (LGPL-2.1, GPL-2.0) and the OpenSSH client (BSD). The Store's Disk Formats item, not preinstalled, brings ntfs-3g and exfatprogs (GPL-2.0), dosfstools (GPL-3.0) and, on amd64, apfs-dkms (GPL-2.0). Moving wallpapers are public domain, CC0, CC BY and CC BY-SA, with credits in Settings and in their repository.
 
-Since 0.8.8 `lordos` also depends on polkit (`polkitd` and `pkexec`, LGPL-2.0-or-later), so Linux apps that ask for administrator rights get Insane OS's administrator prompt, and recommends libnss-mdns (LGPL-2.1-or-later), which resolves `.local` names. The images add wireless-regdb (ISC), the database of Wi-Fi's country rules, and libnss-mdns; the ISOs also carry firmware-brcm80211, Broadcom Wi-Fi firmware that is non-free but redistributable, from Debian's `non-free-firmware` section (the Raspberry Pi image already had it for the board's own Wi-Fi).
+Since 0.8.8 `insaneos` also depends on polkit (`polkitd` and `pkexec`, LGPL-2.0-or-later), so Linux apps that ask for administrator rights get Insane OS's administrator prompt, and recommends libnss-mdns (LGPL-2.1-or-later), which resolves `.local` names. The images add wireless-regdb (ISC), the database of Wi-Fi's country rules, and libnss-mdns; the ISOs also carry firmware-brcm80211, Broadcom Wi-Fi firmware that is non-free but redistributable, from Debian's `non-free-firmware` section (the Raspberry Pi image already had it for the board's own Wi-Fi).
 
 ## Source code
 
-The source code of Insane OS is in [github.com/lordbasex/Insane OS](https://github.com/lordbasex/Insane OS). If you need the corresponding source of a GPL component we distribute and can't find it, write to us through [our contact form](https://www.iperfex.com/contacto/?lang=en).
+The source code of Insane OS is in [github.com/insaneos/Insane OS](https://github.com/insaneos/Insane OS). If you need the corresponding source of a GPL component we distribute and can't find it, write to us through [our contact form](https://www.iperfex.com/contacto/?lang=en).

@@ -76,7 +76,7 @@ static long long now_ms(void) {
 static void set_state(const char *s) { pthread_mutex_lock(&mu); state = s; pthread_mutex_unlock(&mu); }
 
 /* ---- sockets ----
- * Made by the component's connector, so the kernel counts and decides them as lordos:lan (sec/netconn.h). */
+ * Made by the component's connector, so the kernel counts and decides them as insaneos:lan (sec/netconn.h). */
 static int lan_socket(int type, const struct sockaddr *to, socklen_t tolen) { return netconn_socket(NC_LAN, AF_INET, type, to, tolen); }
 
 static int lan_tcp(uint32_t a, int port) {
@@ -155,7 +155,7 @@ static int helper_spawn(int *out, pid_t *pid) {
     bin[n] = 0;
     char *slash = strrchr(bin, '/');
     if (!slash) return -1;
-    strcpy(slash + 1, "lord-lan");
+    strcpy(slash + 1, "insane-lan");
     struct stat st;
     if (stat(bin, &st) || !S_ISREG(st.st_mode) || (st.st_uid != 0 && st.st_uid != geteuid()) || (st.st_mode & 022)) return -1;   /* root's or ours, not writable by others */
     int sv[2];
@@ -171,8 +171,8 @@ static int helper_spawn(int *out, pid_t *pid) {
     posix_spawnattr_setsigmask(&at, &none);
     posix_spawnattr_setsigdefault(&at, &all);
     posix_spawnattr_setflags(&at, POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETSIGDEF);
-    char *argv[] = { "lord-lan", NULL };
-    char *envp[] = { "LANG=C.UTF-8", getenv("LORDOS_SESSIOND") ? "LORDOS_SESSIOND=1" : NULL, NULL };
+    char *argv[] = { "insane-lan", NULL };
+    char *envp[] = { "LANG=C.UTF-8", getenv("INSANEOS_SESSIOND") ? "INSANEOS_SESSIOND=1" : NULL, NULL };
     int e = posix_spawn(pid, bin, &fa, &at, argv, envp);
     posix_spawn_file_actions_destroy(&fa);
     posix_spawnattr_destroy(&at);

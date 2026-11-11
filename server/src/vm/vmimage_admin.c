@@ -21,22 +21,22 @@
 
 /* ---- the systems the assistant downloads (vmcatalog.h) ----
  *
- * Everything lands in /var/lib/lordos/machines, root's and readable by all: the makers' lists in lists/, the verified
+ * Everything lands in /var/lib/insaneos/machines, root's and readable by all: the makers' lists in lists/, the verified
  * images in images/<sha256>.iso (one copy for every account; a name is the content's hash, so an image there is the one
  * that was checked). Root writes the bytes and compares one hash; it never parses what arrives (the app reads the lists
  * and names the file; the helper only checks that one line of the list it fetched itself says exactly that). */
 #ifndef VM_CATALOG                /* tests/vm_image_cli.c builds with its own */
-#define VM_CATALOG "/usr/lib/lordos/assets/machines/systems.json"
+#define VM_CATALOG "/usr/lib/insaneos/assets/machines/systems.json"
 #endif
 #ifndef VM_KEYS                   /* the makers' keys the catalog pins (packaging/keys/machines) */
-#define VM_KEYS    "/usr/lib/lordos/assets/machines/keys"
+#define VM_KEYS    "/usr/lib/insaneos/assets/machines/keys"
 #endif
 #ifndef VM_STORE
-#define VM_STORE   "/var/lib/lordos/machines"
+#define VM_STORE   "/var/lib/insaneos/machines"
 #endif
 #define VM_LISTS   VM_STORE "/lists"
 #define VM_IMAGES  VM_STORE "/images"
-#define VM_SCOPE   "lordos-net-machines.scope"
+#define VM_SCOPE   "insaneos-net-machines.scope"
 #define VM_LIST_MAX (1u << 20)
 
 static int word(const char *s) {
@@ -82,7 +82,7 @@ static int entry_of(const char *id, const char *arch, VmCatEntry *e) {
 static void store_dirs(void) {
     char up[sizeof VM_STORE];
     memcpy(up, VM_STORE, sizeof up);
-    *strrchr(up, '/') = 0;                                   /* /var/lib/lordos */
+    *strrchr(up, '/') = 0;                                   /* /var/lib/insaneos */
     mkdir(up, 0755);
     mkdir(VM_STORE, 0755);
     mkdir(VM_LISTS, 0755);
@@ -193,7 +193,7 @@ void vm_act_image_list(const AdminReq *r, const char *arg, size_t len) {
     admin_say("OK", "%s", dest);                             /* i18n-ok: a path, parsed by apps/machines */
 }
 
-static void image_job(const AdminReq *r, char *p, size_t n) { snprintf(p, n, "/run/lordos/vm-image-%u.job", (unsigned)r->uid); }
+static void image_job(const AdminReq *r, char *p, size_t n) { snprintf(p, n, "/run/insaneos/vm-image-%u.job", (unsigned)r->uid); }
 
 void vm_act_image_get(const AdminReq *r, const char *arg, size_t len) {
     char buf[320], *f[4];
@@ -221,7 +221,7 @@ void vm_act_image_get(const AdminReq *r, const char *arg, size_t len) {
     if (lfd < 0 || flock(lfd, LOCK_EX | LOCK_NB)) { if (lfd >= 0) close(lfd); admin_err("vm.imageBusy", NULL); return; }
     char jp[64];
     image_job(r, jp, sizeof jp);
-    mkdir("/run/lordos", 0755);
+    mkdir("/run/insaneos", 0755);
     FILE *jf = fopen(jp, "we");
     if (jf) { fprintf(jf, "%d %u %s\n", (int)getpid(), (unsigned)r->uid, sha); fclose(jf); }
     char url[VMCAT_URL + 160];
@@ -262,7 +262,7 @@ void vm_act_image_cancel(const AdminReq *r, const char *arg, size_t len) {
     FILE *c = fopen(cp, "re");
     if (c) { if (!fgets(comm, sizeof comm, c)) comm[0] = 0; fclose(c); }
     unlink(jp);
-    if (strncmp(comm, "lord-admin", 10)) { admin_err("vm.nothingRunning", NULL); return; }
+    if (strncmp(comm, "insane-admin", 10)) { admin_err("vm.nothingRunning", NULL); return; }
     kill(pid, SIGTERM);
     for (int i = 0; i < 40 && !kill(pid, 0); i++) usleep(50000);
     /* the part stays (<sha256>.iso.part): asking for the image again continues it; Storage removes it */

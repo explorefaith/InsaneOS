@@ -208,7 +208,7 @@ static void test_map(void) {
     CHECK(look(m, A, "203.0.113.66", 1000, out, 16) == 0);  /* the stray one was ignored */
     CHECK(look(m, A, "::ffff:203.0.113.10", 1000, out, 16) == 3);   /* IPv4 mapeada */
     CHECK(look(m, "desktop:other", "203.0.113.10", 1000, out, 16) == 0);
-    CHECK(look(m, "app-lordos-org.chromium.Chromium.scope", "203.0.113.10", 1000, out, 16) == 3);
+    CHECK(look(m, "app-insaneos-org.chromium.Chromium.scope", "203.0.113.10", 1000, out, 16) == 3);
     CHECK(look(m, A, "203.0.113.10", 1000, out, 1) == 1);
     /* TTL: the smallest in the chain (120) */
     CHECK(look(m, A, "203.0.113.10", 1119, out, 16) == 3);

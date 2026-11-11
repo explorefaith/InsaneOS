@@ -13,13 +13,13 @@ The script is a list of scenes:
                 ["rclick", 547, 757], ["wheel", "down", 3], ["wait", 1.5], ["ssh", "command in the VM"]],
     "min": 4 }                          # minimum seconds
 Each scene lasts at least as long as its voice. Actions go over QMP to the Proxmox host
-(tools/lord-qmp-input.py, tools/lord-type.py), and recording is done by tools/demo/record.py."""
+(tools/insane-qmp-input.py, tools/insane-type.py), and recording is done by tools/demo/record.py."""
 import json, os, shutil, subprocess, sys, tempfile, time
 from PIL import Image, ImageDraw, ImageFont
 
-KEY = os.path.expanduser('~/.ssh/ssh/sshkey/lord.basex.pem')
+KEY = os.path.expanduser('~/.ssh/ssh/sshkey/insane.basex.pem')
 HOST = 'root@172.17.0.2'
-VM_SSH = None                           # 'lord@172.17.0.51' for "ssh" actions
+VM_SSH = None                           # 'insane@172.17.0.51' for "ssh" actions
 W, H = 1280, 800
 
 
@@ -27,10 +27,10 @@ def ssh(host, cmd, check=False):
     return subprocess.run(['ssh', '-o', 'ConnectTimeout=10', '-i', KEY, host, cmd], capture_output=True, text=True, check=check)
 
 
-# Voice: Kokoro-82M (tts_kokoro.py) if LORDOS_TTS_PY (python with kokoro-onnx) and
-# LORDOS_TTS_MODEL (model folder) are set and the voice is a Kokoro one (af_heart…); otherwise the host's `say`.
+# Voice: Kokoro-82M (tts_kokoro.py) if INSANEOS_TTS_PY (python with kokoro-onnx) and
+# INSANEOS_TTS_MODEL (model folder) are set and the voice is a Kokoro one (af_heart…); otherwise the host's `say`.
 def voice(text, path, name):
-    py, model = os.environ.get('LORDOS_TTS_PY'), os.environ.get('LORDOS_TTS_MODEL')
+    py, model = os.environ.get('INSANEOS_TTS_PY'), os.environ.get('INSANEOS_TTS_MODEL')
     if py and model and '_' in name:
         subprocess.run([py, os.path.join(os.path.dirname(__file__), 'tts_kokoro.py'), model, name, path, text], check=True)
     else:
@@ -65,7 +65,7 @@ def act(vmid, a):
     if k in ('key', 'type', 'typela'):
         txt = latam(a[1]) if k == 'typela' else a[1]
         txt = txt.replace("'", "'\\''")
-        ssh(HOST, f"python3 /root/lord-type.py {vmid} '{txt}'"); return
+        ssh(HOST, f"python3 /root/insane-type.py {vmid} '{txt}'"); return
     if k == 'move': mouse = f'move {a[1]} {a[2]}'
     elif k == 'click': mouse = f'move {a[1]} {a[2]} down up'
     elif k == 'rclick': mouse = f'move {a[1]} {a[2]} rdown rup'
@@ -73,7 +73,7 @@ def act(vmid, a):
     elif k == 'drag': mouse = f'move {a[1]} {a[2]} down sleep 0.2 move {a[3]} {a[4]} sleep 0.2 up'
     elif k == 'wheel': mouse = ' '.join([f'wheel{a[1]}'] * (a[2] if len(a) > 2 else 1))
     else: raise ValueError(f'unknown action: {a}')
-    if mouse: ssh(HOST, f'python3 /root/lord-qmp-input.py {vmid} {W} {H} {mouse}')
+    if mouse: ssh(HOST, f'python3 /root/insane-qmp-input.py {vmid} {W} {H} {mouse}')
 
 
 def font(size, bold=False):
@@ -117,9 +117,9 @@ def title_card(text, sub, path):
     for i in range(H):                                            # violet gradient
         c = int(30 + 40 * i / H)
         d.line([(0, i), (W, i)], fill=(c, 18, 70 + int(50 * i / H)))
-    crown = os.path.join(os.path.dirname(__file__), '../../assets/icons/lordos-crown.png')
-    if os.path.exists(crown):
-        ic = Image.open(crown).convert('RGBA').resize((120, 120))
+    apple = os.path.join(os.path.dirname(__file__), '../../assets/icons/insaneos-apple.png')
+    if os.path.exists(apple):
+        ic = Image.open(apple).convert('RGBA').resize((120, 120))
         img.paste(ic, ((W - 120) // 2, 200), ic)
     f1, f2 = font(54, True), font(26)
     tw = d.textlength(text, font=f1)
@@ -135,7 +135,7 @@ def main():
     args = sys.argv[1:]
     script, out = args[0], args[1]
     vmid = args[args.index('--vmid') + 1] if '--vmid' in args else '117'
-    vname = args[args.index('--voice') + 1] if '--voice' in args else ('af_heart' if os.environ.get('LORDOS_TTS_MODEL') else 'Samantha')
+    vname = args[args.index('--voice') + 1] if '--voice' in args else ('af_heart' if os.environ.get('INSANEOS_TTS_MODEL') else 'Samantha')
     VM_SSH = args[args.index('--vm-ssh') + 1] if '--vm-ssh' in args else None
     scenes = json.load(open(script))
     if '--rehearse' in args:                                      # rehearsal: no voice or recording, one screenshot per scene
@@ -155,16 +155,16 @@ def main():
             subprocess.run(['scp', '-q', '-i', KEY, f'{HOST}:/tmp/reh.png', f'{out}-{i:02d}.png'])
             print(i, s.get('chapter') or s.get('es', '')[:40], flush=True)
         return
-    tmp = tempfile.mkdtemp(prefix='lordos-demo-')
+    tmp = tempfile.mkdtemp(prefix='insaneos-demo-')
     # 1. voices
     for i, s in enumerate(scenes):
         s['voice'] = os.path.join(tmp, f'v{i:03d}.wav')
         s['vdur'] = voice(s['en'], s['voice'], vname) if s.get('en') else 0
     # 2. recording
-    rec = f'/dev/shm/lordos-rec-{vmid}'
+    rec = f'/dev/shm/insaneos-rec-{vmid}'
     ssh(HOST, f'rm -rf {rec}; mkdir -p {rec}')
-    subprocess.run(['scp', '-q', '-i', KEY, os.path.join(os.path.dirname(__file__), 'record.py'), f'{HOST}:/root/lordos-record.py'], check=True)
-    recp = subprocess.Popen(['ssh', '-i', KEY, HOST, f'python3 /root/lordos-record.py {vmid} {rec} 6'])
+    subprocess.run(['scp', '-q', '-i', KEY, os.path.join(os.path.dirname(__file__), 'record.py'), f'{HOST}:/root/insaneos-record.py'], check=True)
+    recp = subprocess.Popen(['ssh', '-i', KEY, HOST, f'python3 /root/insaneos-record.py {vmid} {rec} 6'])
     time.sleep(1.5)
     t0 = time.time()
     timeline = []

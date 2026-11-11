@@ -1,11 +1,11 @@
-/* sql_e2e_test.c — lord-sql (build/lord-sql) end to end against a fake MySQL / MariaDB server that runs in this
+/* sql_e2e_test.c — insane-sql (build/insane-sql) end to end against a fake MySQL / MariaDB server that runs in this
  * test, over a socketpair: the real helper, sandboxed, with its channel on fd 3 and the "server" on fd 4. Covers
  * mysql_native_password, caching_sha2_password (fast path, full auth with the server's RSA key, full auth over
  * TLS), the auth switch, a refused login, an ERR greeting and a garbage one, TLS (preferred, verify with the
  * cert event, a trusted fingerprint, a CA file, a wrong host name, required without TLS), queries with two result
  * sets, NULLs, binary values, an ERR, an ERR after a first result, maxRows, the 64 MB limit (sent as a memfd),
- * COM_INIT_DB, COM_PING, COM_QUIT and a server that goes away while idle. Then lord-server's own side
- * (src/sql/sqlc.c, what lord.sql calls) over a TCP listener on 127.0.0.1: favorites, open, query, busy, close.
+ * COM_INIT_DB, COM_PING, COM_QUIT and a server that goes away while idle. Then insane-server's own side
+ * (src/sql/sqlc.c, what insane.sql calls) over a TCP listener on 127.0.0.1: favorites, open, query, busy, close.
  * No MySQL server is needed; nothing leaves this machine.
  *
  *   make -C server build/sql-e2e-test        (also in `make test` when OpenSSL's headers are there) */
@@ -39,7 +39,7 @@
 #include <openssl/x509v3.h>
 
 static int fails, checks;
-static const char *lordsql;
+static const char *insanesql;
 #define CHECK(c, ...) do { checks++; if (!(c)) { fails++; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
 
 static const uint8_t SCRAMBLE[21] = "abcdefghijklmnopqrst";
@@ -365,8 +365,8 @@ static int start(Helper *h, Scn *s) {
     if (h->pid == 0) {
         dup2(a, 3);
         dup2(b, 4);
-        char *argv[] = { "lord-sql", NULL }, *envp[] = { "LANG=C.UTF-8", NULL };
-        execve(lordsql, argv, envp);
+        char *argv[] = { "insane-sql", NULL }, *envp[] = { "LANG=C.UTF-8", NULL };
+        execve(insanesql, argv, envp);
         _exit(127);
     }
     close(a); close(b); close(ch[1]); close(db[1]);
@@ -602,7 +602,7 @@ static void test_helper(void) {
     CHECK(WIFEXITED(st) && WEXITSTATUS(st) == 0, "idle drop exit %d", st);
 }
 
-/* ---- lord-server's side: sqlc.c over a TCP listener ---- */
+/* ---- insane-server's side: sqlc.c over a TCP listener ---- */
 
 typedef struct { int lfd; Scn *s; } Acc;
 static void *acceptor(void *arg) {
@@ -643,7 +643,7 @@ static void test_sqlc(void) {
     char home[] = "/tmp/sql-e2e-home.XXXXXX";
     if (!mkdtemp(home)) { CHECK(0, "mkdtemp"); return; }
     setenv("HOME", home, 1);
-    CHECK(sql_available() == 0, "lord-sql next to the test binary");
+    CHECK(sql_available() == 0, "insane-sql next to the test binary");
     int lfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_addr.s_addr = htonl(INADDR_LOOPBACK) };
     bind(lfd, (struct sockaddr *)&a, sizeof a);
@@ -681,7 +681,7 @@ static void test_sqlc(void) {
     const char *oj = "{\"op\":\"open\",\"fav\":\"local\",\"password\":\"s3cret pass\"}";
     id = sql_request(oj, strlen(oj));
     CHECK(wait_for(id, &d, 15000) == SQL_OK && has(d, "{\"conn\":") && has(d, "\"server\":{\"version\":\"8.0.36\",\"flavor\":\"mysql\"},\"threadId\":4242,\"tls\":null,\"db\":\"shop\"}"),
-          "open through lord-server: %s (%s)", d, s.why);
+          "open through insane-server: %s (%s)", d, s.why);
     int conn = 0;
     if (d) sscanf(d, "{\"conn\":%d", &conn);
     free(d);
@@ -691,7 +691,7 @@ static void test_sqlc(void) {
     int id2 = sql_request(q, strlen(q));
     CHECK(wait_for(id2, &d, 2000) == SQL_ERR && has(d, "busy"), "one query at a time: %s", d);
     free(d);
-    CHECK(wait_for(id1, &d, 15000) == SQL_OK && has(d, "\"truncated\":true") && has(d, "\"ms\":"), "query through lord-server: %s", d);
+    CHECK(wait_for(id1, &d, 15000) == SQL_OK && has(d, "\"truncated\":true") && has(d, "\"ms\":"), "query through insane-server: %s", d);
     free(d);
     snprintf(q, sizeof q, "{\"op\":\"close\",\"conn\":%d}", conn);
     id = sql_request(q, strlen(q));
@@ -711,19 +711,19 @@ static void test_sqlc(void) {
     CHECK(wait_for(0, &d, 10000) == SQL_EVT && has(d, "\"ev\":\"closed\"") && has(d, "\"reason\":\"server\""), "closed event: %s", d);
     free(d);
     pthread_join(th, NULL);
-    /* a wrong password through lord-server */
+    /* a wrong password through insane-server */
     s = (Scn){ .version = "8.0.36", .plugin = "mysql_native_password", .caps = CAPS, .password = "other" };
     pthread_create(&th, NULL, acceptor, &acc);
     id = sql_request(oj, strlen(oj));
     CHECK(wait_for(id, &d, 15000) == SQL_ERR && has(d, "\"error\":\"auth\""), "wrong password: %s", d);
     free(d);
     pthread_join(th, NULL);
-    /* a certificate that doesn't check: the event names lord-server's conn and favorite */
+    /* a certificate that doesn't check: the event names insane-server's conn and favorite */
     s = (Scn){ .version = "8.0.36", .plugin = "mysql_native_password", .caps = CAPS, .offer_tls = 1, .password = "s3cret pass" };
     pthread_create(&th, NULL, acceptor, &acc);
     const char *tj = "{\"op\":\"open\",\"fav\":\"tlsv\",\"password\":\"s3cret pass\"}";
     id = sql_request(tj, strlen(tj));
-    CHECK(wait_for(id, &d, 15000) == SQL_ERR && has(d, "{\"error\":\"cert\"}"), "cert through lord-server: %s", d);
+    CHECK(wait_for(id, &d, 15000) == SQL_ERR && has(d, "{\"error\":\"cert\"}"), "cert through insane-server: %s", d);
     free(d);
     CHECK(wait_for(0, &d, 2000) == SQL_EVT && has(d, "{\"ev\":\"cert\",\"conn\":") && has(d, "\"fav\":\"tlsv\",\"sha256\":\"") && has(d, fp) &&
           has(d, "\"subject\":\"/CN=db.test\""), "cert event: %s", d);
@@ -736,10 +736,10 @@ static void test_sqlc(void) {
 }
 
 int main(int argc, char **argv) {
-    lordsql = argc > 1 ? argv[1] : "build/lord-sql";
-    unsetenv("LORDOS_SESSIOND");   /* sockets made here, not by a session connector (sec/netconn.h) */
+    insanesql = argc > 1 ? argv[1] : "build/insane-sql";
+    unsetenv("INSANEOS_SESSIOND");   /* sockets made here, not by a session connector (sec/netconn.h) */
     signal(SIGPIPE, SIG_IGN);
-    if (access(lordsql, X_OK)) { printf("sql-e2e-test: skipped: needs %s\n", lordsql); return 0; }
+    if (access(insanesql, X_OK)) { printf("sql-e2e-test: skipped: needs %s\n", insanesql); return 0; }
     make_cert();
     test_helper();
     test_sqlc();

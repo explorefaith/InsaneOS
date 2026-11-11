@@ -1,8 +1,8 @@
 /* glscene.h — a fixed 3D scene (a rotating cube, a colour per face) drawn with OpenGL ES 2 in whatever
- * context is current: lordos-testbench's window (wayland-egl) or InsaneBench's offscreen context. Needs
+ * context is current: insaneos-testbench's window (wayland-egl) or InsaneBench's offscreen context. Needs
  * GLESv2 only; the caller owns EGL. */
-#ifndef LORD_BENCH_GLSCENE_H
-#define LORD_BENCH_GLSCENE_H
+#ifndef INSANE_BENCH_GLSCENE_H
+#define INSANE_BENCH_GLSCENE_H
 
 typedef struct {
     char renderer[96], vendor[64], version[64];

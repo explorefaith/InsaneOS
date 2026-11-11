@@ -51,7 +51,7 @@ void sr_facts(SrFacts *f, const char *root) {
     }
     free(st);
 
-    /* "0::/system.slice/lordos.service/lordos-session-1000/server" (cgroup v2) */
+    /* "0::/system.slice/insaneos.service/insaneos-session-1000/server" (cgroup v2) */
     char *cg = slurp(root, "/proc/self/cgroup", 4096);
     const char *z = cg ? strstr(cg, "0::") : NULL;
     if (z && (z == cg || z[-1] == '\n')) {

@@ -13,10 +13,10 @@
  * validated names of missing firmware files.
  *
  * `root` prefixes every path ("" for the real system); tests and the fixture mode
- * (LORD_HWSCAN_ROOT, development only) point it at a fake tree, where the kernel log is the
+ * (INSANE_HWSCAN_ROOT, development only) point it at a fake tree, where the kernel log is the
  * plain file <root>/kmsg. */
-#ifndef LORD_HW_HWSCAN_H
-#define LORD_HW_HWSCAN_H
+#ifndef INSANE_HW_HWSCAN_H
+#define INSANE_HW_HWSCAN_H
 
 #include <stddef.h>
 

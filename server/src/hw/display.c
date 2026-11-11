@@ -1,4 +1,4 @@
-/* display.c — Settings → Displays, lord-server side (see display.h, docs/DISPLAYS.md). */
+/* display.c — Settings → Displays, insane-server side (see display.h, docs/DISPLAYS.md). */
 #include "display.h"
 #include "accel.h"
 #include "edid.h"
@@ -33,7 +33,7 @@ typedef struct {
 
 static struct {
     const DisplayHost *host;
-    char path[PATH_MAX];                /* ~/.config/lordos/displays.json */
+    char path[PATH_MAX];                /* ~/.config/insaneos/displays.json */
     Conf saved, live, undo;             /* the file, what is shown now, before the last change */
     int capture_all;
     int dirty, retry, save_pending;
@@ -66,13 +66,13 @@ static double now_ms(void) {
 static Kms *kms(void) { return D.host && D.host->kms ? D.host->kms() : NULL; }
 
 /* Development only (tests/lock_e2e.sh, a VM whose one card the running desktop holds): with
- * LORD_IDLE_HEADLESS=1 a session without a monitor keeps the idle deadlines as if its frame in memory
- * were the screen ("off" only stops counting it as lit), until lord-sessiond's RP_UNDISPLAY
- * (display_left). lord-sessiond never sets it. */
+ * INSANE_IDLE_HEADLESS=1 a session without a monitor keeps the idle deadlines as if its frame in memory
+ * were the screen ("off" only stops counting it as lit), until insane-sessiond's RP_UNDISPLAY
+ * (display_left). insane-sessiond never sets it. */
 static int idle_headless = -1, idle_left;
 static int screen(void) {
     if (kms()) return 1;
-    if (idle_headless < 0) idle_headless = getenv("LORD_IDLE_HEADLESS") != NULL;
+    if (idle_headless < 0) idle_headless = getenv("INSANE_IDLE_HEADLESS") != NULL;
     return idle_headless && !idle_left;
 }
 void display_left(void) { idle_left = 1; D.off = 0; }
@@ -221,12 +221,12 @@ void display_init(const DisplayHost *h) {
         char dir[PATH_MAX];
         snprintf(dir, sizeof dir, "%s/.config", home);
         mkdir(dir, 0700);
-        snprintf(dir, sizeof dir, "%s/.config/lordos", home);
+        snprintf(dir, sizeof dir, "%s/.config/insaneos", home);
         mkdir(dir, 0700);
-        snprintf(D.path, sizeof D.path, "%s/.config/lordos/displays.json", home);
+        snprintf(D.path, sizeof D.path, "%s/.config/insaneos/displays.json", home);
         load();
     }
-    /* lord-server started on its own card as root (development): the picker ran before $HOME was
+    /* insane-server started on its own card as root (development): the picker ran before $HOME was
      * the user's, so the saved configuration is applied now (and the other displays are opened) */
     D.dirty = 1;
 }
@@ -249,9 +249,9 @@ int display_plan(const KmsOutput *o, int n, DisplayPlan *p) {
         unique_identity(o, i, ids[i], ID_MAX, names[i], sizeof names[i]);
         if (main_i < 0 && c->main_id[0] && !strcmp(ids[i], c->main_id)) main_i = i;
     }
-    /* the login screen has no displays.json: lord-sessiond gives it the main display last chosen in a
-     * session (LORD_MAIN_DISPLAY, a connector), else the first connected one */
-    const char *want = c->main_id[0] ? NULL : getenv("LORD_MAIN_DISPLAY");
+    /* the login screen has no displays.json: insane-sessiond gives it the main display last chosen in a
+     * session (INSANE_MAIN_DISPLAY, a connector), else the first connected one */
+    const char *want = c->main_id[0] ? NULL : getenv("INSANE_MAIN_DISPLAY");
     for (int i = 0; i < n && i < KMS_MAX_OUTPUTS && main_i < 0 && want && want[0]; i++) {
         char conn[32];
         snprintf(conn, sizeof conn, "%s-%u", kms_connector_type_name(o[i].type), o[i].type_id);
@@ -409,7 +409,7 @@ static void apply_tint_all(void) {
     D.soft = 0;
     /* hardware gamma only if every display has a LUT; otherwise the software tint for all of them
      * (and the LUTs that exist stay neutral, so nothing is tinted twice) */
-    int hw = nh > 0 && !getenv("LORD_SOFT_GAMMA");
+    int hw = nh > 0 && !getenv("INSANE_SOFT_GAMMA");
     for (int i = 0; i < nh && hw; i++) { int gs = kms_gamma_size(hs[i]); if (gs <= 1 || gs > 4096) hw = 0; }
     int gs = 0;
     for (int i = 0; i < nh; i++) {

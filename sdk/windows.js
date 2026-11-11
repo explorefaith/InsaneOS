@@ -5,7 +5,7 @@
 // windows (wm.open('terminal', { new: true }) → id 'terminal#2'), a dynamic title
 // (wm.setTitle), confirmation on close (wm.setCloseGuard) and its own menus (wm.setMenus)
 // that the theme shows in its menu bar.
-import { screen, onScreenChange, addListener, mainDisplay, displayAt, displayFor } from '@lordos/runtime';
+import { screen, onScreenChange, addListener, mainDisplay, displayAt, displayFor } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { appName, t } from './i18n.js';
 import { SNAP_ZONES, snapRect, zoneAt, snapNext } from './snap.js';
@@ -185,7 +185,7 @@ export const isSystemApp = (id) => { const a = getApp(id); return !!(a && a.syst
 // "hidden": true (System Information's Sandbox Probe) keeps an app out of the launcher and search.
 let live = null;
 export const isLiveSystem = () => {
-  if (live === null) { try { const i = lord.system.info(); live = !!(i.live || i.firstAccount); } catch (e) { live = false; } }
+  if (live === null) { try { const i = insane.system.info(); live = !!(i.live || i.firstAccount); } catch (e) { live = false; } }
   return live;
 };
 export const listApps = () => [...registry.values()].filter((a) => !a.builtin && !a.hidden && (!a.live || isLiveSystem()));
@@ -222,10 +222,10 @@ function showDesktopOf(id) {
 }
 const patch = (id, p) => windows.set((ws) => ws.map((w) => (w.id === id ? { ...w, ...p } : w)));
 
-// ---- dragging in C (lord.wm, docs/WINDOWS.md) ----
+// ---- dragging in C (insane.wm, docs/WINDOWS.md) ----
 // The theme marks each window's node with ref={wm.frameRef(id, inset)}; inset = how much the
 // node extends past the frame on each side (the invisible borders for resizing). Moving or resizing is tracked
-// by lord-server with no JS per frame; on release __lordWm('end') arrives and the new geometry is saved.
+// by insane-server with no JS per frame; on release __insaneWm('end') arrives and the new geometry is saved.
 const frameNodes = new Map();         // window id → { node, inset }
 const frameRefs = new Map();
 let grab = null;
@@ -246,7 +246,7 @@ function frameRef(id, inset = 0) {
 // top or bottom of that edge, a quarter; to the top edge, the whole area (maximized). The theme turns
 // it on (configureWindows({ snap: true })), draws the preview from `snapPreview` and may offer the
 // layouts with wm.snap(id, zone). While a window is moved in C, the SDK only reads the pointer a few
-// times per second (lord.wm.pointer), never per frame.
+// times per second (insane.wm.pointer), never per frame.
 let snapOn = false;
 // { id, zone, rect: { x, y, w, h } } while a dragged window would snap, else null
 export const snapPreview = createStore(null);
@@ -280,9 +280,9 @@ let previewTimer = 0;
 function watchSnap(id) {
   clearInterval(previewTimer);
   previewTimer = 0;
-  if (!snapOn || typeof lord === 'undefined' || !lord.wm || typeof lord.wm.pointer !== 'function') return;
+  if (!snapOn || typeof insane === 'undefined' || !insane.wm || typeof insane.wm.pointer !== 'function') return;
   previewTimer = setInterval(() => {
-    const p = lord.wm.pointer();
+    const p = insane.wm.pointer();
     const zone = p.active && p.edges === 0 ? snapZoneAt(p.x, p.y) : null;
     if (!p.active) { clearInterval(previewTimer); previewTimer = 0; }
     const cur = snapPreview.get();
@@ -296,15 +296,15 @@ const grabAreas = () => screen.displays.map((d) => workAreaOf(d)).map((a, i) => 
 function beginGrab(id, edges) {
   const w = windows.get().find((x) => x.id === id);
   const f = frameNodes.get(id);
-  if (!w || !f || w.maximized || w.fullscreen || typeof lord === 'undefined' || !lord.wm) return false;
+  if (!w || !f || w.maximized || w.fullscreen || typeof insane === 'undefined' || !insane.wm) return false;
   const [minW, minH] = registry.get(w.app)?.minSize || [160, 100];
   const areas = grabAreas();
-  if (!lord.wm.grab(f.node, edges, { inset: f.inset, minW, minH, minTop: areaOfWindow(w).y, areas })) return false;
+  if (!insane.wm.grab(f.node, edges, { inset: f.inset, minW, minH, minTop: areaOfWindow(w).y, areas })) return false;
   grab = { id, node: f.node, edges, f: { x: w.x, y: w.y, w: w.w, h: w.h } };
   if (!edges) watchSnap(id);
   return true;
 }
-globalThis.__lordWm = (type, d) => {
+globalThis.__insaneWm = (type, d) => {
   if (type !== 'end' || !grab || grab.node !== d.node) return;
   const { id, f, edges } = grab;
   grab = null;
@@ -313,8 +313,8 @@ globalThis.__lordWm = (type, d) => {
   if (snapPreview.get()) snapPreview.set(null);
   if (!d.dx && !d.dy && !d.dw && !d.dh) return;      // it was a click on the bar
   const nx = Math.round(f.x + d.dx), ny = Math.round(f.y + d.dy);
-  if (snapOn && !edges && typeof lord !== 'undefined' && lord.wm && typeof lord.wm.pointer === 'function') {
-    const p = lord.wm.pointer();
+  if (snapOn && !edges && typeof insane !== 'undefined' && insane.wm && typeof insane.wm.pointer === 'function') {
+    const p = insane.wm.pointer();
     const zone = snapZoneAt(p.x, p.y);
     const w = windows.get().find((x) => x.id === id);
     if (zone && w) {
@@ -334,22 +334,22 @@ globalThis.__lordWm = (type, d) => {
     ...(edges ? { snapped: null, restore: null } : null) });
 };
 
-// when each window was opened (lord.now()), for the developer timing log (settings "debugTiming")
+// when each window was opened (insane.now()), for the developer timing log (settings "debugTiming")
 export const openedAt = new Map();
 
 export const wm = {
   // opts: { new: true } another window of the same app; { instance: 'x' } named window;
   //       { frame: { x, y, w, h } } initial geometry; { args: {...} } data for the app
-  //       (e.g. wm.open('files', { args: { path: '/home/lord/Documentos' } }));
+  //       (e.g. wm.open('files', { args: { path: '/home/insane/Documentos' } }));
   //       { desktop: n } a new window on that desktop, not the showing one (session restore: it
   //       doesn't take the front or the keyboard from the desktop in view).
   // Returns the window id.
   open(appId, opts = {}) {
     if (!registry.has(appId)) {
-      // inside an isolated system app (lord-server --app): another system app is opened by the
+      // inside an isolated system app (insane-server --app): another system app is opened by the
       // session, through the broker (Mail → Calendar, Contacts → a new message; sec/brokermail.c)
-      if (typeof lord !== 'undefined' && typeof lord.appId === 'string' && lord.broker && typeof lord.broker.openApp === 'function') {
-        lord.broker.openApp(String(appId), JSON.stringify(opts.args || {}), !!opts.new);
+      if (typeof insane !== 'undefined' && typeof insane.appId === 'string' && insane.broker && typeof insane.broker.openApp === 'function') {
+        insane.broker.openApp(String(appId), JSON.stringify(opts.args || {}), !!opts.new);
         return null;
       }
       console.warn('unknown app:', appId);
@@ -357,7 +357,7 @@ export const wm = {
     }
     const id = opts.instance ? `${appId}#${opts.instance}` : opts.new ? `${appId}#${seq++}` : appId;
     const args = opts.args ? { ...opts.args, nonce: seq++ } : null;
-    if (globalThis.__lordTiming && typeof lord !== 'undefined' && lord.now) openedAt.set(id, lord.now());
+    if (globalThis.__insaneTiming && typeof insane !== 'undefined' && insane.now) openedAt.set(id, insane.now());
     const desktop = desktopList.get().includes(opts.desktop) ? opts.desktop : activeDesktop.get();
     showDesktopOf(id);                                 // already open: its desktop comes into view
     windows.set((ws) => (ws.some((w) => w.id === id)
@@ -463,9 +463,9 @@ export const wm = {
     return () => { if (guards.get(id) === fn) guards.delete(id); };
   },
   setMenus: (id, menus) => {
-    // In an isolated app (lord-server --app) the menus go to the system menu bar through the
+    // In an isolated app (insane-server --app) the menus go to the system menu bar through the
     // broker: they are serialized (no onClick, with an id per item) and clicks come back as an event.
-    if (typeof lord !== 'undefined' && typeof lord.appId === 'string') { sendAppMenus(menus); return; }   // only in the app process
+    if (typeof insane !== 'undefined' && typeof insane.appId === 'string') { sendAppMenus(menus); return; }   // only in the app process
     appMenus.set((m) => ({ ...m, [id]: menus }));
   },
   get: (id) => windows.get().find((w) => w.id === id) || null,
@@ -497,16 +497,16 @@ export const wm = {
   frameRef,
   beginMove: (id) => beginGrab(id, 0),
   beginResize: (id, edges) => beginGrab(id, edges & 15),
-  // InsaneBench's desktop scene (apps/sysinfo/scene.jsx): lord-server moves the window along a figure of
+  // InsaneBench's desktop scene (apps/sysinfo/scene.jsx): insane-server moves the window along a figure of
   // eight (rx × ry px, one turn every periodMs) through the drag's own path, one step per frame, until
   // stopScript() or pointer input. The store keeps the old place: the scene's window is closed after.
   scriptMove(id, { rx, ry, periodMs }) {
     const w = windows.get().find((x) => x.id === id);
     const f = frameNodes.get(id);
-    if (!w || !f || w.maximized || w.fullscreen || typeof lord === 'undefined' || !lord.wm || typeof lord.wm.script !== 'function') return false;
-    return !!lord.wm.script(f.node, { rx, ry, periodMs, inset: f.inset, minTop: areaOfWindow(w).y, areas: grabAreas() });
+    if (!w || !f || w.maximized || w.fullscreen || typeof insane === 'undefined' || !insane.wm || typeof insane.wm.script !== 'function') return false;
+    return !!insane.wm.script(f.node, { rx, ry, periodMs, inset: f.inset, minTop: areaOfWindow(w).y, areas: grabAreas() });
   },
-  stopScript: () => { if (typeof lord !== 'undefined' && lord.wm) lord.wm.cancel(); },
+  stopScript: () => { if (typeof insane !== 'undefined' && insane.wm) insane.wm.cancel(); },
   // Effective geometry (a maximized window takes the work area).
   frame: (w) => { if (!w.maximized) return w; const a = areaOfWindow(w); return { x: a.x, y: a.y, w: a.w, h: a.h }; },
   // The radius of the frame's corners in logical px, as the theme draws it now (0: square, or not drawn).
@@ -549,7 +549,7 @@ function sendAppMenus(menus) {
       return { label: it.label, hint: it.hint, disabled: !!it.disabled, checked: !!it.checked, id: mid, submenu: sub };
     }),
   }));
-  try { lord.broker.menus(JSON.stringify(ser)); } catch (e) { /* server without broker */ }
+  try { insane.broker.menus(JSON.stringify(ser)); } catch (e) { /* server without broker */ }
 }
 // Called by the app host when the user picks an item in the system menu bar.
 export function appMenuClick(itemId) { const fn = appMenuHandlers.get(itemId); if (fn) try { fn(); } catch (e) { console.error('menu:', e); } }
@@ -561,31 +561,31 @@ export const useAppMenus = (id) => useStore(appMenus, (m) => (id ? m[id] : null)
 export const windowTitle = (w) => w?.title || appName(getApp(w?.id)) || '';
 
 // ---- Smoothness: report the pids behind visible windows (pressure-freeze helper) ----
-// A small user helper (lordos-smooth-freeze) stops background processes when memory or CPU
+// A small user helper (insaneos-smooth-freeze) stops background processes when memory or CPU
 // pressure gets high, and wakes them when it drops or they come back to the front. It must
 // know which processes are on screen: visible Linux/isolated app windows here, through
-// lord.wm.nodePid (our own process always answers 0, so lord-server is never listed).
+// insane.wm.nodePid (our own process always answers 0, so insane-server is never listed).
 const smoothFile = () => {
-  try { return (lord.fs.home() || '') + '/.cache/lordos/fgpids.json'; } catch { return null; }
+  try { return (insane.fs.home() || '') + '/.cache/insaneos/fgpids.json'; } catch { return null; }
 };
 let smoothLast = '';
 let smoothTimer = 0;
 function reportSmoothPids() {
   smoothTimer = 0;
   try {
-    if (typeof lord === 'undefined' || !lord.fs?.write || !lord.wm?.nodePid) return;
+    if (typeof insane === 'undefined' || !insane.fs?.write || !insane.wm?.nodePid) return;
     const fg = new Set();
     for (const w of windows.get()) {
       if (w.minimized) continue;
       const fr = frameNodes.get(w.id);
-      const pid = fr ? lord.wm.nodePid(fr.node) : 0;
+      const pid = fr ? insane.wm.nodePid(fr.node) : 0;
       if (pid > 1) fg.add(pid);
     }
     const key = [...fg].sort((a, b) => a - b).join(',');
     if (key === smoothLast) return;
     smoothLast = key;
     const file = smoothFile();
-    if (file) lord.fs.write(file, JSON.stringify({ ts: Date.now(), fg: [...fg] }));
+    if (file) insane.fs.write(file, JSON.stringify({ ts: Date.now(), fg: [...fg] }));
   } catch (e) { console.log(`smooth: ${e.message}`); }
 }
 windows.subscribe(() => {

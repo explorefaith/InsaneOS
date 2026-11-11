@@ -1,6 +1,6 @@
 /* termconf_test.c — the Terminal's configuration file (src/termconf.c): the default and a chosen file, paths that are
  * refused, a missing file and a place that isn't there (nothing created in it), atomic 0600 writes, the backups, the
- * migration out of settings.json and its backup, and the protection from lord.fs (fsops). A temporary home.
+ * migration out of settings.json and its backup, and the protection from insane.fs (fsops). A temporary home.
  * `make build/termconf-test` */
 #include "../src/termconf.h"
 #include "../src/fsops.h"
@@ -38,31 +38,31 @@ int main(void) {
     double mt;
 
     /* the default file */
-    check(!termconf_is_custom() && strstr(termconf_path(), "/.config/lordos/terminal.json"), "default: ~/.config/lordos/terminal.json");
-    check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.unavailable"), "no ~/.config/lordos yet: unavailable");
+    check(!termconf_is_custom() && strstr(termconf_path(), "/.config/insaneos/terminal.json"), "default: ~/.config/insaneos/terminal.json");
+    check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.unavailable"), "no ~/.config/insaneos yet: unavailable");
     check(!termconf_write(termconf_path(), "{\"schema\":1}", 12, &mt, err, sizeof err), "default: written (its folders are made)");
-    check(mode_of("/.config/lordos/terminal.json") == 0600, "0600");
+    check(mode_of("/.config/insaneos/terminal.json") == 0600, "0600");
     char *t = termconf_read(termconf_path(), &len, &mt, err, sizeof err);
     check(t && len == 12 && !strcmp(t, "{\"schema\":1}") && mt > 0, "read back");
     free(t);
 
-    /* protection from lord.fs: the file and its family, settings.json's family */
-    snprintf(p, sizeof p, "%s/.config/lordos/terminal.json", H);
-    check(fsops_protected(p), "lord.fs: terminal.json protected");
-    snprintf(p, sizeof p, "%s/.config/lordos/terminal.json.3", H);
-    check(fsops_protected(p), "lord.fs: its backups too");
-    snprintf(p, sizeof p, "%s/.config/lordos/terminal.jsonx", H);
-    check(!fsops_protected(p), "lord.fs: a name that only starts the same isn't");
-    snprintf(p, sizeof p, "%s/.config/lordos/settings.json.pre-terminal-migration.bak", H);
-    check(fsops_protected(p), "lord.fs: settings.json's migration backup protected");
+    /* protection from insane.fs: the file and its family, settings.json's family */
+    snprintf(p, sizeof p, "%s/.config/insaneos/terminal.json", H);
+    check(fsops_protected(p), "insane.fs: terminal.json protected");
+    snprintf(p, sizeof p, "%s/.config/insaneos/terminal.json.3", H);
+    check(fsops_protected(p), "insane.fs: its backups too");
+    snprintf(p, sizeof p, "%s/.config/insaneos/terminal.jsonx", H);
+    check(!fsops_protected(p), "insane.fs: a name that only starts the same isn't");
+    snprintf(p, sizeof p, "%s/.config/insaneos/settings.json.pre-terminal-migration.bak", H);
+    check(fsops_protected(p), "insane.fs: settings.json's migration backup protected");
 
     /* backups: the first write after one exists keeps a .1; within 10 minutes no new one */
-    check(!termconf_write(termconf_path(), "{\"schema\":1,\"v\":2}", 18, &mt, err, sizeof err) && exists("/.config/lordos/terminal.json.1"), "backup .1 made");
-    check(mode_of("/.config/lordos/terminal.json.1") == 0600, "backup 0600");
+    check(!termconf_write(termconf_path(), "{\"schema\":1,\"v\":2}", 18, &mt, err, sizeof err) && exists("/.config/insaneos/terminal.json.1"), "backup .1 made");
+    check(mode_of("/.config/insaneos/terminal.json.1") == 0600, "backup 0600");
     termconf_write(termconf_path(), "{\"v\":3}", 7, &mt, err, sizeof err);
-    check(!exists("/.config/lordos/terminal.json.2"), "no new backup within 10 minutes");
-    for (int i = 0; i < 7; i++) { age("/.config/lordos/terminal.json.1", 700); termconf_write(termconf_path(), "{\"v\":4}", 7, &mt, err, sizeof err); }
-    check(exists("/.config/lordos/terminal.json.5") && !exists("/.config/lordos/terminal.json.6"), "five backups at most");
+    check(!exists("/.config/insaneos/terminal.json.2"), "no new backup within 10 minutes");
+    for (int i = 0; i < 7; i++) { age("/.config/insaneos/terminal.json.1", 700); termconf_write(termconf_path(), "{\"v\":4}", 7, &mt, err, sizeof err); }
+    check(exists("/.config/insaneos/terminal.json.5") && !exists("/.config/insaneos/terminal.json.6"), "five backups at most");
 
     /* a chosen file */
     check(termconf_set_custom("relative/terminal.json", err, sizeof err) && has_code(err, "termconf.badPath"), "relative path refused");
@@ -70,19 +70,19 @@ int main(void) {
     check(termconf_set_custom(p, err, sizeof err) && has_code(err, "termconf.badPath"), "'..' refused");
     snprintf(p, sizeof p, "%s/Backups/terminal.txt", H);
     check(termconf_set_custom(p, err, sizeof err) && has_code(err, "termconf.badPath"), "not .json refused");
-    check(termconf_set_custom("/etc/lordos-terminal.json", err, sizeof err) && has_code(err, "fs.outsideHome"), "outside the home refused");
-    snprintf(p, sizeof p, "%s/.config/lordos/settings.json", H);
+    check(termconf_set_custom("/etc/insaneos-terminal.json", err, sizeof err) && has_code(err, "fs.outsideHome"), "outside the home refused");
+    snprintf(p, sizeof p, "%s/.config/insaneos/settings.json", H);
     check(termconf_set_custom(p, err, sizeof err) && has_code(err, "fs.protected"), "settings.json refused");
-    mk("/.config/lordos/mail");
-    snprintf(p, sizeof p, "%s/.config/lordos/mail/x.json", H);
+    mk("/.config/insaneos/mail");
+    snprintf(p, sizeof p, "%s/.config/insaneos/mail/x.json", H);
     check(termconf_set_custom(p, err, sizeof err) && has_code(err, "fs.protected"), "a protected folder refused");
 
     mk("/Backups"); mk("/Backups/Insane OS-Terminal");
     snprintf(p, sizeof p, "%s/Backups/Insane OS-Terminal/terminal.json", H);
     check(!termconf_set_custom(p, err, sizeof err) && termconf_is_custom() && !strcmp(termconf_path(), p), "chosen file set");
-    check(fsops_protected(p), "lord.fs: the chosen file protected");
+    check(fsops_protected(p), "insane.fs: the chosen file protected");
     snprintf(p, sizeof p, "%s/Backups/Insane OS-Terminal", H);
-    check(fsops_protected_below(p), "lord.fs: its folder can't be moved by a generic operation");
+    check(fsops_protected_below(p), "insane.fs: its folder can't be moved by a generic operation");
     check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.missing"), "chosen, not written yet: missing");
     check(!termconf_write(termconf_path(), "{\"chosen\":1}", 12, &mt, err, sizeof err), "chosen file written");
     check(mode_of("/Backups/Insane OS-Terminal/terminal.json") == 0600, "chosen file 0600");
@@ -108,7 +108,7 @@ int main(void) {
     check(!termconf_is_custom(), "back to the default");
     mk("/Links");
     snprintf(a, sizeof a, "%s/Links/terminal.json", H);
-    snprintf(b, sizeof b, "%s/.config/lordos/terminal.json", H);
+    snprintf(b, sizeof b, "%s/.config/insaneos/terminal.json", H);
     if (symlink(b, a)) perror("symlink");
     termconf_set_custom(a, err, sizeof err);
     check(!termconf_read(termconf_path(), &len, &mt, err, sizeof err) && has_code(err, "termconf.notRegular"), "a link is not followed");
@@ -123,23 +123,23 @@ int main(void) {
 
     /* the migration */
     mk("/.config");
-    put("/.config/lordos/settings.json", "{\"terminal\":{\"profiles\":[{\"id\":\"x\",\"itermGuid\":\"G\"}]}}");
+    put("/.config/insaneos/settings.json", "{\"terminal\":{\"profiles\":[{\"id\":\"x\",\"itermGuid\":\"G\"}]}}");
     check(termconf_migrate("{}", 2, err, sizeof err) && has_code(err, "termconf.exists"), "migration refused: terminal.json already there");
-    snprintf(p, sizeof p, "%s/.config/lordos", H);
+    snprintf(p, sizeof p, "%s/.config/insaneos", H);
     char cmd[PATH_MAX * 2];
     snprintf(cmd, sizeof cmd, "rm -f %s/terminal.json*", p);
     if (system(cmd)) perror("rm");
     const char *mig = "{\"schema\":1,\"profiles\":[{\"id\":\"x\",\"itermGuid\":\"G\"}]}";
     check(!termconf_migrate(mig, strlen(mig), err, sizeof err), "migrated");
-    check(exists("/.config/lordos/settings.json.pre-terminal-migration.bak"), "settings.json backed up first");
-    check(mode_of("/.config/lordos/settings.json.pre-terminal-migration.bak") == 0600, "backup 0600");
+    check(exists("/.config/insaneos/settings.json.pre-terminal-migration.bak"), "settings.json backed up first");
+    check(mode_of("/.config/insaneos/settings.json.pre-terminal-migration.bak") == 0600, "backup 0600");
     t = termconf_read(termconf_cache(), &len, &mt, err, sizeof err);
     check(t && !strcmp(t, mig), "terminal.json has every field (itermGuid too)");
     free(t);
-    put("/.config/lordos/settings.json", "{\"later\":1}");
+    put("/.config/insaneos/settings.json", "{\"later\":1}");
     if (system(cmd)) perror("rm");
     termconf_migrate(mig, strlen(mig), err, sizeof err);
-    snprintf(p, sizeof p, "%s/.config/lordos/settings.json.pre-terminal-migration.bak", H);
+    snprintf(p, sizeof p, "%s/.config/insaneos/settings.json.pre-terminal-migration.bak", H);
     FILE *f = fopen(p, "r");
     char back[256] = "";
     if (f) { if (!fgets(back, sizeof back, f)) back[0] = 0; fclose(f); }

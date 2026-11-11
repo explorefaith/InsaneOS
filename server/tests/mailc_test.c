@@ -1,4 +1,4 @@
-/* mailc_test.c — lord-server's network policy for lord-maild (docs/MAIL.md): which endpoints the
+/* mailc_test.c — insane-server's network policy for insane-maild (docs/MAIL.md): which endpoints the
  * connector accepts for configured accounts, and the public-address check that keeps remote
  * images (hosts chosen by whoever sent the mail) away from loopback, LAN and link-local. */
 #include "mail/mailc.h"
@@ -31,7 +31,7 @@ static int pub(const char *ip) {
     return mail_addr_public((struct sockaddr *)&ss);
 }
 
-/* The event queue (issue #18): lord-maild's replies are re-validated before JS sees them. A message
+/* The event queue (issue #18): insane-maild's replies are re-validated before JS sees them. A message
  * view nests as deep as the HTML tree (HTML_JSON_DEPTH), broken JSON becomes an error the waiter
  * sees, and a reply that would overflow the queue becomes "too-big" without spoiling the queue. */
 static void test_events(void) {

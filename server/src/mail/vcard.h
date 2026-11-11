@@ -1,4 +1,4 @@
-/* vcard.h — vCard 2.1, 3.0 and 4.0 (RFC 6350) for Contacts in lord-maild.
+/* vcard.h — vCard 2.1, 3.0 and 4.0 (RFC 6350) for Contacts in insane-maild.
  *
  * Reading goes through the shared content-line parser (ical.h). The JSON a contact becomes:
  *   {"uid","fn","n":{"family","given","middle","prefix","suffix"},"nick","org","dept","title",
@@ -6,8 +6,8 @@
  *    "urls":[…],"im":[…],"bday":"YYYY-MM-DD","notes","cats":[…],"photo":true,"kind":"individual"|"group",
  *    "members":["uid"…],"rev"}
  * Writing produces vCard 3.0 (what the common CardDAV servers, Nextcloud and Radicale among them, accept). */
-#ifndef LORD_MAIL_VCARD_H
-#define LORD_MAIL_VCARD_H
+#ifndef INSANE_MAIL_VCARD_H
+#define INSANE_MAIL_VCARD_H
 
 #include <stddef.h>
 #include "../doc/wire.h"

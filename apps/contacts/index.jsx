@@ -1,11 +1,11 @@
-// Contacts — address books kept by lord-maild (local, or synced with CardDAV): see docs/MAIL.md.
+// Contacts — address books kept by insane-maild (local, or synced with CardDAV): see docs/MAIL.md.
 // Three columns: books and groups, the contact list (search, letter sections, virtualized) and
 // the card, with an edit mode. Groups are contacts with kind 'group' and a list of member uids.
 import {
   View, Text, useTheme, useLocale, useKeyboard, useWindowState, usePim, addressBooks, contacts, contactName,
   Button, TextInput, SearchField, Hairline, EmptyState, ToolbarButton, FilePicker, addListener, direction, formatNumber, t,
   isolatedPim, pickFileFd, closeFileFd, openDavSetup, openMailAccounts,
-} from '@lordos/sdk';
+} from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RED, Sheet, Popover, MenuList, Layers, useLoad } from './ui.jsx';
 import { Card, Editor, blankContact } from './card.jsx';
@@ -303,7 +303,7 @@ function ContactList({ list, cur, onPick }) {
     return { out, total: y };
   }, [list]);
   useEffect(() => {
-    const id = setTimeout(() => { if (box.current) { const v = lord.getLayout(box.current.id)[3]; if (v && Math.abs(v - h) > 1) setH(v); } }, 30);
+    const id = setTimeout(() => { if (box.current) { const v = insane.getLayout(box.current.id)[3]; if (v && Math.abs(v - h) > 1) setH(v); } }, 30);
     return () => clearTimeout(id);
   });
   const max = Math.max(0, rows.total - h);

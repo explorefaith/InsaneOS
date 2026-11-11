@@ -10,12 +10,12 @@
  * The first start boots the installer's own kernel and initrd, read from the ISO, with the kernel command line of the
  * catalog entry (QEMU -kernel/-initrd/-append; no boot menu to edit) and the ISO in the CD drive as usual. Its files are
  * in <machine>/disks/unattended: vmlinuz, initrd, cmdline and (Ubuntu, Fedora) seed.img. When the installer restarts
- * the machine at its end, lord-vm removes that folder and the ISO, and the next start is the installed system. The
+ * the machine at its end, insane-vm removes that folder and the ISO, and the next start is the installed system. The
  * password is in these files only as a SHA-512 crypt hash; the person's text never reaches them.
  *
  * Pure functions over bytes and one file reader (the ISO), apart for their test (tests/vmunattend_test.c). */
-#ifndef LORD_VM_UNATTEND_H
-#define LORD_VM_UNATTEND_H
+#ifndef INSANE_VM_UNATTEND_H
+#define INSANE_VM_UNATTEND_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -41,7 +41,7 @@ typedef struct {
     int desktop;            /* install the system's own desktop (default 1) */
 } VmUnattend;
 
-/* the spec lord-server writes (JSON, see the top of lordvm.c): 0, or -1 with why in err */
+/* the spec insane-server writes (JSON, see the top of insanevm.c): 0, or -1 with why in err */
 int vmu_parse(const char *json, size_t n, VmUnattend *u, char *err, size_t errlen);
 
 /* the answer file's text (malloc, NUL-terminated) and its name in the guest: "preseed.cfg", "user-data" or "ks.cfg" */

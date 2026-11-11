@@ -1,4 +1,4 @@
-/* smem.h — memory for lord-vault secrets (see docs/PASSWORDS.md, "Memory").
+/* smem.h — memory for insane-vault secrets (see docs/PASSWORDS.md, "Memory").
  *
  * Everything decrypted (the vault, fields, requests and replies that carry secrets) lives
  * in blocks of this arena and not in the libc heap:
@@ -10,8 +10,8 @@
  *
  * Small blocks (up to 4 KB) use size classes with free lists, O(1); large ones get
  * their own mmap. Thread-safe (one mutex). */
-#ifndef LORD_VAULT_SMEM_H
-#define LORD_VAULT_SMEM_H
+#ifndef INSANE_VAULT_SMEM_H
+#define INSANE_VAULT_SMEM_H
 
 #include <stddef.h>
 

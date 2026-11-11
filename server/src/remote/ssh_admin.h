@@ -1,6 +1,6 @@
 /* ssh_admin.h — root actions of remote login (SSH) (see ssh_admin.c and docs/REMOTE.md). */
-#ifndef LORD_SSH_ADMIN_H
-#define LORD_SSH_ADMIN_H
+#ifndef INSANE_SSH_ADMIN_H
+#define INSANE_SSH_ADMIN_H
 
 #include "../admin.h"
 

@@ -106,7 +106,7 @@ on the theme's mode.
   - **visible lines:** it draws only the visible ones, plus 6 above and 6 below; each line is a
     memoized component that redraws only if its tokens change;
   - **font:** monospace (JetBrains Mono, `fontFamily: 'monospace'`, new in the engine);
-  - **columns:** computed with the width of one cell, measured with `lord.measureText`; wide
+  - **columns:** computed with the width of one cell, measured with `insane.measureText`; wide
     characters (CJK, emoji) are measured for real;
   - **direction:** the text area uses `direction: 'ltr'` even when the UI is in Arabic or Hebrew.
 - `index.jsx` — the window: tabs, project, search, dialogs, menus and status bar.
@@ -114,7 +114,7 @@ on the theme's mode.
 For the editor, these were added to the system:
 - **`fontFamily: 'monospace'`** in the engine (`style.c` and `text.c`; JetBrains Mono is loaded
   the first time it is used). The runtime used to drop `fontFamily`.
-- **`lord.fs.write`, `mkdir` and `rename`** (`server/src/ui/js_sys.c`):
+- **`insane.fs.write`, `mkdir` and `rename`** (`server/src/ui/js_sys.c`):
   - only inside the home folder (and, later, the user's mounts in `/media/$USER` and
     `/run/media/$USER`), with the destination folder resolved with `realpath`;
   - they don't follow symlinks on the final file;
@@ -122,8 +122,8 @@ For the editor, these were added to the system:
     permissions;
   - up to 32 MB;
   - they can't touch `~/.local/share/applications`, `~/.config/autostart`,
-    `~/.local/share/lordos/apps` or `~/.config/lordos/settings.json` (nor the other protected
-    files and folders added since, `FILES.md`), not even through a symlink (tested): JS can't create a `.desktop` file, which is the only thing `lord.apps.launch` runs.
+    `~/.local/share/insaneos/apps` or `~/.config/insaneos/settings.json` (nor the other protected
+    files and folders added since, `FILES.md`), not even through a symlink (tested): JS can't create a `.desktop` file, which is the only thing `insane.apps.launch` runs.
 
 ## Performance (measured)
 
@@ -136,7 +136,7 @@ For the editor, these were added to the system:
 - **Outside the UI (Node, same code):** tokenizing the 10,001 lines takes 76 ms; a keystroke in
   the document, 0.004 ms.
 - **Tests of `buffer.js` and `syntax.js`:** 28/28 in Node and in QuickJS (the same engine as
-  lord-server; `/tmp/qjsrun` on the VM): multiple cursors, grouped undo, position mapping, CRLF,
+  insane-server; `/tmp/qjsrun` on the VM): multiple cursors, grouped undo, position mapping, CRLF,
   «modified» after undo, and the language states.
 
 ## Pending

@@ -332,7 +332,7 @@
   "cfg.secNote.files": "Só pode gravar seus discos e ler seu firmware e sua ISO.",
   "cfg.secNote.network": "Não abre conexões próprias: sua rede passa pelo passt, que não escuta em nada.",
   "cfg.secNote.limits": "Seu próprio cgroup: no máximo {limit} de memória e a CPU das suas vCPUs.",
-  "cfg.secNote.display": "Um ajudante isolado à parte copia a imagem; o lord-server nunca vê a memória do QEMU.",
+  "cfg.secNote.display": "Um ajudante isolado à parte copia a imagem; o insane-server nunca vê a memória do QEMU.",
   "cfg.secNote.secrets": "Uma senha de root dada na criação é guardada só como hash, até o primeiro desligamento limpo.",
   "cfg.save": "Salvar",
   "cfg.saving": "Salvando…",

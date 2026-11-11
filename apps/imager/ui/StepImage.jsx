@@ -1,6 +1,6 @@
 // Step 2 — the system image: the latest Insane OS release (signed; downloaded and cached, resumable),
 // an older one, or a file of the user's own (with a clear warning: nobody vouches for it).
-import { View, Text, Button, InsaneLogo, useTheme, useLocale, formatDate, typeScale, spacing } from '@lordos/sdk';
+import { View, Text, Button, InsaneLogo, useTheme, useLocale, formatDate, typeScale, spacing } from '@insaneos/sdk';
 import { useState } from 'react';
 import { platform } from '../platform.js';
 import { app, set, loadReleases, officialImage, setOptions } from '../state.js';

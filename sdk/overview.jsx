@@ -4,14 +4,14 @@
 // desktop along the strip to reorder and double-click its name (or right-click it) to rename it. With
 // Ctrl+Down it shows only the windows of the app in front, with no strip.
 //
-// The windows are the real ones drawn smaller: WindowShell gives each one a transform (lord-server paints
+// The windows are the real ones drawn smaller: WindowShell gives each one a transform (insane-server paints
 // it from a cached raster, so no app redraws) and what you see is live. Other desktops in the strip are
 // miniatures of their windows' frames with the app icon, over the wallpaper: their windows aren't drawn.
 //
 // A theme mounts <OverviewBackdrop /> below its windows and <OverviewChrome /> above them, inside its
 // ThemeProvider. Nothing here runs unless it is open.
 import { createElement as h, useEffect, useState } from 'react';
-import { View, Text, Image, addListener, mainDisplay } from '@lordos/runtime';
+import { View, Text, Image, addListener, mainDisplay } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
 import { t, direction } from './i18n.js';
 import { useTheme, popupBg } from './theme.js';
@@ -63,7 +63,7 @@ desktopList.subscribe(refresh);
 desktopNames.subscribe(refresh);
 
 // A fullscreen Linux app is presented above every layer: the overview wouldn't be seen.
-const blocked = () => typeof lord !== 'undefined' && !!lord.wayland?.fullscreen?.();
+const blocked = () => typeof insane !== 'undefined' && !!insane.wayland?.fullscreen?.();
 
 export function openOverview({ app = null } = {}) {
   if (blocked()) return;
@@ -123,8 +123,8 @@ function endRename(keep) {
   if (keep) renameDesktop(r.id, r.value);
 }
 const inside = (node, e) => {
-  if (!node || typeof lord === 'undefined') return false;
-  try { const [x, y, w, hh] = lord.getLayout(node.id); return e.x >= x && e.x < x + w && e.y >= y && e.y < y + hh; } catch (err) { return false; }
+  if (!node || typeof insane === 'undefined') return false;
+  try { const [x, y, w, hh] = insane.getLayout(node.id); return e.x >= x && e.x < x + w && e.y >= y && e.y < y + hh; } catch (err) { return false; }
 };
 
 // The cover WindowShell puts over a window in the overview.

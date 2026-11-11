@@ -1,14 +1,14 @@
-/* clean.h — Cleaner's lord-server side (docs/CLEANER-ARCHITECTURE.md): one job at a time on a thread of
- * its own (a scan by the lord-clean helper, a plan or its execution), polled by lord.clean. The
+/* clean.h — Cleaner's insane-server side (docs/CLEANER-ARCHITECTURE.md): one job at a time on a thread of
+ * its own (a scan by the insane-clean helper, a plan or its execution), polled by insane.clean. The
  * compositor never waits for it.
  *
  * JS gets candidate ids and display paths; authority stays here. A plan is built from ids of a scan,
  * lives only in this process and expires. Execution reopens each object from its root and compares
  * device, inode, size and modification time before acting. A real delete exists only here, as the
  * session user, for regenerable rules, for a file beneath a rule's fixed root that came from a plan
- * (approved by the maintainer on 2026-10-30). Nothing in lord.fs can reach it. */
-#ifndef LORD_CLEAN_H
-#define LORD_CLEAN_H
+ * (approved by the maintainer on 2026-10-30). Nothing in insane.fs can reach it. */
+#ifndef INSANE_CLEAN_H
+#define INSANE_CLEAN_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -65,7 +65,7 @@ char *clean_saved(void);                    /* the kept map: { at, volume } or n
 void  clean_forget_saved(void);
 
 #ifdef CLEAN_TEST
-/* tests only: not in lord-server */
+/* tests only: not in insane-server */
 extern long clean_test_max_files;
 extern int  clean_test_plan_ttl;
 extern int  clean_test_stop_helper;

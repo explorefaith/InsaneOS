@@ -791,7 +791,7 @@ static OutSlot *slot_of(struct wl_resource *r) {
 
 static void send_output(struct wl_resource *r, const WlOutput *o) {
     int ver = wl_resource_get_version(r);
-    wl_output_send_geometry(r, o->x, o->y, o->mm_w, o->mm_h, WL_OUTPUT_SUBPIXEL_UNKNOWN, "Insane OS", o->desc[0] ? o->desc : "lord-server",
+    wl_output_send_geometry(r, o->x, o->y, o->mm_w, o->mm_h, WL_OUTPUT_SUBPIXEL_UNKNOWN, "Insane OS", o->desc[0] ? o->desc : "insane-server",
                             WL_OUTPUT_TRANSFORM_NORMAL);
     wl_output_send_mode(r, WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, o->pw, o->ph, o->refresh > 0 ? o->refresh : 60000);
     if (ver >= 2) wl_output_send_scale(r, int_scale(o->scale));
@@ -1069,7 +1069,7 @@ static void send_keymap(struct wl_resource *kb) {
     char *km = kb_keymap_string();
     if (!km) return;
     size_t size = strlen(km) + 1;
-    int fd = memfd_create("lord-keymap", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insane-keymap", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd >= 0 && ftruncate(fd, (off_t)size) == 0) {
         void *m = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (m != MAP_FAILED) {
@@ -1159,7 +1159,7 @@ static char clip_img_origin[128] = "linux";
 static int clip_img_sensitive;
 /* Rich text: an HTML version of the clipboard's text, valid while the text is the one it came with (its generation).
  * Read from an app that offers text/html beside its text, or set by Machines (a guest's rich text, sanitized by
- * lord-vm); offered again as text/html to Wayland and X11 apps. Never for a secret. */
+ * insane-vm); offered again as text/html to Wayland and X11 apps. Never for a secret. */
 static char *clip_html;
 static size_t clip_html_len;
 static unsigned clip_html_gen;          /* term_clipboard_gen() it belongs to (0: none) */
@@ -1193,7 +1193,7 @@ static void src_gone(struct wl_resource *r) {
     free(s);
 }
 
-/* The image is also saved as a file in $XDG_RUNTIME_DIR/lordos (user-only),
+/* The image is also saved as a file in $XDG_RUNTIME_DIR/insaneos (user-only),
  * for the history preview; the last 10 are kept. */
 static void store_png(const unsigned char *png, size_t n) {
     unsigned char *copy = malloc(n);
@@ -1208,7 +1208,7 @@ static void store_png(const unsigned char *png, size_t n) {
     const char *rt = getenv("XDG_RUNTIME_DIR");
     if (!rt) return;
     char dir[128], old[160];
-    snprintf(dir, sizeof dir, "%s/lordos", rt);
+    snprintf(dir, sizeof dir, "%s/insaneos", rt);
     mkdir(dir, 0700);
     if (clip_img_gen > 10) { snprintf(old, sizeof old, "%s/clip-%u.png", dir, clip_img_gen - 10); unlink(old); }
     snprintf(clip_png_path, sizeof clip_png_path, "%s/clip-%u.png", dir, clip_img_gen);
@@ -1301,7 +1301,7 @@ static int reader_ready(int fd, uint32_t mask, void *data) {
 }
 
 static void read_selection(Source *s) {
-    if (getenv("LORD_WL_DEBUG")) for (int i = 0; i < s->nmimes; i++) fprintf(stderr, "wayland: selection %s\n", s->mimes[i]);
+    if (getenv("INSANE_WL_DEBUG")) for (int i = 0; i < s->nmimes; i++) fprintf(stderr, "wayland: selection %s\n", s->mimes[i]);
     const char *mime = NULL;
     int image = 0;
     for (int i = 0; i < s->nmimes && !mime; i++) if (!strcmp(s->mimes[i], "text/plain;charset=utf-8")) mime = s->mimes[i];
@@ -1455,16 +1455,16 @@ void wl_clip_set_html(const char *html, size_t n) {
 }
 int wl_clip_image_sensitive(void) { return clip_img_sensitive; }
 
-/* Only two places: the compositor's previews ($XDG_RUNTIME_DIR/lordos/clip-N.png) and the
- * saved history (~/.local/share/lordos/clipboard/img-*.png). */
+/* Only two places: the compositor's previews ($XDG_RUNTIME_DIR/insaneos/clip-N.png) and the
+ * saved history (~/.local/share/insaneos/clipboard/img-*.png). */
 static int clip_path_ok(const char *path) {
     const char *rt = getenv("XDG_RUNTIME_DIR"), *home = getenv("HOME");
     char dir[PATH_MAX];
     size_t n = strlen(path);
     if (n < 6 || strcmp(path + n - 4, ".png") || strstr(path, "..")) return 0;
     for (int k = 0; k < 2; k++) {
-        if (k == 0 && rt) snprintf(dir, sizeof dir, "%s/lordos/clip-", rt);
-        else if (k == 1 && home) snprintf(dir, sizeof dir, "%s/.local/share/lordos/clipboard/img-", home);
+        if (k == 0 && rt) snprintf(dir, sizeof dir, "%s/insaneos/clip-", rt);
+        else if (k == 1 && home) snprintf(dir, sizeof dir, "%s/.local/share/insaneos/clipboard/img-", home);
         else continue;
         size_t dl = strlen(dir);
         if (!strncmp(path, dir, dl) && n > dl + 4 && !strchr(path + dl, '/')) return 1;
@@ -1485,7 +1485,7 @@ int wl_clip_use_image(const char *path) {
     if (selection) { wl_data_source_send_cancelled(selection->res); selection = NULL; }
     clip_offer_gen++;
     store_png(buf, got);
-    snprintf(clip_img_origin, sizeof clip_img_origin, "lordos");
+    snprintf(clip_img_origin, sizeof clip_img_origin, "insaneos");
     clip_img_sensitive = 0;
     free(buf);
     offer_to_focus();
@@ -2384,7 +2384,7 @@ void wl_paint_kept(void) {
     for (int i = 0; i < nkept && ndraws[0] < 128; i++) draws[0][ndraws[0]++] = kept[i];
 }
 
-/* LORD_PAINT_VERIFY (main.c): its check repaint notes the app windows again; the frame keeps its list. */
+/* INSANE_PAINT_VERIFY (main.c): its check repaint notes the app windows again; the frame keeps its list. */
 static Draw verify_draws[2][128];
 static int verify_n[2];
 void wl_paint_save(void) {
@@ -2739,7 +2739,7 @@ const char *wl_node_app(int node) {
 }
 
 /* The Wayland client pid behind a window node, for the shell's foreground-report
- * (the pressure-freeze helper must never stop lord-server itself, so our own pid
+ * (the pressure-freeze helper must never stop insane-server itself, so our own pid
  * comes back as 0; X11 windows answer with Xwayland's pid and are skipped by name). */
 int wl_node_pid(int node) {
     if (!dpy || !node) return 0;
@@ -2771,7 +2771,7 @@ int wl_send_paste(void) {
     return 1;
 }
 
-static int focus_is_lord_app(void);
+static int focus_is_insane_app(void);
 static int node_protected(int node);
 static Surf *toplevel_of(Surf *s);
 
@@ -2779,7 +2779,7 @@ static Surf *toplevel_of(Surf *s);
  * protected window. */
 static int keylag_traceable(void) {
     Surf *top = toplevel_of(key_focus);
-    return !focus_is_lord_app() && !(top && node_protected(top->node));
+    return !focus_is_insane_app() && !(top && node_protected(top->node));
 }
 
 static void send_key_to_focus(int code, int value) {
@@ -2797,9 +2797,9 @@ static void send_key_to_focus(int code, int value) {
     mods_sent[0] = d; mods_sent[1] = l; mods_sent[2] = lk; mods_sent[3] = g;
 }
 
-/* The client with the keyboard is an isolated Insane OS app (`lord-server --app`): its pid is the one
- * lord-server registered when it spawned it (brokersrv). A Linux app never matches. */
-static int focus_is_lord_app(void) {
+/* The client with the keyboard is an isolated Insane OS app (`insane-server --app`): its pid is the one
+ * insane-server registered when it spawned it (brokersrv). A Linux app never matches. */
+static int focus_is_insane_app(void) {
     pid_t pid = 0;
     uid_t uid;
     gid_t gid;
@@ -2895,7 +2895,7 @@ int wl_key(int code, int value, const KeyInfo *k) {
             if (how == KG_HOLD) grab_hold = mods & (KG_ALT | KG_META);
             return 0;
         }
-        if (keygrab_is_remap(letter, mods) && !focus_is_lord_app()) {
+        if (keygrab_is_remap(letter, mods) && !focus_is_insane_app()) {
             *was_remapped = 1;
             send_remapped(code, 1);
             return 2;
@@ -2907,7 +2907,7 @@ int wl_key(int code, int value, const KeyInfo *k) {
          * system's (❖N, ❖C, ❖A, ❖W…), with the ❖ key itself so it knows the modifier, as an app in
          * the theme would; the theme still sees them (it tracks ❖ pressed alone). A Linux app only
          * gets the release of ❖, as before. */
-        if (value != 2 && (focus_is_lord_app() ? super || !system_meta_key(code, k) : super && !value)) send_key_to_focus(code, value);
+        if (value != 2 && (focus_is_insane_app() ? super || !system_meta_key(code, k) : super && !value)) send_key_to_focus(code, value);
         return 0;
     }
     if (keygrab_system_key(code)) return 0;
@@ -3052,7 +3052,7 @@ static void send_feedback(struct wl_resource *fb) {
     int n = dmabuf_formats(f, 256);
     feedback_sig = formats_sig(f, n, feedback_dev());
     size_t size = (size_t)n * 16;
-    int fd = memfd_create("lord-dmabuf-formats", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    int fd = memfd_create("insane-dmabuf-formats", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd < 0 || ftruncate(fd, (off_t)size)) { if (fd >= 0) close(fd); return; }
     uint8_t *m = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (m == MAP_FAILED) { close(fd); return; }
@@ -3511,8 +3511,8 @@ void wl_close_all(int ms) {
     }
 }
 
-/* Force Quit (the crown menu): SIGKILL to the process that owns this Wayland window, for an app that
- * stopped answering. Only a client of this session's user, never lord-server itself, never pid 1, and
+/* Force Quit (the apple menu): SIGKILL to the process that owns this Wayland window, for an app that
+ * stopped answering. Only a client of this session's user, never insane-server itself, never pid 1, and
  * never an X11 window (its client is Xwayland, which every X11 app shares: those are asked to close).
  * 0, or an error code for the interface. */
 const char *wl_kill(int id) {
@@ -3581,7 +3581,7 @@ void wl_set_parked(int id, int parked) {
 void wl_output_resized(void) {
     if (!dpy) return;
     int w = (int)ui.width, h = (int)ui.height;
-    WlOutput o = { 0, 0, w, h, w, h, 60000, 100, w * 254 / 960, h * 254 / 960, "LORD-1", "Insane OS display" };
+    WlOutput o = { 0, 0, w, h, w, h, 60000, 100, w * 254 / 960, h * 254 / 960, "INSANE-1", "Insane OS display" };
     wl_set_outputs(&o, 1, 0);
 }
 

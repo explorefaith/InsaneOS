@@ -1,6 +1,6 @@
 /* thumb.c — the picture of a remote computer that Remote Desk shows on its card: the shared picture of a session, scaled
- * down and kept as a PNG under ~/.local/share/lordos/remote-desk/thumbs/<device>.png (folder 0700, file 0600). Runs in
- * lord-server, as the person; lord-rdesk never writes files. */
+ * down and kept as a PNG under ~/.local/share/insaneos/remote-desk/thumbs/<device>.png (folder 0700, file 0600). Runs in
+ * insane-server, as the person; insane-rdesk never writes files. */
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
 #define STBI_WRITE_NO_STDIO
@@ -63,7 +63,7 @@ unsigned char *rd_thumb_scale(const uint32_t *px, int w, int h, int maxw, int *o
 /* the folder, made 0700 where it is missing (each level that already exists is left as it is, but the last one must be
  * a real directory of this user). An open directory descriptor, or -1. */
 static int thumbs_dir(const char *home) {
-    static const char *const parts[] = { ".local", "share", "lordos", "remote-desk", "thumbs" };
+    static const char *const parts[] = { ".local", "share", "insaneos", "remote-desk", "thumbs" };
     int fd = open(home, O_PATH | O_DIRECTORY | O_CLOEXEC);
     size_t n = sizeof parts / sizeof parts[0];
     for (size_t i = 0; fd >= 0 && i < n; i++) {
@@ -119,6 +119,6 @@ int rd_thumb_save(const char *home, const char *id, const uint32_t *px, int w, i
 int rd_thumb_remove(const char *home, const char *id) {
     if (!home || home[0] != '/' || !rd_thumb_id_ok(id)) return -1;
     char path[4096];
-    snprintf(path, sizeof path, "%s/.local/share/lordos/remote-desk/thumbs/%s.png", home, id);
+    snprintf(path, sizeof path, "%s/.local/share/insaneos/remote-desk/thumbs/%s.png", home, id);
     return unlink(path) && errno != ENOENT ? -1 : 0;
 }

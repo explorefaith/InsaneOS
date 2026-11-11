@@ -11,13 +11,13 @@
  *   vm-image-list   "<id> <arch>[ <list name>]"     fetches the maker's SHA-256 list of a catalog entry
  *              (assets/machines/systems.json) and, when the maker signs it apart, its signature, checks the list's
  *              OpenPGP signature with the keys the entry pins (assets/machines/keys, from packaging/keys/machines)
- *              and keeps only the text that was signed, as /var/lib/lordos/machines/lists/<id>-<arch>.list; a list
+ *              and keeps only the text that was signed, as /var/lib/insaneos/machines/lists/<id>-<arch>.list; a list
  *              that isn't signed is refused (vm.listUnsigned), and one whose signature doesn't verify with those
  *              keys too (vm.listBadSignature). When the list's name changes per build it first fetches the release
  *              folder's listing (<id>-<arch>.index); then, given a name from that listing that matches the entry's
  *              pattern, that list. Answers the file's path                                                     anyone
  *   vm-image-get    "<id> <arch> <file> <sha256>"   downloads that image of the entry when the checked list above
- *              has exactly that line, into /var/lib/lordos/machines/images/<sha256>.iso, and keeps it only if its
+ *              has exactly that line, into /var/lib/insaneos/machines/images/<sha256>.iso, and keeps it only if its
  *              SHA-256 is that one. A cut or stopped download stays as <sha256>.iso.part and the next try continues
  *              it with a Range request (the hash is still over the whole file). Also writes <sha256>.json (what
  *              the image is). Answers the path. Progress: "progress download <done> <total>"                 anyone
@@ -25,11 +25,11 @@
  *   vm-image-remove "<sha256>"                       deletes a downloaded image, or the part of a stopped
  *              download (every account's machines share it); refused while it downloads or any running machine
  *              has it in its CD drive (vm.imageInUse)                                                           admin
- * The downloads run in lordos-net-machines.scope (firewall app lordos:machines), with the Store's downloader
- * (pkg/http.c fetch_batch_in: a child as nobody, TLS by lord-tls).
+ * The downloads run in insaneos-net-machines.scope (firewall app insaneos:machines), with the Store's downloader
+ * (pkg/http.c fetch_batch_in: a child as nobody, TLS by insane-tls).
  */
-#ifndef LORD_VM_ADMIN_H
-#define LORD_VM_ADMIN_H
+#ifndef INSANE_VM_ADMIN_H
+#define INSANE_VM_ADMIN_H
 
 #include "../admin.h"
 
@@ -41,7 +41,7 @@ void vm_act_image_cancel(const AdminReq *r, const char *arg, size_t len);
 void vm_act_image_remove(const AdminReq *r, const char *arg, size_t len);
 
 /* the packages vm-enable installs for `arches` (VM_ARCH bits: 1 arm64, 2 amd64) that this computer lacks, by the
- * files each package brings; space-separated into out. Returns how many. Also used by lord.vm.requirements. */
+ * files each package brings; space-separated into out. Returns how many. Also used by insane.vm.requirements. */
 int vm_missing_packages(int arches, char *out, size_t n);
 
 #define VM_ADMIN_ACTIONS \

@@ -17,10 +17,10 @@ You can write in English, Spanish or Portuguese.
 
 **In scope:**
 
-- Insane OS's own code: `lord-server` (the display server and Wayland compositor), `lord-sessiond` and the login screen, the app sandbox and permission broker, `lord-netperm`, `lord-vault`, the mail, document and media helpers, the package engine, the native apps and the SDK;
-- the release files and their signatures, and the Debian installer script (`lordos.org/install.sh`);
+- Insane OS's own code: `insane-server` (the display server and Wayland compositor), `insane-sessiond` and the login screen, the app sandbox and permission broker, `insane-netperm`, `insane-vault`, the mail, document and media helpers, the package engine, the native apps and the SDK;
+- the release files and their signatures, and the Debian installer script (`insaneos.org/install.sh`);
 - the configuration Insane OS ships for the system (for example services it enables);
-- the lordos.org website.
+- the insaneos.org website.
 
 **Out of scope** (report these to their own projects):
 
@@ -55,7 +55,7 @@ We'll keep you informed, credit you in the release notes if you want, and publis
 
 Every release file (the ISO, the Raspberry Pi image and the `.deb`) is listed with its SHA-256 in `SHA256SUMS`, and `SHA256SUMS` is signed with the Insane OS release key (Ed25519). The Debian installer script refuses to install when the signature is missing or invalid.
 
-- Public key: [lordos-release.pub.pem](/lordos-release.pub.pem)
+- Public key: [insaneos-release.pub.pem](/insaneos-release.pub.pem)
 - Fingerprint (SHA-256 of the DER public key):
   `c7155b8e6bbbb180f907381994d06af76d333016cd6f3facf67cadd053ea108e`
 
@@ -63,7 +63,7 @@ To check a download by hand:
 
 ```
 base64 -d SHA256SUMS.sig > SHA256SUMS.sig.bin
-openssl pkeyutl -verify -pubin -inkey lordos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
+openssl pkeyutl -verify -pubin -inkey insaneos-release.pub.pem -rawin -in SHA256SUMS -sigfile SHA256SUMS.sig.bin
 sha256sum -c --ignore-missing SHA256SUMS
 ```
 

@@ -1,145 +1,145 @@
 [
  {
-  "id": "crystal-crown",
+  "id": "crystal-apple",
   "category": "signature",
-  "thumb": "thumbs/signature/lordos-crystal-crown.jpg",
+  "thumb": "thumbs/signature/insaneos-crystal-apple.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "signature/lordos-crystal-crown.jpg"
+    "file": "signature/insaneos-crystal-apple.jpg"
    }
   ],
-  "file": "signature/lordos-crystal-crown.jpg"
+  "file": "signature/insaneos-crystal-apple.jpg"
  },
  {
   "id": "eternal-dawn",
   "category": "signature",
-  "thumb": "thumbs/signature/lordos-eternal-dawn.jpg",
+  "thumb": "thumbs/signature/insaneos-eternal-dawn.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "signature/lordos-eternal-dawn.jpg"
+    "file": "signature/insaneos-eternal-dawn.jpg"
    }
   ],
-  "file": "signature/lordos-eternal-dawn.jpg"
+  "file": "signature/insaneos-eternal-dawn.jpg"
  },
  {
   "id": "royal-flow",
   "category": "signature",
-  "thumb": "thumbs/signature/lordos-royal-flow.jpg",
+  "thumb": "thumbs/signature/insaneos-royal-flow.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "signature/lordos-royal-flow.jpg"
+    "file": "signature/insaneos-royal-flow.jpg"
    }
   ],
-  "file": "signature/lordos-royal-flow.jpg"
+  "file": "signature/insaneos-royal-flow.jpg"
  },
  {
   "id": "royal-waves",
   "category": "signature",
-  "thumb": "thumbs/signature/lordos-royal-waves.jpg",
+  "thumb": "thumbs/signature/insaneos-royal-waves.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "signature/lordos-royal-waves.jpg"
+    "file": "signature/insaneos-royal-waves.jpg"
    }
   ],
-  "file": "signature/lordos-royal-waves.jpg"
+  "file": "signature/insaneos-royal-waves.jpg"
  },
  {
   "id": "violet-horizon",
   "category": "signature",
-  "thumb": "thumbs/signature/lordos-violet-horizon.jpg",
+  "thumb": "thumbs/signature/insaneos-violet-horizon.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "signature/lordos-violet-horizon.jpg"
+    "file": "signature/insaneos-violet-horizon.jpg"
    }
   ],
-  "file": "signature/lordos-violet-horizon.jpg"
+  "file": "signature/insaneos-violet-horizon.jpg"
  },
  {
   "id": "lumo-aurora",
   "category": "lumo",
-  "thumb": "thumbs/lumo/lordos-lumo-aurora.jpg",
+  "thumb": "thumbs/lumo/insaneos-lumo-aurora.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "lumo/lordos-lumo-aurora.jpg"
+    "file": "lumo/insaneos-lumo-aurora.jpg"
    }
   ],
-  "file": "lumo/lordos-lumo-aurora.jpg"
+  "file": "lumo/insaneos-lumo-aurora.jpg"
  },
  {
   "id": "lumo-celestial",
   "category": "lumo",
-  "thumb": "thumbs/lumo/lordos-lumo-celestial.jpg",
+  "thumb": "thumbs/lumo/insaneos-lumo-celestial.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "lumo/lordos-lumo-celestial.jpg"
+    "file": "lumo/insaneos-lumo-celestial.jpg"
    }
   ],
-  "file": "lumo/lordos-lumo-celestial.jpg"
+  "file": "lumo/insaneos-lumo-celestial.jpg"
  },
  {
   "id": "event-horizon",
   "category": "cosmos",
-  "thumb": "thumbs/cosmos/lordos-event-horizon.jpg",
+  "thumb": "thumbs/cosmos/insaneos-event-horizon.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "cosmos/lordos-event-horizon.jpg"
+    "file": "cosmos/insaneos-event-horizon.jpg"
    }
   ],
-  "file": "cosmos/lordos-event-horizon.jpg"
+  "file": "cosmos/insaneos-event-horizon.jpg"
  },
  {
   "id": "infinite-galaxy",
   "category": "cosmos",
-  "thumb": "thumbs/cosmos/lordos-infinite-galaxy.jpg",
+  "thumb": "thumbs/cosmos/insaneos-infinite-galaxy.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "cosmos/lordos-infinite-galaxy.jpg"
+    "file": "cosmos/insaneos-infinite-galaxy.jpg"
    }
   ],
-  "file": "cosmos/lordos-infinite-galaxy.jpg"
+  "file": "cosmos/insaneos-infinite-galaxy.jpg"
  },
  {
   "id": "solar-odyssey",
   "category": "cosmos",
-  "thumb": "thumbs/cosmos/lordos-solar-odyssey.jpg",
+  "thumb": "thumbs/cosmos/insaneos-solar-odyssey.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "cosmos/lordos-solar-odyssey.jpg"
+    "file": "cosmos/insaneos-solar-odyssey.jpg"
    }
   ],
-  "file": "cosmos/lordos-solar-odyssey.jpg"
+  "file": "cosmos/insaneos-solar-odyssey.jpg"
  },
  {
   "id": "stellar-voyage",
   "category": "cosmos",
-  "thumb": "thumbs/cosmos/lordos-stellar-voyage.jpg",
+  "thumb": "thumbs/cosmos/insaneos-stellar-voyage.jpg",
   "variants": [
    {
     "w": 1672,
     "h": 941,
-    "file": "cosmos/lordos-stellar-voyage.jpg"
+    "file": "cosmos/insaneos-stellar-voyage.jpg"
    }
   ],
-  "file": "cosmos/lordos-stellar-voyage.jpg"
+  "file": "cosmos/insaneos-stellar-voyage.jpg"
  }
 ]

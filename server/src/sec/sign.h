@@ -6,8 +6,8 @@
  *
  * The catalog (catalog.json + catalog.sig, signed with an official key) carries the versions,
  * sizes and hashes of the packages, the keys of verified authors and the revocation list. */
-#ifndef LORD_SEC_SIGN_H
-#define LORD_SEC_SIGN_H
+#ifndef INSANE_SEC_SIGN_H
+#define INSANE_SEC_SIGN_H
 
 #include "../lpk.h"
 #include <stddef.h>
@@ -73,14 +73,14 @@ typedef struct {
 int  catalog_parse(const char *json, size_t len, const char *sig, size_t siglen, Catalog *out, char *err, size_t errlen);
 void catalog_free(Catalog *c);
 
-/* The current catalog: the valid one with the highest serial between /usr/share/lordos/catalog.json and
- * ~/.local/share/lordos/catalog/catalog.json. Reread if the file changed. NULL if none. */
+/* The current catalog: the valid one with the highest serial between /usr/share/insaneos/catalog.json and
+ * ~/.local/share/insaneos/catalog/catalog.json. Reread if the file changed. NULL if none. */
 const Catalog *catalog_current(void);
 const char *catalog_author(const char *keyhex);
 /* Revoked? key, id, version and SHA-256 of contenido.json (any of them may be ""). */
 int catalog_revoked(const char *key, const char *id, const char *version, const char *contents_sha, char *why, size_t n);
 
-/* Level name for logs: "lordos", "verified", "signed", "unsigned". */
+/* Level name for logs: "insaneos", "verified", "signed", "unsigned". */
 const char *sig_trust_name(LpkTrust t);
 
 #endif

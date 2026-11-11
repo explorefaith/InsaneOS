@@ -1,4 +1,4 @@
-/* hold.c — sessions that survive a lord-server restart (a session server).
+/* hold.c — sessions that survive a insane-server restart (a session server).
  *
  * For each session a holder is launched: the same binary re-executed with --term-holder,
  * with no privileges and none of the server's memory. It only keeps the PTY master open (so
@@ -28,9 +28,9 @@
 
 static char dir[256];
 
-/* $XDG_RUNTIME_DIR/lordos-term (the session's, /run/user/<uid> for lord-sessiond's: a tmpfs wiped
- * when the machine reboots) or, if there is none, ~/.cache/lordos/term. Always 0700. The session's
- * runtime folder, as for the rest of lord-server's sockets: a lord-server started with a runtime
+/* $XDG_RUNTIME_DIR/insaneos-term (the session's, /run/user/<uid> for insane-sessiond's: a tmpfs wiped
+ * when the machine reboots) or, if there is none, ~/.cache/insaneos/term. Always 0700. The session's
+ * runtime folder, as for the rest of insane-server's sockets: a insane-server started with a runtime
  * folder of its own (a test, another session) does not find the holders of the user's desktop
  * (0.8.8.6). */
 const char *hold_dir(void) {
@@ -40,16 +40,16 @@ const char *hold_dir(void) {
     const char *rt = getenv("XDG_RUNTIME_DIR");
     if (rt && rt[0] == '/' && strlen(rt) < sizeof run - 16) snprintf(run, sizeof run, "%s", rt);
     else snprintf(run, sizeof run, "/run/user/%d", (int)getuid());
-    if (!stat(run, &st) && S_ISDIR(st.st_mode) && st.st_uid == getuid()) snprintf(dir, sizeof dir, "%s/lordos-term", run);
+    if (!stat(run, &st) && S_ISDIR(st.st_mode) && st.st_uid == getuid()) snprintf(dir, sizeof dir, "%s/insaneos-term", run);
     else {
         const char *home = getenv("HOME");
         if (!home) return NULL;
         char p[256];
         snprintf(p, sizeof p, "%s/.cache", home);
         mkdir(p, 0700);
-        snprintf(p, sizeof p, "%s/.cache/lordos", home);
+        snprintf(p, sizeof p, "%s/.cache/insaneos", home);
         mkdir(p, 0700);
-        snprintf(dir, sizeof dir, "%s/.cache/lordos/term", home);
+        snprintf(dir, sizeof dir, "%s/.cache/insaneos/term", home);
     }
     mkdir(dir, 0700);
     if (stat(dir, &st) || !S_ISDIR(st.st_mode) || st.st_uid != getuid() || (st.st_mode & 077)) { dir[0] = 0; return NULL; }
@@ -114,7 +114,7 @@ int hold_main(int argc, char **argv) {
     signal(SIGPIPE, SIG_IGN);
     int master = 3, lsock = 4, ctrl = 5;
     char msg[64];
-    snprintf(msg, sizeof msg, "LORDTERM %d\n", atoi(argv[3]));
+    snprintf(msg, sizeof msg, "INSANETERM %d\n", atoi(argv[3]));
     struct sockaddr_un addr;
     if (sock_path(argv[2], &addr)) return 1;
     for (;;) {
@@ -130,8 +130,8 @@ int hold_main(int argc, char **argv) {
         if (p[1].revents & POLLIN) {
             int s = accept4(lsock, NULL, NULL, SOCK_CLOEXEC);
             if (s < 0) continue;
-            /* One lord-server at a time: while the one that has the session is alive, nobody else gets the
-             * master. A second lord-server of the same user (a test, a headless session) used to take it as
+            /* One insane-server at a time: while the one that has the session is alive, nobody else gets the
+             * master. A second insane-server of the same user (a test, a headless session) used to take it as
              * well: two readers of one pty, each taking part of the program's output (an ESC lost, half a
              * frame missing), and each setting the pty's size for its own window (Claude Code drawing in 80
              * columns of a 260-column window). The one that has it closes its end when it exits or crashes. */
@@ -180,7 +180,7 @@ int hold_spawn(int master, pid_t pid, char *key, size_t keylen) {
         syscall(SYS_close_range, 6, ~0u, 0);
         char spid[16];
         snprintf(spid, sizeof spid, "%d", (int)pid);
-        char *args[] = { "lord-term-holder", "--term-holder", key, spid, NULL };
+        char *args[] = { "insane-term-holder", "--term-holder", key, spid, NULL };
         execv("/proc/self/exe", args);
         _exit(127);
     }
@@ -229,7 +229,7 @@ void hold_restore(void (*fn)(int fd, int ctrl, pid_t pid, const char *key)) {
         struct cmsghdr *c = r > 0 ? CMSG_FIRSTHDR(&m) : NULL;
         int fd = -1, pid = 0;
         if (c && c->cmsg_level == SOL_SOCKET && c->cmsg_type == SCM_RIGHTS) memcpy(&fd, CMSG_DATA(c), sizeof fd);
-        if (fd < 0 || sscanf(msg, "LORDTERM %d", &pid) != 1 || pid <= 0) { if (fd >= 0) close(fd); close(s); continue; }
+        if (fd < 0 || sscanf(msg, "INSANETERM %d", &pid) != 1 || pid <= 0) { if (fd >= 0) close(fd); close(s); continue; }
         fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
         fn(fd, s, (pid_t)pid, key);
     }

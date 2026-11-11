@@ -1,15 +1,15 @@
-/* drmcard.h — which /dev/dri/cardN is the display (lord-server and lord-sessiond).
+/* drmcard.h — which /dev/dri/cardN is the display (insane-server and insane-sessiond).
  *
  * On a PC it is usually card0, but not always: with simpledrm at boot, amdgpu/i915 show up
  * as card1. On ARM boards (Raspberry Pi 4/5 and many others) the display and the 3D GPU are
  * two devices: on the Pi 5, v3d (render only, no connectors) may end up as card0 and vc4
  * (the one with HDMI) as card1. That is why the first card with connectors and
- * CRTCs is chosen, and among those, the one with a monitor plugged in. LORD_CARD=/dev/dri/cardN forces it.
+ * CRTCs is chosen, and among those, the one with a monitor plugged in. INSANE_CARD=/dev/dri/cardN forces it.
  *
- * Only kernel ioctls (no libdrm); a dependency-free header so that lord-sessiond can use it
+ * Only kernel ioctls (no libdrm); a dependency-free header so that insane-sessiond can use it
  * too, since it does not link kms.c. See docs/RASPBERRY.md. */
-#ifndef LORD_DRMCARD_H
-#define LORD_DRMCARD_H
+#ifndef INSANE_DRMCARD_H
+#define INSANE_DRMCARD_H
 
 #include <errno.h>
 #include <fcntl.h>
@@ -47,7 +47,7 @@ static inline int drm_card_score(int fd) {
 /* Writes the display card's path to out. 0 if it found one with KMS; -1 otherwise
  * (out stays /dev/dri/card0, as before). */
 static inline int drm_pick_card(char *out, size_t size) {
-    const char *env = getenv("LORD_CARD");
+    const char *env = getenv("INSANE_CARD");
     if (env && !strncmp(env, "/dev/dri/card", 13) && !strstr(env, "..")) {
         snprintf(out, size, "%s", env);
         return 0;

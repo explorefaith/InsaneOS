@@ -26,8 +26,8 @@ commit that does it. The details of each item are in the section named after it.
 
 **Where the code is.** Machines ships in **0.8.8.5-beta** (it was planned as 0.8.9; the maintainer moved it forward on
 2026-11-07), merged with Cloud on branch `rel-0885` and from there into `main`. Its history is on `machines-089` (from
-`machines-beta` and `machines-import`). Parts: `server/src/vm/` (`lord-vm`, `lord-vmdisplay`, the protocol `vmproto.h`, import,
-catalog, unattended answer files `vmunattend.c`), `server/src/ui/js_vm*.c` (`lord.vm`), `apps/machines/` (the app, from the
+`machines-beta` and `machines-import`). Parts: `server/src/vm/` (`insane-vm`, `insane-vmdisplay`, the protocol `vmproto.h`, import,
+catalog, unattended answer files `vmunattend.c`), `server/src/ui/js_vm*.c` (`insane.vm`), `apps/machines/` (the app, from the
 mocks), `assets/machines/systems.json` and `packaging/keys/machines/` (download cards and the makers' pinned keys).
 
 **How to test.**
@@ -50,7 +50,7 @@ mocks), `assets/machines/systems.json` and `packaging/keys/machines/` (download 
 
 ### Phase 1, alpha: done (2026-11-05)
 
-- [x] `lord-vm` (sandbox, QMP, cgroup limits, crash recovery), `lord-vmdisplay`, `machine.json` schema, qcow2 NVRAM (3.9).
+- [x] `insane-vm` (sandbox, QMP, cgroup limits, crash recovery), `insane-vmdisplay`, `machine.json` schema, qcow2 NVRAM (3.9).
 - [x] Isolation test passes on the Pi 5 and amd64.
 - [x] Phase 1's open items: Esc in a menu, CD/DVD while running, install timeout, passt crash healing.
 
@@ -114,14 +114,14 @@ Still open in Phase 2:
 - [ ] dmabuf import in the compositor (13.8 item 3) and latency to the screen (13.8 item 4).
 - [ ] Picture in Picture, multi-head.
 - [ ] Export, backups of machines, Monitor integration.
-- [ ] `lordvm` command line: shell, exec, logs, cp.
+- [ ] `insanevm` command line: shell, exec, logs, cp.
 - [ ] Done when: a real compatibility and security matrix per architecture (16).
 
 ### Phase 4, integration: not started
 
 - [ ] Linux Apps mode (guest apps as windows, in the Dock).
-- [ ] Reproducible machines (`lordvm apply dev.toml`, rebuild).
-- [ ] Local MCP server (`lordvm mcp`, off by default; open question 11).
+- [ ] Reproducible machines (`insanevm apply dev.toml`, rebuild).
+- [ ] Local MCP server (`insanevm mcp`, off by default; open question 11).
 - [ ] Migrate from another computer (6.11).
 - [ ] Android card, if the image exists (open question 6).
 
@@ -135,7 +135,7 @@ Still open in Phase 2:
 - [ ] 13.8 item 5: repeat the Pi's 4-vCPU drag on an untouched board, a memory-heavy guest at 3 vCPUs, the 1000 ms stalls with all
   cores busy (a desktop issue, also with no VM).
 - [ ] 13.8 item 6: GICV trapping cost on the 16K kernel, and a 4K kernel (open decision 4).
-- [ ] 13.8 item 7: render node by descriptor, one slice for all machines under `lord-sessiond` (3.7).
+- [ ] 13.8 item 7: render node by descriptor, one slice for all machines under `insane-sessiond` (3.7).
 - [ ] 13.8 item 8: passt's 96–379 MB/s spread on the Pi.
 - [ ] 13.8 item 9: boot time (UEFI is 12.3 s of the Pi's 18.6 s); direct kernel boot for Linux guests.
 - [ ] Our own seccomp filter on top of QEMU's (3.x, To test).
@@ -151,7 +151,7 @@ The bar is section 16: the most complete desktop virtualization app, and visuall
    and getting its drivers is one flow.
 3. **Insane OS's own desktop.** The VM's picture is a node in our compositor, with no QEMU window, no X11, no toolkit. Moving, resizing,
    full screen, Picture in Picture, desktops and the theme all work as for any app.
-4. **Same security model as the rest of Insane OS.** `lord-server` never runs as root. Each VM is one sandboxed process tree. Privileged
+4. **Same security model as the rest of Insane OS.** `insane-server` never runs as root. Each VM is one sandboxed process tree. Privileged
    steps are closed admin actions. A guest gets nothing of the host unless the person gives it.
 5. **Both architectures, same features where the hardware allows.** Where it doesn't, the app says so instead of offering a switch
    that fails.
@@ -283,19 +283,19 @@ Decisions:
 ## 3. Architecture
 
 ```
-lord-server (the person's user, never root)
-  └─ Machines app (React, sdk/vm.js → lord.vm.*)
+insane-server (the person's user, never root)
+  └─ Machines app (React, sdk/vm.js → insane.vm.*)
        │  closed RPC
        ▼
-  lord-vmdisplay  one per running VM: receiver and validator, sandboxed, no files, no network
-  lord-vm         one per running VM: supervisor, sandboxed, owns the VM's folder
+  insane-vmdisplay  one per running VM: receiver and validator, sandboxed, no files, no network
+  insane-vm         one per running VM: supervisor, sandboxed, owns the VM's folder
     ├─ qemu-system-<arch>  device engine, in its own sandbox and cgroup scope
     ├─ swtpm               TPM state, when the VM has one
     ├─ virtiofsd           one per shared folder
     ├─ passt or tap helper network
     └─ usbredir            attached device, on demand
        ▲
-  qemu ──p2p D-Bus──▶ lord-vmdisplay ──fixed binary messages, dmabuf by descriptor──▶ lord-server's compositor (MediaView)
+  qemu ──p2p D-Bus──▶ insane-vmdisplay ──fixed binary messages, dmabuf by descriptor──▶ insane-server's compositor (MediaView)
 
 Admin helper (closed actions, root)
   vm-enable, vm-bridge-on/off, vm-usb-allow
@@ -306,10 +306,10 @@ Admin helper (closed actions, root)
 - **KVM** is the kernel's. We add nothing in the kernel.
 - **QEMU** is the device engine, used through its control socket (QMP) and never as an app. Debian 13 ships 10.0.13
   (**Measured**, `apt-cache policy`). `qemu-system-x86` is 68 MB installed by itself (**Measured**).
-- **`lord-vm`**, new, C, the supervisor: starts the tree, holds the QMP connection, applies settings, takes snapshots, reports state.
+- **`insane-vm`**, new, C, the supervisor: starts the tree, holds the QMP connection, applies settings, takes snapshots, reports state.
   It writes no display code.
-- **`sdk/vm.js` and `lord.vm`**: the app's only way in, as `lord.rdesk` is for Remote Desk.
-- The approach is the one `lord-rdesk` proved: a helper in its own cgroup scope with memory limits and a Landlock and seccomp sandbox, talking
+- **`sdk/vm.js` and `insane.vm`**: the app's only way in, as `insane.rdesk` is for Remote Desk.
+- The approach is the one `insane-rdesk` proved: a helper in its own cgroup scope with memory limits and a Landlock and seccomp sandbox, talking
   over a socketpair, drawing into something the engine shows.
 
 ### 3.2 Display: no QEMU window
@@ -324,13 +324,13 @@ redirection travels over Chardev with the stream name `org.qemu.usbredir` (**Rep
 
 So one socket carries picture, input, clipboard, sound and USB. No bus daemon is involved: QEMU accepts the peer through QMP `add_client`.
 
-**The compositor never speaks D-Bus to QEMU.** A compromised QEMU must not get a parser inside the process that draws the whole desktop, so the top security risk gets a process of its own. `lord-vmdisplay` is small, one per VM, sandboxed with no files and no network. It speaks that D-Bus protocol to QEMU and passes `lord-server` only fixed binary messages over a socketpair, as `lord-rdesk` does.
+**The compositor never speaks D-Bus to QEMU.** A compromised QEMU must not get a parser inside the process that draws the whole desktop, so the top security risk gets a process of its own. `insane-vmdisplay` is small, one per VM, sandboxed with no files and no network. It speaks that D-Bus protocol to QEMU and passes `insane-server` only fixed binary messages over a socketpair, as `insane-rdesk` does.
 
 It checks before forwarding: the size against limits, the dmabuf's real length (`lseek`) against stride and height, fourcc and modifier against what this GPU imported before, the update rate, the cursor's size, and the clipboard's size and types. Input and clipboard travel back the same way.
 
 What this doesn't remove: importing a dmabuf still reaches the host's GPU driver in the compositor, so an import failure must show a black picture and never take the session down, and **the compositor never waits on a guest's fence without a timeout**. A guest that hangs its GPU work costs its own window, not the desktop.
  The media node path (`MediaView`) already shows dmabufs and shared-memory
-pictures from `lord-media` and `lord-rdesk`.
+pictures from `insane-media` and `insane-rdesk`.
 
 - With GPU: a dmabuf goes straight to the compositor with no copy. **Target:** one frame of added latency at most.
 - Without GPU acceleration (2D guests, TCG, virtio-win guests): the shared-memory path, copied on update, with damage rectangles.
@@ -341,7 +341,7 @@ introspection, the module or the 10.0.0 interface file), so Debian 13 offers sin
 
 **What Phase 0 changed here** (prototype on both architectures, 2026-11-04, section 13.6):
 
-- **Decision (changed): `lord-vmdisplay` requires `Listener.Unix.Map`.** With it, the picture arrives once as a memfd (`ScanoutMap`)
+- **Decision (changed): `insane-vmdisplay` requires `Listener.Unix.Map`.** With it, the picture arrives once as a memfd (`ScanoutMap`)
   and updates as rectangles (`UpdateMap`). Without it, every full-screen update is a 4 MB `Scanout` message, QEMU uses about 70
   percentage points more CPU, and on amd64 a mode switch sends partial updates before any `Scanout`, so the picture stays stale. The
   plain array path isn't used.
@@ -366,19 +366,19 @@ introspection, the module or the 10.0.0 interface file), so Debian 13 offers sin
 
 QEMU parses guest-controlled data all day, so **assume it can be compromised**. What a compromised QEMU may reach is the design:
 
-- Own user namespace if available, no capabilities, `no_new_privs`, in `app-lordos-vm-<id>.scope` with memory and CPU limits.
+- Own user namespace if available, no capabilities, `no_new_privs`, in `app-insaneos-vm-<id>.scope` with memory and CPU limits.
 - **Landlock:** read-only `/usr/lib`, firmware and ISOs chosen for this VM; read-write only that VM's folder. On kernels without
   Landlock (see 2.3) the app shows "Weaker isolation on this kernel".
 - **Seccomp:** QEMU's own `-sandbox on,obsolete=deny,elevateprivileges=deny,spawn=deny,resourcecontrol=deny` plus ours. Our allowlist needs care: QEMU uses many
-  ioctls on `/dev/kvm`, and `lord-server`'s helper filter can't be reused unchanged. QEMU's own filter costs nothing measurable: boot
+  ioctls on `/dev/kvm`, and `insane-server`'s helper filter can't be reused unchanged. QEMU's own filter costs nothing measurable: boot
   to login 36.5 s with it and 36.0 s without, QEMU RSS 424 MB against 422.5 MB (**Measured**, 2026-11-04, amd64, **nested**, 6 boots
   each). It also ran in every Pi run, 3D included, with no trouble (**Measured**, 2026-11-04, Pi 5). Our own filter on top is **To test**.
-- `/dev/kvm`, `/dev/vhost-net`, render node and tap are opened by `lord-vm` and passed as descriptors, so QEMU can't open devices. For KVM, `-add-fd` plus `-accel kvm,device=/dev/fdset/NN`, which Debian 13's QEMU manual documents, works on both architectures with the sandbox on (**Measured**, 2026-11-04, Pi 5 and **nested** amd64). Passing the render node by descriptor is **To test**: in Phase 0 QEMU opened it itself, through the user's `render` group.
-- On amd64 with `-nodefaults`, the guest needs a display device, or its kernel never starts (**Measured**, 2026-11-04, **nested**); `lord-vm` always adds one, `-display none` included. On arm64 `virt` has no keyboard of its own, so a machine with a picture also gets `virtio-keyboard-pci`.
+- `/dev/kvm`, `/dev/vhost-net`, render node and tap are opened by `insane-vm` and passed as descriptors, so QEMU can't open devices. For KVM, `-add-fd` plus `-accel kvm,device=/dev/fdset/NN`, which Debian 13's QEMU manual documents, works on both architectures with the sandbox on (**Measured**, 2026-11-04, Pi 5 and **nested** amd64). Passing the render node by descriptor is **To test**: in Phase 0 QEMU opened it itself, through the user's `render` group.
+- On amd64 with `-nodefaults`, the guest needs a display device, or its kernel never starts (**Measured**, 2026-11-04, **nested**); `insane-vm` always adds one, `-display none` included. On arm64 `virt` has no keyboard of its own, so a machine with a picture also gets `virtio-keyboard-pci`.
 - No network sockets of its own: networking is an fd. Debian 13's QEMU has no `-netdev passt`, so `passt` gets one end of a socketpair and QEMU the other through `-netdev stream,addr.type=fd` (**Measured**, 2026-11-04, both hosts).
 - Files are opened by the supervisor and passed by descriptor wherever QEMU allows (`/dev/fdset`).
 - No shell, no `-readconfig` from the guest's folder: arguments are built from validated settings.
-- A machine can't outlive `lord-vm`: `PR_SET_PDEATHSIG` is set before exec. QEMU's newer `-run-with exit-with-parent=on` isn't in Debian 13's version (**Measured**: the 10.0 manual lists only `async-teardown`, `chroot` and `user`). swtpm exits with QEMU.
+- A machine can't outlive `insane-vm`: `PR_SET_PDEATHSIG` is set before exec. QEMU's newer `-run-with exit-with-parent=on` isn't in Debian 13's version (**Measured**: the 10.0 manual lists only `async-teardown`, `chroot` and `user`). swtpm exits with QEMU.
 - `-M dump-guest-core=off`, no core dumps, and non-dumpable processes, so that guest memory doesn't land in a host file.
 - One VM can't read another's folder: one process tree and one Landlock domain per VM.
 - A guest's disk file isn't encrypted by default; see 8.
@@ -386,7 +386,7 @@ QEMU parses guest-controlled data all day, so **assume it can be compromised**. 
 ### 3.4 Access to `/dev/kvm`
 
 `/dev/kvm` is `root:kvm 0660` and our session user isn't in `kvm` (**Measured**). Options: add the user to `kvm` (a closed admin action,
-`vm-enable`, asked once, new login needed) or let the seat rule grant it. Our sessions come from `lord-sessiond`, so seat rules must be
+`vm-enable`, asked once, new login needed) or let the seat rule grant it. Our sessions come from `insane-sessiond`, so seat rules must be
 checked. Decision: `vm-enable`, asked the first time, one question with one sentence of explanation.
 
 **Built in the alpha** (3.9, The app): the closed admin action is `vm-kvm` (`vm-enable` installs the packages). It adds the session
@@ -398,7 +398,7 @@ can't be opened.
 ### 3.5 Files on disk
 
 ```
-~/Machines/<name>.lordvm/
+~/Machines/<name>.insanevm/
   machine.json       settings, schema-versioned
   disks/system.qcow2
   disks/data-1.qcow2
@@ -425,17 +425,17 @@ What a machine promises, so that updates don't break it.
 | Firmware | The firmware's identity is recorded with the NVRAM, which only works with a matching build. A firmware update must not orphan it: the old code file is kept in the machine's folder |
 | External dependencies | Listed in `machine.json`: a shared base (6.3), an attached ISO, a shared folder path, a USB rule, a bridge. A missing one is named at start, and the machine isn't touched |
 | Suspended state | Valid only with the QEMU build, machine type and CPU that wrote it. The check runs before loading; on mismatch the choice is shown: try, or discard the state and boot from disk |
-| Interrupted operations | Each multi-step operation (clone, snapshot, revert, import, compaction, disk resize) writes an intent to `operation.json` first, and works on new files that replace old ones by rename. At next open, `lord-vm` finishes or rolls back and says which |
+| Interrupted operations | Each multi-step operation (clone, snapshot, revert, import, compaction, disk resize) writes an intent to `operation.json` first, and works on new files that replace old ones by rename. At next open, `insane-vm` finishes or rolls back and says which |
 
-**Moving a machine.** A `.lordvm` is portable only if it's shut down, with complete disks and no external dependency; a clone over a shared base (6.3) isn't, until Export flattens it. Export checks this, and an import verifies a manifest of checksums. A suspended or running machine doesn't move, and a copy made by hand in Files is offered as a Duplicate.
+**Moving a machine.** A `.insanevm` is portable only if it's shut down, with complete disks and no external dependency; a clone over a shared base (6.3) isn't, until Export flattens it. Export checks this, and an import verifies a manifest of checksums. A suspended or running machine doesn't move, and a copy made by hand in Files is offered as a Duplicate.
 
 ### 3.7 Resource budget
 
-Limits per machine aren't enough: three reasonable machines can starve the desktop. All machines sit under one parent cgroup slice, with a memory ceiling for the sum, lower CPU and I/O weight than the session, and a floor kept for the desktop: **target** 2 GB, or 1 GB on a 4 GB board. Starting a machine that doesn't fit asks first: pause another, start with less, or cancel. Memory pressure (PSI) warns before swap does, and the summary header shows the budget, not only host use. Whether `lord-sessiond`'s scopes can nest under one slice is **To test** in Phase 1.
+Limits per machine aren't enough: three reasonable machines can starve the desktop. All machines sit under one parent cgroup slice, with a memory ceiling for the sum, lower CPU and I/O weight than the session, and a floor kept for the desktop: **target** 2 GB, or 1 GB on a 4 GB board. Starting a machine that doesn't fit asks first: pause another, start with less, or cancel. Memory pressure (PSI) warns before swap does, and the summary header shows the budget, not only host use. Whether `insane-sessiond`'s scopes can nest under one slice is **To test** in Phase 1.
 
 ### 3.8 Why direct QMP, and not libvirt
 
-Decided on 2026-11-01: `lord-vm` drives QEMU directly through QMP.
+Decided on 2026-11-01: `insane-vm` drives QEMU directly through QMP.
 
 libvirt was considered seriously: its session mode runs as the user, Debian 13 has 11.3.0 (**Measured**), it supports `<graphics type='dbus' p2p='yes'>` through `virDomainOpenGraphics` (**Reported**, its documentation), and it brings machine-type and firmware handling, plus snapshots with years of edge cases. Against it: a second daemon in the session, XML as the contract, and its own process setup between us and QEMU, right where our sandbox has to be.
 
@@ -444,10 +444,10 @@ It stays only as a fallback, if the technical proof finds a blocker in direct QM
 ### 3.9 Phase 1 implementation
 
 Built on branch `machines-alpha` (2026-11-04/05) in two parts: the internals, then the window and the app (The app, below). Sources in
-`server/src/vm/`, rules in `server/mk/vm.mk`, both binaries installed in `/usr/lib/lordos/bin` by `tools/iso/mkdeb.sh`
+`server/src/vm/`, rules in `server/mk/vm.mk`, both binaries installed in `/usr/lib/insaneos/bin` by `tools/iso/mkdeb.sh`
 (QEMU and passt are not package dependencies).
 
-**Files of one machine** (any folder; the app will use `~/Machines/<name>.lordvm`, 3.5). QEMU may write only in `disks/`, so a
+**Files of one machine** (any folder; the app will use `~/Machines/<name>.insanevm`, 3.5). QEMU may write only in `disks/`, so a
 compromised QEMU can't change `machine.json` (and through it, what the next start lets it read), the logs or the state:
 
 | File | What |
@@ -455,32 +455,32 @@ compromised QEMU can't change `machine.json` (and through it, what the next star
 | `machine.json` | The description, schema 1 (`machine.h`; schema 2 added `base`, `agent`, `clipboard`, schema 3 an imported machine's hardware, 6.22): `schema`, `id` (UUID, QEMU's `-uuid`), `name`, `arch` (`arm64`, `amd64`), `accel` (`kvm`, `tcg`), `vcpus`, `memory_mb`, `disk_gb`, `firmware` (`uefi`, `bios`), `machine_type` (pinned at creation, `virt-10.0` or `pc-q35-10.0`, read from QEMU), `firmware_code` and `firmware_sha256` (the UEFI build the NVRAM was made with; a changed build is logged at start), `display` (`window`, `none`), `network` (`shared`, `isolated`), `mac`, optional `iso`, `created`, `updated`. Unknown keys, wrong types and values out of range are refused; a newer schema is refused before its other keys are read and is never rewritten. No password is ever stored |
 | `disks/system.qcow2` | System disk, made by `qemu-img` at creation (empty, or converted from an image with `--import`) |
 | `disks/nvram.qcow2` | UEFI variables as qcow2, converted from the firmware's template (6.2). arm64 always uses UEFI (`AAVMF_CODE.no-secboot.fd`); amd64 uses UEFI (`OVMF_CODE_4M.fd`) when the `ovmf` package is there and SeaBIOS otherwise, which is what a Pi gets for an emulated amd64 guest |
-| `log/lord-vm.log` | This run: lord-vm's lines, QEMU's and passt's stderr, the command line (credentials named, never their values); 4 MB at most. `lord-vm.1.log` and `lord-vm.2.log` are the two runs before (6.19) |
+| `log/insane-vm.log` | This run: insane-vm's lines, QEMU's and passt's stderr, the command line (credentials named, never their values); 4 MB at most. `insane-vm.1.log` and `insane-vm.2.log` are the two runs before (6.19) |
 | `log/serial.log` | The guest's serial console, 1 MB at most per run (`serial.1.log`, the run before) |
-| `lock` | `flock`ed by the running lord-vm: a second one on the same machine is refused |
-| `run.json` | The last state lord-vm wrote: state, reason, code, pids, time, detail. Status and recovery read it |
+| `lock` | `flock`ed by the running insane-vm: a second one on the same machine is refused |
+| `run.json` | The last state insane-vm wrote: state, reason, code, pids, time, detail. Status and recovery read it |
 
 **Limits** (3.7): vCPUs at most the host's CPUs, with a warning above all-but-one (3 on a Pi 5, 13.7); memory 256 MB up to the
 host's RAM minus 2 GB (1 GB on a 4 GB board). The machine's memory limit is its memory plus QEMU's overhead (384 MB with KVM, 640
 MB with TCG, whose translation cache is capped with `tb-size=256`); `vm_budget_fits` checks a new machine against the ones
-running. Enforcing the sum needs one slice for all machines, which lord-sessiond can't make yet (below).
+running. Enforcing the sum needs one slice for all machines, which insane-sessiond can't make yet (below).
 
 **Processes** of a running machine:
 
 ```
-lord-server ──fd 3, VmMsg──▶ lord-vm (app-lordos-lordos-vm-<id>.scope)      ← lord-vm --control-fd 3 [--paused] DIR
+insane-server ──fd 3, VmMsg──▶ insane-vm (app-insaneos-insaneos-vm-<id>.scope)      ← insane-vm --control-fd 3 [--paused] DIR
                                ├─ passt   -f -q -1 --fd 3 --no-map-gw -t none -u none --dns-forward 169.254.0.53
                                └─ qemu-system-<arch>   fds: 3 /dev/kvm, 4 QMP, 5 serial, 6 network, 7… credentials
-lord-server ──fd 3, VdMsg──▶ lord-vmdisplay <id> (lordos-vmdisplay-<id>.scope) ──fd 4, D-Bus p2p──▶ QEMU
+insane-server ──fd 3, VdMsg──▶ insane-vmdisplay <id> (insaneos-vmdisplay-<id>.scope) ──fd 4, D-Bus p2p──▶ QEMU
 ```
 
-- **lord-vm** loads and checks `machine.json` and this computer, takes the lock, recovers a previous run that ended without a
+- **insane-vm** loads and checks `machine.json` and this computer, takes the lock, recovers a previous run that ended without a
   final state (kills what is left of it, marks it `supervisor-lost`, removes its socket), rotates the logs, enters the machine's
   scope, opens `/dev/kvm`, starts passt and QEMU paused (`-S`), completes the QMP handshake, applies its own Landlock (read and
   write in the machine's folder only) and continues QEMU unless asked to stay paused. It listens on
-  `$XDG_RUNTIME_DIR/lordos-vm/<id>.sock` (folder 0700, peer uid checked) with the same messages as fd 3, so the CLI and a restarted
-  lord-server can reach it. When lord-server closes fd 3, the machine is shut down (ACPI, 60 s, then off), unless lord-vm was
-  started with `--keep-running`. lord-vm exits when QEMU has, after the last state.
+  `$XDG_RUNTIME_DIR/insaneos-vm/<id>.sock` (folder 0700, peer uid checked) with the same messages as fd 3, so the CLI and a restarted
+  insane-server can reach it. When insane-server closes fd 3, the machine is shut down (ACPI, 60 s, then off), unless insane-vm was
+  started with `--keep-running`. insane-vm exits when QEMU has, after the last state.
 - **QEMU** gets `-nodefaults -no-user-config`, `-uuid`, the pinned machine type with `dump-guest-core=off`, `-accel kvm,device=/dev/fdset/1`
   with `-add-fd` (or `tcg,thread=multi,tb-size=256`), `-cpu host` (`max` with TCG), every disk as `-blockdev` JSON with
   `bootindex=0` on the system disk, an ISO as `scsi-cd` with `bootindex=1`, `virtio-net-pci` on `-netdev stream,addr.type=fd`, `virtio-rng-pci`,
@@ -489,49 +489,49 @@ lord-server ──fd 3, VdMsg──▶ lord-vmdisplay <id> (lordos-vmdisplay-<id
   `-sandbox on,obsolete=deny,elevateprivileges=deny,spawn=deny,resourcecontrol=deny`. Its environment is `LC_ALL=C.UTF-8` only.
   `PR_SET_PDEATHSIG` (SIGKILL) and its own process group are set before exec, and core dumps are off.
 - **Guest credentials** (systemd's first-boot settings, a root password for tests) come from `--credentials-file` (mode 0600),
-  never from a command line: lord-vm puts each in a sealed memfd and QEMU reads it as `-smbios type=11,path=/proc/self/fd/N`. The
+  never from a command line: insane-vm puts each in a sealed memfd and QEMU reads it as `-smbios type=11,path=/proc/self/fd/N`. The
   log names them only; the isolation test checks that the password isn't on QEMU's command line or in any log.
-- **lord-vmdisplay** reads the console, registers its listener (with `Listener.Unix.Map`), then applies the helper sandbox of
+- **insane-vmdisplay** reads the console, registers its listener (with `Listener.Unix.Map`), then applies the helper sandbox of
   `sec/sandbox.c` (no files, no new sockets, no exec, threads only, its own scope with 512 MB) before it handles anything about the
   picture. Decisions on 13.8 item 4: QEMU's memfd is sealed only against new seals (`seal_shrink: no`, again on both hosts), so
   refusing unsealed buffers would mean no picture: every read of QEMU's buffer runs under a `SIGBUS` guard instead, and a fault drops
-  that buffer until the next `ScanoutMap`. The damaged area is copied into lord-server's picture (sealed by lord-server against
-  shrinking and growing), at most `VD_RATE` times a second (60 by default; lord-server sends the display's real rate), and not again
-  until lord-server acknowledges the frame or 250 ms pass, so lord-server never reads a picture while it's written and never sees
+  that buffer until the next `ScanoutMap`. The damaged area is copied into insane-server's picture (sealed by insane-server against
+  shrinking and growing), at most `VD_RATE` times a second (60 by default; insane-server sends the display's real rate), and not again
+  until insane-server acknowledges the frame or 250 ms pass, so insane-server never reads a picture while it's written and never sees
   QEMU's memory. Plain `Scanout`/`Update` arrays are still copied (QEMU uses them for surfaces it can't share); `ScanoutDMABUF` is
   refused in the alpha (no 3D). Input goes out as D-Bus calls that expect no reply: evdev key codes mapped to QEMU's numbers
   (`vmkeys.h`), absolute pointer (relative while the guest's tablet driver isn't up; `IsAbsolute` is asked again while the pointer
   moves), buttons, wheel steps, release-all on focus loss, and `SetUIInfo` at most every 100 ms for the window's size. The cursor
-  (`CursorDefine`) goes to lord-server in its own sealed memfd.
+  (`CursorDefine`) goes to insane-server in its own sealed memfd.
 
 **Messages** (`server/src/vm/vmproto.h`, the full contract is its header comment). Both channels are `SOCK_SEQPACKET`, one fixed
 struct per packet, at most one descriptor per message; anything of another length or version drops the peer.
 
 | `VmMsg` (224 bytes) | Direction | Meaning |
 |---|---|---|
-| `VM_STATUS`, `VM_PAUSE`, `VM_RESUME`, `VM_SHUTDOWN` (a = seconds, 0: 60), `VM_POWEROFF`, `VM_RESET` | to lord-vm | Lifecycle (6.1); each answered by `VM_REPLY` with the request's `seq` |
-| `VM_DISPLAY` | to lord-vm | QMP `getfd` + `add_client @dbus-display`; answered by `VM_DISPLAY_FD` carrying the connection for lord-vmdisplay |
-| `VM_QMP` | to lord-vm | One raw QMP command, only with `lord-vm --dev-qmp` (tests) |
-| `VM_REPLY` | from lord-vm | a = `VME_*`, text = reason |
-| `VM_STATE` | from lord-vm | a = `stopped`, `starting`, `running`, `paused`, `stopping`, `crashed`; b = why (`guest-shutdown`, `host-shutdown`, `forced`, `poweroff`, `qemu-failed`, `qemu-signal`, `out-of-memory`, `start-failed`, `guest-panic`, `supervisor-lost`, `reset`, `user`); c = exit status or signal; d = QEMU's pid; text = detail for the log and the likely-cause line of 6.1 |
-| `VM_INFO` | from lord-vm | vCPUs, memory, `VMS_*` (what the sandbox applied), `VMC_*` (cgroups), the id |
+| `VM_STATUS`, `VM_PAUSE`, `VM_RESUME`, `VM_SHUTDOWN` (a = seconds, 0: 60), `VM_POWEROFF`, `VM_RESET` | to insane-vm | Lifecycle (6.1); each answered by `VM_REPLY` with the request's `seq` |
+| `VM_DISPLAY` | to insane-vm | QMP `getfd` + `add_client @dbus-display`; answered by `VM_DISPLAY_FD` carrying the connection for insane-vmdisplay |
+| `VM_QMP` | to insane-vm | One raw QMP command, only with `insane-vm --dev-qmp` (tests) |
+| `VM_REPLY` | from insane-vm | a = `VME_*`, text = reason |
+| `VM_STATE` | from insane-vm | a = `stopped`, `starting`, `running`, `paused`, `stopping`, `crashed`; b = why (`guest-shutdown`, `host-shutdown`, `forced`, `poweroff`, `qemu-failed`, `qemu-signal`, `out-of-memory`, `start-failed`, `guest-panic`, `supervisor-lost`, `reset`, `user`); c = exit status or signal; d = QEMU's pid; text = detail for the log and the likely-cause line of 6.1 |
+| `VM_INFO` | from insane-vm | vCPUs, memory, `VMS_*` (what the sandbox applied), `VMC_*` (cgroups), the id |
 
 | `VdMsg` (32 bytes) | Direction | Meaning |
 |---|---|---|
-| `VD_READY`, `VD_STATE`, `VD_STATS` | from lord-vmdisplay | Console size; connected / no picture / lost; counts every 5 s |
-| `VD_SIZE` → `VD_SHM` | both | The helper asks for a picture of w × h; lord-server answers with a memfd of w × h × 4 sealed against shrinking and growing (`vm_picture_memfd`) |
-| `VD_FRAME` → `VD_FRAME_DONE` | both | Damage x, y, w, h and a frame number; lord-server answers after it read the picture |
-| `VD_CURSOR`, `VD_POINTER` | from lord-vmdisplay | Cursor image in a memfd sealed against writing (`vm_cursor_check`), hotspot; pointer position |
-| `VD_KEY`, `VD_MOTION`, `VD_BUTTON`, `VD_WHEEL`, `VD_RELEASE_ALL`, `VD_RESIZE`, `VD_RATE`, `VD_CLOSE` | to lord-vmdisplay | Input and window changes |
+| `VD_READY`, `VD_STATE`, `VD_STATS` | from insane-vmdisplay | Console size; connected / no picture / lost; counts every 5 s |
+| `VD_SIZE` → `VD_SHM` | both | The helper asks for a picture of w × h; insane-server answers with a memfd of w × h × 4 sealed against shrinking and growing (`vm_picture_memfd`) |
+| `VD_FRAME` → `VD_FRAME_DONE` | both | Damage x, y, w, h and a frame number; insane-server answers after it read the picture |
+| `VD_CURSOR`, `VD_POINTER` | from insane-vmdisplay | Cursor image in a memfd sealed against writing (`vm_cursor_check`), hotspot; pointer position |
+| `VD_KEY`, `VD_MOTION`, `VD_BUTTON`, `VD_WHEEL`, `VD_RELEASE_ALL`, `VD_RESIZE`, `VD_RATE`, `VD_CLOSE` | to insane-vmdisplay | Input and window changes |
 
 **Command line, for development and tests:**
 
 ```
-lord-vm --create DIR [--name N] [--arch arm64|amd64] [--accel kvm|tcg] [--vcpus N] [--memory MB] [--disk GB]
+insane-vm --create DIR [--name N] [--arch arm64|amd64] [--accel kvm|tcg] [--vcpus N] [--memory MB] [--disk GB]
                      [--firmware uefi|bios] [--display window|none] [--network shared|isolated] [--import IMAGE] [--iso FILE]
-lord-vm --start DIR [--paused] [--detach] [--keep-running] [--credentials-file FILE] [--dev-qmp]
-lord-vm --status DIR [--json] | --check DIR | --stop DIR [--timeout S] | --poweroff DIR | --pause DIR | --resume DIR | --reset DIR
-lordvm-dev run|attach DIR      plays lord-server: picture memfd, frames, PNG, typing, pointer, resize (server/tests/vm_dev.c)
+insane-vm --start DIR [--paused] [--detach] [--keep-running] [--credentials-file FILE] [--dev-qmp]
+insane-vm --status DIR [--json] | --check DIR | --stop DIR [--timeout S] | --poweroff DIR | --pause DIR | --resume DIR | --reset DIR
+insanevm-dev run|attach DIR      plays insane-server: picture memfd, frames, PNG, typing, pointer, resize (server/tests/vm_dev.c)
 ```
 
 **What is enforced, and where it stops.**
@@ -541,21 +541,21 @@ lordvm-dev run|attach DIR      plays lord-server: picture memfd, frames, PNG, ty
   `socket`, `connect`, `bind`, `listen`, `accept`, namespaces, mount, `ptrace`, `process_vm_*`, `bpf`, `perf_event_open`, `keyctl`,
   `io_uring`, `userfaultfd`, modules, kexec, `TIOCSTI`), then QEMU's own filter. Ours is a denylist: an allowlist for QEMU is still
   **To test** (3.3).
-- passt sandboxes itself (namespaces and its own seccomp); lord-vm doesn't put Landlock on it, because Landlock would forbid the
+- passt sandboxes itself (namespaces and its own seccomp); insane-vm doesn't put Landlock on it, because Landlock would forbid the
   mounts passt's own isolation makes.
-- cgroups: lord-vm enters `app-lordos-lordos-vm-<id>.scope` through lord-sessiond (memory.max = the machine's limit + 128 MB, cpu.max
-  = vCPUs × 100 % + 50 %). With lord-sessiond, scopes belong to root, so lord-vm can't divide its scope: QEMU and passt share it.
-  When lord-vm runs in a cgroup it may divide (a delegated scope), it makes leaves `supervisor`, `qemu` (the machine's memory limit,
+- cgroups: insane-vm enters `app-insaneos-insaneos-vm-<id>.scope` through insane-sessiond (memory.max = the machine's limit + 128 MB, cpu.max
+  = vCPUs × 100 % + 50 %). With insane-sessiond, scopes belong to root, so insane-vm can't divide its scope: QEMU and passt share it.
+  When insane-vm runs in a cgroup it may divide (a delegated scope), it makes leaves `supervisor`, `qemu` (the machine's memory limit,
   swap 0, its CPU limit) and `passt` (128 MB, 200 %); the test below runs that way. One slice for all machines, the sum of 3.7,
-  needs lord-sessiond to create nested scopes: not done.
-- lord-vm's own Landlock covers files only; it keeps the right to signal QEMU and passt.
+  needs insane-sessiond to create nested scopes: not done.
+- insane-vm's own Landlock covers files only; it keeps the right to signal QEMU and passt.
 
 **Isolation test** (`server/tests/vm_isolation.sh BUILD_DIR IMAGE`, Phase 1's "done when"). It makes a machine from a Debian 13
-image, starts it through `lordvm-dev` (lord-server's part), and has QEMU itself try what it must not do, through
-`lord-vm --dev-qmp`: `blockdev-add` of files and devices, `screendump`, file, TCP, UDP and unix `chardev-add`, a user network with a
+image, starts it through `insanevm-dev` (insane-server's part), and has QEMU itself try what it must not do, through
+`insane-vm --dev-qmp`: `blockdev-add` of files and devices, `screendump`, file, TCP, UDP and unix `chardev-add`, a user network with a
 forwarded port. The guest reports its own network on the kernel log through a unit passed as a systemd credential. Then pause,
-resume, a second lord-vm on the same machine, QEMU killed with `SIGSEGV`, lord-vm killed with `SIGKILL`, recovery, and an ACPI
-shutdown. With `LORDVM_SCOPE=1` each lord-vm runs alone in a delegated scope (`systemd-run --user --scope -p Delegate=yes`), so the
+resume, a second insane-vm on the same machine, QEMU killed with `SIGSEGV`, insane-vm killed with `SIGKILL`, recovery, and an ACPI
+shutdown. With `INSANEVM_SCOPE=1` each insane-vm runs alone in a delegated scope (`systemd-run --user --scope -p Delegate=yes`), so the
 nested leaves are tested. **Measured** on 2026-11-05, final runs:
 
 | | Pi 5 (arm64 guest, KVM) | amd64, **nested** (amd64 guest, KVM, OVMF) |
@@ -563,14 +563,14 @@ nested leaves are tested. **Measured** on 2026-11-05, final runs:
 | Result | **61 passed, 0 failed, 0 skipped** | **59 passed, 0 failed, 0 skipped** |
 | QEMU's sandbox | Landlock (files, TCP, scope), our seccomp, QEMU's seccomp (`Seccomp_filters` ≥ 2), `NoNewPrivs` 1, `CapEff` 0 | same |
 | QEMU's descriptors | only sockets, pipes, anonymous files, `/dev/kvm`, `/dev/null`, its disks, the firmware | same |
-| Refused to QEMU | `/etc/hostname`, a file in the home folder, its own `machine.json` and logs, `/proc/<lord-vm>/environ`, a screenshot or file chardev in `/tmp`, `/dev/mem`, `/dev/mmcblk0`, `/dev/dri/renderD128`, `/dev/dri/card0`, `/dev/net/tun`, `/dev/vhost-net`, `/dev/tty`, `/dev/ptmx`; TCP connect and listen, UDP, a unix socket, the session bus, a user network with a forwarded port; nothing reached the host's listeners | same, with `/dev/nvme0n1` |
+| Refused to QEMU | `/etc/hostname`, a file in the home folder, its own `machine.json` and logs, `/proc/<insane-vm>/environ`, a screenshot or file chardev in `/tmp`, `/dev/mem`, `/dev/mmcblk0`, `/dev/dri/renderD128`, `/dev/dri/card0`, `/dev/net/tun`, `/dev/vhost-net`, `/dev/tty`, `/dev/ptmx`; TCP connect and listen, UDP, a unix socket, the session bus, a user network with a forwarded port; nothing reached the host's listeners | same, with `/dev/nvme0n1` |
 | Allowed (control) | a file in `disks/` | same |
 | Guest network (passt) | address and gateway copied from the host, DNS answered, `http://1.1.1.1/` 301, `http://deb.debian.org/` 200, the host's loopback through the gateway unreachable | same |
-| cgroups | QEMU in its `qemu` leaf, `memory.max` 1,476,395,008 (1024 + 384 MB); passt beside it, listening on nothing | same, in the scope lord-vm made for itself |
+| cgroups | QEMU in its `qemu` leaf, `memory.max` 1,476,395,008 (1024 + 384 MB); passt beside it, listening on nothing | same, in the scope insane-vm made for itself |
 | Display | first picture, not black, typed login and command ran (`echo` reached the serial line), `SetUIInfo` 1024 × 768 taken by the guest, nothing refused on either side | same |
-| lord-vmdisplay | seccomp, `NoNewPrivs`, no file held; its sandbox refuses `/etc`, home, `/dev/kvm`, files in `/tmp`, AF_INET, AF_UNIX, `socketpair`, `fork`; `/dev/null` and `memfd` stay | same |
+| insane-vmdisplay | seccomp, `NoNewPrivs`, no file held; its sandbox refuses `/etc`, home, `/dev/kvm`, files in `/tmp`, AF_INET, AF_UNIX, `socketpair`, `fork`; `/dev/null` and `memfd` stay | same |
 | Secrets | the root password from `--credentials-file` was on no command line and in no log | same |
-| Lifecycle | pause, resume, second start refused (exit 3), QEMU `SIGSEGV` → `crashed`/`qemu-signal` 11 with passt and the socket gone, lord-vm `SIGKILL` → QEMU and passt gone, status `supervisor-lost`, the next start recovers, ACPI shutdown in 4 s | same, ACPI shutdown in 4 s |
+| Lifecycle | pause, resume, second start refused (exit 3), QEMU `SIGSEGV` → `crashed`/`qemu-signal` 11 with passt and the socket gone, insane-vm `SIGKILL` → QEMU and passt gone, status `supervisor-lost`, the next start recovers, ACPI shutdown in 4 s | same, ACPI shutdown in 4 s |
 
 Earlier runs on the same day found, and the code now handles: on arm64, QEMU opens `/dev/kvm` again by path for `-cpu host` (a
 scratch vCPU to read the CPU's features), so KVM machines have `/dev/kvm` in QEMU's Landlock rules (it holds a KVM descriptor anyway);
@@ -579,11 +579,11 @@ amd64 guest finished booting is ignored and ends as `forced` after the timeout, 
 cgroup (a plain SSH session), the same checks pass and QEMU runs with no limits, which `VM_INFO` reports.
 
 The `machine.json` schema, the message checks, QMP line reading, the key map and the image checks have unit tests (`server/tests/vm_test.c`, 167 checks,
-run by `make test`). lord-vmdisplay and lordvm-dev build only where `libsystemd-dev` is installed (`VMDISPLAY ?=` in `mk/vm.mk`).
+run by `make test`). insane-vmdisplay and insanevm-dev build only where `libsystemd-dev` is installed (`VMDISPLAY ?=` in `mk/vm.mk`).
 
 **Import never follows another file.** A qcow2 can name a backing file or an external data file, and an import that followed it
 would copy that file (anything the person can read: keys, other people's shared files) into the new disk, where the guest reads it;
-a raw file can also hold a qcow2 header. So lord-vm decides the format itself from the first bytes and the name (`vm_image_kind`,
+a raw file can also hold a qcow2 header. So insane-vm decides the format itself from the first bytes and the name (`vm_image_kind`,
 `machine.c`): the qcow2 magic with version 2 or 3, no backing file, no external data file and not marked corrupt, or a `.img`/`.raw`
 name without the magic; anything else is refused. `qemu-img` then sees the image only as a `json:` filename that names the driver
 (never probed) with `"backing": null`, and runs in a jail like QEMU's (`vm_jail_tool`: `no_new_privs`, the same seccomp filter, no TCP,
@@ -595,20 +595,20 @@ header patched by hand and a system disk swapped after creation: all refused, an
 amd64 build VM, 2026-11-05). Each layer was also checked alone: `backing: null` keeps the backing file's bytes out of a convert, and the
 jail alone makes `qemu-img` fail to open the backing file.
 
-**The app** (part 2, 2026-11-05). `lord.vm` (`server/src/ui/js_vm.c`) plays the part `vm_dev.c` plays in the tests, inside
-lord-server: it lists `~/Machines/*.lordvm` (machine.json and run.json; a run.json that says active with no `lord-vm` behind its pid
-shows as *Off (recovered)*, and lord-vm recovers it at the next start), runs `lord-vm --create` in the background, starts a machine
+**The app** (part 2, 2026-11-05). `insane.vm` (`server/src/ui/js_vm.c`) plays the part `vm_dev.c` plays in the tests, inside
+insane-server: it lists `~/Machines/*.insanevm` (machine.json and run.json; a run.json that says active with no `insane-vm` behind its pid
+shows as *Off (recovered)*, and insane-vm recovers it at the next start), runs `insane-vm --create` in the background, starts a machine
 on a control socketpair (`--control-fd 3 --paused`, no cgroup step in the child), attaches to a running one through its runtime socket,
-asks for the display once it has VM_INFO and a running or paused state, starts lord-vmdisplay with fd 3 and fd 4, resumes, maps each
+asks for the display once it has VM_INFO and a running or paused state, starts insane-vmdisplay with fd 3 and fd 4, resumes, maps each
 VD_SIZE picture read-only into an image media node, acknowledges a frame only when the engine painted it (`MediaSrc.painted_seq`, set
 by `media_paint`; a hidden window never paints and the helper goes on after 250 ms), gives the guest's pointer (below) to that media node, forwards evdev keys, picture-coordinate motion, buttons, wheel steps, release-all on
 blur, resize after the window kept a size for 400 ms, and the display's refresh rate. At most 256 messages per channel per poll; no
-call blocks. lord-vm's stderr goes to a non-blocking pipe, so a window that stops polling can't stall the supervisor; when lord-vm
+call blocks. insane-vm's stderr goes to a non-blocking pipe, so a window that stops polling can't stall the supervisor; when insane-vm
 ends without a last state the reason is *start-failed* (it never ran) or *supervisor-lost*.
 
 First start of cloud images: Debian's `nocloud` image stops at systemd's first-boot questions on its serial line, where nobody sees
-them. lord-server passes, at every start, this computer's language, keyboard layout and time zone as systemd credentials (5.2, "copied
-from the host"; a 0600 file in the runtime folder, removed at lord-vm's first message), and, when the New sheet was given a root
+them. insane-server passes, at every start, this computer's language, keyboard layout and time zone as systemd credentials (5.2, "copied
+from the host"; a 0600 file in the runtime folder, removed at insane-vm's first message), and, when the New sheet was given a root
 password, its SHA-512 crypt hash, which lives in the machine's `firstboot.creds` (0600) until the machine's first clean shutdown. The
 password itself is never written anywhere.
 
@@ -620,11 +620,11 @@ spot; the lights and bars show only real numbers.
 - **Control Center** (the library window): the summary bars *Running* (machines on of all), *Memory* (what the running machines' cgroups
   use, against this computer's RAM) and *Free* (free space where machines live); a card per machine with its picture (`thumb.png`,
   written by the machine's window every 5 s while it runs, so a stopped machine shows its last picture, dimmed), the system's own mark
-  (a letter tile of ours, never a project's logo), name, system and architecture (*emulated*), what it's doing (lord-vm's state: no
+  (a letter tile of ours, never a project's logo), name, system and architecture (*emulated*), what it's doing (insane-vm's state: no
   agent yet), the three lights (power; agent, always off; disk activity, from the cgroup's `io.stat`), CPU % of its vCPUs and memory from
-  its cgroup (`lord.vm.stats`, two samples 1.5 s apart: `usage` in `model.js`) and what its disks use on this computer. Hover shows a
+  its cgroup (`insane.vm.stats`, two samples 1.5 s apart: `usage` in `model.js`) and what its disks use on this computer. Hover shows a
   round Start/Open button, double-click opens or starts, right-click has Start or Open, Pause, Resume, Shut Down, Restart, Force Off,
-  Configure…, Logs, Show in Files, Eject ISO and Remove…. The app keeps what lord-vm doesn't need (the system's id and name, notes) in
+  Configure…, Logs, Show in Files, Eject ISO and Remove…. The app keeps what insane-vm doesn't need (the system's id and name, notes) in
   the machine's `app.json`. **FirstRun** (an empty library) offers New Machine and Import, and beside it *One step first* (`vm-kvm`) or
   *Virtualization is off* with *Continue Emulated*. **Requirements** (*What's Missing* in the header when something is) lists KVM, the
   engine, the firmware, the display module, the disk tools and passt with Ready/Missing and installs what's missing (`vm-enable`).
@@ -632,7 +632,7 @@ spot; the lights and bars show only real numbers.
   and about machines on a microSD card (the library's device, from `/sys/dev/block`).
 - **New Machine assistant** (full window, five steps: Choose, Profile, Name, Review, Create). Choose: *Download and install* tiles
   (Insane OS, Debian, Ubuntu, Fedora) are *Coming later*, like *Migrate from another computer*; *Install from an ISO file* and *Import a
-  machine* open the file dialog. The system is recognized from the ISO 9660 volume label (`lord.vm.isoInfo`) and the file's name
+  machine* open the file dialog. The system is recognized from the ISO 9660 volume label (`insane.vm.isoInfo`) and the file's name
   (`systemOf`, `versionOf`), the architecture from the name (`archOf`), with *Other architecture…* to switch; an emulated choice says
   it's much slower. Profile: Light, Standard, Development (`profileSize`, kept within this computer). Name: prefilled
   (`suggestName`), the root password for imported cloud images, and *Customize settings before starting*. Review lists everything and
@@ -640,26 +640,26 @@ spot; the lights and bars show only real numbers.
 - **Configure** (a window per machine): a sidebar of sections with one-line summaries, General (name, system, notes, architecture,
   created, folder), Startup and shutdown, CPU and memory (cores and memory with bars and the cgroup limit), Display, Network (Shared or
   Isolated, MAC), Sound and input, Disks (grow the system disk, insert or eject an ISO), Sharing, Boot, Security (what the sandbox
-  does). Changes go through **`lord-vm --set`** (new: under the machine's lock, refused with exit 3 while it runs, the same checks as
-  `--create`, the disk only grows, through the jailed `qemu-img resize`), as a background job (`lord.vm.set`); while the machine runs
+  does). Changes go through **`insane-vm --set`** (new: under the machine's lock, refused with exit 3 while it runs, the same checks as
+  `--create`, the disk only grows, through the jailed `qemu-img resize`), as a background job (`insane.vm.set`); while the machine runs
   they are dimmed with a note. What later phases bring (suspend on close, 3D, forwarded ports, sound, shared folders, TPM) says so.
 - **Machine window**: a toolbar with the power light and name, the resolution (*Follow the window* or a fixed size sent to the guest),
   Devices (the CD/DVD; changing it, shared folders and sound later), Logs, Screenshot (the guest's picture at its size into
-  `~/Pictures/Screenshots`, with a notification), Pause or Resume (QMP `stop`/`cont`, VM_PAUSE/VM_RESUME, already in lord-vm and in the
+  `~/Pictures/Screenshots`, with a notification), Pause or Resume (QMP `stop`/`cont`, VM_PAUSE/VM_RESUME, already in insane-vm and in the
   isolation test), Power (Shut Down, Restart, Ctrl+Alt+Delete, Force Off), Configure… and Full Screen; the menu bar has **Actions** and
   **Devices** with the same items. In full screen the bar floats at the top edge (shown when the pointer reaches it) with *Leave Full
-  Screen*, and a hint at the bottom for five seconds. A failure shows **BootFailed**: why, the likely fix and lord-vm's detail,
+  Screen*, and a hint at the bottom for five seconds. A failure shows **BootFailed**: why, the likely fix and insane-vm's detail,
   Start Again, Configure… and the machine log with Copy. **Logs** (a window): the machine log or the guest's serial console, a filter,
   Pause/Follow, Copy, Save (to Documents), levels guessed from the words.
-- `lord.vm.stop(dir, how)` (the library's menu, through the runtime socket) takes `shutdown`, `poweroff`, `pause`, `resume` and
-  `reset`, and waits up to half a second for lord-vm's answer before closing the socket.
+- `insane.vm.stop(dir, how)` (the library's menu, through the runtime socket) takes `shutdown`, `poweroff`, `pause`, `resume` and
+  `reset`, and waits up to half a second for insane-vm's answer before closing the socket.
 
 **On screen** (VM 125: Insane OS 0.8.8.3 amd64, nested VT-x, 4 cores, 3.8 GB, no QEMU at the start), 2026-11-05: the banner installed
 the packages in about 15 s and *Allow* gave `alex` the kvm group and an access-list entry on `/dev/kvm` with no new login; Debian 13's
 official nocloud qcow2 (SHA512 checked) was imported (2 vCPU, 1 GB, 20 GB) and started with KVM; firmware, kernel and login appeared in
 the window, the guest followed the window's size, the root login and a shell worked from the host keyboard (`nproc` 2, 961 MB,
 the Shared network's address); Pause, Resume, Ctrl+Alt+Delete (the guest rebooted), Shut Down from the library (`host-shutdown`),
-Force Off, close-to-shut-down, QEMU killed with SIGSEGV (*Stopped with an error*, Start again), lord-vm killed with SIGKILL (the
+Force Off, close-to-shut-down, QEMU killed with SIGSEGV (*Stopped with an error*, Start again), insane-vm killed with SIGKILL (the
 window and the library say so, the next start logs the recovery) and Delete to the Trash all worked. Screenshots are kept with the
 branch's test notes.
 
@@ -694,15 +694,15 @@ installed GRUB (the installer's boot entry in the NVRAM qcow2 and the disk's ESP
 
 - **The network card moved when the ISO was taken out.** QEMU numbered the PCI slots in the order of the devices, so the ISO's SCSI
   controller pushed the network card from slot 2 to slot 3: the installer configured `enp0s3`, and after the ISO was gone the card was
-  `enp0s2` with nothing configured for it. Every device now has a fixed slot (`lordvm.c`): the system disk 1, the network card 2, the
+  `enp0s2` with nothing configured for it. Every device now has a fixed slot (`insanevm.c`): the system disk 1, the network card 2, the
   random-number device 3, the display 4, then the keyboard and tablet, and the ISO's controller 8; slots 1 to 6 are the ones a machine
   without an ISO always had, so existing machines keep theirs (an *Isolated* machine's devices after the disk move up once).
 - **Taking the ISO out.** A machine that is off and has an ISO shows *ISO attached* and an **Eject ISO** button in the library;
-  `lord.vm.eject(dir)` takes the machine's lock (refused while lord-vm holds it) and rewrites `machine.json` without `iso`. After it, the
+  `insane.vm.eject(dir)` takes the machine's lock (refused while insane-vm holds it) and rewrites `machine.json` without `iso`. After it, the
   installed system started with its network up on `enp0s2` (slot 2) and `apt-get` installed packages.
 
 Seen once, not fixed: passt (Debian 13's `0.0~git20250503.587980c-2+deb13u1`) crashed with SIGSEGV during a large `apt-get` download in
-the installed guest, after logging `Flow 26 (FREE): Failed to set SO_PEEK_OFF … Socket operation on non-socket`; lord-vm logged *the
+the installed guest, after logging `Flow 26 (FREE): Failed to set SO_PEEK_OFF … Socket operation on non-socket`; insane-vm logged *the
 machine's network stopped* and the guest had no network until its next start. QEMU's `-netdev stream` on a descriptor can't reconnect,
 so a restarted passt would need the network card to be detached and attached again (to do: a newer passt, or that reattach).
 
@@ -730,7 +730,7 @@ only its library is saved, and a saved list that names it more than once opens i
 branch). *Allow* gave the account the kvm group and an access-list entry on `/dev/kvm`, but the first start failed with QEMU's *Failed to
 retrieve host CPU features*: `/dev/kvm` carries udev's `uaccess` tag, and systemd-logind rewrote its access list at the next login of any
 kind (an SSH login was enough), keeping only the active seat session's user, which a Insane OS session isn't. `vm-kvm` now writes
-`/etc/udev/rules.d/71-lordos-kvm.rules` (`TAG-="uaccess"` for kvm) so the entry stays until the next boot, and from the next login the
+`/etc/udev/rules.d/71-insaneos-kvm.rules` (`TAG-="uaccess"` for kvm) so the entry stays until the next boot, and from the next login the
 kvm group covers it; after a reboot the session had group 992 (kvm) and machines started with KVM. Under GPU composition the machine's
 picture was see-through: QEMU's x8r8g8b8 leaves the fourth byte 0, which the CPU composition never reads but the GPU's takes as the UI's
 hole for app windows; `MediaSrc.xrgb` now draws it with alpha 255 (`force_alpha` in `mview.c`, two checks in `mview_test.c`). Then: Debian
@@ -751,13 +751,13 @@ with the ISO moved away (*the attached image is missing*), FirstRun with an empt
 **Not done or not verified:** ~~Esc pressed while one of the window's menus is open closes it and also reaches the guest~~ (fixed in the
 beta, below); BIOS machines were built for but not run from the app; ~~the package engine's download of `vm-enable` waited with no time
 limit while the network didn't answer~~ (beta); ~~ejecting an ISO from a running machine and attaching another one~~ (beta); one slice for all machines and nested
-leaves under lord-sessiond; our seccomp allowlist for QEMU; a guest cursor larger than 64 × 64 after scaling is drawn smaller (the
+leaves under insane-sessiond; our seccomp allowlist for QEMU; a guest cursor larger than 64 × 64 after scaling is drawn smaller (the
 cursor plane's size); HiDPI (the guest is asked for the window's logical size); render node and 3D; latency to the screen. Unit tests: `vm_test.c` 167 checks (with `vm_image_kind`), `vm_model_test.mjs` 66 checks (states, actions, the sheet's
 checks, letterbox and pointer scaling, guest size, refresh rate, wheel steps).
 
 **Phase 2, the beta.** Built on branch `machines-beta` (2026-11-05), from `machines-alpha`, in the order of the beta's list; each part is its own commit. The
 messages of 3.9 grew (`vmproto.h` is the contract: `VM_CDROM`, `VM_SUSPEND`, `VM_KEEP`, `VM_SNAPSHOT`, `VM_CONSOLE`, `VM_AGENT`, `VM_CLIP`
-to lord-vm; `VM_NOTICE`, `VM_JOB`, `VM_CONSOLE_FD`, `VM_AGENT_STATE`, `VM_CLIP_DATA` from it; reasons `suspended` and `resume-failed`); the
+to insane-vm; `VM_NOTICE`, `VM_JOB`, `VM_CONSOLE_FD`, `VM_AGENT_STATE`, `VM_CLIP_DATA` from it; reasons `suspended` and `resume-failed`); the
 version number is unchanged, since both ends ship together and an older peer drops what it doesn't know. `machine.json` is schema 2 (`base`,
 `agent`, `clipboard`): a schema 1 file is read as is and written as 2 with `machine.json.schema1` kept, as 3.6 says. Measured on the amd64
 build VM (**nested**, Debian 13 nocloud guest, 512 MB to 1 GB) and on screen on VM 125 (Insane OS amd64, nested) unless said otherwise.
@@ -767,9 +767,9 @@ build VM (**nested**, Debian 13 nocloud guest, 512 MB to 1 GB) and on screen on 
 - *Esc in a menu*: a key pressed while one of the window's menus (or the agent's popover, or the disc picker) is open stays with it, down
   and up. Seen on VM 125: with Devices open, `x` didn't reach the guest's login prompt and Esc closed the menu; with no menu, `x` did.
 - *CD/DVD while running*: the drive is always there (`virtio-scsi-pci` at slot 8, after the slots a machine always had, so no interface
-  moves). `VM_CDROM` carries a descriptor lord-server opened for the person; lord-vm hands it to QEMU with QMP `add-fd` and inserts a raw
+  moves). `VM_CDROM` carries a descriptor insane-server opened for the person; insane-vm hands it to QEMU with QMP `add-fd` and inserts a raw
   node on `/dev/fdset/N` (`blockdev-open-tray`, `-remove-medium`, `-del`, `-insert-medium`, `-close-tray`), so QEMU never opens a path and
-  its Landlock rules don't change; `machine.json` follows. Devices → Choose Disc Image / Eject Disc; `lord-vm --cdrom DIR IMAGE|none`. Seen
+  its Landlock rules don't change; `machine.json` follows. Devices → Choose Disc Image / Eject Disc; `insane-vm --cdrom DIR IMAGE|none`. Seen
   on VM 125 with Debian 13.7's netinst ISO; the guest's state carried across a suspend and resume with the disc in.
 - *Install timeout*: the package engine's HTTP client tries all of a host's addresses for 20 s together, and a host that didn't connect or
   answer isn't tried again in the same batch (`pkg/http.c`), so `vm-enable` on a network that drops packets ends in about a minute; the
@@ -780,7 +780,7 @@ build VM (**nested**, Debian 13 nocloud guest, 512 MB to 1 GB) and on screen on 
   words and keeps its message in place of the note under the rows, so its buttons stay in the window.
 - *passt crashing*: the network heals itself (below, *The network heals itself*).
 
-*Suspend and resume (6.1).* `VM_SUSPEND` stops the vCPUs and migrates to `file:/dev/fdset/90`, a descriptor lord-vm opened on
+*Suspend and resume (6.1).* `VM_SUSPEND` stops the vCPUs and migrates to `file:/dev/fdset/90`, a descriptor insane-vm opened on
 `.suspend.state.tmp` (QEMU 10 deprecates `fd:` for files; the 128 MiB/s default limit is lifted), with progress from `query-migrate` as
 `VM_JOB`; `suspend.json` records QEMU's version, the machine type, this CPU (a hash of its model and features), vCPUs and memory; both are
 renamed into place under `operation.json` "suspend" and QEMU quits: *stopped, suspended*. The next start passes `-incoming defer`, loads the
@@ -788,8 +788,8 @@ state through `migrate-incoming` under "resume" and removes it before the first 
 count or memory size isn't loaded (*resume-failed*, the state kept): Try Anyway (`--resume-anyway`) or Discard (`--discard-state`).
 Measured: a 512 MB guest saved 288 MB in 0.9 s and resumed in 0.4 s (build VM); a 1 GB guest saved 326 MB in 2.6 s and resumed in 0.3 s
 (VM 125, from the window; text typed at its login prompt was still there). **Keep Running** (`VM_KEEP`) leaves a machine on when its
-window closes; **Start Without Window** runs `lord-vm --detach --keep-running`; the card says *No window*. Closing a window asks Suspend,
-Shut Down or Keep Running unless Configure says which. **Keep awake**: the session's idle sleep asks `lord.vm.awake()` and skips while a
+window closes; **Start Without Window** runs `insane-vm --detach --keep-running`; the card says *No window*. Closing a window asks Suspend,
+Shut Down or Keep Running unless Configure says which. **Keep awake**: the session's idle sleep asks `insane.vm.awake()` and skips while a
 running machine keeps the computer awake (app.json `keepAwake`, on by default); the guest is kept awake through the agent (below). Whether
 the idle sleep was really held off wasn't watched on screen.
 
@@ -802,7 +802,7 @@ pictures are `snapshots/<tag>.png` (the live picture from the window, else the c
 tag the list doesn't name is removed. Measured (build VM): take 1.0 s, go back 0.55 s; on VM 125, Go Back to This with *a snapshot of now
 first* took both and went back in 3 s, and the text typed after the snapshot was gone. At most 64; a warning from 20 (6.2).
 
-*Clones (6.3) and storage (6.16).* `lord-vm --clone DIR NEWDIR [--duplicate] [--linked] [--from-snapshot TAG]`, with the source off: a
+*Clones (6.3) and storage (6.16).* `insane-vm --clone DIR NEWDIR [--duplicate] [--linked] [--from-snapshot TAG]`, with the source off: a
 reflink copy first (btrfs, XFS); with `--linked` on ext4 the source's disk moves to `<library>/.shared/` as a read-only base and both machines
 get an overlay (`qemu-img create -u -b`, the base never opened) under "link" in the source; otherwise a Clone is converted (flattened,
 without snapshots) and a Duplicate copied with its holes, snapshots and saved session. A linked clone's base is named in `machine.json`;
@@ -817,7 +817,7 @@ bases nobody uses. Shared extents weren't seen: VM 125 and the build VM are ext4
 
 *Profiles, resolution, recording.* Profiles per 5.6 (Productivity, Software Development, Testing, Design, Light desktop) scaled to the
 host; Testing is Isolated; Design says 3D comes later. The resolution menu lists the sizes that fit the display. **Record** feeds the guest's
-picture (not the screen) into lord-media's screen recorder (`media_framerec_*`), into `~/Pictures/Screenshots`; no sound yet. Seen on VM
+picture (not the screen) into insane-media's screen recorder (`media_framerec_*`), into `~/Pictures/Screenshots`; no sound yet. Seen on VM
 125: a 26 s recording, a 1022 × 598 H.264 MP4 of 25 KB, and the notification with Open and Show in Files.
 
 *Logs and the Shell (6.18, 6.19).* `VM_CONSOLE` hands out one stream to the serial console (output also to `serial.log`; the last 8 KB
@@ -826,11 +826,11 @@ serial console, not the agent's shell of 6.18, so it works with no agent and no 
 **Overview** (unified diagnostics from run.json, the machine log and the library: state, last start, QEMU's version, sandbox, limits, network
 notices, storage, an operation waiting, recoveries, problems; Copy Report), then the machine log, the serial console and the guest's journal.
 
-*The guest agent (6.17, 7).* Opt-in per machine (`agent`; off for Testing). virtio-serial at slot 7 with two ports, sockets lord-vm holds:
-`org.qemu.guest_agent.0` for **qemu-guest-agent** (the guest's package) and `org.lordos.agent` for our own channel. The doc leaves the
-clipboard path open (6.8: QEMU's D-Bus clipboard needs a vdagent in the guest), so the clipboard goes through our channel and **lordos-guest**
+*The guest agent (6.17, 7).* Opt-in per machine (`agent`; off for Testing). virtio-serial at slot 7 with two ports, sockets insane-vm holds:
+`org.qemu.guest_agent.0` for **qemu-guest-agent** (the guest's package) and `org.insaneos.agent` for our own channel. The doc leaves the
+clipboard path open (6.8: QEMU's D-Bus clipboard needs a vdagent in the guest), so the clipboard goes through our channel and **insaneos-guest**
 (`tools/guest`, a small static program packaged per architecture), which reads and writes the clipboard with the guest's `wl-paste`/`wl-copy`
-or `xclip`, as the desktop user, and never runs anything the host names; frames per 6.17 with a 1 MiB limit, parsed in lord-vm. Install
+or `xclip`, as the desktop user, and never runs anything the host names; frames per 6.17 with a 1 MiB limit, parsed in insane-vm. Install
 Clipboard Helper copies it in through `guest-file-write` and one fixed script (udev rule, user unit). The agent's light is on the card and
 first on the bar, with a popover of what works now. Seen on VM 125: *Debian GNU/Linux 13 (trixie), agent 10.0.13*, journal in Logs, guest
 kept awake, the helper installed in 60 ms (build VM) and from the popover, and the clipboard both ways (a guest with Xvfb and xclip: text
@@ -841,8 +841,8 @@ front). Not tried: a guest desktop session starting the helper by itself (the un
 
 | Gate | Script | What it does | Result |
 |---|---|---|---|
-| Disk integrity | `vm_integrity.sh` | SIGKILL of QEMU or lord-vm while the guest writes, in a snapshot, a revert, a suspend, three full clones, four linked clones (15 to 60 ms in) and two compactions; `qemu-img check` after each and after the next open | **46 passed**, 0 failed (leaked clusters only after some kills, repaired at the next start) |
-| Failure recovery | `vm_recovery.sh` | kills lord-vm in the middle of each operation with an intent file (suspend, resume, snapshot take, delete and revert, compaction, linked clone) and checks the next open finishes it or rolls it back, says so, and leaves clean disks | **22 passed**, 0 failed |
+| Disk integrity | `vm_integrity.sh` | SIGKILL of QEMU or insane-vm while the guest writes, in a snapshot, a revert, a suspend, three full clones, four linked clones (15 to 60 ms in) and two compactions; `qemu-img check` after each and after the next open | **46 passed**, 0 failed (leaked clusters only after some kills, repaired at the next start) |
+| Failure recovery | `vm_recovery.sh` | kills insane-vm in the middle of each operation with an intent file (suspend, resume, snapshot take, delete and revert, compaction, linked clone) and checks the next open finishes it or rolls it back, says so, and leaves clean disks | **22 passed**, 0 failed |
 | Leaks | `vm_leak.sh` | 100 start/stop cycles, then no process, zombie, socket, cgroup, lock or operation left, logs rotated, disks clean | **10 passed**; 100 cycles in 145 s, 1456 ms each on average, the slowest 5244 ms |
 
 The first runs failed on things the gates were written to find: `qemu-img check` right after a kill raced the dying QEMU for
@@ -861,25 +861,25 @@ user's desktop).
 app, measured on the build VM, and on the Pi 5 below.
 
 - *The network heals itself (6.5).* The card sits on a QEMU hub (`-netdev hubport,id=nic0`) and passt on another port of it (`pst0` on
-  `hp0`). A child forked before lord-vm's own Landlock (the *keeper*) starts a new passt on request and hands back its socket, its stderr
-  and a pidfd; lord-vm takes the old backend off (`netdev_del hp<n>`, `pst<n>`) and puts the new one on (`getfd`, `netdev_add` `socket`
+  `hp0`). A child forked before insane-vm's own Landlock (the *keeper*) starts a new passt on request and hands back its socket, its stderr
+  and a pidfd; insane-vm takes the old backend off (`netdev_del hp<n>`, `pst<n>`) and puts the new one on (`getfd`, `netdev_add` `socket`
   with the descriptor's name, `hubport` `hp<n+1>`). The card, its MAC and the guest's interface don't change. QEMU's `stream` backend
   can't take a named descriptor once QEMU runs (it connects from a thread: *Unable to parse FD number*), `socket` can, and passt speaks
   the same framing. Right away the first time, then after 1, 2, 4, 8 s; after 5 in a minute the machine keeps no network and says so.
   `VM_NOTICE network-lost` (*reconnecting*) and `network-back` (milliseconds without network) show as a short line in the window.
-  Measured: lord-vm attaches the new passt 4 to 7 ms after the old one ended; the guest's next HTTP fetch 0.22 s (build VM) and 239 ms
+  Measured: insane-vm attaches the new passt 4 to 7 ms after the old one ended; the guest's next HTTP fetch 0.22 s (build VM) and 239 ms
   (recovery gate) after the kill, then 1.1 s and 2.6 s after two more kills in the same minute. On VM 125, passt killed during a 12.7 MB
   download at 300 KB/s in the guest: the transfer didn't stop while the guest drained what it had received, its TCP connection was reset
   18.8 s later (passt's sockets went with it), curl resumed in 0.1 s and the file arrived intact (`gzip -t`). The recovery gate kills
-  passt three times while the guest fetches twice a second, then until lord-vm gives up, and checks the machine keeps running.
-- *Clipboard beyond text (6.8).* `AGK_CLIPX` on `org.lordos.agent`, when both hellos say `clipx`: text, `text/html` and `image/png` in
-  one frame (8 MB for a picture, 1 MB for text, 8192 px a side). lord-vm checks what either side sends: UTF-8 text; HTML sanitized
+  passt three times while the guest fetches twice a second, then until insane-vm gives up, and checks the machine keeps running.
+- *Clipboard beyond text (6.8).* `AGK_CLIPX` on `org.insaneos.agent`, when both hellos say `clipx`: text, `text/html` and `image/png` in
+  one frame (8 MB for a picture, 1 MB for text, 8192 px a side). insane-vm checks what either side sends: UTF-8 text; HTML sanitized
   (formatting tags and their text; `script`, `style`, `iframe`, `svg` and the like go with their content; no event attributes; `href`
   only `http`, `https`, `mailto` or `#`; `style` only for colors, weights, sizes and alignment, never `url`, `expression` or `import`);
-  a PNG header that is believable. lord-server re-encodes a guest's picture in lord-media's sandbox (decode and write a new PNG,
+  a PNG header that is believable. insane-server re-encodes a guest's picture in insane-media's sandbox (decode and write a new PNG,
   `MW_EDIT`) before it goes on the clipboard, and puts rich text on the clipboard with its text (`wl_clip_set_html`): offered as
-  `text/html` to Wayland and X11 apps, and read from apps that offer it, also from one that offers only HTML. `lordos-guest` 2 reads the
-  guest's `TARGETS` (`xclip`, or `wl-paste -l`) and writes one form back (the tools hold one type each). After a resume, lord-vm asks the
+  `text/html` to Wayland and X11 apps, and read from apps that offer it, also from one that offers only HTML. `insaneos-guest` 2 reads the
+  guest's `TARGETS` (`xclip`, or `wl-paste -l`) and writes one form back (the tools hold one type each). After a resume, insane-vm asks the
   helper to say hello again. Seen on VM 125 with an X guest (Xorg on its screen, `xclip`, `feh`): a picture copied in the guest was in
   Insane OS's clipboard history, re-encoded (573 bytes in, 784 out); a picture copied with `wl-copy` on the host arrived in the guest with
   the same MD5 and was shown by `feh`; rich text with a `<script>`, an `onerror`, a `javascript:` link and a `url()` background went both
@@ -887,14 +887,14 @@ app, measured on the build VM, and on the Pi 5 below.
   aren't in the beta: 6.21, below.
 - *Recordings with sound (6.9, 6.20).* Every machine has an HDA card (slot 9; a state saved without it still loads, checked: suspended by
   the previous build, resumed by this one). With a window, QEMU's audio goes out on the peer-to-peer D-Bus display (`-audiodev dbus`,
-  48 kHz, 16-bit stereo) and lord-vmdisplay registers an `AudioOutListener` (with its `Interfaces` property, while serving the console's
-  listener too: QEMU asks both for their properties before it answers). While Record runs, lord-vmdisplay writes the sound, mixed to one
-  channel, into a ring (aring.h) lord-media reads as the recording's AAC track, with silence for the time the guest plays nothing and
+  48 kHz, 16-bit stereo) and insane-vmdisplay registers an `AudioOutListener` (with its `Interfaces` property, while serving the console's
+  listener too: QEMU asks both for their properties before it answers). While Record runs, insane-vmdisplay writes the sound, mixed to one
+  channel, into a ring (aring.h) insane-media reads as the recording's AAC track, with silence for the time the guest plays nothing and
   nothing more than 200 ms ahead of the clock; the picture is fed at 30 frames a second. Measured on VM 125, the guest playing three
   1.5 s bursts of 1 kHz (`speaker-test`) and turning its screen red during each: video 23.634 s, audio 23.616 s (18 ms apart); tone
   starts and red frames 10 to 34 ms apart, ends 38 to 70 ms apart.
 - *A Clone's identity (6.3).* A Clone gets a new SMBIOS UUID (`-uuid`) and MAC as before, and `identity.json` with the name inside the
-  machine (`<name>-clone` by default, editable in the sheet; `--hostname`). At its first start lord-vm passes it as the credential
+  machine (`<name>-clone` by default, editable in the sheet; `--hostname`). At its first start insane-vm passes it as the credential
   `system.hostname`, and once qemu-guest-agent answers runs one fixed script as root: `/etc/machine-id` (and the D-Bus copy) removed and
   made again by `systemd-machine-id-setup`, which takes the new UUID; the hostname in `/etc/hostname` and `/etc/hosts`; new SSH host keys
   when there were some. Then `identity.json` goes and the window says so. **Keep identity (exact copy)**, off by default, skips it. Without
@@ -902,17 +902,17 @@ app, measured on the build VM, and on the Pi 5 below.
   credential can't replace an existing `/etc/hostname` or machine-id). Seen on VM 125: original `testbox`, machine-id
   `6393cf9c…8da0` = product_uuid `6393cf9c-…-8da0`, MAC `…:86:37:84`; its clone `test-box-clone`, `516e4286…1df8` = `516e4286-…-1df8`, MAC
   `…:aa:58:a9`, SSH key fingerprint changed; both running side by side. The script ran 0.9 s after the agent answered.
-- *Host shutdown, restart and logout (6.1).* lord-vm holds a logind *delay* inhibitor (`shutdown`) while it runs. PrepareForShutdown, a
-  SIGTERM (the session's units stopping) or lord-server going away without Keep Running starts a suspend to disk; if it isn't done in
+- *Host shutdown, restart and logout (6.1).* insane-vm holds a logind *delay* inhibitor (`shutdown`) while it runs. PrepareForShutdown, a
+  SIGTERM (the session's units stopping) or insane-server going away without Keep Running starts a suspend to disk; if it isn't done in
   30 s, or can't be, the machine is shut down (ACPI, 30 s), then turned off. QEMU is started with SIGTERM, SIGINT and SIGHUP blocked, so
-  stopping the machine's scope doesn't kill it first. The package has `/usr/lib/systemd/logind.conf.d/lordos-machines.conf`
+  stopping the machine's scope doesn't kill it first. The package has `/usr/lib/systemd/logind.conf.d/insaneos-machines.conf`
   (`InhibitDelayMaxSec=30`). Seen on VM 125: a machine with text on its screen, the host restarted (`systemctl reboot`):
   *the computer is shutting down: saving the machine to disk*, the SIGTERM 1.1 s later absorbed, 496 MB saved in 2.3 s; after the
-  restart the card said Suspended, and Start resumed it in 1.2 s with the text on its screen. The recovery gate sends SIGTERM to lord-vm
+  restart the card said Suspended, and Start resumed it in 1.2 s with the text on its screen. The recovery gate sends SIGTERM to insane-vm
   and QEMU at once and checks the machine is saved, then resumed.
-- *Idle sleep held off (6.14).* While a machine runs and *Keep this computer awake* is on, lord-vm holds a logind *idle block*
-  inhibitor, let go when the machine pauses or stops. The session's idle sleep asks `lord.vm.awake()`, says so in the session log, and
-  tries again every 30 s, sleeping once no machine runs; the login screen's sleep deadline (lord-sessiond) reads logind's
+- *Idle sleep held off (6.14).* While a machine runs and *Keep this computer awake* is on, insane-vm holds a logind *idle block*
+  inhibitor, let go when the machine pauses or stops. The session's idle sleep asks `insane.vm.awake()`, says so in the session log, and
+  tries again every 30 s, sleeping once no machine runs; the login screen's sleep deadline (insane-sessiond) reads logind's
   `BlockInhibited`. `systemd-inhibit --list` on VM 125 with two machines: two *Insane OS Machines* idle blocks and two shutdown delays;
   none once they stopped. Seen on VM 125 with *Sleep when inactive* at 10 minutes and a machine running: at the deadline the session
   log said *idle: sleep held off: 1 running machine(s) keep this computer awake* and the computer stayed up (12:53 to 13:04, uptime
@@ -933,7 +933,7 @@ recovery **32 passed** (passt killed: the guest's next fetch 110 ms after, then 
 start resumed it), leaks **10 passed**, 100 cycles in 147 s, 1476 ms each, the slowest 5441 ms.
 
 *On the Pi 5, the final arm64 build.* Built from `beta-deploy` (`pi-machines` with `machines-beta` merged, `next-0884` included: Remote
-Desk's `lord-rdesk`, the Fortinet single sign-on and the Sound balance strings checked in the installed package), installed with one
+Desk's `insane-rdesk`, the Fortinet single sign-on and the Sound balance strings checked in the installed package), installed with one
 reboot. Driven on the owner's desktop with a virtual pointer and keyboard, its windows left as they were: the library, Start of *Pi
 Debian* from its card, the Shell pane on the serial console, Logs (Overview and the machine log, with the logind lines), Suspend (367
 MB in 5.9 s) and Resume (state loaded in 217 ms), the Snapshots window and Take Snapshot (with memory, 385 MB, 9 s), Shut Down, the
@@ -945,17 +945,17 @@ reflink path weren't seen (no btrfs or XFS here); a power cut isn't simulated; t
 now; files by copy and paste or drag (6.21) aren't built; a sound card's playback on this computer's speakers isn't built (only
 recordings take the guest's sound).
 
-*Release gates on the Pi 5 with `machines-089`* (2026-11-06; 0.8.8.4 with the beta and the import merged; `lord-vm`
+*Release gates on the Pi 5 with `machines-089`* (2026-11-06; 0.8.8.4 with the beta and the import merged; `insane-vm`
 built for arm64 in the arm64 build root and run from a scratch folder, the installed packages untouched, Debian 13's
 nocloud arm64 image, KVM, QEMU 10.0.13, Insane OS kernel 6.18.57): integrity **45 passed**, 0 failed (296 s); recovery
 **41 passed**, 0 failed (301 s; the 32 of the beta plus the 9 of the import case; passt killed: the guest's next fetch
-542 ms after, then 1,068 ms and 2,609 ms after two more kills, lord-vm gave up after five in a minute and said so; the
+542 ms after, then 1,068 ms and 2,609 ms after two more kills, insane-vm gave up after five in a minute and said so; the
 host-stop case saved the machine and the next start resumed it); leaks **10 passed** (152 s), 100 cycles in 151 s,
 1,510 ms each on average, the slowest 5,345 ms. Nothing was left running or in `/var/tmp`. Two earlier tries were cut
-by reboots of the board for other work (lord-vm's shutdown delay held each one the 5 s logind allowed).
+by reboots of the board for other work (insane-vm's shutdown delay held each one the 5 s logind allowed).
 
 **Phase 3, import of other apps' machines.** Built on branch `machines-import` (2026-11-05), from `machines-beta`: *Migrate from another
-app* in the assistant, `lord-vm --import-plan` and `--import-machine`, `lord.vm.importPlan`, `importMachine` and `importInfo`, Configure's
+app* in the assistant, `insane-vm --import-plan` and `--import-machine`, `insane.vm.importPlan`, `importMachine` and `importInfo`, Configure's
 *Switch to Fast Devices*, `machine.json` schema 3, the tool jail for any number of files (`vm_jail_tool_n`), an import case in
 `vm_recovery.sh`, and `vm_import_identity.sh`. What it reads, keeps, refuses and why, how the SMBIOS UUID is derived, and what was
 measured: 6.22.
@@ -965,7 +965,7 @@ measured: 6.22.
 cards (a mark, the name and release, the architecture and the size), then *Or bring your own*.
 
 - *The catalog* is a data file, `assets/machines/systems.json`, bundled into the app and installed as
-  `/usr/lib/lordos/assets/machines/systems.json`, where the admin helper reads it as root. An entry names a release
+  `/usr/lib/insaneos/assets/machines/systems.json`, where the admin helper reads it as root. An entry names a release
   (4.1: no file is pinned): for each architecture the maker's folder (`dir`, `https://` only), its SHA-256 list, fixed
   (`sums`) or found in the folder's listing when its name changes per build (`sumsPattern`, Fedora's `CHECKSUM`), the
   image's name as an anchored extended regular expression (`file`), an optional mirror folder for the image itself
@@ -991,16 +991,16 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   itself (`<hash>  <name>`, `<hash> *<name>` or `SHA256 (<name>) = <hash>`); the image is kept only if the SHA-256 of
   the bytes written is that one, else deleted (`vm.hashMismatch`). Root never parses the HTML or the list beyond that
   line comparison. One download of an image at a time (a lock), sizes capped by `maxMb`, lists by 1 MB.
-- *Where it lands:* `/var/lib/lordos/machines/lists/<id>-<arch>.list` (the signed text of the maker's list, written only
-  after its signature verified) and `/var/lib/lordos/machines/images/<sha256>.iso` with `<sha256>.json` (what it is:
+- *Where it lands:* `/var/lib/insaneos/machines/lists/<id>-<arch>.list` (the signed text of the maker's list, written only
+  after its signature verified) and `/var/lib/insaneos/machines/images/<sha256>.iso` with `<sha256>.json` (what it is:
   catalog id, architecture, file name, size), root's and readable by all: one copy for every account, named by its
   content, so an image there is the one that was checked, and an account can't change it under another's machine.
   Removing one is `vm-image-remove`, an administrator's action, since other accounts' machines may use it.
-- *Network:* the bytes come through the Store's downloader (`pkg/http.c`, a child as `nobody`, TLS by `lord-tls` with the
-  system's certificate authorities), whose child enters `lordos-net-machines.scope` instead of the Store's
-  (`fetch_batch_in`): a component of its own, firewall app `lordos:machines`, "Machines" in the Monitor
+- *Network:* the bytes come through the Store's downloader (`pkg/http.c`, a child as `nobody`, TLS by `insane-tls` with the
+  system's certificate authorities), whose child enters `insaneos-net-machines.scope` instead of the Store's
+  (`fetch_batch_in`): a component of its own, firewall app `insaneos:machines`, "Machines" in the Monitor
   (FIREWALL.md, "Machines' downloads"). Since 0.8.8.6 the running machines' own traffic (their scope
-  `app-lordos-lordos-vm-<id>.scope`, where QEMU and passt run) is the same app: "Machines · <machine name>" in the
+  `app-insaneos-insaneos-vm-<id>.scope`, where QEMU and passt run) is the same app: "Machines · <machine name>" in the
   Monitor, and a rule for Machines applies to the guests too.
 - *The makers' signatures (0.8.9, closed 2026-11-06).* Before any hash in a list is trusted, the helper checks the
   list's OpenPGP signature with the maker's key pinned in the package. All four sign with RSA 4096 (v4 signatures):
@@ -1011,7 +1011,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   clear-signed path now shares that verifier with InRelease (a real Debian InRelease still verifies, and one changed
   byte fails). The keys, fetched once from each project's official source and stripped to the key and its
   self-signatures (`gpg --export-options export-minimal`), are `packaging/keys/machines/*.asc`, installed in
-  `/usr/lib/lordos/assets/machines/keys`; each fingerprint was compared, over https, with the one the project
+  `/usr/lib/insaneos/assets/machines/keys`; each fingerprint was compared, over https, with the one the project
   publishes, and `systems.json` says where for each (`keySource`, `fingerprintChecked`):
 
   | Card | Key | Fingerprint | Fetched from | Fingerprint compared with |
@@ -1046,18 +1046,18 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   frees …** with a confirmation that says which machines start with an empty drive and that other accounts' machines
   lose it too; disabled while one of those machines runs. The helper refuses too when any process holds the image
   open (`/proc/*/fd`: QEMU of any account's running machine, `vm.imageInUse`) or it is downloading, and deletes its
-  part and `.json` with it; the app then ejects it from this account's machines (`lord.vm.eject`), so they still start.
+  part and `.json` with it; the app then ejects it from this account's machines (`insane.vm.eject`), so they still start.
 - *Install without questions (0.8.9, the mock "Unattended").* Step 3 becomes *Set up* for a card whose catalog entry
   has an `unattended` block (Debian, Ubuntu, Fedora; not Kali yet): a switch, on by default as in the mock, *Account
   name* (the person's own login name), *Password*, and *Computer name*, *Time zone* and *Keyboard* filled from this
-  computer (`lord.vm.hostDefaults()`: `/etc/localtime`, `/etc/default/keyboard`, `LANG`). The Review says *Without
+  computer (`insane.vm.hostDefaults()`: `/etc/localtime`, `/etc/default/keyboard`, `LANG`). The Review says *Without
   questions: account … on …*. What happens:
   - *The answer file* is the system's own installer's: a Debian **preseed**, an Ubuntu **autoinstall** (cloud-init
-    NoCloud `user-data` and `meta-data`) or a Fedora **kickstart**, made by `lord-vm --create … --unattended SPEC`
-    (`vm/vmunattend.c`). lord-server writes SPEC (0600, in the runtime folder; lord-vm reads and deletes it at once)
+    NoCloud `user-data` and `meta-data`) or a Fedora **kickstart**, made by `insane-vm --create … --unattended SPEC`
+    (`vm/vmunattend.c`). insane-server writes SPEC (0600, in the runtime folder; insane-vm reads and deletes it at once)
     from the assistant's words, with the password replaced by its SHA-512 crypt hash (`crypt_r`, a random salt): the
     text the person typed never reaches a file, and the answer files carry `passwd/user-password-crypted`,
-    `identity.password` or `user --iscrypted`. Every field is checked again in lord-vm (account names, no quotes or
+    `identity.password` or `user --iscrypted`. Every field is checked again in insane-vm (account names, no quotes or
     control characters, a crypt hash, an RFC 1123 host name, the ISO paths and a command line without shell
     characters); the root account is locked, the person's account is the administrator (sudo, wheel).
   - *What is installed:* the system's own desktop (Debian's GNOME task, Ubuntu's `ubuntu-desktop-minimal`, Fedora
@@ -1076,7 +1076,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
     virtio disk in slot 0xa. The ISO stays in the CD drive, where each installer finds its packages. These files are
     `<machine>/disks/unattended/{vmlinuz,initrd,cmdline,seed.img}`, 0600.
   - *The end:* QEMU runs with `-action reboot=shutdown`, so the installer's last restart stops it (`SHUTDOWN`,
-    `guest-reset`); lord-vm then overwrites and deletes the seed disk, deletes the folder, takes the ISO out of
+    `guest-reset`); insane-vm then overwrites and deletes the seed disk, deletes the folder, takes the ISO out of
     `machine.json`, and stops with the new reason `installed` (`VR_INSTALLED`, added at the end of `vmproto.h`). The
     machine's window starts it again at once: the installed system. QEMU gives a `-kernel` boot index 0, so during
     that first start the system disk is 1 and the CD 2.
@@ -1092,13 +1092,13 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   `out/final/machines-e2e/u-*.png`, one guest at a time:
   - **Debian 13.7 desktop, nothing typed:** the card, *Set up* (`u-02`), Review (`u-03`), the download, stopped and
     continued (`08`, `09`), then the installer from language to GNOME with no question (`u-05`), the installer's
-    restart ended QEMU (*the install is done*), lord-vm emptied `disks/unattended` and took the ISO out, the window
+    restart ended QEMU (*the install is done*), insane-vm emptied `disks/unattended` and took the ISO out, the window
     started the machine again: GRUB from the disk and GDM with the account `tester` (`u-07`), and the login with
     the password typed in the assistant (`u-08`, GNOME's welcome). Install 28 minutes with GNOME (2 vCPU, 3 GB).
     Two fixes on the way: (1) the first run stopped once on *keyboard-configuration* (the installed system's package
     asks for the layout again when only `xkb-keymap` is preseeded): the preseed now also carries `layoutcode`,
     `variantcode`, `modelcode` and the layout's xkb description from this computer's rules
-    (`/usr/share/X11/xkb/rules/base.lst`: *English (US)*), and the next run had no question; (2) lord-vm's own
+    (`/usr/share/X11/xkb/rules/base.lst`: *English (US)*), and the next run had no question; (2) insane-vm's own
     Landlock lets it remove files in the machine's folder, not folders: the empty `unattended` folder stays (a
     start only looks for `unattended/cmdline`). Also seen: the first start's picture said *Display output is not
     active* while the installer ran, until the window was given a size (1280 × 800); a start after that showed it
@@ -1120,7 +1120,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
     waits on its error screen. The autoinstall now pins firefox out (`apt.preferences`, priority -1) when it adds the
     desktop (a browser can come from the Store afterwards); `vmunattend-test` 83. With that, the card's run (2 vCPU, 3 GB, 24 GB; the image
     already stored) installed with nothing typed in **23 minutes** (08:02:39 to 08:25:58), the installer's restart
-    ended the first start, lord-vm removed the seed disk and the ISO, and the machine started again into the installed
+    ended the first start, insane-vm removed the seed disk and the ISO, and the machine started again into the installed
     system: GDM with the account `tester` (`u-14`), and the password typed in the assistant logged in to the Ubuntu
     desktop (`u-15`). Shut Down through the guest agent: off in 5.5 s. Its disk took 8.9 GB.
   - **Not changed, noted:** the first start's picture can stay on *Display output is not active* while the installer
@@ -1166,7 +1166,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
   store; the same file asked for with a hash the list didn't have was refused before any byte (`vm.notListed`), and with
   a wrong hash added to the list it was downloaded and thrown away (`vm.hashMismatch`, nothing left, no `.part`); a name
   from the other architecture, a path (`../../etc/passwd`) and the image's name in place of the list's were refused
-  (`admin.invalidArgument`). `lord-vm --create --iso` with that root-owned image made an arm64 machine (emulated on that
+  (`admin.invalidArgument`). `insane-vm --create --iso` with that root-owned image made an arm64 machine (emulated on that
   host) whose serial console showed GRUB 12 s after the start.
 
   *Signatures, resume and removal, tested (2026-11-06).* `tests/vmcatalog_test.c` now **223** checks (the real catalog,
@@ -1184,7 +1184,7 @@ cards (a mark, the name and release, the architecture and the size), then *Or br
 
   *The cards driven on screen (2026-11-06).* A real headless Insane OS session built from this branch on VM 116
   (`tools/vm/e2e`, the Cloud bench's approach: a test-only theme bundle with a driver, input and pictures over the
-  session's `remote.sock`; lord-server started as root with `--user` so the session has its administration helper),
+  session's `remote.sock`; insane-server started as root with `--user` so the session has its administration helper),
   screenshots in `out/final/machines-e2e/`: the Debian 13 card read Debian's list and checked its signature in 2.3 s
   (*Debian 13.7, … from its maker's signed list*); Create and Start showed the progress (*34 MB of 756 MB*); Stop
   Download at 213 MB kept the part; after the session was restarted, Create again said *Continued from the 213 MB
@@ -1224,7 +1224,7 @@ Automatic install: Debian preseed, Ubuntu autoinstall, Fedora kickstart. The per
 it reaches the guest through a small seed disk (Debian: inside the installer's initrd) that is deleted after the first boot, and only
 its hash is ever stored (built in 0.8.9: 3.9, "Install without questions").
 
-Guest tools come from the guest's own repository: `qemu-guest-agent`, `spice-vdagent`, plus our `lordos-guest` package for what they lack.
+Guest tools come from the guest's own repository: `qemu-guest-agent`, `spice-vdagent`, plus our `insaneos-guest` package for what they lack.
 
 ### 4.2 Android
 
@@ -1303,7 +1303,7 @@ The library. A **summary header**, then a grid of machines, each with a **live p
 | Item | Source | Target refresh |
 |---|---|---|
 | Live picture | Same dmabuf, downscaled by the compositor | 1 fps visible, none hidden |
-| Power light | `lord-vm` state | On change |
+| Power light | `insane-vm` state | On change |
 | Agent light | Agent connection (6.17) | On change |
 | Disk light, blinks with I/O | QMP `query-blockstats` | 2 Hz, visible only |
 | Name, system | `machine.json`; agent's report when connected | On change |
@@ -1457,7 +1457,7 @@ qcow2 internal snapshots, with RAM optional. Timeline view with names, notes, th
 **What a snapshot holds.** Without care, "snapshot" means five things: disks, memory, NVRAM, TPM and settings. The model:
 
 - A snapshot covers **all writable disks together**, the NVRAM, the TPM state and a copy of `machine.json`. With memory, it resumes where it was; without, it's as after power loss.
-- Taken with QMP `snapshot-save`, listing every writable node in `devices`, as QEMU advises for a consistent snapshot. It's a job: the command returns before it's done, and `lord-vm` follows `JOB_STATUS_CHANGE` and fetches errors (**Reported**, QMP reference; since 6.0). The app shows progress, and the guest may stop during the save.
+- Taken with QMP `snapshot-save`, listing every writable node in `devices`, as QEMU advises for a consistent snapshot. It's a job: the command returns before it's done, and `insane-vm` follows `JOB_STATUS_CHANGE` and fetches errors (**Reported**, QMP reference; since 6.0). The app shows progress, and the guest may stop during the save.
 - **Raw NVRAM blocks internal snapshots:** QEMU refuses with "Device 'pflash1' is writable but does not support snapshots", which is why UEFI machines have long had trouble with them (**Reported**). Our NVRAM is therefore qcow2 from the start. This can't be added later without converting.
 - TPM state: swtpm's state goes with the machine's memory state in a live snapshot, as far as we can tell from how it migrates (**To test**). A disk-only snapshot copies the `tpm/` folder with the machine off.
 - Without a running guest's cooperation, disks are crash-consistent. With the agent, a filesystem freeze comes first, and the timeline says which it got.
@@ -1489,7 +1489,7 @@ The app picks by file system and says which one it used. Templates are read-only
 - **Reflink** on btrfs and XFS: instant copies.
 - `io_uring` where seccomp and kernel allow; `virtio-blk` by default for speed, `virtio-scsi` for discard and many disks. `iothread` per disk.
 - TRIM from guest is passed to shrink. "Reclaim space" compacts offline.
-- Export, with the machine shut down: a `.lordvm` bundle with or without snapshots, OVA, or a bare disk image, optionally encrypted. Import: 6.22.
+- Export, with the machine shut down: a `.insanevm` bundle with or without snapshots, OVA, or a bare disk image, optionally encrypted. Import: 6.22.
 
 ### 6.5 Network
 
@@ -1510,7 +1510,7 @@ downloading 500 MB from a server on the host (**Measured**, 2026-11-04, medians 
 
 **Decision (confirmed, open question 7 closed):** `passt` stays the default for Shared. It's 3.2× faster on amd64, about equal on the
 Pi, and it is the process the firewall can name as the machine. On the Pi its speed varies far more from run to run, which Phase 1
-looks at. QEMU 10.0 has no `-netdev passt`, so it's connected through `-netdev stream` on a socketpair (3.3). `vhost-net` for Bridged. `passt` runs as the machine's own process, in its scope, because it's the one opening the connections: the firewall has to see **that** as the machine, as it does for `desktop:lordos-rdesk`. Centinela sees each VM as an app (`desktop:lordos-vm-<id>`, **To test**): its traffic in Shared mode appears in the firewall, the map and Monitor as "Machine: name". A rule can block it. Bridged traffic bypasses this: Security says so.
+looks at. QEMU 10.0 has no `-netdev passt`, so it's connected through `-netdev stream` on a socketpair (3.3). `vhost-net` for Bridged. `passt` runs as the machine's own process, in its scope, because it's the one opening the connections: the firewall has to see **that** as the machine, as it does for `desktop:insaneos-rdesk`. Centinela sees each VM as an app (`desktop:insaneos-vm-<id>`, **To test**): its traffic in Shared mode appears in the firewall, the map and Monitor as "Machine: name". A rule can block it. Bridged traffic bypasses this: Security says so.
 
 Each forwarded port has a scope: **Only this computer** by default, or **Your network**, which is a firewall rule the person sees.
 
@@ -1522,11 +1522,11 @@ Each forwarded port has a scope: **Only this computer** by default, or **Your ne
 
 `virtiofsd` 1.13.2 (Debian, **Measured**), one per folder, in a sandbox of its own that can reach only that folder. **QEMU never gets the folder**: it holds a vhost-user socket, so a broken QEMU still can't open your files. The reverse needs saying: vhost-user requires guest memory to be shared, so a broken `virtiofsd` can read that guest's memory, and only that guest's. Machines with no shared folder don't run it, and don't pay the shared-memory backend. Linux guests mount it natively. virtio-win guests use the virtio-win virtiofs driver plus WinFsp (a separate dependency to review). Read-only by default, as in Remote Desk. Fallback: a small SMB share reachable only by that guest.
 
-**Built (0.8.8.7).** `machine.json` schema 4 `shares`: up to 4 `{ tag, path, writable }`. `lord-vm --set DIR --share
+**Built (0.8.8.7).** `machine.json` schema 4 `shares`: up to 4 `{ tag, path, writable }`. `insane-vm --set DIR --share
 ro|rw:TAG:FOLDER` (repeated; `--shares none` empties the list), Configure → Sharing (Add a Folder, Writable, Copy Command,
 Remove) and the bar's folder button (each folder opens in Files; the mount command is copied). Which folders
 (`vm_share_allowed`, checked on `--set` and again at every start): a real directory inside home but not home itself, or under
-`/media/<user>` or `/mnt`; nothing hidden; never the library or what holds it. At start `lord-vm` binds a listening socket in
+`/media/<user>` or `/mnt`; nothing hidden; never the library or what holds it. At start `insane-vm` binds a listening socket in
 the machine's run folder, opens the folder once without following a link at any step (`O_PATH` per component, its path read
 back from the descriptor must match), and starts `virtiofsd --fd=3 --shared-dir=/proc/self/fd/4 --sandbox=namespace
 --seccomp=kill --cache=auto --migration-mode=find-paths [--readonly]` on that socket and that descriptor, so a folder of
@@ -1549,17 +1549,17 @@ TAG /mnt/TAG`; mounting it by itself through the agent is still to do.
 - **Cost:** the shared memory backend counts in full once the guest touches it: peak QEMU RSS 803 MB against 444 MB without a share, and
   boot 42.4 s against 36.5 s (amd64, **nested**). This is why machines without a share don't get the backend.
 - **Boot order:** with the virtiofs device attached, the arm64 firmware went to its built-in shell instead of booting. **Decision:**
-  `lord-vm` always gives the system disk an explicit `bootindex`.
+  `insane-vm` always gives the system disk an explicit `bootindex`.
 
 ### 6.8 Clipboard and drag
 
-Clipboard through `org.qemu.Display1.Clipboard` (text, images), direction chosen per VM, **Off for Testing**. Protected windows (`wm.setProtected`) never leak. File drag: into the guest copies through the agent; out copies from the guest. Linux: our `lordos-guest`. virtio-win guests: SPICE agent, `spice-vdagent` with the dbus Clipboard path needs confirming: QEMU's clipboard needs `qemu-vdagent` chardev (**To test**).
+Clipboard through `org.qemu.Display1.Clipboard` (text, images), direction chosen per VM, **Off for Testing**. Protected windows (`wm.setProtected`) never leak. File drag: into the guest copies through the agent; out copies from the guest. Linux: our `insaneos-guest`. virtio-win guests: SPICE agent, `spice-vdagent` with the dbus Clipboard path needs confirming: QEMU's clipboard needs `qemu-vdagent` chardev (**To test**).
 
-If the D-Bus clipboard turns out unworkable on a guest, the clipboard moves to the agent's own channel, `org.lordos.agent`: text, images and files, with the direction chosen for that machine. It's a private data channel inside the machine, so it needs no network, no port and no VNC. WebRTC's data channel solves reaching another computer, and 6.23 uses it there; inside one computer a virtio-serial port does the same job with no encryption layer to carry, since nothing leaves the host.
+If the D-Bus clipboard turns out unworkable on a guest, the clipboard moves to the agent's own channel, `org.insaneos.agent`: text, images and files, with the direction chosen for that machine. It's a private data channel inside the machine, so it needs no network, no port and no VNC. WebRTC's data channel solves reaching another computer, and 6.23 uses it there; inside one computer a virtio-serial port does the same job with no encryption layer to carry, since nothing leaves the host.
 
 ### 6.9 Sound, camera, microphone
 
-Sound via `audio-dbus`, into PipeWire by `lord-server`. Microphone and camera: asked once per VM with the existing Permissions flow; camera through USB redirect or `uvc` emulation. Off by default.
+Sound via `audio-dbus`, into PipeWire by `insane-server`. Microphone and camera: asked once per VM with the existing Permissions flow; camera through USB redirect or `uvc` emulation. Off by default.
 
 ### 6.10 Graphics
 
@@ -1592,22 +1592,22 @@ Inside a guest: amd64: on by default for Software Development (`kvm_intel nested
 
 ### 6.14 Monitor and system ties
 
-Monitor shows each VM as one row with a drill-in. Cleaner never touches `~/Machines` without explicit choice, and offers Reclaim space. Backups skip running VM disks unless consistent. Files shows `.lordvm` as a bundle. Search finds VMs by name. Desktops treat each VM window normally. Power: laptops on battery get a notification with Pause All; a guest's load keeps the host awake while it runs, on purpose, and the battery warning says so.
+Monitor shows each VM as one row with a drill-in. Cleaner never touches `~/Machines` without explicit choice, and offers Reclaim space. Backups skip running VM disks unless consistent. Files shows `.insanevm` as a bundle. Search finds VMs by name. Desktops treat each VM window normally. Power: laptops on battery get a notification with Pause All; a guest's load keeps the host awake while it runs, on purpose, and the battery warning says so.
 
 ### 6.15 Command line and coding agents
 
-`lordvm list|start|stop|suspend|snapshot|clone|console <name>`, plus through the agent:
+`insanevm list|start|stop|suspend|snapshot|clone|console <name>`, plus through the agent:
 
 ```sh
-lordvm shell "Debian Dev"                 # an interactive shell
-lordvm exec "Debian Dev" -- uname -m      # exits with the command's status; stdin and stdout are piped
-lordvm logs "Debian Dev"                  # follows until Ctrl+C
-lordvm cp ./build "Debian Dev":~/          # with progress, in either direction
+insanevm shell "Debian Dev"                 # an interactive shell
+insanevm exec "Debian Dev" -- uname -m      # exits with the command's status; stdin and stdout are piped
+insanevm logs "Debian Dev"                  # follows until Ctrl+C
+insanevm cp ./build "Debian Dev":~/          # with progress, in either direction
 ```
 
 Same rules as the app: one small tool over the same socket, no shortcut around sandbox or admin actions, reachable only by the person's own user.
 
-A local **MCP server** (`lordvm mcp`), off until turned on in Settings, lets a coding agent **build a machine**: "a Debian machine with 40 GB, user neil". Tools: `list_machines`, `requirements`, `create_machine` (card or ISO, profile, unattended), `wait_until_ready` (with progress), `machine_status`, `start`, `stop`, `clone`, `screenshot`, `run_command`, `get_logs`. A password it creates goes to the keyring and never into its replies. It speaks only over stdin of a process the person started, and runs commands as the guest's normal user (6.18). It can't touch a VM marked **No automation**, which is the default for profiles with sensitive data, and every action it takes is written to the VM's log. Destructive tools (delete, revert) ask the person on screen.
+A local **MCP server** (`insanevm mcp`), off until turned on in Settings, lets a coding agent **build a machine**: "a Debian machine with 40 GB, user neil". Tools: `list_machines`, `requirements`, `create_machine` (card or ISO, profile, unattended), `wait_until_ready` (with progress), `machine_status`, `start`, `stop`, `clone`, `screenshot`, `run_command`, `get_logs`. A password it creates goes to the keyring and never into its replies. It speaks only over stdin of a process the person started, and runs commands as the guest's normal user (6.18). It can't touch a VM marked **No automation**, which is the default for profiles with sensitive data, and every action it takes is written to the VM's log. Destructive tools (delete, revert) ask the person on screen.
 
 ### 6.16 Storage window
 
@@ -1625,7 +1625,7 @@ How it knows: backing-file chains are read from qcow2 headers; shared extents fr
 
 ### 6.17 Agent state
 
-`lordos-guest` is one small static binary with no Python or other runtime, so it runs on a minimal guest. It's separate from `qemu-ga`, which keeps doing time, shutdown and freeze.
+`insaneos-guest` is one small static binary with no Python or other runtime, so it runs on a minimal guest. It's separate from `qemu-ga`, which keeps doing time, shutdown and freeze.
 
 The first icon on the bar shows its state: gray (not installed), amber (machine starting or agent reconnecting), green (connected), red (version too old or failing). Clicking it opens a popover:
 
@@ -1633,13 +1633,13 @@ The first icon on the bar shows its state: gray (not installed), amber (machine 
 - **A list of what works now, and what doesn't and why:** Shell, Logs, File copy, Clipboard, Resolution, Folders, Apps. Each line comes from the agent's reported capabilities, so it's the truth for that guest, not a table in the app.
 - **Not connected:** the next step, which depends on the state. If the guest is still booting, says wait. If the agent isn't installed: an **Install Agent** button attaches a small verified disc, shows the one command to run, and removes the disc once connected.
 
-**Protocol.** A virtio-serial port named `org.lordos.agent`, chosen over vsock because it works in every guest without extra drivers. Length-prefixed frames with a channel number, a `hello` carrying version and capabilities, skipped unknown kinds so that either side can grow, and a hard frame limit. `lord-vm`, not `lord-server`, parses it, inside the sandbox. A newer host updates an older agent itself only with the person's consent, from the signed disc.
+**Protocol.** A virtio-serial port named `org.insaneos.agent`, chosen over vsock because it works in every guest without extra drivers. Length-prefixed frames with a channel number, a `hello` carrying version and capabilities, skipped unknown kinds so that either side can grow, and a hard frame limit. `insane-vm`, not `insane-server`, parses it, inside the sandbox. A newer host updates an older agent itself only with the person's consent, from the signed disc.
 
 **Direction of trust.** The host runs things in the guest, never the reverse. A guest can't open a channel, start a host program, or read a host path. Only the person's own user can reach a VM's socket. A profile can turn the agent's shell off while leaving file copy on, and **Testing** starts with everything off.
 
 ### 6.18 Shell
 
-The Shell icon opens Insane OS's Terminal with a shell inside the guest: over the agent, not the network, so it works with no SSH and with Isolated network. **The signed-in user by default**, in a Linux shell or PowerShell. Root or an administrator shell only with an explicit switch, per machine, in Security. The same rule covers `lordvm exec` and the MCP server's `run_command`. The tab is titled with the machine's name and marked, so that a guest's shell can't be mistaken for a host's. Terminal size follows the tab.
+The Shell icon opens Insane OS's Terminal with a shell inside the guest: over the agent, not the network, so it works with no SSH and with Isolated network. **The signed-in user by default**, in a Linux shell or PowerShell. Root or an administrator shell only with an explicit switch, per machine, in Security. The same rule covers `insanevm exec` and the MCP server's `run_command`. The tab is titled with the machine's name and marked, so that a guest's shell can't be mistaken for a host's. Terminal size follows the tab.
 
 ### 6.19 Logs
 
@@ -1649,7 +1649,7 @@ A window following the guest's logs as they arrive: the systemd journal in Linux
 - Pause (entries keep buffering, with a count of new ones), Clear view, Copy selected, Save to a file.
 - Colored level plus a text label, monospaced, timestamps in local time, with the guest's time zone shown if it differs.
 - A bounded ring in memory, 50 000 lines, so a noisy guest can't grow the app.
-- Also **Machine log**: QEMU's and `lord-vm`'s own log, which works even if the guest never boots. A guest's log is untrusted text: escape sequences are stripped.
+- Also **Machine log**: QEMU's and `insane-vm`'s own log, which works even if the guest never boots. A guest's log is untrusted text: escape sequences are stripped.
 
 ### 6.20 Screenshot and recording
 
@@ -1669,16 +1669,16 @@ A panel along the bottom of the window shows file name, size, a bar, speed, time
 - Flow control by acknowledgement keeps memory flat for any file size. **Target:** 300 MB/s on Linux guests with NVMe on a PC, measured in Phase 3.
 - Resume after a dropped connection, by offset and hash. Optional end-to-end check, on by default for files over 1 GB.
 - Names are sanitized for the guest's rules. Symbolic links aren't followed; permissions and dates carry over where the file system can.
-- **Out of the guest:** in Apps mode, windows are ours, so dragging out works. From a Linux guest's own desktop, no agent can see the drag, so the agent adds **Send to Insane OS** to the guest's file manager, plus `lordvm cp`. The panel says this when someone tries. Virtio-win guests allow drag-out through the agent, **To test**.
+- **Out of the guest:** in Apps mode, windows are ours, so dragging out works. From a Linux guest's own desktop, no agent can see the drag, so the agent adds **Send to Insane OS** to the guest's file manager, plus `insanevm cp`. The panel says this when someone tries. Virtio-win guests allow drag-out through the agent, **To test**.
 - Scanning: files coming out of a guest get the same quarantine marking as downloads.
 
 ### 6.22 Import
 
-An importer has three steps: **detect** a file or folder, show a **plan** of what will happen, then **import** into a new `.lordvm`, leaving the original alone.
+An importer has three steps: **detect** a file or folder, show a **plan** of what will happen, then **import** into a new `.insanevm`, leaving the original alone.
 
 | Source | Reads | Result |
 |---|---|---|
-| Disk images: qcow2, raw | The image | New machine, settings from a profile (the assistant's *Import a machine*, `lord-vm --create --import`, 3.9) |
+| Disk images: qcow2, raw | The image | New machine, settings from a profile (the assistant's *Import a machine*, `insane-vm --create --import`, 3.9) |
 | Disk images: VMDK, VDI, VHDX, VHD | The image | New machine around it (*Migrate from another app*, below) |
 | OVA, OVF | Descriptor: CPU, memory, disks, networks; a VirtualBox machine section when the package has one | Machine with those settings |
 | Virtual machine bundles of other desktop tools | Their settings file and disks | Settings mapped where they mean the same; disks converted |
@@ -1686,16 +1686,16 @@ An importer has three steps: **detect** a file or folder, show a **plan** of wha
 
 The plan states what's lost. **Snapshots in foreign formats are flattened to the current state.** Saved sessions can't move between engines, so a machine must be shut down first. Encrypted foreign disks need decrypting first. A guest that lacks virtio drivers starts on emulated SATA and an ordinary NIC; the assistant then installs the drivers and switches. A machine of another architecture imports fine and is marked Emulated: moving an arm64 machine to a Pi works natively, moving an amd64 one doesn't. Conversions run in the sandbox, because disk images are hostile input.
 
-**Built** (Phase 3, branch `machines-import`, 2026-11-05): *Migrate from another app* in the assistant, `lord-vm --import-plan SRC` and
-`lord-vm --import-machine SRC DIR`. The goal is an exact clone, so that a licensed guest that is already activated sees as little
+**Built** (Phase 3, branch `machines-import`, 2026-11-05): *Migrate from another app* in the assistant, `insane-vm --import-plan SRC` and
+`insane-vm --import-machine SRC DIR`. The goal is an exact clone, so that a licensed guest that is already activated sees as little
 hardware change as possible. User-facing text says "other virtualization apps" and the file extensions; the tools are named only in
 this table of formats, in code identifiers and where a name is a file-format fact.
 
 | Format (the tool that writes it) | Settings | Disks, as read | Snapshots |
 |---|---|---|---|
 | `.vmx` and a `.vmwarevm` folder (VMware Workstation, Fusion) | `key = "value"` lines, `\|XX` escapes; 1 MB at most | VMDK: one sparse file (`KDMV`, its own descriptor), or a descriptor and its extents (`twoGbMaxExtentSparse`, `monolithicFlat`, split flat); stream-optimized | Delta VMDKs naming their parent (`parentFileNameHint`), followed from the current one, each parent named by us |
-| `.vbox` (VirtualBox) | XML | VDI, VMDK, VHD; the media registry's tree | Differencing VDIs: **merged by lord-vm** (QEMU's `vdi` driver can't read a differencing image) |
-| `.pvm` folder with `config.pvs` (Parallels Desktop) | XML | `.hdd` folders: `DiskDescriptor.xml` and `.hds` data files, read with QEMU's `parallels` driver | `.hds` layers of the snapshot tree: **merged by lord-vm** (the driver has no backing) |
+| `.vbox` (VirtualBox) | XML | VDI, VMDK, VHD; the media registry's tree | Differencing VDIs: **merged by insane-vm** (QEMU's `vdi` driver can't read a differencing image) |
+| `.pvm` folder with `config.pvs` (Parallels Desktop) | XML | `.hdd` folders: `DiskDescriptor.xml` and `.hds` data files, read with QEMU's `parallels` driver | `.hds` layers of the snapshot tree: **merged by insane-vm** (the driver has no backing) |
 | `.ova`, `.ovf` (OVF, any tool) | XML; an `.ova` is a ustar archive read in place | Stream-optimized VMDK inside the package, read through a `raw` node with `offset` and `size`: nothing is extracted | Flattened at export by the tool |
 | One disk: `.vmdk`, `.vdi`, `.vhdx`, `.vhd`, `.qcow2`, `.img`/`.raw` | none: a machine with this computer's defaults; BIOS or UEFI chosen on the sheet | Format from the first bytes | A VDI layer alone is refused (import its `.vbox`) |
 
@@ -1744,7 +1744,7 @@ cut to this computer. The other architecture is marked Emulated, with *Other arc
 **Guests without virtio drivers.** Every import starts on `devices: compat`: the system disk and data disks as `ide-hd` on SATA (q35's own
 AHCI, `ide.0`…`ide.4`; on arm64 an `ich9-ahci` in the system disk's slot), the CD/DVD as `ide-cd` on port 5 (so a drivers' disc can go in
 while it runs), a USB tablet (and keyboard on arm64) on `qemu-xhci`, and the card's own model (e1000e when the source's has no QEMU
-twin), MAC kept. Configure → Disks → *Switch to Fast Devices* (`lord-vm --set --devices virtio --nic-model virtio`, the machine off) moves
+twin), MAC kept. Configure → Disks → *Switch to Fast Devices* (`insane-vm --set --devices virtio --nic-model virtio`, the machine off) moves
 it to virtio once the guest has the drivers, and *Switch Back* undoes it. Installing those drivers into a guest that has none (a Windows
 guest: the virtio-win ISO, 4.3) is **Phase 3 work, not done**: today the person inserts the drivers' disc and installs them in the guest.
 
@@ -1762,13 +1762,13 @@ guest: the virtio-win ISO, 4.3) is **Phase 3 work, not done**: today the person 
   file or data file (`vm_qcow2_plain`); `qemu-img` sees each disk only as a `json:` spec that names every driver, `"backing": null` on the
   base and each parent named by us (never the header's name), extents opened by the `file` driver, and runs in the tool jail
   (`vm_jail_tool_n`: `no_new_privs`, our seccomp filter, no TCP, Landlock with read access to exactly the files we resolved and write access to
-  the new `disks/` only). VDI and `.hds` layers are merged by a jailed child of lord-vm (the same jail, no exec) that checks every block table
+  the new `disks/` only). VDI and `.hds` layers are merged by a jailed child of insane-vm (the same jail, no exec) that checks every block table
   entry against its file and writes one sparse raw file, then converted by the jailed `qemu-img`; the raw file is removed.
 - The result: each disk passes `vm_qcow2_plain`; files are 0600; the source's files are only read (`O_NOFOLLOW`).
 
 **Interrupted imports** (3.6): the machine is made in `<library>/.<name>.part-<pid>` with `operation.json` "import" (source and target), and
 renamed into place after `machine.json`; `operation.json` goes last. A killed import leaves its hidden folder, which the next import or
-clone in the library removes (the pid is gone), and says so; `qemu-img` and the merge die with lord-vm (`PR_SET_PDEATHSIG`). An intent left
+clone in the library removes (the pid is gone), and says so; `qemu-img` and the merge die with insane-vm (`PR_SET_PDEATHSIG`). An intent left
 after the rename is closed at the machine's next start (*the import had finished*). `vm_recovery.sh`'s import case kills it mid-conversion: no `qemu-img` left, nothing in the library, the next import removes the folder and says so, the new disks clean, the source unchanged, an intent left after the rename closed at the next start (9 checks; the gate 31 passed, 0 failed, VM116, 2026-11-05).
 
 **Tests.** `tests/vmimport_test.c` (run by `make test` under ASan and UBSan, 141 checks): one invented fixture per format in
@@ -1801,7 +1801,7 @@ the progress (`03-import-progress.png`), the done sheet (`04-import-done.png`), 
 running in its window (`06-imported-running.png`, `07-imported-running-console.png`: the guest's kernel brings up `e1000e` as `enp0s2` and
 `vmxnet3` as `enp0s24`, and its first-boot questions on the serial console). The guest's own reading of its UUID and MACs on screen wasn't
 finished: VM 125 was taken back by another test session mid-way (the same readings are measured above by `vm_import_identity.sh`), and
-Configure's *Switch to Fast Devices* wasn't driven on screen (`lord-vm --set --devices` is). Seen there and fixed: the sheet's name field
+Configure's *Switch to Fast Devices* wasn't driven on screen (`insane-vm --set --devices` is). Seen there and fixed: the sheet's name field
 didn't show, "1 snapshots", the tile's hint was cut.
 
 An independent review (path traversal, XXE, memory safety) found and the branch fixed: XML text split by many comments cost the square of
@@ -1829,7 +1829,7 @@ From another computer, a running machine is offered by Insane OS's own remote de
 
 ### 6.24 Reproducible machines
 
-`lordvm apply dev.toml` creates or updates a machine from a short text file kept beside a project: system, resources, forwarded ports, folders, packages to install through the agent. A team gets the same environment by running one command, `lordvm rebuild` starts over from it, and the file is reviewed like code. Shared folders and root access in such a file still ask the person on screen: a file from a repository is untrusted. Phase 4.
+`insanevm apply dev.toml` creates or updates a machine from a short text file kept beside a project: system, resources, forwarded ports, folders, packages to install through the agent. A team gets the same environment by running one command, `insanevm rebuild` starts over from it, and the file is reviewed like code. Shared folders and root access in such a file still ask the person on screen: a file from a repository is untrusted. Phase 4.
 
 ## 7. Guest tools
 
@@ -1838,12 +1838,12 @@ From another computer, a running machine is offered by Insane OS's own remote de
 | Need | Linux | virtio-win |
 |---|---|---|
 | Time, shutdown, IP, freeze | `qemu-guest-agent` | qemu-ga from virtio-win |
-| Resolution, clipboard | `spice-vdagent` or `lordos-guest` | SPICE agent |
+| Resolution, clipboard | `spice-vdagent` or `insaneos-guest` | SPICE agent |
 | Folders | Kernel | virtiofs driver + WinFsp |
-| Apps mode | `lordos-guest` | our agent, later |
+| Apps mode | `insaneos-guest` | our agent, later |
 | Install | From guest's repo | Mounted ISO, one run, silent |
 
-Tool updates: Linux through guest's own updates, plus `lordos-guest` in our repository; virtio-win at the pinned version, offered by the app, with a snapshot first.
+Tool updates: Linux through guest's own updates, plus `insaneos-guest` in our repository; virtio-win at the pinned version, offered by the app, with a snapshot first.
 
 ### 7.1.1 Driver or agent, and what we would write ourselves
 
@@ -1852,9 +1852,9 @@ Copy and paste, drag, resolution and shell are **agents**: ordinary programs in 
 | Piece | First version | Our own later | Cost of our own |
 |---|---|---|---|
 | Linux disk, network, display, 3D | In the guest's kernel and Mesa, nothing to install | No reason to | None |
-| Linux clipboard, resolution, files | `spice-vdagent`, then `lordos-guest` | Yes: `lordos-guest` | Ours, ordinary packaging |
+| Linux clipboard, resolution, files | `spice-vdagent`, then `insaneos-guest` | Yes: `insaneos-guest` | Ours, ordinary packaging |
 | virtio-win disk, network, memory, 2D display, folders | The public virtio-win set | No: they are mature and free | Would add risk and nothing else |
-| virtio-win clipboard, resolution | SPICE agent | Yes: `lordos-guest` for virtio-win, user mode | Code signing certificate, to avoid warnings |
+| virtio-win clipboard, resolution | SPICE agent | Yes: `insaneos-guest` for virtio-win, user mode | Code signing certificate, to avoid warnings |
 | virtio-win file copy, shell, logs, Apps mode | Our agent, phase by phase | Yes | Same |
 | virtio-win 3D | None | Only by following or joining the open effort below | Very high |
 
@@ -1864,7 +1864,7 @@ Copy and paste, drag, resolution and shell are **agents**: ordinary programs in 
 
 ### 7.2 Apps mode (seamless)
 
-**Linux guests:** apps speak Wayland to a small compositor proxy in the guest (`lordos-guest`), which forwards surfaces over vsock to the host, as `waypipe` does. On the host each surface is a native Insane OS Wayland client, so it's a real window with its own Dock entry. Zero-copy with virtio-gpu cross-domain is the target; a first version copies. Guest X11 apps need the guest's Xwayland. Host keeps no X11.
+**Linux guests:** apps speak Wayland to a small compositor proxy in the guest (`insaneos-guest`), which forwards surfaces over vsock to the host, as `waypipe` does. On the host each surface is a native Insane OS Wayland client, so it's a real window with its own Dock entry. Zero-copy with virtio-gpu cross-domain is the target; a first version copies. Guest X11 apps need the guest's Xwayland. Host keeps no X11.
 
 **virtio-win guests:** no free way exists. Our own agent would enumerate windows and stream regions. Phase 5 at the earliest, and only if real demand exists. Until then Apps mode is off there, and the setting says so.
 
@@ -1875,8 +1875,8 @@ Each forwarded window carries a thin marker in the frame with the machine's name
 - **Machines itself** makes no connection, except downloads the person starts: choosing a download card reads that one maker's checksum list, and Create downloads the image (3.9, "The Linux download cards"). The catalog is a file in the signed package, read with no connection. No telemetry.
 - **A guest's connectivity is a separate thing:** the default network mode is Shared, because a machine with no network surprises people, and the assistant shows that. Testing is Isolated.
 - Everything shared with a guest is **off** until the person turns it on, in every profile (5.6).
-- Guest → host channels: virtio devices, vsock to `lordos-guest`, clipboard, folder, usbredir. Each has an on/off and shows in **Guest can see**.
-- `lordos-guest` traffic is treated as untrusted: strict parser, size limits, fuzz target. A guest can't start a host process, read host files beyond its folder, or inject input into other windows.
+- Guest → host channels: virtio devices, vsock to `insaneos-guest`, clipboard, folder, usbredir. Each has an on/off and shows in **Guest can see**.
+- `insaneos-guest` traffic is treated as untrusted: strict parser, size limits, fuzz target. A guest can't start a host process, read host files beyond its folder, or inject input into other windows.
 - **An encrypted machine has to be encrypted whole,** or the disk is the only safe part. Disks use qcow2 LUKS, with the key in the keyring. Also covered: suspended state and snapshot memory, written inside the encrypted qcow2 and never as a separate file (**To test**); TPM state, through swtpm's own state encryption (**To test**, to confirm in Debian's build); NVRAM; recordings and screenshots stay out of the folder. Thumbnails, and persistent logs, are off, and logs stay in memory. Host swap can still hold guest memory, and only encrypted swap solves that, so Security says so. Bridged mode and encrypted disks each state what they mean in one line.
 - `vm-enable`, `vm-bridge-on/off`, `vm-usb-allow` are closed actions with fixed arguments, added to the list maintainers review.
 - Catalog of images and tools: signed with the Insane OS release key path, verified before use.
@@ -1885,7 +1885,7 @@ Each forwarded window carries a thin marker in the frame with the machine's name
 ## 9. Performance targets, and what Phase 0 measured
 
 Targets are goals. The Phase 0 columns are **Measured** on 2026-11-04 (section 13); the amd64 ones are **nested** and are not bare-metal
-figures. Phase 0 had no app and no `lord-vmdisplay` yet, so app memory and latency to the screen are still open.
+figures. Phase 0 had no app and no `insane-vmdisplay` yet, so app memory and latency to the screen are still open.
 
 | Measure | amd64 target | amd64, Phase 0 (**nested**) | Pi 5 target | Pi 5, Phase 0 |
 |---|---|---|---|---|
@@ -1915,7 +1915,7 @@ The Insane OS rule holds: this app must not slow the desktop. It's idle until op
 ## 10. Packaging
 
 - **Machines** is a Store item, free, not preinstalled: QEMU and firmware are large and most people won't use them. A Dock entry appears once installed. Open decision 3.
-- Package: `lordos-machines` (app, `lord-vm`), with `Depends: qemu-system-<native arch>`, `qemu-system-modules-opengl`, `qemu-utils`, `swtpm`, `virtiofsd`, UEFI firmware.
+- Package: `insaneos-machines` (app, `insane-vm`), with `Depends: qemu-system-<native arch>`, `qemu-system-modules-opengl`, `qemu-utils`, `swtpm`, `virtiofsd`, UEFI firmware.
 - Emulation: a second switch on the Store page, as Disk Formats has for APFS: `qemu-system-<other arch>`.
 - Sizes: `qemu-system-x86` is 68 MB (**Measured**). The whole set, with dependencies, is **To measure**: plan on 300 to 500 MB, not including any image. Each guest wants 20 to 64 GB.
 - **Insane OS 1.0 doesn't depend on Machines.** It's an optional Store package that follows the roadmap's place, after the final ISO. Its first public form is an **experimental, reduced release**, Phase 2's scope, and it ships only after passing isolation, disk integrity and failure recovery tests (section 12).
@@ -1929,16 +1929,16 @@ All text in en, es and pt from the first commit, a `machines.json` per language.
 ## 12. Tests
 
 - **Unit:** settings → QEMU arguments in a table test, for each architecture; `machine.json` schema and migration.
-- **Sandbox:** a test that a hostile `lord-vm` child can't open `~/.ssh`, another VM's folder, or `/dev/kvm` again.
-- **Fuzz:** `lordos-guest` parser and D-Bus listener in `lord-server`.
+- **Sandbox:** a test that a hostile `insane-vm` child can't open `~/.ssh`, another VM's folder, or `/dev/kvm` again.
+- **Fuzz:** `insaneos-guest` parser and D-Bus listener in `insane-server`.
 - **Boot matrix** in CI where KVM exists: Debian, Ubuntu, Fedora, Insane OS on amd64; same on arm64 (Pi).
 - **Real hardware matrix before each claim:** Pi 5 16 KiB kernel; Pi 5 4 KiB kernel; Pi 4; Intel; AMD; a nested amd64 VM (TCG path and refused KVM).
 - **Install test** of each pinned virtio-win version before the catalog moves.
 - **E2E** with `vm.sh`: the assistant to first boot, snapshot and revert, folder, USB, clipboard.
 - **Agent:** fuzz the protocol from the guest side; kill mid-transfer and check that nothing partial appears; a guest asking for a channel is refused.
 - **Storage figures:** clones on btrfs, XFS and ext4 compared to the real change in free space after deleting.
-- **Release gate, isolation:** a QEMU made to misbehave on purpose can't reach the home folder, other machines, or the compositor; malformed scanouts sent to `lord-vmdisplay` are refused.
-- **Release gate, disk integrity:** kill `lord-vm`, QEMU and the power during write, snapshot, revert, clone and compaction, then `qemu-img check` every disk.
+- **Release gate, isolation:** a QEMU made to misbehave on purpose can't reach the home folder, other machines, or the compositor; malformed scanouts sent to `insane-vmdisplay` are refused.
+- **Release gate, disk integrity:** kill `insane-vm`, QEMU and the power during write, snapshot, revert, clone and compaction, then `qemu-img check` every disk.
 - **Release gate, failure recovery:** each interrupted operation of 3.6 ends finished or rolled back, with no terminal.
 - **Leak test:** start and stop 100 times: no orphan processes, scopes, sockets, tap devices.
 
@@ -1946,35 +1946,35 @@ All text in en, es and pt from the first commit, a `machines.json` per language.
 and on the Pi 5 (3.9); on a physical amd64 PC they run with `tools/vm/bare-metal-gates.sh`, which checks the PC first
 (amd64, not a virtual machine, VT-x or AMD-V, `/dev/kvm` usable by the account, the engine, about 15 GB free on a real
 disk, 2 GB of memory), downloads Debian 13's nocloud image (SHA-512 checked) unless given one, runs the gates one after
-the other and writes one file with the PC's details (CPU, board, memory, disk, kernel, QEMU, passt, Insane OS, `lord-vm`'s
+the other and writes one file with the PC's details (CPU, board, memory, disk, kernel, QEMU, passt, Insane OS, `insane-vm`'s
 SHA-256) and every gate's log. Exit 0 when the three pass. On the PC, from the Insane OS live USB or an installed Insane OS,
 as the normal user (not root), with the network:
 
 ```
 # 1. Machines → What's Missing → Install, then Turn On (the kvm group: log out and in once if it says so)
 # 2. the source tree on the PC (a clone, or the branch copied on a USB stick)
-git clone https://github.com/lordbasex/Insane OS.git && cd Insane OS && git checkout machines-089
+git clone https://github.com/insaneos/Insane OS.git && cd Insane OS && git checkout machines-089
 # 3. on the live USB, /var/tmp is in memory: give a folder on an internal disk or a USB SSD with 15 GB free
 sh tools/vm/bare-metal-gates.sh --work /media/$USER/<disk>        # installed Insane OS: sh tools/vm/bare-metal-gates.sh
 # 4. attach the printed results file (machines-gates-<host>-<date>.txt) to the release notes or the issue
 ```
 
-`--lord-vm DIR` tests a `lord-vm` other than the installed one (`server/build` after `make`), `--image FILE` uses a
+`--insane-vm DIR` tests a `insane-vm` other than the installed one (`server/build` after `make`), `--image FILE` uses a
 Debian 13 nocloud amd64 qcow2 already there, `--cycles N` shortens the leak gate. The run takes about 15 minutes.
 `GATES_ALLOW_VM=1` lets the script run on a virtual machine, for trying the script itself; its file then says *NOT bare
 metal*.
 
 *The script tried on the amd64 build VM* (2026-11-06, `GATES_ALLOW_VM=1`, nested, Xeon Silver 4108, 8 threads, 3.8 GB,
-`machines-089`'s `lord-vm`, QEMU 10.0.13): integrity **46 passed** (435 s), recovery **41 passed** (271 s; passt killed:
+`machines-089`'s `insane-vm`, QEMU 10.0.13): integrity **46 passed** (435 s), recovery **41 passed** (271 s; passt killed:
 579 ms to the guest's next fetch, then 1,079 and 2,591 ms), leaks **10 passed** (147 s; 100 cycles in 146 s, 1,464 ms
 each, the slowest 5,242 ms); exit 0, nothing left in `/var/tmp`. These are nested numbers, not bare metal.
 
 *Bare metal (Xeon Silver 4108, Proxmox host, pve-qemu 11.1)* — **Measured** 2026-11-06, run with the maintainer's
 authorization on the physical Proxmox host (Supermicro X11DDW-NT, 16 threads, 31 GB, kernel 7.0.14-23-pve), host left
 unchanged: nothing installed, no user or group created, no VM touched (`qm list` identical before and after). The kit:
-`lord-vm-testpaths` from `machines-089` pointed at pve-qemu 11.1.3, `/usr/share/pve-edk2-firmware/OVMF_CODE_4M.fd` and
+`insane-vm-testpaths` from `machines-089` pointed at pve-qemu 11.1.3, `/usr/share/pve-edk2-firmware/OVMF_CODE_4M.fd` and
 `OVMF_VARS_4M.fd`, and passt extracted from Debian 13's package; the gates ran as `nobody` with the `kvm` group through
-`setpriv` (they refuse root), `nice 19` and idle I/O, one at a time, their files in `/var/tmp/lordos-gates`, removed at
+`setpriv` (they refuse root), `nice 19` and idle I/O, one at a time, their files in `/var/tmp/insaneos-gates`, removed at
 the end with the kit (0 processes left). Results: integrity **47 passed** (216 s), recovery **41 passed** (229 s; passt
 killed: 390 ms to the guest's next fetch, then 1,102 and 2,583 ms), leaks **10 passed** (152 s; 100 cycles in 151 s,
 1,512 ms each, the slowest 5,286 ms); exit 0. pve-qemu 11.1 has `ScanoutDMABUF2` (Debian's 10.0.13 doesn't), but these
@@ -1994,7 +1994,7 @@ runs unless it says otherwise. The scripts are in `tools/vm0/` (not committed ye
 | | Pi 5 | amd64 (**nested**) |
 |---|---|---|
 | Hardware | Raspberry Pi 5, 16 GB, 4 × Cortex-A76 | A VM with 8 vCPUs and 16 GB, on a desktop hypervisor running on a 10-core amd64 desktop CPU at 2.8 GHz base, AVX2, no SHA instructions |
-| Host kernel | Insane OS `6.18.57-lordos.3-rpi-2712`, 16K pages | Debian `6.12.115+deb13.1-cloud-amd64`, nested KVM on in the kernel module, no DRM drivers |
+| Host kernel | Insane OS `6.18.57-insaneos.3-rpi-2712`, 16K pages | Debian `6.12.115+deb13.1-cloud-amd64`, nested KVM on in the kernel module, no DRM drivers |
 | QEMU | Debian `1:10.0.13+ds-0+deb13u1` | same |
 | Other parts | virtiofsd 1.13.2, passt (Debian 13), AAVMF from `qemu-efi-aarch64` 2025.02, virglrenderer 1.1.0 | virtiofsd `1.13.2-1+deb13u1`, passt `0.0~git20250503.587980c-2+deb13u1`, same AAVMF, SeaBIOS |
 | Guests | Debian 13.7 nocloud images, arm64 and amd64, kernel `6.12.115+deb13.1` with 4K pages, checked against Debian's `SHA512SUMS` | same |
@@ -2179,14 +2179,14 @@ networking, virtiofs on both architectures, the desktop under a 3-vCPU load. Sti
 2. **The arm64 3D abort:** a fix in Debian's QEMU, a patch of ours (open decision 5), or 3D stays off on arm64 (6.10).
 3. **dmabuf import in the compositor:** the tiled V3D modifier, direct scanout or composite, fences with a timeout, and checking that the
    picture is right.
-4. **`lord-vmdisplay` for real:** done in 3.9 (`SIGBUS`-guarded copy, copy before forward with an acknowledged frame, a rate lord-server
+4. **`insane-vmdisplay` for real:** done in 3.9 (`SIGBUS`-guarded copy, copy before forward with an acknowledged frame, a rate insane-server
    sets). Still open: latency all the way to the screen, which needs the window (Phase 1, part 2).
 5. **The Pi desktop:** repeat the 4-vCPU drag on an untouched board, measure a memory-heavy guest at 3 vCPUs, and find the cause of the
    1000 ms stalls when all four cores are busy, which happens with no VM at all.
 6. **GICV trapping:** the cost of interrupt-heavy work on the 16K kernel, and whether a 4K kernel removes it (open decision 4).
 7. **Not touched in Phase 0:** our own seccomp filter on top of QEMU's, Landlock on QEMU, nested cgroup leaves, mouse, pause and
-   resume, and UEFI vars as qcow2 are done in 3.9 (the filter is a denylist; nested leaves only where lord-vm's cgroup is delegated, not
-   yet under lord-sessiond). Still open: the render node passed by descriptor, one slice for all machines (3.7), D-Bus audio, clipboard
+   resume, and UEFI vars as qcow2 are done in 3.9 (the filter is a denylist; nested leaves only where insane-vm's cgroup is delegated, not
+   yet under insane-sessiond). Still open: the render node passed by descriptor, one slice for all machines (3.7), D-Bus audio, clipboard
    and Chardev, the cursor of a graphical guest, disk speed of qcow2, suspend.
 8. **`passt` on the Pi:** why its speed ranges from 96 to 379 MB/s from run to run, and whether that matters for real traffic.
 9. **Boot time:** UEFI firmware is 12.3 s of the Pi's 18.6 s. Whether a lighter firmware setup or direct kernel boot for Linux guests is
@@ -2194,23 +2194,23 @@ networking, virtiofs on both architectures, the desktop under a 3-vCPU load. Sti
 
 ## 14. Phases
 
-**Decided on 2026-11-01, moved on 2026-11-02 and 2026-11-03:** the MVP starts in **0.8.9**, with `lord-vm` and direct QMP, on this stack:
+**Decided on 2026-11-01, moved on 2026-11-02 and 2026-11-03:** the MVP starts in **0.8.9**, with `insane-vm` and direct QMP, on this stack:
 
 ```
 Machines (React + Insane OS SDK)
-  → lord-vm in C (supervisor, QMP, limits, sandbox)
+  → insane-vm in C (supervisor, QMP, limits, sandbox)
     → QEMU + KVM
       → Debian 13 guest, amd64 and arm64
         → D-Bus display with validated buffers
-          → lord-server MediaView, a window in the compositor
+          → insane-server MediaView, a window in the compositor
 ```
 
 | Phase | Ships | Done when |
 |---|---|---|
 | **0, Technical proof** | No app. KVM, QEMU, QMP and D-Bus display: a Debian 13 guest with picture and input on amd64 and Pi 5, over direct QMP. Answers 2.2's open items: 4K guest on 16K host, Pi GICv2, GICV trapping by kernel, TCG numbers, `ui-dbus` on arm64, nested checks, `device=/dev/fdset`, formats and modifiers per GPU, desktop under load. No agent, no 3D, no USB, no snapshots | Done 2026-11-04: numbers in section 13, open items in 13.8 |
-| **1, Alpha** | `lord-vm`, `lord-vmdisplay`, sandbox, native window, qcow2 with qcow2 NVRAM, Shared network, schema and contracts (3.6), resource budget. Create, start, stop and recover without a terminal | Isolation test passes on Pi 5 and amd64 |
+| **1, Alpha** | `insane-vm`, `insane-vmdisplay`, sandbox, native window, qcow2 with qcow2 NVRAM, Shared network, schema and contracts (3.6), resource budget. Create, start, stop and recover without a terminal | Isolation test passes on Pi 5 and amd64 |
 | **2, Beta** | Control Center, assistant with Linux cards, requirements check, one-screen settings, profiles, snapshots, suspend, clones, Storage window, agent with state popover, Shell, Logs, unified diagnostics, screenshot and recording, resolution menu, Keep Running, clipboard. The experimental release | Full install and failure recovery are repeatable; release gates pass. Built on `machines-beta` (3.9, Phase 2, the beta) and merged with the import on `machines-089`: the gates pass on nested amd64 and, with `machines-089`, on the Pi 5 (45, 41 and 10 passed, 2026-11-06); the Linux download cards are built (3.9, "The Linux download cards"), with the makers' signatures checked, resumed downloads and removal in Storage, and driven on screen in a Insane OS session through a whole Debian install (2026-11-06); the gates pass on bare-metal amd64 too. Unattended install built (3.9, "Install without questions") and seen into Debian's base system install on VM 116; still open: its end to end (Debian to login, Ubuntu, Fedora) and the power-button check, waiting for the build VM |
-| **3, Advanced** | UEFI secure boot, TPM, virtio-win flow on both architectures with automatic setup, virgl, venus, shared folders, USB, file copy panel, Bridged, Host only, Picture in Picture, multi-head, export and import (import of other apps' machines built, 6.22), backups, Monitor, `lordvm` with shell, exec, logs and cp | A real compatibility and security matrix per architecture |
+| **3, Advanced** | UEFI secure boot, TPM, virtio-win flow on both architectures with automatic setup, virgl, venus, shared folders, USB, file copy panel, Bridged, Host only, Picture in Picture, multi-head, export and import (import of other apps' machines built, 6.22), backups, Monitor, `insanevm` with shell, exec, logs and cp | A real compatibility and security matrix per architecture |
 | **4, Integration** | Linux Apps mode, guest apps in the Dock, reproducible machines, local MCP server, Migrate, Android card if the image exists | Each on tested hardware |
 | **5, Later** | Our own agent for other guests' windows; a lightweight engine for Linux guests, like crosvm; GPU passthrough on PCs; reaching a machine from another computer | Decided then |
 
@@ -2223,7 +2223,7 @@ Machines (React + Insane OS SDK)
 | Upstream virtio-win regressions | Failing installs | Pinned versions |
 | GPU drivers and venus: fragile | Crashes on some GPUs | 3D opt-in, per-GPU allow list, 2D fallback |
 | Scope | It's the biggest app on the roadmap | Phases ship on their own; 1.0 doesn't wait for it |
-| A compromised QEMU attacks the compositor | Whole desktop falls | `lord-vmdisplay`, fence timeouts, tolerant import |
+| A compromised QEMU attacks the compositor | Whole desktop falls | `insane-vmdisplay`, fence timeouts, tolerant import |
 | A failure midway through a snapshot or clone | Machine damaged | Intent file, rename, release gates |
 | Desktop stutters while a machine works | Fails the Insane OS rule | Budget, measured target, fewer default cores on a Pi |
 | Dependence on 16 KiB behaviour | Pi path rests on To test items | Phase 0 measured a 4K guest working on the 16K kernel at native CPU speed; the GICV trapping cost is still open (13.8) |
@@ -2307,7 +2307,7 @@ The bar: **the most complete desktop virtualization app there is, and the best l
 | Guest apps in the launcher and Dock | 4 | Work | |
 | Open host files with a guest app | 4 | Work | |
 | Shell in a guest with no network | 2 | Work | Agent |
-| Run commands from the host | 3 | Work | `lordvm` |
+| Run commands from the host | 3 | Work | `insanevm` |
 | Live logs | 2 | Work | Agent |
 | MCP server, a coding agent builds a machine | 4 | Work | Off by default |
 
@@ -2348,7 +2348,7 @@ What people don't normally get from a desktop virtualization app, and the reason
 | **A budget across all machines** | 1 | Yes | The desktop keeps its share, whatever is running |
 | **Whole-machine encryption** | 3 | Partly | Memory, TPM, NVRAM and logs too, not only the disk |
 | **Unified diagnostics** | 2 | Yes | One place: machine log, guest log, agent, Monitor and firewall agree on what a machine did |
-| **Reproducible machines** | 4 | Work | A text file beside a project, `lordvm apply` |
+| **Reproducible machines** | 4 | Work | A text file beside a project, `insanevm apply` |
 | **Desktop integration** | 4 | Work | One compositor, permissions, Dock, Files and search, not an app beside the system |
 | **Claims only after testing** | always | Yes | The app and this document say what wasn't tested |
 
@@ -2383,4 +2383,4 @@ Decided on 2026-11-01: settings on one screen replaces tabs; Kali is in the cata
 8. Does the first public release include virtio-win guests, or Linux only?
 9. Does the catalog list only systems we can download freely, as recommended?
 10. Is Migrate worth its cost?
-11. Does `lordvm mcp` ship at all, given that it lets a coding agent run commands in guests? Off by default is the recommendation.
+11. Does `insanevm mcp` ship at all, given that it lets a coding agent run commands in guests? Off by default is the recommendation.
