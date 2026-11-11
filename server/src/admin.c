@@ -466,6 +466,7 @@ static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
     { "timezone", a_timezone, 0 },
     { "langpack", a_langpack, A_FORK },
     { "battery-limit", a_battery_limit, 0 },
+    { "dictate-transcribe", a_dictate_transcribe, A_FORK },
     { "optimize-now", a_optimize_now, A_FORK },
     PKG_ADMIN_ACTIONS
     NET_ADMIN_ACTIONS

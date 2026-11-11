@@ -92,7 +92,7 @@ int mail_available(void) {
         char *slash = strrchr(self, '/');
         if (!slash) return -1;
         *slash = 0;
-        if (strlen(self) + 12 > sizeof helper) return -1;
+        if (strlen(self) + sizeof "/insane-maild" > sizeof helper) return -1;
         snprintf(helper, sizeof helper, "%s/insane-maild", self);
     }
     struct stat st, me;

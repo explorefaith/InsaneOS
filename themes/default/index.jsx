@@ -242,11 +242,3 @@ function App() {
 }
 
 startShell(<App />);
-
-// TEMPORARY test driver for the headless effect captures (removed after the run): at fixed times
-// minimize the front window (the genie) and close one (the fade), so the dump frames show them.
-// Only in a headless session: its display's connector is the synthetic INSANE-1 (main.c).
-if (typeof insane !== 'undefined' && insane.screen?.displays?.some?.((d) => d.connector === 'INSANE-1')) {
-  setTimeout(() => { const w = windows.get().find((x) => !x.minimized && !x.closing); if (w) wm.minimize(w.id); }, 9000);
-  setTimeout(() => { const w = windows.get().find((x) => !x.minimized && !x.closing); if (w) wm.close(w.id); }, 13500);
-}
