@@ -2,7 +2,7 @@
 // (the SDK's AppHost); the theme only decides how the frame looks. Moving and resizing (invisible
 // borders on all 4 sides and 4 corners, <WindowShell>) is done by insane-server in C
 // (docs/WINDOWS.md); the JS drag below is only kept for a maximized window.
-import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings } from '@insaneos/sdk';
+import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings, DUR, easeOutCubic } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -26,31 +26,39 @@ function LightGlyph({ l }) {
   ));
 }
 
-// fx: the minimize effect ({ p: 0..1, x, y: where the Dock is}): the frame shrinks towards it.
+// fx: the minimize effect, on its way into the Dock icon.
+//   genie: { p, x, y, w, h } — the icon's rect: the engine warps the window's cached raster into
+//   it strip by strip (insane-server paint.c → canvas_genie_blit); no transform here.
+//   fade: reduce motion — a plain fade, no geometry moves.
+//   otherwise the fallback shrink: transform + opacity towards (x, y).
 function fxStyle(fx, geo) {
   if (!fx) return null;
+  if (fx.genie) return { genieP: fx.p, genieX: fx.x, genieY: fx.y, genieW: fx.w, genieH: fx.h, pointerEvents: 'none' };
+  if (fx.fade) return { opacity: 1 - fx.p, pointerEvents: 'none' };
   const e = fx.p * fx.p;                                // ease-in
   const dx = (fx.x - (geo.x + geo.w / 2)) * e, dy = (fx.y - (geo.y + geo.h / 2)) * e;
   return { transform: `translate(${dx}px, ${dy}px) scale(${1 - 0.9 * e})`, opacity: 1 - 0.7 * e, pointerEvents: 'none' };
 }
 
 // Traffic lights for apps that draw their own frame (GTK, Chromium, Firefox): macOS-style
-// circles floating at the window's top-left, above the app's own bar. They stay out of the
+// circles floating at one end of the window's top edge, above the app's own bar. They stay out of the
 // app's way (only the three small circles take clicks; everything else passes through),
-// dim on blurred windows and show the ×, − and + glyphs on hover, like the standard frame.
-function CsdLights({ win, t, focused }) {
+// dim on blurred windows and show the ×, − and + glyphs on hover (or always: Settings →
+// Appearance → Window Controls), like the standard frame.
+function CsdLights({ win, t, focused, lights }) {
   const [hover, setHover] = useState(false);
+  if (!lights.on) return null;
   return (
     <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onMouseDown={(e) => e.stopPropagation()}
-      style={{ position: 'absolute', left: 9, top: 8, flexDirection: 'row', gap: 6, zIndex: 50,
+      style={{ position: 'absolute', [lights.side]: 9, top: 8, flexDirection: 'row', gap: 6, zIndex: 50,
         borderRadius: 9, padding: 2, pointerEvents: 'auto',
         backgroundColor: focused || hover ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.12)' }}>
       {LIGHTS.map((l) => (
         <View key={l.key} onMouseDown={(e) => e.stopPropagation()} onClick={() => l.act(win.id)}
           style={{ width: LIGHT - 1, height: LIGHT - 1, borderRadius: (LIGHT - 1) / 2, direction: 'ltr',
             backgroundColor: focused || hover ? l.color : t.lightOff }}>
-          {hover && <LightGlyph l={l} />}
+          {(hover || lights.glyphs === 'always') && <LightGlyph l={l} />}
         </View>
       ))}
     </View>
@@ -86,15 +94,35 @@ export function Window({ win, app, t, focused, fx }) {
   // opening fade: the window rises a little and fades in, unless motion is reduced —
   // a JS ramp because the engine has no style transitions (the minimize effect works the same way)
   const [s] = useSettings();
+  // the traffic lights (Settings → Appearance → Window Controls): shown, at which end of the
+  // title bar, and whether the × − + symbols wait for a hover or are always there
+  const lights = { on: !s || s.windowLights !== false, side: s?.windowLightsSide === 'right' ? 'right' : 'left',
+    glyphs: s?.windowLightsGlyphs === 'always' ? 'always' : 'hover' };
   const [enter, setEnter] = useState(() => (s?.reduceMotion ? 1 : 0));
+  // the close animation: the window fades and shrinks a little (wm.close keeps it for DUR.close)
+  const [closeP, setCloseP] = useState(0);
+  useEffect(() => {
+    if (!win.closing) return undefined;
+    setCloseP(0);
+    const t0 = performance.now();
+    const iv = setInterval(() => setCloseP(Math.min(1, (performance.now() - t0) / DUR.close)), 16);
+    return () => clearInterval(iv);
+  }, [win.closing]);
   const glass = !win.fullscreen && !win.maximized && app.glass ? glassPrefs(s || {}) : { on: false, alpha: 1, blur: 0 };
   useEffect(() => {
     if (enter >= 1) return undefined;               // reduce motion starts at 1: no animation
-    const iv = setInterval(() => setEnter((v) => Math.min(1, v + 0.2)), 16);
+    const t0 = performance.now();                   // a time-based ramp: DUR.open from mount
+    const iv = setInterval(() => setEnter((v) => {
+      const k = Math.min(1, (performance.now() - t0) / DUR.open);
+      return k >= 1 ? 1 : Math.max(v, 0.2 + 0.8 * easeOutCubic(k));
+    }), 16);
     return () => clearInterval(iv);
   }, []);
   const enterStyle = enter < 1 && !fx
     ? { opacity: 0.2 + 0.8 * enter, transform: `translateY(${Math.round((1 - enter) * 12)}px) scale(${(0.984 + 0.016 * enter).toFixed(3)})` }
+    : null;
+  const closeStyle = win.closing
+    ? { opacity: 1 - 0.9 * closeP, transform: `scale(${(1 - 0.04 * closeP).toFixed(4)})`, pointerEvents: 'none' }
     : null;
 
   // A maximized window is dragged out of its place by JS, but only once the pointer really moved: a
@@ -124,9 +152,9 @@ export function Window({ win, app, t, focused, fx }) {
     const wmenu = win.windowMenu;
     return (
       <WindowShell win={win} leaving={!!fx} onMouseDown={() => wm.focus(win.id)}
-        style={[{ ...(app.ownFrame ? { borderRadius: win.maximized ? 0 : 12, overflow: 'hidden' } : null), boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.5)' : '0 10px 28px rgba(0,0,0,0.3)', ...fxs }, enterStyle]}>
+        style={[{ ...(app.ownFrame ? { borderRadius: win.maximized ? 0 : 12, overflow: 'hidden' } : null), boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.5)' : '0 10px 28px rgba(0,0,0,0.3)', ...fxs }, enterStyle, closeStyle]}>
         <AppHost id={win.id} focused={focused} />
-        {!win.fullscreen ? <CsdLights win={win} t={t} focused={focused} /> : null}
+        {!win.fullscreen ? <CsdLights win={win} t={t} focused={focused} lights={lights} /> : null}
         {wmenu && (
           <Menu x={wmenu.x} y={wmenu.y} onClose={() => wm.closeWindowMenu(win.id)} items={[
             { label: tr('shell.window.minimize'), onClick: () => wm.minimize(win.id) },
@@ -148,23 +176,25 @@ export function Window({ win, app, t, focused, fx }) {
       border: `1px solid ${app.transparent ? solidOver(t.windowBorder, t.titleBg) : t.windowBorder}`,
       boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.55)' : '0 10px 28px rgba(0,0,0,0.32)',
       ...fxs,
-    }, enterStyle]}>
+    }, enterStyle, closeStyle]}>
       <View onMouseDown={(e) => { if (!wm.beginMove(win.id)) drag.current = { x0: e.x, y0: e.y, rel: geo.w ? (e.x - geo.x) / geo.w : 0.5, moving: false }; }}
         onDoubleClick={() => wm.toggleMaximize(win.id)}
         style={{ height: TITLE_H, flexDirection: 'row', alignItems: 'center', paddingLeft: 14, backgroundColor: glass.on ? hexA(t.titleBg, glass.alpha * 0.55) : t.titleBg }}>
         <Text style={{ position: 'absolute', left: 0, right: 0, top: 0, lineHeight: TITLE_H, textAlign: 'center',
           fontSize: 13, fontWeight: 600, color: focused ? t.text : t.textDim, pointerEvents: 'none', whiteSpace: 'nowrap',
           paddingHorizontal: 80 }}>{windowTitle(win)}</Text>
-        <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-          style={{ flexDirection: 'row', gap: 8, paddingVertical: 6 }}>
-          {LIGHTS.map((l) => (
-            <View key={l.key} onMouseDown={(e) => e.stopPropagation()} onClick={() => l.act(win.id)}
-              style={{ width: LIGHT, height: LIGHT, borderRadius: LIGHT / 2, direction: 'ltr',
-                backgroundColor: focused || hover ? l.color : t.lightOff }}>
-              {hover && <LightGlyph l={l} />}
-            </View>
-          ))}
-        </View>
+        {lights.on && (
+          <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+            style={{ position: 'absolute', top: 0, bottom: 0, [lights.side]: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {LIGHTS.map((l) => (
+              <View key={l.key} onMouseDown={(e) => e.stopPropagation()} onClick={() => l.act(win.id)}
+                style={{ width: LIGHT, height: LIGHT, borderRadius: LIGHT / 2, direction: 'ltr',
+                  backgroundColor: focused || hover ? l.color : t.lightOff }}>
+                {(hover || lights.glyphs === 'always') && <LightGlyph l={l} />}
+              </View>
+            ))}
+          </View>
+        )}
       </View>
       <View style={{ height: 1, backgroundColor: app.transparent ? solidOver(t.separator, t.titleBg) : t.separator }} />
       <View style={{ flex: 1 }}><AppHost id={win.id} focused={focused} /></View>

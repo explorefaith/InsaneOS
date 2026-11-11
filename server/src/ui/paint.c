@@ -416,7 +416,15 @@ static int tf_paint(Canvas *c, Node *n, float opacity) {
     float f6[6] = { fwd.a, fwd.b, fwd.c, fwd.d, fwd.e, fwd.f }, i6[6] = { inv.a, inv.b, inv.c, inv.d, inv.e, inv.f };
     if (below_collect && !tf_nest) below_note_affine(f6, e->w, e->h);
     if (!tf_nest) wl_tf_open_holes(c);      /* GPU path: the raster has alpha 0 there, and blending opens nothing */
-    canvas_blit_affine(c, e->px, e->w, e->h, i6, f6, opacity * n->s.opacity);
+    /* the minimize genie: the icon's rect arrives in the parent's logical coordinates, the canvas
+     * works in physical ones (the same mapping as the v matrix applies to it) */
+    const StyleExt *gx = n->s.ext;
+    if (gx && gx->genie_p > 0.001f && gx->genie_p < 0.999f) {
+        float gix = k * (gx->genie_tx - paint_view.x) + paint_view.dx;
+        float giy = k * (gx->genie_ty - paint_view.y) + paint_view.dy;
+        canvas_genie_blit(c, e->px, e->w, e->h, f6, opacity * n->s.opacity, gx->genie_p,
+                          gix, giy, gx->genie_tw * k, gx->genie_th * k);
+    } else canvas_blit_affine(c, e->px, e->w, e->h, i6, f6, opacity * n->s.opacity);
     tf_composites++;
     return 1;
 }

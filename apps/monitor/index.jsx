@@ -327,7 +327,7 @@ function MemTop() {
               <Text style={{ fontSize: 12, fontWeight: 600, color: t.text, whiteSpace: 'nowrap' }}>{fmt.mem(g.rss)}</Text>
             </View>
             <View style={{ height: 6, borderRadius: 3, backgroundColor: t.control }}>
-              <View style={{ width: `${(g.rss / top[0].rss) * 100}%`, height: 6, borderRadius: 3, backgroundColor: C.mem }} />
+              <View style={{ width: `${(g.rss / Math.max(1, top[0].rss)) * 100}%`, height: 6, borderRadius: 3, backgroundColor: C.mem }} />
             </View>
           </View>
         </View>

@@ -1747,10 +1747,34 @@ static void present_memory(Server *s, Out *o, int index, int feed, Rect drawn) {
 static const char *dump_pattern;
 static int dump_every = 1, dump_max = 1, dump_n, dump_state;
 
+/* The PNG encode takes long for a frame loop (~250 ms at 1280x800), so it runs on a thread of
+ * its own: the compositor hands it copies of the frames (at most 8 queued; a busier moment drops
+ * the oldest) and keeps the pace of the session. */
+static pthread_t dump_thread;
+static pthread_mutex_t dump_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t dump_cond = PTHREAD_COND_INITIALIZER;
+typedef struct { uint8_t *rgb; int w, h; char path[4096]; } DumpJob;
+static DumpJob dump_q[8];
+static int dump_qn, dump_quit;
+
+static void *dump_run(void *arg) {
+    (void)arg;
+    for (;;) {
+        pthread_mutex_lock(&dump_lock);
+        while (!dump_qn && !dump_quit) pthread_cond_wait(&dump_cond, &dump_lock);
+        if (!dump_qn && dump_quit) { pthread_mutex_unlock(&dump_lock); return NULL; }
+        DumpJob j = dump_q[0];
+        memmove(dump_q, dump_q + 1, (size_t)(--dump_qn) * sizeof(DumpJob));
+        pthread_mutex_unlock(&dump_lock);
+        if (stbi_write_png(j.path, j.w, j.h, 4, j.rgb, j.w * 4)) dump_n++;   /* atomic enough: a count */
+        free(j.rgb);
+    }
+}
+
 /* Writes the composed frame of a headless session as a PNG, one in INSANE_DUMP_EVERY frames
  * (default all) up to INSANE_DUMP_MAX of them (default 1). The pattern may hold one %d for the
- * frame counter. Nothing when the variable is unset; a failed write is tried again on later
- * frames. The session runs the same with it on or off. */
+ * frame counter. Nothing when the variable is unset; a full queue drops the frame (the session
+ * runs the same with it on or off). */
 static void frame_dump_maybe(Server *s, const Out *o) {
     if (!dump_state) {
         dump_pattern = getenv("INSANE_DUMP_FRAME");
@@ -1760,6 +1784,8 @@ static void frame_dump_maybe(Server *s, const Out *o) {
         e = getenv("INSANE_DUMP_MAX");
         if (e) { int v = atoi(e); if (v > 0) dump_max = v; }
         dump_state = strchr(dump_pattern, '%') ? 2 : 1;
+        if (pthread_create(&dump_thread, NULL, dump_run, NULL) == 0) pthread_detach(dump_thread);
+        else dump_state = -1;
     }
     if (dump_state < 0 || dump_n >= dump_max || s->frames % dump_every) return;
     const uint32_t *px = wl_fullscreen_active() ? o->frame : o->scene.px;
@@ -1768,7 +1794,7 @@ static void frame_dump_maybe(Server *s, const Out *o) {
     if (dump_state == 2) snprintf(path, sizeof path, dump_pattern, (int)s->frames);
     else snprintf(path, sizeof path, "%s", dump_pattern);
     /* The canvas stores 0xAARRGGBB words (memory bytes B,G,R,A); PNG wants R,G,B,A: the channels
-     * are swapped into a copy of the frame. */
+     * are swapped into a copy of the frame for the thread. */
     size_t n = (size_t)o->scene.w * o->scene.h;
     uint8_t *rgb = malloc(n * 4);
     if (!rgb) return;
@@ -1779,9 +1805,19 @@ static void frame_dump_maybe(Server *s, const Out *o) {
         rgb[i * 4 + 2] = (uint8_t)p;
         rgb[i * 4 + 3] = (uint8_t)(p >> 24);
     }
-    int ok = stbi_write_png(path, o->scene.w, o->scene.h, 4, rgb, o->scene.w * 4);
-    free(rgb);
-    if (ok) dump_n++;
+    pthread_mutex_lock(&dump_lock);
+    if (dump_qn < 8) {
+        DumpJob *j = &dump_q[dump_qn++];
+        j->rgb = rgb;
+        j->w = o->scene.w;
+        j->h = o->scene.h;
+        snprintf(j->path, sizeof j->path, "%s", path);
+        pthread_cond_signal(&dump_cond);
+        pthread_mutex_unlock(&dump_lock);
+    } else {
+        pthread_mutex_unlock(&dump_lock);
+        free(rgb);                              /* the queue is full: this frame is not kept */
+    }
 }
 
 /* Does this display have something to show? (damage, a moved cursor on it, a fullscreen app) */

@@ -60,6 +60,11 @@ typedef struct StyleExt {
     Dim inset_inline[2];            /* insetInlineStart / insetInlineEnd (auto = unset) */
     float radius_corner[8];         /* top-left, top-right, bottom-right, bottom-left, top-start, top-end, bottom-start, bottom-end */
     Dim origin_x, origin_y;         /* transformOrigin, 50% 50% by default */
+    /* The minimize genie (paint.c tf_paint): p in (0,1) warps the node's raster into the rect
+     * (genie_tx, genie_ty, genie_tw, genie_th) — the Dock icon's place, in the parent's logical
+     * coordinates. The bottom strips lead, each pinches to the icon's width and bulges slightly
+     * mid-flight. 0 or ≥1: no genie, the ordinary composite. */
+    float genie_p, genie_tx, genie_ty, genie_tw, genie_th;
     /* not style: the edges resolved for the node's direction (layout.c node_resolve_edges), physical L, T, R, B */
     struct {
         float mg[4], pd[4], bw[4];
@@ -191,7 +196,8 @@ int    style_rotates(float deg);
 /* inline: layout asks it of every node */
 static inline int style_has_transform(const Style *s) {
     const struct StyleExt *x = s->ext;
-    return x && (x->scale_x != 1 || x->scale_y != 1 || (x->rotate != 0 && style_rotates(x->rotate)));
+    return x && (x->scale_x != 1 || x->scale_y != 1 || (x->rotate != 0 && style_rotates(x->rotate)) ||
+                 (x->genie_p > 0.001f && x->genie_p < 0.999f));
 }
 /* The node's own transform: translate(origin) · rotate · scale · translate(-origin), with the origin
  * resolved against its border box at (x, y, w, h). */

@@ -76,8 +76,9 @@ export { Markdown, markdownHeadings, parseMarkdown, parseInline, toggleTask } fr
 export {
   dock, useDockEntries, dockActivate, dockMenu, registerDockMenu, registerDockActions, dockQuickActions, launcherIdOf, dockIdOf, dockIdOfWindow,
   launchDockItem, dockPrefs, DOCK_DEFAULTS, dockHideSettings, DOCK_HIDE_MODES, useDockCovered, quitApp, DOCK_LAUNCHER, useTrash, trashState, refreshTrash, openTrash, emptyTrash, trashMenu,
-  dockDrag, dockPoof, beginDockDrag, registerDockTarget, dockDragJustEnded,
+  dockDrag, dockPoof, beginDockDrag, registerDockTarget, dockDragJustEnded, dockIconRects,
 } from './dock.js';
+export { DUR, easeOutCubic, easeInOut, easeIn, genieStrip } from './animation.js';
 export { sound, useSound, useSoundPeak, soundState, defaultSink, defaultSource, microphones } from './sound.js';
 export { SoundOutputList, useSoundOutputs } from './soundoutputs.js';   // choosing the output by the volume (issue #58)
 export { monitor, useMonitor, monitorSamples, monitorProcesses, monitorConnections, monitorDevices, monitorDetail, MONITOR_HISTORY, diskTempHistory, DISK_TEMP_HISTORY, firewall, firewallState } from './monitor.js';

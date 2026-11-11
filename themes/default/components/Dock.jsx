@@ -9,17 +9,22 @@
 // this file only draws it and says where things are. The Trash is always the last item.
 import {
   View, Text, screen, appName, useLocale, addListener, t as tr, useStore, settings, dockDrag, dockPoof, beginDockDrag,
-  registerDockTarget, dockDragJustEnded, refreshTrash, Layer, useDockCovered,
+  registerDockTarget, dockDragJustEnded, refreshTrash, Layer, useDockCovered, dockIconRects, DUR,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const GAP = 8, PAD = 9, MARGIN = 6;
 const SEP = GAP + 1;          // separator before the recent apps and before the Trash
-const SLIDE_MS = 180;
-const REORDER_MS = 150;       // neighbours sliding aside while dragging
-const POOF_MS = 320;
+const SLIDE_MS = DUR.dockSlide, REORDER_MS = DUR.reorder, POOF_MS = DUR.poof;
 const NEAR = 60;              // dragged farther than this from the Dock: the remove cue (after a hold)
 const TRASH = '__trash';
+
+// The launch hop: two damped jumps towards the screen's inside (the bounce of an app that was
+// just opened). p: 0..1 of the whole animation.
+function bounceUpPx(p) {
+  if (p <= 0 || p >= 1) return 0;
+  return Math.abs(Math.sin(p * Math.PI * 2)) * 24 * Math.exp(-2.6 * p);
+}
 
 // What the Dock takes up from its screen edge (for the work area).
 export const dockThickness = (size) => size + PAD * 2 + MARGIN + 4;
@@ -222,6 +227,24 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
   const drag = useStore(dockDrag);
   const poof = useStore(dockPoof);
   const reduce = !!useStore(settings).reduceMotion;
+  // Launch bounce: an app that was not running and just opened (from the Dock, the launcher,
+  // Spotlight — anything) makes its icon hop. The first pass only learns the state, so apps that
+  // were already running when the Dock mounted do not bounce (session restore).
+  const bounce = useRef({});                    // dock id → t0 of the hop
+  const wasRunning = useRef({});
+  const firstPass = useRef(true);
+  const [, bounceTick] = useState(0);
+  {
+    const now = Date.now();
+    let launched = null;
+    for (const it of list) {
+      const was = wasRunning.current[it.id];
+      wasRunning.current[it.id] = !!it.running;
+      if (it.running && !was) launched = it.id;
+    }
+    if (firstPass.current) { firstPass.current = false; launched = null; }
+    if (launched && !reduce) bounce.current[launched] = now;
+  }
   // The magnifier computes positions with the mouse coordinate: in Arabic/Hebrew the bottom row reverses
   // the list (the visual result users expect); on the side the order is top to bottom in all of them.
   const flip = !vert && dir === 'rtl';
@@ -354,6 +377,29 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
     return () => { a(); b(); };
   }, []);
 
+  // the launch hops animate on their own: a frame-driven tick while any of them runs
+  useEffect(() => {
+    if (!Object.keys(bounce.current).length) return undefined;
+    let raf = requestAnimationFrame(function step() {
+      const now = Date.now();
+      for (const k of Object.keys(bounce.current)) if (now - bounce.current[k] > DUR.bounce) delete bounce.current[k];
+      bounceTick((n) => n + 1);
+      if (Object.keys(bounce.current).length) raf = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(raf);
+  });
+  // the icons' places on screen (the minimize genie's targets): computed below, once `place` and
+  // the box exist, and published to sdk/dock.js from here
+  const rects = useRef(null);
+  useEffect(() => {
+    const m = rects.current?.map;
+    if (!m) return;
+    const prev = dockIconRects.get();
+    const same = Object.keys(m).length === Object.keys(prev).length &&
+      Object.keys(m).every((k) => prev[k] && Math.abs(prev[k].x - m[k].x) < 0.5 && Math.abs(prev[k].y - m[k].y) < 0.5 && prev[k].w === m[k].w);
+    if (!same) dockIconRects.set(m);
+  });
+
   if (hideMode !== 'never' && shown <= 0 && !dragging) return <Layer name="drag"><Poof poof={poof} size={BASE} reduce={reduce} /></Layer>;
 
   // The hit box covers only the bar until the pointer is on it; then it grows to fit the magnified
@@ -364,8 +410,24 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
       : { left: AR - (MARGIN - hide) - BW, top: start, width: BW, height: glen };
   const back = position === 'bottom' ? { left: 0, right: 0, bottom: 0, height: bar }
     : position === 'left' ? { left: 0, top: 0, bottom: 0, width: bar } : { right: 0, top: 0, bottom: 0, width: bar };
-  const place = (i) => (position === 'bottom' ? { left: iconC[i] - sizes[i] / 2, bottom: PAD }
-    : position === 'left' ? { top: iconC[i] - sizes[i] / 2, left: PAD } : { top: iconC[i] - sizes[i] / 2, right: PAD });
+  const bounceUp = (it) => { const t0 = bounce.current[it.id]; return t0 ? bounceUpPx((Date.now() - t0) / DUR.bounce) : 0; };
+  const place = (i) => (position === 'bottom' ? { left: iconC[i] - sizes[i] / 2, bottom: PAD + bounceUp(items[i]) }
+    : position === 'left' ? { top: iconC[i] - sizes[i] / 2, left: PAD + bounceUp(items[i]) }
+      : { top: iconC[i] - sizes[i] / 2, right: PAD + bounceUp(items[i]) });
+  // every icon's rect on screen, into the ref the store-sync effect reads
+  {
+    const next = {};
+    items.forEach((it, i) => {
+      const p = place(i);
+      next[it.id] = position === 'bottom'
+        ? { x: start + p.left, y: box.top + box.height - PAD - sizes[i], w: sizes[i], h: sizes[i] }
+        : position === 'left'
+          ? { x: box.left + PAD, y: start + p.top, w: sizes[i], h: sizes[i] }
+          : { x: box.left + box.width - PAD - sizes[i], y: start + p.top, w: sizes[i], h: sizes[i] };
+    });
+    const sig = Object.keys(next).map((k) => `${k}:${Math.round(next[k].x)},${Math.round(next[k].y)},${next[k].w}`).join('|');
+    if (!rects.current || rects.current.sig !== sig) rects.current = { sig, map: next };
+  }
   const dot = (s) => (position === 'bottom' ? { left: s / 2 - 2, bottom: -7 } : position === 'left' ? { top: s / 2 - 2, left: -7 } : { top: s / 2 - 2, right: -7 });
   const dotColor = t.mode === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)';
   // where to open the right-click menu and the tooltip: beside the icon, on the inner side

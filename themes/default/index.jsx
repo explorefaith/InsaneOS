@@ -9,6 +9,7 @@ import {
   findWallpaper, wallpaperSrc, MotionWallpaper, useShortcuts, AppSwitcher, openSwitcher, switcherKeys, switcherGrabs, switcherHold, cycleAppWindows, hideApp, hideOthers,
   toggleShowDesktop, appSettingsItem, flowDesktopKeys, flowGrabs, desktopSwipe, DesktopHud, OverviewBackdrop, OverviewChrome,
   openOverview, closeOverview, toggleOverview, LevelHud, useStore, notifyHistory, menuBarEveryDisplay, hasBar, displayAt, keepWindowsInWorkAreas,
+  dockIconRects, dockIdOfWindow, DUR, windows,
 } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState } from 'react';
@@ -49,9 +50,11 @@ configureWindows({ apps, workArea: areaFn, chrome: { w: 2, h: 43 } });
 // Pinned by default (the user changes the Dock by dragging and with «Keep in Dock»: settings.dockPinned).
 const DOCK_DEFAULT = [...DOCK_ORDER, ...apps.filter((a) => a.dock && !DOCK_ORDER.includes(a.id)).map((a) => a.id)];
 
-// Minimize effect: a window that was just minimized stays drawn for MIN_MS, shrinking towards the
-// Dock (transform: scale, painted from a cached raster by insane-server; layout doesn't change).
-const MIN_MS = 260;
+// Minimize effect: a window that was just minimized stays drawn for DUR.minimize while the genie
+// warps its cached raster into its Dock icon (insane-server's canvas_genie_blit; layout doesn't
+// change). The icon's place comes from the Dock itself (dockIconRects), with a bottom-centre
+// fallback; reduce motion fades instead (Window.jsx).
+const MIN_MS = DUR.minimize;
 function useMinimizing(windows) {
   const prev = useRef(new Map());
   const [anim, setAnim] = useState([]);                 // [{ id, t0 }]
@@ -116,7 +119,14 @@ function App() {
   const t = makeTheme(s);
   const { windows, mounted, focused } = useWindows();
   const minimizing = useMinimizing(windows);
-  const minFx = (id) => { const m = minimizing.find((x) => x.win.id === id); return m ? { p: m.p, x: main.x + main.w / 2, y: main.y + main.h - 36 } : undefined; };
+  const dockRects = useStore(dockIconRects);
+  const minFx = (id) => {
+    const m = minimizing.find((x) => x.win.id === id);
+    if (!m) return undefined;
+    if (s.reduceMotion) return { fade: true, p: m.p };
+    const r = dockRects[dockIdOfWindow(m.win)];
+    return { genie: true, p: m.p, ...(!r ? { x: main.x + main.w / 2 - 27, y: main.y + main.h - 63, w: 54, h: 54 } : r) };
+  };
   const [launchpad, setLaunchpad] = useState(false);
   const [control, setControl] = useState(null);         // { area, at }: the display whose menu bar opened it, and the item
   const [clockPanel, setClockPanel] = useState(null);   // the same, for the clock's notifications and calendar
@@ -232,3 +242,11 @@ function App() {
 }
 
 startShell(<App />);
+
+// TEMPORARY test driver for the headless effect captures (removed after the run): at fixed times
+// minimize the front window (the genie) and close one (the fade), so the dump frames show them.
+// Only in a headless session: its display's connector is the synthetic INSANE-1 (main.c).
+if (typeof insane !== 'undefined' && insane.screen?.displays?.some?.((d) => d.connector === 'INSANE-1')) {
+  setTimeout(() => { const w = windows.get().find((x) => !x.minimized && !x.closing); if (w) wm.minimize(w.id); }, 9000);
+  setTimeout(() => { const w = windows.get().find((x) => !x.minimized && !x.closing); if (w) wm.close(w.id); }, 13500);
+}

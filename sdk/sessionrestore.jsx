@@ -49,7 +49,7 @@ const allowed = () => typeof insane !== 'undefined' && typeof insane.appId !== '
 // ---- what is open now ----
 
 function entryOf(open) {
-  if (open.pip || !open.id) return null;
+  if (open.pip || open.closing || !open.id) return null;
   // moved or shrunk for the on-screen keyboard: what is saved is the window as the person left it
   const w = open.oskFrame ? { ...open, ...open.oskFrame } : open;
   const isLinux = String(w.id).startsWith('linux#');

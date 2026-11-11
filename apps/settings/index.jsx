@@ -231,6 +231,24 @@ function Appearance() {
           <Toggle small on={!!s.reduceMotion} onChange={(reduceMotion) => set({ reduceMotion })} />
         </SettingRow>
       </Section>
+      <Section title={tOptional('settings.lights.title') || 'Window Controls'}
+        footer={tOptional('settings.lights.hint') || 'The close, minimize and zoom lights at the corner of every window.'}>
+        <SettingRow label={tOptional('settings.lights.show') || 'Traffic lights'}>
+          <Toggle small on={s.windowLights !== false} onChange={(windowLights) => set({ windowLights })} />
+        </SettingRow>
+        {s.windowLights !== false && (
+          <>
+            <SettingRow label={tOptional('settings.lights.side') || 'Position'}>
+              <PopUp width={130} value={s.windowLightsSide || 'left'} onChange={(windowLightsSide) => set({ windowLightsSide })}
+                options={[['left', tOptional('settings.lights.left') || 'Left'], ['right', tOptional('settings.lights.right') || 'Right']]} />
+            </SettingRow>
+            <SettingRow label={tOptional('settings.lights.glyphs') || 'Show symbols'}>
+              <PopUp width={150} value={s.windowLightsGlyphs || 'hover'} onChange={(windowLightsGlyphs) => set({ windowLightsGlyphs })}
+                options={[['hover', tOptional('settings.lights.onHover') || 'On hover'], ['always', tOptional('settings.lights.always') || 'Always']]} />
+            </SettingRow>
+          </>
+        )}
+      </Section>
       <Section footer={tr('settings.scrollBarsHint')}>
         <SettingRow label={tr('settings.scrollBars')}>
           <PopUp width={170} value={s.scrollBars || 'auto'} onChange={(scrollBars) => set({ scrollBars })}
@@ -437,11 +455,11 @@ function Wallpapers() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const [s, set] = useSettings();
+  const [target, setTarget] = useState('desktop');
+  const [note, setNote] = useState('');
   const list = t.wallpapers || [];
   if (!list.length) return <Stack><Note>{tr('settings.noWallpapers')}</Note></Stack>;
-  const [target, setTarget] = useState('desktop');
   const login = target === 'login';
-  const [note, setNote] = useState('');
   const shown = login ? s.loginWallpaper : s.wallpaper;
   const cur = findWallpaper(list, login ? (list.some((w) => w.id === shown) || userWallpaperName(shown) ? shown : GREETER_WALLPAPER) : s.wallpaper);
   const stillPick = (id) => {

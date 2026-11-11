@@ -54,6 +54,16 @@ void canvas_corners_restore4(Canvas *c, Corners *k, float x, float y, float w, f
 /* Affine copy: destination pixel p takes the source at inv(p) (bilinear, transparent outside), a
  * premultiplied w × h image; inv maps canvas pixels to source pixels. */
 void canvas_blit_affine(Canvas *c, const uint32_t *src, int sw, int sh, const float inv[6], const float fwd[6], float opacity);
+/* The same, sampling only source rows ry0..ry1 (the minimize genie composites the window's
+ * raster one horizontal strip at a time). */
+void canvas_blit_affine_rows(Canvas *c, const uint32_t *src, int sw, int sh, const float inv[6], const float fwd[6], float opacity, float ry0, float ry1);
+/* The minimize genie: the raster's horizontal strips fly into the icon's rectangle (ix, iy, iw, ih,
+ * physical pixels). The bottom strips lead, each pinches to the icon's width and bulges slightly
+ * sideways mid-flight; p: 0 the window as it is, 1 everything inside the icon. fwd maps the raster
+ * to the canvas as in canvas_blit_affine; it must be axis-aligned (no rotation), which is how the
+ * window's minimize transform is driven. */
+void canvas_genie_blit(Canvas *c, const uint32_t *src, int sw, int sh, const float fwd[6], float opacity,
+                       float p, float ix, float iy, float iw, float ih);
 /* partial repaints: watch canvas c for an affine image cut by its left edge x (canvas.c) */
 void canvas_affine_watch(const Canvas *c, int x);
 int  canvas_affine_cut(void);           /* 1 if one was cut since canvas_affine_watch; stops watching */

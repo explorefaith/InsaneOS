@@ -9,6 +9,9 @@ const DEFAULTS = {
   glassBlur: 24,          // 0.8.8.8, Settings → Wallpaper → Glass: the panels' backdrop blur radius, 0-64 px
   glassTransparency: 0.3, // 0.8.8.8, same page: how much the wallpaper shows through, 0 (today's look) … 1 (almost clear)
   reduceMotion: false,   // decorative animations off (Settings → Appearance)
+  windowLights: true,        // 0.8.8.8, Settings → Appearance: the traffic lights on every window frame
+  windowLightsSide: 'left',  // which end of the title bar they sit at: 'left' | 'right'
+  windowLightsGlyphs: 'hover', // when the × − + symbols show: 'hover' (as on macOS) or 'always'
   browserTabsInTitlebar: true,   // 0.8.4, Settings → Appearance: Chromium and Firefox draw their own bar (browserframe.js)
   browserFramePending: false,    // that switch is still waiting for Chromium to quit
   scrollBars: 'auto',    // 0.8.3, Settings → Appearance → Show scroll bars: 'auto' | 'scrolling' | 'always'

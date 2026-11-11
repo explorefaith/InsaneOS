@@ -6,6 +6,7 @@
 // (wm.setTitle), confirmation on close (wm.setCloseGuard) and its own menus (wm.setMenus)
 // that the theme shows in its menu bar.
 import { screen, onScreenChange, addListener, mainDisplay, displayAt, displayFor } from '@insaneos/runtime';
+import { DUR } from './animation.js';
 import { createStore, useStore } from './store.js';
 import { appName, t } from './i18n.js';
 import { SNAP_ZONES, snapRect, zoneAt, snapNext } from './snap.js';
@@ -365,7 +366,8 @@ export const wm = {
       : [...ws, { id, app: appId, title: null, args, desktop, ...place(appId, ws.length, opts.frame) }]));
     return id;
   },
-  // Closes the window; if the app set a guard and it returns false, it doesn't close.
+  // Closes the window; if the app set a guard and it returns false, it doesn't close. The window
+  // fades and shrinks for DUR.close first (the theme plays it from w.closing), then it goes.
   close(id, force = false) {
     const guard = guards.get(id);
     if (!force && guard && guard() === false) {
@@ -377,7 +379,14 @@ export const wm = {
     }
     guards.delete(id);
     appMenus.set((m) => { if (!(id in m)) return m; const n = { ...m }; delete n[id]; return n; });
-    windows.set((ws) => ws.filter((w) => w.id !== id));
+    const w = windows.get().find((x) => x.id === id);
+    if (w && w.closing) { windows.set((ws) => ws.filter((x) => x.id !== id)); return true; }   // a second close: now
+    if (w && !w.minimized && !w.fullscreen && !w.pip) {
+      patch(id, { closing: true });
+      setTimeout(() => windows.set((ws) => ws.filter((x) => x.id !== id)), DUR.close + 40);
+      return true;
+    }
+    windows.set((ws) => ws.filter((x) => x.id !== id));
     return true;
   },
   // To the front of its desktop, and that desktop comes into view.
@@ -525,7 +534,8 @@ export function useWindows() {
   const overview = useStore(overviewShowing);
   // fullscreen and picture-in-picture windows are drawn by the SDK (FloatingWindows)
   const visible = visibleOn(list, desktop);
-  const top = visible.length ? visible[visible.length - 1].id : null;
+  // the front window: a closing one (its close animation is playing) never holds the focus
+  const top = visible.length ? [...visible].reverse().find((w) => !w.closing)?.id ?? null : null;
   return { windows: list, visible, mounted: mountedOn(list, desktop, overview), focused: top, desktop };
 }
 // The window is out of sight (minimized or on a hidden desktop): what animates in it should stop.

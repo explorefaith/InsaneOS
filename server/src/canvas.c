@@ -1069,6 +1069,10 @@ void canvas_affine_watch(const Canvas *c, int x) { affine_watch = c; affine_watc
 int canvas_affine_cut(void) { affine_watch = NULL; return affine_cut; }
 
 void canvas_blit_affine(Canvas *c, const uint32_t *src, int sw, int sh, const float inv[6], const float fwd[6], float opacity) {
+    canvas_blit_affine_rows(c, src, sw, sh, inv, fwd, opacity, 0, (float)sh);
+}
+
+void canvas_blit_affine_rows(Canvas *c, const uint32_t *src, int sw, int sh, const float inv[6], const float fwd[6], float opacity, float ry0, float ry1) {
     if (sw <= 0 || sh <= 0) return;
     /* destination bounds: the four transformed corners */
     float bx0 = 1e30f, by0 = 1e30f, bx1 = -1e30f, by1 = -1e30f;
@@ -1089,7 +1093,7 @@ void canvas_blit_affine(Canvas *c, const uint32_t *src, int sw, int sh, const fl
         float u = inv[0] * (x0 + 0.5f) + inv[2] * dy + inv[4] - 0.5f;
         float v = inv[1] * (x0 + 0.5f) + inv[3] * dy + inv[5] - 0.5f;
         for (int i = x0; i < x1; i++, u += inv[0], v += inv[1]) {
-            if (u <= -1 || v <= -1 || u >= sw || v >= sh) continue;
+            if (u <= -1 || v <= ry0 - 1 || u >= sw || v >= ry1 || v >= sh) continue;
             int ix = (int)floorf(u), iy = (int)floorf(v);
             uint32_t wx = (uint32_t)((u - ix) * 256), wy = (uint32_t)((v - iy) * 256);
             uint32_t a = texel(src, sw, sh, ix, iy), b = texel(src, sw, sh, ix + 1, iy);
@@ -1107,5 +1111,52 @@ void canvas_blit_affine(Canvas *c, const uint32_t *src, int sw, int sh, const fl
             uint32_t drb = (((dd & 0xff00ff) * ia) >> 8) & 0xff00ff, dg = (((dd & 0xff00) * ia) >> 8) & 0xff00;
             row[i] = over_alpha(sa, dd >> 24) << 24 | (srb + drb) | (sg + dg);
         }
+    }
+}
+
+/* The minimize genie: the raster's horizontal strips fly into the icon's rectangle. The bottom
+ * strips lead (each one's progress starts a little later the higher it is), every strip pinches
+ * to the icon's width, and mid-flight it bulges a few per cent wider, the sticky/liquid look of
+ * the classic effect. Strips are composites of the same raster: the whole effect is one cached
+ * raster sampled N times, with no re-render of the window. */
+void canvas_genie_blit(Canvas *c, const uint32_t *src, int sw, int sh, const float fwd[6], float opacity,
+                       float p, float ix, float iy, float iw, float ih) {
+    if (p <= 0 || opacity <= 0 || sw <= 0 || sh <= 0 || iw <= 1 || ih <= 1) return;
+    if (fwd[1] != 0 || fwd[2] != 0) {           /* rotated: fall back to the plain composite */
+        float det = fwd[0] * fwd[3] - fwd[1] * fwd[2];
+        if (det > -1e-8f && det < 1e-8f) return;
+        float i = 1 / det;
+        float i6[6] = { fwd[3] * i, -fwd[1] * i, -fwd[2] * i, fwd[0] * i,
+                        (fwd[2] * fwd[5] - fwd[3] * fwd[4]) * i, (fwd[1] * fwd[4] - fwd[0] * fwd[5]) * i };
+        canvas_blit_affine(c, src, sw, sh, i6, fwd, opacity);
+        return;
+    }
+    /* the window's place now: the raster's corners through fwd (scale + translation only) */
+    float wx0 = fwd[4], wy0 = fwd[5], wx1 = fwd[0] * sw + fwd[4], wy1 = fwd[3] * sh + fwd[5];
+    if (fwd[0] < 0) { float t = wx0; wx0 = wx1; wx1 = t; }
+    if (fwd[3] < 0) { float t = wy0; wy0 = wy1; wy1 = t; }
+    float ww = wx1 - wx0, wh = wy1 - wy0;
+    if (ww < 1 || wh < 1) return;
+    enum { N = 32 };                            /* horizontal strips */
+    float sh_f = (float)sh;
+    for (int k = 0; k < N; k++) {
+        float v0 = (float)k / N, v1 = (float)(k + 1) / N;
+        float sy0 = v0 * sh_f, sy1 = v1 * sh_f;
+        /* each strip's own progress: the lower it is, the sooner it starts */
+        float start = 0.42f * (1 - v0);
+        float q = (p - start) / (1 - start);
+        if (q <= 0) q = 0;
+        if (q >= 1) q = 1;
+        q = q * q * (3 - 2 * q);                /* ease-in-out */
+        /* mid-flight bulge: a few per cent wider, widest at half way */
+        float bulge = q > 0 && q < 1 ? ww * 0.05f * (1 - q * (1 - q)) * 4 / 3 * 0.75f : 0;
+        float dx = wx0 + (ix - wx0) * q - bulge * 0.5f;
+        float dw = ww + (iw - ww) * q + bulge;
+        float dy = (wy0 + v0 * wh) + ((iy + v0 * ih) - (wy0 + v0 * wh)) * q;
+        float dh = (wh + (ih - wh) * q) / N;
+        float a = dw / sw, d = dh / sh_f;
+        float fk[6] = { a, 0, 0, d, dx, dy - sy0 * d };
+        float ik[6] = { 1 / a, 0, 0, 1 / d, -fk[4] / a, -fk[5] / d };
+        canvas_blit_affine_rows(c, src, sw, sh, ik, fk, opacity, sy0, sy1);
     }
 }

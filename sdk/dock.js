@@ -398,6 +398,9 @@ export function trashMenu({ onEmpty }) {
 const DRAG_START = 6, REMOVE_HOLD = 350;
 export const dockDrag = createStore(null);   // { id, Icon, x, y, source, over, out, removing, removable }
 export const dockPoof = createStore(null);   // { x, y, Icon, t0 }: the removal animation, drawn by the theme
+// Where each Dock icon is on screen: typed id → { x, y, w, h } (global logical coordinates). The
+// theme's Dock publishes them every time its layout settles; the minimize genie reads the target.
+export const dockIconRects = createStore({});
 let press = null, holdTimer = 0, endedAt = 0;
 const targets = new Set();
 export function registerDockTarget(tg) { targets.add(tg); return () => { targets.delete(tg); }; }

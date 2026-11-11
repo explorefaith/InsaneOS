@@ -132,6 +132,12 @@ static const StyleProp props[] = {
     PX("rotate", ST_FLOAT, rotate),
     PX("transformOriginX", ST_DIM, origin_x),
     PX("transformOriginY", ST_DIM, origin_y),
+    /* the minimize genie (the theme's Window sets them while its minimize effect runs) */
+    PX("genieP", ST_FLOAT, genie_p),
+    PX("genieX", ST_FLOAT, genie_tx),
+    PX("genieY", ST_FLOAT, genie_ty),
+    PX("genieW", ST_FLOAT, genie_tw),
+    PX("genieH", ST_FLOAT, genie_th),
 };
 
 static const StyleProp *find(const char *key) {
