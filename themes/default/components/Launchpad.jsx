@@ -9,6 +9,17 @@ import { Menu } from './Menu.jsx';
 
 const COLS = 6, CELL = 130, ICON = 72;
 
+// The launcher shows the system's daily-use apps only (Phase 3 cleanup). Everything else stays
+// installed and runnable — from Files, the Store or a terminal — it just doesn't fill the grid.
+const LAUNCHER_KEEP = new Set([
+  'settings', 'terminal', 'mail', 'recorder', 'files', 'photos', 'dotdeb',
+  'desktop:com.google.Chrome.desktop', 'desktop:google-chrome.desktop',
+  'desktop:chrome-agimnkijcaahngcdmfeangaknmldooml-Default.desktop',   // YouTube (Chrome app)
+  'desktop:chrome-akpamiohjfcnimfljfndmaldlcfphjmp-Default.desktop',   // Instagram (Chrome app)
+  'desktop:com.anthropic.Claude.desktop',
+  'desktop:zcode.desktop',
+]);
+
 // area: the display it covers (the main one; global coordinates)
 export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: screen.width, h: screen.height } }) {
   useEffect(refreshApps, []);
@@ -18,8 +29,17 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   const [cat, setCat] = useState(null);                      // null: all
   const q = query.trim().toLowerCase();
   const match = (a) => [appName(a), a.name, a.id, a.genericName, a.keywords, a.comment].some((v) => v && String(v).toLowerCase().includes(q));
-  const present = APP_CATEGORIES.filter((c) => apps.some((a) => appCategory(a) === c));
-  const list = apps.filter((a) => (!q || match(a)) && (q || !cat || appCategory(a) === cat));
+  const kept = [];
+  const seenName = new Set();
+  for (const a of apps) {
+    if (!LAUNCHER_KEEP.has(a.id)) continue;
+    const key = appName(a).toLowerCase();                     // Chrome ships two .desktop files: one entry
+    if (seenName.has(key)) continue;
+    seenName.add(key);
+    kept.push(a);
+  }
+  const present = APP_CATEGORIES.filter((c) => kept.some((a) => appCategory(a) === c));
+  const list = kept.filter((a) => (!q || match(a)) && (q || !cat || appCategory(a) === cat));
   const rows = [];
   for (let i = 0; i < list.length; i += COLS) rows.push(list.slice(i, i + COLS));
   const open = (id) => { onClose(); onOpen(id); };

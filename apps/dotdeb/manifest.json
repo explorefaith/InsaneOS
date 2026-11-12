@@ -1,0 +1,11 @@
+{
+  "id": "dotdeb",
+  "version": "1.0.0",
+  "name": "DotDeb",
+  "description": "The official Insane OS app store — discover, install and enjoy Debian software",
+  "size": [820, 560],
+  "minSize": [640, 440],
+  "dock": true,
+  "permissions": [],
+  "category": "System"
+}

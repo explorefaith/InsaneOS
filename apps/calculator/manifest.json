@@ -1,8 +1,8 @@
 {
   "id": "calculator",
-  "version": "0.8.5",
+  "version": "0.9.0",
   "name": "Calculator",
-  "description": "Calculator with keyboard input",
+  "description": "Calculator with keyboard, percentage and history",
   "size": [
     300,
     430

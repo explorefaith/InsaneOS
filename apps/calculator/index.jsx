@@ -1,5 +1,7 @@
-// Calculator — sample native app: buttons and keyboard (no eval: our own parser).
-import { View, Text, useTheme, useKeyboard, t as tr, formatNumber } from '@insaneos/sdk';
+// Calculator — buttons and keyboard (no eval: our own parser). Percentage turns the number just
+// typed into its fraction (50 % → 0.5), and the calculation history keeps the last entries in the
+// user's settings, so they survive a restart.
+import { View, Text, useTheme, useKeyboard, useSettings, t as tr, formatNumber } from '@insaneos/sdk';
 import { useState } from 'react';
 
 export function Icon({ size: s }) {
@@ -45,31 +47,46 @@ function evaluate(src) {
   return Math.round(v * 1e10) / 1e10;
 }
 
+// The last row is the wide '=' (the primary action), accent-colored.
 const KEYS = [
-  ['C', '(', ')', '÷'],
-  ['7', '8', '9', '×'],
-  ['4', '5', '6', '-'],
-  ['1', '2', '3', '+'],
-  ['0', '.', '⌫', '='],
+  ['C', '%', '(', ')'],
+  ['7', '8', '9', '÷'],
+  ['4', '5', '6', '×'],
+  ['1', '2', '3', '-'],
+  ['0', '.', '⌫', '+'],
+  ['='],
 ];
 
 export default function Calculator() {
   const t = useTheme();
+  const [s, set] = useSettings();
   const [expr, setExpr] = useState('');
   const [result, setResult] = useState('0');
+  const history = s.calculatorHistory || [];
+
+  const remember = (e, v) => {
+    const list = [{ e, v }, ...(s.calculatorHistory || []).filter((h) => h.e !== e)].slice(0, 20);
+    set({ calculatorHistory: list });
+  };
 
   const press = (k) => {
     if (k === 'C') { setExpr(''); setResult('0'); }
+    else if (k === '%') setExpr((e) => e.replace(/(\d*\.?\d+)$/, (m) => String(Math.round(Number(m) / 100 * 1e10) / 1e10)));
     else if (k === '⌫') setExpr((e) => e.slice(0, -1));
     else if (k === '=') {
-      try { const v = String(evaluate(expr)); setResult(v); setExpr(v); } catch (e) { setResult(tr('calculator.error')); }
+      try {
+        const v = String(evaluate(expr));
+        setResult(v);
+        if (expr) remember(expr, v);
+        setExpr(v);
+      } catch (e) { setResult(tr('calculator.error')); }
     } else setExpr((e) => (e + k).slice(0, 40));
   };
 
   useKeyboard((e) => {
-    const map = { '*': '×', '/': '÷', Enter: '=', Backspace: '⌫', Escape: 'C', ',': '.' };
+    const map = { '*': '×', '/': '÷', Enter: '=', Backspace: '⌫', Escape: 'C', ',': '.', '%': '%' };
     const k = map[e.key] || map[e.char] || e.char;
-    if (KEYS.flat().includes(k)) press(k);
+    if (KEYS.flat().includes(k) || k === '=') press(k);
   });
 
   // the region's decimal separator (1,5 or 1.5); internally always '.'
@@ -81,8 +98,19 @@ export default function Calculator() {
   const big = shown.length <= 8 ? 44 : shown.length <= 11 ? 34 : 26;
   return (
     // the calculator is always left to right, also in Arabic or Hebrew
-    <View style={{ flex: 1, padding: 16, gap: 8, direction: 'ltr', backgroundColor: t.mode === 'dark' ? '#1c1c1e' : '#f5f5f7' }}>
-      <View style={{ height: 92, justifyContent: 'flex-end', alignItems: 'flex-end', paddingHorizontal: 6, marginBottom: 4, overflow: 'hidden' }}>
+    <View style={{ flex: 1, padding: 14, gap: 6, direction: 'ltr', backgroundColor: t.mode === 'dark' ? '#1c1c1e' : '#f5f5f7' }}>
+      {history.length ? (
+        <View style={{ gap: 2, paddingTop: 2, paddingBottom: 2 }}>
+          {history.slice(0, 3).map((h) => (
+            <View key={h.e} onClick={() => { setExpr(h.v); setResult(h.v); }} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5 }}>
+              <Text style={{ fontSize: 11, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden' }}>{show(h.e)}</Text>
+              <Text style={{ fontSize: 11, color: t.textDim }}>{show(h.v)}</Text>
+            </View>
+          ))}
+          {history.length > 3 ? <Text onClick={() => set({ calculatorHistory: [] })} style={{ fontSize: 10, color: t.textDim, textAlign: 'end', paddingVertical: 1 }}>{tr('calculator.clearHistory') || 'Clear history'}</Text> : null}
+        </View>
+      ) : null}
+      <View style={{ height: 78, justifyContent: 'flex-end', alignItems: 'flex-end', paddingHorizontal: 6, marginBottom: 2, overflow: 'hidden' }}>
         <Text style={{ fontSize: 13, color: t.textDim, whiteSpace: 'nowrap' }}>{show(expr) || ' '}</Text>
         <Text style={{ fontSize: big, fontWeight: 400, color: t.text, whiteSpace: 'nowrap' }}>{shown}</Text>
       </View>
@@ -95,14 +123,14 @@ export default function Calculator() {
   );
 }
 
-// Key: digits, functions (C, parentheses, delete) and operators in orange; = in the accent color
-// (the primary action). Lightens on hover and dims while pressed.
+// Key: digits, functions (C, parentheses, percentage, delete) and operators in orange; the wide =
+// in the accent color (the primary action). Lightens on hover and dims while pressed.
 function Key({ k, label, onPress }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
   const [down, setDown] = useState(false);
   const dark = t.mode === 'dark';
-  const op = '÷×-+'.includes(k), fn = 'C()⌫'.includes(k);
+  const op = '÷×-+'.includes(k), fn = 'C()%⌫'.includes(k);
   const bg = k === '=' ? t.accent : op ? '#ff9f0a' : fn ? (dark ? '#4a4a50' : '#d4d4d9') : (dark ? '#333338' : '#ffffff');
   return (
     <View onMouseDown={() => setDown(true)} onMouseUp={() => setDown(false)} onClick={onPress}

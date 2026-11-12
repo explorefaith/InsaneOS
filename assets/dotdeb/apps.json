@@ -1,0 +1,362 @@
+{
+ "synced": "13 Nov 2026",
+ "items": [
+  {
+   "id": "firefox",
+   "name": "Firefox ESR",
+   "tagline": "The independent, open-source web browser by Mozilla.",
+   "description": [
+    "Firefox ESR is the Extended Support Release of Mozilla’s browser — the same rendering engine and privacy protections as rapid Firefox, with a slower update cadence suited to desktops.",
+    "It ships with Enhanced Tracking Protection, sync via Firefox Account, and a large extension library."
+   ],
+   "developer": "Mozilla",
+   "category": "internet",
+   "license": "MPL-2.0",
+   "version": "153.7.0esr",
+   "sizeLabel": "77.6 MB",
+   "installMethod": "apt",
+   "packages": "firefox-esr",
+   "desktop": "firefox-esr.desktop",
+   "logo": "firefox.svg"
+  },
+  {
+   "id": "thunderbird",
+   "name": "Thunderbird",
+   "tagline": "Email, calendar and chat — free and open source.",
+   "description": [
+    "Thunderbird is Mozilla’s mail client: IMAP and POP support, OpenPGP end-to-end encryption, calendars and address books in one application.",
+    "The ESR build in Debian receives security updates on a stable schedule."
+   ],
+   "developer": "MZLA / Mozilla",
+   "category": "internet",
+   "license": "MPL-2.0",
+   "version": "153.7.0esr",
+   "sizeLabel": "77.9 MB",
+   "installMethod": "apt",
+   "packages": "thunderbird",
+   "desktop": "thunderbird.desktop",
+   "logo": "thunderbird.svg"
+  },
+  {
+   "id": "vlc",
+   "name": "VLC",
+   "tagline": "Plays everything — video, music, streams and discs.",
+   "description": [
+    "VLC media player plays nearly every codec without external packs: files, network streams, DVDs and webcams, on every desktop platform.",
+    "It also converts formats, records screens and streams over the network. The Debian package is a metapackage that pulls in the player and its plugin set."
+   ],
+   "developer": "VideoLAN",
+   "category": "multimedia",
+   "license": "GPL-2.0",
+   "version": "3.0.24",
+   "sizeLabel": "~40 MB with plugins",
+   "installMethod": "apt",
+   "packages": "vlc",
+   "desktop": "vlc.desktop",
+   "logo": "vlc.svg"
+  },
+  {
+   "id": "gimp",
+   "name": "GIMP",
+   "tagline": "The GNU Image Manipulation Program — raster editing, free.",
+   "description": [
+    "GIMP is the free raster image editor: layers, masks, filters, content-aware tools and a scriptable plug-in system for photos, illustration and design work.",
+    "The 3.x series brings a modernised GTK interface and non-destructive editing improvements."
+   ],
+   "developer": "GIMP Team",
+   "category": "graphics",
+   "license": "GPL-3.0",
+   "version": "3.0.4",
+   "sizeLabel": "6.2 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "gimp",
+   "desktop": "gimp.desktop",
+   "logo": "gimp.svg"
+  },
+  {
+   "id": "blender",
+   "name": "Blender",
+   "tagline": "The complete open-source 3D creation suite.",
+   "description": [
+    "Blender covers the full 3D pipeline — modelling, sculpting, animation, simulation, rendering, compositing and video editing — in one free application.",
+    "Cycles and EEVEE render engines ship built in, and the same file format runs on every platform."
+   ],
+   "developer": "Blender Foundation",
+   "category": "graphics",
+   "license": "GPL-3.0",
+   "version": "4.3.2",
+   "sizeLabel": "25.3 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "blender",
+   "desktop": "blender.desktop",
+   "logo": "blender.svg"
+  },
+  {
+   "id": "inkscape",
+   "name": "Inkscape",
+   "tagline": "Professional vector graphics editor, open standard SVG.",
+   "description": [
+    "Inkscape is a vector editor built around the SVG standard: nodes, paths, booleans, text-on-path, extensions and a node editor for logos, icons and technical drawing.",
+    "It reads and writes AI-compatible SVG output, PDF, EPS and PNG."
+   ],
+   "developer": "Inkscape Project",
+   "category": "graphics",
+   "license": "GPL-3.0",
+   "version": "1.4",
+   "sizeLabel": "23.3 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "inkscape",
+   "desktop": "org.inkscape.Inkscape.desktop",
+   "logo": "inkscape.svg"
+  },
+  {
+   "id": "libreoffice",
+   "name": "LibreOffice",
+   "tagline": "The free office suite — Writer, Calc, Impress and more.",
+   "description": [
+    "LibreOffice is the open-source office suite: Writer (documents), Calc (spreadsheets), Impress (presentations), Draw, Base and Math, with strong Microsoft format compatibility.",
+    "The Debian package is a metapackage that installs the full suite."
+   ],
+   "developer": "The Document Foundation",
+   "category": "productivity",
+   "license": "MPL-2.0",
+   "version": "25.2.3",
+   "sizeLabel": "~450 MB full suite",
+   "installMethod": "apt",
+   "packages": "libreoffice",
+   "desktop": "libreoffice-startcenter.desktop",
+   "logo": "libreoffice.svg"
+  },
+  {
+   "id": "kdenlive",
+   "name": "Kdenlive",
+   "tagline": "KDE’s non-linear video editor with unlimited tracks.",
+   "description": [
+    "Kdenlive is a multi-track video editor built on MLT: proxy editing, effects, titling, audio mixing and timeline keyframes for real production work.",
+    "Projects render through FFmpeg to every common format."
+   ],
+   "developer": "KDE Community",
+   "category": "multimedia",
+   "license": "GPL-3.0",
+   "version": "24.12.3",
+   "sizeLabel": "3.9 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "kdenlive",
+   "desktop": "org.kde.kdenlive.desktop",
+   "logo": "kdenlive.svg"
+  },
+  {
+   "id": "audacity",
+   "name": "Audacity",
+   "tagline": "Multi-track audio recording and editing.",
+   "description": [
+    "Audacity records live audio, digitises tapes and edits podcasts or music on a straightforward spectrogram-and-waveform view.",
+    "Noise reduction, EQ, compression and label tracks are built in; projects export to WAV, MP3, FLAC and more."
+   ],
+   "developer": "Audacity Team",
+   "category": "multimedia",
+   "license": "GPL-2.0",
+   "version": "3.7.3",
+   "sizeLabel": "6.8 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "audacity",
+   "desktop": "audacity.desktop",
+   "logo": "audacity.svg"
+  },
+  {
+   "id": "obs",
+   "name": "OBS Studio",
+   "tagline": "Free streaming and screen recording, done properly.",
+   "description": [
+    "OBS Studio records and broadcasts your desktop with scenes, sources, filters and hardware-accelerated encoding — a small studio in one window.",
+    "Streams to Twitch, YouTube and any RTMP endpoint, or records 4K locally."
+   ],
+   "developer": "OBS Project",
+   "category": "multimedia",
+   "license": "GPL-2.0",
+   "version": "30.2.3",
+   "sizeLabel": "5.8 MB (+ library deps)",
+   "installMethod": "apt",
+   "packages": "obs-studio",
+   "desktop": "com.obsproject.Studio.desktop",
+   "logo": "obs.svg"
+  },
+  {
+   "id": "telegram",
+   "name": "Telegram Desktop",
+   "tagline": "Fast, cloud-synced messaging client.",
+   "description": [
+    "Telegram Desktop is the official client for Telegram: cloud chats, channels, voice calls and file sharing up to 2 GB, synced across every device.",
+    "On Debian the recommended route is the Flathub build, kept current by upstream."
+   ],
+   "developer": "Telegram FZ-LLC",
+   "category": "internet",
+   "license": "GPL-3.0",
+   "sizeLabel": "~87 MB",
+   "installMethod": "flatpak",
+   "packages": "",
+   "desktop": "",
+   "logo": "telegram.svg"
+  },
+  {
+   "id": "steam",
+   "name": "Steam",
+   "tagline": "Valve’s game platform — thousands of titles for Linux.",
+   "description": [
+    "Steam is the game distribution platform: Proton runs Windows titles on Linux, and the library covers native Linux games, VR and remote play.",
+    "The Debian launcher package (in contrib) pulls in the Steam runtime on first start."
+   ],
+   "developer": "Valve Corporation",
+   "category": "games",
+   "license": "Proprietary",
+   "sizeLabel": "~4.6 MB launcher (+ runtime)",
+   "installMethod": "apt",
+   "packages": "steam",
+   "desktop": "",
+   "logo": "steam.svg"
+  },
+  {
+   "id": "claude",
+   "name": "Claude Code",
+   "tagline": "Anthropic’s agentic coding tool in your terminal.",
+   "description": [
+    "Claude Code is a command-line agent for software engineering: it reads your project, edits files, runs commands and commits — under your direction, from the terminal.",
+    "Installed globally through npm; run claude inside a project to start."
+   ],
+   "developer": "Anthropic",
+   "category": "development",
+   "license": "Proprietary",
+   "version": "2.1.x",
+   "sizeLabel": "~55 MB (npm package)",
+   "installMethod": "npm",
+   "packages": "",
+   "desktop": "",
+   "logo": "claude.svg"
+  },
+  {
+   "id": "docker",
+   "name": "Docker Engine",
+   "tagline": "Build, ship and run containers everywhere.",
+   "description": [
+    "Docker Engine packages applications into portable containers. The get.docker.com script installs the engine, CLI, containerd and compose plugin from Docker’s official apt repository.",
+    "After installing, the docker group manages access without sudo."
+   ],
+   "developer": "Docker Inc.",
+   "category": "system",
+   "license": "Apache-2.0",
+   "sizeLabel": "~120 MB with daemon + CLI",
+   "installMethod": "curl",
+   "packages": "",
+   "desktop": "",
+   "logo": "docker.svg"
+  },
+  {
+   "id": "nodejs",
+   "name": "Node.js",
+   "tagline": "JavaScript runtime built on Chrome’s V8 engine.",
+   "description": [
+    "Node.js runs JavaScript outside the browser — servers, build tools and CLIs. The NodeSource setup script registers the official apt repository for the current LTS line.",
+    "npm ships with it, giving access to two million packages."
+   ],
+   "developer": "OpenJS Foundation",
+   "category": "development",
+   "license": "MIT",
+   "version": "22.x LTS",
+   "sizeLabel": "~32 MB",
+   "installMethod": "curl",
+   "packages": "",
+   "desktop": "",
+   "logo": "nodejs.svg"
+  },
+  {
+   "id": "git",
+   "name": "Git",
+   "tagline": "The distributed version control system.",
+   "description": [
+    "Git tracks projects of any size with fast branching and merging. It is the foundation of modern development workflows and every code host.",
+    "Debian’s build includes the CLI tools, gitk and the credential helpers."
+   ],
+   "developer": "Git project",
+   "category": "development",
+   "license": "GPL-2.0",
+   "version": "2.47.3",
+   "sizeLabel": "8.7 MB",
+   "installMethod": "apt",
+   "packages": "git",
+   "desktop": "",
+   "logo": "git.svg"
+  },
+  {
+   "id": "neovim",
+   "name": "Neovim",
+   "tagline": "Vim’s refactor — hyperextensible, Lua-configured editing.",
+   "description": [
+    "Neovim is a fork of Vim focused on extensibility: Lua configuration, built-in LSP support, tree-sitter syntax and a thriving plugin ecosystem.",
+    "It stays faithful to modal editing while modernising the internals."
+   ],
+   "developer": "Neovim team",
+   "category": "development",
+   "license": "Apache-2.0",
+   "version": "0.10.4",
+   "sizeLabel": "2.2 MB",
+   "installMethod": "apt",
+   "packages": "neovim",
+   "desktop": "",
+   "logo": ""
+  },
+  {
+   "id": "supertuxkart",
+   "name": "SuperTuxKart",
+   "tagline": "3D kart racing with the open-source mascots.",
+   "description": [
+    "SuperTuxKart is a family-friendly kart racer: circuits, arenas, football and story mode with split-screen and LAN/online multiplayer.",
+    "The engine package is small; the track data ships in companion packages."
+   ],
+   "developer": "SuperTuxKart Team",
+   "category": "games",
+   "license": "GPL-3.0",
+   "version": "1.4",
+   "sizeLabel": "4.6 MB engine (+ ~550 MB data)",
+   "installMethod": "apt",
+   "packages": "supertuxkart",
+   "desktop": "",
+   "logo": ""
+  },
+  {
+   "id": "0ad",
+   "name": "0 A.D.",
+   "tagline": "Historical real-time strategy in the ancient Mediterranean.",
+   "description": [
+    "0 A.D. is a war and economy RTS covering the centuries around 500 BC – 500 AD: twelve civilisations, formations, real line-of-sight and naval warfare.",
+    "The engine package pairs with large data packages containing art, sound and maps."
+   ],
+   "developer": "Wildfire Games",
+   "category": "games",
+   "license": "GPL-2.0",
+   "version": "0.27.0",
+   "sizeLabel": "15.1 MB engine (+ ~500 MB data)",
+   "installMethod": "apt",
+   "packages": "0ad",
+   "desktop": "",
+   "logo": ""
+  },
+  {
+   "id": "wesnoth",
+   "name": "Battle for Wesnoth",
+   "tagline": "Turn-based fantasy strategy on an epic scale.",
+   "description": [
+    "Battle for Wesnoth is turn-based strategy in a high-fantasy world: humans, elves, dwarves and orcs across dozens of single-player campaigns and hot-seat or online multiplayer.",
+    "Terrain and time of day shape every fight; the add-on server carries hundreds of community campaigns."
+   ],
+   "developer": "Wesnoth Project",
+   "category": "games",
+   "license": "GPL-2.0",
+   "version": "1.18.5",
+   "sizeLabel": "~4 MB core (+ data packages)",
+   "installMethod": "apt",
+   "packages": "wesnoth",
+   "desktop": "",
+   "logo": ""
+  }
+ ]
+}

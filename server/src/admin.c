@@ -39,6 +39,7 @@
 #include "imager/imager_admin.h"
 #include "logs/logs_admin.h"
 #include "hw/hw_admin.h"
+#include "pkg/dotdeb_admin.h"
 #include "clean/clean_admin.h"
 #include "vm/vm_admin.h"
 #include "lan/share_admin.h"
@@ -479,6 +480,7 @@ static const struct { const char *name; ActionFn fn; int flags; } actions[] = {
     IMAGER_ADMIN_ACTIONS
     LOGS_ADMIN_ACTIONS
     HW_ADMIN_ACTIONS
+    DOTDEB_ADMIN_ACTIONS
     CLEAN_ADMIN_ACTIONS
     VM_ADMIN_ACTIONS
     PROC_ADMIN_ACTIONS

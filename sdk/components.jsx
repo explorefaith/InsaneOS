@@ -1,7 +1,7 @@
 // components.jsx — base controls for apps. They take colors from useTheme(), so they
 // adapt to any theme.
 import { View, Text, addListener, displayFor, onCommit, onScreenChange } from '@insaneos/runtime';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { Component, Fragment, createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useTheme } from './theme.js';
 import { getApp, windows, openedAt, wm, activeDesktop, onActiveDesktop } from './windows.js';
 import { onDesktop } from './desktopmodel.js';
@@ -548,6 +548,31 @@ export function useWindowState(key, initial) {
 }
 
 // The theme uses <AppHost id focused /> inside its window frame.
+
+// One error boundary per app window (Phase 1 stability): an app that throws during render shows a
+// small fallback inside its own window — the shell and every other window stay alive. "Reopen"
+// remounts the app fresh, as wm.open would.
+class AppBoundary extends Component {
+  constructor(props) { super(props); this.state = { failed: false, nonce: 0 }; }
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(e) { console.error(`app ${this.props.name || '?'} crashed while rendering:`, e?.message || e); }
+  reopen() { this.setState((s) => ({ failed: false, nonce: s.nonce + 1 })); }
+  render() {
+    if (this.state.failed) return <AppCrash name={this.props.name} reopen={() => this.reopen()} />;
+    return <Fragment key={this.state.nonce}>{this.props.children}</Fragment>;
+  }
+}
+function AppCrash({ name, reopen }) {
+  const t = useTheme();
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: t.windowBg }}>
+      <Text style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{`${name} stopped responding`}</Text>
+      <Text style={{ fontSize: 11, color: t.textDim }}>The rest of the desktop is unaffected.</Text>
+      <Text onClick={reopen} style={{ fontSize: 12, color: t.accent, border: `1px solid ${t.accent}`, borderRadius: 6, padding: '4px 14px' }}>Reopen</Text>
+    </View>
+  );
+}
+
 export function AppHost({ id, focused }) {
   const app = getApp(id);
   const args = useStore(windows, (ws) => ws.find((w) => w.id === id)?.args || null);
@@ -566,7 +591,9 @@ export function AppHost({ id, focused }) {
   return (
     <AppWindowContext.Provider value={{ id, focused, args, mode, protected: prot, overlayHost }}>
       <View protected={prot} style={{ flex: 1, alignSelf: 'stretch' }}>
-        <C />
+        <AppBoundary name={app.name || app.id}>
+          <C key={app.id} />
+        </AppBoundary>
         <View ref={setOverlayHost} style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, pointerEvents: 'box-none' }} />
       </View>
     </AppWindowContext.Provider>
