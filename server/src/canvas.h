@@ -12,7 +12,7 @@ typedef struct {
     Rect clip;
 } Canvas;
 
-enum { FIT_FILL, FIT_COVER, FIT_CONTAIN };
+enum { FIT_FILL, FIT_COVER, FIT_CONTAIN, FIT_CENTER };
 
 /* Optional: run row-local pixel loops on a pool (insane-server passes par_rows, see par.h); same pixels. */
 typedef void (*CanvasPar)(int j0, int j1, void (*fn)(void *ctx, int a, int b), void *ctx);

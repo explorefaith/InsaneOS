@@ -184,7 +184,11 @@ static void rescale(Image *img, int bw, int bh, int fit) {
     if (!img->scaled) { img->sw = img->sh = 0; return; }
     img->sw = bw; img->sh = bh; img->sfit = fit;
     float sx = (float)bw / img->w, sy = (float)bh / img->h, ox = 0, oy = 0;
-    if (fit != FIT_FILL) {
+    if (fit == FIT_CENTER) {
+        sx = sy = 1;                       /* no scaling: the image 1:1, centered in the box (wallpaper 'center') */
+        ox = (bw - img->w) / 2;
+        oy = (bh - img->h) / 2;
+    } else if (fit != FIT_FILL) {
         float s = fit == FIT_COVER ? fmaxf(sx, sy) : fminf(sx, sy);
         sx = sy = s;
         ox = (bw - img->w * s) / 2;
@@ -211,7 +215,7 @@ void image_draw(Canvas *c, Image *img, float x, float y, float w, float h, float
         return;
     }
     rescale(img, bw, bh, fit);
-    int opaque = img->opaque && (fit != FIT_CONTAIN);
+    int opaque = img->opaque && fit != FIT_CONTAIN && fit != FIT_CENTER;   /* contain and center may leave transparent margins */
     if (!img->scaled) return;
     canvas_blit(c, img->scaled, bw, bh, (int)roundf(x), (int)roundf(y), r, opacity, opaque);
 }
