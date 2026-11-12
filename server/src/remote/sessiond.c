@@ -431,6 +431,9 @@ static int greeter_dark, greeter_off_s, greeter_sleep_s, greeter_sleep_left_s;
 #define GREETER_LINGER_S 10
 static double greeter_stop_at;
 static double greeter_asked_at;
+static double greeter_retry_at;         /* a login screen that died too fast waits before coming back */
+static double greeter_died_at;          /* last time the login screen's worker ended unexpectedly */
+static int greeter_deaths;              /* how many of those within 20 s of each other */
 static int left_on_purpose;             /* the monitor was just taken from the session for a lock or a switch */         /* when the login screen was asked for (lock, switch), to log the wait */
 
 /* The last user whose session was shown on the monitor: the login screen preselects it. Kept in
@@ -1373,6 +1376,8 @@ static int proc_real_uid(long pid, uid_t *uid) {
 }
 
 static void stop_greeters(const char *why) {
+    greeter_deaths = 0;                 /* a stop we asked for is not a death */
+    greeter_retry_at = 0;
     struct passwd *pw = getpwnam(SD_GREETER_USER);
     if (!pw || pw->pw_uid == 0) return;
     uid_t gu = pw->pw_uid;
@@ -1535,8 +1540,25 @@ int main(int argc, char **argv) {
                 worker_pid = -1;
                 WorkKind k = pending;
                 pending = W_NONE;
-                if (k == W_GREETER) show_greeter(greeter_mode, greeter_user);
+                if (k == W_GREETER) {
+                    /* the login screen died: it comes back at once, but three quick deaths mean
+                     * something is badly wrong — wait 3 s instead of spinning on a black screen */
+                    if (rd_now() - greeter_died_at > 20) greeter_deaths = 0;
+                    greeter_died_at = rd_now();
+                    if (++greeter_deaths >= 3) {
+                        greeter_retry_at = rd_now() + 3;
+                        sd_log("the login screen died %d times in 20 s: waiting 3 s before starting it again", greeter_deaths);
+                    } else show_greeter(greeter_mode, greeter_user);
+                }
                 else if (k == W_AUTOLOGIN && start_worker(W_AUTOLOGIN, pending_user, NULL)) pending = k;
+                else if (shown == 'u' && (WIFSIGNALED(st) || (WIFEXITED(st) && WEXITSTATUS(st)))) {
+                    /* the session's compositor died while it was on the monitor: the login screen comes
+                     * back, never a blank display. The dead process's closed socket usually gets here
+                     * first through monitor_event; this covers the paths where it doesn't. */
+                    sd_log("the session's compositor died (%s): the login screen comes back",
+                           WIFSIGNALED(st) ? "killed by a signal" : "exit error");
+                    leave_for_greeter("login");
+                }
                 else if (WIFEXITED(st) && WEXITSTATUS(st) && shown != 'u' && shown != 'g') show_greeter("login", NULL);
             } else {
                 for (int i = 0; i < RD_MAX_CHILDREN; i++) if (kids[i].pid == pid) memset(&kids[i], 0, sizeof kids[i]);
@@ -1556,6 +1578,11 @@ int main(int argc, char **argv) {
         if (greeter_stop_at && rd_now() >= greeter_stop_at) {
             greeter_stop_at = 0;
             if (shown == 'u' && worker_pid < 0 && pending == W_NONE) stop_greeters("a session is on the monitor");
+        }
+        if (greeter_retry_at && worker_pid < 0 && pending == W_NONE && rd_now() >= greeter_retry_at) {
+            greeter_retry_at = 0;
+            sd_log("the login screen comes back after its backoff");
+            show_greeter(greeter_mode, greeter_user);
         }
         if (rd_shared->lockout_dirty) save_lockout();
         boot_test_tick();
