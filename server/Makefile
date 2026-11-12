@@ -936,3 +936,11 @@ build/wallpaper-image-test: tests/wallpaper_image_test.c src/hw/wallpaper_image.
 	$(CC) $(CPPFLAGS) -O1 -g -w -std=gnu11 -fsanitize=address,undefined -fno-sanitize=shift -fno-sanitize-recover=all -o $@ tests/wallpaper_image_test.c src/hw/wallpaper_image.c src/ui/stb.c -lm
 	ASAN_OPTIONS=detect_leaks=0 ./$@ || { rm -f $@; exit 1; }
 test: build/wallpaper-image-test
+
+# the login screen's privileged wallpaper choices (src/hw/wallpaper_admin.c): the closed charset of the still
+# sources, the fit/rate tails, the root-owned files and the cleanup — the store redirected to a temp dir
+build/wallpaper-admin-test: tests/wallpaper_admin_test.c src/hw/wallpaper_admin.c src/hw/wallpaper_find.c src/hw/wallpaper_image.c src/hw/wallpaper_image.h src/hw/hw_admin.h src/sec/json.c src/pkg/crypto.c src/ui/stb.c
+	@mkdir -p build
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/wallpaper_admin_test.c src/hw/wallpaper_find.c src/hw/wallpaper_image.c src/sec/json.c src/pkg/crypto.c src/ui/stb.c -lm
+	./$@ || { rm -f $@; exit 1; }
+test: build/wallpaper-admin-test

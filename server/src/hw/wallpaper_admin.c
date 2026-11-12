@@ -44,7 +44,10 @@
 #include <unistd.h>
 
 #define CATALOG "/usr/share/backgrounds/insaneos/motion.json"
-#define STORE   "/var/lib/insaneos/wallpapers"
+#ifndef WALLPAPER_STORE
+#define WALLPAPER_STORE "/var/lib/insaneos/wallpapers"
+#endif
+#define STORE   WALLPAPER_STORE
 #define MINE    "/.local/share/insaneos/wallpapers"     /* under the user's home: their copies */
 #define IMAGE_SECONDS 30                              /* a picture takes far less; a stuck disk doesn't wait forever */
 
@@ -204,6 +207,7 @@ static int hex6(const char *s) {
 /* A still source: 0 a wallpaper id, 1 "solid:rrggbb", 2 "gradient:rrggbb-rrggbb-deg" (deg 0..360); -1 invalid. The mark
  * is written to login-still exactly as given — a closed charset, never a path (the greeter reads it as text). */
 static int still_kind(const char *s, size_t n) {
+    if (!n) return -1;
     if (n > 6 && !strncmp(s, "solid:", 6)) {
         return n == 12 && hex6(s + 6) ? 1 : -1;
     }
