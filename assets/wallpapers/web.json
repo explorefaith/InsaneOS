@@ -1,0 +1,203 @@
+{
+ "base": "https://upload.wikimedia.org/wikipedia/commons",
+ "items": [
+  {
+   "id": "nature-peyto-lake",
+   "category": "nature",
+   "title": "Peyto Lake-Banff NP-Canada.jpg",
+   "author": "Tobias Alt, Tobi 87",
+   "license": "CC BY-SA 4.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 4150,
+     "h": 2467,
+     "file": "thumb/9/91/Peyto_Lake-Banff_NP-Canada.jpg/1920px-Peyto_Lake-Banff_NP-Canada.jpg",
+     "size": 876441,
+     "sha256": "1ed9589b8a14723521eaa267769f401e2e43988f76333c9ef5231cb5f4287ffc"
+    }
+   ]
+  },
+  {
+   "id": "nature-bow-lake",
+   "category": "nature",
+   "title": "Bow Lake beim Icefields Parkway.jpg",
+   "author": "Florian Fuchs",
+   "license": "CC BY 3.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 4820,
+     "h": 2711,
+     "file": "thumb/5/51/Bow_Lake_beim_Icefields_Parkway.jpg/1920px-Bow_Lake_beim_Icefields_Parkway.jpg",
+     "size": 767958,
+     "sha256": "b3ba8936fb8f9c642e978b51ddcfe52e12b812d012f520068e3c2d9c33767c49"
+    }
+   ]
+  },
+  {
+   "id": "nature-aurora-alaska",
+   "category": "nature",
+   "title": "Aurora borealis over Eielson Air Force Base, Alaska.jpg",
+   "author": "United States Air Force photo by Senior Airman Joshua Strang",
+   "license": "Public domain",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 3008,
+     "h": 1960,
+     "file": "thumb/d/d3/Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg/1920px-Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg",
+     "size": 364596,
+     "sha256": "92fbedd59497dd89ba584c01a34d101f27d709136339ef57970b9c327f0fc5f1"
+    }
+   ]
+  },
+  {
+   "id": "nature-moraine-lake",
+   "category": "nature",
+   "title": "Moraine Lake 17092005.jpg",
+   "author": "Gorgo",
+   "license": "Public domain",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 2048,
+     "h": 1536,
+     "file": "thumb/c/c5/Moraine_Lake_17092005.jpg/1920px-Moraine_Lake_17092005.jpg",
+     "size": 602815,
+     "sha256": "8d1119788d5377a3588d1a1409770a3e688fc8ef91a789b2c7a2a8ef9606795d"
+    }
+   ]
+  },
+  {
+   "id": "anime-on-the-edge",
+   "category": "anime",
+   "title": "On the edge - free world version.jpg",
+   "author": "„Niabot, because commons should stay free“",
+   "license": "CC BY-SA 3.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 3855,
+     "h": 3000,
+     "file": "thumb/4/40/On_the_edge_-_free_world_version.jpg/1920px-On_the_edge_-_free_world_version.jpg",
+     "size": 629343,
+     "sha256": "e2c3d14e0f4821a8681db58203b62aacdc11e8a8d6ae74b8c7466d3e0ec1dfb9"
+    }
+   ]
+  },
+  {
+   "id": "anime-girl-beach",
+   "category": "anime",
+   "title": "Anime girl at beach.jpg",
+   "author": "Niabot",
+   "license": "CC BY-SA 3.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 2200,
+     "h": 3200,
+     "file": "thumb/d/df/Anime_girl_at_beach.jpg/1920px-Anime_girl_at_beach.jpg",
+     "size": 520326,
+     "sha256": "51413c2faf06465cc3d429b45e4a7a014b91806fe7e92f5d238532f43407ca2e"
+    }
+   ]
+  },
+  {
+   "id": "nature-star-trails",
+   "category": "nature",
+   "title": "Mountain Lake Star Trails Reflection 4K Ultra HD Desktop Wallpaper (26184236070).jpg",
+   "author": "Kent Larsson",
+   "license": "CC BY 2.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 3840,
+     "h": 2160,
+     "file": "thumb/5/56/Mountain_Lake_Star_Trails_Reflection_4K_Ultra_HD_Desktop_Wallpaper_%2826184236070%29.jpg/1920px-Mountain_Lake_Star_Trails_Reflection_4K_Ultra_HD_Desktop_Wallpaper_%2826184236070%29.jpg",
+     "size": 383750,
+     "sha256": "dc80034ced55d48f01f00b398f21f11e6300ff18206ad5b21b622a4b07040cf1"
+    }
+   ]
+  },
+  {
+   "id": "nature-maya-beach",
+   "category": "nature",
+   "title": "Maya beach tropical paradise, Koh Phi Phi Leh, Thailand.jpg",
+   "author": "Vyacheslav Argenberg",
+   "license": "CC BY 4.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 3072,
+     "h": 2048,
+     "file": "thumb/9/91/Maya_beach_tropical_paradise%2C_Koh_Phi_Phi_Leh%2C_Thailand.jpg/1920px-Maya_beach_tropical_paradise%2C_Koh_Phi_Phi_Leh%2C_Thailand.jpg",
+     "size": 584053,
+     "sha256": "bed43ddf022265747bdd104c26d3d18f12e442ee95efa31d6cb1a043e652ff02"
+    }
+   ]
+  },
+  {
+   "id": "car-lamborghini-ferrari",
+   "category": "cars",
+   "title": "Lamborghini & Ferrari (8439652732).jpg",
+   "author": "Axion23",
+   "license": "CC BY 2.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 4928,
+     "h": 3264,
+     "file": "thumb/1/18/Lamborghini_%26_Ferrari_%288439652732%29.jpg/1920px-Lamborghini_%26_Ferrari_%288439652732%29.jpg",
+     "size": 480103,
+     "sha256": "37ed1fe150f2df56652f354fcaa1d56c4120a1616e348b2cb17e515d0b95a2a0"
+    }
+   ]
+  },
+  {
+   "id": "car-roma-supercar",
+   "category": "cars",
+   "title": "Supercar - Roma Auto Show 18.JPG",
+   "author": "Nicholas Gemini",
+   "license": "CC BY-SA 4.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 4000,
+     "h": 3000,
+     "file": "thumb/3/3f/Supercar_-_Roma_Auto_Show_18.JPG/1920px-Supercar_-_Roma_Auto_Show_18.JPG",
+     "size": 485048,
+     "sha256": "843d5406298bbd4b9e2ada0d4ded639e316cc68ebf83b56284ab8443a6cdd03a"
+    }
+   ]
+  },
+  {
+   "id": "car-roma-classics",
+   "category": "cars",
+   "title": "Supercar - Roma Auto Show 113.JPG",
+   "author": "Nicholas Gemini",
+   "license": "CC BY-SA 4.0",
+   "variants": [
+    {
+     "name": "1920",
+     "codec": "jpeg",
+     "w": 4000,
+     "h": 3000,
+     "file": "thumb/4/45/Supercar_-_Roma_Auto_Show_113.JPG/1920px-Supercar_-_Roma_Auto_Show_113.JPG",
+     "size": 500735,
+     "sha256": "140095f55873cba94784b2ecf3b9f86c3a63e3bcf87a4ecc7d91a035506206c4"
+    }
+   ]
+  }
+ ]
+}
