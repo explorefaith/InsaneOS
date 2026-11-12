@@ -32,7 +32,10 @@ the rest 12.5 to 30 fps. No 120, 144 or 240 fps source with a clear license was 
 
 `sdk/motion.jsx` pauses the decoder, and `pauseReason` says why: Reduce motion, a fullscreen window, every display showing
 it covered by a window, five minutes with no input, the battery at 20 % or less and discharging, or the CPU above 85 % for
-two readings 5 s apart. The login screen pauses after five minutes with no input.
+two readings 5 s apart. The fullscreen, covered, locked, idle, battery and busy reasons can each be turned off in
+Settings → Wallpaper → Live → Pause when; reduce motion and a screen that is off are not optional. "Locked" is the
+session not being the one on the monitor (`insane.session.onMonitor()`). The login screen pauses after five minutes with
+no input.
 
 One video per file, however many displays show it. The still wallpaper stays drawn underneath, so a failure, a missing
 file or a helper crash just shows it.
@@ -55,12 +58,18 @@ bytes go through `fetch_batch` (a child as `nobody`, in the Store's scope, so th
 whose size or hash isn't the catalog's is deleted. `insane-media` keeps its sandbox and receives an open file, and
 `media_open_input` accepts those two system folders besides the user's own files. `server/tests/wallpaper_find_test.c` covers the lookup.
 
-An added video stays in the user's files. It needs at most 10 s and a format this machine decodes in hardware.
+An added video stays in the user's files. It needs a format this machine decodes in hardware — H.264 and HEVC, and VP9
+or AV1 too where the probe says the GPU decodes them (webm, mkv). There is no length limit: the cost is per frame, not
+per second of source, and a long file loops from its start. Above 1080p or above 30 fps the page warns (it plays anyway).
 
 ## The login screen
 
-The greeter can't read a user's settings, so the choice reaches it as a file: `/var/lib/insaneos/wallpapers/login.mp4`, else
-the built-in `apple.hevc.mp4` or `apple.h264.mp4`.
+The greeter can't read a user's settings, so the choice reaches it as files: `/var/lib/insaneos/wallpapers/login.mp4`, else
+the built-in `apple.hevc.mp4` or `apple.h264.mp4`. A video of the user's own reaches it with the `wallpaper-login-video`
+action: a child running as the user streams the bytes, root checks the container (MP4 or Matroska, up to 100 MB) and
+keeps them as `login.mp4`. A still source is `login-still` (a wallpaper id, or `image:<name>`, or a colour:
+`solid:rrggbb`, `gradient:rrggbb-rrggbb-deg`, which the greeter draws itself), how it is drawn is `login-fit`
+(`fill`=cover, `fit`, `stretch`, `center` — the video always covers) and the playback speed is `login-rate` (1/100).
 
 Before 0.8.7 the login screen composed on the CPU: `insaneos-greeter` couldn't open `/dev/dri/renderD128`. It now joins
 `render` and `video` (`install.sh`, the ISO, the Pi image, migration 006). That gives the login screen's process the GPU
@@ -98,7 +107,13 @@ Root never opens the user's file and never decodes it. A child gives up root for
 
 A file that goes missing costs nothing: the desktop goes back to the default wallpaper, the login screen to its usual background. The remote login page keeps its built-in background. `server/tests/wallpaper_image_test.c` covers the conversion and the refusals.
 
-Settings offers 1×, 0.75×, 0.5× and 0.25×. A slower speed decodes fewer frames per second, and it applies to the desktop, not to the login screen.
+Settings offers 1×, 0.75×, 0.5× and 0.25×. A slower speed decodes fewer frames per second; it applies to the desktop,
+and to the login screen through `login-rate`.
+
+The Wallpaper page draws its previews, the desktop and the greeter's still background through one component
+(`sdk/backdrop.jsx`): the picture with the chosen fit (fill/fit/stretch/center — the engine's `objectFit`, "center"
+added for this), or the solid colour / gradient (`wallpaperBg`; the greeter's mark). A change crossfades over 450 ms,
+unless Reduce motion is on.
 
 Choosing a still wallpaper turns the moving one off, since it would stay in front. A new player can start while the last one still holds the decoder, so a stop nobody asked for is retried four times, half a second apart; the tile shows a spinner until the video plays.
 
