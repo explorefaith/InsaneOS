@@ -802,7 +802,7 @@ export default function Settings() {
           <View style={{ paddingHorizontal: spacing.xxl, paddingTop: spacing.xl, alignItems: 'center' }}>
             {/* Cloud's account page has two columns: it takes a wider column on wide windows */}
             <View style={{ width: '100%', maxWidth: section === 'cloud' ? 980 : 680 }}>
-              <Body page={section === 'network' || section === 'cloud' ? args?.page : undefined} />
+              <Body page={args?.page} />
             </View>
           </View>
         </ScrollView>

@@ -205,7 +205,7 @@ function PicturePane({ login, curId, fit, onFit, onPick, onRemove, onDefault, se
   return (
     <>
       <Section title={tr('settings.wallpaper.fit')}>
-        <SettingRow label={tr('settings.wallpaper.fit')}>
+        <SettingRow label={L('wallpaper.for', 'How the picture covers the screen')}>
           <Segmented small options={fitOptions(tr)} value={fit} onChange={onFit} />
         </SettingRow>
       </Section>
@@ -433,12 +433,13 @@ function GlassSection() {
 // The login screen applies its staged choice when the page changes a discrete control or Apply is pressed.
 const refreshLater = () => setTimeout(() => globalThis.__wallpaperRefresh?.(), 500);
 
-export function WallpaperSettings() {
+export function WallpaperSettings({ page }) {
   const t = useTheme();
   const { t: tr } = useLocale();
   const [s, set] = useSettings();
   const codecs = useCodecs();
-  const [target, setTarget] = useState('desktop');
+  // the login screen's tab opens on demand (wm.open('settings', { args: { section: 'wallpaper', page: 'login' } }))
+  const [target, setTarget] = useState(page === 'login' ? 'login' : 'desktop');
   const [note, setNote] = useState('');
   const [picking, setPicking] = useState(null);          // null | 'image' | 'video'
   const [info, setInfo] = useState(() => readLogin());
@@ -505,7 +506,7 @@ export function WallpaperSettings() {
       {noteNode}
       <PreviewBox login={login} info={info} sel={sel} />
       <Section title={L('wallpaper.source', 'Source')}>
-        <SettingRow label={L('wallpaper.source', 'Source')}>
+        <SettingRow label={L('wallpaper.sourceOf', 'What the wallpaper is')}>
           <Segmented options={[['picture', L('wallpaper.source.picture', 'Picture')], ['live', L('wallpaper.source.live', 'Live (video)')], ['solid', L('wallpaper.source.solid', 'Solid / gradient')]]}
             value={source} onChange={(src) => {
               setNote('');
@@ -534,7 +535,7 @@ export function WallpaperSettings() {
               ? (fn) => setSel((x) => ({ ...x, color: fn(x.color) }))
               : (fn) => set({ wallpaperBg: colorBg(fn(shownColor)) })} />
             {login ? null : (
-              <SettingRow label={tr('settings.wallpaper.fit')}>
+              <SettingRow label={L('wallpaper.for', 'How the picture covers the screen')}>
                 <Segmented small options={fitOptions(tr)} value={s.wallpaperFit || 'fill'} onChange={(f) => set({ wallpaperFit: f })} />
               </SettingRow>
             )}
