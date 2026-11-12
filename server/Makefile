@@ -923,6 +923,13 @@ build/wallpaper-find-test: tests/wallpaper_find_test.c src/hw/wallpaper_find.c s
 
 test: build/wallpaper-find-test
 
+# the live wallpaper's decode path (src/media/proto.h against the real insane-media, hwOnly): skips with no GPU
+build/media-wallpaper-test: tests/media_wallpaper_test.c src/media/proto.c src/media/proto.h
+	@mkdir -p build
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=c11 -o $@ tests/media_wallpaper_test.c src/media/proto.c
+	./$@ || { rm -f $@; exit 1; }
+test: build/media-wallpaper-test
+
 # a picture chosen as wallpaper (src/hw/wallpaper_image.c): only real images, no links, EXIF applied, nothing oversized
 build/wallpaper-image-test: tests/wallpaper_image_test.c src/hw/wallpaper_image.c src/hw/wallpaper_image.h src/ui/stb.c
 	@mkdir -p build
