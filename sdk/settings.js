@@ -19,6 +19,14 @@ const DEFAULTS = {
   motion: {},            // moving wallpaper per display: { '*': id, <display id>: id } (sdk/motion.jsx)
   motionFiles: {},       // id → the variant on disk
   motionUser: [],        // added videos: [{ id: 'user:…', name, path }]
+  motionRate: 100,       // the live wallpaper's speed, 1/100 (25, 50, 75, 100)
+  motionLoop: true,      // the live wallpaper loops (off: the last frame stays)
+  motionPause: null,     // the "Pause when" switches: { fullscreen, covered, locked, idle, battery, busy } (all default on)
+  wallpaperMuted: true,  // the live wallpaper's sound: muted unless the user unmutes it
+  wallpaperBg: null,     // solid colour or gradient instead of a picture: { kind: 'solid'|'gradient', a, b, angle }
+  wallpaperFit: 'fill',  // how a still wallpaper is drawn: 'fill' (cover) | 'fit' | 'stretch' | 'center'
+  loginFit: 'fill',      // the same for the login screen's still sources (also sent as login-fit to the greeter)
+  loginBg: null,         // solid colour or gradient for the login screen (sent as a login-still mark)
   wallpaperImages: [],   // the user's own pictures, newest first: ids 'image:<name>' (sdk/wallpapers.js)
   wallpaper: DEFAULT_WALLPAPER,  // 0.8.2: Lumo Celestial (before: 'aurora', still available)
   keyboard: null,        // before M5; now keyboards (see keyboard.js). It was 'latam' until 0.8.8.6 (#55)

@@ -723,6 +723,7 @@
   "wallpaper.imageTooBig": "Cette image est trop grande : jusqu’à 64 Mo et 100 mégapixels",
   "wallpaper.imageUnreadable": "Impossible de lire ce fichier",
   "wallpaper.imageFailed": "Impossible d’enregistrer l’image",
+  "wallpaper.badVideo": "Ce fichier n'est pas une vidéo MP4, WebM ou Matroska de 100 Mo au plus",
   "share.badGrant": "Cette demande d’autorisation n’est pas valide.",
   "share.grantFailed": "Impossible d’enregistrer l’autorisation.",
   "companion.badManifest": "Le fichier manifest.json de l’app empaquetée n’est pas valide",

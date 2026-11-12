@@ -70,8 +70,14 @@ export async function removeMotion(it) {
 // home, so choosing one for it stores a copy of its own as root.
 export const addWallpaperImage = (path) => admin.run('wallpaper-image', path, null, { quiet: true }).then((name) => `image:${name}`);
 export const removeWallpaperImage = (id) => admin.run('wallpaper-image', `remove ${userWallpaperName(id)}`, null, { quiet: true });
-export const setLoginImage = (id) => admin.run('wallpaper-login-image', userWallpaperName(id), null, { quiet: true });
-export const setLoginStill = (id) => admin.run('wallpaper-login', `still ${id}`, null, { quiet: true });
+export const setLoginImage = (id, fit) => admin.run('wallpaper-login-image', fit ? `${userWallpaperName(id)} fit ${fit}` : userWallpaperName(id), null, { quiet: true });
+export const setLoginStill = (id, fit) => admin.run('wallpaper-login', fit ? `still ${id} fit ${fit}` : `still ${id}`, null, { quiet: true });
+// A colour of the user's choosing: the mark goes to login-still as text ("solid:…", "gradient:…"), validated by the
+// action's closed charset. hex comes without the '#'.
+export const setLoginSolid = (hex, fit) => setLoginStill(`solid:${hex}`, fit);
+export const setLoginGradient = (a, b, deg, fit) => setLoginStill(`gradient:${a}-${b}-${deg}`, fit);
+// A video of the user's own for the login screen: the action keeps it as login.mp4 (container and size checked there).
+export const setLoginVideo = (path) => admin.run('wallpaper-login-video', path, null, { quiet: true });
 export const setLoginMotion = (it) => admin.run('wallpaper-login', it ? `${it.id} ${settings.get().motionFiles?.[it.id]}` : 'default', null, { quiet: true });
 
 // The file behind a chosen id, or null.
@@ -111,11 +117,15 @@ function evaluate() {
     if (cpu) { const dt = t - cpu[0]; const load = dt > 0 ? 1 - (i - cpu[1]) / dt : 0; busy = load > 0.85 ? busy + 1 : 0; b = busy >= 2; }
     cpu = [t, i];
   } catch (e) { /* no reading: not busy */ }
+  // locked (or on another console): this session is not the one on the monitor. Only a switch in the pause
+  // settings turns it off — the still wallpaper stays drawn under it anyway.
+  let locked = false;
+  try { locked = !!s.motionPause?.locked && !!insane.session.managed() && !insane.session.onMonitor(); } catch (e) { /* an older insane-server */ }
   for (const p of players.values()) {
     const rects = live.map((w) => ({ x: w.x, y: w.y, w: w.w, h: w.h }));
     const covered = p.views.size > 0 && [...p.views.values()].every((d) => displayCovered(d, rects));
     const why = pauseReason({ reduceMotion: s.reduceMotion, idleSec: (Date.now() - lastInput) / 1000, battery: battery.get(),
-      covered, fullscreen: live.some((w) => w.fullscreen), busy: b });
+      covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pauseWhen: s.motionPause });
     if (!!why !== p.paused) { p.paused = !!why; media.control(p.id, why ? 'pause' : 'play'); }
   }
 }
@@ -137,12 +147,15 @@ export const motionBusy = createStore(false);       // a chosen wallpaper is sta
 const RETRIES = 4, RETRY_MS = 500;
 
 function acquire(file, rate, key, display, onLost) {
-  const tag = `${file}|${rate}`;
+  const s = settings.get();
+  const mute = s.wallpaperMuted !== false;            // muted unless the user unmutes it
+  const loop = s.motionLoop !== false;                // looping unless the user turns it off
+  const tag = `${file}|${rate}|${mute ? 'm' : 's'}|${loop ? 'l' : 'o'}`;
   let p = players.get(tag);
   if (!p) {
     let id = 0;
     motionBusy.set(true);
-    try { id = media.play('wallpaper', file, { loop: true, audio: 0, hwOnly: 1, rate, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
+    try { id = media.play('wallpaper', file, { loop, audio: mute ? 0 : 1, hwOnly: 1, rate, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
     if (!id) { motionBusy.set(false); return null; }
     p = { id, tag, views: new Map(), paused: false, playing: createStore(false) };
     media.on(id, (type, d) => {
@@ -162,11 +175,11 @@ function release(p, key) {
   if (!p.views.size && players.get(p.tag) === p) { players.delete(p.tag); wallpaperMedia.set(null); media.close(p.id); }
 }
 
-function Layer({ path, rate, display, style }) {
+function Layer({ path, rate, mute, loop, display, style }) {
   const [p, setP] = useState(null);
   const [turn, setTurn] = useState(0);
   const tries = useRef(0);
-  useEffect(() => { tries.current = 0; }, [path, rate]);
+  useEffect(() => { tries.current = 0; }, [path, rate, mute, loop]);
   useEffect(() => {
     const key = {};
     let timer = 0;
@@ -177,7 +190,7 @@ function Layer({ path, rate, display, style }) {
     const mine = acquire(path, rate, key, display, lost);
     setP(mine);
     return () => { clearTimeout(timer); setP(null); if (mine) release(mine, key); };
-  }, [path, rate, turn, display.x, display.y, display.w, display.h]);
+  }, [path, rate, mute, loop, turn, display.x, display.y, display.w, display.h]);
   const on = useStore(p ? p.playing : idle);
   return on && p ? h(MediaView, { media: p.id, style }) : null;
 }
@@ -195,7 +208,7 @@ export function MotionWallpaper({ display }) {
     // chosen, but this machine can't play it: its still poster
     return it && !codecs.length ? h(Image, { src: motionPoster(it), style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h, objectFit: 'cover' } }) : null;
   }
-  return h(Layer, { path, rate: MOTION_RATES.includes(s.motionRate) ? s.motionRate : 100, display, style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h } });
+  return h(Layer, { path, rate: MOTION_RATES.includes(s.motionRate) ? s.motionRate : 100, mute: s.wallpaperMuted !== false, loop: s.motionLoop !== false, display, style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h } });
 }
 
 export const variantFor = (it, codecs, display) => pickVariant(it, codecs, display.w, display.h);

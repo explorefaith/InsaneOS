@@ -10,7 +10,9 @@ const eq = (name, a, b) => {
 eq('gpu and hevc', motionCodecs({ hevc: true, h264: false }, 'gpu'), ['hevc']);
 eq('gpu and both, hevc first', motionCodecs({ hevc: true, h264: true }, 'gpu'), ['hevc', 'h264']);
 eq('h264 only when in hardware', motionCodecs({ hevc: false, h264: true }, 'gpu'), ['h264']);
-eq('no decoder: nothing', motionCodecs({ hevc: false, h264: false }, 'gpu'), []);
+eq('vp9 and av1 when in hardware, after the catalog\'s', motionCodecs({ hevc: true, h264: true, vp9: true, av1: true }, 'gpu'), ['hevc', 'h264', 'vp9', 'av1']);
+eq('vp9 without the probe: nothing extra', motionCodecs({ hevc: true, h264: true }, 'gpu'), ['hevc', 'h264']);
+eq('no decoder: nothing', motionCodecs({ hevc: false, h264: false, vp9: true }, 'gpu'), ['vp9']);
 eq('no gpu composition: nothing', motionCodecs({ hevc: true, h264: true }, 'gpu-off'), []);
 eq('a virtual gpu: nothing', motionCodecs({ hevc: true, virtualGpu: true }, 'gpu'), []);
 eq('unknown yet: nothing', motionCodecs(null, 'gpu'), []);
@@ -34,6 +36,14 @@ eq('idle', pauseReason({ ...base, idleSec: 300 }), 'idle');
 eq('battery low', pauseReason({ ...base, battery: { discharging: true, percent: 20 } }), 'battery');
 eq('battery charging', pauseReason({ ...base, battery: { discharging: false, percent: 5 } }), null);
 eq('load', pauseReason({ ...base, busy: true }), 'busy');
+eq('locked', pauseReason({ ...base, locked: true }), 'locked');
+eq('the switches turn fullscreen off', pauseReason({ ...base, fullscreen: true, pauseWhen: { fullscreen: false } }), null);
+eq('the switches turn covered off, fullscreen stays', pauseReason({ ...base, fullscreen: true, covered: true, pauseWhen: { covered: false } }), 'fullscreen');
+eq('the switches turn idle off', pauseReason({ ...base, idleSec: 300, pauseWhen: { idle: false } }), null);
+eq('the switches turn battery off', pauseReason({ ...base, battery: { discharging: true, percent: 20 }, pauseWhen: { battery: false } }), null);
+eq('the switches turn busy off', pauseReason({ ...base, busy: true, pauseWhen: { busy: false } }), null);
+eq('the switches turn locked off', pauseReason({ ...base, locked: true, pauseWhen: { locked: false } }), null);
+eq('reduce motion is not optional', pauseReason({ ...base, reduceMotion: true, pauseWhen: { fullscreen: false, covered: false, idle: false, battery: false, busy: false, locked: false } }), 'reduceMotion');
 
 const d = { x: 0, y: 0, w: 1920, h: 1080 };
 eq('full window', displayCovered(d, [{ x: 0, y: 0, w: 1920, h: 1080 }]), true);
@@ -41,10 +51,12 @@ eq('bigger window', displayCovered(d, [{ x: -5, y: -5, w: 2000, h: 1200 }]), tru
 eq('smaller window', displayCovered(d, [{ x: 0, y: 30, w: 1920, h: 1050 }]), false);
 eq('another display', displayCovered(d, [{ x: 1920, y: 0, w: 1920, h: 1080 }]), false);
 
-eq('short hevc', userVideoProblem({ duration: 8, codec: 'hevc' }, ['hevc']), null);
-eq('long', userVideoProblem({ duration: 11, codec: 'hevc' }, ['hevc']), 'tooLong');
-eq('10 s', userVideoProblem({ duration: 10, codec: 'hevc' }, ['hevc']), null);
-eq('vp9', userVideoProblem({ duration: 8, codec: 'vp9' }, ['hevc']), 'format');
+eq('hevc of any length', userVideoProblem({ duration: 8, codec: 'hevc' }, ['hevc']), null);
+eq('long still plays: no cap', userVideoProblem({ duration: 3600, codec: 'hevc' }, ['hevc']), null);
+eq('vp9 when the machine decodes it', userVideoProblem({ duration: 8, codec: 'vp9' }, ['hevc', 'vp9']), null);
+eq('vp9 without hardware: format', userVideoProblem({ duration: 8, codec: 'vp9' }, ['hevc']), 'format');
+eq('av1 when the machine decodes it', userVideoProblem({ duration: 8, codec: 'av1' }, ['av1']), null);
+eq('h264 alias avc', userVideoProblem({ duration: 8, codec: 'avc' }, ['h264']), null);
 eq('unreadable', userVideoProblem(null, ['hevc']), 'unreadable');
 
 eq('random skips the last', nextRandom(['a', 'b'], 'a', () => 0), 'b');
