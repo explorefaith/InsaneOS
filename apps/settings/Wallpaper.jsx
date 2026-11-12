@@ -116,6 +116,7 @@ export function WallpaperSettings() {
         );
       })}
       <Section title={L('wallpaper.live.title', 'Live wallpaper')} footer={L('wallpaper.live.hint', 'Hardware decoding only: without a compatible GPU the still picture stays, nothing breaks.')}>
+        {s.reduceMotion ? <Note tone="warn">{L('wallpaper.live.reduceMotion', 'Reduce Motion is on (Settings → Appearance): the live wallpaper stays paused until you turn it off.')}</Note> : null}
         <View style={{ width: '100%', height: 180, borderRadius: 10, overflow: 'hidden', border: `1px solid ${t.separator}`, backgroundColor: '#000' }}>
           <Image src={`asset:wallpapers/web/nature-star-trails.thumb.jpg`} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: liveOn ? 0 : 1 }} />
           <LivePreview path={liveOn ? YOUR_VIDEO : null} />
