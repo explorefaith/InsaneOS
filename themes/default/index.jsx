@@ -6,7 +6,7 @@ import {
   useLauncherApps, launchApp, useDockEntries, dockActivate, dockMenu, dockPrefs, DOCK_LAUNCHER,
   useTrash, openTrash, emptyTrash, trashMenu, ConfirmDialog,
   DesktopWidgets, registerGestureActions, screenDisplays, mainDisplay, settings, Layer, PowerDialog,
-  findWallpaper, wallpaperSrc, MotionWallpaper, useShortcuts, AppSwitcher, openSwitcher, switcherKeys, switcherGrabs, switcherHold, cycleAppWindows, hideApp, hideOthers,
+  findWallpaper, wallpaperSrc, MotionWallpaper, Backdrop, useShortcuts, AppSwitcher, openSwitcher, switcherKeys, switcherGrabs, switcherHold, cycleAppWindows, hideApp, hideOthers,
   toggleShowDesktop, appSettingsItem, flowDesktopKeys, flowGrabs, desktopSwipe, DesktopHud, OverviewBackdrop, OverviewChrome,
   openOverview, closeOverview, toggleOverview, LevelHud, useStore, notifyHistory, menuBarEveryDisplay, hasBar, displayAt, keepWindowsInWorkAreas,
   dockIconRects, dockIdOfWindow, DUR, windows,
@@ -181,10 +181,8 @@ function App() {
   return (
     <ThemeProvider tokens={t}>
       <View style={{ width: '100%', height: '100%' }}>
-        {all.map((d) => (
-          <Image key={d.id + ':' + d.x} src={wallpaperSrc(wallpaper, d.w * (d.scale || 100) / 100, d.h * (d.scale || 100) / 100)} onContextMenu={(e) => setContext({ x: e.x, y: e.y })}
-            style={{ position: 'absolute', left: d.x, top: d.y, width: d.w, height: d.h, objectFit: 'cover' }} />
-        ))}
+        <Backdrop wallpaper={wallpaper} bg={s.wallpaperBg || null} fit={s.wallpaperFit} displays={all}
+          onContextMenu={(e) => setContext({ x: e.x, y: e.y })} />
         {all.map((d) => <MotionWallpaper key={d.id + ':' + d.x} display={d} />)}
         <DesktopWidgets layer="below" />
         <OverviewBackdrop />

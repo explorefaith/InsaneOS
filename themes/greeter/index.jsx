@@ -15,7 +15,7 @@
 import { render, screen, mainBox, onScreenChange, addListener } from '@insaneos/runtime';
 import {
   View, Text, Image, TextInput, ThemeProvider, useStore, locale, t, formatDate, formatTime, setLanguage, languages, CORE_LANGUAGES, keyboard, settings, InsaneWordmark,
-  insaneosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView,
+  insaneosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView, fitOf, bgStyle,
   regionOf, regionCountry,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -52,6 +52,23 @@ const LOGIN_PICKED = '/var/lib/insaneos/wallpapers/login.mp4';      // chosen in
 const LOGIN_BUILTIN = '/usr/share/backgrounds/insaneos/motion/apple';
 const LOGIN_STILL = '/var/lib/insaneos/wallpapers/login-still';     // a still wallpaper's id: no video at all
 const loginStill = () => { try { return String(fs.read(LOGIN_STILL)).trim(); } catch (e) { return ''; } };
+// How a still source is drawn ("fill" = cover, no file), and the playback speed, 1/100. Both written by the
+// wallpaper-login action (server/src/hw/wallpaper_admin.c).
+const loginFit = () => {
+  try { const f = String(fs.read('/var/lib/insaneos/wallpapers/login-fit')).trim(); return ['fill', 'fit', 'stretch', 'center'].includes(f) ? f : 'fill'; }
+  catch (e) { return 'fill'; }
+};
+const loginRate = () => {
+  try { const r = +String(fs.read('/var/lib/insaneos/wallpapers/login-rate')).trim(); return [25, 50, 75, 100].includes(r) ? r : 100; }
+  catch (e) { return 100; }
+};
+// A colour choice ("solid:rrggbb", "gradient:rrggbb-rrggbb-deg"): the greeter draws it itself, no picture.
+function loginColor(mark) {
+  if (!mark) return null;
+  if (mark.startsWith('solid:')) return { kind: 'solid', a: `#${mark.slice(6)}` };
+  const m = /^gradient:([0-9a-f]{6})-([0-9a-f]{6})-(\d+)$/.exec(mark);
+  return m ? { kind: 'gradient', a: `#${m[1]}`, b: `#${m[2]}`, angle: +m[3] } : null;
+}
 // A picture of the user's own, kept there by wallpaper-login-image; the greeter never sees a home.
 function loginImage(still) {
   const m = /^image:([0-9a-f]{16})$/.exec(still);
@@ -68,7 +85,7 @@ function LoginVideo({ box, stop }) {
     const start = (codecs) => {
       const files = [LOGIN_PICKED, ...codecs.map((c) => `${LOGIN_BUILTIN}.${c}.mp4`)];
       for (const f of files) {
-        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, appName: 'Insane OS' }); } catch (e) { cur = 0; }
+        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, rate: loginRate(), appName: 'Insane OS' }); } catch (e) { cur = 0; }
         if (cur) break;
       }
       if (!cur) return;
@@ -335,14 +352,17 @@ function Greeter() {
 
   const marked = loginStill();
   const image = loginImage(marked);
-  const still = marked.startsWith('image:') ? '' : marked;
+  const solid = loginColor(marked);
+  const still = marked.startsWith('image:') || solid ? '' : marked;
   return (
     <ThemeProvider tokens={{ mode: 'dark', accent: '#ffffff', text: '#ffffff', textDim: 'rgba(255,255,255,0.55)',
       inputBg: 'rgba(255,255,255,0.16)', separator: 'rgba(255,255,255,0.22)',
       panelBg: 'rgba(30,22,40,0.94)', control: 'rgba(255,255,255,0.18)', sidebarBg: 'rgba(255,255,255,0.09)' }}>
       <View style={{ width: screen.width, height: screen.height, direction: 'ltr' }}>
-        <Image src={image || wallpaperSrc(findWallpaper(insaneosWallpapers, still || GREETER_WALLPAPER), screen.width, screen.height) || 'assets/background.jpg'}
-          style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height, objectFit: 'cover' }} />
+        {solid
+          ? <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height, ...bgStyle(solid) }} />
+          : <Image src={image || wallpaperSrc(findWallpaper(insaneosWallpapers, still || GREETER_WALLPAPER), screen.width, screen.height) || 'assets/background.jpg'}
+              style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height, objectFit: fitOf(loginFit()) }} />}
         {/* soft dark vignette so the glass panels read on any wallpaper */}
         <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
           background: 'linear-gradient(180deg, rgba(4,4,14,0.30) 0%, rgba(4,4,14,0.16) 42%, rgba(4,4,14,0.52) 100%)', pointerEvents: 'none' }} />

@@ -326,8 +326,9 @@ function LocaleRoot({ children }) {
     at('system', PermissionPrompt, SharePrompt, Powerbox, KeyringPrompt, BluetoothPrompt, PolkitPrompt, PortalFilePrompt, VoiceSavePrompt, DisplayConfirm),
     at('input', OskPanel, ImeOverlay));
 }
-export { setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, MotionWallpaper, MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionPoster, motionDownloads, wallpaperMedia, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor } from './motion.jsx';
-export { userVideoProblem, heavyVideoWarning, motionCodecs, MAX_SECONDS } from './motionmodel.js';
+export { setLoginStill, setLoginImage, setLoginVideo, setLoginSolid, setLoginGradient, setLoginRate, motionPathFor, addWallpaperImage, removeWallpaperImage, MotionWallpaper, MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionPoster, motionDownloads, wallpaperMedia, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor } from './motion.jsx';
+export { userVideoProblem, heavyVideoWarning, motionCodecs } from './motionmodel.js';
+export { Backdrop, fitOf, bgStyle } from './backdrop.jsx';
 export { insaneosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, findWallpaper, DEFAULT_WALLPAPER, GREETER_WALLPAPER, WALLPAPER_CATEGORIES } from './wallpapers.js';
 export { appGroup, appMenuItems, runningApps, forceQuit, recentItems, storeUpdates, hideApp, hideOthers, toggleShowDesktop, appSettingsItem } from './appcontrol.js';
 export { windowMenuItems, moveResizeItems } from './windowmenu.js';

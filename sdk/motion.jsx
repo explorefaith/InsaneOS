@@ -78,6 +78,8 @@ export const setLoginSolid = (hex, fit) => setLoginStill(`solid:${hex}`, fit);
 export const setLoginGradient = (a, b, deg, fit) => setLoginStill(`gradient:${a}-${b}-${deg}`, fit);
 // A video of the user's own for the login screen: the action keeps it as login.mp4 (container and size checked there).
 export const setLoginVideo = (path) => admin.run('wallpaper-login-video', path, null, { quiet: true });
+// The login screen's playback speed, whatever its source is.
+export const setLoginRate = (rate) => admin.run('wallpaper-login', `rate ${rate}`, null, { quiet: true });
 export const setLoginMotion = (it) => admin.run('wallpaper-login', it ? `${it.id} ${settings.get().motionFiles?.[it.id]}` : 'default', null, { quiet: true });
 
 // The file behind a chosen id, or null.
@@ -96,6 +98,9 @@ function resolve(s, choice, w, h_, codecs) {
   // only a format this machine decodes in hardware, however it was downloaded
   return v && codecs.includes(v.codec) ? pathOf(v) : null;
 }
+
+// The file a choice resolves to right now (Settings → Wallpaper's preview). Same rules as the player's.
+export const motionPathFor = (s, choice, codecs, w, h) => resolve(s, choice, w, h, codecs);
 let lastRandom = null, randomPick = null;
 function randomFor(ids) {
   if (!randomPick || !ids.includes(randomPick)) { randomPick = nextRandom(ids, lastRandom); lastRandom = randomPick; }

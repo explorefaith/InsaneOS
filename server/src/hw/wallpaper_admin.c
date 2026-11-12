@@ -3,9 +3,10 @@
  *   wallpaper-get "<id> <variant>"     downloads one file of the catalog to /var/lib/insaneos/wallpapers/<sha256>.mp4
  *   wallpaper-remove "<id> <variant>"  deletes it
  *   wallpaper-login "still <id>"       the login screen shows that still wallpaper, with no video; the source can also
- *                                      be a colour mark ("solid:rrggbb", "gradient:rrggbb-rrggbb-deg"), and an optional
- *                                      " fit <fill|fit|stretch|center>" tail sets how still sources are drawn
- *                                      (login-fit; the video always covers)
+ *                                      be a colour mark ("solid:rrggbb", "gradient:rrggbb-rrggbb-deg"), with optional
+ *                                      " fit <fill|fit|stretch|center>" (login-fit; the video always covers) and
+ *                                      " rate <25|50|75|100>" (login-rate) tails, in any order
+ *   wallpaper-login "rate <r>"         just the playback speed, whatever the source is
  *   wallpaper-login "<id> <variant>"   the login screen plays it; "default" goes back to the built-in one
  *   wallpaper-image "<path>"           the session user's own copy of a picture they chose, made by a child running as
  *                                      them; answers its name, 16 hex digits. "remove <name>" deletes that copy
@@ -135,6 +136,19 @@ static int put_fit(const char *what, size_t n) {
     return 0;
 }
 
+/* The login screen's playback speed, 1/100 (25, 50, 75, 100): for the video and for nothing else. */
+static int put_rate(int rate) {
+    char what[8];
+    const char *tmp = STORE "/.login-rate.part";
+    int n = snprintf(what, sizeof what, "%d", rate);
+    int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
+    if (fd < 0) return -1;
+    int bad = write(fd, what, (size_t)n) != (ssize_t)n;
+    if (close(fd)) bad = 1;
+    if (bad || rename(tmp, STORE "/login-rate")) { unlink(tmp); return -1; }
+    return 0;
+}
+
 /* The login screen's fit for still sources; the video always covers. */
 static int fit_ok(const char *s, size_t n) {
     static const char *const fits[] = { "fill", "fit", "stretch", "center" };
@@ -144,22 +158,42 @@ static int fit_ok(const char *s, size_t n) {
     return 0;
 }
 
-/* "<spec> fit <mode>" as the optional tail of an argument. When it is there, spec/spec_n shrink to the part before it
- * and fit/fit_n point at the mode; otherwise fit stays NULL. The spec itself never contains a space, so the first one
- * anchors the tail. */
-static void split_fit(const char *spec, size_t *spec_n, const char **fit, size_t *fit_n) {
-    static const char tail[] = " fit ";
-    const size_t tl = sizeof tail - 1;
-    for (size_t i = 0; i + tl <= *spec_n; i++) {
-        if (spec[i] != ' ') continue;
-        if (strncmp(spec + i, tail, tl)) return;        /* a space but not our tail: no fit here */
-        size_t fn = *spec_n - i - tl;
-        if (!fit_ok(spec + i + tl, fn)) return;
-        *fit = spec + i + tl;
-        *fit_n = fn;
-        *spec_n = i;
-        return;
+/* "<spec> [fit <mode>] [rate <25|50|75|100>]" — the spec itself never contains a space, so the rest of the
+ * argument is keyword-value pairs, in any order. spec (NUL-terminated) and fit (NUL-terminated, "" with none)
+ * come out; rate is 0 with none. 0 ok, -1 invalid. */
+static int login_still_parse(const char *arg, size_t len, char *spec, size_t specn, char *fit, size_t fitn, int *rate) {
+    spec[0] = fit[0] = 0;
+    *rate = 0;
+    size_t i = 0;
+    while (i < len && arg[i] != ' ') i++;
+    if (i == 0 || i >= specn || i > len) return -1;
+    memcpy(spec, arg, i);
+    spec[i] = 0;
+    while (i < len) {
+        while (i < len && arg[i] == ' ') i++;
+        size_t kw = i;
+        while (i < len && arg[i] != ' ') i++;
+        size_t kwn = i - kw;
+        if (i >= len) return -1;                        /* a keyword with no value */
+        i++;                                            /* the space before the value */
+        size_t v = i;
+        while (i < len && arg[i] != ' ') i++;
+        size_t vn = i - v;
+        if (kwn == 3 && !strncmp(arg + kw, "fit", 3)) {
+            if (fit[0] || vn >= fitn || !fit_ok(arg + v, vn)) return -1;
+            memcpy(fit, arg + v, vn);
+            fit[vn] = 0;
+        } else if (kwn == 4 && !strncmp(arg + kw, "rate", 4)) {
+            if (*rate || vn < 2 || vn > 3) return -1;
+            *rate = 0;
+            for (size_t k = 0; k < vn; k++) {
+                if (arg[v + k] < '0' || arg[v + k] > '9') return -1;
+                *rate = *rate * 10 + arg[v + k] - '0';
+            }
+            if (*rate != 25 && *rate != 50 && *rate != 75 && *rate != 100) return -1;
+        } else return -1;
     }
+    return 0;
 }
 
 static int hex6(const char *s) {
@@ -378,12 +412,10 @@ void hw_act_wallpaper_image(const AdminReq *r, const char *arg, size_t len) {
 
 void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len) {
     if (strlen(arg) != len || !len) { admin_err("admin.invalidArgument", NULL); return; }
-    const char *fit = NULL;
-    size_t fitn = 0;
-    const char *spec = arg;
-    size_t sn = len;
-    split_fit(spec, &sn, &fit, &fitn);
-    if (!name_ok(spec, sn)) { admin_err("admin.invalidArgument", NULL); return; }
+    char spec[32], fit[16];
+    int rate = 0;
+    if (login_still_parse(arg, len, spec, sizeof spec, fit, sizeof fit, &rate) || rate) { admin_err("admin.invalidArgument", NULL); return; }
+    if (!name_ok(spec, strlen(spec))) { admin_err("admin.invalidArgument", NULL); return; }
     char src[PATH_MAX];
     if (snprintf(src, sizeof src, "%s" MINE "/%.16s.jpg", r->home, spec) >= (int)sizeof src) { admin_err("admin.invalidArgument", NULL); return; }
     unsigned char *jpg = NULL;
@@ -403,8 +435,8 @@ void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len
     if (fd >= 0 && close(fd)) bad = 1;
     free(jpg);
     if (bad || rename(tmp, dst)) { unlink(tmp); admin_err("wallpaper.imageFailed", NULL); return; }
-    if (fit) {
-        if (put_fit(fit, fitn)) { admin_err("wallpaper.imageFailed", NULL); return; }
+    if (fit[0]) {
+        if (put_fit(fit, strlen(fit))) { admin_err("wallpaper.imageFailed", NULL); return; }
     } else unlink(STORE "/login-fit");
     int ml = snprintf(mark, sizeof mark, "image:%s", hex);
     if (put_still(mark, (size_t)ml)) { unlink(dst); admin_err("wallpaper.imageFailed", NULL); return; }
@@ -417,25 +449,36 @@ void hw_act_wallpaper_login(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     const char *dst = STORE "/login.mp4", *tmp = STORE "/.login.part", *still = STORE "/login-still";
     if (len > 6 && len < 96 && !strncmp(arg, "still ", 6)) {            /* a still source by its id or colour mark, never a path */
-        const char *spec = arg + 6;
-        size_t sn = len - 6;
-        const char *fit = NULL;
-        size_t fitn = 0;
-        split_fit(spec, &sn, &fit, &fitn);
-        int kind = still_kind(spec, sn);
+        char spec[64], fit[16];
+        int rate = 0;
+        if (login_still_parse(arg + 6, len - 6, spec, sizeof spec, fit, sizeof fit, &rate)) { admin_err("admin.invalidArgument", NULL); return; }
+        int kind = still_kind(spec, strlen(spec));
         if (kind < 0) { admin_err("admin.invalidArgument", NULL); return; }
-        if (put_still(spec, sn)) { admin_err("wallpaper.removeFailed", NULL); return; }
-        if (fit) {
-            if (put_fit(fit, fitn)) { admin_err("wallpaper.removeFailed", NULL); return; }
+        if (rate && put_rate(rate)) { admin_err("wallpaper.removeFailed", NULL); return; }
+        if (put_still(spec, strlen(spec))) { admin_err("wallpaper.removeFailed", NULL); return; }
+        if (fit[0]) {
+            if (put_fit(fit, strlen(fit))) { admin_err("wallpaper.removeFailed", NULL); return; }
         } else unlink(STORE "/login-fit");
         unlink(dst);
         login_images_clear(NULL);
         admin_say("OK", "%s", kind == 2 ? "gradient" : kind == 1 ? "solid" : "still");  /* i18n-ok: parsed by sdk/motion.js */
         return;
     }
+    if (len > 5 && len < 12 && !strncmp(arg, "rate ", 5)) {             /* just the playback speed, whatever the source is */
+        int rate = 0;
+        for (size_t i = 5; i < len; i++) {
+            if (arg[i] < '0' || arg[i] > '9') { admin_err("admin.invalidArgument", NULL); return; }
+            rate = rate * 10 + arg[i] - '0';
+        }
+        if (rate != 25 && rate != 50 && rate != 75 && rate != 100) { admin_err("admin.invalidArgument", NULL); return; }
+        if (put_rate(rate)) { admin_err("wallpaper.removeFailed", NULL); return; }
+        admin_say("OK", "%s", "rate");                  /* i18n-ok: parsed by sdk/motion.js */
+        return;
+    }
     if (len == 7 && !strncmp(arg, "default", 7)) {
         unlink(still);
         unlink(STORE "/login-fit");
+        unlink(STORE "/login-rate");
         login_images_clear(NULL);
         if (unlink(dst) && errno != ENOENT) { admin_err("wallpaper.removeFailed", NULL); return; }
         admin_say("OK", "%s", "default");               /* i18n-ok: parsed by sdk/motion.js */
