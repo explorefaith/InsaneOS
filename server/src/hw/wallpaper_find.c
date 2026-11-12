@@ -30,7 +30,7 @@ static int word_ok(const char *s, size_t n) {
     return 1;
 }
 
-int hw_wallpaper_find(const char *json, size_t n, const char *arg, char *url, size_t un, char *sha, size_t sn, unsigned long long *size) {
+int hw_wallpaper_find(const char *json, size_t n, const char *arg, const char *prefix, char *url, size_t un, char *sha, size_t sn, unsigned long long *size) {
     const char *sp = arg ? strchr(arg, ' ') : NULL;
     if (!sp || !word_ok(arg, (size_t)(sp - arg)) || !word_ok(sp + 1, strlen(sp + 1))) return -1;
     JDoc d;
@@ -38,7 +38,7 @@ int hw_wallpaper_find(const char *json, size_t n, const char *arg, char *url, si
     int rc = -1;
     const char *base = str(d.root, "base");
     const JVal *items = get(d.root, "items");
-    if (base && !strncmp(base, BASE, BASE_LEN) && items && items->type == J_ARR) {
+    if (base && prefix && !strncmp(base, prefix, strlen(prefix)) && items && items->type == J_ARR) {
         for (const JVal *it = items->kid; it && rc; it = it->next) {
             const char *id = str(it, "id");
             if (!id || strlen(id) != (size_t)(sp - arg) || strncmp(id, arg, (size_t)(sp - arg))) continue;

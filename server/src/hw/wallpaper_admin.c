@@ -44,6 +44,9 @@
 #include <unistd.h>
 
 #define CATALOG "/usr/share/backgrounds/insaneos/motion.json"
+#define WEB_CATALOG "/usr/share/backgrounds/insaneos/web.json"
+#define MOTION_BASE "https://raw.githubusercontent.com/insaneos/"
+#define WEB_BASE "https://upload.wikimedia.org/"
 #ifndef WALLPAPER_STORE
 #define WALLPAPER_STORE "/var/lib/insaneos/wallpapers"
 #endif
@@ -51,16 +54,19 @@
 #define MINE    "/.local/share/insaneos/wallpapers"     /* under the user's home: their copies */
 #define IMAGE_SECONDS 30                              /* a picture takes far less; a stuck disk doesn't wait forever */
 
-static int entry(const char *arg, size_t len, char *url, size_t un, char *sha, size_t sn, unsigned long long *size) {
+/* The catalog entry of "<id> <variant>" out of a root-owned catalog file. JS names an entry, never a URL:
+ * the catalog in the package carries the urls, the hashes and the sizes, and its base must start with
+ * prefix (the motion catalog's own github base, the web pictures' upload.wikimedia.org). */
+static int entry_at(const char *catalog, const char *prefix, const char *arg, size_t len, char *url, size_t un, char *sha, size_t sn, unsigned long long *size) {
     if (!len || len > 120 || strlen(arg) != len) return -1;
-    int fd = open(CATALOG, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+    int fd = open(catalog, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
     if (fd < 0) return -1;
     struct stat st;
     char *buf = NULL;
     int rc = -1;
     if (!fstat(fd, &st) && S_ISREG(st.st_mode) && st.st_uid == 0 && st.st_size > 0 && st.st_size < 1 << 20 && (buf = malloc((size_t)st.st_size + 1))) {
         ssize_t r = read(fd, buf, (size_t)st.st_size);
-        if (r == st.st_size) rc = hw_wallpaper_find(buf, (size_t)r, arg, url, un, sha, sn, size);
+        if (r == st.st_size) rc = hw_wallpaper_find(buf, (size_t)r, arg, prefix, url, un, sha, sn, size);
     }
     free(buf);
     close(fd);
@@ -81,7 +87,7 @@ void hw_act_wallpaper_get(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     char url[900], sha[65];
     unsigned long long size = 0;
-    if (entry(arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
+    if (entry_at(CATALOG, MOTION_BASE, arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
     mkdir(STORE, 0755);
     chmod(STORE, 0755);
     FetchItem it;
@@ -109,7 +115,7 @@ void hw_act_wallpaper_remove(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     char url[900], sha[65], p[200];
     unsigned long long size = 0;
-    if (entry(arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
+    if (entry_at(CATALOG, MOTION_BASE, arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
     snprintf(p, sizeof p, "%s/%s.mp4", STORE, sha);
     if (unlink(p) && errno != ENOENT) { admin_err("wallpaper.removeFailed", NULL); return; }
     admin_say("OK", "%s", "removed");                   /* i18n-ok: parsed by sdk/motion.js */
@@ -490,7 +496,7 @@ void hw_act_wallpaper_login(const AdminReq *r, const char *arg, size_t len) {
     }
     char url[900], sha[65], p[200];
     unsigned long long size = 0;
-    if (entry(arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
+    if (entry_at(CATALOG, MOTION_BASE, arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
     snprintf(p, sizeof p, "%s/%s.mp4", STORE, sha);
     struct stat st;
     if (lstat(p, &st) || !S_ISREG(st.st_mode) || (unsigned long long)st.st_size != size) { admin_err("wallpaper.notDownloaded", NULL); return; }
@@ -602,3 +608,44 @@ void hw_act_wallpaper_login_video(const AdminReq *r, const char *arg, size_t len
     login_images_clear(NULL);
     admin_say("OK", "%s", "video");                     /* i18n-ok: parsed by sdk/motion.jsx */
 }
+/* wallpaper-web-get "<id> <variant>": one picture of the web catalog (the package's curated collection of
+ * Wikimedia photographs and drawings, entry and hash verified here like the motion catalog's). The bytes
+ * land in the store as a root-owned 0644 file, and the user's own copy (a baseline JPEG with its thumb,
+ * exactly the wallpaper-image pipeline) is made by a child running as them. It answers the copy's name,
+ * 16 hex digits: the id "image:<name>" then works for the desktop and, through wallpaper-login-image,
+ * for the login screen. */
+void hw_act_wallpaper_web_get(const AdminReq *r, const char *arg, size_t len) {
+    char url[900], sha[65];
+    unsigned long long size = 0;
+    if (entry_at(WEB_CATALOG, WEB_BASE, arg, len, url, sizeof url, sha, sizeof sha, &size)) { admin_err("admin.invalidArgument", NULL); return; }
+    mkdir(STORE, 0755);
+    chmod(STORE, 0755);
+    FetchItem it;
+    memset(&it, 0, sizeof it);
+    snprintf(it.url, sizeof it.url, "%s", url);
+    snprintf(it.dest, sizeof it.dest, "%s/%s.jpg", STORE, sha);
+    struct stat st;
+    if (!stat(it.dest, &st) || (unsigned long long)st.st_size != size) {
+        int last = -1;
+        it.max = size;
+        it.expect = size;
+        fetch_batch(&it, 1, progress, &last);
+        char hex[65];
+        for (int i = 0; i < 32; i++) snprintf(hex + i * 2, 3, "%02x", it.sha256[i]);
+        if (it.status != 200 || it.size != size || strcmp(hex, sha)) {
+            unlink(it.dest);
+            admin_err("wallpaper.downloadFailed", NULL);
+            return;
+        }
+        chmod(it.dest, 0644);
+    }
+    unsigned char *out = NULL;
+    size_t n = 0;
+    int rc = in_child(r, it.dest, 1, &out, &n);         /* as the user: their copy and its thumb */
+    unlink(it.dest);
+    if (rc) { image_err(rc); return; }
+    if (n != 16 || !name_ok((char *)out, 16)) { free(out); admin_err("wallpaper.imageFailed", NULL); return; }
+    admin_say("OK", "%.16s", (char *)out);              /* i18n-ok: parsed by sdk/motion.jsx */
+    free(out);
+}
+
