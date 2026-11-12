@@ -6,6 +6,8 @@
 #include <string.h>
 
 #define MAX_FILE (100ull * 1024 * 1024)           /* the host's own limit per file */
+#define BASE     "https://raw.githubusercontent.com/insaneos/"
+#define BASE_LEN (sizeof BASE - 1)
 
 static const JVal *get(const JVal *o, const char *k) {
     if (!o || o->type != J_OBJ) return NULL;
@@ -36,7 +38,7 @@ int hw_wallpaper_find(const char *json, size_t n, const char *arg, char *url, si
     int rc = -1;
     const char *base = str(d.root, "base");
     const JVal *items = get(d.root, "items");
-    if (base && !strncmp(base, "https://raw.githubusercontent.com/insaneos/", 44) && items && items->type == J_ARR) {
+    if (base && !strncmp(base, BASE, BASE_LEN) && items && items->type == J_ARR) {
         for (const JVal *it = items->kid; it && rc; it = it->next) {
             const char *id = str(it, "id");
             if (!id || strlen(id) != (size_t)(sp - arg) || strncmp(id, arg, (size_t)(sp - arg))) continue;
