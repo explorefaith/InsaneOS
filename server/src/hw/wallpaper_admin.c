@@ -2,11 +2,17 @@
  *
  *   wallpaper-get "<id> <variant>"     downloads one file of the catalog to /var/lib/insaneos/wallpapers/<sha256>.mp4
  *   wallpaper-remove "<id> <variant>"  deletes it
- *   wallpaper-login "still <id>"       the login screen shows that still wallpaper, with no video
+ *   wallpaper-login "still <id>"       the login screen shows that still wallpaper, with no video; the source can also
+ *                                      be a colour mark ("solid:rrggbb", "gradient:rrggbb-rrggbb-deg"), and an optional
+ *                                      " fit <fill|fit|stretch|center>" tail sets how still sources are drawn
+ *                                      (login-fit; the video always covers)
  *   wallpaper-login "<id> <variant>"   the login screen plays it; "default" goes back to the built-in one
  *   wallpaper-image "<path>"           the session user's own copy of a picture they chose, made by a child running as
  *                                      them; answers its name, 16 hex digits. "remove <name>" deletes that copy
  *   wallpaper-login-image "<name>"     the login screen shows that copy: stored in /var/lib/insaneos/wallpapers
+ *                                      (same optional " fit <mode>" tail)
+ *   wallpaper-login-video "<path>"     the login screen plays the user's own video, kept as login.mp4: a child running
+ *                                      as them streams the bytes, root checks the container's magic and the size
  *
  * What is fetched comes only from the catalog in the package, read here as root: JS names an entry, never a URL or
  * a path. The bytes go through fetch_batch (a child as nobody, in the Store's scope), and a file whose size or
@@ -105,7 +111,8 @@ void hw_act_wallpaper_remove(const AdminReq *r, const char *arg, size_t len) {
     admin_say("OK", "%s", "removed");                   /* i18n-ok: parsed by sdk/motion.js */
 }
 
-/* What the login screen shows with no video: a still wallpaper's id, or "image:<name>". */
+/* What the login screen shows with no video: a still wallpaper's id, or "image:<name>", or a colour
+ * ("solid:rrggbb", "gradient:rrggbb-rrggbb-deg"). */
 static int put_still(const char *what, size_t n) {
     const char *tmp = STORE "/.login.part";
     mkdir(STORE, 0755);
@@ -114,6 +121,74 @@ static int put_still(const char *what, size_t n) {
     int bad = write(fd, what, n) != (ssize_t)n;
     if (close(fd)) bad = 1;
     if (bad || rename(tmp, STORE "/login-still")) { unlink(tmp); return -1; }
+    return 0;
+}
+
+/* How the login screen draws its still source: cover (no file), fill, fit, stretch or center. */
+static int put_fit(const char *what, size_t n) {
+    const char *tmp = STORE "/.login-fit.part";
+    int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
+    if (fd < 0) return -1;
+    int bad = write(fd, what, n) != (ssize_t)n;
+    if (close(fd)) bad = 1;
+    if (bad || rename(tmp, STORE "/login-fit")) { unlink(tmp); return -1; }
+    return 0;
+}
+
+/* The login screen's fit for still sources; the video always covers. */
+static int fit_ok(const char *s, size_t n) {
+    static const char *const fits[] = { "fill", "fit", "stretch", "center" };
+    if (!n || n > 7) return 0;
+    for (size_t i = 0; i < sizeof fits / sizeof fits[0]; i++)
+        if (strlen(fits[i]) == n && !strncmp(s, fits[i], n)) return 1;
+    return 0;
+}
+
+/* "<spec> fit <mode>" as the optional tail of an argument. When it is there, spec/spec_n shrink to the part before it
+ * and fit/fit_n point at the mode; otherwise fit stays NULL. The spec itself never contains a space, so the first one
+ * anchors the tail. */
+static void split_fit(const char *spec, size_t *spec_n, const char **fit, size_t *fit_n) {
+    static const char tail[] = " fit ";
+    const size_t tl = sizeof tail - 1;
+    for (size_t i = 0; i + tl <= *spec_n; i++) {
+        if (spec[i] != ' ') continue;
+        if (strncmp(spec + i, tail, tl)) return;        /* a space but not our tail: no fit here */
+        size_t fn = *spec_n - i - tl;
+        if (!fit_ok(spec + i + tl, fn)) return;
+        *fit = spec + i + tl;
+        *fit_n = fn;
+        *spec_n = i;
+        return;
+    }
+}
+
+static int hex6(const char *s) {
+    for (size_t i = 0; i < 6; i++) if (!((s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f'))) return 0;
+    return 1;
+}
+
+/* A still source: 0 a wallpaper id, 1 "solid:rrggbb", 2 "gradient:rrggbb-rrggbb-deg" (deg 0..360); -1 invalid. The mark
+ * is written to login-still exactly as given — a closed charset, never a path (the greeter reads it as text). */
+static int still_kind(const char *s, size_t n) {
+    if (n > 6 && !strncmp(s, "solid:", 6)) {
+        return n == 12 && hex6(s + 6) ? 1 : -1;
+    }
+    if (n > 9 && !strncmp(s, "gradient:", 9)) {
+        const char *c = s + 9;
+        size_t cn = n - 9;
+        if (cn < 15 || !hex6(c) || c[6] != '-' || !hex6(c + 7) || c[13] != '-') return -1;
+        const char *d = c + 14;
+        size_t dn = cn - 14;
+        if (dn < 1 || dn > 3) return -1;
+        int deg = 0;
+        for (size_t i = 0; i < dn; i++) {
+            if (d[i] < '0' || d[i] > '9') return -1;
+            deg = deg * 10 + (d[i] - '0');
+        }
+        return deg <= 360 ? 2 : -1;
+    }
+    for (size_t i = 0; i < n; i++)
+        if (!((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= '0' && s[i] <= '9') || s[i] == '-')) return -1;
     return 0;
 }
 
@@ -302,9 +377,15 @@ void hw_act_wallpaper_image(const AdminReq *r, const char *arg, size_t len) {
 }
 
 void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len) {
-    if (strlen(arg) != len || !name_ok(arg, len)) { admin_err("admin.invalidArgument", NULL); return; }
+    if (strlen(arg) != len || !len) { admin_err("admin.invalidArgument", NULL); return; }
+    const char *fit = NULL;
+    size_t fitn = 0;
+    const char *spec = arg;
+    size_t sn = len;
+    split_fit(spec, &sn, &fit, &fitn);
+    if (!name_ok(spec, sn)) { admin_err("admin.invalidArgument", NULL); return; }
     char src[PATH_MAX];
-    if (snprintf(src, sizeof src, "%s" MINE "/%.16s.jpg", r->home, arg) >= (int)sizeof src) { admin_err("admin.invalidArgument", NULL); return; }
+    if (snprintf(src, sizeof src, "%s" MINE "/%.16s.jpg", r->home, spec) >= (int)sizeof src) { admin_err("admin.invalidArgument", NULL); return; }
     unsigned char *jpg = NULL;
     size_t n = 0;
     int rc = in_child(r, src, 0, &jpg, &n);
@@ -322,6 +403,9 @@ void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len
     if (fd >= 0 && close(fd)) bad = 1;
     free(jpg);
     if (bad || rename(tmp, dst)) { unlink(tmp); admin_err("wallpaper.imageFailed", NULL); return; }
+    if (fit) {
+        if (put_fit(fit, fitn)) { admin_err("wallpaper.imageFailed", NULL); return; }
+    } else unlink(STORE "/login-fit");
     int ml = snprintf(mark, sizeof mark, "image:%s", hex);
     if (put_still(mark, (size_t)ml)) { unlink(dst); admin_err("wallpaper.imageFailed", NULL); return; }
     unlink(STORE "/login.mp4");
@@ -332,16 +416,26 @@ void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len
 void hw_act_wallpaper_login(const AdminReq *r, const char *arg, size_t len) {
     (void)r;
     const char *dst = STORE "/login.mp4", *tmp = STORE "/.login.part", *still = STORE "/login-still";
-    if (len > 6 && len < 60 && !strncmp(arg, "still ", 6)) {            /* a still wallpaper by its id, never a path */
-        for (size_t i = 6; i < len; i++) if (!((arg[i] >= 'a' && arg[i] <= 'z') || (arg[i] >= '0' && arg[i] <= '9') || arg[i] == '-')) { admin_err("admin.invalidArgument", NULL); return; }
-        if (put_still(arg + 6, len - 6)) { admin_err("wallpaper.removeFailed", NULL); return; }
+    if (len > 6 && len < 96 && !strncmp(arg, "still ", 6)) {            /* a still source by its id or colour mark, never a path */
+        const char *spec = arg + 6;
+        size_t sn = len - 6;
+        const char *fit = NULL;
+        size_t fitn = 0;
+        split_fit(spec, &sn, &fit, &fitn);
+        int kind = still_kind(spec, sn);
+        if (kind < 0) { admin_err("admin.invalidArgument", NULL); return; }
+        if (put_still(spec, sn)) { admin_err("wallpaper.removeFailed", NULL); return; }
+        if (fit) {
+            if (put_fit(fit, fitn)) { admin_err("wallpaper.removeFailed", NULL); return; }
+        } else unlink(STORE "/login-fit");
         unlink(dst);
         login_images_clear(NULL);
-        admin_say("OK", "%s", "still");                 /* i18n-ok: parsed by sdk/motion.js */
+        admin_say("OK", "%s", kind == 2 ? "gradient" : kind == 1 ? "solid" : "still");  /* i18n-ok: parsed by sdk/motion.js */
         return;
     }
     if (len == 7 && !strncmp(arg, "default", 7)) {
         unlink(still);
+        unlink(STORE "/login-fit");
         login_images_clear(NULL);
         if (unlink(dst) && errno != ENOENT) { admin_err("wallpaper.removeFailed", NULL); return; }
         admin_say("OK", "%s", "default");               /* i18n-ok: parsed by sdk/motion.js */
@@ -356,6 +450,108 @@ void hw_act_wallpaper_login(const AdminReq *r, const char *arg, size_t len) {
     unlink(tmp);
     if (link(p, tmp) || rename(tmp, dst)) { unlink(tmp); admin_err("wallpaper.removeFailed", NULL); return; }
     unlink(still);
+    unlink(STORE "/login-fit");                         /* the video always covers */
     login_images_clear(NULL);
     admin_say("OK", "%s", sha);                         /* i18n-ok: parsed by sdk/motion.js */
+}
+
+/* ---- the login screen plays one of the user's own videos ----
+ *
+ * The pictures' rule again: root never opens the user's file. A child that has become the session user reads it and
+ * streams the bytes through a pipe; root only counts them, checks the container's magic (MP4 or Matroska, the formats
+ * insane-media plays) and keeps them, atomically, as the root-owned login.mp4 the greeter reads. The greeter's player
+ * is hardware-only, so a file it can't decode costs nothing: the still source stays on screen. */
+
+#define LOGIN_VIDEO_MAX (100u << 20)                    /* like the catalog's own files */
+
+static int is_mp4(const unsigned char *b, size_t n) {
+    return n >= 12 && !memcmp(b + 4, "ftyp", 4);
+}
+
+static int is_matroska(const unsigned char *b, size_t n) {
+    return n >= 4 && b[0] == 0x1a && b[1] == 0x45 && b[2] == 0xdf && b[3] == 0xa3;
+}
+
+/* Runs as the session user (become_user): the file's bytes to fd 3, after the container check. */
+static void video_child_read(const char *path) {
+    int fd = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC | O_NOCTTY);
+    struct stat st;
+    if (fd < 0 || fstat(fd, &st)) _exit(1);
+    if (!S_ISREG(st.st_mode) || (unsigned long long)st.st_size > LOGIN_VIDEO_MAX || st.st_size < 12) _exit(1);
+    unsigned char hdr[12];
+    size_t got = 0;
+    while (got < sizeof hdr) {
+        ssize_t k = read(fd, hdr + got, sizeof hdr - got);
+        if (k < 0 && errno == EINTR) continue;
+        if (k <= 0) break;
+        got += (size_t)k;
+    }
+    if (got < sizeof hdr || (!is_mp4(hdr, got) && !is_matroska(hdr, got)) || !write_all(3, hdr, got)) _exit(1);
+    unsigned char buf[256 * 1024];
+    for (;;) {
+        ssize_t k = read(fd, buf, sizeof buf);
+        if (k < 0 && errno == EINTR) continue;
+        if (k < 0 || (k && !write_all(3, buf, (size_t)k))) _exit(1);
+        if (!k) break;
+    }
+    _exit(0);
+}
+
+void hw_act_wallpaper_login_video(const AdminReq *r, const char *arg, size_t len) {
+    if (strlen(arg) != len || !len || len >= PATH_MAX) { admin_err("admin.invalidArgument", NULL); return; }
+    if (arg[0] != '/') { admin_err("admin.invalidArgument", NULL); return; }
+    for (size_t i = 0; i < len; i++) if ((unsigned char)arg[i] < 32) { admin_err("admin.invalidArgument", NULL); return; }
+    int p[2];
+    if (pipe2(p, O_CLOEXEC)) { admin_err("wallpaper.imageFailed", NULL); return; }
+    pid_t pid = fork();
+    if (pid < 0) { close(p[0]); close(p[1]); admin_err("wallpaper.imageFailed", NULL); return; }
+    if (!pid) {
+        close(p[0]);
+        if (become_user(r, p[1])) _exit(1);
+        video_child_read(arg);
+    }
+    close(p[1]);
+    mkdir("/var/lib/insaneos", 0755);
+    mkdir(STORE, 0755);
+    char tmp[128];
+    snprintf(tmp, sizeof tmp, STORE "/.login-video.%d", (int)getpid());
+    int fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0644);
+    if (fd < 0) { close(p[0]); kill(pid, SIGKILL); while (waitpid(pid, NULL, 0) < 0 && errno == EINTR) { } admin_err("wallpaper.imageFailed", NULL); return; }
+    unsigned char hdr[12];
+    size_t got = 0;
+    unsigned long long total = 0;
+    int bad = 0;
+    for (;;) {
+        unsigned char buf[256 * 1024];
+        ssize_t k = read(p[0], buf, sizeof buf);
+        if (k < 0 && errno == EINTR) continue;
+        if (k < 0) { bad = 1; break; }
+        if (!k) break;
+        if (total + (unsigned long long)k > LOGIN_VIDEO_MAX) { bad = 1; break; }
+        if (got < sizeof hdr) {
+            size_t take = sizeof hdr - got < (size_t)k ? sizeof hdr - got : (size_t)k;
+            memcpy(hdr + got, buf, take);
+            got += take;
+        }
+        if (!write_all(fd, buf, (size_t)k)) { bad = 1; break; }
+        total += (unsigned long long)k;
+    }
+    close(p[0]);
+    while (waitpid(pid, NULL, 0) < 0 && errno == EINTR) { }
+    if (bad || total < 12 || (!is_mp4(hdr, got) && !is_matroska(hdr, got))) {
+        close(fd);
+        unlink(tmp);
+        admin_err("wallpaper.badVideo", NULL);
+        return;
+    }
+    int wbad = fchmod(fd, 0644) || fsync(fd) || close(fd);
+    if (wbad || rename(tmp, STORE "/login.mp4")) {
+        if (!wbad) unlink(tmp);
+        admin_err("wallpaper.imageFailed", NULL);
+        return;
+    }
+    unlink(STORE "/login-still");
+    unlink(STORE "/login-fit");                         /* the video always covers */
+    login_images_clear(NULL);
+    admin_say("OK", "%s", "video");                     /* i18n-ok: parsed by sdk/motion.jsx */
 }
