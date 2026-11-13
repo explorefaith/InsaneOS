@@ -40,6 +40,14 @@ Settings → Wallpaper → Live → Pause when; reduce motion and a screen that 
 session not being the one on the monitor (`insane.session.onMonitor()`). The login screen pauses after five minutes with
 no input.
 
+The cap is not fixed, either. Settings → Power (and the Control Center's Power Mode tile) picks the
+rendering profile's rendering half — `auto` by default, or pinned balanced / performance / low — and
+the profile's cap (`30/20/15`) is what the players start with. Under it, `motionmodel.adaptiveCap`
+steps the live cap down a rung (half, then 10) when the CPU stays loaded or the decoder itself drops
+what it decodes, and back up one rung per 15 steady seconds — through `media.control('fpsmax')`, which
+reaches the decode loop between frames, so no decoder restarts and nothing flickers. The ladder and
+its hysteresis are in `server/tests/motion_model_test.mjs` (64 checks).
+
 The compositor holds its own backstop, under all of that: when the display goes off (DPMS), `insane-server` pauses the
 wallpaper's and the login screen's players itself (`media_display_power`), and resumes them when it comes back — only the
 ones it paused, so a player the session's rules had paused stays paused. Music, the camera and recordings are never

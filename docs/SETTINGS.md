@@ -261,6 +261,17 @@ against BlueZ 5.82's source and the unit tests above; **not yet with a real Magi
 
 ![Energy](settings-power-dark.png)
 
+- **Rendering quality** (`sdk/quality.js`, 0.8.8.7): the rendering side of the power profile, on the
+  same page and picked together with it from the Control Center's Power Mode tile. `auto` (the
+  default) adapts by itself: when the CPU stays loaded the ambient layers yield — the backdrop
+  blur's downsample rises (`insane.setBlurQuality`, `canvas_blur_shrink`) and the wallpaper's frame
+  cap steps down (`media.control('fpsmax')`, `motionmodel.adaptiveCap`) — and everything steps back
+  gradually after 15 steady seconds. `balanced` pins the normal quality; `performance` and `low`
+  pin a cheaper one (blur floor 4/8, wallpaper cap 20/15, the busy threshold 60/50 %). Nothing here
+  limits an application's frame rate; only the desktop's own ambient layers yield. The adaptive
+  ladder is unit-tested (`motion-model-test`); the blur lever is a closed binding, no files, no
+  new services.
+
 - **Battery.** `hw/power.c` reads `/sys/class/power_supply` (`energy_*`/`power_now` or
   `charge_*`/`current_now`/`voltage_now`): percentage, time to empty or to full (the kernel's
   `time_to_*_now` when present), health (`full / full_design`), cycles, watts, model and
