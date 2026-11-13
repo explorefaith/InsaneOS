@@ -1,0 +1,2 @@
+[00:58:05] == real-world suite 2026-11-14T00:58:05+06:00, session: 1167, conditions follow each scenario ==
+[00:58:05] -- A: idle/ambient (no generated load) --

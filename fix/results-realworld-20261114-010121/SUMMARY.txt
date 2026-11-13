@@ -1,0 +1,42 @@
+[01:01:21] == real-world suite 2026-11-14T01:01:21+06:00, session: 1618, conditions follow each scenario ==
+[01:01:21] -- C1: all-core CPU at nice 0, 12s --
+some avg10=0.00 avg60=0.00 avg300=0.00 total=3 full avg10=0.00 avg60=0.00 avg300=0.00 total=3 some avg10=5.23 avg60=4.27 avg300=1.63 total=6622719 load=3.18 avail=4455MB swapused=0MBsome avg10=0.00 avg60=0.00 avg300=0.00 total=3 full avg10=0.00 avg60=0.00 avg300=0.00 total=3 some avg10=43.75 avg60=14.62 avg300=4.06 total=13903418 load=6.16 avail=3765MB swapused=0MBC1: fps=41.2 frameMs p50=16.96 p99=51.97 max=79.20 missedBudget=41 vblankSkips=197 presented=494/496 in-to-screen=n=0 avg=0.00ms
+[01:01:34] -- compositor log lines from this run (drag stats, touchpad latency, gpu) --
+kms: card i915, XRGB8888 on the primary plane with modifiers: 0x100000000000005 0x100000000000004 0x100000000000003 0x100000000000002 0x100000000000001 0x0
+kms: 1920x1080@60 on connector 99, crtc 53
+tp: SYNA3091:00 06CB:82F5 Touchpad: touchpad (clickpad), 106×56 mm, 5 contacts
+tp: SynPS/2 Synaptics TouchPad: touchpad (clickpad), 100×81 mm, 2 contacts
+gpu: buffer-age scissor off (INSANE_GPU_SCISSOR=1 turns it on)
+gpu: GPU composition (Mesa Intel(R) UHD Graphics 620 (WHL GT2), EGL 1.5, dmabuf with modifiers, render /dev/dri/renderD128, display i915)
+gpu: GPU drag on: the dragged window is composed on the GPU (self-test: 11373321 pixels, every valid premultiplied combination and a 4096x2048 placement pass, the same as the CPU's, 320 ms)
+gpu: cursor by hardware (cursor plane, 256x256)
+tp: pointer: 42 frames, average latency 0.28 ms, max 7.24 ms (read → JS/Wayland)
+tp: pointer: 149 frames, average latency 43.80 ms, max 138.69 ms (read → JS/Wayland)
+tp: pointer: 89 frames, average latency 47.37 ms, max 117.84 ms (read → JS/Wayland)
+tp: pointer: 13 frames, average latency 0.07 ms, max 0.17 ms (read → JS/Wayland)
+tp: pointer: 446 frames, average latency 31.27 ms, max 147.18 ms (read → JS/Wayland)
+tp: pointer: 185 frames, average latency 35.94 ms, max 119.75 ms (read → JS/Wayland)
+tp: pointer: 9 frames, average latency 0.08 ms, max 0.19 ms (read → JS/Wayland)
+tp: pointer: 1716 frames, average latency 4.64 ms, max 236.85 ms (read → JS/Wayland)
+tp: pointer: 1178 frames, average latency 0.24 ms, max 18.93 ms (read → JS/Wayland)
+tp: pointer: 104 frames, average latency 0.13 ms, max 0.57 ms (read → JS/Wayland)
+tp: pointer: 12 frames, average latency 0.07 ms, max 0.19 ms (read → JS/Wayland)
+tp: pointer: 36 frames, average latency 0.08 ms, max 0.17 ms (read → JS/Wayland)
+tp: pointer: 40 frames, average latency 0.17 ms, max 1.71 ms (read → JS/Wayland)
+tp: pointer: 81 frames, average latency 0.09 ms, max 0.13 ms (read → JS/Wayland)
+tp: pointer: 4 frames, average latency 0.09 ms, max 0.22 ms (read → JS/Wayland)
+tp: pointer: 16 frames, average latency 0.09 ms, max 0.59 ms (read → JS/Wayland)
+tp: pointer: 116 frames, average latency 0.94 ms, max 33.04 ms (read → JS/Wayland)
+tp: pointer: 32 frames, average latency 0.10 ms, max 0.19 ms (read → JS/Wayland)
+tp: pointer: 6 frames, average latency 0.11 ms, max 0.27 ms (read → JS/Wayland)
+tp: pointer: 738 frames, average latency 0.42 ms, max 37.78 ms (read → JS/Wayland)
+tp: pointer: 30 frames, average latency 0.13 ms, max 0.54 ms (read → JS/Wayland)
+tp: pointer: 93 frames, average latency 1.57 ms, max 39.85 ms (read → JS/Wayland)
+tp: pointer: 101 frames, average latency 0.15 ms, max 0.63 ms (read → JS/Wayland)
+tp: pointer: 13 frames, average latency 0.10 ms, max 0.24 ms (read → JS/Wayland)
+tp: pointer: 39 frames, average latency 0.14 ms, max 0.49 ms (read → JS/Wayland)
+tp: pointer: 195 frames, average latency 0.29 ms, max 19.79 ms (read → JS/Wayland)
+tp: pointer: 1045 frames, average latency 28.61 ms, max 383.21 ms (read → JS/Wayland)
+tp: pointer: 60 frames, average latency 2.29 ms, max 34.91 ms (read → JS/Wayland)
+tp: pointer: 101 frames, average latency 0.26 ms, max 2.77 ms (read → JS/Wayland)
+[01:01:34] == done: fix/results-realworld-20261114-010121 ==
