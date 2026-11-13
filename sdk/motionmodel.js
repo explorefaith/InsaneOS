@@ -36,16 +36,20 @@ export function pickVariant(item, codecs, width, height) {
 }
 
 // Why the video should be paused now, or null. Each is a reason not to spend power on something nobody sees.
-// The user's switches (Settings → Wallpaper → Live → Pause when) can turn the optional ones off: fullscreen,
-// covered, locked (the session is not the one on the monitor), idle, battery and busy. Reduce motion, a
-// screen that is off and memory pressure are not optional: they are accessibility and physics.
-export function pauseReason({ screenOff, reduceMotion, pressure, idleSec, idleMax = 300, battery, covered, fullscreen, busy, locked, pauseWhen }) {
+// The user's switches (Settings → Wallpaper → Live → Pause when) can turn the optional ones off: desktopCovered
+// (any application window in view — the "Automatic Wallpaper Pause" switch), fullscreen, covered, locked
+// (the session is not the one on the monitor), idle, battery and busy. Reduce motion, a screen that is off
+// and memory pressure are not optional: they are accessibility and physics.
+// The switches compose: desktopCovered off + covered on = pause only when a window covers every display;
+// desktopCovered on (the default) makes covered unreachable — the desktop is hidden by the first window.
+export function pauseReason({ screenOff, reduceMotion, pressure, idleSec, idleMax = 300, battery, covered, fullscreen, busy, locked, desktopCovered, pauseWhen }) {
   const w = pauseWhen || {};
   if (reduceMotion) return 'reduceMotion';
   if (screenOff) return 'screenOff';
   if (pressure) return 'pressure';
   if (locked && w.locked !== false) return 'locked';
-  if (fullscreen && w.fullscreen !== false) return 'fullscreen';
+  if (fullscreen && w.fullscreen !== false) return 'fullscreen';      // the more specific state reports
+  if (desktopCovered && w.desktopCovered !== false) return 'desktopCovered';
   if (covered && w.covered !== false) return 'covered';
   if (idleSec >= idleMax && w.idle !== false) return 'idle';
   if (battery && battery.discharging && battery.percent <= 20 && w.battery !== false) return 'battery';
@@ -69,6 +73,17 @@ export function memoryPressure({ some10 = 0, some60 = 0, availKB = Infinity } = 
   }
   const on = some60 >= PRESSURE.some60 || (some10 >= PRESSURE.some10 && availKB < PRESSURE.availMB * 1024);
   return { on, state: { hot: on ? 1 : 0 } };
+}
+
+// Is the desktop hidden behind applications? A normal application window counts: in the view
+// (this active desktop — desktopmodel.FIRST_DESKTOP is the default for a window that never named
+// one), not minimized, not picture-in-picture (a floating video never hides the desktop), and not
+// fullscreen (its own reason governs that, so the user's "Fullscreen" switch keeps meaning
+// something on its own). Shell surfaces — the Dock, Control Center, Spotlight, notification
+// banners, the desktop's own context menu — are not windows in the wm store and never count:
+// overlays must not pause the wallpaper (round 4, State E).
+export function appsOpen(windows, active) {
+  return windows.some((w) => !w.minimized && !w.pip && !w.fullscreen && (w.desktop ?? 1) === (active ?? 1));
 }
 
 // Is this display's desktop fully hidden by a window? rects: the windows on it, not minimized.

@@ -10,10 +10,10 @@ import { media } from './media.js';
 import { settings, useSettings } from './settings.js';
 import { createStore, useStore } from './store.js';
 import { admin } from './admin.js';
-import { windows } from './windows.js';
+import { windows, activeDesktop } from './windows.js';
 import { battery } from './hardware.jsx';
 import { userWallpaperName } from './wallpapers.js';
-import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant, adaptiveCap, memoryPressure } from './motionmodel.js';
+import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant, adaptiveCap, memoryPressure, appsOpen } from './motionmodel.js';
 import { qualityKnobs, qualityTick } from './quality.js';
 
 const STORE = '/var/lib/insaneos/wallpapers';
@@ -143,11 +143,18 @@ function evaluate() {
     if (pr.on) b = false;                 // the pause reason says why; "busy" would cap a paused player
     pressureOn = pr.on;
   } catch (e) { /* no pressure reading on an older insane-server */ }
+  // the desktop behind applications (motionmodel.appsOpen): an app window in the view pauses the
+  // wallpaper at once — this runs on every windows-store change, not only on the 5 s tick, so an
+  // app opening pauses before its first frame is even up; the active desktop counts (another
+  // desktop's windows are not in view), pip and fullscreen windows have their own rules
+  const active = activeDesktop.get();
+  const desktopHidden = appsOpen(ws, active);
   for (const p of players.values()) {
     const rects = live.map((w) => ({ x: w.x, y: w.y, w: w.w, h: w.h }));
     const covered = p.views.size > 0 && [...p.views.values()].every((d) => displayCovered(d, rects));
     const why = pauseReason({ reduceMotion: s.reduceMotion, idleSec: (Date.now() - lastInput) / 1000, battery: battery.get(),
-      covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pressure: pressureOn, pauseWhen: s.motionPause });
+      covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pressure: pressureOn,
+      desktopCovered: desktopHidden, pauseWhen: s.motionPause });
     if (!!why !== p.paused) { p.paused = !!why; media.control(p.id, why ? 'pause' : 'play'); }
     // the adaptive cap (motionmodel.adaptiveCap): the deltas of the helper's own numbers decide
     if (!p.paused) {
@@ -165,6 +172,7 @@ function startTicking() {
   if (ticking) return;
   ticking = setInterval(evaluate, 5000);
   windows.subscribe(() => { if (players.size) evaluate(); });
+  activeDesktop.subscribe(() => { if (players.size) evaluate(); });   // a desktop switch can uncover the wallpaper
   settings.subscribe(() => { if (players.size) evaluate(); });
   const seen = () => { const was = Date.now() - lastInput > 300000; lastInput = Date.now(); if (was) evaluate(); };
   addListener('keydown', seen);

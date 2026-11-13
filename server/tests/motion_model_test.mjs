@@ -1,5 +1,5 @@
 // motion_model_test.mjs — moving wallpapers without a screen (sdk/motionmodel.js).
-import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom, adaptiveCap, memoryPressure, PRESSURE, CAP_STEADY_MS } from '../../sdk/motionmodel.js';
+import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, appsOpen, userVideoProblem, nextRandom, adaptiveCap, memoryPressure, PRESSURE, CAP_STEADY_MS } from '../../sdk/motionmodel.js';
 
 let ok = 0, bad = 0;
 const eq = (name, a, b) => {
@@ -71,6 +71,44 @@ eq('memory pressure', pauseReason({ ...base, pressure: true }), 'pressure');
 eq('pressure is not optional', pauseReason({ ...base, pressure: true, pauseWhen: { busy: false, fullscreen: false, covered: false, idle: false, battery: false, locked: false } }), 'pressure');
 eq('pressure beats busy, reports itself', pauseReason({ ...base, pressure: true, busy: true }), 'pressure');
 eq('reduce motion beats pressure', pauseReason({ ...base, pressure: true, reduceMotion: true }), 'reduceMotion');
+
+// desktopCovered (round 4): an app window in the view pauses; the switch composes with the others
+const A = (over) => pauseReason({ ...base, desktopCovered: true, ...over });
+eq('an app window open: pauses', A({}), 'desktopCovered');
+eq('the switch can turn it off', A({ pauseWhen: { desktopCovered: false } }), null);
+eq('fullscreen wins the reason', A({ fullscreen: true }), 'fullscreen');
+eq('fullscreen off falls back to desktopCovered', A({ fullscreen: true, pauseWhen: { fullscreen: false } }), 'desktopCovered');
+eq('screen off beats apps open', A({ screenOff: true }), 'screenOff');
+eq('pressure beats apps open', A({ pressure: true }), 'pressure');
+eq('locked beats apps open', A({ locked: true }), 'locked');
+eq('apps open with every other switch off', A({ pauseWhen: { desktopCovered: true, locked: false, fullscreen: false, covered: false, idle: false, battery: false, busy: false } }), 'desktopCovered');
+
+// appsOpen: what counts as a normal application window (desktopmodel's defaults: FIRST_DESKTOP = 1)
+const W = (over) => ({ desktop: 1, ...over });
+eq('a plain window: open', appsOpen([W({})], 1), true);
+eq('minimized: desktop visible', appsOpen([W({ minimized: true })], 1), false);
+eq('fullscreen window: not counted', appsOpen([W({ fullscreen: true })], 1), false);
+eq('picture-in-picture: not counted', appsOpen([W({ pip: true })], 1), false);
+eq('another desktop: not in view', appsOpen([W({ desktop: 2 })], 1), false);
+eq('the same window after switching to its desktop', appsOpen([W({ desktop: 2 })], 2), true);
+eq('a window that never named a desktop', appsOpen([{ minimized: false }], 1), true);
+eq('an empty desktop', appsOpen([], 1), false);
+eq('one window of many closed: still open', appsOpen([W({}), W({ minimized: true })], 1), true);
+
+// acceptance: 100 open/close/minimize/restore cycles — the reason follows the desktop every time,
+// nothing sticks, and the answer to "should it play" is the exact inverse of "is it covered"
+let stuck = 0, cycles = 0;
+for (let i = 0; i < 100; i++) {
+  for (const state of [[false], [true], [true, true], [true, true, false]]) {
+    const ws = state.map((min, k) => ({ id: k, desktop: 1, minimized: min }));
+    const hidden = appsOpen(ws, 1);
+    const why = pauseReason({ ...base, desktopCovered: hidden });
+    cycles++;
+    if ((why === 'desktopCovered') !== hidden) stuck++;
+    if ((why === null) !== !hidden) stuck++;
+  }
+}
+eq(`100 open/close/minimize/restore cycles, no stuck state (${cycles} transitions)`, stuck, 0);
 
 // memoryPressure: the wallpaper stops on real pressure and returns only when it is clearly over
 eq('quiet system: plays', memoryPressure({ some10: 0, some60: 0, availKB: 3e6 }, {}).on, false);

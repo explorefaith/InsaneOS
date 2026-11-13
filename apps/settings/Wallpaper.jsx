@@ -327,6 +327,9 @@ export function WallpaperSettings() {
         })}
         <View style={{ gap: 2, paddingVertical: spacing.s }}>
           <Text style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{L('wallpaper.live.pauseWhen', 'Pause when')}</Text>
+          <SettingRow label={L('wallpaper.live.pApps', 'An app window is open (automatic)')} hint={L('wallpaper.live.pAppsHint', 'Pause live wallpaper while applications are open to save system resources. It resumes by itself when the desktop is in view again.')}>
+            <Toggle on={mp.desktopCovered !== false} onChange={(v) => setPause('desktopCovered', v)} />
+          </SettingRow>
           <SettingRow label={L('wallpaper.live.pLocked', 'The session is locked or away')} hint={L('wallpaper.live.pLockedHint', 'The still wallpaper stays drawn under the login screen.')}>
             <Toggle on={mp.locked !== false} onChange={(v) => setPause('locked', v)} />
           </SettingRow>
