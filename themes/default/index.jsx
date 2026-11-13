@@ -79,7 +79,7 @@ import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
 import { ControlCenter } from './components/ControlCenter.jsx';
-import './components/DesktopWidgets.jsx';   // registers the glass clock + stats cards (sdk/widgets.js)
+import { WidgetGallery, widgetsEditing } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
 import { NotificationCenter } from './components/NotificationCenter.jsx';
 import { Menu } from './components/Menu.jsx';
 
@@ -328,6 +328,7 @@ function App() {
           <Menu x={context.x} y={context.y} onClose={() => setContext(null)} items={[
             { label: tr('shell.desktop.wallpaper'), onClick: () => { const d = displayAt(context.x, context.y); setControl({ area: hasBar(d, every, screen.mirror) ? d : main, at: null }); } },
             { label: tr('shell.desktop.openLaunchpad'), onClick: () => setLaunchpad(true) },
+            { label: tr('shell.widgets.edit') || 'Edit Widgets', onClick: () => widgetsEditing.set(true) },
             { label: tr('shell.desktops.overview'), onClick: () => toggleOverview() },
             '-',
             { label: tr('shell.menu.settings'), onClick: () => wm.open('settings') },
@@ -335,6 +336,7 @@ function App() {
           ]} />
         )}
         {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
+        <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
       </View>
     </ThemeProvider>
   );
