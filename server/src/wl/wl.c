@@ -18,6 +18,7 @@
 #include "wl.h"
 #include "keygrab.h"
 #include "../keylag.h"
+#include "../sec/fgprio.h"
 
 #include <errno.h>
 #include <math.h>
@@ -3450,6 +3451,9 @@ void wl_set_focus(int id) {
         dismiss_popups();
     }
     key_focus = s;
+    /* the focused app's scope takes the foreground CPU share (sec/fgprio.h); 0 gives the previous
+     * one its default weight back when the keyboard left the apps */
+    fgprio_focus(s && s->client ? client_pid(s->client) : 0);
     wl_textinput_focus(s ? s->client : NULL, s ? s->res : NULL);
     if (s) {
         FOR_CLIENT(&keyboards, s->client, kb) send_enter_keyboard(kb, s);

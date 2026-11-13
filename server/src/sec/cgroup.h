@@ -13,12 +13,23 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <sys/types.h>
 
 typedef struct {
     long mem_high_mb;       /* memory.high in MB (0 = no limit) */
     long mem_max_mb;        /* memory.max in MB (0 = no limit) */
     int  cpu_percent;       /* cpu.max as % of one core (0 = no limit; 100 = one core) */
+    int  cpu_weight;        /* cpu.weight 1..10000 (0 = untouched; CFS share against the siblings) */
 } CgroupLimits;
+
+/* CPU weights inside the session subtree: the compositor's «server» leaf weighs ten apps, and the
+ * app the user works in weighs four of the rest, so a build or a sync in another scope cannot take
+ * the focused app's CPU. Plain CFS weights: no real-time, no starvation — an unfocused app always
+ * keeps its share while the foreground is idle. The compositor asks insane-sessiond for the
+ * focused scope's weight (fgprio.c); a wallpaper player enters at CG_WALLPAPER_CPU_WEIGHT. */
+#define CG_FG_CPU_WEIGHT 400
+#define CG_APP_CPU_WEIGHT 100
+#define CG_WALLPAPER_CPU_WEIGHT 50
 
 /* Moves the current process into scope `name` inside the session's delegated subtree and
  * applies the limits. 0 if it ended up in the scope; -1 if it couldn't (already warned, the caller goes on). */
@@ -85,5 +96,15 @@ void cgroup_harden_session(int sessfd);
  * Only a peer that is in its session's «server» leaf and runs a binary from bindir can be placed,
  * and only itself (SO_PEERCRED pid). Answers "ok" or "err <reason>". 0 if placed. */
 int cgroup_place_serve(int cfd, const char *bindir, int insecure);
+
+/* The compositor (from its «server» leaf) sets an app scope's cpu.weight — the focused app up, the
+ * previously focused one back down (fgprio.c). One attempt, silent when refused or unanswered.
+ * 0 applied, -1 not. */
+int cgroup_weight(const char *scope, int weight);
+
+/* The app-insaneos-*.scope the pid lives in, under this user's own session subtree (the same rule
+ * appid.c applies, but the scope name itself, not the app id). 0 found, -1 not (the compositor's
+ * own leaf, Xwayland's, a helper's or another user's — never eligible for the foreground weight). */
+int cgroup_scope_of_pid(pid_t pid, char *out, size_t n);
 
 #endif

@@ -856,7 +856,7 @@ int sandbox_apply_helper(const SandboxHelperCfg *cfg) {
     if (cfg->name) {
         char scope[96];
         snprintf(scope, sizeof scope, "%.80s.scope", cfg->name);
-        CgroupLimits lim = { .mem_high_mb = cfg->mem_max_mb ? cfg->mem_max_mb * 3 / 4 : 0, .mem_max_mb = cfg->mem_max_mb, .cpu_percent = 0 };
+        CgroupLimits lim = { .mem_high_mb = cfg->mem_max_mb ? cfg->mem_max_mb * 3 / 4 : 0, .mem_max_mb = cfg->mem_max_mb, .cpu_percent = 0, .cpu_weight = cfg->cpu_weight };
         if (!cgroup_enter(scope, &lim)) mask |= SB_CGROUP;
     }
     if (!apply_nopriv()) mask |= SB_NOPRIV;

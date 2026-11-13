@@ -123,8 +123,13 @@ static int enter_via_sessiond(const char *name, const CgroupLimits *lim) {
     if (fd < 0) { fprintf(stderr, "cgroup: insane-sessiond does not answer (%s); %s runs without a scope\n", CGROUP_SOCK, name); return -1; }
     struct timeval tv = { 3, 0 };
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    /* The trailing weight is new: an older insane-sessiond's sscanf stops after four fields and
+     * ignores it, and a caller without a weight against a newer sessiond sends the old request —
+     * both directions of an upgrade keep working. */
     char req[160], rep[128];
-    int n = snprintf(req, sizeof req, "enter %s %ld %ld %d", name, lim ? lim->mem_high_mb : 0, lim ? lim->mem_max_mb : 0, lim ? lim->cpu_percent : 0);
+    int n = lim && lim->cpu_weight > 0
+        ? snprintf(req, sizeof req, "enter %s %ld %ld %d %d", name, lim->mem_high_mb, lim->mem_max_mb, lim->cpu_percent, lim->cpu_weight)
+        : snprintf(req, sizeof req, "enter %s %ld %ld %d", name, lim ? lim->mem_high_mb : 0, lim ? lim->mem_max_mb : 0, lim ? lim->cpu_percent : 0);
     ssize_t r = n > 0 && n < (int)sizeof req ? send(fd, req, (size_t)n, MSG_NOSIGNAL) : -1;
     if (r == n) r = recv(fd, rep, sizeof rep - 1, 0);
     close(fd);
@@ -155,6 +160,7 @@ int cgroup_enter(const char *name, const CgroupLimits *lim) {
         if (lim->mem_high_mb) { snprintf(val, sizeof val, "%ld", lim->mem_high_mb * 1024L * 1024L); write_at(dir, "memory.high", val); }
         if (lim->mem_max_mb) { snprintf(val, sizeof val, "%ld", lim->mem_max_mb * 1024L * 1024L); write_at(dir, "memory.max", val); }
         if (lim->cpu_percent) { snprintf(val, sizeof val, "%ld 100000", (long)lim->cpu_percent * 1000L); write_at(dir, "cpu.max", val); }
+        if (lim->cpu_weight > 0) { snprintf(val, sizeof val, "%d", lim->cpu_weight); write_at(dir, "cpu.weight", val); }
     }
     int r = write_at(dir, "cgroup.procs", "0");
     close(dir);
@@ -360,9 +366,29 @@ int cgroup_place_serve(int cfd, const char *bindir, int insecure) {
     ssize_t r = recv(cfd, req, sizeof req - 1, 0);
     if (r <= 0) return -1;
     req[r] = 0;
+    /* Two verbs, the same trust checks:
+     *   "enter <scope> <memhigh> <memmax> <cpu%> [weight]"  — create (or find) the scope, apply the
+     *       limits, move the peer into it (the launch path);
+     *   "weight <scope> <1..10000>"                          — set cpu.weight of an existing scope
+     *       (fgprio.c: the focused app's share; the weight never moves or limits anything).
+     * The trailing weight of "enter" is new: an older caller sends four fields, a newer one five,
+     * and this server accepts both. */
     long mh = 0, mm = 0;
-    int cpu = 0;
-    if (sscanf(req, "enter %95s %ld %ld %d", name, &mh, &mm, &cpu) != 4 || !cgroup_scope_name_ok(name)) { reply(cfd, "err request"); return -1; }
+    int cpu = 0, weight = 0;
+    char verb[8] = "";
+    int is_weight = sscanf(req, "weight %95s %d", name, &weight) == 2;
+    int got = sscanf(req, "enter %95s %ld %ld %d %d", name, &mh, &mm, &cpu, &weight);
+    snprintf(verb, sizeof verb, is_weight ? "weight" : got >= 4 ? "enter" : "");
+    if (is_weight) {
+        if (weight < 1 || weight > 10000) { reply(cfd, "err weight"); return -1; }
+    } else if (got != 4 && got != 5) {
+        reply(cfd, "err request");
+        return -1;
+    } else if (weight < 0 || weight > 10000) {
+        reply(cfd, "err weight");
+        return -1;
+    }
+    if (!verb[0] || !cgroup_scope_name_ok(name)) { reply(cfd, "err request"); return -1; }
     if (cr.uid < 1000 || cr.uid >= 60000) { reply(cfd, "err uid"); return -1; }
     /* The peer must still be in its session's «server» leaf: insane-server itself, or a child it
      * forked right before exec. A process already in an app scope (an app) can never ask. */
@@ -376,15 +402,23 @@ int cgroup_place_serve(int cfd, const char *bindir, int insecure) {
     if ((size_t)snprintf(sess, sizeof sess, "%s/insaneos-session-%u", svc, (unsigned)cr.uid) >= sizeof sess) return -1;
     int sfd = open(sess, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     if (sfd < 0) { reply(cfd, "err no session subtree"); return -1; }
-    if (mkdirat(sfd, name, 0755) && errno != EEXIST) { close(sfd); reply(cfd, "err mkdir"); return -1; }
+    if (!is_weight && mkdirat(sfd, name, 0755) && errno != EEXIST) { close(sfd); reply(cfd, "err mkdir"); return -1; }
     int dfd = openat(sfd, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     close(sfd);
-    if (dfd < 0) { reply(cfd, "err open"); return -1; }
-    chown_root_dir(dfd);            /* a scope left by an older insane-sessiond may be the user's */
+    if (dfd < 0) { reply(cfd, is_weight ? "err no scope" : "err open"); return -1; }
     char val[64];
+    if (is_weight) {                            /* only the share changes: nothing moves, nothing is limited */
+        snprintf(val, sizeof val, "%d", weight);
+        write_at(dfd, "cpu.weight", val);
+        close(dfd);
+        reply(cfd, "ok");
+        return 0;
+    }
+    chown_root_dir(dfd);            /* a scope left by an older insane-sessiond may be the user's */
     if (mh > 0 && mh <= 65536) { snprintf(val, sizeof val, "%ld", mh * 1024L * 1024L); write_at(dfd, "memory.high", val); }
     if (mm > 0 && mm <= 65536) { snprintf(val, sizeof val, "%ld", mm * 1024L * 1024L); write_at(dfd, "memory.max", val); }
     if (cpu > 0 && cpu <= 6400) { snprintf(val, sizeof val, "%ld 100000", (long)cpu * 1000L); write_at(dfd, "cpu.max", val); }
+    if (weight > 0) { snprintf(val, sizeof val, "%d", weight); write_at(dfd, "cpu.weight", val); }
     snprintf(val, sizeof val, "%d", (int)cr.pid);
     int w = write_at(dfd, "cgroup.procs", val);
     close(dfd);
@@ -392,4 +426,55 @@ int cgroup_place_serve(int cfd, const char *bindir, int insecure) {
     /* the peer is blocked waiting for this reply, so the pid cannot have been reused meanwhile */
     reply(cfd, "ok");
     return 0;
+}
+
+/* ---- the compositor side of the foreground weight (fgprio.c calls these) ---- */
+
+int cgroup_weight(const char *scope, int weight) {
+    if (!cgroup_scope_name_ok(scope) || weight < 1 || weight > 10000) return -1;
+    struct sockaddr_un a = { .sun_family = AF_UNIX };
+    snprintf(a.sun_path, sizeof a.sun_path, "%s", CGROUP_SOCK);
+    int fd = socket(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0);
+    if (fd < 0) return -1;
+    if (connect(fd, (struct sockaddr *)&a, sizeof a)) {
+        int e = errno;                      /* -2: no insane-sessiond at all (development) */
+        close(fd);
+        return e == ENOENT || e == ECONNREFUSED ? -2 : -1;
+    }
+    struct timeval tv = { 1, 0 };
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    char req[128], rep[64];
+    int n = snprintf(req, sizeof req, "weight %s %d", scope, weight);
+    ssize_t r = n > 0 && n < (int)sizeof req ? send(fd, req, (size_t)n, MSG_NOSIGNAL) : -1;
+    if (r == n) r = recv(fd, rep, sizeof rep - 1, 0);
+    close(fd);
+    return r > 0 && r < (int)sizeof rep && !strncmp(rep, "ok", 2) ? 0 : -1;
+}
+
+int cgroup_scope_of_pid(pid_t pid, char *out, size_t n) {
+    char p[64], line[PATH_MAX];
+    snprintf(p, sizeof p, "/proc/%d/cgroup", (int)pid);
+    FILE *f = fopen(p, "re");
+    if (!f) return -1;
+    int r = -1;
+    while (fgets(line, sizeof line, f)) {
+        if (strncmp(line, "0::", 3)) continue;
+        char *nl = strchr(line, '\n');
+        if (nl) *nl = 0;
+        const char *path = line + 3;
+        /* only this user's own session subtree counts, as in appid.c */
+        char base[96];
+        snprintf(base, sizeof base, "/system.slice/insaneos.service/insaneos-session-%u/", (unsigned)getuid());
+        size_t bl = strlen(base);
+        if (strncmp(path, base, bl)) break;
+        const char *comp = path + bl;
+        if (strchr(comp, '/')) break;                       /* a leaf inside a scope, not a scope */
+        size_t l = strlen(comp);
+        if (l < 13 + 7 || l >= n || strncmp(comp, "app-insaneos-", 13) || strncmp(comp + l - 6, ".scope", 6)) break;
+        memcpy(out, comp, l + 1);
+        r = 0;
+        break;
+    }
+    fclose(f);
+    return r;
 }

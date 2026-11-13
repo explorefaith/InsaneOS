@@ -6,6 +6,7 @@
  * VA-API if needed, seccomp. */
 #include "lm.h"
 #include "../../sec/sandbox.h"
+#include "../../sec/cgroup.h"
 
 #include <errno.h>
 #include <signal.h>
@@ -92,6 +93,10 @@ int main(int argc, char **argv) {
     }
     SandboxHelperCfg cfg = { .name = "app-insaneos-media", .ro_paths = pi_hevc ? ro_pi : ro, .extra_syscalls = extra, .allow_ioctl_classes = ioctls,
                              .mem_max_mb = m.v[0] == MK_WORKER ? 1024 : 1536, .dev_files = pi_hevc ? devs : NULL };
+    /* An ambient player (the live wallpaper, the login screen) decodes at half of every app's CPU
+     * share, so between the adaptive cap's steps and under memory pressure it still yields
+     * (sec/cgroup.h CG_WALLPAPER_CPU_WEIGHT); content the user plays keeps the default weight. */
+    if (m.v[0] == MK_PLAY && mp_param_int(payload, "ambient", 0) == 1) cfg.cpu_weight = CG_WALLPAPER_CPU_WEIGHT;
     if (m.v[0] == MK_WORKER) {                 /* thumbnails and probes: in the background (before the sandbox) */
         setpriority(PRIO_PROCESS, 0, 10);
         syscall(SYS_ioprio_set, 1, 0, (2 << 13) | 7);   /* IOPRIO_WHO_PROCESS, this process, best effort, lowest */

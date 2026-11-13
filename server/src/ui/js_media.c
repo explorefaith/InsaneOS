@@ -151,9 +151,11 @@ static JSValue f_play(JSContext *c, JSValueConst t, int argc, JSValueConst *argv
     int hw = opt_int(c, o, "hw", 1, 0, 1);
     if (hw) render = media_render_fd();
     char params[256];
-    snprintf(params, sizeof params, "native=%d\nloop=%d\nautoplay=%d\naudio=%d\nhw=%d\nhwonly=%d\nrate=%d\nfpsmax=%d\nhwaccel=%s\n", opt_int(c, o, "native", 0, 0, 1),
+    /* ambient=1 marks the live wallpaper and the login screen: the helper enters its scope at half
+     * of every app's CPU weight (lm_main.c, sec/cgroup.h), so its decode yields to foreground work */
+    snprintf(params, sizeof params, "native=%d\nloop=%d\nautoplay=%d\naudio=%d\nhw=%d\nhwonly=%d\nrate=%d\nfpsmax=%d\nambient=%d\nhwaccel=%s\n", opt_int(c, o, "native", 0, 0, 1),
              opt_int(c, o, "loop", 0, 0, 1), opt_int(c, o, "autoplay", 1, 0, 1), s->audio ? 1 : 0, hw && render >= 0, opt_int(c, o, "hwOnly", 0, 0, 1), opt_int(c, o, "rate", 100, 10, 100),
-             opt_int(c, o, "fpsMax", 0, 0, 240), media_hwaccel());
+             opt_int(c, o, "fpsMax", 0, 0, 240), !strcmp(app, "wallpaper") || !strcmp(app, "greeter"), media_hwaccel());
     int fds[3] = { in, ring, render };
     s->sock = media_spawn(MK_PLAY, params, fds, 3, &s->pid);
     close(in);

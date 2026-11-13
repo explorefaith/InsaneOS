@@ -54,6 +54,8 @@ typedef struct {
     const int *extra_syscalls;      /* extra allowed syscalls; -1-terminated */
     int  allow_ioctl_classes;       /* OR of SANDBOX_IOCTL_* (hardware decoding) */
     long mem_max_mb;                /* memory cap (0 = no cap) */
+    int cpu_weight;                 /* cpu.weight of the scope, 1..10000 (0 = untouched): an ambient
+                                     * player's decode yields to every app's (sec/cgroup.h) */
     /* folders already opened by insane-server (directory fds), -1-terminated; NULL = none.
      * ro: read; rw: read + write/create files, folders and symlinks and delete
      * files (no truncation). That way the helper needs no path at all. */
