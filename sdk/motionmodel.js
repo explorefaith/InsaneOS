@@ -84,3 +84,28 @@ export function nextRandom(ids, last, pick = Math.random) {
   if (!list.length) return ids[0] || null;
   return list[Math.floor(pick() * list.length) % list.length];
 }
+
+// The wallpaper's adaptive frame cap (sdk/quality.js resolves the profile's top; docs/WALLPAPERS.md).
+// The cap steps down a rung as soon as the system stays loaded or the decoder drops what it decodes,
+// and climbs back one rung only after STEADY_MS of being clear — a burst lowers it for the burst,
+// and a recovery never flickers it around. One call a tick (5 s in sdk/motion.jsx). state is the
+// caller's { level, good }; the answer carries the next one. A cap of 0 means no cap.
+export const CAP_STEADY_MS = 15000;
+
+export function adaptiveCap(cap, { busy, dropRatio }, state, now) {
+  if (!cap) return { cap, state: { level: 0, good: 0 } };
+  const half = Math.max(12, Math.round(cap / 2));
+  const ladder = cap <= half || cap <= 10 ? [cap] : half <= 10 ? [cap, half] : [cap, half, 10];
+  const st = { level: state?.level ?? 0, good: state?.good ?? 0 };
+  if (st.level >= ladder.length) st.level = ladder.length - 1;
+  const bad = !!busy || dropRatio >= 0.5;
+  if (bad) st.good = 0;
+  else if (!st.good) st.good = now;
+  const want = bad ? Math.min(ladder.length - 1, st.level + 1)
+    : st.good && now - st.good >= CAP_STEADY_MS ? Math.max(0, st.level - 1) : st.level;
+  if (want !== st.level) {
+    st.level = want;
+    if (!bad) st.good = now;                            // the next rung needs as long again
+  }
+  return { cap: ladder[st.level], state: st };
+}

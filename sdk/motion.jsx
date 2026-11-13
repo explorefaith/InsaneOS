@@ -13,7 +13,8 @@ import { admin } from './admin.js';
 import { windows } from './windows.js';
 import { battery } from './hardware.jsx';
 import { userWallpaperName } from './wallpapers.js';
-import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant } from './motionmodel.js';
+import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant, adaptiveCap } from './motionmodel.js';
+import { qualityKnobs, qualityTick } from './quality.js';
 
 const STORE = '/var/lib/insaneos/wallpapers';
 export const MOTION_RATES = [100, 75, 50, 25];
@@ -117,9 +118,16 @@ function evaluate() {
   const ws = windows.get();
   const live = ws.filter((w) => !w.minimized);
   let b = false;
+  const busyAt = qualityKnobs().busyAt;
   try {
     const [t, i] = insane.system.cpuTimes();
-    if (cpu) { const dt = t - cpu[0]; const load = dt > 0 ? 1 - (i - cpu[1]) / dt : 0; busy = load > 0.85 ? busy + 1 : 0; b = busy >= 2; }
+    if (cpu) {
+      const dt = t - cpu[0];
+      const load = dt > 0 ? 1 - (i - cpu[1]) / dt : 0;
+      busy = load * 100 >= busyAt ? busy + 1 : 0;
+      b = busy >= 2;
+      qualityTick(Math.round(load * 100));          // the profiles' adaptive layer (sdk/quality.js)
+    }
     cpu = [t, i];
   } catch (e) { /* no reading: not busy */ }
   // locked (or on another console): this session is not the one on the monitor. Only a switch in the pause
@@ -132,6 +140,15 @@ function evaluate() {
     const why = pauseReason({ reduceMotion: s.reduceMotion, idleSec: (Date.now() - lastInput) / 1000, battery: battery.get(),
       covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pauseWhen: s.motionPause });
     if (!!why !== p.paused) { p.paused = !!why; media.control(p.id, why ? 'pause' : 'play'); }
+    // the adaptive cap (motionmodel.adaptiveCap): the deltas of the helper's own numbers decide
+    if (!p.paused) {
+      const dec = p.decoded - (p.lastDecoded || 0), dr = p.dropped - (p.lastDropped || 0);
+      p.lastDecoded = p.decoded;
+      p.lastDropped = p.dropped;
+      const r = adaptiveCap(qualityKnobs().wallpaperFps, { busy: b, dropRatio: dec > 0 ? dr / dec : 0 }, p.capState, Date.now());
+      p.capState = r.state;
+      if (r.cap !== p.curCap) { p.curCap = r.cap; try { media.control(p.id, 'fpsmax', r.cap); } catch (e) { /* an older insane-server keeps its cap */ } }
+    }
   }
 }
 
@@ -167,11 +184,12 @@ function acquire(file, rate, key, display, onLost) {
   if (!p) {
     let id = 0;
     motionBusy.set(true);
-    try { id = media.play('wallpaper', file, { loop, audio: mute ? 0 : 1, hwOnly: 1, rate, fpsMax: 30, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
+    try { id = media.play('wallpaper', file, { loop, audio: mute ? 0 : 1, hwOnly: 1, rate, fpsMax: qualityKnobs().wallpaperFps, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
     if (!id) { motionBusy.set(false); return null; }
-    p = { id, tag, views: new Map(), paused: false, playing: createStore(false) };
+    p = { id, tag, views: new Map(), paused: false, playing: createStore(false), curCap: qualityKnobs().wallpaperFps, capState: null, decoded: 0, dropped: 0 };
     media.on(id, (type, d) => {
       if (type === 'state' && d.state === 'playing') { p.playing.set(true); motionBusy.set(false); }
+      else if (type === 'stats') { p.decoded = d.decoded; p.dropped = d.dropped; }   // the helper's totals; evaluate() reads the deltas
       else if (type === 'error' || type === 'closed') { p.playing.set(false); if (players.get(tag) === p) { players.delete(tag); wallpaperMedia.set(null); p.onLost?.(); } }
     });
     players.set(tag, p);

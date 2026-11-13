@@ -677,6 +677,9 @@ void lm_player(const char *params, int fd, int pulse, int render) {
                     pthread_mutex_unlock(&P.mu);
                     if (m.v[0] == 'a') seek_to(clock_ms());
                     break;
+                case MM_FPSMAX:     /* the adaptive cap (sdk/quality.js): read between frames, no lock needed */
+                    P.fps_max = (int)m.v[0] < 0 || (int)m.v[0] > 240 ? 0 : (int)m.v[0];
+                    break;
                 case MM_STOP: quit = 1; break;
                 default: break;
                 }

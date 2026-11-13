@@ -25,6 +25,9 @@ Rect canvas_push_clip(Canvas *c, float x, float y, float w, float h);   /* retur
 void canvas_set_clip(Canvas *c, Rect r);
 void canvas_copy(Canvas *dst, const Canvas *src);
 void canvas_clear(Canvas *c, uint32_t rgb);        /* only inside the clip */
+/* The backdrop blur's minimum downsample (0 = each radius's own 1/2/4): the performance profiles'
+ * lever for the most expensive effect (sdk/quality.js calls it through insane.setBlurQuality). */
+void canvas_blur_shrink(int f);
 
 void canvas_rrect(Canvas *c, float x, float y, float w, float h, float r, uint32_t argb);
 void canvas_rrect_gradient(Canvas *c, float x, float y, float w, float h, float r,

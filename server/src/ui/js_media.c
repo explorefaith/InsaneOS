@@ -184,6 +184,7 @@ static JSValue f_control(JSContext *c, JSValueConst t, int argc, JSValueConst *a
     else if (!strcmp(cmd, "audioTrack") && v >= 0 && v < 64) r = mp_sendv(s->sock, MM_TRACK, 0, 'a', (int64_t)v, 0, 0);
     else if (!strcmp(cmd, "subTrack") && v >= -1 && v < 64) r = mp_sendv(s->sock, MM_TRACK, 0, 's', (int64_t)v, 0, 0);
     else if (!strcmp(cmd, "loop")) r = mp_sendv(s->sock, MM_LOOP, 0, v != 0, 0, 0, 0);
+    else if (!strcmp(cmd, "fpsmax") && v >= 0 && v <= 240) r = mp_sendv(s->sock, MM_FPSMAX, 0, (int64_t)v, 0, 0, 0);
     JS_FreeCString(c, cmd);
     return JS_NewBool(c, r == 0);
 }

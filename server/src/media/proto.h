@@ -73,6 +73,7 @@ enum {
     MM_KEYFRAME,        /* live encoder: the next frame is a keyframe */
     MM_RATE,            /* live encoder: v[0] = target kbit/s */
     MM_LINK,            /* camera: fd = live link (live.h); v[0] = 1 VP8, 0 H.264; v[1] = kbit/s. Its pictures also go there */
+    MM_FPSMAX,          /* v[0] = ambient playback cap in frames a second (0: none); wallpapers adapt it live (sdk/quality.js) */
 
     /* insane-media → insane-server */
     MM_INFO = 64,       /* payload = JSON with the file's information */

@@ -47,7 +47,12 @@ function PowerTile({ t }) {
   const active = profiles?.activeProfile || null;
   if (!list || !active) return null;
   const label = (p) => tOptional(`shell.cc.power.${p}`) || (p === 'power-saver' ? 'Low Power' : p === 'performance' ? 'Performance' : 'Balanced');
-  const pick = (p) => { try { insane.power.setProfile(p); } catch (e) { console.log(`power: ${e.message}`); } };
+  const pick = (p) => {
+    try { insane.power.setProfile(p); } catch (e) { console.log(`power: ${e.message}`); }
+    // one decision, both halves of the profile: the CPU policy and what the ambient layers draw
+    // (sdk/quality.js; balanced pins the normal quality, power-saver goes low)
+    set({ renderQuality: p === 'performance' ? 'performance' : p === 'power-saver' ? 'low' : 'balanced' });
+  };
   return (
     <Tile t={t} style={{ gap: 8 }}>
       <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tOptional('shell.cc.power.title') || 'Power Mode'}</Text>

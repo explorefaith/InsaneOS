@@ -22,6 +22,7 @@ const DEFAULTS = {
   motionRate: 100,       // the live wallpaper's speed, 1/100 (25, 50, 75, 100)
   motionLoop: true,      // the live wallpaper loops (off: the last frame stays)
   motionPause: null,     // the "Pause when" switches: { fullscreen, covered, locked, idle, battery, busy } (all default on)
+  renderQuality: 'auto', // the rendering side of the performance profiles (sdk/quality.js): 'auto' adapts to load
   wallpaperMuted: true,  // the live wallpaper's sound: muted unless the user unmutes it
   wallpaperBg: null,     // solid colour or gradient instead of a picture: { kind: 'solid'|'gradient', a, b, angle }
   wallpaperFit: 'fill',  // how a still wallpaper is drawn: 'fill' (cover) | 'fit' | 'stretch' | 'center'

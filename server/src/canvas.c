@@ -37,6 +37,13 @@ static inline void put(uint32_t *p, uint32_t argb, uint32_t a) {
 
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 
+/* The backdrop blur's minimum downsample (canvas_blur_shrink): 0 keeps each radius's own factor
+ * (canvas.c picks 1, 2 or 4 by radius). The performance profiles raise it to trade a little
+ * softness for memory bandwidth; read by the paint threads' banded copies, so it changes between
+ * frames, never within one. */
+static int blur_shrink;
+void canvas_blur_shrink(int f) { blur_shrink = f < 0 ? 0 : f > 16 ? 16 : f; }
+
 /* ---- rows: portable C and, on ARM64 with NEON=1 (Makefile), NEON ----
  * Both versions give the same bit-exact result for valid premultiplied sources;
  * tests/canvas_test.c checks it (make build/canvas-test). See docs/RASPBERRY.md. */
@@ -661,8 +668,10 @@ void canvas_backdrop_blur(Canvas *c, float x, float y, float w, float h, float r
     int m = radius * 2;
     b.bx0 = clampi(b.x0 - m, 0, c->w); b.by0 = clampi(b.y0 - m, 0, c->h);
     b.bx1 = clampi(b.x1 + m, 0, c->w); b.by1 = clampi(b.y1 + m, 0, c->h);
-    /* Blurred at reduced resolution: same visual result, much cheaper. */
+    /* Blurred at reduced resolution: same visual result, much cheaper. blur_shrink raises the
+     * floor: the performance profiles trade a little softness for the bandwidth (canvas.h). */
     b.f = radius >= 12 ? 4 : radius >= 6 ? 2 : 1;
+    if (b.f < blur_shrink) b.f = blur_shrink;
     b.sw = (b.bx1 - b.bx0 + b.f - 1) / b.f;
     b.sh = (b.by1 - b.by0 + b.f - 1) / b.f;
     b.rad = radius / (2 * b.f) > 0 ? radius / (2 * b.f) : 1;

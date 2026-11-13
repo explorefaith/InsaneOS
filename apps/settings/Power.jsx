@@ -65,6 +65,19 @@ function ProfileRow({ tr }) {
   );
 }
 
+// The rendering side of the profile (sdk/quality.js): what the ambient layers draw when the user
+// pins one, or 'auto' — the default — where the desktop adapts by itself to the load.
+function QualityRow({ tr }) {
+  const [s, set] = useSettings();
+  const opts = [['auto', tr('prefs.power.quality.auto')], ['balanced', tr('prefs.power.quality.balanced')],
+    ['performance', tr('prefs.power.quality.performance')], ['low', tr('prefs.power.quality.low')]];
+  return (
+    <SettingRow label={tr('prefs.power.quality')} hint={tr('prefs.power.qualityHint')}>
+      <Segmented small value={s.renderQuality || 'auto'} onChange={(v) => set({ renderQuality: v })} options={opts} />
+    </SettingRow>
+  );
+}
+
 function Buttons({ hasLid, tr }) {
   const [b, setB] = useState(() => insane.power.buttons());
   const [err, setErr] = useState('');
@@ -114,6 +127,7 @@ export function PowerSettings() {
         : <PageHeader icon={<Badge glyph="⚡" color="#30d158" size={44} />} title={tr('prefs.power.onPower')} subtitle={tr('prefs.power.noBattery')} />}
       <GroupBox>
         <ProfileRow tr={tr} />
+      <QualityRow tr={tr} />
         {hasBattery ? <ChargeLimitRow tr={tr} /> : null}
         {hasBattery ? (
           <SettingRow label={tOptional('prefs.power.autoSwitch') || 'Switch power mode automatically'}

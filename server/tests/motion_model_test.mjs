@@ -1,5 +1,5 @@
 // motion_model_test.mjs — moving wallpapers without a screen (sdk/motionmodel.js).
-import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom } from '../../sdk/motionmodel.js';
+import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom, adaptiveCap, CAP_STEADY_MS } from '../../sdk/motionmodel.js';
 
 let ok = 0, bad = 0;
 const eq = (name, a, b) => {
@@ -22,6 +22,31 @@ eq('hw: all four, catalog order first', hwCodecs({ hevc: true, h264: true, vp9: 
 eq('hw: a virtual gpu: nothing', hwCodecs({ hevc: true, virtualGpu: true }), []);
 eq('hw: unknown yet: nothing', hwCodecs(null), []);
 eq('hw: none of the four: nothing', hwCodecs({ hevc: false, h264: false, vp9: false, av1: false }), []);
+
+// adaptiveCap: the wallpaper's frame cap steps down under load and climbs back slowly
+let st = null, now = 1000;
+const step = (busy, dr) => { const r = adaptiveCap(30, { busy, dropRatio: dr }, st, now); st = r.state; now += 5000; return r.cap; };
+eq('clear: stays at the cap', step(false, 0), 30);
+eq('one busy sample: down a rung', step(true, 0), 15);
+eq('still busy: down to the floor', step(true, 0), 10);
+eq('clear but not steady yet: stays', step(false, 0), 10);
+eq('drops alone count as load', (() => { st = null; now = 1000; return adaptiveCap(30, { busy: false, dropRatio: 0.9 }, st, now).cap; })(), 15);
+for (let i = 0; i < 2; i++) step(true, 0);                    // back to the floor
+for (let i = 0; i < 2; i++) step(false, 0);                   // clear samples, not steady yet
+now += CAP_STEADY_MS;                                          // ... now it is
+const r1 = adaptiveCap(30, { busy: false, dropRatio: 0 }, st, now); st = r1.state; now += 1000;
+eq('steady: one rung back', r1.cap, 15);
+const r2 = adaptiveCap(30, { busy: false, dropRatio: 0 }, st, now);
+eq('right after a step: no second rung', r2.cap, 15);
+st = r2.state; now += CAP_STEADY_MS;
+const r3 = adaptiveCap(30, { busy: false, dropRatio: 0 }, st, now);
+eq('steady again: back at the cap', r3.cap, 30);
+const r4 = adaptiveCap(30, { busy: true, dropRatio: 0 }, r3.state, now + CAP_STEADY_MS);
+eq('a burst drops one rung and resets the recovery clock', adaptiveCap(30, { busy: false, dropRatio: 0 }, r4.state, now + CAP_STEADY_MS + 5000).cap, 15);
+const r5 = adaptiveCap(30, { busy: true, dropRatio: 0 }, r4.state, now + CAP_STEADY_MS + 10000);
+eq('a second busy sample: to the floor', r5.cap, 10);
+eq('clear again: the clock starts over', adaptiveCap(30, { busy: false, dropRatio: 0 }, r5.state, now + CAP_STEADY_MS + 15000).cap, 10);
+eq('no cap: stays uncapped', adaptiveCap(0, { busy: true, dropRatio: 1 }, null, 0).cap, 0);
 
 const item = { variants: [{ name: '2160.hevc', codec: 'hevc', w: 3840, h: 2160 }, { name: '1080.hevc', codec: 'hevc', w: 1920, h: 1080 }, { name: '1080.h264', codec: 'h264', w: 1920, h: 1080 }] };
 eq('1080 screen', pickVariant(item, ['hevc', 'h264'], 1920, 1080).name, '1080.hevc');

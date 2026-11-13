@@ -126,6 +126,7 @@ export * as fs from './fs.js';
 export { useDirectory } from './fs.js';
 export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver, shadeHex, alphaHex, deriveTokens } from './theme.js';
 export { useTween, reducedMotionNow, easeOutBack } from './animation.js';
+export { QUALITY_PROFILES, qualityProfile, qualityKnobs, qualityTick, renderQuality, isAdaptive } from './quality.js';
 export {
   Button, Toggle, Segmented, SidebarItem, SectionTitle, ScrollView, TextInput, FormFields, hasTextFocus, takeTextFocus, releaseTextFocus, textFocusOwner, Stepper, Slider,
   AppHost, useAppWindow, useKeyboard, focusToken, restoreFocus, pasteIntoFocused, FloatingWindows, useWindowState,

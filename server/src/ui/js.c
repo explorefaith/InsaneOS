@@ -339,7 +339,19 @@ static JSValue f_stats(JSContext *c, JSValueConst this_val, int argc, JSValueCon
     return o;
 }
 
+/* insane.setBlurQuality(f): the performance profiles' lever on the backdrop blur's cost (canvas.h,
+ * canvas_blur_shrink). 0 = each blur radius keeps its own downsample. Between frames; the paint
+ * threads read it during a job. */
+static JSValue f_set_blur_quality(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
+    (void)t;
+    int32_t f = 0;
+    if (argc >= 1) JS_ToInt32(c, &f, argv[0]);
+    canvas_blur_shrink((int)f);
+    return JS_UNDEFINED;
+}
+
 static const JSCFunctionListEntry insane_funcs[] = {
+    JS_CFUNC_DEF("setBlurQuality", 1, f_set_blur_quality),
     JS_CFUNC_DEF("createNode", 1, f_create_node),
     JS_CFUNC_DEF("setText", 2, f_set_text),
     JS_CFUNC_DEF("setStyle", 3, f_set_style),
