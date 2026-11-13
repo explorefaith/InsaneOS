@@ -108,9 +108,9 @@ export const dock = {
 // right-to-left language.
 export const DOCK_DEFAULTS = {
   dockPosition: 'bottom',     // 'bottom' | 'left' | 'right' (Insane Flow theme)
-  dockSize: 54,               // px of each icon (36–80)
+  dockSize: 46,               // px of each icon (36–80); round 4: the understated default
   dockMagnify: true,          // magnification
-  dockMagnifySize: 86,        // px of the largest icon when magnified (more than dockSize)
+  dockMagnifySize: 62,        // px of the largest icon when magnified (more than dockSize)
   dockAutohide: false,        // hides and comes back when the edge is touched
   dockIntellihide: false,     // with dockAutohide: hides only while a window covers it (dockmodel.js, #46)
   dockRecents: false,        // shows the most recently used apps that aren't pinned

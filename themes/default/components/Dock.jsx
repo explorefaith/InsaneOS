@@ -13,7 +13,7 @@ import {
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
-const GAP = 8, PAD = 9, MARGIN = 6;
+const GAP = 8, PAD = 12, MARGIN = 6;    // PAD 12: the bar is 70 px at the default 46 px icon
 const SEP = GAP + 1;          // separator before the recent apps and before the Trash
 const SLIDE_MS = DUR.dockSlide, REORDER_MS = DUR.reorder, POOF_MS = DUR.poof;
 const NEAR = 60;              // dragged farther than this from the Dock: the remove cue (after a hold)
