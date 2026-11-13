@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, t as tr, tOptional } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional } from '@insaneos/sdk';
 import { View, Text } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
 const INK = '#1d1d1f';

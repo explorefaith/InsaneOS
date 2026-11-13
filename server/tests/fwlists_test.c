@@ -150,7 +150,7 @@ static void test_set(void) {
     for (int i = 0; bad[i]; i++) CHECK(!fwl_load_text(bad[i], strlen(bad[i]), err, sizeof err));
     char withnul[] = "insaneos-fwlists 1\nd a.example\0\n";
     CHECK(!fwl_load_text(withnul, sizeof withnul - 1, err, sizeof err));
-    b = fwl_load_text("insaneos-fwlists 1", 16, err, sizeof err);
+    b = fwl_load_text("insaneos-fwlists 1", sizeof FWL_HEADER - 1, err, sizeof err);
     CHECK(b && !fwl_domains(b));
     fwl_free(b);
     fwl_free(l);
