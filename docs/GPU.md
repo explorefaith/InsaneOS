@@ -487,6 +487,32 @@ Alone both hold 60.0 fps. v087.20 gave the same picture (3 runs each: 2.6 agains
 30.0–31.2 fps under load). A scissor still loads the tiles it touches, so on V3D the partial frame is slower than the
 whole one. The code stays, off, for other tilers.
 
+**On an Intel UHD 620 (2026-11-13, `build/gpu-scissor`, Mesa iris, WHL GT2, beside a live session with
+an unrelated all-core compile running — the ratios are the finding, the absolutes are noisy):** here it
+pays, and it pays big. The tool repeats the GPU path's own frame — a persistent 1920 × 1080 scene
+texture, the changed rectangle TexSubImage'd every frame, composed into one of three FBOs standing in
+for the GBM chain — alternating 30 whole frames with 30 scissored ones, GPU time from the native fence.
+
+| Damage share of the screen | Whole compose p50 | Scissored p50 | Scissored p99 | Saved |
+|---|---|---|---|---|
+| 1.5 % (a cursor, a caret) | 2.14 ms | 0.23 ms | 3.64 ms | 89 % |
+| 5 % | 2.09 ms | 0.58 ms | 4.17 ms | 73 % |
+| 15 % | 2.01 ms | 0.58 ms | 4.53 ms | 71 % |
+| 30 % | 2.05 ms | 0.59 ms | 5.49 ms | 71 % |
+
+Under a 4-core memory-traffic load (`--load read`, the case where the GPU-late frames happen) the win
+holds: 2.87 → 0.88 ms (70 %) at 1.5 % damage, 3.08 → 1.30 ms (58 %) at 30 %. Correctness on the driver
+was the gap GPU.md left open ("no GPU has" run it): `--verify` composes 600 frames scissored, reads the
+region back every 20th frame against the same frame composed whole — **2 465 420 pixels compared, 0
+differ**. This closes the loop with `build/engine-test` (the gsc logic, 7 567 frames) and the llvmpipe
+scratch (24 % of the pixels, 3.77 vs 8.80 ms).
+
+**Decision (0.8.8.7):** the scissor follows the driver (`scissor_default` in `gpu/gpu.c`) — on for the
+Intel drivers and the software rasterizers, where it was measured to win; off for V3D/vc4, where it was
+measured to lose; off for the other tilers (Adreno, Mali, Tegra) until they are measured. `INSANE_GPU_SCISSOR=0`
+or `=1` still overrides, and the session log says which of the three decided. `build/gpu-scissor` stays
+in the tree as the tool a new driver gets measured with.
+
 ## What slows the GPU under CPU load (the experiment, 0.8.7)
 
 On the Pi 5 a frame's GPU time goes from about 1.5 ms alone to 14–16 ms under an all-core load with no clock change

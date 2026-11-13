@@ -476,6 +476,19 @@ void gpu_info(GpuInfo *i) {
     i->scanouts = total_scanouts;
 }
 
+/* The buffer-age scissor's default for this renderer: on for the drivers it was measured to win on
+ * (the Intel ones, the software rasterizers), off for the tilers — V3D measured a loss, the rest
+ * unmeasured — and off for anything else until it is measured (docs/GPU.md). */
+static int scissor_default(const char *renderer) {
+    char r[128];
+    snprintf(r, sizeof r, "%s", renderer ? renderer : "");
+    for (char *p = r; *p; p++) if (*p >= 'A' && *p <= 'Z') *p += 32;
+    if (strstr(r, "v3d") || strstr(r, "vc4") || strstr(r, "freedreno") || strstr(r, "adreno") ||
+        strstr(r, "panfrost") || strstr(r, "mali") || strstr(r, "lima") || strstr(r, "tegra")) return 0;
+    return strstr(r, "iris") || strstr(r, "i965") || strstr(r, "i915") || strstr(r, "llvmpipe") ||
+           strstr(r, "swrast") || strstr(r, "swr") || strstr(r, "softpipe");
+}
+
 int gpu_init(Kms *k) {
     const char *env = getenv("INSANE_GPU");
     G.debug = getenv("INSANE_GPU_DEBUG") != NULL;
@@ -526,10 +539,18 @@ int gpu_init(Kms *k) {
     G.have_external = has_ext(gl_exts, "GL_OES_EGL_image_external");
     G.unpack_sub = has_ext(gl_exts, "GL_EXT_unpack_subimage");
     {
+        /* Where the buffer-age scissor pays, measured (docs/GPU.md): it wins on the Intel drivers
+         * and on llvmpipe — 71–89 % of the frame's GPU time at 1.5–30 % damage on a UHD 620
+         * (build/gpu-scissor, 2.47 Mpx compared against the whole composition, 0 differ; the win
+         * holds, 58–69 %, under a 4-core memory-traffic load) — and loses on the Pi 5's V3D, whose
+         * tiles reload whatever the scissor draws (the 0.8.7 run). The other tilers are unmeasured:
+         * off until they are. INSANE_GPU_SCISSOR=0 or =1 overrides. */
         const char *sc = getenv("INSANE_GPU_SCISSOR");
-        int want = sc && !strcmp(sc, "1");
+        int want = sc ? (sc[0] == '1' && !sc[1]) : scissor_default(G.renderer);
         G.scissor = want && has_ext(exts, "EGL_EXT_buffer_age");
-        fprintf(stderr, "gpu: buffer-age scissor %s\n", G.scissor ? "on" : want ? "off: no EGL_EXT_buffer_age" : "off (INSANE_GPU_SCISSOR=1 turns it on)");
+        fprintf(stderr, "gpu: buffer-age scissor %s\n", G.scissor ? "on"
+                 : sc ? "off (INSANE_GPU_SCISSOR=0)" : want ? "off: no EGL_EXT_buffer_age"
+                   : "off: this driver is a tiler or unmeasured (INSANE_GPU_SCISSOR=1 forces it)");
     }
     if (!G.unpack_sub) dbg("no GL_EXT_unpack_subimage: damage is uploaded as whole rows");
     if (make_prog(0, fs_2d) || (G.have_external && make_prog(1, fs_ext))) { fprintf(stderr, "gpu: shaders failed, CPU composition\n"); last_why = "shaders"; goto fail; }

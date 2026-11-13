@@ -636,6 +636,9 @@ build/lock-seat: tests/lock_seat.c
 
 # what slows the GPU under CPU load (tests/gpu_contention.c, docs/GPU.md): a test tool, never installed
 GC_PKGS := gbm egl glesv2
+# does the buffer-age scissor pay on this GPU? (docs/GPU.md, "The buffer-age scissor")
+build/gpu-scissor: tests/gpu_scissor.c src/gpu/gscissor.c src/gpu/gscissor.h
+	$(CC) $(CFLAGS) $(WARN) -std=gnu11 -D_GNU_SOURCE $(shell pkg-config --cflags gbm egl glesv2) -Isrc -o $@ tests/gpu_scissor.c src/gpu/gscissor.c $(shell pkg-config --libs gbm egl glesv2) -lpthread
 build/gpu-contention: tests/gpu_contention.c src/gpu/gcontend.c src/gpu/gcontend.h
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(WARN) -std=gnu11 -D_GNU_SOURCE $(shell pkg-config --cflags $(GC_PKGS)) -Isrc -o $@ tests/gpu_contention.c src/gpu/gcontend.c $(shell pkg-config --libs $(GC_PKGS)) -lpthread
