@@ -25,7 +25,9 @@
 // 0.8.8.6) shows the bar as it was: no migration. The Cleaner item (the apple) keeps its own key,
 // cleaner.menuItem, which Cleaner → Settings already writes; the Settings row writes the same key.
 export const MENUBAR_DEFAULTS = {
-  keyboard: true,       // the keyboard layout (FR, ES…): one click goes to the next layout
+  keyboard: false,      // the keyboard layout's label in the bar (US, FR…): off by default since round 4 —
+                        // the unwanted visible label is gone, switching stays in Settings → Keyboard and
+                        // the row in Menu Bar settings brings the item back for those who used it
   osk: true,            // the on-screen keyboard's item
   bell: true,           // the notifications' bell next to the clock
   calendar: true,       // the month calendar in the clock's panel
