@@ -110,7 +110,7 @@ mode-aware surfaces), notification banners (motion + token light palette), Butto
 
 ## 7. Tests performed
 
-Full `make test` (C: fw-rules 16181 checks, npcompile 480 000 random decisions, timer-order 427 538
+Full `make test` (C: fw-rules 16181, fwlists 8307/8307, cloud 2279, backup 220, gpustat 63, fwdest 99, voltage 35, nethist 22 checks; damage fuzz 12 seeds clean; npcompile 480 000 random decisions, npcompile 480 000 random decisions, timer-order 427 538
 callbacks, tzif 216 168 instants, mview, hwfall, wallpaper-find/-admin/-image, media-wallpaper…),
 `tests/run_suites.sh` (90 JS suites), the menubar and classic-taskbar scenes (63 checks), theme
 bundle build (all apps), three code-manifest-verified bundles. The motion-model suite covers the
@@ -123,6 +123,9 @@ new `hwCodecs` split (52 checks).
   was not weakened.
 - sound/pkg/hwreport JS suites fail on this machine for environmental reasons recorded before this
   session began (they pass in the release environment).
+- `clean-test` is nondeterministic on this machine (different checks fail per run; reproduced at the
+  pre-session commit `e5d75c8`) — timestamp/state races in the test's throwaway folder, not in the
+  cleaner's code paths this session touched.
 - InsaneBench before/after on this laptop awaits AC power (battery guard is a feature).
 - No focus-visible rings on mouse-driven controls yet (the engine has no semantic focus tree — only
   TextInput, menus, Spotlight, StartMenu and now Launchpad are keyboard-first).
