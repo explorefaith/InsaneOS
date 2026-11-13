@@ -2,13 +2,15 @@
 // (the SDK's AppHost); the theme only decides how the frame looks. Moving and resizing (invisible
 // borders on all 4 sides and 4 corners, <WindowShell>) is done by insane-server in C
 // (docs/WINDOWS.md); the JS drag below is only kept for a maximized window.
-import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings, DUR, easeOutCubic } from '@insaneos/sdk';
+import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings, DUR, easeOutCubic, useTween } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
 const TITLE_H = 40;
 const DRAG_START = 6;      // px the pointer moves before a maximized window is dragged out
 const LIGHT = 13;          // a traffic light's diameter
+const HIT = 24;            // a traffic light's click target (round 4): the circle sits centred in it,
+                           // neighbours overlap by 3 px so the visible gap stays 8 px
 // bars: the glyph shown on hover, as [length, angle] bars crossing the light's center
 const LIGHTS = [
   { key: 'close', color: '#ff5f57', bars: [[8, 45], [8, -45]], act: (id) => wm.close(id) },
@@ -47,18 +49,22 @@ function fxStyle(fx, geo) {
 // Appearance → Window Controls), like the standard frame.
 function CsdLights({ win, t, focused, lights }) {
   const [hover, setHover] = useState(false);
+  const glyphP = useTween((hover || lights?.glyphs === 'always') ? 1 : 0, { dur: DUR.hover });
   if (!lights.on) return null;
   return (
     <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onMouseDown={(e) => e.stopPropagation()}
-      style={{ position: 'absolute', [lights.side]: 9, top: 8, flexDirection: 'row', gap: 6, zIndex: 50,
-        borderRadius: 9, padding: 2, pointerEvents: 'auto',
+      style={{ position: 'absolute', [lights.side]: 2, top: 6, flexDirection: 'row', zIndex: 50, padding: 1, borderRadius: 13, pointerEvents: 'auto',
         backgroundColor: focused || hover ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.12)' }}>
       {LIGHTS.map((l) => (
         <View key={l.key} onMouseDown={(e) => e.stopPropagation()} onClick={() => l.act(win.id)}
-          style={{ width: LIGHT - 1, height: LIGHT - 1, borderRadius: (LIGHT - 1) / 2, direction: 'ltr',
+          style={{ width: HIT, height: HIT, marginHorizontal: -3, justifyContent: 'center', alignItems: 'center', direction: 'ltr' }}>
+          <View style={{ width: LIGHT - 1, height: LIGHT - 1, borderRadius: (LIGHT - 1) / 2,
             backgroundColor: focused || hover ? l.color : t.lightOff }}>
-          {(hover || lights.glyphs === 'always') && <LightGlyph l={l} />}
+            <View style={{ width: LIGHT - 1, height: LIGHT - 1, justifyContent: 'center', alignItems: 'center', opacity: glyphP }}>
+              <LightGlyph l={l} />
+            </View>
+          </View>
         </View>
       ))}
     </View>
@@ -90,6 +96,7 @@ function glassPrefs(s) {
 export function Window({ win, app, t, focused, fx }) {
   const drag = useRef(null);
   const [hover, setHover] = useState(false);
+  const glyphP = useTween((hover || lights?.glyphs === 'always') ? 1 : 0, { dur: DUR.hover });
   const geo = wm.frame(win);
   const fxs = fxStyle(fx, geo);
   // opening fade: the window rises a little and fades in, unless motion is reduced —
@@ -186,12 +193,16 @@ export function Window({ win, app, t, focused, fx }) {
           paddingHorizontal: 80 }}>{windowTitle(win)}</Text>
         {lights.on && (
           <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-            style={{ position: 'absolute', top: 0, bottom: 0, [lights.side]: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            style={{ position: 'absolute', top: 0, bottom: 0, [lights.side]: 10, flexDirection: 'row', alignItems: 'center' }}>
             {LIGHTS.map((l) => (
               <View key={l.key} onMouseDown={(e) => e.stopPropagation()} onClick={() => l.act(win.id)}
-                style={{ width: LIGHT, height: LIGHT, borderRadius: LIGHT / 2, direction: 'ltr',
+                style={{ width: HIT, height: HIT, marginHorizontal: -1.5, justifyContent: 'center', alignItems: 'center', direction: 'ltr' }}>
+                <View style={{ width: LIGHT, height: LIGHT, borderRadius: LIGHT / 2,
                   backgroundColor: focused || hover ? l.color : t.lightOff }}>
-                {(hover || lights.glyphs === 'always') && <LightGlyph l={l} />}
+                  <View style={{ width: LIGHT, height: LIGHT, justifyContent: 'center', alignItems: 'center', opacity: glyphP }}>
+                    <LightGlyph l={l} />
+                  </View>
+                </View>
               </View>
             ))}
           </View>
