@@ -62,3 +62,13 @@
 - [ ] **Wallpaper pressure pause** — মেমরি চাপ দিলে (বড় balloon বা অনেক ট্যাব) wallpaper আগে থামবে (still image থাকবে), চাপ কমলে নিজেই ফিরবে — Settings-এর switch ছাড়াই, এটা protection
 - [ ] **Pointer lag log** — `INSANE_INPUT_DEBUG=1` session-এ `cat $XDG_RUNTIME_DIR/insaneos-pointerlag.log` — ৫ সেকেন্ডে এক লাইন percentiles (docs/TROUBLESHOOTING.md)
 - [ ] `bash fix/realworld-suite.sh all 12` upgrade-এর আগে ও পরে — দুটো SUMMARY.txt তুলনা (fix/REALWORLD-TESTS.md)
+
+## ১১. Round 4 — desktop experience (upgrade-insaneos.sh + relogin এর পরে)
+- [ ] **Wallpaper automatic pause** — একটা অ্যাপ খোলো → wallpaper সাথে সাথে থেমে যায় (still frame থাকে, কালো হয় না); সব window minimize/close করো → নিজেই ফিরে আসে; Control Center/Dock/Spotlight খুললে থামে না; পরপর ১০ বার open/close — আটকে যায় না (Settings → Wallpaper → Live → "An app window is open" switch)
+- [ ] **Traffic lights** — বড় click area (24px), hover-এ × − + আসে (১০০ms fade); CSD অ্যাপেও (Chromium/GTK) একই
+- [ ] **Panel** — battery-র পাশে আর `US` নেই, রাজার মুকুট নেই (Cleaner-এর জায়গায় এখন স্পার্ক আইকন); Settings → Desktop & Dock → Menu Bar-এ "Keyboard layout" toggle দিয়ে ফেরত আনা যায়
+- [ ] **Charge limit** — Settings → Power → Charge limit বদলালে এই মেশিনে লেখা দেখাবে: firmware does not support (সত্যি কথা); সাপোর্ট করা মেশিনে 80% সেট হয়
+- [ ] **Sounds** — স্ক্রিনশট নিলে শাটার শব্দ (শুধু সফল ক্যাপচারে), Trash খালি করলে crumple, চার্জার লাগালে/খুললে নোট; Settings → Sound → Sound Effects-এ সব toggle + preview বাটন
+- [ ] **Widgets** — ডেস্কটপে right-click → Edit Widgets: গ্যালারি থেকে Clock/Calendar/Battery/System/Media যোগ, drag করে সরানো, × দিয়ে বাদ, Done; রিবুটের পরে জায়গামতোই থাকে
+- [ ] **Dock** — ছোট ডিফল্ট আইকন (46px), ম্যাগনিফাই 62px; পুরনো setting দিয়েছিলে সেটাই থাকবে
+- [ ] `bash fix/realworld-suite.sh A 12` — wallpaper চলা অবস্থায় বনাম একটা অ্যাপ খোলা অবস্থায় insane-server-এর CPU তুলনা (pause কাজ করার প্রমাণ)

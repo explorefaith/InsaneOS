@@ -157,3 +157,36 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
         the suite used to stop at imager-test; all environmental, none in this round's diff
 - PENDING install via fix/upgrade-insaneos.sh + relogin, then TEST-CHECKLIST §10 and the suite re-run
         (the round's C changes are in the tree, not in the installed binary — REALWORLD-TESTS.md notes it)
+
+## Session 8 (round 4 — desktop experience, multi-app performance, macOS-inspired interaction)
+- MEASURED  the round-3 build installed (04:37) and rebooted: real-display session (i915 KMS 1920×1080@60,
+        hw decode) — the pending round-3 comparison taken on it: A 56.0 fps / frame p99 18.2 ms / 39
+        vblank skips (was 49.8 / 34.6 / 83 against the pre-round-1 binary; different machine state,
+        recorded in fix/results-realworld-20261114-045*), C1 52.1 fps / p99 34.0 ms, C2 12.1 fps /
+        p99 869 ms — the memory-traffic collapse stands, unschedulable, as predicted
+- DONE   wallpaper: automatic desktop-aware pause — appsOpen() (an app window on the active desktop,
+        not minimized/pip/fullscreen) is the new non-default-off 'desktopCovered' pause reason; the
+        windows-store and active-desktop subscriptions make it event-driven (no polling); motion-model
+        test 96 ok incl. a 100-cycle open/close/minimize/restore acceptance; the "An app window is
+        open" switch (default on) in Wallpaper → Pause when
+- DONE   windows: the traffic lights' spec'd hit targets (24×24 boxes, circles still 13 px/8 px apart)
+        and the 100 ms glyph fade through useTween; CSD overlay keeps its plate with the same treatment
+- DONE   panel: the old Lord OS crown (the Cleaner status item's PNG!) replaced by a generated four-point
+        spark (tools/gen-cleaner-status.py); the keyboard layout's US label off by default (Menu Bar
+        settings row brings it back; switching itself untouched) — found by zooming into the user's
+        actual screenshots, not by grepping
+- DONE   battery: charge limit refuses honestly — without charge_control_end_threshold the action
+        answers battery.limit.unsupported (translated), writes nothing; the dropdown rolls back and
+        shows the reason (this machine: unsupported, verified in /sys)
+- DONE   sound: the effects layer — shutter (mirror slap), trash (crumple), plug/unplug (two-note)
+        synthesized in snd.c with per-effect volume (sound.play(name, vol)); sdk/soundfx.js gates
+        everything (Settings → Sound → Sound Effects: master, volume, per-event, previews; minimize/
+        restore and app launch are opt-in); the shutter fires only after a capture landed
+- DONE   widgets: the desktop widget system — widgetmodel.js (grid, clamp, free spots, persistence to
+        settings.desktopWidgets, widget-model-test 20/20), edit mode (desktop right-click → Edit
+        Widgets: drag, remove, gallery) and calendar/battery/media cards; weather honestly absent
+- DONE   dock: the understated defaults (46/62 px, bar 70) — magnification machinery unchanged
+- TESTED JS 91 passed / 3 failed (the documented environmental set); menubar-model updated for the new
+        default; bundles + code manifest clean; C suite run at the round's close (see ROUND4-REPORT.md)
+- PENDING install + relogin for the round-4 build; then TEST-CHECKLIST §11 and the wallpaper-paused
+        CPU comparison (the running session's binary predates this round)
