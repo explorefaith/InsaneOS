@@ -12,7 +12,10 @@ eq('no menuBar', menuBarPrefs({}), MENUBAR_DEFAULTS);
 eq('null settings', menuBarPrefs(null), MENUBAR_DEFAULTS);
 eq('menuBar not an object', menuBarPrefs({ menuBar: 'off' }), MENUBAR_DEFAULTS);
 eq('one off', menuBarPrefs({ menuBar: { osk: false } }).osk, false);
-eq('others stay on', menuBarPrefs({ menuBar: { osk: false } }).keyboard, true);
+// the keyboard label is off by default since round 4 (the unwanted US label; the Menu Bar row brings it back)
+eq('others keep their own defaults', menuBarPrefs({ menuBar: { osk: false } }).keyboard, MENUBAR_DEFAULTS.keyboard);
+eq('keyboard default is off now', MENUBAR_DEFAULTS.keyboard, false);
+eq('a saved true still shows it', menuBarPrefs({ menuBar: { keyboard: true } }).keyboard, true);
 eq('only booleans count', menuBarPrefs({ menuBar: { bell: 0, calendar: 'no' } }).bell, true);
 eq('unknown keys are dropped', Object.keys(menuBarPrefs({ menuBar: { foo: false } })), Object.keys(MENUBAR_DEFAULTS));
 
