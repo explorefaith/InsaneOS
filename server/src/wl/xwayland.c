@@ -241,7 +241,7 @@ static void spawn(void) {
         if (dup2(a, 3) != 3 || dup2(b, 4) != 4 || dup2(c, 5) != 5) _exit(126);
         syscall(SYS_close_range, 6, ~0u, 0);
         /* its own scope: never insane-server's (the firewall and the Monitor know it apart) */
-        CgroupLimits lim = { 0, 0, 0 };
+        CgroupLimits lim = { .mem_high_mb = 0, .mem_max_mb = 0, .cpu_percent = 0 };
         if (cgroup_enter("insaneos-xwayland.scope", &lim) && managed) {
             static const char m[] = "xwayland: could not enter insaneos-xwayland.scope: not started\n";
             if (write(2, m, sizeof m - 1) < 0) {}

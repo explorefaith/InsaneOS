@@ -68,7 +68,7 @@ static void child(int fd, const char *cwd, int id) {
      * for the firewall and Monitor → Network (insaneos:terminal), each connection with its program's
      * name. Best effort: a terminal that can't be placed still opens. */
     if (getenv("INSANEOS_SESSIOND")) {
-        CgroupLimits lim = { 0, 0, 0 };
+        CgroupLimits lim = { .mem_high_mb = 0, .mem_max_mb = 0, .cpu_percent = 0 };
         cgroup_enter("insaneos-net-terminal.scope", &lim);
     }
 
