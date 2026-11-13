@@ -150,10 +150,15 @@ evidence; noted as future work with the `useTween` migration.
 - **JS suites: 91 passed, 3 failed** — the documented environmental set (sound, pkg, hwreport).
   New: `widget-model-test` 20/20; `motion-model-test` 96 ok; `menubar-model-test` 76 ok (updated
   for the keyboard-label default). Bundles + code-manifest build clean.
-- **C suite**: run at the round's close (`make -k test`); the new C surface this round is the
-  sound synths (no C test harness exists for PulseAudio playback — verified by the on-screen
-  preview buttons in Settings → Sound) and the battery-limit refusal (root action; verified by
-  the live `/sys` check on this machine). Tallies in `fix/INSANE-OS-PROGRESS.md` session 8.
+- **C suite** (`make -k test`, plus the up-to-date binaries run directly): **engine-test 8831/0**
+  (damage fuzz 12 seeds clean, scissor fuzz 0 differ), **fpipe-test 61/0**, **cgweight-test 18/18**,
+  **fw-rules 16193/16193**, fwlists 8307/8307, tzif ok, cloud 2279, media-wallpaper OK. Known
+  failures, all pre-existing and baseline-verified in round 3: `imager-test` 2 (the release-key
+  fixture), `rconnect-run-test` 7 (sandbox namespaces in this environment), `clean-test`
+  (nondeterministic here), `sql-e2e-test` (blocked at 0 % CPU again, killed to let the rest run).
+  The new C surface this round — the sound synths and the battery-limit refusal — has no C test
+  harness (PulseAudio playback, root sysfs): verified by the Settings → Sound preview buttons and
+  the live `/sys` check on this machine, and listed in the on-screen checklist.
 - **Performance comparison**: the round-3-build baseline is in §1. The **round-4 build's** numbers
   (wallpaper paused under apps, resume latency) require the install below — the running session
   predates this round's work, and no number in this report claims otherwise.
