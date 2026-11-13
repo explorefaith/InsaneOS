@@ -2703,7 +2703,7 @@ int main(int argc, char **argv) {
         }
         scripted = grab_scripted();
         /* Timers del tema (React agenda su trabajo con setTimeout/setImmediate). Una ráfaga de
-         * timers vencidos corre como mucho TIMER_BURST_MS por vuelta del bucle: lo demás sigue en
+         * timers vencidos corre como mucho 8 ms por vuelta del bucle: lo demás sigue en
          * la siguiente (delay 0 despierta el poll al instante), y el input se lee entre medias
          * en vez de esperar detrás de 64 rondas seguidas. */
         double delay = -1, tick0 = now_ms();
