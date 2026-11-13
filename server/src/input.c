@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <time.h>
 #include <unistd.h>
 
 #define LONG_BITS (8 * sizeof(long))
@@ -47,6 +48,10 @@ static void add_device(Input *in, int fd, const char *path) {
     if (HAS(ev, EV_LED)) ioctl(fd, EVIOCGBIT(EV_LED, sizeof led), led);
     for (int l = LED_NUML; l <= LED_SCROLLL; l++) if (HAS(led, l)) d->leds |= 1 << l;
     d->led_state = -1;
+    /* the kernel stamps events with CLOCK_REALTIME by default, which steps with the wall clock;
+     * pointers report CLOCK_MONOTONIC so latency traces read the stamp directly (tp_open does its
+     * own for the touchpads). The exclusive grab keeps other readers from needing a clock anyway. */
+    if (!d->tp && (mouse || tablet)) { int clk = CLOCK_MONOTONIC; ioctl(fd, EVIOCSCLOCKID, &clk); }
     /* touchpad or touchscreen (multitouch): handled by our own driver (tp/tp.c) */
     d->tp = tp_open(fd, d->name);
     if (d->tp) tablet = 0;

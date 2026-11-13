@@ -18,6 +18,7 @@
  */
 #include "admin.h"
 #include "keylag.h"
+#include "plag.h"
 #include "bench/lbinput.h"
 #include "net/net.h"
 #include "disk/disk.h"
@@ -463,6 +464,7 @@ static int out_at_pointer(const Server *s);
 /* shake the pointer to find it (shake.h): every motion, from any device, feeds it */
 static Shake pointer_shake;
 static void dispatch_pointer(Server *s) {
+    plag_dispatch();                        /* the batch's read→dispatch stage (plag.h) */
     s->motion_pending = 0;
     {
         static int px, py, seen;
@@ -1162,6 +1164,7 @@ static void on_input(void *ud, const InputDevice *d, const struct input_event *e
         break;
     }
     case EV_SYN:
+        if (plag_enabled() && s->moved && ev->time.tv_sec) plag_event(&ev->time);
         if (s->moved) {
             /* juegos: movimiento relativo crudo; con el puntero bloqueado el cursor no se mueve */
             wl_pointer_relative(s->rdx, s->rdy);
@@ -2651,6 +2654,7 @@ int main(int argc, char **argv) {
     sigaction(SIGINT, &stop_sa, NULL);
     sigaction(SIGTERM, &stop_sa, NULL);
     keylag_init(s.greeter);                 /* key latency trace, only with INSANE_INPUT_DEBUG=1 (keylag.h) */
+    plag_init(s.greeter);                   /* pointer latency trace, same env (plag.h) */
     fpipe_init(&fpipe, getenv("INSANE_PIPELINE"));
     fprintf(stderr, "insane-server: frame pipeline %s (INSANE_PIPELINE: unset or 0 off, 1 while frames are heavy, 2 always)\n",
             fpipe.mode == FPIPE_OFF ? "off" : fpipe.mode == FPIPE_ALWAYS ? "always" : "while frames are heavy");
@@ -2774,6 +2778,7 @@ int main(int argc, char **argv) {
             }
         }
         js_input_flush();                   /* the on-screen keyboard's taps (js_input.c), as physical keys */
+        plag_flush();                       /* the pointer trace writes at its own pace (plag.h) */
         /* the frame pipeline (fpipe.h): a prepared frame whose flip is done is submitted, and the next one may
          * be painted while every display waits for its flip */
         {   /* a machine's guest changed its pointer (or the scale it's drawn at) while the host's is over it */
@@ -2878,6 +2883,7 @@ int main(int argc, char **argv) {
                 wl_presented(mk->flip_ns, mk->flip_seq, mk->mode.vrefresh ? 1000000000u / mk->mode.vrefresh : 16666667u);
                 lbf_presented(mk->flip_ns, mk->mode.vrefresh ? 1000000000u / mk->mode.vrefresh : 16666667u);
                 if (keylag_enabled) keylag_presented(mk->flip_ns);
+                plag_presented(mk->flip_ns);    /* the dispatch→flip stage (plag.h) */
                 if (lbf_recording()) {
                     uint64_t done = 0;
                     if (gpu_active() && main_out(&s)->gpu >= 0) gpu_fence_time(main_out(&s)->gpu, &done);
