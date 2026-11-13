@@ -37,12 +37,13 @@ export function pickVariant(item, codecs, width, height) {
 
 // Why the video should be paused now, or null. Each is a reason not to spend power on something nobody sees.
 // The user's switches (Settings → Wallpaper → Live → Pause when) can turn the optional ones off: fullscreen,
-// covered, locked (the session is not the one on the monitor), idle, battery and busy. Reduce motion and a
-// screen that is off are not optional: they are accessibility and physics.
-export function pauseReason({ screenOff, reduceMotion, idleSec, idleMax = 300, battery, covered, fullscreen, busy, locked, pauseWhen }) {
+// covered, locked (the session is not the one on the monitor), idle, battery and busy. Reduce motion, a
+// screen that is off and memory pressure are not optional: they are accessibility and physics.
+export function pauseReason({ screenOff, reduceMotion, pressure, idleSec, idleMax = 300, battery, covered, fullscreen, busy, locked, pauseWhen }) {
   const w = pauseWhen || {};
   if (reduceMotion) return 'reduceMotion';
   if (screenOff) return 'screenOff';
+  if (pressure) return 'pressure';
   if (locked && w.locked !== false) return 'locked';
   if (fullscreen && w.fullscreen !== false) return 'fullscreen';
   if (covered && w.covered !== false) return 'covered';
@@ -50,6 +51,24 @@ export function pauseReason({ screenOff, reduceMotion, idleSec, idleMax = 300, b
   if (battery && battery.discharging && battery.percent <= 20 && w.battery !== false) return 'battery';
   if (busy && w.busy !== false) return 'busy';
   return null;
+}
+
+// Memory pressure: the wallpaper is the first decoder to stop, and the last thing to restart.
+// sample comes from insane.system.pressure() ({ some10, some60, availKB }): the PSI memory "some"
+// percentages and MemAvailable, the same signals the background freezer acts on. It stops when the
+// system has been meaningfully stalled (some60 ≥ 25 %), or during a burst (some10 ≥ 40 %) with less
+// than 400 MB free, and comes back only when it is clearly over (some60 < 15 and 800 MB free) — a
+// memory storm must not flicker it on and off, and a pause costs nothing (the still image stays).
+// Non-optional, like a screen that is off. Returns { on, state } with the caller's hysteresis state.
+export const PRESSURE = { some60: 25, some10: 40, availMB: 400, resume60: 15, resumeMB: 800 };
+export function memoryPressure({ some10 = 0, some60 = 0, availKB = Infinity } = {}, state = {}) {
+  const hot = state.hot || 0;
+  if (hot) {
+    if (some60 < PRESSURE.resume60 && availKB >= PRESSURE.resumeMB * 1024) return { on: false, state: { hot: 0 } };
+    return { on: true, state: { hot: 1 } };
+  }
+  const on = some60 >= PRESSURE.some60 || (some10 >= PRESSURE.some10 && availKB < PRESSURE.availMB * 1024);
+  return { on, state: { hot: on ? 1 : 0 } };
 }
 
 // Is this display's desktop fully hidden by a window? rects: the windows on it, not minimized.

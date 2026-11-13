@@ -366,6 +366,34 @@ static JSValue f_sys_info(JSContext *c, JSValueConst this_val, int argc, JSValue
 }
 
 /* [total, idle] in jiffies; CPU usage is computed from the difference between two reads. */
+/* Memory pressure for the wallpaper's yield (sdk/motionmodel.js, docs/WALLPAPERS.md): PSI memory
+ * "some" (avg10/avg60, percent stalled on memory) plus MemAvailable. Two small reads; motion.jsx
+ * samples it on its 5 s tick. On a kernel without PSI (older than 4.20, or disabled) the fields
+ * come back absent and the caller reads that as "no pressure". */
+static JSValue f_sys_pressure(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    JSValue o = JS_NewObject(c);
+    double some10 = -1, some60 = -1, avail = 0;
+    char *txt = read_small("/proc/pressure/memory", 1024, NULL);
+    if (txt) {
+        const char *some = strstr(txt, "some avg10=");
+        if (some) some10 = strtod(some + 11, NULL);
+        const char *s60 = strstr(txt, "some avg60=");
+        if (s60) some60 = strtod(s60 + 11, NULL);
+        free(txt);
+    }
+    txt = read_small("/proc/meminfo", 8192, NULL);
+    if (txt) {
+        char buf[64];
+        if (!field(txt, "MemAvailable", buf, sizeof buf)) avail = atof(buf);
+        free(txt);
+    }
+    JS_SetPropertyStr(c, o, "some10", JS_NewFloat64(c, some10));
+    JS_SetPropertyStr(c, o, "some60", JS_NewFloat64(c, some60));
+    JS_SetPropertyStr(c, o, "availKB", JS_NewFloat64(c, avail));
+    return o;
+}
+
 static JSValue f_sys_cpu(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val; (void)argc; (void)argv;
     double v[8] = {0}, total = 0;
@@ -1494,6 +1522,7 @@ static const JSCFunctionListEntry fs_funcs[] = {
 static const JSCFunctionListEntry system_funcs[] = {
     JS_CFUNC_DEF("info", 0, f_sys_info),
     JS_CFUNC_DEF("cpuTimes", 0, f_sys_cpu),
+    JS_CFUNC_DEF("pressure", 0, f_sys_pressure),
 };
 static const JSCFunctionListEntry settings_funcs[] = {
     JS_CFUNC_DEF("load", 0, f_settings_load),

@@ -13,7 +13,7 @@ import { admin } from './admin.js';
 import { windows } from './windows.js';
 import { battery } from './hardware.jsx';
 import { userWallpaperName } from './wallpapers.js';
-import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant, adaptiveCap } from './motionmodel.js';
+import { displayCovered, motionCodecs, nextRandom, pauseReason, pickVariant, adaptiveCap, memoryPressure } from './motionmodel.js';
 import { qualityKnobs, qualityTick } from './quality.js';
 
 const STORE = '/var/lib/insaneos/wallpapers';
@@ -111,7 +111,7 @@ function randomFor(ids) {
 // ---- one player per file, and the reasons to pause ----
 
 const players = new Map();                // path → { id, refs, views, paused }
-let lastInput = Date.now(), cpu = null, busy = 0, ticking = 0;
+let lastInput = Date.now(), cpu = null, busy = 0, ticking = 0, pressureState = {};
 
 function evaluate() {
   const s = settings.get();
@@ -134,11 +134,20 @@ function evaluate() {
   // settings turns it off — the still wallpaper stays drawn under it anyway.
   let locked = false;
   try { locked = !!s.motionPause?.locked && !!insane.session.managed() && !insane.session.onMonitor(); } catch (e) { /* an older insane-server */ }
+  // memory pressure (motionmodel.memoryPressure): the wallpaper is the first decoder to stop and the
+  // last to restart, with its own hysteresis; an older insane-server without the reading means none
+  let pressureOn = false;
+  try {
+    const pr = memoryPressure(insane.system.pressure(), pressureState);
+    pressureState = pr.state;
+    if (pr.on) b = false;                 // the pause reason says why; "busy" would cap a paused player
+    pressureOn = pr.on;
+  } catch (e) { /* no pressure reading on an older insane-server */ }
   for (const p of players.values()) {
     const rects = live.map((w) => ({ x: w.x, y: w.y, w: w.w, h: w.h }));
     const covered = p.views.size > 0 && [...p.views.values()].every((d) => displayCovered(d, rects));
     const why = pauseReason({ reduceMotion: s.reduceMotion, idleSec: (Date.now() - lastInput) / 1000, battery: battery.get(),
-      covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pauseWhen: s.motionPause });
+      covered, fullscreen: live.some((w) => w.fullscreen), busy: b, locked, pressure: pressureOn, pauseWhen: s.motionPause });
     if (!!why !== p.paused) { p.paused = !!why; media.control(p.id, why ? 'pause' : 'play'); }
     // the adaptive cap (motionmodel.adaptiveCap): the deltas of the helper's own numbers decide
     if (!p.paused) {

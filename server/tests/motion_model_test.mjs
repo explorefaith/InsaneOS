@@ -1,5 +1,5 @@
 // motion_model_test.mjs — moving wallpapers without a screen (sdk/motionmodel.js).
-import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom, adaptiveCap, CAP_STEADY_MS } from '../../sdk/motionmodel.js';
+import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom, adaptiveCap, memoryPressure, PRESSURE, CAP_STEADY_MS } from '../../sdk/motionmodel.js';
 
 let ok = 0, bad = 0;
 const eq = (name, a, b) => {
@@ -67,6 +67,23 @@ eq('idle', pauseReason({ ...base, idleSec: 300 }), 'idle');
 eq('battery low', pauseReason({ ...base, battery: { discharging: true, percent: 20 } }), 'battery');
 eq('battery charging', pauseReason({ ...base, battery: { discharging: false, percent: 5 } }), null);
 eq('load', pauseReason({ ...base, busy: true }), 'busy');
+eq('memory pressure', pauseReason({ ...base, pressure: true }), 'pressure');
+eq('pressure is not optional', pauseReason({ ...base, pressure: true, pauseWhen: { busy: false, fullscreen: false, covered: false, idle: false, battery: false, locked: false } }), 'pressure');
+eq('pressure beats busy, reports itself', pauseReason({ ...base, pressure: true, busy: true }), 'pressure');
+eq('reduce motion beats pressure', pauseReason({ ...base, pressure: true, reduceMotion: true }), 'reduceMotion');
+
+// memoryPressure: the wallpaper stops on real pressure and returns only when it is clearly over
+eq('quiet system: plays', memoryPressure({ some10: 0, some60: 0, availKB: 3e6 }, {}).on, false);
+eq('sustained stall: stops', memoryPressure({ some10: 30, some60: 26, availKB: 3e6 }, {}).on, true);
+eq('burst with room to spare: plays', memoryPressure({ some10: 45, some60: 5, availKB: 2e6 }, {}).on, false);
+eq('burst with little free: stops', memoryPressure({ some10: 45, some60: 5, availKB: 300 * 1024 }, {}).on, true);
+eq('just under the sustained line: plays', memoryPressure({ some10: 0, some60: PRESSURE.some60 - 0.5, availKB: 1e5 }, {}).on, false);
+let ps = memoryPressure({ some60: 30, availKB: 1e5 }, {}).state;
+eq('stays hot below the resume line', memoryPressure({ some60: 20, availKB: 3e6 }, ps).on, true);
+eq('stays hot with memory still tight', memoryPressure({ some60: 10, availKB: 700 * 1024 }, ps).on, true);
+eq('clear of both: back on', memoryPressure({ some60: 10, availKB: 2e6 }, ps).on, false);
+eq('empty sample: plays', memoryPressure(undefined, {}).on, false);
+eq('no psi on this kernel: plays', memoryPressure({ some10: -1, some60: -1, availKB: 2e6 }, {}).on, false);
 eq('locked', pauseReason({ ...base, locked: true }), 'locked');
 eq('the switches turn fullscreen off', pauseReason({ ...base, fullscreen: true, pauseWhen: { fullscreen: false } }), null);
 eq('the switches turn covered off, fullscreen stays', pauseReason({ ...base, fullscreen: true, covered: true, pauseWhen: { covered: false } }), 'fullscreen');
