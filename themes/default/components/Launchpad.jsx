@@ -5,7 +5,7 @@
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded, scoreText } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText, useTween } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -20,6 +20,8 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   const [cat, setCat] = useState(null);                      // null: all
   const [sel, setSel] = useState(0);                         // the grid's roving selection
   const glass = !!t.effects;
+  // entrance fade over the panel duration (Reduce Motion jumps to 1); closing stays instant
+  const enter = useTween(1, { from: 0 });
   const q = query.trim().toLowerCase();
   const scoreOf = (a) => Math.max(0,
     scoreText(appName(a), q),
@@ -49,6 +51,7 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
     <View onClick={onClose} style={{
       position: 'absolute', left: area.x, top: area.y, width: area.w, height: area.h, alignItems: 'center',
       backgroundColor: glass ? t.scrim : t.scrimPanel, backdropFilter: glass ? `blur(32px) saturate(${t.glassSaturate || 1.2})` : undefined,
+      opacity: 0.3 + 0.7 * enter,
     }}>
       <View onClick={(e) => e.stopPropagation()} style={{ marginTop: 48, width: 260 }}>
         <TextInput value={query} onChange={setQuery} placeholder={tr('shell.launchpad.search')} autoFocus

@@ -5,7 +5,7 @@ import {
   View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
   usePowerProfiles, admin,
-  panelLeft, inBar,
+  panelLeft, inBar, useTween,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
@@ -195,6 +195,9 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   const info = useSystemInfo(3000);
   const ref = useRef(null);
   const used = (info.memTotalKB - info.memAvailableKB) / info.memTotalKB;
+  // entrance: rises 6 px and fades in over the panel duration (useTween skips it under Reduce Motion);
+  // the close stays instant — a panel that lingers after its click would feel slow
+  const enter = useTween(1, { from: 0 });
   // a click on this display's bar is its items' own (the button toggles the panel); anywhere else closes it, another
   // display's bar too (its button then opens the panel there)
   useEffect(() => addListener('pointerdown', (e) => {
@@ -206,6 +209,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 16,
       backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
+      opacity: 0.4 + 0.6 * enter, transform: `translateY(${Math.round((1 - enter) * 6)}px)`,
     }}>
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <Tile t={t} style={{ flex: 1, gap: 8 }}>

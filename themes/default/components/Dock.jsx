@@ -222,7 +222,14 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
   magnify = true, maxSize = 86, hideMode = 'never', top = 0, keepOpen = false, area = { x: 0, y: 0, w: screen.width, h: screen.height } }) {
   // area: the display it is on (global coordinates); everything below is placed inside it
   const vert = position !== 'bottom';
-  const [m, setM] = useState(null);             // mouse position along the Dock's axis
+  const [m, setM] = useState(null)
+  // Magnification coalesced to one value per frame: the layout below recomputes every icon's place,
+  // so a re-render per pointermove event would run at the dispatch rate (hundreds a second exactly
+  // when the machine is busy). The engine's rAF fires once per compositor frame; the latest pointer
+  // position wins, like the coalescing that already bounds the events themselves.
+  const pendM = useRef(null)
+  const rafM = useRef(0)
+  useEffect(() => () => { if (rafM.current) cancelAnimationFrame(rafM.current) }, []);             // mouse position along the Dock's axis
   const { dir } = useLocale();
   const drag = useStore(dockDrag);
   const poof = useStore(dockPoof);
@@ -476,7 +483,11 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
 
   return (
     <>
-      <View onMouseMove={(e) => setM(vert ? e.y : e.x)} onMouseLeave={() => setM(null)}
+      <View onMouseMove={(e) => {
+          pendM.current = vert ? e.y : e.x;
+          if (!rafM.current) rafM.current = requestAnimationFrame(() => { rafM.current = 0; if (pendM.current != null) setM(pendM.current); });
+        }}
+        onMouseLeave={() => { pendM.current = null; if (rafM.current) { cancelAnimationFrame(rafM.current); rafM.current = 0; } setM(null); }}
         style={{ position: 'absolute', ...box, direction: 'ltr' }}>
         <View style={{ position: 'absolute', ...back, borderRadius: 20,
           backgroundColor: t.dockBg, backdropFilter: t.glassFilter, border: `1px solid ${t.dockBorder}` }} />

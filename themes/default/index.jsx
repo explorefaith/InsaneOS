@@ -55,6 +55,38 @@ const DOCK_DEFAULT = [...DOCK_ORDER, ...apps.filter((a) => a.dock && !DOCK_ORDER
 // change). The icon's place comes from the Dock itself (dockIconRects), with a bottom-centre
 // fallback; reduce motion fades instead (Window.jsx).
 const MIN_MS = DUR.minimize;
+const RESTORE_MS = DUR.restore;
+// The restore genie: a window that was just un-minimized warps back out of its Dock icon — the same
+// engine warp the minimize effect uses (canvas_genie_blit), driven 1 → 0 so the strips fly the other
+// way. Its raster is the window's own, live again. Reduce Motion keeps the plain appearance, and a
+// fullscreen or pip window never had an icon to come out of. Nothing here blocks input: the window
+// is interactive while it settles, the warp only changes how it is painted.
+function useRestoring(windows) {
+  const prev = useRef(new Map());
+  const [anim, setAnim] = useState([]);                 // [{ id, t0 }]
+  useEffect(() => {
+    const started = [];
+    for (const w of windows) {
+      if (!w.minimized && prev.current.get(w.id) === true && !w.fullscreen && !w.pip) started.push({ id: w.id, t0: Date.now() });
+      prev.current.set(w.id, !!w.minimized);
+    }
+    if (started.length) setAnim((a) => [...a.filter((x) => !started.some((y) => y.id === x.id)), ...started]);
+  }, [windows]);
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!anim.length) return undefined;
+    let raf = requestAnimationFrame(function step() {
+      const now = Date.now();
+      if (anim.some((x) => now - x.t0 >= RESTORE_MS)) setAnim((a) => a.filter((x) => now - x.t0 < RESTORE_MS));
+      else { tick((n) => n + 1); raf = requestAnimationFrame(step); }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [anim]);
+  const now = Date.now();
+  return anim.map((x) => ({ win: windows.find((w) => w.id === x.id), q: Math.min(1, (now - x.t0) / RESTORE_MS) }))
+    .filter((x) => x.win && !x.win.minimized);
+}
+
 function useMinimizing(windows) {
   const prev = useRef(new Map());
   const [anim, setAnim] = useState([]);                 // [{ id, t0 }]
@@ -119,6 +151,7 @@ function App() {
   const t = makeTheme(s);
   const { windows, mounted, focused } = useWindows();
   const minimizing = useMinimizing(windows);
+  const restoring = useRestoring(windows);
   const dockRects = useStore(dockIconRects);
   const minFx = (id) => {
     const m = minimizing.find((x) => x.win.id === id);
@@ -126,6 +159,14 @@ function App() {
     if (s.reduceMotion) return { fade: true, p: m.p };
     const r = dockRects[dockIdOfWindow(m.win)];
     return { genie: true, p: m.p, ...(!r ? { x: main.x + main.w / 2 - 27, y: main.y + main.h - 63, w: 54, h: 54 } : r) };
+  };
+  // the restore warp: the same icon rect, progress backwards from the icon (0.99: the first painted
+  // frame already comes out of the icon, never a flash of the full window before it)
+  const restFx = (id) => {
+    const r = restoring.find((x) => x.win.id === id);
+    if (!r || s.reduceMotion) return undefined;
+    const rc = dockRects[dockIdOfWindow(r.win)];
+    return { genie: true, p: Math.min(0.99, 1 - r.q), ...(!rc ? { x: main.x + main.w / 2 - 27, y: main.y + main.h - 63, w: 54, h: 54 } : rc) };
   };
   const [launchpad, setLaunchpad] = useState(false);
   const [control, setControl] = useState(null);         // { area, at }: the display whose menu bar opened it, and the item
@@ -186,7 +227,7 @@ function App() {
         {all.map((d) => <MotionWallpaper key={d.id + ':' + d.x} display={d} />)}
         <DesktopWidgets layer="below" />
         <OverviewBackdrop />
-        {mounted.map((w) => <Window key={w.id} win={w} app={getApp(w.id)} t={t} focused={w.id === focused} fx={minFx(w.id)} />)}
+        {mounted.map((w) => <Window key={w.id} win={w} app={getApp(w.id)} t={t} focused={w.id === focused} fx={minFx(w.id) || restFx(w.id)} />)}
         {minimizing.filter((x) => !mounted.includes(x.win)).map(({ win }) => <Window key={win.id} win={win} app={getApp(win.id)} t={t} focused={false} fx={minFx(win.id)} />)}
         <DesktopWidgets layer="above" />
         {/* Everything above the windows goes in its layer (sdk/layers.js, docs/LAYERS.md): the
