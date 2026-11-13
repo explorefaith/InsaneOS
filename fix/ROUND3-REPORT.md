@@ -111,15 +111,25 @@ freezer's freeze line and would SIGSTOP the user's real applications. Command do
 
 ## 4. Validation
 
-- C suite: `make test` stops at the documented pre-existing `imager-test` fixture (the release
-  signature does not verify against the repo's public key — needs the maintainer's private key,
-  unchanged since round 1); `make -k test` continues past it. Tallies at the round's close:
-  engine-test (damage fuzz + drag goldens, includes this round's dispatch-gate change),
-  fpipe-test, **cgweight-test 18/18 (new)**, fw-rules 16181/16181, tzif, npcompile, timer-order,
-  cloud, backup… — see `fix/INSANE-OS-PROGRESS.md` session 7 for the exact tallies.
+- C suite (`make -k test` continuing past the known failures, plus the up-to-date suites run
+  directly): **engine-test 8831/0** (damage fuzz 12 seeds clean, scissor fuzz 1793 frames 0
+  differ — this includes this round's dispatch-gate change), **fpipe-test 61/0**, **cgweight-test
+  18/18 (new)**, **fw-rules 16193/16193**, fwlists 8307/8307, tzif ok, npcompile 71/71,
+  timer-order 427 538 callbacks 0 differ, mview 9/0, cloud 2279, lan 335, rdesk 72, sqlc 77,
+  sql-proto 69, media-wallpaper end-to-end OK (hw decode, helper cpu 1 % of a core while playing).
+- Known failures, all pre-existing and none touched by this round: `imager-test` 2 (the release
+  signature fixture, needs the maintainer's private key — since round 1); `rconnect-run-test` 7
+  (**verified identical at the round-2 close commit `d9cb56b`** — its sandbox namespace isolation
+  does not work in this environment); `clean-test` (the nondeterminism documented in rounds 1–2);
+  `hiss-test` 14/15 (one syllable's dB threshold — audio environment; first time this target was
+  reached here, the suite used to stop at `imager-test`); `sql-e2e-test` blocked with 0 % CPU for
+  22 min and was killed to let the rest run (also first-time-reached here; uncharted on this
+  machine, nothing in this round's diff is in its path — verify on the release environment).
 - JS suites: **90 passed, 4 failed** — the same documented environmental set as rounds 1–2
   (sound, pkg, hwreport; store-search's timing check under ambient load). `motion-model-test`
-  carries the round's 10 new pressure checks (78 ok).
+  carries the round's 10 new pressure checks (**78 ok**). The theme bundle builds clean
+  (code-manifest verified) with the dock/CC/Launchpad/restore changes; the menubar scene test
+  exercises ControlCenter and passes.
 - The version note that bounds every comparison: the running session's compositor predates round 1
   (`fix/REALWORLD-TESTS.md`). This round's C changes reach a session through
   `fix/upgrade-insaneos.sh` + re-login; the suite should be re-run then — that before/after is

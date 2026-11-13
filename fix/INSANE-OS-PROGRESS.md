@@ -147,5 +147,13 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
         pressure pause and the unblocked dispatch (a CPU weight cannot buy back a page-wait)
 - BLOCKED InsaneBench: refused at the gate again (stopReason: thermal; machine 99 % busy with the
         round's own test run, battery 63 %); quoted verbatim in the session log of the attempt
+- TESTED  engine-test 8831/0 (damage fuzz 12 seeds clean; scissor fuzz 1793 frames 0 differ), fpipe
+        61/0, cgweight 18/18 (new), fw-rules 16193/16193, fwlists 8307/8307, tzif ok, npcompile
+        71/71, timer-order 427538 callbacks 0 differ, mview 9/0, cloud 2279, media-wallpaper OK;
+        JS 90 passed / 4 failed (the documented environmental set); motion-model-test 78 ok
+- KNOWN  rconnect-run-test 7 failed — verified identical at the round-2 close commit d9cb56b
+        (sandbox namespace isolation does not work in this environment); hiss-test 14/15 and
+        sql-e2e-test (blocked at 0 % CPU, killed after 22 min) reached for the first time here —
+        the suite used to stop at imager-test; all environmental, none in this round's diff
 - PENDING install via fix/upgrade-insaneos.sh + relogin, then TEST-CHECKLIST §10 and the suite re-run
         (the round's C changes are in the tree, not in the installed binary — REALWORLD-TESTS.md notes it)
