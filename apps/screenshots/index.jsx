@@ -9,11 +9,7 @@
 // box, line, text, blur, pixelate and solid-fill redaction, crop, resize, turns). Photos and Files'
 // Quick Preview open the same editor on any picture (media.js openMarkup). Captures are saved in
 // ~/Pictures/Screenshots or to the clipboard.
-import {
-  View, Text, Image, MediaView, Toggle, Segmented, GroupBox, FormRow, clipboard,
-  useTheme, useAppWindow, useStore, useWindows, wm, windows, typeScale,
-  t as tr, media, userDirs, fs, addListener, addShortcuts, createStore, windowTitle, settings, useSettings, notify, toast, errorText, dndActive, appNotifyPrefs,
-} from '@insaneos/sdk';
+import { View, Text, Image, MediaView, Toggle, Segmented, GroupBox, FormRow, clipboard, useTheme, useAppWindow, useStore, useWindows, wm, windows, typeScale, t as tr, media, userDirs, fs, addListener, addShortcuts, createStore, windowTitle, settings, useSettings, notify, toast, errorText, dndActive, appNotifyPrefs, playFx } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { captureRect, displaysToCapture, displayAt, dragRect, capturePixel, magnify, middleColor, LOUPE_PX, LOUPE_ZOOM } from './geometry.js';
 import { ocrLangs, cleanText } from './ocr.js';
@@ -78,6 +74,7 @@ async function finish(handle, { copy = true } = {}) {
     else failed = { what: failed ? 'both' : 'save', error: r.error };
   }
   if (failed) notSaved(failed);
+  else playFx('shutter');                 // only a capture that actually landed (saved or copied)
   showThumb(handle, path, failed ? failed.what : null);
 }
 

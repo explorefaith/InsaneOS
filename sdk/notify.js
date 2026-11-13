@@ -14,6 +14,7 @@
 import { createElement as h, useEffect, useState } from 'react';
 import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
+import { soundFxPrefs } from './soundfx.js';
 import { useTheme, deriveTokens } from './theme.js';
 import { useTween, reducedMotionNow, DUR, easeOutBack } from './animation.js';
 import { direction, formatTime, appName } from './i18n.js';
@@ -90,7 +91,7 @@ export function notify({ app = '', title = '', body = '', actions = [], sound: w
   // Do Not Disturb or "no banner": kept in the history only, without a sound
   if (dndActive() || ap.style === 'none') return id;
   notifications.set((l) => [n, ...l].slice(0, MAX_SHOWN));
-  if (withSound && ap.sound) sound.play('notify');
+  if (withSound && ap.sound && soundFxPrefs().on && soundFxPrefs().notify !== false) sound.play('notify');
   if (!n.sticky) timers.set(id, setTimeout(() => dismissNotification(id), Math.max(1500, timeout)));
   return id;
 }

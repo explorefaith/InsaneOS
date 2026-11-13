@@ -107,6 +107,7 @@ export { spotlight, spotlightOpen, calc as spotlightCalc, convert as spotlightCo
 export { registerSpotlightSource, searchEverything } from './spotlight.js';
 // session notifications, menu bar status items, Clock (alarms) and Help (docs/SYSTEM.md)
 export { notify, dismissNotification, useNotifications, notifications, notifyHistory, clearNotifyHistory, NotificationBanner, setBannerPlacement } from './notify.js';
+export { playFx, soundFxPrefs } from './soundfx.js';
 export { registerStatusItem, StatusItems, statusItems } from './statusitems.js';
 export { MENUBAR_DEFAULTS, menuBarPrefs, menuBarPatch, cleanerItemShown, outputChoices, monthCells, weekStartFor } from './menubarmodel.js';   // what the bar shows (issue #58)
 export { menuBarEveryDisplay, barDisplays, hasBar, displayIdFor, activeBarId, pinBar, focusDisplayId, panelLeft, inBar, insideDisplay } from './menubarmodel.js';   // a bar on every display

@@ -134,7 +134,9 @@ static JSValue f_play(JSContext *c, JSValueConst this_val, int argc, JSValueCons
     if (argc < 1) return JS_FALSE;
     const char *name = arg_name(c, argv[0]);
     if (!name) return JS_FALSE;
-    int ok = snd_play(name) == 0;
+    double vol = 1.0;
+    if (argc > 1) JS_ToFloat64(c, &vol, argv[1]);   /* sound.play(name, vol): the effect's own level */
+    int ok = snd_play_vol(name, vol) == 0;
     JS_FreeCString(c, name);
     return JS_NewBool(c, ok);
 }

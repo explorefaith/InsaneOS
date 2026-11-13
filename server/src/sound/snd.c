@@ -78,13 +78,14 @@ static struct {
     double peak;
     int peak_ready;
     int debug;                          /* INSANE_SND_DEBUG=1: every packet to stderr */
-    int samples_uploaded, uploading, play_after;   /* bits: pop, notify, error */
+    int samples_uploaded, uploading, play_after;   /* bits: pop, notify, error, chime, shutter… */
+    double fx_vol;                                  /* the level the pending sample plays at */
     char last_error[128];
 } S = { .fd = -1, .timer = -1, .meter_source = PA_INVALID_INDEX, .meter_channel = PA_INVALID_INDEX };
 
 static void disconnect(const char *why);
 static void upload_data(int which, uint32_t channel);
-static int play_sample(int which);
+static int play_sample_vol(int which, double vol);
 
 /* ---- E/S ---- */
 
@@ -879,7 +880,8 @@ int snd_meter(uint32_t source) {
 
 /* ---- system sounds ---- */
 
-static const char *const sample_names[4] = { "insaneos-pop", "insaneos-notify", "insaneos-error", "insaneos-chime" };
+static const char *const sample_names[8] = { "insaneos-pop", "insaneos-notify", "insaneos-error", "insaneos-chime",
+                                             "insaneos-shutter", "insaneos-trash", "insaneos-plug", "insaneos-unplug" };
 
 #define SR 44100
 
@@ -890,6 +892,66 @@ static int16_t *synth(int which, uint32_t *bytes) {
         { 1046.5, 1568, 0.32, 0.12 },               /* notify: C6 → G6 */
         { 311, 233, 0.30, 0.13 },                   /* error: two low notes */
     };
+    if (which == 4) {
+        /* shutter: the mirror slap — two very short band-ish clicks (damped sines), 45 ms apart */
+        static const double f[2] = { 4200, 2600 };
+        static const double at[2] = { 0, 0.045 };
+        int n = (int)(0.11 * SR);
+        int16_t *s = calloc((size_t)n, 2);
+        if (!s) return NULL;
+        for (int k = 0; k < 2; k++)
+            for (int i = (int)(at[k] * SR); i < (int)((at[k] + 0.018) * SR) && i < n; i++) {
+                double local = (double)i / SR - at[k];
+                double env = exp(-local * 900) * (1 - exp(-local * 4000));
+                double v = sin(2 * M_PI * f[k] * local) * 0.7 + sin(2 * M_PI * f[k] * 2.7 * local) * 0.2;
+                double x = s[i] + v * env * 0.55 * 32767;
+                s[i] = x > 32767 ? 32767 : x < -32768 ? -32768 : (int16_t)x;
+            }
+        *bytes = (uint32_t)n * 2;
+        return s;
+    }
+    if (which == 5) {
+        /* trash: a paper crumple — three noise bursts, each softer and lower than the last */
+        static const double at[3] = { 0, 0.07, 0.15 };
+        static const double dur[3] = { 0.05, 0.045, 0.06 };
+        static const double lp[3] = { 0.55, 0.35, 0.22 };
+        int n = (int)(0.24 * SR);
+        int16_t *s = calloc((size_t)n, 2);
+        if (!s) return NULL;
+        unsigned st = 123456789u;
+        for (int k = 0; k < 3; k++)
+            for (int i = (int)(at[k] * SR); i < (int)((at[k] + dur[k]) * SR) && i < n; i++) {
+                double local = (double)i / SR - at[k];
+                double env = exp(-local * 60) * (1 - exp(-local * 1500));
+                st = st * 1664525u + 1013904223u;                  /* LCG noise, Park–Miller's cousin */
+                double nz = ((int32_t)st / 2147483648.0);
+                double v = nz * env * lp[k] * 0.8;
+                double x = s[i] + v * 32767;
+                s[i] = x > 32767 ? 32767 : x < -32768 ? -32768 : (int16_t)x;
+            }
+        *bytes = (uint32_t)n * 2;
+        return s;
+    }
+    if (which == 6 || which == 7) {
+        /* plug / unplug: a two-note rise or fall, soft and short */
+        static const double up[2] = { 659.3, 987.8 };              /* E5 → B5 */
+        static const double dn[2] = { 987.8, 659.3 };              /* B5 → E5 */
+        const double *nt = which == 6 ? up : dn;
+        static const double start[2] = { 0, 0.09 };
+        int n = (int)(0.3 * SR);
+        int16_t *s = calloc((size_t)n, 2);
+        if (!s) return NULL;
+        for (int k = 0; k < 2; k++)
+            for (int i = (int)(start[k] * SR); i < n; i++) {
+                double local = (double)i / SR - start[k];
+                double env = (1 - exp(-local * 500)) * exp(-local * 11);
+                double v = sin(2 * M_PI * nt[k] * local) * 0.6 + sin(4 * M_PI * nt[k] * local) * 0.1;
+                double x = s[i] + v * env * 0.3 * 32767;
+                s[i] = x > 32767 ? 32767 : x < -32768 ? -32768 : (int16_t)x;
+            }
+        *bytes = (uint32_t)n * 2;
+        return s;
+    }
     if (which == 3) {
         /* chime: C6, E6, G6 arpeggio, warm and soft — the login sound */
         static const double notes[3] = { 1046.5, 1318.5, 1568.0 };
@@ -939,30 +1001,41 @@ static void upload_data(int which, uint32_t channel) {
     cmd_send(&t, tag, R_ACK, PA_CMD_FINISH_UPLOAD_STREAM, 0);
     S.samples_uploaded |= 1 << which;
     S.uploading &= ~(1 << which);
-    if (S.play_after & 1 << which) { S.play_after &= ~(1 << which); play_sample(which); }
+    if (S.play_after & 1 << which) { S.play_after &= ~(1 << which); play_sample_vol(which, S.fx_vol); }
 }
 
 /* goes after the upload on the same socket: the server already has it when this arrives */
-static int play_sample(int which) {
+static int play_sample_vol(int which, double vol) {
     TsOut t;
     uint32_t tag = cmd_begin(&t, PA_CMD_PLAY_SAMPLE);
     ts_u32(&t, PA_INVALID_INDEX);
     ts_str(&t, NULL);                               /* the default output */
-    ts_u32(&t, PA_VOLUME_NORM);
+    ts_u32(&t, (uint32_t)(PA_VOLUME_NORM * vol));   /* the effects' own volume (sdk/soundfx.js) */
     ts_str(&t, sample_names[which]);
     const char *kv[] = { "media.role", "event", "application.name", "Insane OS", "application.id", "org.insaneos.Server", "event.id", sample_names[which] };
     ts_proplist(&t, kv, 4);
     return cmd_send(&t, tag, R_ACK, PA_CMD_PLAY_SAMPLE, 0);
 }
 
-int snd_play(const char *name) {
-    int which = -1;
-    if (!strcmp(name, "pop")) which = 0;
-    else if (!strcmp(name, "notify")) which = 1;
-    else if (!strcmp(name, "error")) which = 2;
-    else if (!strcmp(name, "chime")) which = 3;
+static int sample_of(const char *name) {
+    if (!strcmp(name, "pop")) return 0;
+    if (!strcmp(name, "notify")) return 1;
+    if (!strcmp(name, "error")) return 2;
+    if (!strcmp(name, "chime")) return 3;
+    if (!strcmp(name, "shutter")) return 4;
+    if (!strcmp(name, "trash")) return 5;
+    if (!strcmp(name, "plug")) return 6;
+    if (!strcmp(name, "unplug")) return 7;
+    return -1;
+}
+
+int snd_play_vol(const char *name, double vol) {
+    int which = sample_of(name);
     if (which < 0 || !S.connected) return -1;
-    if (S.samples_uploaded & 1 << which) return play_sample(which);
+    if (vol < 0) vol = 0;
+    if (vol > 1) vol = 1;
+    S.fx_vol = vol;
+    if (S.samples_uploaded & 1 << which) return play_sample_vol(which, vol);
     S.play_after |= 1 << which;
     if (S.uploading & 1 << which) return 0;
     uint32_t bytes = 0;
@@ -980,3 +1053,6 @@ int snd_play(const char *name) {
     S.uploading |= 1 << which;
     return 0;
 }
+
+/* the old entry point: system volume, as before */
+int snd_play(const char *name) { return snd_play_vol(name, 1.0); }

@@ -11,6 +11,7 @@
 import { createElement as h, useEffect } from 'react';
 import { View, Text, Image } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
+import { playFx } from './soundfx.js';
 import { locale, appName } from './i18n.js';
 import { errorText } from './errors.js';
 import { notify } from './notify.js';
@@ -83,6 +84,7 @@ export function appCategory(a) {
 }
 
 export function launchApp(id) {
+  playFx('launch');                     // opt-in (soundFx.launch): the launcher's tap
   if (isLinuxApp(id)) {
     const ok = insane.apps.launch(String(id).slice(DESKTOP.length));
     // refused for a reason the user can act on (e.g. its restrictions need a newer kernel)

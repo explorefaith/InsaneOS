@@ -9,6 +9,7 @@
 //     wallpaper tokens swapped by time of day.
 //   • Login chime: sound.play('chime') once per session start.
 import { addListener, screen } from '@insaneos/runtime';
+import { playFx, watchWindowFx, soundFxPrefs } from './soundfx.js';
 import { settings } from './settings.js';
 import { sound } from './sound.js';
 import { toggleShowDesktop } from './appcontrol.js';
@@ -73,7 +74,11 @@ function tick() {
 export function startSmooth() {
   // login chime — once, in the user's session (the login screen stays quiet)
   const greeter = typeof insane !== 'undefined' && typeof insane.greeter !== 'undefined';
-  if (!greeter) { try { sound.play('chime'); } catch { /* sound may not be up yet */ } }
+  if (!greeter) {
+    const fx = soundFxPrefs();
+    if (fx.on && fx.startup !== false) { try { sound.play('chime'); } catch { /* sound may not be up yet */ } }
+    watchWindowFx();                    // the opt-in minimize/restore sounds (sdk/soundfx.js)
+  }
 
   // hot corners
   addListener('pointermove', (e) => {
@@ -114,5 +119,6 @@ export function startSmooth() {
     if (ac === lastAC) return;
     lastAC = ac;
     try { insane.power.setProfile(ac ? 'balanced' : 'power-saver'); } catch { /* ppd missing */ }
+    playFx(ac ? 'plug' : 'unplug');     // the charger's own little note (Settings → Sound → Sound Effects)
   });
 }

@@ -3,8 +3,10 @@ import {
   View, Text, useTheme, useLocale, Slider, Toggle, Button, Segmented, useSound, useSoundPeak, sound, defaultSink,
   microphones, defaultSource, spacing, typeScale,
 } from '@insaneos/sdk';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, Section, SettingRow, Note, tint } from './ui.jsx';
+import { useSettings } from '@insaneos/sdk';
+import { soundFxPrefs } from '../../sdk/soundfx.js';
 import { balanceOf, volumesFor, snapBalance } from './balance.js';
 
 function Volume({ kind, item, width = 170 }) {
@@ -76,6 +78,42 @@ function Meter({ source }) {
   );
 }
 
+// Sound effects (round 4): the master switch, the effects' own level, and each event. The rows
+// write settings.soundFx (sdk/soundfx.js); a preview click plays the event's sample right here.
+function SoundEffects() {
+  const { t: tr } = useLocale();
+  const [s, set] = useSettings();
+  const fx = soundFxPrefs();
+  const patch = (k, v) => set({ soundFx: { ...soundFxPrefs(), [k]: v } });
+  const row = (key, labelKey, fb, hint) => (
+    <SettingRow key={key} label={tr(labelKey) || fb} hint={hint ? tr(labelKey + 'Hint') || hint : undefined}>
+      <Toggle small on={fx[key] !== false} onChange={(v) => patch(key, v)} />
+    </SettingRow>
+  );
+  return (
+    <Section title={tr('settings.sound.fx') || 'Sound Effects'} footer={tr('settings.sound.fxHint') || 'Short system sounds for desktop events. They follow the system mute and output device.'}>
+      <SettingRow label={tr('settings.sound.fxOn') || 'Sound effects'}>
+        <Toggle small on={fx.on !== false} onChange={(v) => patch('on', v)} />
+      </SettingRow>
+      <SettingRow label={tr('settings.sound.fxVolume') || 'Effects volume'}>
+        <Slider value={fx.volume ?? 0.7} max={1} width={170} onChange={(v) => patch('volume', v)} />
+      </SettingRow>
+      {row('screenshot', 'settings.sound.fxScreenshot', 'Screenshot captured')}
+      {row('trash', 'settings.sound.fxTrash', 'Trash emptied')}
+      {row('power', 'settings.sound.fxPower', 'Charger connected')}
+      {row('notify', 'settings.sound.fxNotify', 'Notifications')}
+      {row('startup', 'settings.sound.fxStartup', 'Startup chime')}
+      {row('minimize', 'settings.sound.fxMinimize', 'Window minimize and restore')}
+      {row('launch', 'settings.sound.fxLaunch', 'Application launch')}
+      <SettingRow label={tr('settings.sound.fxTest') || 'Preview'}>
+        <Button small label={tr('settings.sound.fxShutter') || 'Shutter'} onClick={() => insane.sound.play('shutter', fx.volume ?? 0.7)} />
+        <Button small label={tr('settings.sound.fxTrashP') || 'Trash'} onClick={() => insane.sound.play('trash', fx.volume ?? 0.7)} />
+        <Button small label={tr('settings.sound.fxPlug') || 'Charger'} onClick={() => insane.sound.play('plug', fx.volume ?? 0.7)} />
+      </SettingRow>
+    </Section>
+  );
+}
+
 export function SoundSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
@@ -109,6 +147,7 @@ export function SoundSettings() {
           <SettingRow label={tr('settings.sound.level')}><Meter source={mic} /></SettingRow>
         </Section>
       )}
+      <SoundEffects />
       <Section title={tr('settings.sound.apps')}>
         {apps.length === 0 ? <SettingRow label={tr('settings.sound.noApps')} disabled /> : apps.map((a) => (
           <SettingRow key={a.index} label={a.app || a.name}>
