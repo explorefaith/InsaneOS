@@ -7,7 +7,7 @@
 // Insane Classic has no global menu bar: an app that declares menus (File, Edit, View, Go…; the same
 // ones Insane Flow shows on top, useAppMenus) gets them in a strip under its title bar, with Window and
 // Help, as desktop apps do on a taskbar layout. Apps without menus of their own get no strip.
-import { View, Text, Layer, addListener, wm, AppHost, windowTitle, WindowShell, windowIcon, snapZoneAt, screen, useMenusWithSpeech, getApp, appGroup, windowMenuItems, moveToDesktopItems, solidOver, t as tr } from '@insaneos/sdk';
+import { View, Text, Layer, addListener, wm, AppHost, windowTitle, WindowShell, windowIcon, snapZoneAt, screen, useMenusWithSpeech, getApp, appGroup, windowMenuItems, moveToDesktopItems, solidOver, t as tr, useSettings, DUR, easeOutCubic } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { MinimizeGlyph, MaximizeGlyph, RestoreGlyph, CloseGlyph, LayoutGlyph } from '../glyphs.jsx';
 import { Menu } from './Menu.jsx';
@@ -191,12 +191,35 @@ export function Window({ win, t, focused, app }) {
   };
   const enterMax = () => { clearTimeout(leaveTimer.current); clearTimeout(hoverTimer.current); hoverTimer.current = setTimeout(openLayouts, 550); };
   const titleMenu = (e) => setMenu({ x: e.x, y: e.y });
+  // the same entrance and close ramps as Insane Flow's frames (the shared motion language,
+  // sdk/animation.js): the window rises and fades in over DUR.open, fades and shrinks over DUR.close
+  const [st] = useSettings();
+  const [enter, setEnter] = useState(() => (st?.reduceMotion ? 1 : 0));
+  const [closeP, setCloseP] = useState(0);
+  useEffect(() => {
+    if (!win.closing) return undefined;
+    setCloseP(0);
+    const t0 = performance.now();
+    const iv = setInterval(() => setCloseP(Math.min(1, (performance.now() - t0) / DUR.close)), 16);
+    return () => clearInterval(iv);
+  }, [win.closing]);
+  useEffect(() => {
+    if (enter >= 1) return undefined;               // reduce motion starts at 1: no animation
+    const t0 = performance.now();
+    const iv = setInterval(() => setEnter((v) => {
+      const k = Math.min(1, (performance.now() - t0) / DUR.open);
+      return k >= 1 ? 1 : Math.max(v, 0.2 + 0.8 * easeOutCubic(k));
+    }), 16);
+    return () => clearInterval(iv);
+  }, []);
+  const enterStyle = enter < 1 ? { opacity: 0.2 + 0.8 * enter, transform: `translateY(${Math.round((1 - enter) * 12)}px) scale(${(0.984 + 0.016 * enter).toFixed(3)})` } : null;
+  const closeStyle = win.closing ? { opacity: 1 - 0.9 * closeP, transform: `scale(${(1 - 0.04 * closeP).toFixed(4)})`, pointerEvents: 'none' } : null;
   return (
-    <WindowShell win={win} onMouseDown={() => wm.focus(win.id)} style={{
+    <WindowShell win={win} onMouseDown={() => wm.focus(win.id)} style={[{
       borderRadius: flat ? 0 : 8, backgroundColor: app.transparent ? 'transparent' : t.windowBg, overflow: 'hidden',
       // a transparent app (the Terminal) has nothing behind its border: the border is drawn opaque
       border: `1px solid ${app.transparent ? solidOver(focused ? t.windowBorder : t.separator, t.titleBg) : (focused ? t.windowBorder : t.separator)}`, boxShadow: shadow,
-    }}>
+    }, enterStyle, closeStyle]}>
       <View onMouseDown={(e) => {
         if (e.button) return;
         if (!wm.beginMove(win.id)) drag.current = { x0: e.x, y0: e.y, rel: geo.w ? (e.x - geo.x) / geo.w : 0.5, moving: false };
