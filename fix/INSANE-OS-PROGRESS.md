@@ -94,3 +94,27 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
         weakened to keep the suite green)
 - PENDING on-screen test of the live-wallpaper changes (desktop + login screen), theme audit for
   the design-system phase
+
+## Session 6 (round 2 — GPU delivery, adaptive quality, benchmarks)
+- MEASURED  buffer-age scissor on a real desktop GPU for the first time (build/gpu-scissor, UHD 620 /
+        Mesa iris): the scissored compose saves 71–89 % of the frame's GPU time at 1.5–30 % damage;
+        58–69 % under a 4-core memory-traffic load; 2,465,420 pixels compared against the whole
+        composition, 0 differ. V3D's 0.8.7 loss stands; the default now follows the driver
+        (scissor_default in gpu/gpu.c) with the env override kept — docs/GPU.md carries the table
+- DONE   rendering side of the performance profiles (sdk/quality.js): auto/balanced/performance/low
+        behind Settings → Power and the Control Center's Power Mode tile; levers: canvas_blur_shrink
+        through insane.setBlurQuality, and the wallpaper's frame cap changed live through MM_FPSMAX
+        (media.control 'fpsmax' → the decode loop, no decoder restart)
+- DONE   adaptive layer: two loaded samples in lower the ambient quality (blur floor, then the
+        wallpaper ladder cap→half→10), 15 steady seconds per rung back; adaptiveCap unit-tested
+        (motion-model-test 64/64); application frame rates untouched
+- DONE   docs: WALLPAPERS.md (the adaptive cap), SETTINGS.md (Rendering quality), GPU.md (the
+        measurement + decision)
+- TESTED engine-test 8831/0 with the scissor default on for Intel; fw-rules 16181/16181; full
+        suites green except the documented pre-existing set (imager fixture, clean-test
+        nondeterminism, sound/pkg/hwreport JS, store-search's timing check under load)
+- BLOCKED InsaneBench comparisons: three attempts, three honest refusals (battery; thermal twice —
+        the machine runs the user's own workload; 77–92 °C against a 50 °C passive trip). The gate
+        did its job. Procedure in fix/BENCHMARK-ROUND2.md §4
+- PENDING on-screen: install via fix/upgrade-insaneos.sh, then TEST-CHECKLIST (wallpaper gallery,
+        live wallpaper, dock/panel feel, Launchpad keyboard, CC's DND + Night Light tiles)
