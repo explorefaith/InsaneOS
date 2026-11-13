@@ -1889,18 +1889,44 @@ static int prep_valid(const Out *o) {
 
 static int par_on, par_light;           /* the paint threads (render_frame) */
 
-/* Recording the screen, or a remote viewer with protected windows: the screen must be in memory (CPU path).
- * 1 if the GPU was stopped now (every display is painted whole next). */
-static int cpu_switch(Server *s) {
-    if (!gpu_active() || !need_cpu()) return 0;
-    fprintf(stderr, "remote: composing by CPU (%s)\n", media_needs_cpu() ? "screen recording" : "protected windows on screen");
-    cpu_takeover(s);                            /* first: the GPU's framebuffers leave the screen (outputs_apply) */
+/* The GPU stops: the dumb buffers go back on screen (cpu_takeover first, so no framebuffer it removes is still
+ * on screen), every display is painted whole next, and the GPU is retried when gpu_paused is cleared again
+ * (the main loop). */
+static void gpu_to_cpu(Server *s, const char *why) {
+    fprintf(stderr, "gpu: composing by CPU (%s)\n", why);
+    cpu_takeover(s);
     gpu_tex_free(s->cursor_tex);
     s->cursor_tex = NULL;
     gpu_shutdown();
     s->gpu_paused = 1;
     full_damage(s);
+}
+
+/* Recording the screen, or a remote viewer with protected windows: the screen must be in memory (CPU path).
+ * 1 if the GPU was stopped now (every display is painted whole next). */
+static int cpu_switch(Server *s) {
+    if (!gpu_active() || !need_cpu()) return 0;
+    gpu_to_cpu(s, media_needs_cpu() ? "screen recording" : "protected windows on screen");
     return 1;
+}
+
+/* A page flip that never completed (a GPU wedged under load): every frame waits for the flip event that
+ * isn't coming, so nothing would ever paint again — and a display pipe the kernel reset comes back black,
+ * with the hardware cursor plane still moving. The dumb buffer goes on screen with a synchronous modeset
+ * (SETCRTC needs no flip event), the GPU stops and is retried later through gpu_paused. */
+static void flip_stalled(Server *s, double now) {
+    static double since[OUT_MAX];
+    static int was[OUT_MAX];
+    for (int i = 0; i < OUT_MAX; i++) {
+        Out *o = &s->out[i];
+        if (!o->on || !o->kms.flip_pending) { was[i] = 0; continue; }
+        if (!was[i]) { was[i] = 1; since[i] = now; continue; }
+        if (now - since[i] < 2000) continue;
+        gpu_to_cpu(s, "a page flip never completed");
+        for (int j = 0; j < OUT_MAX; j++) s->out[j].kms.flip_pending = 0;    /* that flip is abandoned */
+        for (int j = 0; j < OUT_MAX; j++) was[j] = 0;
+        return;
+    }
 }
 static void cursor_mark(Server *s) {
     if (!s->cursor_dirty) return;
@@ -2671,6 +2697,7 @@ int main(int argc, char **argv) {
         }
         if (wl_idle_inhibited()) display_activity(now_ms());   /* a video or a presentation keeps the screen on */
         display_tick(now_ms());             /* screen off, lock and sleep after N minutes (src/hw) */
+        flip_stalled(&s, now_ms());         /* a page flip that never came back (a wedged GPU): by CPU, retried later */
         double hwd = display_timeout(now_ms());
         if (hwd >= 0 && (delay < 0 || hwd < delay)) delay = hwd;
         double bwd = hw_timeout(now_ms());  /* the battery's percentage, read again every 30 s (src/hw) */

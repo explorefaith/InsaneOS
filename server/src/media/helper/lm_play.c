@@ -83,6 +83,8 @@ typedef struct {
     LmHwFall hwf;                   /* consecutive decoding failures (lm_hwfall.h) */
     int hw_resume;                  /* it went to software: seek to the clock */
     int rate;                       /* percent of normal speed, moving wallpapers only: fewer frames to decode */
+    int fps_max;                    /* ambient playback cap (wallpapers): frames beyond this are dropped before
+                                     * the readback and the upscale, which is where a wallpaper's cost is */
     int hw_only;                    /* a moving wallpaper: no software decoding, the still image stays */
     SwrContext *swr;
     int out_ch;
@@ -571,6 +573,8 @@ void lm_player(const char *params, int fd, int pulse, int render) {
     P.hw_only = (int)mp_param_int(params, "hwonly", 0);
     P.rate = (int)mp_param_int(params, "rate", 100);
     if (P.rate < 10 || P.rate > 100) P.rate = 100;
+    P.fps_max = (int)mp_param_int(params, "fpsmax", 0);
+    if (P.fps_max < 0 || P.fps_max > 240) P.fps_max = 0;
 
     /* VA-API before seccomp (it loads the driver from /usr/lib) */
     char accel[24];
@@ -722,6 +726,13 @@ void lm_player(const char *params, int fd, int pulse, int render) {
             pthread_cond_broadcast(&P.cv);
             pthread_mutex_unlock(&P.mu);
             if (late && !seek_wait) { P.dropped++; av_frame_free(&vf.f); continue; }
+            /* the ambient cap (wallpapers): a frame arriving sooner than the cap allows is dropped
+             * before the readback and the upscale, which is where a wallpaper's cost is */
+            if (P.fps_max > 0 && !seek_wait && lm_now_ms() - last_shown_ms < 1000 / P.fps_max) {
+                P.dropped++;
+                av_frame_free(&vf.f);
+                continue;
+            }
             int64_t clk = clock_ms();
             int r = lm_out_present(vf.f, vf.pts);
             int hwframe = vf.f->format == AV_PIX_FMT_VAAPI || vf.f->format == AV_PIX_FMT_DRM_PRIME;

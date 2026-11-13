@@ -1,18 +1,27 @@
 // motionmodel.js — the decisions behind moving wallpapers, with no screen (docs/WALLPAPERS.md; tests:
-// server/tests/motion_model_test.mjs). Hardware only: a moving wallpaper needs the GPU composing the session and
-// hardware decoding of the file's format. There is no software mode: anything else shows the still poster.
+// server/tests/motion_model_test.mjs). Hardware only: the decode must be in hardware, and on the desktop
+// the GPU must compose the session (the login screen composes headless and only asks hwCodecs).
+// There is no software mode: anything else shows the still poster.
 
-// Which formats this machine can play. hw is insane.media.hwDecode(); composition insane.media.composition().
-// The catalog ships HEVC and H.264; a machine that also decodes VP9 or AV1 in hardware can play those as
-// wallpapers of the user's own (webm, mkv).
-export function motionCodecs(hw, composition) {
-  if (composition !== 'gpu' || !hw || hw.virtualGpu) return [];
+// Which formats this machine decodes in hardware. hw is insane.media.hwDecode(). The catalog ships
+// HEVC and H.264; a machine that also decodes VP9 or AV1 in hardware can play those as wallpapers of
+// the user's own (webm, mkv). This is the whole requirement on the login screen, whose compositor is
+// headless: only the decode needs the hardware, the frame itself is a plain blit (docs/WALLPAPERS.md).
+export function hwCodecs(hw) {
   const out = [];
+  if (!hw || hw.virtualGpu) return out;
   if (hw.hevc) out.push('hevc');
   if (hw.h264) out.push('h264');
   if (hw.vp9) out.push('vp9');
   if (hw.av1) out.push('av1');
   return out;
+}
+
+// Which formats this machine can play on the desktop: the GPU composing the session, and the decode
+// in hardware (the login screen's poll asks hwCodecs() directly).
+export function motionCodecs(hw, composition) {
+  if (composition !== 'gpu') return [];
+  return hwCodecs(hw);
 }
 
 // The variant to play on a screen: HEVC before H.264, then the smallest that covers the screen. Screens above the

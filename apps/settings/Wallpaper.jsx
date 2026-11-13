@@ -90,7 +90,7 @@ function LivePreview({ path, playing }) {
   useEffect(() => {
     if (!path || !codecs.length) return undefined;
     let pid = 0, off = null;
-    try { pid = media.play('settings', path, { loop: true, audio: 0, hwOnly: 1, appName: 'Settings' }); } catch (e) { pid = 0; }
+    try { pid = media.play('settings', path, { loop: true, audio: 0, hwOnly: 1, fpsMax: 30, appName: 'Settings' }); } catch (e) { pid = 0; }
     if (pid) {
       off = media.on(pid, (type, d) => {
         if (type === 'state' && d.state === 'playing') setId(pid);

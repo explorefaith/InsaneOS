@@ -15,7 +15,7 @@
 import { render, screen, mainBox, onScreenChange, addListener } from '@insaneos/runtime';
 import {
   View, Text, Image, TextInput, ThemeProvider, useStore, locale, t, formatDate, formatTime, setLanguage, languages, CORE_LANGUAGES, keyboard, settings, InsaneWordmark,
-  insaneosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, motionCodecs, media, MediaView, fitOf, bgStyle,
+  insaneosWallpapers, findWallpaper, wallpaperSrc, GREETER_WALLPAPER, fs, osk, oskState, startOsk, OskPanel, OskIcon, oskLift, hwCodecs, media, MediaView, fitOf, bgStyle,
   regionOf, regionCountry,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -85,7 +85,7 @@ function LoginVideo({ box, stop }) {
     const start = (codecs) => {
       const files = [LOGIN_PICKED, ...codecs.map((c) => `${LOGIN_BUILTIN}.${c}.mp4`)];
       for (const f of files) {
-        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, rate: loginRate(), appName: 'Insane OS' }); } catch (e) { cur = 0; }
+        try { cur = media.play('greeter', f, { loop: true, audio: 0, hwOnly: 1, rate: loginRate(), fpsMax: 30, appName: 'Insane OS' }); } catch (e) { cur = 0; }
         if (cur) break;
       }
       if (!cur) return;
@@ -101,7 +101,9 @@ function LoginVideo({ box, stop }) {
     };
     const poll = () => {
       let c = [];
-      try { c = motionCodecs(insane.media.hwDecode(), insane.media.composition()); } catch (e) { c = []; }
+      // hardware decode is the whole requirement here: this compositor is headless, so the desktop's
+      // "the GPU composes the session" rule can never be met — the frame itself is a plain blit
+      try { c = hwCodecs(insane.media.hwDecode()); } catch (e) { c = []; }
       if (c.length) start(c);                // hardware only: otherwise the still image stays
       else if (++polls < 40) timer = setTimeout(poll, 250);
     };
@@ -116,7 +118,7 @@ function LoginVideo({ box, stop }) {
     };
   }, [stop]);
   if (!id) return null;
-  return <MediaView media={id} style={{ position: 'absolute', left: box.left, top: box.top, width: box.width, height: box.height }} />;
+  return <MediaView media={id} style={{ position: 'absolute', left: box.left, top: box.top, width: box.width, height: box.height, pointerEvents: 'none' }} />;
 }
 
 function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.codePointAt(0)) >>> 0; return h; }

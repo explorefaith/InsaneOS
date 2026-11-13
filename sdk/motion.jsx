@@ -160,7 +160,7 @@ function acquire(file, rate, key, display, onLost) {
   if (!p) {
     let id = 0;
     motionBusy.set(true);
-    try { id = media.play('wallpaper', file, { loop, audio: mute ? 0 : 1, hwOnly: 1, rate, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
+    try { id = media.play('wallpaper', file, { loop, audio: mute ? 0 : 1, hwOnly: 1, rate, fpsMax: 30, appName: 'Insane OS' }); } catch (e) { motionBusy.set(false); return null; }
     if (!id) { motionBusy.set(false); return null; }
     p = { id, tag, views: new Map(), paused: false, playing: createStore(false) };
     media.on(id, (type, d) => {
@@ -197,7 +197,8 @@ function Layer({ path, rate, mute, loop, display, style }) {
     return () => { clearTimeout(timer); setP(null); if (mine) release(mine, key); };
   }, [path, rate, mute, loop, turn, display.x, display.y, display.w, display.h]);
   const on = useStore(p ? p.playing : idle);
-  return on && p ? h(MediaView, { media: p.id, style }) : null;
+  // click-through: the still wallpaper underneath keeps the desktop's right-click (backdrop.jsx)
+  return on && p ? h(MediaView, { media: p.id, style: { ...style, pointerEvents: 'none' } }) : null;
 }
 const idle = createStore(false);
 
@@ -211,7 +212,7 @@ export function MotionWallpaper({ display }) {
   const it = catalog.items.find((x) => x.id === chosen);
   if (!path) {
     // chosen, but this machine can't play it: its still poster
-    return it && !codecs.length ? h(Image, { src: motionPoster(it), style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h, objectFit: 'cover' } }) : null;
+    return it && !codecs.length ? h(Image, { src: motionPoster(it), style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h, objectFit: 'cover', pointerEvents: 'none' } }) : null;
   }
   return h(Layer, { path, rate: MOTION_RATES.includes(s.motionRate) ? s.motionRate : 100, mute: s.wallpaperMuted !== false, loop: s.motionLoop !== false, display, style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h } });
 }

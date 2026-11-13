@@ -11,9 +11,10 @@ A moving wallpaper plays only when **both** hold:
 - the hardware decodes the file's format (`insane.media.hwDecode()`).
 
 If either is missing, the section is disabled with one line, "Moving wallpapers need a compatible GPU.", and a chosen
-wallpaper shows its still poster. H.264 is used only where it is decoded in hardware. The login screen follows the same
-rule and otherwise shows its still image. The decisions are in `sdk/motionmodel.js`, tested without a screen by
-`server/tests/motion_model_test.mjs`.
+wallpaper shows its still poster. H.264 is used only where it is decoded in hardware. The login screen needs the decode
+only: its compositor is headless (`insane-server --headless --greeter`), so `composition()` can never answer `gpu` there —
+the frame is a plain blit into the greeter's scene, and its poll asks `hwCodecs` (the decode alone). The decisions are in
+`sdk/motionmodel.js`, tested without a screen by `server/tests/motion_model_test.mjs`.
 
 A virtual machine's GPU never qualifies (`hwDecode().virtualGpu`). On a V4L2 decoder HEVC counts only if the FFmpeg in use
 can drive it (`drmprime` from `lm_hwprobe.c`): Debian's FFmpeg can't, Raspberry Pi's can.
@@ -26,7 +27,9 @@ covers the display.
 
 Clips last 6 to 10 s. The loop is closed by fading the second after the clip's end over its first second. Nothing is
 upscaled or interpolated: frame rate and size never exceed the source's. Of the sources chosen, four are real 60 fps and
-the rest 12.5 to 30 fps. No 120, 144 or 240 fps source with a clear license was found.
+the rest 12.5 to 30 fps. No 120, 144 or 240 fps source with a clear license was found. Playback holds an ambient ceiling
+all the same: a wallpaper presents at most 30 frames a second (`fpsMax: 30` on every `media.play` of a wallpaper), and a
+frame beyond it is dropped before its readback and upscale — the two steps that cost.
 
 ## When it pauses
 
@@ -72,8 +75,9 @@ keeps them as `login.mp4`. A still source is `login-still` (a wallpaper id, or `
 (`fill`=cover, `fit`, `stretch`, `center` — the video always covers) and the playback speed is `login-rate` (1/100).
 
 Before 0.8.7 the login screen composed on the CPU: `insaneos-greeter` couldn't open `/dev/dri/renderD128`. It now joins
-`render` and `video` (`install.sh`, the ISO, the Pi image, migration 006). That gives the login screen's process the GPU
-driver's attack surface; it already ran Mesa in software.
+`render` and `video` (`install.sh`, the ISO, the Pi image, migration 006). The render node is what the hardware decoder
+needs; the greeter's compositor itself keeps composing on the CPU — it runs headless, and its scene is a clock, a few
+labels and the video's blit.
 
 ## The Raspberry Pi 5
 
@@ -87,7 +91,7 @@ reads `/sys/class`, `/sys/bus` and `/run/udev`, and gets the V4L2 and media cont
 | Machine | Case | Result |
 |---|---|---|
 | Pi 5, login, trial build | 1080p60 H.264, software decode, CPU composition | about 156 % of one core |
-| Pi 5, login, 0.8.7 | 1080p60 HEVC, hardware decode, GPU composition | `insane-media` 41 %, `insane-server` 147 % of one core, 30 s, SoC 52 °C with its case |
+| Pi 5, login, 0.8.7 | 1080p60 HEVC, hardware decode, the greeter's CPU composition | `insane-media` 41 %, `insane-server` 147 % of one core, 30 s, SoC 52 °C with its case |
 
 Decoding is in hardware; each frame is then read back and converted to BGRA in `insane-media`, and `insane-server` paints it. That copy is why the total stays high. Showing the decoder's buffer directly on the GPU is the next step, planned for a later release.
 

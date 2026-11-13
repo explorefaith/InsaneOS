@@ -1,5 +1,5 @@
 // motion_model_test.mjs — moving wallpapers without a screen (sdk/motionmodel.js).
-import { motionCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom } from '../../sdk/motionmodel.js';
+import { motionCodecs, hwCodecs, pickVariant, pauseReason, displayCovered, userVideoProblem, nextRandom } from '../../sdk/motionmodel.js';
 
 let ok = 0, bad = 0;
 const eq = (name, a, b) => {
@@ -16,6 +16,12 @@ eq('no decoder: nothing', motionCodecs({ hevc: false, h264: false, vp9: true }, 
 eq('no gpu composition: nothing', motionCodecs({ hevc: true, h264: true }, 'gpu-off'), []);
 eq('a virtual gpu: nothing', motionCodecs({ hevc: true, virtualGpu: true }, 'gpu'), []);
 eq('unknown yet: nothing', motionCodecs(null, 'gpu'), []);
+// hwCodecs: what the login screen asks for — the decode only, no composition requirement
+eq('hw: hevc', hwCodecs({ hevc: true, h264: false }), ['hevc']);
+eq('hw: all four, catalog order first', hwCodecs({ hevc: true, h264: true, vp9: true, av1: true }), ['hevc', 'h264', 'vp9', 'av1']);
+eq('hw: a virtual gpu: nothing', hwCodecs({ hevc: true, virtualGpu: true }), []);
+eq('hw: unknown yet: nothing', hwCodecs(null), []);
+eq('hw: none of the four: nothing', hwCodecs({ hevc: false, h264: false, vp9: false, av1: false }), []);
 
 const item = { variants: [{ name: '2160.hevc', codec: 'hevc', w: 3840, h: 2160 }, { name: '1080.hevc', codec: 'hevc', w: 1920, h: 1080 }, { name: '1080.h264', codec: 'h264', w: 1920, h: 1080 }] };
 eq('1080 screen', pickVariant(item, ['hevc', 'h264'], 1920, 1080).name, '1080.hevc');
