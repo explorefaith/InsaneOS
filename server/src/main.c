@@ -228,6 +228,10 @@ typedef struct {
     double last_render;
     /* GPU paused because someone is watching over the network: it comes back when nobody is left */
     int gpu_paused;
+    /* GPU frame failures in a row and when the last one happened: the retry that follows gpu_paused
+     * backs off (1 s, 2 s, 4 s … 30 s), so a broken GPU can't spin init → fail forever */
+    int gpu_fails;
+    double gpu_fail_at;
     /* pointer motion gathered until the next frame; buttons held (mask); cursor shape from the
      * node under the pointer (`cursor` style, docs/WINDOWS.md) */
     int motion_pending, held, shape, over_app;
@@ -1888,6 +1892,7 @@ static int prep_valid(const Out *o) {
 }
 
 static int par_on, par_light;           /* the paint threads (render_frame) */
+static int display_dark;                /* the last state media_display_power saw (DPMS) */
 
 /* The GPU stops: the dumb buffers go back on screen (cpu_takeover first, so no framebuffer it removes is still
  * on screen), every display is painted whole next, and the GPU is retried when gpu_paused is cleared again
@@ -1900,6 +1905,14 @@ static void gpu_to_cpu(Server *s, const char *why) {
     gpu_shutdown();
     s->gpu_paused = 1;
     full_damage(s);
+}
+
+/* How long to wait before trying the GPU again after frame failures: 1 s, 2 s, 4 s … 30 s. The
+ * recording and flip-stall takeovers never bump the count, so they retry at once. */
+static double gpu_retry_ms(const Server *s) {
+    double d = 1000;
+    for (int i = 1; i < s->gpu_fails && d < 30000; i++) d *= 2;
+    return d > 30000 ? 30000 : d;
 }
 
 /* Recording the screen, or a remote viewer with protected windows: the screen must be in memory (CPU path).
@@ -2042,11 +2055,10 @@ static void out_present(Server *s, Out *o, int i, Rect r, const Out *feed, LbPha
             o->wl_new = 0;
         }
         if (failed) {
-            fprintf(stderr, "gpu: a frame failed; going on by CPU\n");
-            cpu_takeover(s);
-            gpu_shutdown();
-            full_damage(s);
-        }
+            gpu_to_cpu(s, "a frame failed");    /* gpu_paused set: the main loop retries, with a backoff */
+            s->gpu_fails++;
+            s->gpu_fail_at = now_ms();
+        } else s->gpu_fails = 0;                /* a good frame and the backoff starts over */
     } else present_cpu(s, o, i, r, o == feed);
     if (ph) {
         ph->prev_flip = o->kms.flip_ns;
@@ -2725,7 +2737,11 @@ int main(int argc, char **argv) {
         static int force_render = -1;           /* INSANE_HEADLESS_RENDER: draw with no viewer (tests, INSANE_DUMP_FRAME) */
         if (force_render < 0) force_render = getenv("INSANE_HEADLESS_RENDER") != NULL;
         int unseen = s.headless && !mirror_watchers() && !media_needs_cpu() && !force_render;   /* recording the screen: yes */
-        if (!s.headless && display_is_off()) unseen = 1;     /* screen off after idle (DPMS): nothing to draw */
+        if (!s.headless) {
+            int dark = display_is_off();
+            if (dark != display_dark) { display_dark = dark; media_display_power(dark); }   /* the wallpaper's decode follows the screen */
+            if (dark) unseen = 1;                            /* screen off after idle (DPMS): nothing to draw */
+        }
         /* nothing is drawn: the Linux apps waiting for a frame get it at most once a second (wl.c) */
         if (unseen) {
             /* a frame prepared before the screen went off would be shown stale when it comes back */
@@ -2863,8 +2879,9 @@ int main(int argc, char **argv) {
         if (nlost) wl_input_devices_changed();
         if (s.input.count || nlost) keyboards_check(&s);
         input_set_leds(&s.input, kb_leds());   /* Caps Lock and Num Lock lights follow the keyboard state */
-        /* la GPU vuelve cuando ya nadie mira desde la red */
-        if (s.gpu_paused && !s.headless && !any_flip_pending(&s) && gpu_allowed(&s)) {
+        /* la GPU vuelve cuando ya nadie mira desde la red, o cuando un fallo de frame la paró
+         * (gpu_to_cpu): tras fallos repetidos la prueba se espacia (gpu_retry_ms) */
+        if (s.gpu_paused && !s.headless && !any_flip_pending(&s) && gpu_allowed(&s) && now_ms() - s.gpu_fail_at >= gpu_retry_ms(&s)) {
             s.gpu_paused = 0;
             gpu_start(&s);
         }

@@ -23,6 +23,8 @@ void media_dispatch(const struct pollfd *p, int n);
  * is left; media_reap_timeout: ms until the next look, -1 with none pending. */
 void media_reap(void);
 double media_reap_timeout(void);
+void media_display_power(int off);      /* the display went off (DPMS) or came back: the wallpaper's
+                                         * players stop decoding (and resume), nothing else touches */
 typedef void (*MediaEventFn)(int id, const char *type, const char *json);
 void media_events(MediaEventFn fn);
 int  media_wants_frame(void);           /* a recording is waiting for the next frame */

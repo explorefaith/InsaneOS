@@ -72,6 +72,8 @@ typedef struct {
     uint8_t *in_map;
     size_t in_len;
     double rec_start, rec_last;
+    double last_msg;            /* the helper's last message: the watchdog's sign of life */
+    int dark;                   /* paused here because the display is off (media_display_power) */
     int rec_fps;
     long rec_frames, rec_dropped;
     int64_t stats[6];

@@ -280,6 +280,7 @@ int   text_direction(const char *s);                       /* 1 if the first str
 
 /* image.c */
 Image *image_get(const char *path);
+void   image_cache_frame(void);                         /* once a paint pass: the cache's gc (image.c) */
 void   image_size(const Image *img, int *w, int *h);
 Image *image_pixels(Image *img, int w, int h, const uint8_t *rgba);
 Image *image_argb(Image *img, int w, int h, const uint32_t *argb);   /* premultiplied ARGB (doc/doc.c) */

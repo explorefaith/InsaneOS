@@ -192,17 +192,64 @@ static void reap(void) {
     double t = now_ms();
     int k = 0;
     for (int i = 0; i < nzombies; i++) {
-        if (waitpid(zombies[i].pid, NULL, WNOHANG) == zombies[i].pid) continue;
+        int r = waitpid(zombies[i].pid, NULL, WNOHANG);
+        if (r == zombies[i].pid || (r < 0 && errno == ECHILD)) continue;    /* reaped here or by a dispatch */
         if (t > zombies[i].deadline) { kill(zombies[i].pid, SIGKILL); if (waitpid(zombies[i].pid, NULL, WNOHANG) == zombies[i].pid) continue; zombies[i].deadline = t + 1000; }
         zombies[k++] = zombies[i];
     }
     nzombies = k;
 }
 
+/* A player that stopped talking: alive, but no frame, no position, no stats for 10 s (a decoder
+ * wedged under load). Killing it ends the socket, and the JS side sees the same
+ * "closed" {"crashed":true} a crash produces, so its retry rules apply. A paused player is
+ * skipped: it has nothing to say. */
+#define MEDIA_WATCHDOG_MS 10000
+static void media_watchdog(void) {
+    double t = now_ms();
+    for (int i = 0; i < MEDIA_MAX_SRC; i++) {
+        MediaSrc *s = &srcs[i];
+        if (!s->used || s->kind != SK_PLAYER || s->sock < 0 || s->closing || s->state != MS_PLAYING || !s->playing) continue;
+        if (t - s->last_msg < MEDIA_WATCHDOG_MS) continue;
+        fprintf(stderr, "media: insane-media (%s) gave no sign of life for 10 s: killed\n", s->app);
+        bury(s->pid, 0);
+    }
+}
+
+/* The display went off (DPMS) or came back: the wallpaper's and the login screen's players stop and
+ * resume here, in the compositor — nothing shows their frames while the screen is dark, and the
+ * session's pause rules may be switched off or come too late. Music, the camera and recordings are
+ * not touched, and a player the JS side had paused stays paused (only a source we paused is resumed). */
+void media_display_power(int off) {
+    for (int i = 0; i < MEDIA_MAX_SRC; i++) {
+        MediaSrc *s = &srcs[i];
+        if (!s->used || s->kind != SK_PLAYER || s->sock < 0 || s->closing) continue;
+        if (strcmp(s->app, "wallpaper") && strcmp(s->app, "greeter")) continue;
+        if (off) {
+            if (s->playing && !s->dark) { s->dark = 1; mp_sendv(s->sock, MM_PAUSE, 0, 0, 0, 0, 0); }
+        } else if (s->dark) {
+            s->dark = 0;
+            if (s->state == MS_PLAYING) mp_sendv(s->sock, MM_PLAY, 0, 0, 0, 0, 0);
+        }
+    }
+}
+
 /* Called on every pass of the main loop: with no source left media_pollfds has nothing and media_dispatch
  * doesn't run, so a helper that was just stopped would stay a zombie until the next video or song. */
-void media_reap(void) { if (nzombies) reap(); }
-double media_reap_timeout(void) { return nzombies ? 100 : -1; }
+void media_reap(void) {
+    if (nzombies) reap();
+    media_watchdog();
+}
+double media_reap_timeout(void) {
+    double out = nzombies ? 100 : -1, t = now_ms();
+    for (int i = 0; i < MEDIA_MAX_SRC; i++) {
+        MediaSrc *s = &srcs[i];
+        if (!s->used || s->kind != SK_PLAYER || s->sock < 0 || s->closing || s->state != MS_PLAYING || !s->playing) continue;
+        double d = s->last_msg + MEDIA_WATCHDOG_MS - t;     /* wake for the nearest watchdog check */
+        if (out < 0 || d < out) out = d > 100 ? d : 100;
+    }
+    return out;
+}
 
 /* ---- descriptors that are passed ---- */
 
@@ -552,6 +599,7 @@ static void src_dispatch(MediaSrc *s) {
         int fds[MP_MAX_FDS];
         int r = mp_recv(s->sock, &m, payload, sizeof payload, fds, 0);
         if (r < 0) break;
+        s->last_msg = now_ms();         /* any message: the watchdog's sign of life */
         if (r == 0) {
             int crashed = s->state != MS_DONE && s->state != MS_ENDED && !s->closing;
             int pid = s->pid;

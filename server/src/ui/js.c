@@ -64,6 +64,19 @@ static double now_ms(void) {
     return t.tv_sec * 1e3 + t.tv_nsec / 1e6;
 }
 
+/* A script that never comes back (an infinite loop in a timer, an event handler gone wild) would
+ * freeze the whole single-threaded compositor: the interrupt handler ends any armed JS entry that
+ * runs over its wall-clock budget, the exception surfaces like any other (dump_exception), and the
+ * desktop goes on. Only event dispatch and promise jobs arm the budget — never the startup eval of
+ * a bundle, which may take as long as it takes. */
+#define JS_ENTRY_BUDGET_MS 3000
+static double js_deadline;              /* 0: nothing armed */
+static int js_interrupt(JSRuntime *rt_, void *opaque) {
+    (void)rt_; (void)opaque;
+    return js_deadline > 0 && now_ms() > js_deadline;
+}
+static void js_arm(void) { js_deadline = now_ms() + JS_ENTRY_BUDGET_MS; }
+
 static void dump_exception(JSContext *c) {
     JSValue e = JS_GetException(c);
     const char *msg = JS_ToCString(c, e);
@@ -81,8 +94,13 @@ static void dump_exception(JSContext *c) {
 static void drain_jobs(void) {
     JSContext *c;
     int r;
-    while ((r = JS_ExecutePendingJob(rt, &c)) != 0)
+    for (;;) {
+        js_arm();                       /* a runaway job ends here instead of freezing the loop */
+        r = JS_ExecutePendingJob(rt, &c);
+        js_deadline = 0;
+        if (!r) break;
         if (r < 0) dump_exception(c);
+    }
 }
 
 static Node *arg_node(JSContext *c, JSValueConst v) {
@@ -351,7 +369,9 @@ static int eval(const char *src, size_t len, const char *name) {
 static JSValue call_global_atom(JSAtom name, int argc, JSValueConst *argv) {
     JSValue g = JS_GetGlobalObject(ctx), f = JS_GetProperty(ctx, g, name), r = JS_UNDEFINED;
     if (JS_IsFunction(ctx, f)) {
+        js_arm();                       /* a runaway script ends here instead of freezing the loop */
         r = JS_Call(ctx, f, g, argc, argv);
+        js_deadline = 0;
         if (JS_IsException(r)) { dump_exception(ctx); r = JS_UNDEFINED; }
     }
     JS_FreeValue(ctx, f);
@@ -400,6 +420,7 @@ static void session_context(void) {
     rt = JS_NewRuntime();
     JS_SetMemoryLimit(rt, 256u << 20);
     JS_SetMaxStackSize(rt, 4u << 20);
+    JS_SetInterruptHandler(rt, js_interrupt, NULL);
     ctx = JS_NewContext(rt);
 
     JSValue g = JS_GetGlobalObject(ctx);
@@ -557,6 +578,7 @@ static void app_context(const char *app_id) {
     rt = JS_NewRuntime();
     JS_SetMemoryLimit(rt, 256u << 20);
     JS_SetMaxStackSize(rt, 4u << 20);
+    JS_SetInterruptHandler(rt, js_interrupt, NULL);
     ctx = JS_NewContext(rt);
     JSValue g = JS_GetGlobalObject(ctx);
     JSValue insane = JS_NewObject(ctx);

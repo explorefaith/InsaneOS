@@ -42,6 +42,13 @@ static int brand_font[2] = { -2, -2 };  /* Plus Jakarta Sans Medium and ExtraBol
 
 static Glyph *cache;
 static size_t cache_cap, cache_used;
+/* The cache never evicts (a glyph is a pure function of cp+font+size), so it is wiped whole when it
+ * gets too big: the visible text re-rasterizes once (a few ms) and the hot set refills. Without this
+ * a long session with CJK, emoji and many font sizes only ever grows (docs/BENCHMARK.md keeps the
+ * idle-memory numbers honest against this). */
+#define GLYPH_CAP 65536              /* entries: the table alone would pass ~2.5 MB many times over */
+#define GLYPH_BMP_BYTES (64u << 20)  /* 64 MB of bitmaps */
+static size_t bmp_bytes;
 
 static unsigned char *map_file(const char *path, size_t *size) {
     int fd = open(path, O_RDONLY | O_CLOEXEC);
@@ -225,9 +232,22 @@ static void cache_grow(void) {
     free(old);
 }
 
+/* Frees every bitmap and empties the table in place (no realloc: a caller's Glyph* stays valid,
+ * it just reads as an empty glyph — w = h = 0 — until the next lookup fills it again). */
+static void cache_wipe(void) {
+    for (size_t i = 0; i < cache_cap; i++) free(cache[i].bmp);
+    memset(cache, 0, cache_cap * sizeof *cache);
+    cache_used = 0;
+    bmp_bytes = 0;
+}
+
 static Glyph *slot_for(uint32_t key, int font, int size_q) {
     Glyph *g = glyph_slot(key, font, size_q);
-    if (!g->used && (cache_used + 1) * 10 > cache_cap * 7) { cache_grow(); g = glyph_slot(key, font, size_q); }
+    if (!g->used && (cache_used + 1) * 10 > cache_cap * 7) {
+        if (cache_cap * 2 > GLYPH_CAP || bmp_bytes > GLYPH_BMP_BYTES * 9 / 10) cache_wipe();
+        else cache_grow();
+        g = glyph_slot(key, font, size_q);
+    }
     return g;
 }
 
@@ -244,6 +264,7 @@ const Glyph *text_glyph(uint32_t cp, int font, float size) {
     stbtt_GetCodepointHMetrics(&f->info, (int)cp, &adv, &lsb);
     g->adv = adv * scale;
     g->bmp = stbtt_GetCodepointBitmap(&f->info, scale, scale, (int)cp, &g->w, &g->h, &g->xoff, &g->yoff);
+    if ((bmp_bytes += (size_t)g->w * g->h) > GLYPH_BMP_BYTES) cache_wipe();
     return g;
 }
 
@@ -262,6 +283,7 @@ const Glyph *text_glyph_id(int font, uint32_t gid, float size) {
     stbtt_GetGlyphHMetrics(&f->info, (int)gid, &adv, &lsb);
     g->adv = adv * scale;
     g->bmp = stbtt_GetGlyphBitmap(&f->info, scale, scale, (int)gid, &g->w, &g->h, &g->xoff, &g->yoff);
+    if ((bmp_bytes += (size_t)g->w * g->h) > GLYPH_BMP_BYTES) cache_wipe();
     return g;
 }
 

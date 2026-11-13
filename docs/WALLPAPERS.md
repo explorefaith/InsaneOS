@@ -40,6 +40,12 @@ Settings → Wallpaper → Live → Pause when; reduce motion and a screen that 
 session not being the one on the monitor (`insane.session.onMonitor()`). The login screen pauses after five minutes with
 no input.
 
+The compositor holds its own backstop, under all of that: when the display goes off (DPMS), `insane-server` pauses the
+wallpaper's and the login screen's players itself (`media_display_power`), and resumes them when it comes back — only the
+ones it paused, so a player the session's rules had paused stays paused. Music, the camera and recordings are never
+touched. With the screen dark nothing shows the frames anyway, and this one works even if the session's JavaScript is
+the thing that failed.
+
 One video per file, however many displays show it. The still wallpaper stays drawn underneath, so a failure, a missing
 file or a helper crash just shows it.
 
@@ -119,9 +125,13 @@ The Wallpaper page draws its previews, the desktop and the greeter's still backg
 added for this), or the solid colour / gradient (`wallpaperBg`; the greeter's mark). A change crossfades over 450 ms,
 unless Reduce motion is on.
 
-Choosing a still wallpaper turns the moving one off, since it would stay in front. A new player can start while the last one still holds the decoder, so a stop nobody asked for is retried four times, half a second apart; the tile shows a spinner until the video plays.
+Choosing a still wallpaper turns the moving one off, since it would stay in front. A new player can start while the last one still holds the decoder, so a stop nobody asked for is retried four times — half a second, then 1 s, 2 s, 4 s; the tile shows a spinner until the video plays. A file that burned all four tries stays disabled across sessions (settings `motionDisabled`), and its tile in Settings offers *try again*.
 
-A moving wallpaper plays with `hwOnly`: if the hardware decoder doesn't start, or fails, `insane-media` stops rather than decoding in software, and the still image stays.
+A helper that wedges without dying (alive, but no frame, position or stats for 10 s) is killed by the compositor's
+watchdog (`media_watchdog`); the session sees the same "closed" event a crash produces, and the retry rules above apply
+to it just the same.
+
+A moving wallpaper plays with `hwOnly`: if the hardware decoder doesn't start, or fails, `insane-media` stops rather than decoding in software, and the still image stays. While a wallpaper's MediaView waits for its first frame — and whenever its ring is rebuilt — it draws nothing at all, so the still wallpaper shows through instead of a black flash filling the display (`media_view_reset` keeps the wallpaper's and the greeter's backgrounds transparent; every other player keeps its black).
 
 ## The collection
 

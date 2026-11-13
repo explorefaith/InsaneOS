@@ -17,10 +17,53 @@ struct Image {
     uint32_t *scaled2;              /* the previous one: an icon at two sizes (Dock and bar) is not rescaled every frame */
     int sw2, sh2, sfit2;
     long ver;                       /* the "#<version>" it was loaded for (image_get) */
+    unsigned tick;                  /* image_cache_frame's counter at the last draw (the gc's liveness) */
     struct Image *next;
 };
 
 static struct Image *images;
+static unsigned img_frame;          /* bumped by image_cache_frame(), once a paint pass */
+
+static uint32_t *load_file(const char *path, int *w, int *h, int *opaque);
+
+/* The file cache never dropped an entry, so a long session with a photo gallery or many wallpaper
+ * previews only ever grew. Now the gc frees the buffers of entries not drawn for a while (the node
+ * keeps its Image*; image_draw reloads the file from img->path if it is drawn again), so memory
+ * follows what is actually on screen. Node-owned images (pixels, path == NULL) are never touched. */
+#define IMAGE_IDLE_TICKS 3600           /* ~60 s of frames since the last draw */
+#define IMAGE_CACHE_BYTES (256u << 20)  /* the whole cache: px + both scaled copies */
+#define IMAGE_GC_EVERY 600              /* frames between sweeps (a walk of the list) */
+
+static size_t entry_bytes(const Image *i) {
+    return (i->px ? (size_t)i->w * i->h * 4 : 0)
+         + (i->scaled ? (size_t)i->sw * i->sh * 4 : 0)
+         + (i->scaled2 ? (size_t)i->sw2 * i->sh2 * 4 : 0);
+}
+
+/* px == NULL with a path marks an evicted entry. */
+static void image_evict(Image *img) {
+    free(img->px); free(img->scaled); free(img->scaled2);
+    img->px = img->scaled = img->scaled2 = NULL;
+    img->sw = img->sh = img->sw2 = img->sh2 = 0;
+}
+
+static void image_reload(Image *img) {
+    int w, h, opaque;
+    uint32_t *px = load_file(img->path, &w, &h, &opaque);
+    if (!px) return;                        /* the file is gone: image_draw shows nothing */
+    image_evict(img);
+    img->px = px; img->w = w; img->h = h; img->opaque = opaque;
+}
+
+void image_cache_frame(void) {
+    img_frame++;
+    if (img_frame % IMAGE_GC_EVERY) return;
+    size_t total = 0;
+    for (Image *i = images; i; i = i->next) total += entry_bytes(i);
+    if (total <= IMAGE_CACHE_BYTES) return;
+    for (Image *i = images; i; i = i->next)
+        if (i->path && i->px && img_frame - i->tick > IMAGE_IDLE_TICKS) image_evict(i);
+}
 
 /* the file's pixels, premultiplied; NULL if it doesn't load */
 static uint32_t *load_file(const char *path, int *w, int *h, int *opaque) {
@@ -207,6 +250,9 @@ static void rescale(Image *img, int bw, int bh, int fit) {
 void image_draw(Canvas *c, Image *img, float x, float y, float w, float h, float r, int fit, float opacity) {
     int bw = (int)roundf(w), bh = (int)roundf(h);
     if (bw <= 0 || bh <= 0) return;
+    if (!img->px && img->path) image_reload(img);   /* the gc freed it: back from disk (image_cache_frame) */
+    img->tick = img_frame;
+    if (!img->px) return;                           /* the reload failed (the file went away) */
     /* outside what is being repainted: nothing (not even rescaling) */
     int ix = (int)roundf(x), iy = (int)roundf(y);
     if (ix >= c->clip.x1 || iy >= c->clip.y1 || ix + bw <= c->clip.x0 || iy + bh <= c->clip.y0) return;

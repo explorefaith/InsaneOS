@@ -2064,6 +2064,7 @@ static int paint_root_body(Canvas *c, Node *root, int clear, uint32_t rgb, GpuDr
     skip_until = 0;
     paint_cull = 0;
     tf_gc();
+    image_cache_frame();
     wl_paint_popups(c);                     /* menús de las apps Wayland, encima de todo */
     if (paint_profile) {
         fprintf(stderr, "  paint:");

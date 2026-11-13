@@ -15,8 +15,12 @@
 
 void media_view_reset(MediaSrc *s) {
     unsigned gen = s->view.gen + 1;
+    /* The wallpaper and the login screen play over their still image: until the first frame arrives
+     * (or while the ring is rebuilt) the background stays transparent, so the still shows instead of
+     * a black flash filling the display. Every other player keeps its black. */
+    int still_under = !strcmp(s->app, "wallpaper") || !strcmp(s->app, "greeter");
     s->view = (MediaView){ .fit = 0, .zoom = 0, .cx = 0.5f, .cy = 0.5f, .rot = 0, .mirror = 0,
-                           .bg = (s->kind == SK_PLAYER || s->kind == SK_CAMERA) ? 0xff000000u : 0, .gen = gen };
+                           .bg = (s->kind == SK_PLAYER || s->kind == SK_CAMERA) && !still_under ? 0xff000000u : 0, .gen = gen };
 }
 
 static const uint32_t *pixels_of(MediaSrc *s, int *w, int *h) {

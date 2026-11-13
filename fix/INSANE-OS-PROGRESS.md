@@ -60,3 +60,37 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
          (order bug fixed), glow pulse, mark pulse, tagline fade-in
 - DONE   Desktop/Operating re-synced with the final rebranded source (756 MB, publish-ready)
 - PENDING  content search indexer, Universal Clipboard, Stage Manager (design notes in ROADMAP)
+
+## Session 5 (transformation round 1 — performance, stability, wallpaper engine)
+- DONE  audit: compositor + wallpaper engines mapped end to end (two reports: render pipeline,
+        damage, GPU lifecycle, caches, watchdogs; media IPC, pause coverage, failure paths)
+- DONE  rebrand regression fixed: fw scope-prefix length constants (15/11 → measured) — per-app
+        firewall rules, Monitor app ids and notification app names never matched any scope since
+        the rename (fw/rules.c, ui/js_monitor.c, sec/appid.c, sec/cgroup.c, sec/pwguard.c)
+- DONE  rebrand regression fixed: tzif test's Australia/Lord_Howe listed as "Insane_Howe" — the
+        30-minute-DST edge case had been dead since the rename; 216k instants now compare 0 diff
+- DONE  GPU frame failure now retries: out_present's failed path goes through gpu_to_cpu (sets
+        gpu_paused) with an exponential retry backoff (1 s … 30 s) so a broken GPU can't spin
+- DONE  runaway-JS watchdog: JS_SetInterruptHandler + 3 s wall-clock budget on event dispatch and
+        promise jobs (never on bundle eval) — a theme infinite loop throws and logs, the desktop
+        survives
+- DONE  unbounded caches capped: glyph cache wipes at 64 MB of bitmaps / 65536 entries (visible
+        text re-rasterizes, hot set refills); file-image cache gc frees entries not drawn for 60 s
+        once the cache passes 256 MB, image_draw reloads an evicted entry from its path
+- DONE  wallpaper: compositor-side display-power backstop (media_display_power) — DPMS off pauses
+        the wallpaper/greeter players in C, resume restores only what it paused
+- DONE  wallpaper: helper watchdog — a player silent for 10 s (wedged decoder) is killed, the JS
+        side sees a crash; zombie reap no longer spins on already-reaped pids
+- DONE  wallpaper: no black flash before the first frame or across a ring rebuild — the wallpaper's
+        and greeter's MediaView backgrounds stay transparent until pixels exist (mview.c)
+- DONE  wallpaper: retry policy with growing waits (0.5 s, 1 s, 2 s, 4 s) and a persisted per-file
+        disable (settings motionDisabled) with a try-again affordance (sdk motionDisabled/retryMotion)
+- DONE  Wallpaper settings: the shipped motion catalog is back as a gallery (sections, verified
+        downloads with progress, apply dialog desktop/login, remove, stopped→try again), real
+        playback facts under the preview (the player's own stats), your-own-video flow with probe
+        checks and heavy-video warnings, and the six "Pause when" switches
+- KNOWN imager-test: release-SHA256SUMS.sig does not verify against the repo's public release key
+        (pre-existing at 000142d; needs the maintainer's private key to re-sign the fixture — not
+        weakened to keep the suite green)
+- PENDING on-screen test of the live-wallpaper changes (desktop + login screen), theme audit for
+  the design-system phase

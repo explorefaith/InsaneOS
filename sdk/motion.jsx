@@ -147,9 +147,16 @@ function startTicking() {
 }
 
 // A new player can start while the last one still holds the decoder, and a moving wallpaper never falls back to software:
-// its helper stops. So a stop that nobody asked for is tried again, a few times, before the still image stays.
+// its helper stops. So a stop that nobody asked for is tried again — with a growing wait (0.5 s, 1 s, 2 s, 4 s) —
+// before the still image stays. A file that burned all of its tries stays disabled even across sessions
+// (settings "motionDisabled"): Settings → Wallpaper offers Try again.
 export const motionBusy = createStore(false);       // a chosen wallpaper is starting
 const RETRIES = 4, RETRY_MS = 500;
+
+const disabledMap = () => settings.get().motionDisabled || {};
+export const motionDisabled = (file) => !!disabledMap()[file];
+export const retryMotion = (file) => { const d = { ...disabledMap() }; delete d[file]; settings.set({ motionDisabled: d }); };
+const disableMotion = (file) => settings.set({ motionDisabled: { ...disabledMap(), [file]: Date.now() } });
 
 function acquire(file, rate, key, display, onLost) {
   const s = settings.get();
@@ -189,8 +196,8 @@ function Layer({ path, rate, mute, loop, display, style }) {
     const key = {};
     let timer = 0;
     const lost = () => {
-      if (tries.current++ < RETRIES) timer = setTimeout(() => setTurn((n) => n + 1), RETRY_MS);
-      else motionBusy.set(false);
+      if (tries.current++ < RETRIES) timer = setTimeout(() => setTurn((n) => n + 1), RETRY_MS * (1 << Math.min(tries.current - 1, 4)));
+      else { motionBusy.set(false); disableMotion(path); }   // four tries burned: the file stays off (retryMotion)
     };
     const mine = acquire(path, rate, key, display, lost);
     setP(mine);
@@ -210,6 +217,7 @@ export function MotionWallpaper({ display }) {
   const path = codecs.length ? resolve(s, wanted(s, display.id), display.w * px, display.h * px, codecs) : null;
   const chosen = wanted(s, display.id);
   const it = catalog.items.find((x) => x.id === chosen);
+  if (path && motionDisabled(path)) return null;      // it burned its tries: the still stays, Settings offers Try again
   if (!path) {
     // chosen, but this machine can't play it: its still poster
     return it && !codecs.length ? h(Image, { src: motionPoster(it), style: { position: 'absolute', left: display.x, top: display.y, width: display.w, height: display.h, objectFit: 'cover', pointerEvents: 'none' } }) : null;
