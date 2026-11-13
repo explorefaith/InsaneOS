@@ -828,5 +828,6 @@
   "termconf.verifyFailed": "the new file didn’t read back the same, so nothing was moved",
   "termconf.corrupt": "the file isn’t valid JSON for the Terminal",
   "termconf.newer": "the file was written by a newer Insane OS",
-  "vm.shareProtected": "A folder shared with write access can’t be, or hold, a protected file of this computer (such as the Terminal’s configuration or settings.json): the machine could change what this computer runs. Share it read-only, or share a folder without it."
+  "vm.shareProtected": "A folder shared with write access can’t be, or hold, a protected file of this computer (such as the Terminal’s configuration or settings.json): the machine could change what this computer runs. Share it read-only, or share a folder without it.",
+  "battery.limit.unsupported": "This device's firmware does not support a charge limit (no charge_control_end_threshold)."
 }

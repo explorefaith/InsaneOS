@@ -19,8 +19,12 @@ function ChargeLimitRow({ tr }) {
   const [err, setErr] = useState('');
   const cur = s.chargeLimit ?? 80;
   const setLimit = (v) => {
+    const was = cur;
     set({ chargeLimit: v });
-    admin.run('battery-limit', String(v)).then(() => setErr(''), (e) => setErr(e.message));
+    admin.run('battery-limit', String(v)).then(() => setErr(''), (e) => {
+      set({ chargeLimit: was });          // the value never applied: the dropdown shows the truth
+      setErr(e.message);
+    });
   };
   return (
     <SettingRow label={tOptional('prefs.power.chargeLimit') || 'Charge limit'}

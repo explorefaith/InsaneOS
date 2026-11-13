@@ -397,9 +397,17 @@ static void a_langpack(const AdminReq *r, const char *a, size_t n) { (void)r; (v
 static void act_battery_limit(const char *arg) {
     int pct = atoi(arg && *arg ? arg : "80");
     if (pct < 5 || pct > 100) pct = 80;
+    /* nothing pretends: without the interface nothing is written, and the settings row shows why
+     * (errcode.h battery.limit.unsupported). 100 ("Full") lifts an existing limit where one exists. */
+    char path[128];
+    int supported = 0;
+    for (int i = 0; i < 4 && !supported; i++) {
+        snprintf(path, sizeof path, "/sys/class/power_supply/BAT%d/charge_control_end_threshold", i);
+        supported = access(path, W_OK) == 0;
+    }
+    if (!supported) { admin_err("battery.limit.unsupported", NULL); return; }
     FILE *f = fopen("/etc/insaneos/battery-limit", "w");
     if (f) { fprintf(f, "%d\n", pct); fclose(f); }
-    char path[128];
     for (int i = 0; i < 4; i++) {
         snprintf(path, sizeof path, "/sys/class/power_supply/BAT%d/charge_control_end_threshold", i);
         f = fopen(path, "w");
