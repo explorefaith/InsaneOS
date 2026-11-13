@@ -1871,6 +1871,20 @@ static int any_blocked(const Server *s) {
 }
 /* the next frame's CPU work that can be done ahead: UI damage, layout or a JS frame callback waiting */
 static int ahead_work(const Out *o) { return ui.dirty || js_wants_frame() || o->full || !box_empty(o->pend); }
+
+/* Pointer motion waits for the main display's flip (fpipe.h) so it lands once per frame — but a flip
+ * that misses its vblank (the GPU busy under load) must not hold the pointer behind it: once the
+ * queued flip is more than one refresh period old (it missed the vblank it was aimed at), the events
+ * dispatch anyway. Dispatching early cannot present anything (render stays gated on the flip); it
+ * only runs the JS side and the Wayland clients, and the once-per-frame coalescing still holds. */
+static int motion_due(Server *s) {
+    Out *o = main_out(s);
+    if (!out_blocked(s, o)) return 1;
+    const Kms *k = &o->kms;
+    if (!k->flip_pending || !k->flip_submit_ns) return 1;
+    uint64_t period = k->mode.vrefresh > 0 ? 1000000000ull / k->mode.vrefresh : 16666667ull;
+    return k->flip_submit_ns + period + period / 4 < mono_ns();     /* 1.25 periods: genuinely late */
+}
 static int can_prepare(const Server *s) {
     for (int i = 0; i < OUT_MAX; i++) {
         const Out *o = &s->out[i];
@@ -2650,8 +2664,9 @@ int main(int argc, char **argv) {
             if (!switch_theme(current)) snprintf(current, sizeof current, "%s", next);
         }
         /* El movimiento del puntero juntado: una vez por cuadro, cuando terminó el page flip. Así un
-         * mouse de 1000 Hz no llama a JS (ni a las apps Linux) mil veces por segundo. */
-        if (s.motion_pending && !out_blocked(&s, main_out(&s))) {
+         * mouse de 1000 Hz no llama a JS (ni a las apps Linux) mil veces por segundo. Un flip que
+         * llegó tarde (motion_due) no lo retiene: el puntero nunca espera detrás de la GPU. */
+        if (s.motion_pending && motion_due(&s)) {
             dispatch_pointer(&s);
             if (gpu_active()) update_cursor(&s);
         }
@@ -2683,11 +2698,15 @@ int main(int argc, char **argv) {
             lbf_drag_begin();                   /* its frames' phases (bench/lbframes.h) */
         }
         scripted = grab_scripted();
-        /* Timers del tema (React agenda su trabajo con setTimeout/setImmediate). */
+        /* Timers del tema (React agenda su trabajo con setTimeout/setImmediate). Una ráfaga de
+         * timers vencidos corre como mucho TIMER_BURST_MS por vuelta del bucle: lo demás sigue en
+         * la siguiente (delay 0 despierta el poll al instante), y el input se lee entre medias
+         * en vez de esperar detrás de 64 rondas seguidas. */
         double delay = -1, tick0 = now_ms();
         for (int i = 0; i < 64; i++) {
             delay = js_tick(now_ms());
             if (delay != 0) break;
+            if (now_ms() - tick0 >= 8.0) { delay = 0; break; }
         }
         if (dstat.active) dstat.js += now_ms() - tick0;     /* React agenda su trabajo en timers */
         /* Terminales: parpadeo del cursor y región que cambió con la salida de los shells. */
