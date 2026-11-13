@@ -118,3 +118,34 @@ Format: `[state] item — detail`. States: DONE, TEST-ON-SCREEN, PENDING, BLOCKE
         did its job. Procedure in fix/BENCHMARK-ROUND2.md §4
 - PENDING on-screen: install via fix/upgrade-insaneos.sh, then TEST-CHECKLIST (wallpaper gallery,
         live wallpaper, dock/panel feel, Launchpad keyboard, CC's DND + Night Light tiles)
+
+## Session 7 (round 3 — real-world responsiveness & interaction engineering)
+- MEASURED  the input path end to end: pointer motion dispatch was gated on the main display's page flip
+        completing (fpipe.h without the pipeline) — GPU-late frames under load queue the pointer behind
+        them; and a burst of due JS timers (up to 64 rounds of js_tick) delays the next device read
+- DONE   input: motion dispatches once the queued flip misses its vblank (1.25 periods, motion_due in
+        main.c) — the pointer never queues behind the GPU; coalescing unchanged. A timer burst yields
+        after 8 ms so events are read between waves
+- DONE   input: a pointer latency trace like keylag's (src/plag.c, INSANE_INPUT_DEBUG=1): three stages
+        (evdev→read, read→dispatch, dispatch→flip), percentile lines (p50/p95/p99/max) every 5 s to
+        $XDG_RUNTIME_DIR/insaneos-pointerlag.log; pointer devices now stamp CLOCK_MONOTONIC (EVIOCSCLOCKID)
+- DONE   priority: the focused app's cgroup scope weighs 400 against 100 (sec/fgprio.c follows the
+        keyboard focus; new root-side "weight" verb on /run/insaneos/cgroup.sock, backward/forward
+        compatible with the enter verb); the live wallpaper's and login screen's decode enters its
+        scope at weight 50 (CG_WALLPAPER_CPU_WEIGHT, ambient=1 in the play params); cgweight-test 18/18
+- DONE   wallpaper: insane.system.pressure() (PSI memory + MemAvailable) and motionmodel.memoryPressure —
+        the wallpaper is the first decoder to stop under real memory pressure (some60 ≥ 25 %, or
+        avg10 ≥ 40 % with < 400 MB free) and the last to restart (some60 < 15 % and 800 MB free);
+        non-optional 'pressure' pause reason; motion-model-test 78 ok
+- DONE   interaction: dock magnification coalesced to one layout per frame (rAF, latest pointer wins) —
+        a re-render per event ran at the dispatch rate exactly when the machine is busy; windows restore
+        through the same genie warp the minimize uses, driven 1→0 (Reduce Motion skips it); Control
+        Center and Launchpad got the panel-entrance their tokens define (closes stay instant)
+- MEASURED  real-world suite (fix/realworld-suite.sh + fix/rwload.c, fix/REALWORLD-TESTS.md): ambient
+        49.8 fps / frame p99 34.6 ms; all-core nice-0 load 41.2 fps / p99 52 ms / missed 41; memory-
+        traffic pressure 18.8 fps / frame p99 639 ms / testbench in-to-screen 338 ms — the case for the
+        pressure pause and the unblocked dispatch (a CPU weight cannot buy back a page-wait)
+- BLOCKED InsaneBench: refused at the gate again (stopReason: thermal; machine 99 % busy with the
+        round's own test run, battery 63 %); quoted verbatim in the session log of the attempt
+- PENDING install via fix/upgrade-insaneos.sh + relogin, then TEST-CHECKLIST §10 and the suite re-run
+        (the round's C changes are in the tree, not in the installed binary — REALWORLD-TESTS.md notes it)
