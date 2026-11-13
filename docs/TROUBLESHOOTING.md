@@ -68,6 +68,18 @@ about two minutes.
    ```
 
 2. Run it in the Insane OS Terminal: `sh keylag.sh`. It prints:
+### The pointer: where the milliseconds go
+
+Keys have `keylag`; the pointer has `plag` (same build, same switch): with `INSANE_INPUT_DEBUG=1`
+(insane-sessiond sets it for a debug session, never the login screen) every pointer motion batch is
+timed through three stages — evdev→read (the loop was busy or preempted before the device), read→dispatch
+(the coalesced batch reached JS and the clients), dispatch→flip (the main display's next completed page
+flip). Every 5 s one line of percentiles (p50/p95/p99/max, µs) per stage goes to
+`$XDG_RUNTIME_DIR/insaneos-pointerlag.log`, like `insaneos-keylag.log`, with a line cap, timestamps
+only. Stage 1 following the machine's load spikes means the loop is losing CPU time; stage 3 tracking
+the frame-time tail means the GPU's late frames were queueing the pointer (round 3 removed that queue:
+`main.c` `motion_due`). `fix/realworld-suite.sh` records the conditions that reproduce each.
+
    - the version;
    - GPU or CPU composition;
    - the virtual machine and its guest tools;

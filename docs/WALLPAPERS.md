@@ -36,9 +36,23 @@ frame beyond it is dropped before its readback and upscale — the two steps tha
 `sdk/motion.jsx` pauses the decoder, and `pauseReason` says why: Reduce motion, a fullscreen window, every display showing
 it covered by a window, five minutes with no input, the battery at 20 % or less and discharging, or the CPU above 85 % for
 two readings 5 s apart. The fullscreen, covered, locked, idle, battery and busy reasons can each be turned off in
-Settings → Wallpaper → Live → Pause when; reduce motion and a screen that is off are not optional. "Locked" is the
+Settings → Wallpaper → Live → Pause when; reduce motion and a screen that are off are not optional. "Locked" is the
 session not being the one on the monitor (`insane.session.onMonitor()`). The login screen pauses after five minutes with
 no input.
+
+Memory pressure is not optional either, and it is measured, not guessed: every 5 s the shell reads
+`insane.system.pressure()` (PSI memory "some" and MemAvailable) and `motionmodel.memoryPressure`
+stops the wallpaper when the system has been meaningfully stalled (PSI some avg60 ≥ 25 %), or in a
+burst (avg10 ≥ 40 %) with less than 400 MB free — the same signals the background freezer acts on
+(`fix/insaneos-smooth-freeze.sh`). It comes back only when it is clearly over (some60 < 15 % and
+800 MB free), so a memory storm does not flicker it, and a pause costs nothing: the still image is
+already drawn underneath. The reason is `pressure`. The measured case for this is
+`fix/REALWORLD-TESTS.md`: under memory-traffic pressure the frame p99 went to 639 ms — a CPU weight
+cannot buy back a page-wait, so the wallpaper must be the first to stop.
+
+The decode itself also yields: an ambient player (the wallpaper, the login screen) enters its cgroup
+scope at half of every app's CPU weight (`CG_WALLPAPER_CPU_WEIGHT` in `sec/cgroup.h`), so between the
+adaptive cap's steps it loses contention to any app.
 
 The cap is not fixed, either. Settings → Power (and the Control Center's Power Mode tile) picks the
 rendering profile's rendering half — `auto` by default, or pinned balanced / performance / low — and

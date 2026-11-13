@@ -52,3 +52,13 @@
 ## ⚠️ সমস্যা হলে
 - এক ফিচার ভাঙলে বাকি সব ঠিক থাকবে — নম্বর বললেই আলাদা করে ঠিক করব
 - সব revert: `sudo bash /var/backups/insaneos-fix-*/REVERT.sh` + রিবুট
+
+## ১০. Round 3 — রেসপন্সিভনেস (upgrade-insaneos.sh + relogin এর পরে)
+- [ ] **ডক ম্যাগনিফিকেশন** — আইকনের উপর দিয়ে দ্রুত mouse নাড়ালে স্মুথ; ১০০০Hz mouse-এও ডক জুড়ে ঝিঁকে ওঠা নেই
+- [ ] **Window restore** — Dock আইকনে ক্লিক করে minimize করা window ফেরত আনলে জিনি ইফেক্ট উল্টো দিকে (আইকন থেকে window); Reduce Motion-এ সরাসরি আসে
+- [ ] **Control Center / Launchpad** — খোলার সময় হালকা fade+rise; বন্ধ আগের মতোই সাথে সাথে
+- [ ] **লোডের মধ্যে pointer** — ভারী build চলাকালীন (clang++/gradle) window drag করো: cursor-এর পিছনে window আর লেগ করবে না (আগে flip-এর জন্য অপেক্ষা করত)
+- [ ] **Foreground priority** — দুটো অ্যাপে ভারী কাজ চালু রেখে focused অ্যাপে কাজ করো: focused অ্যাপটা এগিয়ে থাকবে; `cat /sys/fs/cgroup/system.slice/insaneos.service/insaneos-session-1000/app-*.scope/cpu.weight`-এ focused টার 400, বাকিদের 100
+- [ ] **Wallpaper pressure pause** — মেমরি চাপ দিলে (বড় balloon বা অনেক ট্যাব) wallpaper আগে থামবে (still image থাকবে), চাপ কমলে নিজেই ফিরবে — Settings-এর switch ছাড়াই, এটা protection
+- [ ] **Pointer lag log** — `INSANE_INPUT_DEBUG=1` session-এ `cat $XDG_RUNTIME_DIR/insaneos-pointerlag.log` — ৫ সেকেন্ডে এক লাইন percentiles (docs/TROUBLESHOOTING.md)
+- [ ] `bash fix/realworld-suite.sh all 12` upgrade-এর আগে ও পরে — দুটো SUMMARY.txt তুলনা (fix/REALWORLD-TESTS.md)

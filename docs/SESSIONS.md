@@ -399,6 +399,16 @@ without root, so `insane-sessiond` **delegates** a subtree to it:
   every `cgroup.procs`, are root's. After a restart the new `insane-sessiond` hardens the subtrees
   of the sessions that survived. See `PRIVACY.md`, «Root-owned app scopes».
 - The login screen and the web connections stay in `supervisor`.
+- **CPU weights inside the session subtree (round 3):** the compositor's `server` leaf weighs 1000
+  against 100 for every app scope (`CG_SERVER_CPU_WEIGHT`). On top of that, the app that has the
+  keyboard weighs 400 while it has it (`CG_FG_CPU_WEIGHT`, `sec/fgprio.c`): the compositor watches
+  the keyboard focus and asks the same root service — `weight <scope> <1..10000>` on
+  `/run/insaneos/cgroup.sock` — to raise the focused scope and put the previous one back at 100.
+  Plain CFS weights: no real-time, nothing starves; the background keeps its share whenever the
+  foreground sleeps. A wallpaper player enters its scope at 50 (`CG_WALLPAPER_CPU_WEIGHT`), so its
+  decode loses to any app between the adaptive cap's steps. Not eligible: the compositor's own
+  leaf, Xwayland's (its windows' processes live elsewhere), helpers, anything outside the session
+  subtree — without insane-sessiond the whole feature quietly does nothing.
 
 ```
 insaneos.service
