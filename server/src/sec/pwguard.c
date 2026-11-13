@@ -527,7 +527,7 @@ static void arm(void) {
     struct dirent *e;
     while (d && (e = readdir(d)) && !armed) {
         char path[512], app[FW_APP_MAX];
-        if (strncmp(e->d_name, "app-insaneos-", 11)) continue;
+        if (strncmp(e->d_name, "app-insaneos-", 13)) continue;
         snprintf(path, sizeof path, "/system.slice/insaneos.service/insaneos-session-%u/%s", (unsigned)getuid(), e->d_name);
         if (appid_of_cgroup(path, app, sizeof app)) continue;
         armed = restrict_blocks(app, FW_R_NO_MIC) || restrict_blocks(app, FW_R_NO_CAMERA);

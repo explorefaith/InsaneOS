@@ -170,9 +170,10 @@ static int scope_of(int pid, char *kind, char *id, size_t n) {
             const char *leaf = strrchr(line, '/');
             leaf = leaf ? leaf + 1 : line + 3;
             size_t l = strlen(leaf);
-            if (l > 17 && !strncmp(leaf, "app-insaneos-", 11) && !strcmp(leaf + l - 6, ".scope") && l - 17 < sizeof buf) {
-                const char *b = leaf + 11;
-                size_t bl = l - 17;
+            /* "app-insaneos-<id>.scope" / "app-insaneos-lpk-<id>.scope" (sec/cgroup.h) */
+            if (l > 13 + 6 && !strncmp(leaf, "app-insaneos-", 13) && !strcmp(leaf + l - 6, ".scope") && l - 13 - 6 < sizeof buf) {
+                const char *b = leaf + 13;
+                size_t bl = l - 13 - 6;
                 if (bl > 4 && !strncmp(b, "lpk-", 4)) { k = 'l'; b += 4; bl -= 4; } else k = 'd';
                 memcpy(buf, b, bl);
                 buf[bl] = 0;

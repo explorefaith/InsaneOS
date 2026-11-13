@@ -94,7 +94,7 @@ static int write_at(int dirfd, const char *leaf, const char *val) {
 int cgroup_scope_name_ok(const char *name) {
     size_t n = name ? strlen(name) : 0;
     if (n < 8 || n > 90 || strcmp(name + n - 6, ".scope")) return 0;
-    if (strncmp(name, "app-insaneos-", 11) && (strncmp(name, "insaneos-", 7) || !strncmp(name, "insaneos-session-", 15))) return 0;
+    if (strncmp(name, "app-insaneos-", 13) && (strncmp(name, "insaneos-", 9) || !strncmp(name, "insaneos-session-", 17))) return 0;
     for (const char *p = name; *p; p++)
         if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '-' || *p == '.' || *p == '_' || *p == '@')) return 0;
     return !strstr(name, "..");

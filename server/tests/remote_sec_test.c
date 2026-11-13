@@ -80,7 +80,7 @@ static void test_small(void) {
     CHECK(!rs_valid_host("") && !rs_valid_host("a b") && !rs_valid_host("a:0") && !rs_valid_host("a:65536") && !rs_valid_host("[zz]"));
     CHECK(!rs_valid_host("a..b") && !rs_valid_host("-a") && !rs_valid_host("a:5673x") && !rs_valid_host("a/b"));
     CHECK(rs_same_origin("https://10.0.0.5:5673", "10.0.0.5:5673"));
-    CHECK(rs_same_origin("https://Insane OS.local:5673", "insaneos.local:5673"));
+    CHECK(rs_same_origin("https://InsaneOS.local:5673", "insaneos.local:5673"));   /* case-folding: the host is "insaneos.local" */
     CHECK(!rs_same_origin("http://10.0.0.5:5673", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://evil.example", "10.0.0.5:5673"));
     CHECK(!rs_same_origin("https://10.0.0.5:5673.evil", "10.0.0.5:5673"));

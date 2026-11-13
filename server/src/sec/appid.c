@@ -19,7 +19,7 @@ int appid_of_cgroup(const char *path, char *out, size_t n) {
     p = end + 1;
     char scope[FW_APP_MAX + 32];
     size_t l = strcspn(p, "/\n");
-    if (l < 18 || l >= sizeof scope || strncmp(p, "app-insaneos-", 11) || strncmp(p + l - 6, ".scope", 6)) return -1;
+    if (l < 13 + 7 || l >= sizeof scope || strncmp(p, "app-insaneos-", 13) || strncmp(p + l - 6, ".scope", 6)) return -1;
     memcpy(scope, p, l);
     scope[l] = 0;
     return fw_app_canon(scope, out, n);

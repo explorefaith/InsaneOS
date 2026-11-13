@@ -79,12 +79,14 @@ int fw_component_ok(const char *name) {
 }
 
 int fw_component_scope(const char *scope, char *app, size_t n) {
+    static const char pre[] = "insaneos-net-";      /* sec/cgroup.h; measured, so a rename can't desync */
+    const size_t pl = sizeof pre - 1;
     size_t l = scope ? strlen(scope) : 0;
-    if (l <= 17 || strncmp(scope, "insaneos-net-", 11) || strcmp(scope + l - 6, ".scope")) return -1;
+    if (l <= pl + 6 || strncmp(scope, pre, pl) || strcmp(scope + l - 6, ".scope")) return -1;
     char comp[32];
-    size_t cl = l - 11 - 6;
+    size_t cl = l - pl - 6;
     if (cl >= sizeof comp) return -1;
-    memcpy(comp, scope + 11, cl);
+    memcpy(comp, scope + pl, cl);
     comp[cl] = 0;
     if (!fw_component_ok(comp)) return -1;
     int w = snprintf(app, n, "insaneos:%s", comp);
@@ -110,14 +112,15 @@ int fw_vm_scope(const char *scope, char *id, size_t n) {
 }
 
 int fw_scope_app(const char *scope, char *app, size_t n) {
+    static const char net_pre[] = "insaneos-net-", app_pre[] = "app-insaneos-";
     size_t l = scope ? strnlen(scope, FW_APP_MAX) : 0;
     if (!l || l >= FW_APP_MAX || !app || !n) return -1;
-    if (!strncmp(scope, "insaneos-net-", 11)) return fw_component_scope(scope, app, n);
+    if (!strncmp(scope, net_pre, sizeof net_pre - 1)) return fw_component_scope(scope, app, n);
     if (!fw_vm_scope(scope, NULL, 0)) {
         int w = snprintf(app, n, "insaneos:machines");
         return w < 0 || (size_t)w >= n ? -1 : 0;
     }
-    if (l < 18 || strncmp(scope, "app-insaneos-", 11) || strcmp(scope + l - 6, ".scope")) return -1;
+    if (l < sizeof app_pre - 1 + 7 || strncmp(scope, app_pre, sizeof app_pre - 1) || strcmp(scope + l - 6, ".scope")) return -1;
     /* the machines' prefix is reserved: a scope under it that isn't a machine's is no app */
     if (!strncmp(scope, FW_VM_SCOPE_PREFIX, sizeof FW_VM_SCOPE_PREFIX - 1)) return -1;
     return fw_app_canon(scope, app, n);
@@ -130,11 +133,14 @@ int fw_app_canon(const char *in, char *out, size_t n) {
     char buf[FW_APP_MAX];
     const char *pre = NULL, *mid = in;
     size_t mlen = len;
-    /* cgroup scopes (sec/cgroup.h): the .lpk one first, since it's the longest */
-    if (ends_with(in, len, ".scope") && !strncmp(in, "app-insaneos-lpk-", 15) && len > 15 + 6) {
-        pre = "lpk:"; mid = in + 15; mlen = len - 15 - 6;
-    } else if (ends_with(in, len, ".scope") && !strncmp(in, "app-insaneos-", 11) && len > 11 + 6) {
-        pre = "desktop:"; mid = in + 11; mlen = len - 11 - 6;
+    /* cgroup scopes (sec/cgroup.h): the .lpk one first, since it's the longest;
+     * the prefixes are measured, so a rename can't desynchronize them again */
+    static const char lpk_pre[] = "app-insaneos-lpk-", app_pre[] = "app-insaneos-";
+    const size_t lpk_pl = sizeof lpk_pre - 1, app_pl = sizeof app_pre - 1;
+    if (ends_with(in, len, ".scope") && !strncmp(in, lpk_pre, lpk_pl) && len > lpk_pl + 6) {
+        pre = "lpk:"; mid = in + lpk_pl; mlen = len - lpk_pl - 6;
+    } else if (ends_with(in, len, ".scope") && !strncmp(in, app_pre, app_pl) && len > app_pl + 6) {
+        pre = "desktop:"; mid = in + app_pl; mlen = len - app_pl - 6;
     }
     if (pre) {
         for (size_t i = 0; i < mlen; i++) if (!id_char((unsigned char)mid[i]) || mid[i] == ':') return -1;
