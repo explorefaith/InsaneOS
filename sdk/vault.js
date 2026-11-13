@@ -244,7 +244,7 @@ export function AutofillButton({ app, service, account = '', url, ssid, host, on
     h(View, { ref: btn, onClick: () => { setOpen(!open); if (!open) load(); }, style: { width: 30, height: 30, borderRadius: 7, alignItems: 'center', justifyContent: 'center',
       backgroundColor: th.control } }, h(Text, { style: { fontSize: 14 } }, '🔑')),
     open ? h(Overlay, { anchor: btn, onClose: () => setOpen(false) }, h(View, { style: { position: 'absolute', top: 34, right: 0, width: 260, padding: 4, borderRadius: 9, backgroundColor: th.windowBg,
-      border: `1px solid ${th.separator}`, boxShadow: '0 10px 28px rgba(0,0,0,0.4)' } },
+      border: `1px solid ${th.separator}`, boxShadow: th.shadowPopup } },
       h(Text, { style: { fontSize: 11, fontWeight: 600, color: th.textDim, padding: 6 } }, t('passwords.autofill.title')),
       items == null ? null : !items.length ? h(Text, { style: { fontSize: 12, color: th.textDim, padding: 6 } }, t('passwords.autofill.none'))
         : items.map((it, i) => h(View, { key: i, onClick: () => pick(it), style: { padding: 6, borderRadius: 6 } },

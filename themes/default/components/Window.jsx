@@ -153,7 +153,7 @@ export function Window({ win, app, t, focused, fx }) {
     const wmenu = win.windowMenu;
     return (
       <WindowShell win={win} leaving={!!fx} onMouseDown={() => wm.focus(win.id)}
-        style={[{ ...(app.ownFrame ? { borderRadius: win.maximized ? 0 : 12, overflow: 'hidden' } : null), boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.5)' : '0 10px 28px rgba(0,0,0,0.3)', ...fxs }, enterStyle, closeStyle]}>
+        style={[{ ...(app.ownFrame ? { borderRadius: win.maximized ? 0 : 12, overflow: 'hidden' } : null), boxShadow: focused ? t.shadowWindow : t.shadowWindowDim, ...fxs }, enterStyle, closeStyle]}>
         <AppHost id={win.id} focused={focused} />
         {!win.fullscreen ? <CsdLights win={win} t={t} focused={focused} lights={lights} /> : null}
         {wmenu && (
@@ -175,7 +175,7 @@ export function Window({ win, app, t, focused, fx }) {
       backdropFilter: glass.on ? `blur(${glass.blur}px) saturate(${glass.sat})` : undefined,
       // a transparent app (the Terminal) has nothing behind its border: the border is drawn opaque
       border: `1px solid ${app.transparent ? solidOver(t.windowBorder, t.titleBg) : t.windowBorder}`,
-      boxShadow: focused ? '0 24px 56px rgba(0,0,0,0.55)' : '0 10px 28px rgba(0,0,0,0.32)',
+      boxShadow: focused ? t.shadowWindow : t.shadowWindowDim,
       ...fxs,
     }, enterStyle, closeStyle]}>
       <View onMouseDown={(e) => { if (!wm.beginMove(win.id)) drag.current = { x0: e.x, y0: e.y, rel: geo.w ? (e.x - geo.x) / geo.w : 0.5, moving: false }; }}

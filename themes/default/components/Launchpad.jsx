@@ -1,9 +1,11 @@
-// App launcher ("Apps"): all apps in full screen, with keyboard search.
+// App launcher ("Apps"): all apps in full screen, with keyboard search (arrow keys move the
+// selection through the grid, Enter opens it, Esc closes) and Spotlight's scorer for the matches
+// (sdk/spotlight.js), so typing "term" puts Terminal first, not merely first found.
 // An app is pinned to the Dock by dragging it onto the Dock (the launcher steps aside as soon as the
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -16,32 +18,49 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   A.current = area;
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState(null);                      // null: all
+  const [sel, setSel] = useState(0);                         // the grid's roving selection
+  const glass = !!t.effects;
   const q = query.trim().toLowerCase();
-  const match = (a) => [appName(a), a.name, a.id, a.genericName, a.keywords, a.comment].some((v) => v && String(v).toLowerCase().includes(q));
+  const scoreOf = (a) => Math.max(0,
+    scoreText(appName(a), q),
+    ...[a.name, a.genericName, a.comment].map((v) => scoreText(v || '', q, false) * 0.7),
+    ...((Array.isArray(a.keywords) ? a.keywords : [a.keywords]).filter(Boolean).map((v) => scoreText(String(v), q, false) * 0.6)));
   const present = APP_CATEGORIES.filter((c) => apps.some((a) => appCategory(a) === c));
-  const list = apps.filter((a) => (!q || match(a)) && (q || !cat || appCategory(a) === cat));
+  const list = q ? apps.map((a) => [scoreOf(a), a]).filter(([s]) => s > 0).sort((x, y) => y[0] - x[0]).map(([, a]) => a)
+    : apps.filter((a) => !cat || appCategory(a) === cat);
+  useEffect(() => { setSel(0); }, [query, cat]);
   const rows = [];
   for (let i = 0; i < list.length; i += COLS) rows.push(list.slice(i, i + COLS));
   const open = (id) => { onClose(); onOpen(id); };
+  // the arrows and Enter belong to the grid while the launcher is open (the search field keeps the
+  // letters; the caret sliding along a one-line field costs nothing)
+  useEffect(() => addListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { setSel((n) => Math.min(list.length - 1, n + 1)); e.stopPropagation?.(); }
+    else if (e.key === 'ArrowLeft') { setSel((n) => Math.max(0, n - 1)); e.stopPropagation?.(); }
+    else if (e.key === 'ArrowDown') { setSel((n) => Math.min(list.length - 1, n + COLS)); e.stopPropagation?.(); }
+    else if (e.key === 'ArrowUp') { setSel((n) => Math.max(0, n - COLS)); e.stopPropagation?.(); }
+    else if (e.key === 'Enter' && list[sel]) { open(list[sel].id); e.stopPropagation?.(); }
+  }), [list, sel]);
   useStore(settings);                                         // «Keep in Dock» changes immediately
   const [ctx, setCtx] = useState(null);                       // { app, x, y }
+  const fg = glass ? '#fff' : t.text;
 
   return (
     <View onClick={onClose} style={{
       position: 'absolute', left: area.x, top: area.y, width: area.w, height: area.h, alignItems: 'center',
-      backgroundColor: t.effects ? 'rgba(10,10,16,0.35)' : 'rgba(18,18,24,0.94)', backdropFilter: t.effects ? `blur(32px) saturate(${t.glassSaturate || 1.2})` : undefined,
+      backgroundColor: glass ? t.scrim : t.scrimPanel, backdropFilter: glass ? `blur(32px) saturate(${t.glassSaturate || 1.2})` : undefined,
     }}>
       <View onClick={(e) => e.stopPropagation()} style={{ marginTop: 48, width: 260 }}>
         <TextInput value={query} onChange={setQuery} placeholder={tr('shell.launchpad.search')} autoFocus
-          onSubmit={() => list[0] && open(list[0].id)} onCancel={onClose}
-          style={{ backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)' }} />
+          onSubmit={() => list[sel] && open(list[sel].id)} onCancel={onClose}
+          style={{ backgroundColor: glass ? 'rgba(255,255,255,0.14)' : t.inputBg, border: `1px solid ${glass ? 'rgba(255,255,255,0.22)' : t.separator}` }} />
       </View>
       {!q && (
         <View onClick={(e) => e.stopPropagation()} style={{ marginTop: 22, flexDirection: 'row', gap: 6 }}>
           {[null, ...present].map((c) => (
             <View key={c || 'all'} onClick={() => setCat(c)} style={{ paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14,
-              backgroundColor: c === cat ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.1)' }}>
-              <Text style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{c ? tr(`shell.category.${c}`) : tr('shell.category.all')}</Text>
+              backgroundColor: c === cat ? (glass ? 'rgba(255,255,255,0.32)' : t.accentSubtle) : (glass ? 'rgba(255,255,255,0.1)' : t.hover) }}>
+              <Text style={{ fontSize: 12, fontWeight: 600, color: fg }}>{c ? tr(`shell.category.${c}`) : tr('shell.category.all')}</Text>
             </View>
           ))}
         </View>
@@ -50,18 +69,23 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
       <View style={{ gap: 26, paddingVertical: 16 }}>
         {rows.map((row, r) => (
           <View key={r} style={{ flexDirection: 'row' }}>
-            {row.map((a) => (
-              <View key={a.id} onClick={(e) => { e.stopPropagation(); if (!dockDragJustEnded()) open(a.id); }}
-                onMouseDown={(e) => { if (!e.button && dockIdOf(a)) beginDockDrag({ id: dockIdOf(a), Icon: a.Icon, x: e.x, y: e.y, source: 'launcher', onStart: onClose }); }}
-                onContextMenu={(e) => { e.stopPropagation(); setCtx({ app: a, x: e.x, y: e.y }); }}
-                style={{ width: CELL, alignItems: 'center', gap: 10 }}>
-                <a.Icon size={ICON} />
-                <Text style={{ fontSize: 13, fontWeight: 500, color: '#fff', whiteSpace: 'nowrap', maxWidth: CELL - 10, overflow: 'hidden' }}>{appName(a)}</Text>
-              </View>
-            ))}
+            {row.map((a, c) => {
+              const i = r * COLS + c;
+              return (
+                <View key={a.id} onClick={(e) => { e.stopPropagation(); if (!dockDragJustEnded()) open(a.id); }}
+                  onMouseDown={(e) => { if (!e.button && dockIdOf(a)) beginDockDrag({ id: dockIdOf(a), Icon: a.Icon, x: e.x, y: e.y, source: 'launcher', onStart: onClose }); }}
+                  onContextMenu={(e) => { e.stopPropagation(); setCtx({ app: a, x: e.x, y: e.y }); }}
+                  style={{ width: CELL, alignItems: 'center', gap: 10 }}>
+                  <View style={{ borderRadius: 20, padding: 2, border: `2px solid ${i === sel ? t.accent : 'transparent'}` }}>
+                    <a.Icon size={ICON} />
+                  </View>
+                  <Text style={{ fontSize: 13, fontWeight: 500, color: fg, whiteSpace: 'nowrap', maxWidth: CELL - 10, overflow: 'hidden' }}>{appName(a)}</Text>
+                </View>
+              );
+            })}
           </View>
         ))}
-        {list.length === 0 && <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>{tr('shell.launchpad.empty')}</Text>}
+        {list.length === 0 && <Text style={{ fontSize: 14, color: glass ? 'rgba(255,255,255,0.7)' : t.textDim, textAlign: 'center' }}>{tr('shell.launchpad.empty')}</Text>}
       </View>
       </ScrollView>
       {ctx && (

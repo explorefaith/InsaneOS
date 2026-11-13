@@ -14,7 +14,8 @@
 import { createElement as h, useEffect, useState } from 'react';
 import { View, Text } from '@insaneos/runtime';
 import { createStore, useStore } from './store.js';
-import { useTheme } from './theme.js';
+import { useTheme, deriveTokens } from './theme.js';
+import { useTween, reducedMotionNow, DUR, easeOutBack } from './animation.js';
 import { direction, formatTime, appName } from './i18n.js';
 import { getApp, workArea } from './windows.js';
 import { sound } from './sound.js';
@@ -120,11 +121,15 @@ function Banner({ n, th }) {
   const [hover, setHover] = useState(false);
   const app = n.app ? getApp(n.app) : null;
   const first = n.actions[0];
+  // the entrance: a slide from its edge and a fade (the panels' motion language, DUR.banner);
+  // Reduce Motion lands it in place with no movement
+  const en = useTween(1, { from: 0, dur: DUR.banner, ease: easeOutBack, reduce: reducedMotionNow() });
+  const off = Math.round((1 - en) * (placement === 'bottom' ? 18 : -18));
   return h(View, {
     onMouseEnter: () => setHover(true), onMouseLeave: () => setHover(false),
     onClick: () => (first ? runAction(n, first) : dismissNotification(n.id)),
     style: { width: 340, padding: 12, gap: 8, borderRadius: 14, backgroundColor: th.windowBg, border: `1px solid ${th.separator}`,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.4)' },
+      boxShadow: th.shadowPanel || '0 10px 30px rgba(0,0,0,0.4)', opacity: en, transform: [{ translateY: off }] },
   },
   h(View, { style: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' } },
     app?.Icon ? h(app.Icon, { size: 34 }) : n.Icon ? h(n.Icon, { size: 34 }) : h(View, { style: { width: 34, height: 34, borderRadius: 8, backgroundColor: th.accent } }),
@@ -150,8 +155,11 @@ export function NotificationBanner() {
   const list = useNotifications();
   // drawn outside the theme's provider: follow the user's light/dark setting
   const base = useTheme(), mode = useStore(settings, (x) => x.mode);
-  const th = mode === 'light' ? { ...base, mode: 'light', windowBg: '#f6f6f8', text: '#1d1d1f', textDim: 'rgba(60,60,67,0.62)',
-    separator: 'rgba(0,0,0,0.12)', control: '#e2e2e7' } : base;
+  // the banners mount outside the theme's provider: the light palette comes from the tokens
+  // themselves (deriveTokens), not from a hand-written one next to them
+  const light = { ...base, mode: 'light', windowBg: '#f6f6f8', text: '#1d1d1f', textDim: 'rgba(60,60,67,0.62)',
+    separator: 'rgba(0,0,0,0.12)', control: '#e2e2e7' };
+  const th = mode === 'light' ? { ...light, ...deriveTokens(light) } : base;
   const [, force] = useState(0);
   useEffect(() => { if (list.length) force((x) => x + 1); }, [list.length]);
   if (!list.length) return null;

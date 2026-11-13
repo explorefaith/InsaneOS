@@ -199,7 +199,7 @@ function Card({ c, th, active, all, wallpaper, over, canRemove, lifted }) {
     onMouseEnter: () => cardHover.set(c.id), onMouseLeave: () => cardHover.set((v) => (v === c.id ? null : v)),
     style: { position: 'absolute', left: c.x, top: c.y, width: c.w, height: c.h + 24, alignItems: 'center', opacity: lifted ? 0.9 : 1 } },
   h(View, { style: { width: c.w, height: c.h, borderRadius: 8, overflow: 'hidden', backgroundColor: th.windowBg,
-    border: `2px solid ${over || lifted ? th.accent : active ? '#ffffff' : 'rgba(255,255,255,0.25)'}`, boxShadow: lifted ? '0 10px 28px rgba(0,0,0,0.45)' : 'none' } },
+    border: `2px solid ${over || lifted ? th.accent : active ? '#ffffff' : 'rgba(255,255,255,0.25)'}`, boxShadow: lifted ? th.shadowWindowDim : 'none' } },
   wallpaper ? h(Image, { src: wallpaper, style: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, objectFit: 'cover' } }) : null,
   mine.map((w) => {
     const r = wm.frame(w), Icon = windowIcon(w, getApp);
@@ -284,7 +284,7 @@ function Ghost({ th }) {
   if (!w) return null;
   const Icon = windowIcon(w, getApp);
   return h(View, { style: { position: 'absolute', left: d.x + 10, top: d.y + 10, maxWidth: 260, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 10, height: 34,
-    borderRadius: 8, pointerEvents: 'none', backgroundColor: th.windowBg, border: `1px solid ${th.separator}`, boxShadow: '0 10px 28px rgba(0,0,0,0.4)' } },
+    borderRadius: 8, pointerEvents: 'none', backgroundColor: th.windowBg, border: `1px solid ${th.separator}`, boxShadow: th.shadowWindowDim } },
   Icon ? h(Icon, { size: 18 }) : null,
   h(Text, { style: { fontSize: 12, color: th.text, whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, windowTitle(w)));
 }

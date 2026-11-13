@@ -103,7 +103,7 @@ export { WindowShell, WINDOW_EDGE } from './windowshell.jsx';
 export { term } from './terminal.js';
 export { clipboard, clipboardHistory, clipboardPanel, clipboardKind, toast } from './clipboard.js';
 export { restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers } from './sessionrestore.jsx';
-export { spotlight, spotlightOpen, calc as spotlightCalc, convert as spotlightConvert } from './spotlight.js';
+export { spotlight, spotlightOpen, calc as spotlightCalc, convert as spotlightConvert, score as scoreText } from './spotlight.js';
 export { registerSpotlightSource, searchEverything } from './spotlight.js';
 // session notifications, menu bar status items, Clock (alarms) and Help (docs/SYSTEM.md)
 export { notify, dismissNotification, useNotifications, notifications, notifyHistory, clearNotifyHistory, NotificationBanner, setBannerPlacement } from './notify.js';
@@ -124,7 +124,8 @@ export const windowIcon = (w) => windowIconOf(w, getAppOf);
 export { systemInfo, systemReport, insaneosVersion, useSystemInfo, useServerStats, useCpuUsage, formatBytes, formatDuration } from './system.js';
 export * as fs from './fs.js';
 export { useDirectory } from './fs.js';
-export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver } from './theme.js';
+export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver, shadeHex, alphaHex, deriveTokens } from './theme.js';
+export { useTween, reducedMotionNow, easeOutBack } from './animation.js';
 export {
   Button, Toggle, Segmented, SidebarItem, SectionTitle, ScrollView, TextInput, FormFields, hasTextFocus, takeTextFocus, releaseTextFocus, textFocusOwner, Stepper, Slider,
   AppHost, useAppWindow, useKeyboard, focusToken, restoreFocus, pasteIntoFocused, FloatingWindows, useWindowState,

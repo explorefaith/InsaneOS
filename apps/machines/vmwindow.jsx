@@ -180,6 +180,7 @@ function FloatingBar({ ctl, name }) {
       {near ? (
         <View onMouseLeave={() => setNear(false)} style={{ marginTop: 10, height: 46, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 14, paddingRight: 8,
           borderRadius: 14, backgroundColor: 'rgba(28,28,33,0.94)', boxShadow: '0 10px 28px rgba(0,0,0,0.45)' }}>
+          {/* Machines' own overlay chrome, drawn over the guest's screen in either mode */}
           <StateDot tone={v.tone} size={9} />
           <Text style={{ marginLeft: 6, marginRight: 10, fontSize: 13, fontWeight: 700, color: '#f2f2f5' }}>{name}</Text>
           <Tools ctl={ctl} floating />

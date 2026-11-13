@@ -10,6 +10,7 @@ import { textDirection, direction } from './i18n.js';
 import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitThumb, barShown, barOpacity, hideTime, barWidth } from './scrollbar.js';
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
+import { useTween, DUR } from './animation.js';
 import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
@@ -19,14 +20,18 @@ import { Layer } from './layers.js';
 export function Button({ label, onClick, primary, style, small, plain, disabled, destructive, icon }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
+  const [down, setDown] = useState(false);
   const fg = primary ? '#fff' : destructive ? '#ff453a' : t.text;
-  const bg = primary ? t.accent : plain ? (hover && !disabled ? t.hover : 'transparent') : t.control;
+  // pressed: the accent darkens (accentPress) and the button settles 2 %, everywhere the same
+  const bg = primary ? (down && !disabled ? t.accentPress : t.accent) : plain ? (hover && !disabled ? t.hover : 'transparent') : t.control;
   const border = t.buttonBorder && !plain ? { border: `1px solid ${primary ? t.accent : t.separator}` } : null;
   return (
-    <View onClick={disabled ? undefined : onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+    <View onClick={disabled ? undefined : onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => { setHover(false); setDown(false); }}
+      onMouseDown={() => setDown(true)} onMouseUp={() => setDown(false)}
       style={[{ height: small ? 22 : 28, paddingHorizontal: small ? 10 : 14, borderRadius: small ? t.controlRadiusSmall : t.controlRadius, flexDirection: 'row', gap: 6,
         justifyContent: 'center', alignItems: 'center', backgroundColor: bg, ...border,
-        opacity: disabled ? 0.4 : hover && !plain ? 0.85 : 1 }, style]}>
+        opacity: disabled ? 0.4 : hover && !plain ? 0.85 : 1,
+        transform: down && !disabled ? [{ scale: 0.98 }] : 'none' }, style]}>
       {icon ? <Text style={{ fontSize: small ? 12 : 14, color: fg }}>{icon}</Text> : null}
       {label != null && label !== '' ? <Text style={{ fontSize: small ? 12 : 13, fontWeight: 500, color: fg, whiteSpace: 'nowrap' }}>{label}</Text> : null}
     </View>
@@ -38,10 +43,11 @@ export function Button({ label, onClick, primary, style, small, plain, disabled,
 export function Toggle({ on, onChange, small }) {
   const t = useTheme();
   const w = small ? 36 : 42, h = small ? 20 : 24, k = h - 4;
+  const p = useTween(on ? 1 : 0, { dur: DUR.toggle });       // the knob travels; the track's colour follows the state
   return (
     <View onClick={() => onChange(!on)} style={{ width: w, height: h, borderRadius: h / 2, direction: 'ltr',
       backgroundColor: on ? t.accent : t.control }}>
-      <View style={{ position: 'absolute', top: 2, left: on ? w - k - 2 : 2, width: k, height: k, borderRadius: k / 2,
+      <View style={{ position: 'absolute', top: 2, left: 2 + p * (w - k - 4), width: k, height: k, borderRadius: k / 2,
         backgroundColor: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.35)' }} />
     </View>
   );
@@ -502,6 +508,9 @@ export function Slider({ value, onChange, min = 0, max = 1, width = 160 }) {
   const drag = useRef(false);
   const latest = useRef(onChange);
   latest.current = onChange;
+  const val = useRef(value);
+  val.current = value;
+  const [hover, setHover] = useState(false);
   const at = (x) => {
     const [lx, , w] = insane.getLayout(ref.current.id);
     const f = Math.max(0, Math.min(1, (x - lx) / w));
@@ -512,9 +521,22 @@ export function Slider({ value, onChange, min = 0, max = 1, width = 160 }) {
     const b = addListener('pointerup', () => { drag.current = false; });
     return () => { a(); b(); };
   }, []);
+  // the arrows move a hovered slider by a twentieth of its range, unless a text field has the
+  // keyboard (its caret comes first)
+  useEffect(() => {
+    if (!hover) return undefined;
+    const onKey = (e) => {
+      if (hasTextFocus()) return;
+      const inc = (max - min) / 20;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { latest.current(Math.min(max, val.current + inc)); e.stopPropagation?.(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { latest.current(Math.max(min, val.current - inc)); e.stopPropagation?.(); }
+    };
+    return addListener('keydown', onKey);
+  }, [hover, min, max]);
   const f = (value - min) / (max - min || 1);
   return (
-    <View ref={ref} onMouseDown={(e) => { drag.current = true; at(e.x); }} style={{ width, height: 20, justifyContent: 'center', direction: 'ltr' }}>
+    <View ref={ref} onMouseDown={(e) => { drag.current = true; at(e.x); }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{ width, height: 20, justifyContent: 'center', direction: 'ltr' }}>
       <View style={{ height: 4, borderRadius: 2, backgroundColor: t.control }}>
         <View style={{ width: Math.max(0, f * width), height: 4, borderRadius: 2, backgroundColor: t.accent }} />
       </View>

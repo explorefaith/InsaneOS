@@ -217,7 +217,7 @@ export function DesktopHud() {
   return h(Layer, { name: 'tooltip' },
     h(View, { style: { position: 'absolute', left: d.x, top: d.y + Math.round(d.h * 0.14), width: d.w, alignItems: 'center', pointerEvents: 'none' } },
       h(View, { style: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center', borderRadius: (th.groupRadius ?? 10) + 4,
-        backgroundColor: th.mode === 'dark' ? 'rgba(30,30,34,0.92)' : 'rgba(245,245,247,0.94)', border: `1px solid ${th.separator}`, boxShadow: '0 10px 28px rgba(0,0,0,0.35)' } },
+        backgroundColor: th.scrimPanel, border: `1px solid ${th.separator}`, boxShadow: th.shadowWindowDim } },
       h(Text, { style: { fontSize: 13, fontWeight: 600, color: th.text, whiteSpace: 'nowrap' } }, desktopName(active)),
       h(View, { style: { flexDirection: 'row', gap: 6 } }, list.map((id) => h(View, { key: id,
         style: { width: 18, height: 6, borderRadius: 3, backgroundColor: id === active ? th.accent : th.separator } }))))));

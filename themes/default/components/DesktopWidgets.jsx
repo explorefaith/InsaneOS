@@ -8,12 +8,9 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, useSettings, createStore } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, t as tr, tOptional } from '@insaneos/sdk';
 import { View, Text } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
-
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const INK = '#1d1d1f';
 const INK_DIM = 'rgba(29,29,31,0.55)';
 const INK_FAINT = 'rgba(29,29,31,0.38)';
@@ -116,7 +113,7 @@ function ClockCard({ widget }) {
       <Text style={{ fontSize: 52, fontWeight: 800, color: INK, letterSpacing: -1.2, lineHeight: 1.05 }}>
         {hh}:{mm}</Text>
       <Text style={{ fontSize: 15, fontWeight: 600, color: INK_DIM, marginTop: 2 }}>
-        {WEEKDAYS[d.getDay()]}, {d.getDate()} {MONTHS[d.getMonth()]}</Text>
+        {weekdayName(d.getDay(), false)}, {d.getDate()} {monthName(d.getMonth())}</Text>
       <View style={{ marginTop: 10, height: 2, width: 34, borderRadius: 1, backgroundColor: ink, opacity: 0.8 }} />
     </Card>
   );
@@ -149,7 +146,7 @@ function StatsCard({ widget }) {
   return (
     <Card widget={widget} style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>SYSTEM</Text>
+        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('shell.widgets.system') || 'SYSTEM').toUpperCase()}</Text>
         <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ink, opacity: 0.85 }} />
       </View>
       <Row label="CPU" value={`${Math.round((s.cpu || 0) * 100)}%`} pct={s.cpu || 0} ink={ink} />

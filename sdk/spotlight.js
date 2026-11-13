@@ -64,7 +64,7 @@ function usageBoost(key) {
 // ---- matching: prefix > word > substring > fuzzy ----
 
 const fold = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-function score(text, q, fuzzy = true) {
+export function score(text, q, fuzzy = true) {
   const a = fold(text);
   if (!a || !q) return 0;
   if (a === q) return 100;
