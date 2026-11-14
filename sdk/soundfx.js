@@ -37,7 +37,8 @@ export function watchWindowFx() {
   if (watched) return;
   watched = true;
   const prev = new Map();
-  windows.subscribe((ws) => {
+  windows.subscribe(() => {
+    const ws = windows.get();                            // subscribers get no argument (store.js)
     const fx = soundFxPrefs();
     if (!fx.minimize) { for (const w of ws) prev.set(w.id, !!w.minimized); return; }
     for (const w of ws) {

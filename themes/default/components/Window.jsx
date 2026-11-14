@@ -96,16 +96,18 @@ function glassPrefs(s) {
 export function Window({ win, app, t, focused, fx }) {
   const drag = useRef(null);
   const [hover, setHover] = useState(false);
+  const [s] = useSettings();
+  // the traffic lights (Settings → Appearance → Window Controls): shown, at which end of the
+  // title bar, and whether the × − + symbols wait for a hover or are always there.
+  // Before the tween below reads it — declared after its use, every window frame threw
+  // "lights is not initialized" at render (round 4 regression, dead sessions hid it).
+  const lights = { on: !s || s.windowLights !== false, side: s?.windowLightsSide === 'right' ? 'right' : 'left',
+    glyphs: s?.windowLightsGlyphs === 'always' ? 'always' : 'hover' };
   const glyphP = useTween((hover || lights?.glyphs === 'always') ? 1 : 0, { dur: DUR.hover });
   const geo = wm.frame(win);
   const fxs = fxStyle(fx, geo);
   // opening fade: the window rises a little and fades in, unless motion is reduced —
   // a JS ramp because the engine has no style transitions (the minimize effect works the same way)
-  const [s] = useSettings();
-  // the traffic lights (Settings → Appearance → Window Controls): shown, at which end of the
-  // title bar, and whether the × − + symbols wait for a hover or are always there
-  const lights = { on: !s || s.windowLights !== false, side: s?.windowLightsSide === 'right' ? 'right' : 'left',
-    glyphs: s?.windowLightsGlyphs === 'always' ? 'always' : 'hover' };
   const [enter, setEnter] = useState(() => (s?.reduceMotion ? 1 : 0));
   // the close animation: the window fades and shrinks a little (wm.close keeps it for DUR.close)
   const [closeP, setCloseP] = useState(0);

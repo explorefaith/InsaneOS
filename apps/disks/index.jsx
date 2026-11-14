@@ -9,7 +9,7 @@
 // for an administrator.
 import {
   needsDiskFormats, openDiskFormats, View, Text, ScrollView, useTheme, useLocale, useSystemInfo, useAppWindow, admin, useDisks, disks, formatBytes,
-  Toolbar as Bar, ToolbarButton, ToolbarSpacer, MenuButton, Hairline, GroupBox, FormRow, EmptyState, spacing, typeScale,
+  Toolbar as Bar, ToolbarButton, ToolbarSpacer, MenuButton, Hairline, GroupBox, FormRow, EmptyState, spacing, typeScale, Button,
 } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DisksIcon, DriveGlyph, PartGlyph, fsColor } from './icons.jsx';

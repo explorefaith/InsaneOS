@@ -42,6 +42,7 @@ function OptimizeTile({ t }) {
 // Power mode (macOS's Low Power Mode): performance / balanced / power-saver through
 // power-profiles-daemon (insane.power, sdk/hardware.jsx). Hidden when ppd isn't there.
 function PowerTile({ t }) {
+  const [, set] = useSettings();                         // Power Mode writes settings.renderQuality
   const profiles = usePowerProfiles();
   const list = profiles?.profiles?.length ? profiles.profiles : null;
   const active = profiles?.activeProfile || null;

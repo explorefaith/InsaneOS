@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef } from 'react';
@@ -183,7 +183,7 @@ function StatsCard({ widget }) {
 // desktop → Edit Widgets) cards drag, every card has a remove button, and the gallery adds new
 // ones. A drag does not fight the compositor: the pointer moves arrive already coalesced once per
 // frame, and each move ends in one store write.
-loadWidgets(s ? s.desktopWidgets : null);
+loadWidgets(settings.get().desktopWidgets);   // widgetmodel validates the list; nothing saved yet → the defaults below
 
 function useWorkArea() {
   return { x: 0, y: 30, w: insane.screen.width, h: insane.screen.height - 30 - 96 };   // bar + dock strip
@@ -270,8 +270,9 @@ function MediaCard({ widget }) {
 const saveTimer = useRef2(null);
 function useRef2(v) { return { current: v }; }
 
-widgetLayout.subscribe((list) => {
-  if (!list) return;                                       // not loaded yet
+widgetLayout.subscribe(() => {
+  const list = widgetLayout.get();                       // subscribers get no argument (store.js)
+  if (!list) return;                                     // not loaded yet
   clearTimeout(saveTimer.current);
   saveTimer.current = setTimeout(() => settings.set({ desktopWidgets: list }), 400);
 });

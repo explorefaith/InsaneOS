@@ -25,6 +25,17 @@ export function Icon({ size: s }) {
   );
 }
 
+// small inline note under a store entry; tone 'warn' for the not-installable notice.
+// (There is no shared Note in the SDK — this one was referenced without an import and took the
+// Store's details page down with it.)
+function Note({ tone, children }) {
+  const t = useTheme();
+  return (
+    <Text style={{ fontSize: 12, lineHeight: 1.4, textAlign: 'start',
+      color: tone === 'warn' ? '#d29922' : t.textDim }}>{children}</Text>
+  );
+}
+
 const CATS = [
   ['all', 'All'], ['internet', 'Internet'], ['multimedia', 'Multimedia'], ['graphics', 'Graphics'],
   ['productivity', 'Productivity'], ['development', 'Development'], ['system', 'System'], ['games', 'Games'],

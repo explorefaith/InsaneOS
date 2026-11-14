@@ -5,7 +5,7 @@
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded, scoreText, useTween } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
