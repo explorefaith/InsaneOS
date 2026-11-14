@@ -1239,22 +1239,15 @@ img {
 
 /* ---------------- download extras ---------------- */
 
-.dl-steps {
-  margin: 0 0 8px;
-  padding-left: 22px;
-  display: grid;
-  gap: 10px;
-  color: var(--ink-soft);
-  max-width: 52ch;
-}
-
-.dl-steps li::marker {
-  color: var(--accent-deep);
-  font-weight: 600;
-}
-
 .dl-title-gap {
   margin-top: 34px;
+}
+
+.dl-build-note {
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  max-width: 52ch;
+  margin-bottom: 14px;
 }
 
 .dl-docs-link {

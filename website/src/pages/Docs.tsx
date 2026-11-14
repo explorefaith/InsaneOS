@@ -161,7 +161,13 @@ export default function Docs() {
               <em> beside </em> your current desktop instead of replacing it.
               Nothing is deleted: your existing session, settings and files
               stay intact, and your data is copied — never moved — to the names
-              the new session reads. From a checkout of the repository:
+              the new session reads. The quickest way is the packages from the{' '}
+              <a href="https://github.com/explorefaith/InsaneOS/releases/tag/v0.8.8.6-beta" target="_blank" rel="noreferrer">
+                current release
+              </a>
+              : download the three .deb files and install them together. From a
+              checkout of the repository, the installer script does the same
+              from source:
             </p>
             <Term>{`$ git clone https://github.com/explorefaith/InsaneOS.git
 $ cd InsaneOS
