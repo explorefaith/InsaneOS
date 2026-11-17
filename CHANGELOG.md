@@ -16,12 +16,22 @@ of the matching [GitHub release](https://github.com/insaneos/Insane OS/releases)
 
 ### Added
 
-- **The island desktop: a menu bar that floats, and a shell that wears the wallpaper.** The menu bar is now a centred floating pill
-  (`settings.barStyle`, `island` by default; the classic full strip is Settings → Desktop & Dock → Menu Bar → Shape). The accent
-  follows the wallpaper by default (`accent: 'auto'`): the compositor reads the picture you set — through the new `media.accentFrom`
-  engine-cache API, no second decode — and the bar, panels and controls retint to match it, tone-mapped per light/dark; six hand-made
-  presets and the Auto chip sit in the Control Center and Settings → Appearance, and an older binary that can't sample falls back to
-  the violet gracefully (docs/design/transformation-plan.md).
+- **The island desktop: the menu bar is gone, and a shell that wears the wallpaper.** The top bar is
+  removed entirely (windows use the full height; there is nothing left to auto-hide when an app opens).
+  In its place a floating glass island lives on the left edge: the open apps stacked one under another —
+  clicking one opens the golden panel under the icon with that app's windows (a row brings it forward,
+  × closes it) — and under them exactly what was asked for: the battery percentage, a one-click
+  screenshot, the time in 24-hour format, the notifications bell and the control button. No logo, no OS
+  name, no menus, no junk. The control button opens Android-style quick settings: the Wi-Fi status
+  (opens Settings), Bluetooth with a real switch, Night Light, Do Not Disturb, dark mode, the volume
+  slider and the brightness slider (committed once per drag through the display-brightness helper, not
+  once per pixel). The accent follows the wallpaper by default (`accent: 'auto'`): the compositor reads
+  the picture you set — through the new `media.accentFrom` engine-cache API, no second decode — and the
+  strip, panels and controls retint to match it, tone-mapped per light/dark; six hand-made presets and
+  the Auto chip sit in Settings → Appearance, and an older binary that can't sample falls back to the
+  violet gracefully (docs/design/transformation-plan.md). Also fixed here: Settings crashed on open
+  since the columns commit (`Columns` called `.find` on `useWindows()`'s object — the crash the first
+  live session caught, and the reason the lab now opens the app it touches).
 
 - **A real audio visualizer, and real weather.** The desktop's new Visualizer widget (and the gallery) draws what the machine is
   actually playing: `snd_spectrum` captures the default sink's monitor only while a card is mounted, a 1024-point FFT in `sound/snd.c`

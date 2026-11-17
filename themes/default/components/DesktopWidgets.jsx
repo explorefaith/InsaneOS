@@ -186,7 +186,7 @@ function StatsCard({ widget }) {
 loadWidgets(settings.get().desktopWidgets);   // widgetmodel validates the list; nothing saved yet → the defaults below
 
 function useWorkArea() {
-  return { x: 0, y: 30, w: insane.screen.width, h: insane.screen.height - 30 - 96 };   // bar + dock strip
+  return { x: 0, y: 0, w: insane.screen.width, h: insane.screen.height - 96 };   // the dock strip (the top bar is gone)
 }
 
 // place them on the main display, right side under the menu bar (behind every window)

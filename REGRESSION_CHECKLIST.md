@@ -31,10 +31,16 @@ the live desktop. Every fix commit states which lines were re-run and what passe
       label unless Settings → Keyboard turns it on.
 - [ ] Control-center menus open and close; nothing hides while a menu is open (once C lands).
 
-### Island bar and Auto accent (the desktop transformation)
-- [ ] Island mode (default): the bar is a centred pill on every display; the classic strip comes back
-      with Settings → Desktop & Dock → Menu Bar → Shape → Full. Menus, Control Center, notifications
-      and the clock panel open and anchor exactly as before in both shapes.
+### Island strip and Auto accent (the desktop transformation)
+- [ ] The top menu bar is gone (windows use the full height); the island strip floats on the left
+      edge: open apps stacked with a running dot each, battery %, one-click screenshot, 24-hour clock,
+      the bell and the control button — and nothing else (no logo, no OS name, no menus).
+- [ ] Clicking an open app's icon opens the golden panel under the icon with that app's windows;
+      a row brings the window forward, × closes it; a click outside closes the panel.
+- [ ] The control button opens the Android-style quick settings: Wi-Fi status (opens Settings),
+      Bluetooth with a real switch, Night Light, Do Not Disturb, dark mode, the volume slider and
+      the brightness slider (one display-brightness action per drag, not one per pixel).
+- [ ] The bell opens notifications and the calendar; the unread dot clears when it opens.
 - [ ] Auto accent: change the wallpaper (a still one and a live one) and the bar, panels and toggles
       retint; the Auto chip in Control Center shows the sampled colour; presets still apply; light
       mode keeps text legible (accent tone-mapped, violet fallback on an older server).

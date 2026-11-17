@@ -58,3 +58,12 @@ Plan: `docs/design/transformation-plan.md`
   manual section. `website && npm run build` clean (tsc + vite).
 - **Deliberately untouched**: themes/greeter and the lock screen beyond verification
   (login-critical; the mission's own rule), classic theme beyond the shared app bundles.
+- **Round 2 (the user's own brief, after the first live deploy)**: the live session caught two
+  things — Settings crashed on open (pre-existing: `Columns` treated `useWindows()`'s object as an
+  array; the lab now opens the app it touches) and the user asked for the bar's redesign: the top
+  bar is gone entirely (windows take the full height; "auto-hide" satisfied by removal), and the
+  left island strip carries exactly the brief's items — open-app icons with golden window panels,
+  battery %, one-click screenshot, 24-hour clock, bell, control button, Android-style quick
+  settings (Wi-Fi status, Bluetooth/Night Light/DND/dark toggles, volume, commit-on-release
+  brightness). No logo, no OS name, nothing else. Lab: 0 errors; both themes build under the
+  i18n gate.

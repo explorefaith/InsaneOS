@@ -212,8 +212,8 @@ export function PaneGlyph({ id, size = 14, color = '#fff' }) {
 // and the page paddings come out of it before the content is measured.
 export function Columns({ children, min = 1080 }) {
   const win = useAppWindow();
-  const ws = useWindows();
-  const w = (ws.find((x) => x.id === win?.id) || {}).w || 0;
+  const ws = useWindows();                 // { windows, visible, mounted, focused, desktop }
+  const w = (ws.windows.find((x) => x.id === win?.id) || {}).w || 0;
   const kids = (Array.isArray(children) ? children.flat() : [children]).filter((c) => c != null && c !== false);
   if (!w || w < min || kids.length < 2) return <View style={{ gap: 20 }}>{kids}</View>;
   const half = Math.ceil(kids.length / 2);

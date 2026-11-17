@@ -98,13 +98,6 @@ function MenuBarSection({ classic }) {
   );
   return (
     <Section title={tr(classic ? 'settings.dock.menubar.titleTaskbar' : 'settings.dock.menubar.title')} footer={tr('settings.dock.menubar.footer')}>
-      {/* the bar's shape (Insane Flow only): the floating island pill or the classic full strip */}
-      {!classic ? (
-        <SettingRow label={tr('settings.dock.menubar.style')} hint={tr('settings.dock.menubar.styleHint')}>
-          <Segmented small options={[['island', tr('settings.dock.menubar.styleIsland')], ['full', tr('settings.dock.menubar.styleFull')]]}
-            value={s.barStyle === 'full' ? 'full' : 'island'} onChange={(v) => set({ barStyle: v })} />
-        </SettingRow>
-      ) : null}
       {/* a full bar on each display: Insane Flow's menu bar, Insane Classic's taskbar (the same setting) */}
       {row('everyDisplay', menuBarEveryDisplay(s), true, classic ? 'everyDisplayTaskbar' : 'everyDisplay')}
       {getApp('cleaner') ? row('cleaner', cleanerItemShown(s), true) : null}
