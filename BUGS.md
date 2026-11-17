@@ -114,7 +114,18 @@ open; fullscreen apps handled. (After A is stable.)
 
 **Status**: not started. Waiting on the dock/top-bar architecture notes (docs/ARCHITECTURE_NOTES.md).
 
-## D. No way to uninstall installed apps — FIXED (launcher), needs manual verification
+## D. No way to uninstall installed apps — FIXED; the first deploy carried a REGRESSION, now fixed
+
+**The regression (caught on the live desktop 2026-11-18 01:16, fixed same night)**: the uninstall
+sheet's state (`uninst`) was declared BELOW the keyboard effect whose deps array names it — a deps
+array is evaluated at call time, so every Launchpad render raised the temporal-dead-zone
+ReferenceError (`M is not initialized` in the minified bundle), React unmounted the root, and
+**opening the launcher or an app killed the shell with a black screen**. My lab verification had
+never mounted the Launchpad, so it missed exactly this. Fix: the states are declared before the
+effect (Launchpad.jsx), and the lab now mounts the launcher at boot (`benchLaunchpad` flag,
+verified clean: 106 frames, zero errors) — the mount is part of the check from now on. Lesson
+recorded: a UI change's verification must mount every component it touched, not just the flows it
+intended to test.
 
 **Requirement**: uninstall in the launcher context menu and/or Settings, integrated with the
 existing package system; confirmation dialog; protection for system-critical apps; visible error

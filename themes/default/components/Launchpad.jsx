@@ -34,6 +34,11 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   const rows = [];
   for (let i = 0; i < list.length; i += COLS) rows.push(list.slice(i, i + COLS));
   const open = (id) => { onClose(); onOpen(id); };
+  const [ctx, setCtx] = useState(null);                       // { app, x, y }
+  const [uninst, setUninst] = useState(null);                 // { app, busy, pct, done, error } — the uninstall sheet.
+  // Declared BEFORE the keyboard effect below: the effect's deps array names `uninst`, and a deps
+  // array is evaluated at call time — a declaration below it would put the binding in its temporal
+  // dead zone on every render (the launcher opened, the shell died with "M is not initialized").
   // the arrows and Enter belong to the grid while the launcher is open (the search field keeps the
   // letters; the caret sliding along a one-line field costs nothing) — and to nobody while the
   // uninstall sheet is up: Enter there would open the app the sheet is about
@@ -46,8 +51,6 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
     else if (e.key === 'Enter' && list[sel]) { open(list[sel].id); e.stopPropagation?.(); }
   }), [list, sel, uninst]);
   useStore(settings);                                         // «Keep in Dock» changes immediately
-  const [ctx, setCtx] = useState(null);                       // { app, x, y }
-  const [uninst, setUninst] = useState(null);                 // { app, busy, pct, done, error } — the uninstall sheet
   const fg = glass ? '#fff' : t.text;
   // The removal runs in the background (sdk/packages.js uninstallApp): a .lpk is gone at once, a
   // Linux app's package reports its progress lines. The trash sound is the delete feedback.
