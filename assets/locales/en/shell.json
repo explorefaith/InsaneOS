@@ -18,6 +18,7 @@
   "category.Utility": "Utilities",
   "category.all": "All",
   "cc.accent": "Accent Color",
+  "cc.accentAuto": "Auto · Wallpaper",
   "cc.cpuDetail": {
     "one": "{pct}% · {count} core",
     "other": "{pct}% · {count} cores"

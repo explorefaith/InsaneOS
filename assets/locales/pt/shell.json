@@ -18,6 +18,7 @@
   "category.Utility": "Utilitários",
   "category.all": "Todos",
   "cc.accent": "Cor de destaque",
+  "cc.accentAuto": "Auto · Plano de fundo",
   "cc.cpuDetail": {
     "one": "{pct}% · {count} núcleo",
     "other": "{pct}% · {count} núcleos"

@@ -18,6 +18,7 @@
   "category.Utility": "Utilidades",
   "category.all": "Todas",
   "cc.accent": "Color de acento",
+  "cc.accentAuto": "Auto · Fondo",
   "cc.cpuDetail": {
     "one": "{pct} % · {count} núcleo",
     "other": "{pct} % · {count} núcleos"

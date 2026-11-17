@@ -4,7 +4,10 @@ import { DEFAULT_WALLPAPER } from './wallpapers.js';
 
 const DEFAULTS = {
   mode: 'dark',          // 'dark' | 'light'
-  accent: 'azul',
+  accent: 'auto',        // 'auto' = follow the wallpaper (server/src/ui/js_media.c media.accent, tokens.js
+                         // tone-maps it per mode; falls back to the OS violet on an older server) or a named
+                         // preset of themes/<theme>/tokens.js
+  barStyle: 'island',    // the menu bar's shape: 'island' (floating centred pill, the reference look) | 'full'
   effects: true,         // transparency with blur
   glassBlur: 24,          // 0.8.8.8, Settings → Wallpaper → Glass: the panels' backdrop blur radius, 0-64 px
   glassTransparency: 0.3, // 0.8.8.8, same page: how much the wallpaper shows through, 0 (today's look) … 1 (almost clear)

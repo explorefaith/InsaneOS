@@ -36,6 +36,7 @@ import {
   PowerDialog,
   findWallpaper,
   wallpaperSrc,
+  wallpaperMedia,
   MotionWallpaper,
   Backdrop,
   useShortcuts,
@@ -73,7 +74,7 @@ import {
 } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState } from 'react';
-import { makeTheme } from './tokens.js';
+import { makeTheme, wallpaperAccent, hexFromRgb } from './tokens.js';
 import { MenuBars } from './components/MenuBar.jsx';
 import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
@@ -274,6 +275,28 @@ function App() {
   }), []);
 
   const wallpaper = findWallpaper(t.wallpapers, s.wallpaper);
+  // The Auto accent (settings.accent === 'auto'): the accent follows the wallpaper. Live wallpapers sample
+  // their playing frame (media.accent on the wallpaperMedia id); still wallpapers read the engine's decoded
+  // picture cache (media.accentFrom — the picture the Backdrop paints, so no second decode and no media
+  // job). The C side returns the dominant colour; the store write re-renders the shell and makeTheme
+  // tone-maps the hex per mode. An older server without these APIs (or a picture that never opens) leaves
+  // the store alone — makeTheme's violet fallback keeps the theme whole.
+  const wpLive = useStore(wallpaperMedia);
+  useStore(wallpaperAccent);
+  useEffect(() => {
+    if (s.accent !== 'auto') return undefined;
+    try {
+      const liveId = wallpaperMedia.get();
+      if (liveId) {
+        const a = insane.media.accent?.(liveId);
+        if (a) wallpaperAccent.set({ hex: hexFromRgb(a) });
+      } else if (wallpaper?.src) {
+        const a = insane.media.accentFrom?.(wallpaper.src);
+        if (a) wallpaperAccent.set({ hex: hexFromRgb(a) });
+      }
+    } catch { /* older server */ }
+    return undefined;
+  }, [s.accent, s.wallpaper, wpLive]);
   // Pinned and open apps; windows of the same app (Linux too) share a single icon. The app launcher
   // is a Dock item too (it moves, but can't be removed).
   const entries = useDockEntries(DOCK_DEFAULT, { recents: dp.dockRecents ? 3 : 0, launcher: { Icon: LaunchpadIcon, onOpen: () => setLaunchpad(true) } });

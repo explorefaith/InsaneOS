@@ -18,6 +18,7 @@
   "category.Utility": "Utilitaires",
   "category.all": "Toutes",
   "cc.accent": "Couleur d’accentuation",
+  "cc.accentAuto": "Auto · Fond d’écran",
   "cc.cpuDetail": {
     "one": "{pct} % · {count} cœur",
     "other": "{pct} % · {count} cœurs"

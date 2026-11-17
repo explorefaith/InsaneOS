@@ -5,9 +5,10 @@ import {
   View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
   usePowerProfiles, admin,
-  panelLeft, inBar, useTween,
+  panelLeft, inBar, useTween, useStore,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
+import { wallpaperAccent } from '../tokens.js';
 
 // Four wallpapers fit in the tile: the current one and a few from the collection (all of them are
 // in Settings → Wallpaper, which «Change Wallpaper…» opens).
@@ -181,6 +182,20 @@ function NetTile({ t, onClose, ifs }) {
 
 const inside = (inst, ref) => { for (let n = inst; n; n = n.parent) if (n === ref.current) return true; return false; };
 
+// The accent row as labelled pill chips (the reference's theme row): "Auto" first — the accent that
+// follows the wallpaper (server-side media.accent; the dot shows the sampled colour) — then the named
+// presets. Hidden entirely when the running server predates media.accent, so an old binary never
+// offers an accent that can't resolve.
+function AccentChip({ t, label, dot, active, onPick }) {
+  return (
+    <View onClick={onPick} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5,
+      borderRadius: 9, backgroundColor: active ? t.accent : t.hover, border: `1px solid ${active ? t.accent : t.separator}` }}>
+      <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: dot }} />
+      <Text style={{ fontSize: 11, fontWeight: 600, color: active ? '#fff' : t.text }}>{label}</Text>
+    </View>
+  );
+}
+
 // area: the display of the menu bar it opened from (global coordinates); at: the [x, width] of the bar item that
 // opened it, so it sits under that item, inside that display (sdk/menubarmodel.js panelLeft)
 export function ControlCenter({ t, top, onClose, area = null, at = null }) {
@@ -199,6 +214,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   // entrance: rises 6 px and fades in over the panel duration (useTween skips it under Reduce Motion);
   // the close stays instant — a panel that lingers after its click would feel slow
   const enter = useTween(1, { from: 0 });
+  const canAuto = typeof insane !== 'undefined' && typeof insane.media?.accent === 'function';
   // a click on this display's bar is its items' own (the button toggles the panel); anywhere else closes it, another
   // display's bar too (its button then opens the panel there)
   useEffect(() => addListener('pointerdown', (e) => {
@@ -207,7 +223,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
 
   return (
     <View ref={ref} style={{
-      position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 16,
+      position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 20,
       backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
       opacity: 0.4 + 0.6 * enter, transform: `translateY(${Math.round((1 - enter) * 6)}px)`,
@@ -235,10 +251,14 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       ) : null}
       <Tile t={t} style={{ gap: 10 }}>
         <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.accent')}</Text>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          {canAuto ? (
+            <AccentChip t={t} label={tr('shell.cc.accentAuto')} value="auto" active={s.accent === 'auto'}
+              dot={wallpaperAccent.get().hex || t.accents.violeta} onPick={() => set({ accent: 'auto' })} />
+          ) : null}
           {Object.entries(t.accents).map(([name, c]) => (
-            <View key={name} onClick={() => set({ accent: name })} style={{ width: 22, height: 22, borderRadius: 11,
-              backgroundColor: c, border: s.accent === name ? `2px solid ${t.text}` : '0 solid transparent' }} />
+            <AccentChip key={name} t={t} label={name[0].toUpperCase() + name.slice(1)} dot={c}
+              active={s.accent === name} onPick={() => set({ accent: name })} />
           ))}
         </View>
       </Tile>

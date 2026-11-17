@@ -18,6 +18,7 @@
   "category.Utility": "Priemonės",
   "category.all": "Visos",
   "cc.accent": "Akcento spalva",
+  "cc.accentAuto": "Auto · Fonas",
   "cc.cpuDetail": {
     "one": "{pct}% · {count} branduolys",
     "few": "{pct}% · {count} branduoliai",
