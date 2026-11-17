@@ -532,10 +532,10 @@ static JSValue f_accent(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
 static JSValue f_accent_from(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
     (void)t;
     const char *src = argc ? JS_ToCString(c, argv[0]) : NULL;
-    if (!src) return JS_NULL;
+    if (!src || strstr(src, "..")) { if (src) JS_FreeCString(c, src); return JS_NULL; }
     char path[2048];
     if (src[0] == '/') snprintf(path, sizeof path, "%s", src);
-    else if (!strncmp(src, "asset:", 6) && !strstr(src, "..")) snprintf(path, sizeof path, "%s/%s", js_sys_assets(), src + 6);
+    else if (!strncmp(src, "asset:", 6)) snprintf(path, sizeof path, "%s/%s", js_sys_assets(), src + 6);
     else snprintf(path, sizeof path, "%s/%s", ui.theme_dir, src);
     JS_FreeCString(c, src);
     Image *img = image_get(path);

@@ -92,6 +92,7 @@ static void disconnect(const char *why);
 static void upload_data(int which, uint32_t channel);
 static int play_sample_vol(int which, double vol);
 int snd_spectrum(int on);
+static int spec_start(void);
 
 /* ---- E/S ---- */
 
@@ -356,7 +357,7 @@ static void after_connected(void) {
     cmd_send(&t, tag, R_ACK, PA_CMD_SUBSCRIBE, 0);
     request_all();
     if (S.meter_source != PA_INVALID_INDEX) { uint32_t m = S.meter_source; S.meter_source = PA_INVALID_INDEX; snd_meter(m); }
-    if (S.spec_on) snd_spectrum(1);
+    if (S.spec_on) spec_start();            /* snd_spectrum(1) would see spec_on already set and return */
 }
 
 static const char *socket_path(char *buf, size_t cap) {
