@@ -5,7 +5,7 @@
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener, Button, errorText, playFx, canUninstall, uninstallApp } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener, Button, errorText, playFx, canUninstall, uninstallApp, Progress, Spinner } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -126,12 +126,11 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
             <Text style={{ fontSize: 12, color: glass ? 'rgba(255,255,255,0.8)' : t.textDim, lineHeight: 1.5, textAlign: 'start' }}>{tr('shell.launchpad.uninstallBody')}</Text>
             {uninst.busy ? (
               <View style={{ gap: 6 }}>
-                <Text style={{ fontSize: 12, color: fg, textAlign: 'start' }}>{tr('shell.launchpad.uninstalling')}</Text>
-                {uninst.pct != null ? (
-                  <View style={{ height: 4, borderRadius: 2, backgroundColor: glass ? 'rgba(255,255,255,0.2)' : t.hover, overflow: 'hidden' }}>
-                    <View style={{ width: `${uninst.pct}%`, height: '100%', backgroundColor: t.accent }} />
-                  </View>
-                ) : null}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 12, color: fg, textAlign: 'start' }}>{tr('shell.launchpad.uninstalling')}</Text>
+                  {uninst.pct == null ? <Spinner size={14} /> : null}
+                </View>
+                {uninst.pct != null ? <Progress pct={uninst.pct} width={324} /> : null}
               </View>
             ) : null}
             {uninst.error ? <Text style={{ fontSize: 12, color: '#ff453a', lineHeight: 1.45, textAlign: 'start' }}>{tr('shell.launchpad.uninstallFailed', { name: appName(uninst.app), error: errorText(uninst.error) })}</Text> : null}

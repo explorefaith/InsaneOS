@@ -242,17 +242,33 @@ labels on the live desktop — needs the manual look (REGRESSION_CHECKLIST, Sett
 **Remaining risk**: translations are mine; a native speaker may refine wording later (en wording
 matches the row's existing hint tone; the keys are correct in all five catalogs).
 
-## H. Sound and feedback — PARTLY DONE, IN PROGRESS
+## H. Sound and feedback — FIXED (spinner landed; the sound layer pre-existed)
 
-**Done** (commit `16e83572`): the sound-effects layer — synthesized samples (shutter, trash,
-plug/unplug, …), `insane.sound.play(name, vol)`, `sdk/soundfx.js` gating everything behind
-Settings → Sound → Sound Effects (master, volume, per-event, chatty opt-in); the shutter plays
-only after a capture actually saved or copied; the charger note rides the AC watcher;
-notifications and the startup chime honor their toggles.
+**Done earlier** (commit `16e83572`): the sound-effects layer — synthesized samples (shutter,
+trash, plug/unplug, …), `insane.sound.play(name, vol)` (the central C API the task asked for —
+`server/src/sound/snd.c`, non-blocking), `sdk/soundfx.js` gating everything behind Settings →
+Sound → Sound Effects (master, volume, per-event, chatty opt-in); the shutter plays only after a
+capture actually saved or copied; the charger note rides the AC watcher; notifications and the
+startup chime honor their toggles.
 
-**Remaining**: a shared spinner/progress component for any operation longer than ~300 ms
-(uninstall, wallpaper loading, …) and an audit of which small actions still lack sound or
-progress. No new audio backend, no new dependencies.
+**Added now**: the one shared progress pair in `sdk/components.jsx` —
+- `Progress({ pct, width })`: the determinate bar (rounded track, accent fill, clamped);
+- `Spinner({ size })`: the indeterminate three-dot indicator with one shared rAF loop (cancelled
+  on unmount; Reduce Motion holds it static).
+
+Consumers wired: the launcher's uninstall sheet (bar while the helper reports percent, dots while
+it cannot — bug D's flow), and the wallpaper URL download (bug F's percent under the row). Both
+previously hand-rolled bars or nothing.
+
+**Audit of remaining gaps**: the Store's package jobs keep their richer phase-aware job view (an
+app-local component on purpose — it names the phase); small actions shorter than ~300 ms stay
+instant by design (toggles, settings writes — debounced, no freeze). No event names were added to
+the C sound layer: uninstall plays the gated `trash` sample, which is the delete feedback the
+sample set already has.
+**Verification**: build-theme exit 0; visual pass rides bug D/F's manual steps (the sheet and the
+URL row show their indicators).
+**Remaining risk**: the Spinner re-renders once a frame while visible — one small node, off
+Reduce-Motion; acceptable, but if it ever sits in a hot window it should become a C-side sprite.
 
 ## I. Other small issues — LEDGER (FOUND, NOT FIXED)
 

@@ -10,7 +10,7 @@ import { textDirection, direction } from './i18n.js';
 import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitThumb, barShown, barOpacity, hideTime, barWidth } from './scrollbar.js';
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
-import { useTween, DUR } from './animation.js';
+import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow } from './animation.js';
 import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
@@ -686,4 +686,44 @@ export function useKeyboard(handler) {
     if (!active) return undefined;
     return addListener('keydown', (e) => { if (!hasTextFocus()) ref.current(e); });
   }, [active]);
+}
+
+// Progress — the one determinate bar: a rounded track and the accent filling it. Any operation that
+// reports how far it is (a package job's progress lines, a download's percent) shows this instead of
+// hand-rolling a bar. pct 0..100; values outside are clamped.
+export function Progress({ pct, width, height = 4, color }) {
+  const t = useTheme();
+  const p = Math.max(0, Math.min(100, pct == null ? 0 : Number(pct)));
+  return (
+    <View style={{ width, height, borderRadius: height / 2, overflow: 'hidden',
+      backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)' }}>
+      <View style={{ width: `${p}%`, height: '100%', backgroundColor: color || t.accent }} />
+    </View>
+  );
+}
+
+// Spinner — the one indeterminate indicator, for a wait nobody can put a number on (a probe, a
+// helper's answer): three dots rising and falling out of phase. One shared rAF loop while it is
+// mounted, cancelled on unmount; Reduce Motion holds the dots at mid-bright instead of animating.
+export function Spinner({ size = 18, color }) {
+  const t = useTheme();
+  const c = color || t.accent;
+  const [ph, setPh] = useState(0);
+  useEffect(() => {
+    if (reducedMotionNow()) return undefined;
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now) => { setPh(((now - t0) / 900) % 1); raf = nextFrame(tick); };
+    raf = nextFrame(tick);
+    return () => cancelFrame(raf);
+  }, []);
+  return (
+    <View style={{ flexDirection: 'row', gap: size * 0.22, alignItems: 'center', direction: 'ltr' }}>
+      {[0, 1, 2].map((i) => {
+        const p = (ph + i / 3) % 1;
+        return <View key={i} style={{ width: size * 0.26, height: size * 0.26, borderRadius: size * 0.13,
+          backgroundColor: c, opacity: reducedMotionNow() ? 0.7 : 0.3 + 0.7 * Math.abs(Math.sin(Math.PI * p)) }} />;
+      })}
+    </View>
+  );
 }

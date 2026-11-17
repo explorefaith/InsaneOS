@@ -11,7 +11,7 @@
 // blank the desktop. The Glass section stays at the bottom, as it was.
 import {
   View, Text, Image, MediaView, useTheme, useSettings, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle, TextInput,
-  media, useCodecs, useStore, errorText, fs, admin, GREETER_WALLPAPER, userWallpaperName, setLoginImage, setLoginStill, setLoginVideo,
+  media, useCodecs, useStore, errorText, fs, admin, GREETER_WALLPAPER, userWallpaperName, setLoginImage, setLoginStill, setLoginVideo, Progress,
   setLoginMotion, motionItems, MOTION_SECTIONS, motionThumb, motionPoster, motionDownloads, downloadMotion, removeMotion,
   variantFor, motionDisabled, retryMotion, motionBusy, userVideoProblem, heavyVideoWarning, FilePicker, addWallpaperImage,
   Layer, wm, useAppWindow,
@@ -401,6 +401,7 @@ export function WallpaperSettings() {
             <TextInput value={url} onChange={setUrl} placeholder="https://…" style={{ flex: 1, minWidth: 0 }} onSubmit={downloadUrl} />
             <Button small label={urlPct != null ? `${urlPct} %` : L('wallpaper.customLive.download', 'Download')} onClick={downloadUrl} disabled={urlPct != null} />
           </View>
+          {urlPct != null ? <Progress pct={urlPct} width={320} /> : null}
         </SettingRow>
       </Section>
       <GlassSection />
