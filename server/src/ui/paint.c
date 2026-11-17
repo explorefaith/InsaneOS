@@ -18,6 +18,12 @@
 int paint_profile;
 static double prof[6];
 static const char *const prof_name[6] = {"sombra", "blur", "fondo", "imagen", "texto", "borde"};
+/* The frame's backdrop blur total, always measured (two clock reads on a blur that costs
+ * thousands): the frame loop holds the blur to the frame budget with it (main.c, render_frame). */
+double paint_blur_ms;
+int paint_blur_n;
+/* The unprofiled callees a slow frame may have been waiting on (the slow-frame log, main.c). */
+double paint_media_ms, paint_wl_ms, paint_term_ms;
 static double clk(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t); return t.tv_sec * 1e3 + t.tv_nsec / 1e6; }
 #define PROF(i, call) do { double _t = paint_profile ? clk() : 0; call; if (paint_profile) prof[i] += clk() - _t; } while (0)
 
@@ -149,8 +155,13 @@ static void paint_node_body(Canvas *c, Node *n, float opacity) {
 
     if (own && s->backdrop_blur >= 1) {
         if (below_collect && !tf_nest) below_note_blur(x, y, w, h, (int)(s->backdrop_blur * k + 0.5f));
-        PROF(1, canvas_backdrop_blur(c, x, y, w, h, rad, (int)(s->backdrop_blur * k + 0.5f),
-                                     s->backdrop_saturate > 0 ? s->backdrop_saturate : 1));
+        double _bt = clk();                /* the governor's input (main.c, render_frame) */
+        canvas_backdrop_blur(c, x, y, w, h, rad, (int)(s->backdrop_blur * k + 0.5f),
+                             s->backdrop_saturate > 0 ? s->backdrop_saturate : 1);
+        _bt = clk() - _bt;
+        paint_blur_ms += _bt;
+        paint_blur_n++;
+        if (paint_profile) prof[1] += _bt;
     }
     if (own && s->bg >> 24) {
         if (corners_differ) PROF(2, canvas_rrect4(c, x, y, w, h, r4, with_opacity(s->bg, op)));
@@ -179,9 +190,9 @@ static void paint_node_body(Canvas *c, Node *n, float opacity) {
             canvas_corners_restore4(c, &ic, x, y, w, h, r4);
         } else PROF(3, image_draw(c, n->img, ix, iy, iw, ih, (s->radius - bw) * k, s->object_fit, op));
     }
-    if (n->type == NODE_TERM) term_paint(c, n->term, ix, iy, iw, ih, op);
-    if (n->type == NODE_SURFACE) wl_paint(c, n->term, n->id, lix, liy, liw, lih, op);
-    if (n->type == NODE_MEDIA) media_paint(c, n->term, n->id, ix, iy, iw, ih, (s->radius - bw) * k, op);
+    if (n->type == NODE_TERM) { double _tt = clk(); term_paint(c, n->term, ix, iy, iw, ih, op); paint_term_ms += clk() - _tt; }
+    if (n->type == NODE_SURFACE) { double _tw = clk(); wl_paint(c, n->term, n->id, lix, liy, liw, lih, op); paint_wl_ms += clk() - _tw; }
+    if (n->type == NODE_MEDIA) { double _tm = clk(); media_paint(c, n->term, n->id, ix, iy, iw, ih, (s->radius - bw) * k, op); paint_media_ms += clk() - _tm; }
     /* text is clipped to its box: a label outside the clip (a list row scrolled away) isn't laid out */
     if (n->type == NODE_TEXT && (s->color >> 24) && x < c->clip.x1 && x + w > c->clip.x0 && y < c->clip.y1 && y + h > c->clip.y0) {
         node_gather_text(n, text_buf, sizeof text_buf);

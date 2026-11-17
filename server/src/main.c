@@ -104,6 +104,9 @@
 #include <unistd.h>
 
 extern int paint_profile;
+extern double paint_blur_ms;            /* the window's backdrop blur total (ui/paint.c) */
+extern int paint_blur_n;
+extern double paint_media_ms, paint_wl_ms, paint_term_ms;   /* the slow-frame log's unprofiled callees */
 
 #define MAX_BUTTONS 16
 #define LOGOUT_CLOSE_MS 3000             /* how long the apps get to close at the end of a session */
@@ -1909,6 +1912,7 @@ static int prep_valid(const Out *o) {
 }
 
 static int par_on, par_light;           /* the paint threads (render_frame) */
+static int blur_adapt, blur_hot, blur_light;   /* the blur's governor (render_frame) */
 static int display_dark;                /* the last state media_display_power saw (DPMS) */
 
 /* The GPU stops: the dumb buffers go back on screen (cpu_takeover first, so no framebuffer it removes is still
@@ -2145,6 +2149,8 @@ static int render_frame(Server *s) {
     double t0 = now_ms();
     int prep_only = !s->headless && all_busy(s);
     ui.layout_ms = ui.paint_ms = 0;
+    paint_blur_ms = 0; paint_blur_n = 0;
+    paint_media_ms = paint_wl_ms = paint_term_ms = 0;
     ui.damage_px = 0;
     if (keylag_enabled) keylag_render();
     /* GPU path: a Linux app's new frame is only a texture (wl.c damage_node), not UI damage. Every
@@ -2266,6 +2272,45 @@ static int render_frame(Server *s) {
     else if (par_on) {
         par_light = ui.paint_ms < frame_ms * 0.25 && built < frame_ms * 0.45 ? par_light + 1 : 0;
         if (par_light >= 60) { par_on = 0; canvas_parallel(NULL); }
+    }
+    /* (0.8.8.8) And the backdrop blur under the same budget: when the blur itself takes more than
+     * a third of the frame's period in two frames in a row, its downsample rises a step (4, then
+     * 8) — the frame goes out on time instead of waiting on the blur — and after a run of frames
+     * where the blur costs almost nothing it steps back down, never under the floor the user's
+     * profile set (blur_shrink_min, the performance profiles' lever through insane.setBlurQuality).
+     * Only the blur's own time moves it: a frame made heavy by something else would only lose
+     * sharpness to it, and the blur would not save that frame anyway. The two thresholds are far
+     * apart on purpose (a frame at 30 % is neither): between them it holds, so the softness does
+     * not pump while the blur sits just under the budget. */
+    int bf = blur_shrink_min();
+    if (paint_blur_n && paint_blur_ms > frame_ms * 0.35) {
+        if (blur_adapt < 8 && ++blur_hot >= 2) { blur_adapt = blur_adapt ? 8 : 4; blur_hot = 0; }
+        blur_light = 0;
+    } else if (blur_adapt && (!paint_blur_n || paint_blur_ms < frame_ms * 0.15)) {
+        blur_hot = 0;
+        if (++blur_light >= 120) { blur_adapt = blur_adapt >= 8 ? 4 : 0; blur_light = 0; }
+    } else {
+        blur_hot = 0;
+        blur_light = 0;
+    }
+    int blur_eff = bf > blur_adapt ? bf : blur_adapt;
+    static int blur_eff_shown = -1;
+    if (paint_profile && blur_eff != blur_eff_shown) { fprintf(stderr, "blur-governor: shrink %d (floor %d)\n", blur_eff, bf); blur_eff_shown = blur_eff; }
+    canvas_blur_shrink(blur_eff);
+    /* A frame that took far too long says so (always on, at most one line every 2 s): the session
+     * log gets the breakdown — layout, paint (the blur's share and the governor's state) and what
+     * everything after the paint took (the GPU's upload, the video's contention, the flip) — so a
+     * report of "it lags" carries its own numbers. Under 30 ms nothing prints: a frame that made
+     * its period is nobody's business. */
+    if (!prep_only && built > 30) {
+        static double last_slow;
+        double now = now_ms();
+        if (now - last_slow > 2000) {
+            last_slow = now;
+            fprintf(stderr, "slow frame: %.1f ms (layout %.1f, paint %.1f, blur %.1f shrink %d, media %.1f, wayland %.1f, term %.1f, after the paint %.1f)%s\n",
+                    built, ui.layout_ms, ui.paint_ms, paint_blur_ms, blur_eff, paint_media_ms, paint_wl_ms, paint_term_ms,
+                    built - ui.layout_ms - ui.paint_ms, gpu_active() ? ", gpu" : "");
+        }
     }
     /* the Linux apps' frame callbacks go with a frame submitted, not with one only painted ahead */
     if (!prep_only) wl_frame_done((unsigned)now_ms());

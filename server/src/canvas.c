@@ -37,12 +37,16 @@ static inline void put(uint32_t *p, uint32_t argb, uint32_t a) {
 
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-/* The backdrop blur's minimum downsample (canvas_blur_shrink): 0 keeps each radius's own factor
- * (canvas.c picks 1, 2 or 4 by radius). The performance profiles raise it to trade a little
- * softness for memory bandwidth; read by the paint threads' banded copies, so it changes between
- * frames, never within one. */
-static int blur_shrink;
+/* The backdrop blur's downsample: 0 keeps each radius's own factor (canvas.c picks 1, 2 or 4 by
+ * radius). Two hands write it, and the effective one is the higher: the performance profiles set
+ * the floor (blur_shrink_floor, sdk/quality.js through insane.setBlurQuality), and the frame loop
+ * raises the effective value over it when the blur itself eats the frame budget and lowers it back
+ * step by step when frames are light again (main.c, render_frame). Read by the paint threads'
+ * banded copies, so it changes between frames, never within one. */
+static int blur_shrink, blur_floor;
 void canvas_blur_shrink(int f) { blur_shrink = f < 0 ? 0 : f > 16 ? 16 : f; }
+void blur_shrink_floor(int f) { blur_floor = f < 0 ? 0 : f > 16 ? 16 : f; }
+int blur_shrink_min(void) { return blur_floor; }
 
 /* ---- rows: portable C and, on ARM64 with NEON=1 (Makefile), NEON ----
  * Both versions give the same bit-exact result for valid premultiplied sources;
