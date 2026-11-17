@@ -2,45 +2,18 @@
 // permission with the apps that requested it and lets you revoke it. The Monitor adds its own section
 // through registerPrivacySection (see sdk/privacy.js); this page does not know about the Monitor.
 import { View, Text, useTheme, useLocale, Segmented, useStore, perms, permsRev, privacySections, useIndicators, share, shareRev, packages, appName, getApp, spacing, typeScale } from '@insaneos/sdk';
-import { Stack, Section, SettingRow, Badge, Note, StatusDot, tint } from './ui.jsx';
+import { Stack, Section, SettingRow, Badge, Note, StatusDot, tint, PaneGlyph } from './ui.jsx';
 
-// Small monochrome pictures for the permissions whose usual symbols are color emoji.
-function CameraGlyph() {
-  return (
-    <View style={{ width: 13, height: 10, alignItems: 'center', justifyContent: 'center' }}>
-      <View style={{ position: 'absolute', top: 0, width: 5, height: 3, borderRadius: 1, backgroundColor: '#fff' }} />
-      <View style={{ position: 'absolute', top: 2, width: 13, height: 8, borderRadius: 2, backgroundColor: '#fff' }} />
-      <View style={{ position: 'absolute', top: 4, width: 5, height: 5, borderRadius: 3, backgroundColor: '#30d158' }} />
-    </View>
-  );
-}
-function MicGlyph() {
-  return (
-    <View style={{ width: 10, height: 13, alignItems: 'center' }}>
-      <View style={{ width: 5, height: 8, borderRadius: 3, backgroundColor: '#fff' }} />
-      <View style={{ width: 2, height: 3, backgroundColor: '#fff' }} />
-      <View style={{ width: 7, height: 2, borderRadius: 1, backgroundColor: '#fff' }} />
-    </View>
-  );
-}
-function FolderGlyph() {
-  return (
-    <View style={{ width: 13, height: 10 }}>
-      <View style={{ position: 'absolute', left: 0, top: 0, width: 6, height: 3, borderRadius: 1, backgroundColor: '#fff' }} />
-      <View style={{ position: 'absolute', left: 0, top: 2, width: 13, height: 8, borderRadius: 2, backgroundColor: '#fff' }} />
-    </View>
-  );
-}
-
-// Permissions shown with their symbol (a glyph or a drawing) and color (the order is the page order).
+// Permissions shown with the shared PaneGlyph pictogram (ui.jsx) and color (the order is the page
+// order) — the same pictures the sidebar draws.
 const SHOWN = [
-  ['camera', CameraGlyph, '#30d158'], ['microphone', MicGlyph, '#ff9f0a'], ['screen', '▭', '#0a84ff'],
-  ['files', FolderGlyph, '#30b0c7'], ['network', '⇅', '#0a84ff'], ['clipboard', '⎘', '#5e5ce6'],
-  ['notifications', '◉', '#ff375f'], ['apps', '▦', '#8e8e93'], ['listen', '⇄', '#34c759'],
-  ['usb', '⇆', '#8e8e93'], ['bluetooth', 'ᛒ', '#0a84ff'], ['status-item', '◔', '#8e8e93'],
+  ['camera', 'camera', '#30d158'], ['microphone', 'mic', '#ff9f0a'], ['screen', 'display', '#0a84ff'],
+  ['files', 'folder', '#30b0c7'], ['network', 'globe', '#0a84ff'], ['clipboard', 'clipboard', '#5e5ce6'],
+  ['notifications', 'bell', '#ff375f'], ['apps', 'grid', '#8e8e93'], ['listen', 'share', '#34c759'],
+  ['usb', 'usb', '#8e8e93'], ['bluetooth', 'bt', '#0a84ff'], ['status-item', 'statusitem', '#8e8e93'],
 ];
 
-const PermBadge = ({ glyph: G, color }) => (typeof G === 'string' ? <Badge glyph={G} color={color} size={22} /> : <Badge color={color} size={22}><G /></Badge>);
+const PermBadge = ({ glyph, color }) => <Badge color={color} size={22}><PaneGlyph id={glyph} size={14} /></Badge>;
 
 // Apps that declared a permission (manifest) or already have a saved decision.
 function appsFor(perm, decisions) {
@@ -89,7 +62,7 @@ function ShareSection({ perm }) {
   const list = share.grants().filter((g) => g.perm === perm);
   if (!list.length) return null;
   return (
-    <Section icon={<PermBadge glyph="▣" color="#ff453a" />} title={tr(`privacy.perm.${perm}`)} footer={tr(`privacy.permHint.${perm}`)}>
+    <Section icon={<PermBadge glyph="display" color="#ff453a" />} title={tr(`privacy.perm.${perm}`)} footer={tr(`privacy.permHint.${perm}`)}>
       {list.map((g) => (
         <SettingRow key={g.id} label={g.id.replace(/^(desktop|lpk):/, '')} hint={g.exe}>
           <Segmented value={g.state} onChange={(v) => share.set(g.id, perm, v, g.exe)}

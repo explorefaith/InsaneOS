@@ -34,7 +34,7 @@ import { NotificationsSettings } from './Notifications.jsx';
 import { DateTimeSettings } from './DateTime.jsx';
 import { DefaultAppsSettings } from './DefaultApps.jsx';
 import { FirmwareSettings } from './Firmware.jsx';
-import { Stack, Section, SettingRow, ValueRow, Badge, Note, Message, Actions, PopUp, TimeField, shade } from './ui.jsx';
+import { Stack, Section, SettingRow, ValueRow, Badge, Note, Message, Actions, PopUp, TimeField, shade, PaneGlyph } from './ui.jsx';
 
 // Adds one token → phrase pair to settings.textReplace (the text-replacement map
 // sdk/components.jsx expands while typing).
@@ -640,62 +640,14 @@ function Session() {
 
 // ---- window ----
 
-// A padlock drawn with views (🔒 is a color emoji on the system fonts).
-function LockGlyph() {
-  return (
-    <View style={{ width: 12, height: 13, alignItems: 'center' }}>
-      <View style={{ width: 8, height: 9, borderRadius: 4, border: '2px solid #fff' }} />
-      <View style={{ position: 'absolute', top: 5, width: 12, height: 8, borderRadius: 2, backgroundColor: '#fff' }} />
-    </View>
-  );
-}
-
-// A lightning bolt: two offset bars joined by a short one (⚡ is a color emoji).
-function BoltGlyph() {
-  return (
-    <View style={{ width: 12, height: 14, direction: 'ltr' }}>
-      <View style={{ position: 'absolute', left: 5, top: 0, width: 4, height: 7, borderRadius: 1, backgroundColor: '#fff' }} />
-      <View style={{ position: 'absolute', left: 2, top: 5, width: 8, height: 3, borderRadius: 1, backgroundColor: '#fff' }} />
-      <View style={{ position: 'absolute', left: 3, top: 7, width: 4, height: 7, borderRadius: 1, backgroundColor: '#fff' }} />
-    </View>
-  );
-}
-
-// A fan: three rounded blades around a hub.
-function FanGlyph() {
-  return (
-    <View style={{ width: 14, height: 14, direction: 'ltr' }}>
-      {[0, 120, 240].map((r) => (
-        <View key={r} style={{ position: 'absolute', left: 0, top: 0, width: 14, height: 14, transform: `rotate(${r}deg)` }}>
-          <View style={{ position: 'absolute', left: 6, top: 0, width: 5, height: 7, borderTopRightRadius: 5, borderTopLeftRadius: 2, borderBottomRightRadius: 2, backgroundColor: '#fff' }} />
-        </View>
-      ))}
-      <View style={{ position: 'absolute', left: 5, top: 5, width: 4, height: 4, borderRadius: 2, backgroundColor: '#fff' }} />
-    </View>
-  );
-}
-
-// A chip: a square body with three pins on each side.
-function ChipGlyph() {
-  return (
-    <View style={{ width: 14, height: 14, direction: 'ltr' }}>
-      <View style={{ position: 'absolute', left: 3, top: 3, width: 8, height: 8, borderRadius: 1.5, backgroundColor: '#fff' }} />
-      {[4, 6.5, 9].map((y) => (
-        <View key={y}>
-          <View style={{ position: 'absolute', left: 0, top: y - 0.5, width: 3, height: 1.5, backgroundColor: '#fff' }} />
-          <View style={{ position: 'absolute', left: 11, top: y - 0.5, width: 3, height: 1.5, backgroundColor: '#fff' }} />
-        </View>
-      ))}
-    </View>
-  );
-}
-
-// Sidebar groups (as in TangoOS): [id, component, icon color, symbol (a glyph or a component)].
+// Sidebar groups (as in TangoOS): [id, component, icon color]. The pictogram itself comes from the
+// shared PaneGlyph set (ui.jsx) — one drawn, monochrome icon per section, the same one the pages
+// that need a picture use.
 const GROUPS = [
-  [['general', General, '#8e8e93', 'i'], ['appearance', Appearance, '#3a3a3c', '◐'], ['wallpaper', WallpaperSettings, '#30b0c7', '▣'], ['dock', DockSettings, '#3a3a3c', '▁'], ['displays', DisplaysSettings, '#0a84ff', '▭']],
-  [['network', NetworkSettings, '#0a84ff', '⇅'], ['bluetooth', BluetoothSettings, '#0a84ff', 'ᛒ'], ['sound', SoundSettings, '#ff375f', '♪'], ['notifications', NotificationsSettings, '#ff3b30', '◉'], ['printers', PrintersSettings, '#636366', '⎙'], ['clipboard', ClipboardSettings, '#5e5ce6', '⎘'], ['sharing', SharingSettings, '#34c759', '⇄'], ['cloud', CloudSettings, '#0a84ff', '☁']],
-  [['language', LanguageRegion, '#30b0c7', 'A'], ['datetime', DateTimeSettings, '#0a84ff', '◷'], ['keyboard', Keyboard, '#8e8e93', '⌨'], ['trackpad', TrackpadSettings, '#8e8e93', '▭'], ['defaultapps', DefaultAppsSettings, '#8e8e93', '◫'], ['ai', AISettings, '#bf5af2', '✦']],
-  [['power', PowerSettings, '#30d158', BoltGlyph], ['cooling', CoolingSettings, '#32ade6', FanGlyph], ['firmware', FirmwareSettings, '#5e5ce6', ChipGlyph], ['privacy', PrivacySettings, '#0a84ff', LockGlyph], ['users', UsersSettings, '#0a84ff', '☺'], ['updates', Updates, '#8e8e93', '↻'], ['session', Session, '#ff453a', '↪']],
+  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['dock', DockSettings, '#3a3a3c'], ['displays', DisplaysSettings, '#0a84ff']],
+  [['network', NetworkSettings, '#0a84ff'], ['bluetooth', BluetoothSettings, '#0a84ff'], ['sound', SoundSettings, '#ff375f'], ['notifications', NotificationsSettings, '#ff3b30'], ['printers', PrintersSettings, '#636366'], ['clipboard', ClipboardSettings, '#5e5ce6'], ['sharing', SharingSettings, '#34c759'], ['cloud', CloudSettings, '#0a84ff']],
+  [['language', LanguageRegion, '#30b0c7'], ['datetime', DateTimeSettings, '#0a84ff'], ['keyboard', Keyboard, '#8e8e93'], ['trackpad', TrackpadSettings, '#8e8e93'], ['defaultapps', DefaultAppsSettings, '#8e8e93'], ['ai', AISettings, '#bf5af2']],
+  [['power', PowerSettings, '#30d158'], ['cooling', CoolingSettings, '#32ade6'], ['firmware', FirmwareSettings, '#5e5ce6'], ['privacy', PrivacySettings, '#0a84ff'], ['users', UsersSettings, '#0a84ff'], ['updates', Updates, '#8e8e93'], ['session', Session, '#ff453a']],
 ];
 const SECTIONS = GROUPS.flat();
 // Board firmware
@@ -708,10 +660,8 @@ const sectionShown = (id, hasPad, pi5 = isPi5()) => id !== 'firmware' || pi5;
 registerDockActions('settings', () => SECTIONS.filter(([id]) => sectionShown(id, hasTouchpad()))
   .map(([id]) => ({ id, label: `settings.section.${id}`, args: { section: id } })));
 
-function SectionIcon({ color, glyph: G, size = 20 }) {
-  return typeof G === 'string'
-    ? <Badge glyph={G} color={color} size={size} />
-    : <Badge color={color} size={size}><G /></Badge>;
+function SectionIcon({ id, color, size = 20 }) {
+  return <Badge color={color} size={size}><PaneGlyph id={id} size={Math.round(size * 0.62)} /></Badge>;
 }
 
 // Session user: initials, name and whether they are an administrator.
@@ -781,9 +731,9 @@ export default function Settings() {
           <View style={{ paddingHorizontal: 10, paddingBottom: spacing.m }}>
             {groups.map((g, i) => (
               <View key={i} style={{ gap: 1, marginTop: i ? spacing.m : 0 }}>
-                {g.map(([id, , color, glyph]) => (
+                {g.map(([id, , color]) => (
                   <SidebarItem key={id} label={tr(`settings.section.${id}`)} selected={id === section} onClick={() => setSection(id)}
-                    icon={<SectionIcon color={color} glyph={glyph} />} />
+                    icon={<SectionIcon id={id} color={color} />} />
                 ))}
               </View>
             ))}
@@ -801,7 +751,7 @@ export default function Settings() {
         <ScrollView resetKey={section} style={{ flex: 1 }}>
           <View style={{ paddingHorizontal: spacing.xxl, paddingTop: spacing.xl, alignItems: 'center' }}>
             {/* Cloud's account page has two columns: it takes a wider column on wide windows */}
-            <View style={{ width: '100%', maxWidth: section === 'cloud' ? 980 : 680 }}>
+            <View style={{ width: '100%', maxWidth: section === 'cloud' ? 980 : 920 }}>
               <Body page={args?.page} />
             </View>
           </View>

@@ -137,19 +137,44 @@ Uninstall item; a running app's removal closes its windows.
 package could stall a frame or two); the Store keeps its own no-confirm remove buttons — left
 untouched (their behavior is pre-existing; a confirm there is a separate decision).
 
-## E. Settings layout and icons — OPEN
+## E. Settings layout and icons — FIXED (code), needs visual verification
 
 **Requirement**: content uses the window width responsively (no ~700 px dead column), multi-column
-cards where sensible, one consistent monochrome vector icon set for sidebar + in-page icons,
-consistent spacing on any resolution; fixed through the shared layout, not per-page hacks.
+cards where sensible, one consistent monochrome icon set for sidebar + in-page icons, consistent
+spacing on any resolution; fixed through the shared layout, not per-page hacks.
 
-**Root cause identified**: `apps/settings/index.jsx` renders every page inside
-`maxWidth: 680` (line ~804; a `980` exception already exists for Cloud). Shared primitives live in
-`apps/settings/ui.jsx` (Stack, Section, SettingRow, …). Sidebar icons are unicode glyphs in
-`Badge` (`index.jsx` GROUPS) — the "inconsistent, AI-looking" icons.
+**Root cause**: `apps/settings/index.jsx` rendered every page inside `maxWidth: 680` (one shared
+line — a `980` exception existed for Cloud), and the sidebar/in-page icons were unicode glyphs
+(`◐ ▣ ᛒ ♪ ◉ ⎙ ◔ ☺ …`) whose weight and size vary with the font, plus four ad-hoc drawn glyphs.
 
-**Status**: fix planned: raise the shared max-width, add a responsive two-column arrangement in
-`ui.jsx` for wide windows, one drawn monochrome icon component replacing the glyph soup.
+**What changed** (all through the shared layer, `apps/settings/ui.jsx` + `index.jsx`):
+1. The shared page column widened: `maxWidth` 680 → **920** (Cloud keeps its tuned 980). No
+   per-page width edits anywhere.
+2. `Columns` (new shared primitive in ui.jsx): when the Settings **window** is at least 1080 px
+   wide (maximized, big monitors), a page's sections flow in two balanced columns; under the
+   threshold they stack exactly as before. The window width comes from the windows store, so it
+   follows resizes. Used by General (machine + software cards side by side) and Sound (output +
+   input groups) as the first two consumers — other pages opt in with one wrap, no per-page hacks.
+3. `PaneGlyph` (new shared primitive in ui.jsx): one drawn, **monochrome** pictogram per section on
+   a single 20×20 grid — same 2-unit stroke weight, rounded caps, one color, tinted by the
+   sidebar's colored tile. 31 glyphs (all 27 sections + camera/mic/folder/usb/wifi/status-item for
+   the pages). The engine has no vector paths (node types: VIEW/TEXT/IMAGE/RAW/TERM/SURFACE/MEDIA),
+   so the icons are compositions of views — resolution-independent and theme-tintable, which PNG
+   assets would not be.
+4. Replaced everywhere: the sidebar (`SectionIcon` now draws by section id; GROUPS lost its glyph
+   column), Power's no-battery header, Network's per-device icons (wifi arcs / globe), Privacy's
+   twelve permission pictograms (its three ad-hoc drawn components are gone). DefaultApps' category
+   `LOOK` glyphs are the one remaining unicode set — ledgered below.
+
+**Verification**: `node tools/build-theme.mjs` exits 0 (bundles + i18n check green);
+`tests/switcher_model_test.mjs` + `tests/hwkeys_test.mjs` exit 0. **Visual pass needs the live
+desktop** (the lab renders headless with no viewer scripting for app windows): open Settings,
+check the sidebar on both themes, maximize the window (General and Sound should go two-column),
+resize below half-screen (they return to one column), and visit Privacy/Network/Power for the
+in-page icons.
+**Remaining risk**: drawn glyphs are hand-placed fractions — a glyph may need a nudge (they fall
+back to the grid icon if an id is missing, so nothing breaks); the 1080 px two-column threshold is
+a first value, tunable in one place (`Columns` `min` prop).
 
 ## F. Wallpaper page restructure — OPEN
 

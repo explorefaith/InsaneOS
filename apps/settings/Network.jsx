@@ -6,7 +6,7 @@ import {
   ToolbarButton, MenuButton, openUrl, FilePicker, Layer, useAppWindow, wm,
 } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
-import { Stack, Section, SettingRow, ValueRow, FieldRow, Badge, Note, Message, Actions, StatusDot, tint } from './ui.jsx';
+import { Stack, Section, SettingRow, ValueRow, FieldRow, Badge, Note, Message, Actions, StatusDot, tint, PaneGlyph } from './ui.jsx';
 import { pemBlock, PEM_CERT, PEM_KEY, formFromConfig, configLines, fingerprint } from './vpnform.js';
 
 // VPN interfaces (WireGuard, OpenVPN, IPsec, PPTP, OpenConnect, Fortinet): shown under VPN.
@@ -117,7 +117,7 @@ function InterfacePage({ name, net }) {
   return (
     <Stack>
       <Section>
-        <SettingRow minHeight={52} icon={<Badge glyph={i.type === 'wifi' ? '◠' : '⇅'} color={i.up ? '#0a84ff' : tint.off} size={32} />}
+        <SettingRow minHeight={52} icon={<Badge color={i.up ? '#0a84ff' : tint.off} size={32}><PaneGlyph id={i.type === 'wifi' ? 'wifi' : 'globe'} size={20} /></Badge>}
           label={name} labelStyle={{ fontWeight: 600 }} hint={`${typeLabel(i.type, tr)} · ${statusOf(i, tr)}`}>
           <StatusDot color={dotColor(i)} />
           {!sys && isAdmin && <Toggle small on={i.up} onChange={(on) => run(setMsg, on ? 'net-up' : 'net-down', name)} />}

@@ -4,7 +4,7 @@ import {
   microphones, defaultSource, spacing, typeScale,
 } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
-import { Stack, Section, SettingRow, Note, tint } from './ui.jsx';
+import { Stack, Section, SettingRow, Note, tint, Columns } from './ui.jsx';
 import { useSettings } from '@insaneos/sdk';
 import { soundFxPrefs } from '../../sdk/soundfx.js';
 import { balanceOf, volumesFor, snapBalance } from './balance.js';
@@ -127,26 +127,28 @@ export function SoundSettings() {
   const apps = st.inputs;
   return (
     <Stack>
-      <Section title={tr('settings.sound.output')}>
-        {st.sinks.length === 0 ? <SettingRow label={tr('settings.sound.noOutputs')} disabled /> : deviceRows('sink', st.sinks, t)}
-      </Section>
-      {out && (
-        <Section>
-          <SettingRow label={tr('settings.sound.volume')}><Volume kind="sink" item={out} /></SettingRow>
-          {out.volume && out.volume.length === 2 && <SettingRow label={tr('settings.sound.balance')}><Balance item={out} tr={tr} /></SettingRow>}
-          {out.ports.length > 1 && <SettingRow label={tr('settings.sound.port')}><Ports kind="sink" dev={out} /></SettingRow>}
-          <SettingRow label={tr('settings.sound.test')}><Button small label={tr('settings.sound.play')} onClick={() => sound.play('notify')} /></SettingRow>
+      <Columns>
+        <Section title={tr('settings.sound.output')}>
+          {st.sinks.length === 0 ? <SettingRow label={tr('settings.sound.noOutputs')} disabled /> : deviceRows('sink', st.sinks, t)}
         </Section>
-      )}
-      <Section title={tr('settings.sound.input')}>
-        {mics.length === 0 ? <SettingRow label={tr('settings.sound.noInputs')} disabled /> : deviceRows('source', mics, t)}
-      </Section>
-      {mic && (
-        <Section>
-          <SettingRow label={tr('settings.sound.volume')}><Volume kind="source" item={mic} /></SettingRow>
-          <SettingRow label={tr('settings.sound.level')}><Meter source={mic} /></SettingRow>
+        {out && (
+          <Section>
+            <SettingRow label={tr('settings.sound.volume')}><Volume kind="sink" item={out} /></SettingRow>
+            {out.volume && out.volume.length === 2 && <SettingRow label={tr('settings.sound.balance')}><Balance item={out} tr={tr} /></SettingRow>}
+            {out.ports.length > 1 && <SettingRow label={tr('settings.sound.port')}><Ports kind="sink" dev={out} /></SettingRow>}
+            <SettingRow label={tr('settings.sound.test')}><Button small label={tr('settings.sound.play')} onClick={() => sound.play('notify')} /></SettingRow>
+          </Section>
+        )}
+        <Section title={tr('settings.sound.input')}>
+          {mics.length === 0 ? <SettingRow label={tr('settings.sound.noInputs')} disabled /> : deviceRows('source', mics, t)}
         </Section>
-      )}
+        {mic && (
+          <Section>
+            <SettingRow label={tr('settings.sound.volume')}><Volume kind="source" item={mic} /></SettingRow>
+            <SettingRow label={tr('settings.sound.level')}><Meter source={mic} /></SettingRow>
+          </Section>
+        )}
+      </Columns>
       <SoundEffects />
       <Section title={tr('settings.sound.apps')}>
         {apps.length === 0 ? <SettingRow label={tr('settings.sound.noApps')} disabled /> : apps.map((a) => (
