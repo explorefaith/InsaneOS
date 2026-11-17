@@ -176,17 +176,41 @@ in-page icons.
 back to the grid icon if an id is missing, so nothing breaks); the 1080 px two-column threshold is
 a first value, tunable in one place (`Columns` `min` prop).
 
-## F. Wallpaper page restructure — OPEN
+## F. Wallpaper page restructure — FIXED (code), needs manual verification
 
-**Requirement** (top→bottom): category grids with full captions (ellipsis+tooltip allowed), then
-Live wallpaper, then "Custom wallpaper" (image file) and "Custom live wallpaper" (video file or
-URL). Keep the click-to-choose-destination dialog. Validate files, graceful bad-file handling,
-async video loading.
+**Requirement** (top→bottom): category grids with full captions, then Live wallpaper, then
+"Custom wallpaper" (image file) and "Custom live wallpaper" (video file or URL). Keep the
+click-to-choose-destination dialog. Validate files, graceful bad-file handling, async loading.
 
-**Current state** (`apps/settings/Wallpaper.jsx`): categories exist (nature/anime/cars) but
-captions are truncated with no tooltip (PicTile/LiveTile, `maxWidth: 168`); **no custom image
-picker at all**; custom video exists but is a small button inside the Live section; Glass section
-sits last. Restructure + the missing custom sections is the work.
+**What changed**:
+1. `apps/settings/Wallpaper.jsx` — page order is now exactly: category grids (nature/anime/cars,
+   unchanged apply dialog on click) → Live wallpaper → **Custom wallpaper** (new: "Choose an
+   image…" → FilePicker → the closed `wallpaper-image` action validates it and keeps the user's
+   copy → the same apply-login/desktop dialog) → **Custom live wallpaper** (new section: the
+   "Choose a video…" flow moved here from the Live section's small button, plus a **From a URL**
+   row with progress) → Glass. Tile captions no longer truncate — the full name wraps.
+2. `server/src/hw/wallpaper_admin.c` + `hw_admin.h` — new closed action **`wallpaper-url-get`**:
+   https only, no user-info part, no spaces/control characters, one file capped at 512 MiB
+   (`FetchItem.max`), stored under the hex of the URL's sha256 (the same URL is not fetched twice),
+   root-owned 0644 in the wallpaper store so desktop and login can both read it. It does not judge
+   the bytes: the shell probes them with the media helper and refuses what cannot play
+   (`userVideoProblem`), exactly like a picked file. Progress rides the action's PROGRESS lines
+   (the button shows the percent). `wallpaper.badUrl` string added to the five catalogs.
+3. Bad files: images fail inside the validated `wallpaper-image` action (translated error); videos
+   fail the probe with the page's unreadable/format notes; URL failures surface
+   `wallpaper.badUrl` / `wallpaper.downloadFailed`. Everything async — no UI freeze.
+
+**Verification**: `make build/insane-server` clean (no new warnings); `wallpaper-admin-test: 49 ok`
+(the action table validates); `err-check` 581 codes, 0 problems; `build-theme.mjs` exit 0;
+`wallpaper-find-test`/`media-wallpaper-test`/`canvas-test`/`bench-test` green;
+`wallpaper-image-test` exits 1 on an **ASan leak that pre-exists this change** (proven: identical
+155127-byte/9-allocation report with the change stashed and forced-rebuilt, and with it applied;
+the stacks are the test's own buffers, tests/wallpaper_image_test.c:21,46 — ledgered below).
+**Manual** (REGRESSION_CHECKLIST): pick a picture → dialog → applied to the chosen destination,
+survives reboot; pick a bad image (a text file renamed .jpg) → visible error; pick a video → probe
+→ dialog; URL download → progress → probe → dialog; a non-https URL → refused with the reason.
+**Remaining risk**: the URL store keeps a copy per URL even if the probe later refuses it (a
+failed-probe file is not auto-deleted — harmless, reused on retry); the 512 MiB cap is a constant.
 
 ## G. Raw translation keys in the UI — FIXED
 
@@ -232,6 +256,14 @@ progress. No new audio backend, no new dependencies.
 
 ## I. Other small issues — LEDGER (FOUND, NOT FIXED)
 
+- `wallpaper-image-test` exits 1: ASan reports 155127 bytes leaked in 9 allocations — the test's
+  own grow-only buffers (tests/wallpaper_image_test.c:21 `cb` realloc, :46 `with_exif` malloc),
+  never freed by design of the harness. Proven pre-existing on 2026-11-17 (identical report with
+  the wallpaper-url-get change stashed and rebuilt). Fixing the test's buffer hygiene is an
+  unrelated cleanup; the test's checks themselves print `ok`.
+- `apps/settings/DefaultApps.jsx` still draws its category icons from a unicode `LOOK` table — the
+  one remaining un-migrated icon set after bug E (PaneGlyph covers the needed shapes; converting
+  is a small follow-up).
 - The worktree has the old `web/` site tree deleted but uncommitted (the new site lives in
   `website/`); not OS code — left untouched, the user decides when it lands.
 - `imager-test` shows 2/466 crypto-check failures that predate all compositor work (known, do not

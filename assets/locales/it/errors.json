@@ -723,6 +723,7 @@
   "wallpaper.downloadFailed": "Impossibile scaricare lo sfondo",
   "wallpaper.removeFailed": "Impossibile cambiare lo sfondo",
   "wallpaper.notDownloaded": "Quello sfondo non è stato scaricato",
+  "wallpaper.badUrl": "Quell’URL non è consentito: solo indirizzi https senza parte utente.",
   "wallpaper.badImage": "Quel file non è un’immagine PNG o JPEG",
   "wallpaper.imageTooBig": "Quell’immagine è troppo grande: fino a 64 MB e 100 megapixel",
   "wallpaper.imageUnreadable": "Impossibile leggere quel file",

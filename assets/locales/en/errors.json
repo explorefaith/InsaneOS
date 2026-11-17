@@ -722,6 +722,7 @@
   "wallpaper.downloadFailed": "The wallpaper could not be downloaded",
   "wallpaper.removeFailed": "The wallpaper could not be changed",
   "wallpaper.notDownloaded": "That wallpaper is not downloaded",
+  "wallpaper.badUrl": "That URL is not allowed: only https addresses without a user part.",
   "wallpaper.badImage": "That file is not a PNG or JPEG picture",
   "wallpaper.imageTooBig": "That picture is too large: up to 64 MB and 100 megapixels",
   "wallpaper.imageUnreadable": "That file could not be read",
