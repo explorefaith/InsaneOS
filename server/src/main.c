@@ -2626,6 +2626,12 @@ int main(int argc, char **argv) {
         snprintf(log, sizeof log, "%s/.cache/insaneos", getenv("HOME"));
         mkdir(log, 0700);
         snprintf(log, sizeof log, "%s/.cache/insaneos/%s", getenv("HOME"), s.greeter ? "greeter.log" : "session.log");
+        /* the previous session's log is one rename away, not gone: a server that died — a crash,
+         * the session manager restarting it — takes its last lines with it otherwise, and those are
+         * exactly the lines a crash report needs (the slow-frame breakdown up to the end) */
+        char prev[sizeof log + 8];
+        snprintf(prev, sizeof prev, "%s.prev", log);
+        rename(log, prev);
         if (!freopen(log, "w", stderr)) { /* carries on without a log */ }
         setvbuf(stderr, NULL, _IOLBF, 0);
     }
