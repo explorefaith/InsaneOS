@@ -68,6 +68,21 @@ hang the whole screen; occasional crashes.
 frequency, hover timers stacking, use-after-free on remove-while-hovered (ASan build needed),
 hide-timer race.
 
+**The crash is a HANG, not a memory bug (2026-11-17 23:56, ASan session)**: the user reproduced
+Remove from Dock on the ASan build — freeze/black screen again, sessiond took the monitor back
+(the server's own log shows the loss sequence: `sound: disconnected`, `notifyd: lost the session
+bus`, `sysbus: the system bus connection was lost`, `monitor: the session leaves the screen`,
+then a clean exit summary) and **zero AddressSanitizer output** — no invalid memory access, so
+the compositor's main loop **stopped making frames** (a hung frame never reaches the slow-frame
+logger — the log just stops after the last healthy pointer rows, 0.12–0.36 ms). Same on the
+first crash (dmesg + journal both empty). Hang candidates: a syscall that never returns (DRM
+commit, read on a fifo), a futex deadlock across the main loop and the paint threads, or the
+quickjs job queue. The sessiond window before it takes the monitor back was ~2–3 min — enough
+for a gdb attach from a text VT. **Diagnostic ready**: gdb procedure (attach while frozen,
+`thread apply all bt`), plus /proc task stacks as fallback. On the same ASan session the dock
+hover lag showed as paint 29–63 ms with blur 14–34 ms at shrink 8 — all inflated ~2.6x by ASan;
+the lag half stays verified-fixed on the normal build.
+
 **Verification standard**: no frame > ~20 ms during reveal/hover on the user's hardware;
 "Remove from Dock" never blocks the UI > 100 ms; 500 hover/remove/add cycles clean under ASan.
 
