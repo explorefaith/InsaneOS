@@ -41,7 +41,12 @@ Status vocabulary: **OPEN**, **IN PROGRESS**, **FIXED**, **WONTFIX**, **FOUND, N
 
 ---
 
-## A. Dock lag, freeze and crash — FIXED (both halves; the Remove-from-Dock fix needs the live-desktop pass)
+## A. Dock lag, freeze and crash — FIXED (both halves verified on the live desktop)
+
+**Live-desktop verification (2026-11-18, user-confirmed)**: after `fix/upgrade-insaneos.sh`
+deployed the fixed bundle (`2deb7ed2…`, byte-identical to the repo build), Remove from Dock
+works — repeatedly, no freeze, no black screen — and the live session log carries zero react
+errors. Bug A is closed.
 
 **Symptom 1 (lag)**: the auto-hide dock's reveal and hover lagged; fixed by the blur frame-budget
 governor (below) — the user confirmed the lag is gone on the deployed build (2026-11-17).
