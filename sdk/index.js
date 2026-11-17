@@ -337,3 +337,5 @@ export { insaneosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, fi
 export { appGroup, appMenuItems, runningApps, forceQuit, recentItems, storeUpdates, hideApp, hideOthers, toggleShowDesktop, appSettingsItem } from './appcontrol.js';
 export { windowMenuItems, moveResizeItems } from './windowmenu.js';
 export { setDesktopCount } from './desktops.js';
+export { weather, useWeather, weatherRefresh, weatherConsent, weatherGroup, WEATHER_PLACE_DEFAULT } from './weather.js';
+export { wallpaperAccent } from './accent.js';

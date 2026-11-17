@@ -53,6 +53,9 @@ const DEFAULTS = {
   pickerView: null,           // 0.8.8.3, the system file dialog's List / Thumbnails: { files, images } (sdk/filepickermodel.js viewFor)
   sessionSaved: null,         // { clean, windows } what was open; written by sessionrestore.jsx only
   bluetoothOff: false,        // 0.8.8.6 (#75), the user's last Bluetooth switch: applied again at login (btpowermodel.js)
+  weatherConsent: null,       // the weather tile's consent (sdk/weather.js): null = not asked, true, false
+  weatherPlace: null,         // { name, lat, lon }; null = the default (Dhaka) until Settings offers editing
+  weatherCache: null,         // { ts, data }: the last Open-Meteo answer, shown while a refresh runs
 };
 
 // Per-user settings migrations (docs/UPDATES.md, "Migrations"): when an update changes the shape or

@@ -6,7 +6,7 @@ import {
   View, Text, Image, useTheme, useSettings, shortcutList, shortcutsRev, themes, session, keyboard, admin, languages, setLanguage, useLocale,
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
   spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, heavyVideoWarning, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
-  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers,
+  restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers, wallpaperAccent,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { SoundSettings } from './Sound.jsx';
@@ -173,6 +173,8 @@ function Appearance() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const [s, set] = useSettings();
+  // the Auto accent only shows when the running server can sample the wallpaper (media.accentFrom)
+  const canAuto = typeof insane !== 'undefined' && typeof insane.media?.accentFrom === 'function';
   return (
     <Stack>
       <StylePicker />
@@ -218,9 +220,15 @@ function Appearance() {
       <Section>
         <SettingRow label={tr('shell.cc.accent')}>
           <View style={{ flexDirection: 'row', gap: spacing.s, direction: 'ltr' }}>
+            {canAuto ? (
+              <View onClick={() => set({ accent: 'auto' })} style={{ width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+                background: wallpaperAccent.get().hex ? `linear-gradient(180deg, ${shade(wallpaperAccent.get().hex, 1.15)}, ${wallpaperAccent.get().hex})` : `linear-gradient(180deg, ${shade('#bf5af2', 1.15)}, #bf5af2)`,
+                border: s.accent === 'auto' ? `2px solid ${t.text}` : '0 solid transparent', boxShadow: '0 1px 2px rgba(0,0,0,0.25)' }} />
+            ) : null}
             {Object.entries(t.accents || {}).map(([name, c]) => (
               <View key={name} onClick={() => set({ accent: name })} style={{ width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
-                background: `linear-gradient(180deg, ${shade(c, 1.15)}, ${c})`, boxShadow: '0 1px 2px rgba(0,0,0,0.25)' }}>
+                background: `linear-gradient(180deg, ${shade(c, 1.15)}, ${c})`, boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                border: s.accent === name ? `2px solid ${t.text}` : '0 solid transparent' }}>
                 {s.accent === name ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' }} /> : null}
               </View>
             ))}

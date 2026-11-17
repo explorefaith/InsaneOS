@@ -834,5 +834,6 @@
   "termconf.corrupt": "il file non è un JSON valido per il Terminale",
   "termconf.newer": "il file è stato scritto da un Insane OS più recente",
   "vm.shareProtected": "Una cartella condivisa in scrittura non può essere né contenere un file protetto di questo computer (come la configurazione del Terminale o settings.json): la macchina potrebbe cambiare ciò che questo computer esegue. Condividila in sola lettura, o condividi una cartella senza quel file.",
-  "uninstall.unsupported": "Questa app non può essere disinstallata da qui."
+  "uninstall.unsupported": "Questa app non può essere disinstallata da qui.",
+  "weather.fetchFailed": "Impossibile contattare il servizio meteo"
 }
