@@ -59,7 +59,7 @@ async function buildTheme(name) {
     bundle: true,
     format: 'iife',
     target: 'es2020',
-    minify: true,
+    minify: process.env.UNMINIFIED ? false : true,   // UNMINIFIED=1: readable stack traces for debugging
     jsx: 'automatic',
     alias: {
       '@insaneos/runtime': path.join(root, 'runtime', 'index.js'),

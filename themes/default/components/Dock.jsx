@@ -396,7 +396,12 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
     return () => cancelAnimationFrame(raf);
   });
   // the icons' places on screen (the minimize genie's targets): computed below, once `place` and
-  // the box exist, and published to sdk/dock.js from here
+  // the box exist, and published to sdk/dock.js from here. The publish must not sit in the
+  // passive phase: a set here forces a synchronous re-render of the store's readers, whose own
+  // effects measure again while the dock animates (remove, glide, slide, magnify) — the rects
+  // legitimately differ every pass, the nesting climbs to React's update limit and the shell
+  // dies with error #185 (the screen goes black and stays black; the Remove-from-Dock hang).
+  // One animation frame later the publish opens a fresh update instead of a nested one.
   const rects = useRef(null);
   useEffect(() => {
     const m = rects.current?.map;
@@ -404,7 +409,7 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
     const prev = dockIconRects.get();
     const same = Object.keys(m).length === Object.keys(prev).length &&
       Object.keys(m).every((k) => prev[k] && Math.abs(prev[k].x - m[k].x) < 0.5 && Math.abs(prev[k].y - m[k].y) < 0.5 && prev[k].w === m[k].w);
-    if (!same) dockIconRects.set(m);
+    if (!same) requestAnimationFrame(() => dockIconRects.set(rects.current?.map || m));
   });
 
   if (hideMode !== 'never' && shown <= 0 && !dragging) return <Layer name="drag"><Poof poof={poof} size={BASE} reduce={reduce} /></Layer>;

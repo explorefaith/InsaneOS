@@ -41,53 +41,50 @@ Status vocabulary: **OPEN**, **IN PROGRESS**, **FIXED**, **WONTFIX**, **FOUND, N
 
 ---
 
-## A. Dock lag, freeze and crash — IN PROGRESS
+## A. Dock lag, freeze and crash — FIXED (both halves; the Remove-from-Dock fix needs the live-desktop pass)
 
-**Symptom**: the auto-hide dock's reveal and hover lag extremely; "Remove from Dock" can freeze or
-hang the whole screen; occasional crashes.
+**Symptom 1 (lag)**: the auto-hide dock's reveal and hover lagged; fixed by the blur frame-budget
+governor (below) — the user confirmed the lag is gone on the deployed build (2026-11-17).
 
-**Work so far** (2026-11-16/17, commit `3b621f64` on `stabilize/baseline`):
+**Symptom 2 (Remove from Dock freezes/black screen) — ROOT CAUSE FOUND & FIXED (2026-11-18)**:
+**React error #185 (maximum update depth exceeded)** in the shell. The Dock component published
+its icons' screen rects (`dockIconRects` — the minimize genie's targets) from an effect with no
+deps that called `dockIconRects.set()` **synchronously inside React's passive phase**. After an
+unpin the rects legitimately differ on every pass (one icon fewer, the poof, the glide, the
+hide-slide, the magnification), so the set forced a synchronous re-render of the store's readers
+(`useSyncExternalStore`), whose effects measured again and set again — the nesting climbed 50
+deep, React raised #185, and the reconciler **unmounted the shell's root**: one empty frame
+painted, the screen went black and stayed black, the inputs had nowhere to go. The compositor
+stayed healthy the whole time (the frozen-state gdb capture shows the main loop idling in
+`poll(timeout=16)`), which is why ASan, dmesg and the journal all came up empty — the bug was
+pure JavaScript.
 
-1. **Blur frame-budget governor** (`server/src/canvas.c|canvas.h`, `server/src/main.c render_frame`,
-   `server/src/ui/paint.c`, `server/src/ui/js.c`): when the backdrop blur itself takes >35 % of the
-   frame period for 2 frames, the blur's downsample steps up (4, then 8); after 120 light frames it
-   steps back down, never under the floor the performance profiles set (`blur_shrink_floor` through
-   `insane.setBlurQuality`). Lab-verified on this machine: blur cost collapsed 8.5 → 1.5 ms/frame.
-   Deployed 2026-11-17 14:31 (backup `/var/backups/insaneos-blurfix-20261117-143145`).
-2. **User still reports dock-open lag** on the governor build. Live log showed 40–190 ms loop
-   stalls (`tp:` rows; normal 0.1–0.3 ms). Layout confirmed incremental (`layout_ok`), settings
-   saves don't fsync, intermittent 33–48 ms frames are **not** media/wayland/term/blur — the chunk
-   sits inside the bare paint walk. Suspects: the below-copy rebuild, canvas primitives, QuickJS GC.
-3. **Slow-frame logger** added to `render_frame` (same commit): frames >30 ms print their breakdown
-   to the session log. Build with the logger is `server/build/insane-server` (2026-11-17 21:19;
-   `canvas-test` + `bench-test` green), **not yet installed** — the user must re-run
-   `sudo bash fix/install-blur-governor.sh`, log out/in, reproduce, then the `slow frame:` lines
-   name the next cost. Governor-only binary is what currently runs.
+**How it was found**: the session log survived a restart (rotation), the frozen state was
+captured live by `fix/hang-watchdog.sh` (gdb + connector map, `results/hang-bt-captured.txt`),
+the ASan build cleared the C side, and a lab reproduction harness (a temporary
+`settings.benchUnpin` hook driving pin/unpin cycles) died on its **first** unpin with the same
+signature — then an unminified bundle (`UNMINIFIED=1 node tools/build-theme.mjs`) named the
+exact stack: `commitPassiveMountOnFiber → dock.js store set → forceStoreRerender → #185`.
 
-**Hypotheses still to test** (in order): paint-walk stall (above), dock reveal re-layout/rebuild
-frequency, hover timers stacking, use-after-free on remove-while-hovered (ASan build needed),
-hide-timer race.
+**Fix** (`themes/default/components/Dock.jsx`): the publish moves one animation frame out of the
+passive phase — `requestAnimationFrame(() => dockIconRects.set(...))` publishes the newest rects
+as a fresh update instead of a nested one; the genie reads them a frame later (imperceptible)
+and the per-frame cost is unchanged (the 0.5 px compare already skipped no-op sets).
 
-**The crash is a HANG, not a memory bug (2026-11-17 23:56, ASan session)**: the user reproduced
-Remove from Dock on the ASan build — freeze/black screen again, sessiond took the monitor back
-(the server's own log shows the loss sequence: `sound: disconnected`, `notifyd: lost the session
-bus`, `sysbus: the system bus connection was lost`, `monitor: the session leaves the screen`,
-then a clean exit summary) and **zero AddressSanitizer output** — no invalid memory access, so
-the compositor's main loop **stopped making frames** (a hung frame never reaches the slow-frame
-logger — the log just stops after the last healthy pointer rows, 0.12–0.36 ms). Same on the
-first crash (dmesg + journal both empty). Hang candidates: a syscall that never returns (DRM
-commit, read on a fifo), a futex deadlock across the main loop and the paint threads, or the
-quickjs job queue. The sessiond window before it takes the monitor back was ~2–3 min — enough
-for a gdb attach from a text VT. **Diagnostic ready**: gdb procedure (attach while frozen,
-`thread apply all bt`), plus /proc task stacks as fallback. On the same ASan session the dock
-hover lag showed as paint 29–63 ms with blur 14–34 ms at shrink 8 — all inflated ~2.6x by ASan;
-the lag half stays verified-fixed on the normal build.
+**Verification**: the lab harness died on unpin #1 before the fix (React #185 logged, ASan
+clean, 2–3 frames total) and ran **400/400 cycles alive with zero react errors** (829 frames,
+layout 0.17 ms / paint 5.65 ms average) after it; the shipped minified bundle boots clean
+(68 frames, no errors). Model tests green. **Manual**: Remove from Dock on the live desktop —
+repeatedly, on a hovered dock, with an app running (REGRESSION_CHECKLIST).
 
-**Verification standard**: no frame > ~20 ms during reveal/hover on the user's hardware;
-"Remove from Dock" never blocks the UI > 100 ms; 500 hover/remove/add cycles clean under ASan.
+**Work so far on symptom 1** (2026-11-16/17, commit `3b621f64`): the blur frame-budget governor
+(`server/src/canvas.c|canvas.h`, `main.c render_frame`, `ui/paint.c`, `ui/js.c`) — the blur's
+downsample steps up when the blur itself eats >35 % of the frame period, steps back down after a
+light stretch, never under the performance profiles' floor. Lab-verified: blur 8.5 → 1.5 ms.
+Deployed; the user confirmed the dock lag is gone. The governor's remaining trade-off: it softens
+the blur's sharpness while it rides high — the floor (Settings → Energy → rendering quality) is
+the lever if the softening bothers anyone.
 
-**Remaining risk**: the governor trades blur sharpness for latency by design; if the user dislikes
-the softening, the floor (Settings → Energy → rendering quality) is the lever.
 
 ## B. Crown (LordOS) logo next to the battery — FIXED
 
