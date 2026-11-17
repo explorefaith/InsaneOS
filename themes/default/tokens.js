@@ -1,6 +1,6 @@
 // Tokens of the "Insane Flow" theme. The base keys (text, accent, windowBg…) are the contract
 // with apps (see sdk/theme.js); the rest belongs to this theme.
-import { insaneosWallpapers, createStore } from '@insaneos/sdk';
+import { insaneosWallpapers, wallpaperAccent } from '@insaneos/sdk';
 
 export const accents = {
   azul: '#0a84ff',
@@ -23,11 +23,12 @@ const gradients = [
 export const wallpapers = [...insaneosWallpapers, ...gradients];
 
 // The "Auto" accent (settings.accent === 'auto'): the accent follows the wallpaper. The C side
-// (server/src/ui/js_media.c, media.accent) reads the decoded picture once and returns its dominant
-// colour; index.jsx samples on every wallpaper change and stores the raw hex here. Until the first
-// sample lands (and whenever the running server predates media.accent) this stays null and
-// makeTheme falls back to the OS violet, so 'auto' never renders a broken theme.
-export const wallpaperAccent = createStore({ hex: null });
+// (server/src/ui/js_media.c, media.accentFrom / media.accent) reads the decoded picture and returns
+// its dominant colour; index.jsx samples on every wallpaper change into the sdk's wallpaperAccent
+// store (sdk/accent.js — Settings' accent row shows it too). Until the first sample lands (and
+// whenever the running server predates those APIs) it stays null and makeTheme falls back to the OS
+// violet, so 'auto' never renders a broken theme.
+export { wallpaperAccent };
 
 const hexToRgb = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 export const hexFromRgb = (o) => '#' + [o.r, o.g, o.b].map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
