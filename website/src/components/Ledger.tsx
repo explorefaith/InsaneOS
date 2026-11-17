@@ -38,6 +38,12 @@ const SPECS: Spec[] = [
     to: 47467,
     comma: true,
   },
+  {
+    name: 'Engine suite checks',
+    detail: 'Damage, layout, text and paint invariants, every tree.',
+    to: 8831,
+    comma: true,
+  },
 ]
 
 function fmt(value: number, spec: Spec) {

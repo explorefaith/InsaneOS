@@ -1,8 +1,14 @@
 const PILLARS = [
   {
+    title: 'An island that follows your wallpaper',
+    body: [
+      'The menu bar is a floating island, and the whole desktop wears the wallpaper\u2019s colours: the compositor reads the picture you set and the bar, panels and accents retint to match \u2014 no theme picker required (it\u2019s the default; six hand-made presets are one click away). The audio visualizer dances to what the machine is actually playing \u2014 a 1024-point FFT over the sink\u2019s monitor in C \u2014 and goes completely still when you are. Weather comes from Open-Meteo, asked once, cached for half an hour, honest when the network is down.',
+    ],
+  },
+  {
     title: 'A living desktop',
     body: [
-      'The wallpaper is a hardware-decoded video that pauses when you don\u2019t need it, so the desktop costs nothing while you work. Glass widgets show the time and live system stats, re-inked to match the wallpaper\u2019s own colours.',
+      'The wallpaper is a hardware-decoded video that pauses when you don\u2019t need it, so the desktop costs nothing while you work. Glass widgets show the time and live system stats, re-inked to match the wallpaper\u2019s own colours. The Control Center\u2019s CPU meter now draws every core, from the kernel\u2019s own counters.',
     ],
   },
   {

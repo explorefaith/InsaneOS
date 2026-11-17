@@ -42,3 +42,19 @@ Plan: `docs/design/transformation-plan.md`
   with zero widgets shows the 100% per-frame repaints are the headless driver's own.
   Lesson caught in the lab: a `useState` missing from the react import killed the shell
   ('useState' is not defined) — one frame, one react error line, fixed immediately.
+- **Increment 3 + 4 done, committed (2be353c2 + website/changelog commit)**: weather-get
+  (closed root action, host hard-coded, child-as-nobody fetch, user-cache reply — an admin
+  reply is one 1024-byte line so the body goes through ~/.cache/insaneos/weather.json);
+  sdk/weather.js (consent-first, 30-minute cache, honest error states); Control Center
+  weather footer tile + per-core CoreBars (monitor thread start()/stop() with the panel);
+  the wallpaperAccent store moved to sdk/accent.js so Settings → Appearance offers the
+  Auto chip; ControlCenter smoke-tested by force-mounting it in the lab (0 errors), then
+  reverted. Tests: sound-test's rebrand-era `len == 6` assertion fixed to 9 (pre-existing
+  failure), widget-model test grown to the six-entry catalog (21 ok / 0 failed).
+  Greeter boots headless with 0 errors (login untouched).
+- **Website + docs**: the site's pillars lead with the island/Auto-accent story, the
+  ledger gained the engine-suite row, CHANGELOG [Unreleased] carries the transformation
+  entry, REGRESSION_CHECKLIST gained the sound-test/widget-model rows and the island
+  manual section. `website && npm run build` clean (tsc + vite).
+- **Deliberately untouched**: themes/greeter and the lock screen beyond verification
+  (login-critical; the mission's own rule), classic theme beyond the shared app bundles.

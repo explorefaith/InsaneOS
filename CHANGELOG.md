@@ -12,6 +12,24 @@ of the matching [GitHub release](https://github.com/insaneos/Insane OS/releases)
 
 ### Added
 
+## [Unreleased]
+
+### Added
+
+- **The island desktop: a menu bar that floats, and a shell that wears the wallpaper.** The menu bar is now a centred floating pill
+  (`settings.barStyle`, `island` by default; the classic full strip is Settings → Desktop & Dock → Menu Bar → Shape). The accent
+  follows the wallpaper by default (`accent: 'auto'`): the compositor reads the picture you set — through the new `media.accentFrom`
+  engine-cache API, no second decode — and the bar, panels and controls retint to match it, tone-mapped per light/dark; six hand-made
+  presets and the Auto chip sit in the Control Center and Settings → Appearance, and an older binary that can't sample falls back to
+  the violet gracefully (docs/design/transformation-plan.md).
+
+- **A real audio visualizer, and real weather.** The desktop's new Visualizer widget (and the gallery) draws what the machine is
+  actually playing: `snd_spectrum` captures the default sink's monitor only while a card is mounted, a 1024-point FFT in `sound/snd.c`
+  folds it into log-spaced bands, silence costs no frames at all, and nothing on screen is invented animation. The weather tile asks
+  once before its first request (`weatherConsent`), then reads Open-Meteo through a closed root action with the host hard-coded
+  (`weather-get`, server/src/hw/weather_admin.c), caches for 30 minutes, keeps the last truth on screen while refreshing and says
+  "unavailable" when offline. The Control Center's System tile now draws every CPU core from the monitor thread.
+
 - **Terminal: its own configuration file, wherever you want it.** Profiles, colors, key mappings, shortcuts, the hotkey
   and the windows to restore move out of `settings.json` into `~/.config/insaneos/terminal.json` (with a schema number),
   so they can be backed up, versioned or synced on their own. The move is automatic and loses nothing: `settings.json`

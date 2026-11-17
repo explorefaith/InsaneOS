@@ -12,6 +12,8 @@ the live desktop. Every fix commit states which lines were re-run and what passe
 | `server/build/engine-test` | run from `server/` | layout engine (8831 cases) |
 | `server/build/fpipe-test`, `cgweight-test`, `fw-rules-test` | run from `server/` | file pipe, CSS weight, firewall rules |
 | `node tests/switcher_model_test.mjs`, `node tests/hwkeys_test.mjs` | repo root | app-switcher and menubar model defaults |
+| `node server/tests/widget_model_test.mjs` | repo root | desktop-widgets model (six catalog entries) |
+| `server/build/sound-test` | run from `server/` | PulseAudio protocol serialization |
 | Build cleanliness | `make build/insane-server` | no new `-Wall -Wextra` warnings |
 | ASan/UBSan build | separate build dir, `-g -O0 -fsanitize=address,undefined`; run the touched test binaries + the lab instance | no leaks/UB in touched code |
 
@@ -28,6 +30,20 @@ the live desktop. Every fix commit states which lines were re-run and what passe
 - [ ] Status items in order: cleaner spark, battery (and % if enabled), clock; no crown, no layout
       label unless Settings → Keyboard turns it on.
 - [ ] Control-center menus open and close; nothing hides while a menu is open (once C lands).
+
+### Island bar and Auto accent (the desktop transformation)
+- [ ] Island mode (default): the bar is a centred pill on every display; the classic strip comes back
+      with Settings → Desktop & Dock → Menu Bar → Shape → Full. Menus, Control Center, notifications
+      and the clock panel open and anchor exactly as before in both shapes.
+- [ ] Auto accent: change the wallpaper (a still one and a live one) and the bar, panels and toggles
+      retint; the Auto chip in Control Center shows the sampled colour; presets still apply; light
+      mode keeps text legible (accent tone-mapped, violet fallback on an older server).
+- [ ] Visualizer widget: add it from Edit Widgets; with audio playing the bars dance, in silence the
+      desktop repaints nothing (the session log gains no frames); removing the last card releases the
+      monitor capture.
+- [ ] Weather tile: first open asks (Allow / No thanks — declined never fetches); allowed, it shows
+      real conditions for Dhaka with a refresh button; with the network down it shows the cached data
+      marked stale, or "Unavailable" when there is no cache.
 
 ### Windows
 - [ ] Traffic lights: left/right position (Settings → Appearance → Window Controls), glyphs on
