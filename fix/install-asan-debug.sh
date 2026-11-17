@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# install-asan-debug.sh — install the AddressSanitizer/UBSan debugging build (run with sudo)
+# install-asan-debug.sh — install the AddressSanitizer debugging build (run with sudo)
 #
 #     sudo bash fix/install-asan-debug.sh
 #
 # Installs server/build/insane-server-asan — the same server compiled with
-# -g -O1 -fsanitize=address,undefined -fno-sanitize-recover=all. A memory bug that silently
-# kills the normal build (a crash on, say, Remove from Dock) then writes its full report —
-# the exact file:line and a backtrace — to the session log (stderr) before dying, and the
-# session log survives the restart (session.log.prev, main.c's rotation).
-# The report is the bug's address: the next crash names it.
+# -g -O1 -fsanitize=address. (AddressSanitizer only: the UBSan build trips on a benign
+# null-argument at startup before the session even loads; ASan alone boots clean —
+# verified in the lab, 37 frames, zero reports.)
+# A memory bug that silently kills the normal build (a crash on, say, Remove from Dock)
+# then writes its full report — the exact file:line and a backtrace — to the session log
+# (stderr) before dying, and the session log survives the restart (session.log.prev,
+# main.c's rotation). The report is the bug's address: the next crash names it.
 #
 # This build is 2–5x slower and uses more memory: a debugging session's tool, not a daily build.
 # Going back is the usual REVERT.sh this script writes next to its backup.
@@ -22,8 +24,8 @@ BK="/var/backups/insaneos-asan-$TS"
 
 [ "$(id -u)" -eq 0 ] || { echo "Run with sudo: sudo bash $0"; exit 1; }
 [ -x "$SRC" ] || { echo "ERROR: $SRC not found — build it first:"; echo "  cd server && find build/obj -name '*.o' -delete && \\"
-  echo "    make CFLAGS='-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all' LDFLAGS='-fsanitize=address,undefined' build/insane-server && \\"
-  echo "    mv build/insane-server build/insane-server-asan && make build/insane-server"; exit 1; }
+  echo "    make CFLAGS='-O1 -g -fno-omit-frame-pointer -fsanitize=address' LDFLAGS='-fsanitize=address' build/insane-server && \\"
+  echo "    mv build/insane-server build/insane-server-asan && find build/obj -name '*.o' -delete && make build/insane-server"; exit 1; }
 # the build must carry the sanitizer runtime (grep -c, not -q: -q exits at the first match, nm then
 # dies of SIGPIPE and, with pipefail on, the check fails even on a match)
 SYMS="$(nm "$SRC" 2>/dev/null | grep -c asan_report || true)"
