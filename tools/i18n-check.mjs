@@ -39,9 +39,12 @@ function loadLang(id) {
 const flat = (cats) => Object.fromEntries(Object.entries(cats).flatMap(([ns, o]) => Object.entries(o).map(([k, v]) => [`${ns}.${k}`, v])));
 const vars = (v) => [...new Set((typeof v === 'object' ? Object.values(v).join(' ') : String(v)).match(/\{\w+\}/g) || [])].sort().join(',');
 
-// keys used in the code
+// keys used in the code: the literal ones ('ns.key') and the template-literal families
+// (`ns.sub.${x}` — the whole family counts as present only if en has at least one key with
+// that prefix; a family with no key at all would show raw prefixes in the UI)
 function usedKeys() {
   const out = new Map();
+  const fams = new Map();
   const walk = (d) => {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {
       const p = path.join(d, e.name);
@@ -49,15 +52,18 @@ function usedKeys() {
       if (!/\.(jsx?|mjs)$/.test(e.name) || e.name.endsWith('.bundle.js')) continue;
       const src = fs.readFileSync(p, 'utf8').replace(/^\s*\/\/.*$/gm, '');
       for (const m of src.matchAll(/\b(?:t|T|tr)\(\s*'([a-z][\w-]*\.[\w.-]+)'/g)) out.set(m[1], path.relative(root, p));
+      for (const m of src.matchAll(/\b(?:t|tr)\(\s*`([a-z][\w-]*(?:\.[\w-]+)+\.)\$\{/g)) if (!fams.has(m[1])) fams.set(m[1], path.relative(root, p));
     }
   };
   for (const d of ['apps', 'themes', 'sdk']) walk(path.join(root, d));
-  return out;
+  return { keys: out, families: fams };
 }
 
 const ref = flat(loadLang(REF).cats);
+const { keys: used, families } = usedKeys();
 let bad = 0;
-for (const [k, file] of usedKeys()) if (!(k in ref)) { console.log(`✗ ${k} (used in ${file}) is not in ${REF}`); bad++; }
+for (const [k, file] of used) if (!(k in ref)) { console.log(`✗ ${k} (used in ${file}) is not in ${REF}`); bad++; }
+for (const [pre, file] of families) if (!Object.keys(ref).some((k) => k.startsWith(pre))) { console.log(`✗ ${pre}* (used in ${file}) — no key with this prefix is in ${REF}`); bad++; }
 
 const langs = process.argv[2] ? [process.argv[2]] : fs.readdirSync(dir).filter((d) => d !== REF && fs.existsSync(path.join(dir, d, 'meta.json')));
 for (const id of langs) {

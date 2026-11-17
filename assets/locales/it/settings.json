@@ -722,5 +722,20 @@
   "ai.pv.freeKeepGoing": "{s} s… continua, ancora un po’.",
   "ai.pv.freeEnough": "{s} s · basta così: premi Fatto quando vuoi (si ferma da solo a 30).",
   "ai.pv.freeShort": "Non c’era abbastanza parlato: parla un po’ di più, almeno 15 secondi.",
-  "ai.pv.noMic": "Dal microfono non arriva alcun suono. Controlla che sia collegato e non silenziato (Impostazioni → Suono), poi riprova."
+  "ai.pv.noMic": "Dal microfono non arriva alcun suono. Controlla che sia collegato e non silenziato (Impostazioni → Suono), poi riprova.",
+  "sound.fx": "Effetti sonori",
+  "sound.fxHint": "Suoni brevi di sistema per gli eventi del desktop. Seguono il muto del sistema e il dispositivo di uscita.",
+  "sound.fxOn": "Effetti sonori",
+  "sound.fxVolume": "Volume degli effetti",
+  "sound.fxScreenshot": "Istantanea scattata",
+  "sound.fxTrash": "Cestino svuotato",
+  "sound.fxPower": "Caricatore collegato",
+  "sound.fxNotify": "Notifiche",
+  "sound.fxStartup": "Suono di avvio",
+  "sound.fxMinimize": "Riduzione e ripristino delle finestre",
+  "sound.fxLaunch": "Avvio delle applicazioni",
+  "sound.fxTest": "Anteprima",
+  "sound.fxShutter": "Otturatore",
+  "sound.fxTrashP": "Cestino",
+  "sound.fxPlug": "Caricatore"
 }

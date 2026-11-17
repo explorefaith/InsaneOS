@@ -1,4 +1,5 @@
 {
+  "battery.limit.unsupported": "O firmware deste dispositivo não suporta um limite de carga (sem charge_control_end_threshold).",
   "admin.actionFailed": "A ação terminou com um erro",
   "admin.forkFailed": "Não foi possível iniciar a ação",
   "admin.invalidArgument": "Argumento inválido",
@@ -176,6 +177,9 @@
   "doc.badBlob": "Dados de documento inválidos",
   "doc.itemCount": "Entre 1 e {max} itens",
   "doc.noHelper": "O assistente de documentos (insane-doc) não está disponível",
+  "dotdeb.badPackage": "Uma entrada do catálogo do DotDeb não passou na validação.",
+  "dotdeb.noCatalog": "O catálogo do DotDeb não está instalado neste sistema.",
+  "dotdeb.unknownApp": "{id} não está no catálogo do DotDeb.",
   "errno.E2BIG": "Lista de argumentos longa demais",
   "errno.EACCES": "Permissão negada",
   "errno.EAGAIN": "Recurso temporariamente indisponível",

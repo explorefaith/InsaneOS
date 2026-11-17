@@ -722,5 +722,20 @@
   "ai.pv.freeKeepGoing": "{s} s… continuez, encore un peu.",
   "ai.pv.freeEnough": "{s} s · c’est suffisant : appuyez sur Terminé quand vous voulez (arrêt automatique à 30).",
   "ai.pv.freeShort": "Pas assez de parole : parlez un peu plus longtemps, au moins 15 secondes.",
-  "ai.pv.noMic": "Aucun son ne provient du micro. Vérifiez qu’il est branché et non coupé (Réglages → Son), puis réessayez."
+  "ai.pv.noMic": "Aucun son ne provient du micro. Vérifiez qu’il est branché et non coupé (Réglages → Son), puis réessayez.",
+  "sound.fx": "Effets sonores",
+  "sound.fxHint": "Brefs sons système pour les événements du bureau. Ils suivent le mode silencieux du système et le périphérique de sortie.",
+  "sound.fxOn": "Effets sonores",
+  "sound.fxVolume": "Volume des effets",
+  "sound.fxScreenshot": "Capture réalisée",
+  "sound.fxTrash": "Corbeille vidée",
+  "sound.fxPower": "Chargeur branché",
+  "sound.fxNotify": "Notifications",
+  "sound.fxStartup": "Son de démarrage",
+  "sound.fxMinimize": "Réduction et restauration des fenêtres",
+  "sound.fxLaunch": "Lancement d’application",
+  "sound.fxTest": "Aperçu",
+  "sound.fxShutter": "Obturateur",
+  "sound.fxTrashP": "Corbeille",
+  "sound.fxPlug": "Chargeur"
 }

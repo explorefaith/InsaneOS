@@ -1,4 +1,5 @@
 {
+  "battery.limit.unsupported": "Le micrologiciel de cet appareil ne prend pas en charge une limite de charge (pas de charge_control_end_threshold).",
   "admin.actionFailed": "L’action s’est terminée par une erreur",
   "admin.forkFailed": "Impossible de lancer l’action",
   "admin.invalidArgument": "Argument non valide",
@@ -176,6 +177,9 @@
   "doc.badBlob": "Données de document non valides",
   "doc.itemCount": "Entre 1 et {max} éléments",
   "doc.noHelper": "L’assistant de documents (insane-doc) n’est pas disponible",
+  "dotdeb.badPackage": "Une entrée du catalogue DotDeb n’a pas passé sa validation.",
+  "dotdeb.noCatalog": "Le catalogue DotDeb n’est pas installé sur ce système.",
+  "dotdeb.unknownApp": "{id} n’est pas dans le catalogue DotDeb.",
   "errno.E2BIG": "Liste d’arguments trop longue",
   "errno.EACCES": "Autorisation refusée",
   "errno.EAGAIN": "Ressource temporairement indisponible",

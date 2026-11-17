@@ -133,19 +133,35 @@ captions are truncated with no tooltip (PicTile/LiveTile, `maxWidth: 168`); **no
 picker at all**; custom video exists but is a small button inside the Live section; Glass section
 sits last. Restructure + the missing custom sections is the work.
 
-## G. Raw translation keys in the UI — OPEN
+## G. Raw translation keys in the UI — FIXED
 
 **Symptom**: Settings → Energy shows raw keys (`prefs.power.quality.auto/.balanced/.performance/.low`).
 
-**Root cause identified**: `apps/settings/Power.jsx` QualityRow calls `tr('prefs.power.quality.*')`
-directly (line ~76) — those keys are missing from the locale catalogs, and `tr()` falls through to
-the raw key. Other pages use `tOptional(key) || 'English fallback'`, which is why only some pages
-show raw keys.
+**Root cause**: `apps/settings/Power.jsx` QualityRow calls `tr('prefs.power.quality.*')` directly
+and those keys existed in **no** catalog (not even en); `t()` falls through to the raw key
+(sdk/i18n.js:178). `tools/i18n-check.mjs` existed and would have flagged it — but nothing ran it,
+and it could not see template-literal families (`tr(\`prefs.power.profile.${x}\`)`).
 
-**Status**: audit planned — enumerate every `tr(`/`t(`/`tOptional(` key across apps/ + themes/ +
-sdk/, compare against `assets/locales/`, add the missing strings (English catalog first, shipped
-languages where the key is visible). `tools/i18n-check.mjs` exists and will be extended/used as
-the missing-key check so this cannot silently happen again.
+**What changed**:
+1. Missing strings added to `assets/locales/` — en first, then es/fr/it/pt (non-partial languages
+   must be complete): `prefs.power.quality{,Hint,.auto,.balanced,.performance,.low}`,
+   `shell.widgets.edit`, `errors.battery.limit.unsupported`, `errors.dotdeb.{noCatalog,unknownApp,
+   badPackage}` (the C-side codes err-check flagged), and the 15 `settings.sound.fx*` keys that
+   commit `16e83572` had left English-only in es/fr/it/pt.
+2. `tools/i18n-check.mjs`: also scans template-literal key families — `tr(\`ns.sub.${x}\`)` needs
+   at least one `ns.sub.*` key in en, or the build fails.
+3. The check now **runs in the build**: `tools/build-theme.mjs` runs it before bundling and exits
+   with its status — a missing key can no longer reach the UI silently.
+4. `tools/brand-check.mjs`: ALLOW entries for the shipped wallpaper artwork's own name
+   ("Crystal Apple", the release-note catalog list) — the 4 pre-existing findings that kept the
+   check permanently red and the tool unwired.
+
+**Verification**: `node tools/i18n-check.mjs` exits 0 (all languages 11810/11810, 580 server error
+codes covered, brands ok); `node tools/build-theme.mjs` exits 0 with the check running first and
+`code-manifest.json: unchanged` (no artifact churn). The Energy segmented control now has its
+labels on the live desktop — needs the manual look (REGRESSION_CHECKLIST, Settings section).
+**Remaining risk**: translations are mine; a native speaker may refine wording later (en wording
+matches the row's existing hint tone; the keys are correct in all five catalogs).
 
 ## H. Sound and feedback — PARTLY DONE, IN PROGRESS
 

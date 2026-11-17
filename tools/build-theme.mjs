@@ -2,12 +2,20 @@
 // insane-server loads with QuickJS.
 // Usage: node tools/build-theme.mjs [theme ...]   (no arguments: every theme)
 import { build } from 'esbuild';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
 import { writeManifest } from './code-manifest.mjs';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+
+// The language catalogs and the error codes are checked before anything is built
+// (tools/i18n-check.mjs): a key used in the UI but missing from the reference catalog, a family
+// with no key, an untranslated non-partial language or a prose error in the C sources fails the
+// build, so a raw key can no longer reach the interface silently.
+const i18n = spawnSync('node', [path.join(root, 'tools', 'i18n-check.mjs')], { stdio: 'inherit' });
+if (i18n.status) process.exit(i18n.status || 1);
 
 // Virtual module '@insaneos/apps': one entry per apps/<id>/manifest.json.
 const appsPlugin = {

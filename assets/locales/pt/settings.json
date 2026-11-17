@@ -722,5 +722,20 @@
   "ai.pv.freeKeepGoing": "{s} s… continue, só mais um pouco.",
   "ai.pv.freeEnough": "{s} s · já basta: pressione Pronto quando quiser (para sozinho aos 30).",
   "ai.pv.freeShort": "Não houve fala suficiente: fale um pouco mais, pelo menos 15 segundos.",
-  "ai.pv.noMic": "Não chega som do microfone. Verifique se está conectado e sem mudo (Ajustes → Som) e tente de novo."
+  "ai.pv.noMic": "Não chega som do microfone. Verifique se está conectado e sem mudo (Ajustes → Som) e tente de novo.",
+  "sound.fx": "Efeitos sonoros",
+  "sound.fxHint": "Sons curtos do sistema para eventos do desktop. Seguem o mudo do sistema e o dispositivo de saída.",
+  "sound.fxOn": "Efeitos sonoros",
+  "sound.fxVolume": "Volume dos efeitos",
+  "sound.fxScreenshot": "Captura feita",
+  "sound.fxTrash": "Lixeira esvaziada",
+  "sound.fxPower": "Carregador conectado",
+  "sound.fxNotify": "Notificações",
+  "sound.fxStartup": "Som de início",
+  "sound.fxMinimize": "Minimizar e restaurar janelas",
+  "sound.fxLaunch": "Início de aplicativos",
+  "sound.fxTest": "Testar",
+  "sound.fxShutter": "Obturador",
+  "sound.fxTrashP": "Lixeira",
+  "sound.fxPlug": "Carregador"
 }
