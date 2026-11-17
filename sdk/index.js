@@ -84,7 +84,7 @@ export { SoundOutputList, useSoundOutputs } from './soundoutputs.js';   // choos
 export { monitor, useMonitor, monitorSamples, monitorProcesses, monitorConnections, monitorDevices, monitorDetail, MONITOR_HISTORY, diskTempHistory, DISK_TEMP_HISTORY, firewall, firewallState } from './monitor.js';
 export * as fwRule from './fwrule.js';            // checks what the user types for a firewall rule
 export * as netModel from './netmodel.js';        // (0.8.5) Monitor → Network: search tokens, filters, the tree
-export { packages, packageList, refreshPackages, packageFile, loadWasm } from './packages.js';
+export { packages, packageList, refreshPackages, packageFile, loadWasm, canUninstall, uninstallApp } from './packages.js';
 import { refreshPackages, forgetGonePackaged, packageList as packageListOf } from './packages.js';
 export {
   windows, wm, openedAt, useWindows, configureWindows, getApp, listApps, isLiveSystem, appIdOf, workArea, workAreaOf, pointerWorkArea, appMenus, useAppMenus, windowTitle, appRegistry, appMenuClick,

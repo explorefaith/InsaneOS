@@ -832,5 +832,6 @@
   "termconf.verifyFailed": "le nouveau fichier ne s’est pas relu à l’identique, donc rien n’a été déplacé",
   "termconf.corrupt": "le fichier n’est pas un JSON valide pour le Terminal",
   "termconf.newer": "le fichier a été écrit par un Insane OS plus récent",
-  "vm.shareProtected": "Un dossier partagé en écriture ne peut pas être ni contenir un fichier protégé de cet ordinateur (comme la configuration du Terminal ou settings.json) : la machine pourrait changer ce que cet ordinateur exécute. Partagez-le en lecture seule, ou partagez un dossier sans ce fichier."
+  "vm.shareProtected": "Un dossier partagé en écriture ne peut pas être ni contenir un fichier protégé de cet ordinateur (comme la configuration du Terminal ou settings.json) : la machine pourrait changer ce que cet ordinateur exécute. Partagez-le en lecture seule, ou partagez un dossier sans ce fichier.",
+  "uninstall.unsupported": "Cette application ne peut pas être désinstallée d’ici."
 }

@@ -832,5 +832,6 @@
   "termconf.verifyFailed": "el archivo nuevo no se leyó igual, así que no se movió nada",
   "termconf.corrupt": "el archivo no es un JSON válido para la Terminal",
   "termconf.newer": "el archivo lo escribió un Insane OS más nuevo",
-  "vm.shareProtected": "Una carpeta compartida con escritura no puede ser ni contener un archivo protegido de esta computadora (como la configuración de la Terminal o settings.json): la máquina podría cambiar lo que esta computadora ejecuta. Compartila de solo lectura, o compartí una carpeta sin ese archivo."
+  "vm.shareProtected": "Una carpeta compartida con escritura no puede ser ni contener un archivo protegido de esta computadora (como la configuración de la Terminal o settings.json): la máquina podría cambiar lo que esta computadora ejecuta. Compartila de solo lectura, o compartí una carpeta sin ese archivo.",
+  "uninstall.unsupported": "Esta aplicación no se puede desinstalar desde aquí."
 }

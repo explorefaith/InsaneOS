@@ -97,15 +97,45 @@ open; fullscreen apps handled. (After A is stable.)
 
 **Status**: not started. Waiting on the dock/top-bar architecture notes (docs/ARCHITECTURE_NOTES.md).
 
-## D. No way to uninstall installed apps — OPEN
+## D. No way to uninstall installed apps — FIXED (launcher), needs manual verification
 
 **Requirement**: uninstall in the launcher context menu and/or Settings, integrated with the
 existing package system; confirmation dialog; protection for system-critical apps; visible error
 on failure; removal from the dock too; background run with progress so the UI never freezes.
 
-**Status**: not started. Package system to integrate with: `.lpk` packages
-(`server/src/sec/`, `tools/lpk.mjs`, per docs/PRIVACY.md) and apt for system packages — the exact
-integration point is the first thing to establish.
+**What existed already**: the plumbing — `packages.remove(id)` for `.lpk` (sdk/packages.js, closes
+the app's windows, forgets permissions and share grants) and the Store's `pkg-remove` admin action
+for Debian apps (server/src/pkg/pkg.c plan + apt/dpkg). The Store could remove, but the **launcher
+had no uninstall** (its context menu was Open / Keep in Dock only), and neither flow had a
+confirmation dialog.
+
+**What changed**:
+1. `sdk/packages.js`: `canUninstall(a)` — what the shell may offer ('package' for a `.lpk` not
+   owned by a Debian package, 'linux' when a Debian package brings the app's `.desktop`, null for
+   built-ins and everything else) and `uninstallApp(a, onProgress)` — resolves `{ ok, error }`,
+   never blocks the caller, rides the helper's `progress <phase> <done> <total>` lines the same way
+   the Store's job view does. Built-ins are never removable (docs/SIGNING.md "Verified system
+   code"); a `.lpk` that arrived inside a Debian package is that package's business — the Store's
+   own line, kept.
+2. `themes/default/components/Launchpad.jsx`: the context menu gains **Uninstall** only when
+   `canUninstall` says so; choosing it opens a confirmation sheet (icon, name, what stays — the
+   app's data is never deleted) with Cancel / destructive Uninstall; while a Debian removal runs,
+   a progress bar shows (phases → percent); failure shows the translated error
+   (`uninstall.unsupported` and the helper's codes through `errorText`); success plays the gated
+   `trash` feedback (Settings → Sound → Sound Effects governs it). The sheet owns the keyboard
+   while open (Enter could otherwise launch the app behind it), Esc closes it, the launcher only
+   closes when the sheet is not busy.
+3. Dock removal is automatic: the entries derive from the app registry, which both paths refresh
+   (`refreshPackages` / `refreshApps`).
+
+**Verification**: `node tools/i18n-check.mjs` and `node tools/build-theme.mjs` exit 0 (the new
+keys exist in en/es/fr/it/pt; the bundle builds). **Manual (REGRESSION_CHECKLIST)**: right-click a
+`.lpk` app in the launcher → Uninstall → confirm → app gone from launcher and dock, windows
+closed; same for a Linux app with the progress bar; a built-in (Settings, Files) shows no
+Uninstall item; a running app's removal closes its windows.
+**Remaining risk**: `uninstallApp` for `.lpk` is synchronous inside the promise (a very large
+package could stall a frame or two); the Store keeps its own no-confirm remove buttons — left
+untouched (their behavior is pre-existing; a confirm there is a separate decision).
 
 ## E. Settings layout and icons — OPEN
 
