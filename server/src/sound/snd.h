@@ -28,6 +28,10 @@ int snd_set_default(int kind, const char *name);                        /* SND_S
 int snd_set_port(int kind, uint32_t index, const char *port);           /* SND_SINK or SND_SOURCE */
 int snd_move(int kind, uint32_t index, uint32_t device);                /* SND_INPUT → output, SND_OUTPUT → input */
 int snd_meter(uint32_t source);         /* peak meter of an input; 0xffffffff turns it off */
+int snd_spectrum(int on);               /* the desktop visualizer's capture of the default sink's monitor
+                                           (a record stream kept only while on; rearmed on reconnect) */
+int snd_spectrum_bands(float *out, int n);   /* n log-spaced band levels 0..1 of the newest ~21 ms of
+                                           output, 0 before the first samples land; n <= 64 */
 int snd_play(const char *name);         /* system sound: "pop", "notify", "error", "chime",
                                            "shutter", "trash", "plug", "unplug" */
 int snd_play_vol(const char *name, double vol);   /* the same, at 0..1 of its own level */

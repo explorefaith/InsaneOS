@@ -11,7 +11,7 @@
 import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 const INK = '#1d1d1f';
 const INK_DIM = 'rgba(29,29,31,0.55)';
 const INK_FAINT = 'rgba(29,29,31,0.38)';
@@ -265,6 +265,61 @@ function MediaCard({ widget }) {
   );
 }
 
+// ---- the audio visualizer: real output, never invented bars ----
+//
+// The reference desktop's signature widget. Its data is the machine's own output: the C side
+// (sound/snd.c, media.accent's sibling work) captures the default sink's monitor while a visualizer
+// card is mounted (refcounted here), windows the newest 1024 samples and folds them into 28
+// log-spaced bands; insane.sound.spectrum() returns those levels and the card only draws them —
+// silence stays flat, music dances. ~22 redraws a second of ~28 small views, and the capture
+// stream goes away the moment the last card unmounts.
+
+let vizWanted = 0;                                   // how many visualizer cards are mounted
+
+function VisualizerCard({ widget }) {
+  useEffect(() => {
+    vizWanted++;
+    try { if (vizWanted === 1) insane.sound.spectrumOn?.(true); } catch { /* older server */ }
+    return () => {
+      vizWanted--;
+      try { if (vizWanted === 0) insane.sound.spectrumOn?.(false); } catch { /* older server */ }
+    };
+  }, []);
+  const p = useStore(palette);
+  const ink = hex(p.ink);
+  const [, tick] = useState(0);
+  const last = useRef('');
+  const BANDS = 28;
+  useEffect(() => {
+    let alive = 1, tm = 0;
+    // poll the bands at ~22 Hz but only re-render when their quantized shape changed — silence and a
+    // missing capture cost no frames at all (the desktop idles; the mission's "optimize the refresh
+    // rate and rendering cost")
+    const step = () => {
+      if (!alive) return;
+      let b = null;
+      try { b = insane.sound.spectrum?.(BANDS); } catch { /* older server */ }
+      const sig = b ? b.map((v) => Math.round(v * 40)).join(',') : '';
+      if (sig !== last.current) { last.current = sig; tick((n) => (n + 1) % 100000); }
+      tm = setTimeout(step, 45);
+    };
+    tm = setTimeout(step, 45);
+    return () => { alive = 0; clearTimeout(tm); };
+  }, []);
+  let bands = null;
+  try { bands = insane.sound.spectrum?.(BANDS); } catch { /* older server */ }
+  return (
+    <Card widget={widget} style={{ justifyContent: 'flex-end' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 64 }}>
+        {Array.from({ length: BANDS }, (_, i) => {
+          const v = bands && Number.isFinite(bands[i]) ? Math.max(0.05, Math.min(1, bands[i])) : 0.05;
+          return <View key={i} style={{ flex: 1, height: `${Math.round(v * 100)}%`, minHeight: 4, borderRadius: 2, backgroundColor: ink, opacity: 0.85 }} />;
+        })}
+      </View>
+    </Card>
+  );
+}
+
 // ---- edit mode: the gallery and the persistence ----
 
 const saveTimer = useRef2(null);
@@ -277,7 +332,7 @@ widgetLayout.subscribe(() => {
   saveTimer.current = setTimeout(() => settings.set({ desktopWidgets: list }), 400);
 });
 
-const EDITING = { clock: 'Clock', calendar: 'Calendar', battery: 'Battery', stats: 'System', media: 'Media' };
+const EDITING = { clock: 'Clock', calendar: 'Calendar', battery: 'Battery', stats: 'System', media: 'Media', visualizer: 'Visualizer' };
 export function WidgetGallery({ workArea, onClose }) {
   const editing = useStore(widgetsEditing);
   if (!editing) return null;
@@ -304,3 +359,6 @@ function ink2() { return hex(palette.get().ink); }
 registerWidgetType('insane-calendar', CalendarCard);
 registerWidgetType('insane-battery', BatteryCard);
 registerWidgetType('insane-media', MediaCard);
+registerWidgetType('insane-visualizer', VisualizerCard);
+// the reference's bottom-left visualizer, out of the way of the right-side cards
+setWidgets('insane-visualizer', [{ id: 'viz', x: 40, y: Math.max(140, insane.screen.height - 30 - 96 - 130), w: 320, h: 118 }]);
