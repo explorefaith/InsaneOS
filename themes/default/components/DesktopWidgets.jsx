@@ -70,7 +70,7 @@ function Card({ widget, children }) {
   const [s] = useSettings();
   const on = s.effects !== false;
   const t = on ? Math.max(0, Math.min(1, Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3)) : 0;
-  const alpha = Math.max(0.04, 0.92 + (0.24 - 0.92) * t);    // paper white, pulled towards glass
+  const alpha = Math.max(0.04, 0.82 + (0.16 - 0.82) * t);    // paper white, pulled towards glass
   const blur = on ? Math.max(0, Math.min(64, Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24)) : 0;
   const sat = on && blur ? Math.max(1, Math.min(2, Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2)) : 1;
   const editing = useStore(widgetsEditing);
@@ -160,7 +160,7 @@ function ClockCard({ widget }) {
           <View style={{ position: 'absolute', left: face / 2 - 3, top: face / 2 - 3, width: 6, height: 6, borderRadius: 3, backgroundColor: INK }} />
         </View>
       ) : (
-        <Text style={{ fontSize: 52, fontWeight: 800, color: INK, letterSpacing: -1.2, lineHeight: 1.05 }}>
+        <Text style={{ fontSize: 50, fontWeight: 700, color: INK, letterSpacing: -1.2, lineHeight: 1.05 }}>
           {String(hh).padStart(2, '0')}:{mm}{secs ? `:${ss}` : ''}{ampm}</Text>
       )}
       <Text style={{ fontSize: 15, fontWeight: 600, color: INK_DIM, marginTop: 2 }}>
@@ -178,7 +178,7 @@ function DateCard({ widget }) {
   return (
     <Card widget={widget} style={{ gap: 4 }}>
       <Text style={{ fontSize: 15, fontWeight: 600, color: INK_DIM }}>{weekdayName(d.getDay(), false)}</Text>
-      <Text style={{ fontSize: 56, fontWeight: 800, color: INK, letterSpacing: -1, lineHeight: 1.02 }}>{d.getDate()}</Text>
+      <Text style={{ fontSize: 54, fontWeight: 700, color: INK, letterSpacing: -1, lineHeight: 1.02 }}>{d.getDate()}</Text>
       <Text style={{ fontSize: 16, fontWeight: 600, color: INK_DIM }}>{monthName(d.getMonth())} {d.getFullYear()}</Text>
     </Card>
   );
@@ -363,7 +363,7 @@ function MediaCard({ widget }) {
   if (widget.sample && (!np || !np.title)) {
     return (
       <Card widget={widget} style={{ gap: 8 }}>
-        <Text style={{ fontSize: 15, fontWeight: 700, color: INK, whiteSpace: 'nowrap', overflow: 'hidden' }}>Sample Song</Text>
+        <Text style={{ fontSize: 14, fontWeight: 600, color: INK, whiteSpace: 'nowrap', overflow: 'hidden' }}>Sample Song</Text>
         <Text style={{ fontSize: 12, color: INK_DIM, whiteSpace: 'nowrap', overflow: 'hidden' }}>Sample Artist</Text>
       </Card>
     );
