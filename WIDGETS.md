@@ -259,3 +259,15 @@ notifications→bell, printers→printer, sharing→share, datetime→clock, def
 and the Widgets section has its own drawn glyph. `tests/paneglyph_test.mjs` reads the source and
 FAILS when any sidebar section id resolves to no glyph (33 glyphs / 27 sections verified).
 **G — NOT STARTED** (Time/System/Media headings + the Columns grid).
+
+## CORRECTION ROUND M1c — the user's live feedback after the mini fix (2026-11-18, late)
+
+1. **Font**: the cards' typography is not good (the default stack at weight 800 looks heavy/cheap).
+   Next: refine the card type (weight, sizes, letter spacing, the family the engine renders best).
+2. **Transparency**: the cards read too milky/solid. The Card's paper alpha blends 0.92→0.24 with
+   the slider — make the widget cards properly glassy (a lower floor, the video showing through).
+3. **Broken text mid-display**: the mini previews' scaled text renders broken/blurry — the engine
+   rasterizes text and the 0.35 scale transform magnifies the artifacts. Fix direction: do not
+   scale text — either draw the minis from the same components at a smaller natural size (pass a
+   scale factor the cards honour natively) or keep minis unscaled inside a cropped window. Also
+   re-check the bottom-left Visualizer default (the user reads its flat silent bands as broken).
