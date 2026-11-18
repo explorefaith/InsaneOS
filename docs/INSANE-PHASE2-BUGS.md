@@ -40,6 +40,19 @@ quoted command output). The full findings table with evidence lives in
 | BUG-029 | P3 | tsResetInstance no-oped after a resolution change | VERIFIED | kind-ordinal fallback |
 | BUG-030 | P3 | tsInit and the bridge shared one try block | VERIFIED | split; bridge installs first |
 
+## Fixed + verified (round 2 — the interaction audit)
+
+| ID | Sev | One line | Status |
+|---|---|---|---|
+| BUG-031 | P1 | Studio canvas: the root's onClick deselected every block on mouseup | VERIFIED (blocks stop the click) |
+| BUG-032 | P1 | all four editor Toggles passed value= (SDK prop: on=) — never turned off | VERIFIED |
+| BUG-033 | P1 | Wallpaper login-apply of a user picture passed the stripped name → admin.invalidArgument every time | VERIFIED (full id through setLoginImage, incl. stopLive) |
+| BUG-034 | P2 | the slider-undo coalescer held its timer in the render body — never coalesced | VERIFIED (useRef) |
+| BUG-035 | P2 | the Arrange row never landed in the editor (a patch had silently no-matched); validList stripped `locked` | VERIFIED (row present; locked persists) |
+| BUG-036 | P3 | tsMutate's no-change guard was dead code — edge nudges left junk undo entries | VERIFIED (value comparison) |
+| BUG-037 | P3 | canvas drag listeners leaked on unmount mid-drag | VERIFIED (unmount cleanup) |
+| BUG-038 | P3 | a blank rename closed the dialog silently | VERIFIED (error note) |
+
 ## Open (ledgered, not bugs — known limitations)
 
 - L1: plan positions don't re-scale on a mid-session resolution change (saved widgets re-clamp).
