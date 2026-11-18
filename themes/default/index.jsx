@@ -199,6 +199,15 @@ function DockMenu({ pos, at, items, onClose }) {
     : <Menu centered side={pos === 'left' ? 'right' : 'left'} x={at.x} y={at.y} onClose={onClose} items={items} />;
 }
 
+// TEMPORARY (widgets M1 lab mount — the Bug D lesson): settings.benchWidgets opens Settings on
+// the Widgets section at boot, so the page and the desktop's widget layer mount without a pointer.
+function BenchWidgets() {
+  useEffect(() => {
+    if (settings.get().benchWidgets) wm.open('settings', { args: { section: 'widgets' } });
+  }, []);
+  return null;
+}
+
 function App() {
   const [s] = useSettings();
   const t = makeTheme(s);
@@ -330,6 +339,7 @@ function App() {
         )}
         {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
         <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
+        <BenchWidgets />
 
       </View>
     </ThemeProvider>

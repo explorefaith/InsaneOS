@@ -30,6 +30,7 @@ import { BluetoothSettings } from './Bluetooth.jsx';
 import { PowerSettings } from './Power.jsx';
 import { CoolingSettings } from './Cooling.jsx';
 import { AISettings } from './AI.jsx';
+import { WidgetsSettings } from './Widgets.jsx';
 import { NotificationsSettings } from './Notifications.jsx';
 import { DateTimeSettings } from './DateTime.jsx';
 import { DefaultAppsSettings } from './DefaultApps.jsx';
@@ -652,7 +653,7 @@ function Session() {
 // shared PaneGlyph set (ui.jsx) — one drawn, monochrome icon per section, the same one the pages
 // that need a picture use.
 const GROUPS = [
-  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['dock', DockSettings, '#3a3a3c'], ['displays', DisplaysSettings, '#0a84ff']],
+  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
   [['network', NetworkSettings, '#0a84ff'], ['bluetooth', BluetoothSettings, '#0a84ff'], ['sound', SoundSettings, '#ff375f'], ['notifications', NotificationsSettings, '#ff3b30'], ['printers', PrintersSettings, '#636366'], ['clipboard', ClipboardSettings, '#5e5ce6'], ['sharing', SharingSettings, '#34c759'], ['cloud', CloudSettings, '#0a84ff']],
   [['language', LanguageRegion, '#30b0c7'], ['datetime', DateTimeSettings, '#0a84ff'], ['keyboard', Keyboard, '#8e8e93'], ['trackpad', TrackpadSettings, '#8e8e93'], ['defaultapps', DefaultAppsSettings, '#8e8e93'], ['ai', AISettings, '#bf5af2']],
   [['power', PowerSettings, '#30d158'], ['cooling', CoolingSettings, '#32ade6'], ['firmware', FirmwareSettings, '#5e5ce6'], ['privacy', PrivacySettings, '#0a84ff'], ['users', UsersSettings, '#0a84ff'], ['updates', Updates, '#8e8e93'], ['session', Session, '#ff453a']],
