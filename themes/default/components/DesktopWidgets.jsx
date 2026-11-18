@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -227,6 +227,59 @@ function StatsCard({ widget }) {
   );
 }
 
+// M3: network throughput (the monitor's own per-sample rates) and the system disk's fill — the
+// same ref-per-tick pattern as StatsCard (no store write in render, the ticker drives redraws).
+function NetCard({ widget }) {
+  const tick = useStore(statsTicker);
+  const p = useStore(palette);
+  const ink = hex(p.ink);
+  const rate = useRef(null);
+  useEffect(() => { try { insane.monitor?.start?.(); } catch { /* not available */ } }, []);
+  try {
+    const smp = insane.monitor?.sample?.();
+    if (smp && smp.net && isFinite(smp.net.rx)) rate.current = { rx: smp.net.rx, tx: smp.net.tx, rxt: smp.net.rxTotal, txt: smp.net.txTotal };
+  } catch { /* monitor asleep */ }
+  const r = rate.current;
+  if (!r) return null;
+  const fmt = (b) => (!isFinite(b) ? '—' : b < 1024 ? `${Math.round(b)} B/s` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB/s` : `${(b / 1048576).toFixed(1)} MB/s`);
+  return (
+    <Card widget={widget} style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('settings.widgets.type.insane-net') || 'NETWORK').toUpperCase()}</Text>
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ink, opacity: 0.85 }} />
+      </View>
+      <Row label="↓ Down" value={fmt(r.rx)} pct={Math.max(0, Math.min(1, r.rx / 10485760))} ink={ink} />
+      <Row label="↑ Up" value={fmt(r.tx)} pct={Math.max(0, Math.min(1, r.tx / 10485760))} ink={ink} />
+      <Text style={{ fontSize: 11, color: INK_FAINT }}>{`Total ${formatBytes(r.rxt)} ↓ / ${formatBytes(r.txt)} ↑`}</Text>
+    </Card>
+  );
+}
+
+function StorageCard({ widget }) {
+  const tick = useStore(statsTicker);
+  const p = useStore(palette);
+  const ink = hex(p.ink);
+  const disk = useRef(null);
+  try {
+    const list = insane.disks?.list?.() || [];
+    const root = list.find((d) => d.system && isFinite(d.fssize) && d.fssize > 0) || list.find((d) => isFinite(d.fssize) && d.fssize > 0);
+    if (root) disk.current = root;
+  } catch { /* no disks api */ }
+  const d = disk.current;
+  if (!d) return null;
+  const pct = Math.max(0, Math.min(1, d.used / d.fssize));
+  return (
+    <Card widget={widget} style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('settings.widgets.type.insane-storage') || 'STORAGE').toUpperCase()}</Text>
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ink, opacity: 0.85 }} />
+      </View>
+      <Row label={tOptional('settings.widgets.type.insane-storage') || 'Storage'} value={`${formatBytes(d.used)} / ${formatBytes(d.fssize)}`} pct={pct} ink={ink} />
+      <Text style={{ fontSize: 11, color: INK_FAINT }}>{`${formatBytes(d.avail)} free`}</Text>
+    </Card>
+  );
+}
+
 // The user's saved layout (settings.desktopWidgets) drives every card; the two originals below are
 // the fallback when nothing was saved yet (loadWidgets(null)). In edit mode (right-click the
 // desktop → Edit Widgets) cards drag, every card has a remove button, and the gallery adds new
@@ -243,6 +296,8 @@ const X = () => Math.max(40, insane.screen.width - 342);
 
 registerWidgetType('insane-clock', ClockCard);
 registerWidgetType('insane-date', DateCard);
+registerWidgetType('insane-net', NetCard);
+registerWidgetType('insane-storage', StorageCard);
 registerWidgetType('insane-stats', StatsCard);
 setWidgets('insane-clock', [{ id: 'clock', x: X(), y: 104, w: 300, h: 132 }]);
 setWidgets('insane-stats', [{ id: 'stats', x: X(), y: 252, w: 300, h: 158 }]);

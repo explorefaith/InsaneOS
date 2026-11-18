@@ -85,8 +85,20 @@ widget framework is JS). C is used where the brief asks for it: the M5 crypto ne
   paint 21.0 ms average, **zero react errors**, 8 slow frames = the testbench's own bursts (the
   same count as the pre-M2 run — no widget-caused frame). **Still manual**: the analog face's look
   on glass in Light/Dark, the 12 h labels' placement, the cfg pop-ups' feel on the real desktop.
-### M3 — System widgets — **PARTIAL: temperature adaptive color DONE** (2026-11-18); Storage and
-Network-throughput cards remain
+### M3 — System widgets — **COMPLETE** (temperature color + Storage + Network cards; 2026-11-18)
+
+- **M3 part 2** (`DesktopWidgets.jsx`): **NetCard** (`insane-net`, 300×118 — ↓/↑ rates from the
+  monitor's own per-sample `net.rx/tx`, formatted B/KB/MB per second, the lifetime totals via
+  `formatBytes`) and **StorageCard** (`insane-storage`, 300×96 — the system disk's
+  used/total/free from `insane.disks.list()`'s statvfs fields, read defensively, no API → the
+  card hides). Both follow the StatsCard's ref-per-tick pattern: the shared 3 s ticker drives the
+  redraws, **no store write and no state set in render** (the React #185 lesson), and the
+  sampling pauses with the cards (the sharedTicker refcount). Catalog entries + type names in
+  five catalogs.
+- **Verification**: build-theme + i18n-check exit 0; the lab mounted BOTH cards through testbench
+  window cycles — 1172 frames, layout 0.19 ms, **zero react errors**, 6 slow frames = the
+  testbench's own bursts. **Manual**: real throughput under load, a multi-disk machine, a machine
+  without the disks API.
 
 - **Temperature adaptive color** (`sdk/widgetmodel.js` `tempColor`/`tempWord`/`TEMP_THRESHOLDS` +
   the StatsCard): the accent dot, the CPU bar and the temperature bar shift **interpolated**

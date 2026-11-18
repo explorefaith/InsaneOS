@@ -776,5 +776,7 @@
   "widgets.cfgSeconds": "Afficher les secondes",
   "widgets.temp.cool": "Frais",
   "widgets.temp.warm": "Tiède",
-  "widgets.temp.hot": "Chaud"
+  "widgets.temp.hot": "Chaud",
+  "widgets.type.insane-net": "Réseau",
+  "widgets.type.insane-storage": "Stockage"
 }
