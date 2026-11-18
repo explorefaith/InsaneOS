@@ -13,6 +13,7 @@ import {
   TextInput, useStore, useSettings, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
+  tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
   TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
@@ -188,7 +189,7 @@ function StyleControl({ label, children }) {
   );
 }
 
-function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, area }) {
+function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onDistributeX, onDistributeY, area }) {
   const t = useTheme();
   const st = w.style || {};
   const set = (patch) => onStyle(patch);
@@ -348,6 +349,82 @@ function AddDialog({ onAdd, onClose }) {
 }
 
 
+// ---------------------------------------------------------------- the live studio canvas
+
+// The active composition, natively drawn at preview scale (no transforms — the engine renders
+// scaled children blank). A block click selects; a drag moves the real widget live through
+// tsMove, with one undo step per drag (the history's beginDrag/endDrag coalescing) and the
+// alignment guides drawn while a drag snaps.
+function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
+  const t = useTheme();
+  const W = 520;
+  const k = W / area.w;
+  const H = Math.round(area.h * k);
+  const drag = useRef(null);
+  const live = useStore(tsLive);
+  const guides = useRef(null);
+  const byZ = [...widgets].sort((a, b) => a.z - b.z);
+  const start = (e, w) => {
+    if (w.locked) return;
+    e.stopPropagation?.();
+    onSelect(w.id);
+    drag.current = { id: w.id, sx: e.x, sy: e.y, ox: w.x, oy: w.y, moved: false, pre: tsLive.get().widgets.map((x) => ({ ...x })) };
+    histRef.current.beginDrag(drag.current.pre);
+    const move = (ev) => {
+      const d = drag.current;
+      if (!d) return;
+      d.moved = true;
+      const nx = d.ox + (ev.x - d.sx) / k;
+      const ny = d.oy + (ev.y - d.sy) / k;
+      try {
+        tsMove(d.id, nx, ny, area);
+        const cur = (tsLive.get().widgets.find((x) => x.id === d.id)) || {};
+        guides.current = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+      } catch (err) { /* clamped */ }
+    };
+    const up = () => {
+      const d = drag.current;
+      drag.current = null;
+      guides.current = null;
+      offMove(); offUp();
+      if (d && d.moved) histRef.current.endDrag(tsLive.get().widgets.map((x) => ({ ...x })));
+      else histRef.current.endDrag(d ? d.pre : null);
+    };
+    const offMove = addListener('pointermove', move);
+    const offUp = addListener('pointerup', up);
+  };
+  const g = guides.current;
+  return (
+    <View onClick={() => onSelect(null)} style={{ width: W, height: H, borderRadius: 10, overflow: 'hidden',
+      backgroundColor: '#101014', alignSelf: 'center', cursor: 'default' }}>
+      {g ? <View style={{ position: 'absolute', left: 0, right: 0, top: Math.round((g.y + g.h / 2) * k), height: 1, backgroundColor: 'rgba(120,180,255,0.6)' }} /> : null}
+      {g ? <View style={{ position: 'absolute', top: 0, bottom: 0, left: Math.round((g.x + g.w / 2) * k), width: 1, backgroundColor: 'rgba(120,180,255,0.6)' }} /> : null}
+      {byZ.map((w) => {
+        if (w.hidden) return null;
+        const st = rsResolveStyle(live.def?.style || {}, w.style || {});
+        const paper = st.paper || '#222222';
+        const ink = st.color || '#dddddd';
+        const sel = w.id === selW;
+        return (
+          <View key={w.id} onMouseDown={(e) => start(e, w)} style={{
+            position: 'absolute', left: Math.round(w.x * k), top: Math.round(w.y * k),
+            width: Math.max(6, Math.round(w.w * k)), height: Math.max(4, Math.round(w.h * k)),
+            borderRadius: Math.min(10, Math.max(2, Math.round((st.radius ?? 14) * k * 2))),
+            backgroundColor: rsWithAlpha(paper, st.alpha ?? 0.7),
+            border: sel ? '1.5px solid #7ab2ff' : (st.border && st.border !== 'none' ? '1px solid rgba(128,128,128,0.5)' : undefined),
+            padding: Math.max(2, Math.round((st.pad ?? 16) * k * 1.5)), overflow: 'hidden', cursor: w.locked ? 'default' : 'move',
+          }}>
+            <View style={{ height: Math.max(2, Math.round(w.h * k * 0.16)), width: '62%', borderRadius: 99, backgroundColor: rsWithAlpha(ink, 0.5) }} />
+          </View>
+        );
+      })}
+      {!widgets.length ? <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', padding: 16, textAlign: 'center' }}>{L('canvasEmpty', 'The composition is empty — add widgets from the layers panel.')}</Text> : null}
+      <Text style={{ position: 'absolute', left: 8, bottom: 6, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{L('canvasHint', 'Drag to arrange — the desktop follows live')}</Text>
+    </View>
+  );
+}
+
+
 // ---------------------------------------------------------------- the page
 
 export function ThemesSettings() {
@@ -398,6 +475,7 @@ export function ThemesSettings() {
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
+  const tsMutateList = (fn) => act(() => tsMutate(fn, area));
   const redo = () => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next, area); };
   const canUndo = hist.current.canUndo;
   const canRedo = hist.current.canRedo;
@@ -439,6 +517,13 @@ export function ThemesSettings() {
       </Section>
 
       {activeDef ? (
+        <Section title={L('livePreview', 'Live preview')}
+          footer={L('livePreviewHint', 'Click a block to select it; drag it and the real desktop follows. The centre lines are the alignment guides.')}>
+          <StudioCanvas widgets={live.widgets} area={area} selW={selW} onSelect={setSelW} histRef={hist} />
+        </Section>
+      ) : null}
+
+      {activeDef ? (
         <Columns>
           <Section title={L('layers', 'Layers — the widgets of this theme')}
             footer={L('layersHint', 'Top of the list is frontmost. The eye hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look below.')}
@@ -458,6 +543,10 @@ export function ThemesSettings() {
             {selected ? (
               <WidgetEditor w={{ ...selected, _palette: pal }} area={area}
                 onStyle={onStyle} onCfg={onCfg} onGeom={onGeom}
+                onLock={(on) => act(() => tsSetInstance(selected.id, { locked: on }))}
+                onAlign={(edge) => tsMutateList((l) => tsAlignW(l, selected.id, edge, area))}
+                onDistributeX={() => tsMutateList((l) => tsDistributeW(l, 'x', area))}
+                onDistributeY={() => tsMutateList((l) => tsDistributeW(l, 'y', area))}
                 onReset={() => act(() => tsResetInstance(selected.id, area))} />
             ) : (
               <Text style={{ fontSize: 12, color: t.textDim, paddingVertical: 8 }}>{L('pickWidget', 'Pick a widget from the layers to edit its type, size, colours and surface.')}</Text>

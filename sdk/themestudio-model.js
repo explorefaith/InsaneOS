@@ -64,6 +64,7 @@ export function newInstance(kind, list, area, at) {
     z,
     hidden: false,
     pinned: false,
+    locked: false,
     cfg: {},
     style: {},
   };
@@ -117,7 +118,7 @@ export function duplicateW(list, id, area) {
 
 export function moveW(list, id, x, y, area, opt = {}) {
   const w = getW(list, id);
-  if (!w) return list;
+  if (!w || w.locked) return list;
   const nx = opt.snap === false ? Math.round(x) : snap(x, TS_GRID);
   const ny = opt.snap === false ? Math.round(y) : snap(y, TS_GRID);
   let moved = clampInstance({ ...w, x: nx, y: ny }, area);
@@ -131,7 +132,7 @@ export function moveW(list, id, x, y, area, opt = {}) {
 
 export function resizeW(list, id, w, h, area) {
   const o = getW(list, id);
-  if (!o) return list;
+  if (!o || o.locked) return list;
   const size = clampInstance({ ...o, w: snap(w, TS_GRID), h: snap(h, TS_GRID) }, area);
   if (size.w === o.w && size.h === o.h) return list;
   return list.map((x) => (x.id === id ? size : x));
@@ -144,6 +145,47 @@ export function setW(list, id, patch, test) {
   if (test && test(o, next) === false) return list;
   if (shallowEqualObj(o, next)) return list;
   return list.map((x) => (x.id === id ? next : x));
+}
+
+// Alignment: snap a widget to the work area's edges or centres. Distribute: spread the visible
+// widgets of one axis evenly between the outermost two. Both ignore hidden widgets.
+export function alignW(list, id, edge, area) {
+  const w = getW(list, id);
+  if (!w || w.locked) return list;
+  let x = w.x, y = w.y;
+  if (edge === 'left') x = area.x;
+  else if (edge === 'right') x = area.x + area.w - w.w;
+  else if (edge === 'center-x') x = Math.round(area.x + (area.w - w.w) / 2);
+  else if (edge === 'top') y = area.y;
+  else if (edge === 'bottom') y = area.y + area.h - w.h;
+  else if (edge === 'center-y') y = Math.round(area.y + (area.h - w.h) / 2);
+  else return list;
+  return moveW(list, id, x, y, area, { snap: false });
+}
+
+export function distributeW(list, axis, area) {
+  const vis = list.filter((w) => !w.hidden && !w.locked && w.kind !== 'label');
+  if (vis.length < 3) return list;
+  const key = axis === 'y' ? 'y' : 'x';
+  const size = axis === 'y' ? 'h' : 'w';
+  const sorted = [...vis].sort((a, b) => a[key] - b[key]);
+  const first = sorted[0], last = sorted[sorted.length - 1];
+  const span = (last[key] + last[size]) - first[key];
+  if (span <= 0) return list;
+  const total = sorted.reduce((s2, w) => s2 + w[size], 0);
+  const gap = (span - total) / (sorted.length - 1);
+  if (gap < 0) return list;
+  let cursor = first[key];
+  const placed = new Map();
+  for (const w of sorted) {
+    placed.set(w.id, cursor);
+    cursor += w[size] + gap;
+  }
+  return list.map((w) => {
+    if (!placed.has(w.id)) return w;
+    const v = snap(placed.get(w.id), TS_GRID);
+    return axis === 'y' ? { ...w, y: v } : { ...w, x: v };
+  });
 }
 
 // z-order: bring to front (max+1), send to back (min-1), forward/backward swap with the adjacent
@@ -267,6 +309,7 @@ export function resolvePlan(plan, area, sw = 1280, sh = 800) {
       z: p.z ?? n,
       hidden: !!p.hidden,
       pinned: !!p.pinned,
+      locked: !!p.locked,
       cfg: deepCopy(p.cfg || {}),
       style: deepCopy(p.style || {}),
     });
@@ -390,7 +433,7 @@ export function planDiffers(saved, plan) {
   return saved.widgets.some((w, i) => {
     const p = plan[i] || {};
     return w.id !== p.id || w.x !== p.x || w.y !== p.y || w.w !== p.w || w.h !== p.h ||
-      w.z !== p.z || !!w.hidden !== !!p.hidden || !!w.pinned !== !!p.pinned ||
+      w.z !== p.z || !!w.hidden !== !!p.hidden || !!w.pinned !== !!p.pinned || !!w.locked !== !!p.locked ||
       JSON.stringify(w.cfg) !== JSON.stringify(p.cfg) || JSON.stringify(w.style) !== JSON.stringify(p.style);
   });
 }
