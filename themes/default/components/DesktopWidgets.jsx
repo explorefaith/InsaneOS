@@ -359,6 +359,15 @@ function BatteryCard({ widget }) {
 function MediaCard({ widget }) {
   const np = useStore(nowPlaying);
   const cfg = widget.cfg || {};
+  // gallery preview: nothing plays there either — draw the sample song, tagged by the gallery
+  if (widget.sample && (!np || !np.title)) {
+    return (
+      <Card widget={widget} style={{ gap: 8 }}>
+        <Text style={{ fontSize: 15, fontWeight: 700, color: INK, whiteSpace: 'nowrap', overflow: 'hidden' }}>Sample Song</Text>
+        <Text style={{ fontSize: 12, color: INK_DIM, whiteSpace: 'nowrap', overflow: 'hidden' }}>Sample Artist</Text>
+      </Card>
+    );
+  }
   if (!np || !np.title) {
     // nothing playing: hide (the default) or a quiet idle card, per the widget's cfg
     if (cfg.idle !== 'idle') return null;

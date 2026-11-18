@@ -782,5 +782,9 @@
   "widgets.idle": "When nothing plays",
   "widgets.hide": "Hide the card",
   "widgets.card": "Show an idle card",
-  "widgets.text": "Nothing playing"
+  "widgets.text": "Nothing playing",
+  "widgets.sample": "Sample",
+  "widgets.tipAdd": "Add to the desktop",
+  "widgets.tipConfigure": "Configure",
+  "widgets.tipRemove": "Remove the newest one"
 }

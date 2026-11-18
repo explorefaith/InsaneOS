@@ -71,7 +71,7 @@ export { errorText, statusText, codeError, parseCode } from './errors.js';
 export { logs } from './logs.js';
 export { InsaneLogo, InsaneGlyph, InsaneWordmark } from './logo.js';
 export { Lumo, lumoSource } from './mascot.js';
-export { DesktopWidgets, registerWidgetType, setWidgets, desktopWidgets } from './widgets.js';
+export { DesktopWidgets, registerWidgetType, setWidgets, desktopWidgets, widgetComponent } from './widgets.js';
 export { Markdown, markdownHeadings, parseMarkdown, parseInline, toggleTask } from './markdown.jsx';
 export {
   dock, useDockEntries, dockActivate, dockMenu, registerDockMenu, registerDockActions, dockQuickActions, launcherIdOf, dockIdOf, dockIdOfWindow,

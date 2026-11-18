@@ -782,5 +782,9 @@
   "widgets.idle": "Quando nada toca",
   "widgets.hide": "Ocultar o cartão",
   "widgets.card": "Mostrar cartão em repouso",
-  "widgets.text": "Nada tocando"
+  "widgets.text": "Nada tocando",
+  "widgets.sample": "Amostra",
+  "widgets.tipAdd": "Adicionar à área de trabalho",
+  "widgets.tipConfigure": "Configurar",
+  "widgets.tipRemove": "Remover o último"
 }

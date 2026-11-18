@@ -782,5 +782,9 @@
   "widgets.idle": "Quand rien ne joue",
   "widgets.hide": "Masquer la carte",
   "widgets.card": "Afficher une carte au repos",
-  "widgets.text": "Rien ne joue"
+  "widgets.text": "Rien ne joue",
+  "widgets.sample": "Exemple",
+  "widgets.tipAdd": "Ajouter au bureau",
+  "widgets.tipConfigure": "Configurer",
+  "widgets.tipRemove": "Retirer le dernier"
 }

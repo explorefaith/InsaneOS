@@ -33,3 +33,6 @@ export function DesktopWidgets({ layer = 'below' }) {
   if (!items.length) return null;
   return h(View, { style: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 } }, ...items);
 }
+
+// The registered card component of a type (the Settings gallery renders real previews with it).
+export const widgetComponent = (type) => types.get(type) || null;

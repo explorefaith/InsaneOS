@@ -240,7 +240,14 @@ no one can tell what a widget looks like before adding it. A design failure, not
   (System, Battery, Storage, Network), Media (Now Playing, Visualizer); Crypto under Finance only
   when M5 exists; the grid uses the Columns primitive responsively (2–4 per row by width).
 
-**Status**: **E — fix applied + lab-verified** (the defaults-as-layout bridge renders through the
-testbench: 1573 frames, layout 0.18 ms, zero react errors; commit pending). **A, B, C, D, F, G —
-NOT STARTED**; the model tests for placement (snap, clamp, resolution change, cancel restores,
-duplicates) and the failing-if-no-glyph test are part of them.
+**Status**: **E — DONE** (the bridge, verified 1573 frames), **A + B — DONE** (commit `f901695e`):
+the gallery shows the REAL widget components as previews (the registered card component at the
+chosen S/M/L size; the media preview draws its sample song, tagged Sample; no network calls, no
+nested blur — previews mounted only while the page is), with the drawn icon controls under each
+preview (S/M/L segments, +, the gear applying the clock's style/format/seconds and the media's
+idle mode to every placed instance of the type, the remove cross when instances exist, the
+On desktop: N badge) — no pixel sizes anywhere.
+**Verified**: build + i18n exit 0; autohide 689/689 + widgetmodel 9/9; the lab mounted the page
+with every preview through testbench cycles — 1187 frames, layout 0.44 ms, zero react errors.
+**Manual**: compare each preview with the real widget at all three sizes (Light and Dark).
+**C, D, F, G — NOT STARTED** (next: D, then C, then F, then G per the correction order).

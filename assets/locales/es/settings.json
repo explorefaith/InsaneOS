@@ -782,5 +782,9 @@
   "widgets.idle": "Cuando no suena nada",
   "widgets.hide": "Ocultar la tarjeta",
   "widgets.card": "Mostrar tarjeta en reposo",
-  "widgets.text": "Nada suena"
+  "widgets.text": "Nada suena",
+  "widgets.sample": "Muestra",
+  "widgets.tipAdd": "Añadir al escritorio",
+  "widgets.tipConfigure": "Configurar",
+  "widgets.tipRemove": "Quitar el último"
 }
