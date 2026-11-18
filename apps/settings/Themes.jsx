@@ -9,14 +9,14 @@
 // selected widget's geometry and typography, add/duplicate/remove, reset — with undo — and
 // Save as preset keeps the result as the user's own, never overwriting a built-in.
 import {
-  View, Text, Image, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
-  TextInput, useStore, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
+  View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
+  TextInput, useStore, useSettings, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
   TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
-import { useRef, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { Section, SettingRow, Note, Actions, Stack, Columns, PopUp, Message } from './ui.jsx';
 
 const L = (k, fb) => tOptional(`settings.themes.${k}`) || fb;
@@ -75,9 +75,10 @@ function ThemeMiniature({ theme, width, height }) {
   const src = previewWallpaper(theme.appearance);
   const bg = bgOf(theme.appearance);
   const area = { x: 0, y: 0, w: theme.sw || 1280, h: theme.sh || 720 };
-  const plan = theme.custom
+  const plan = useMemo(() => (theme.custom
     ? theme.widgets
-    : tsResolvePlan(theme.widgets || [], area, theme.sw || 1280, theme.sh || 720);
+    : tsResolvePlan(theme.widgets || [], area, theme.sw || 1280, theme.sh || 720)),
+    [theme.id, theme.custom && theme.widgets, theme.sw, theme.sh]);
   return (
     <View style={{ width, height, borderRadius: 10, overflow: 'hidden', backgroundColor: bg || '#141418' }}>
       {src ? <Image src={src} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
@@ -104,17 +105,17 @@ function ThemeCard({ theme, active, onSet, onPreview, onCustomize }) {
         border: `2px solid ${active ? t.accent : hover ? t.separator : 'transparent'}`,
         backgroundColor: active ? t.accentSubtle : 'transparent' }}>
       <View onClick={onPreview}>
-        <ThemeMiniature theme={theme} width={224} height={126} />
+        <ThemeMiniature theme={theme} width={220} height={124} />
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 2 }}>
         <Text style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: t.text, textAlign: 'start' }}
-          ellipsizeMode="tail" numberOfLines={1}>{theme.name}</Text>
+         >{theme.name}</Text>
         {theme.colors.slice(0, 3).map((c) => (
           <View key={c} style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: c, border: `1px solid ${t.separator}` }} />
         ))}
       </View>
       <Text style={{ fontSize: 11, color: t.textDim, paddingHorizontal: 2, minHeight: 26, textAlign: 'start' }}
-        ellipsizeMode="tail" numberOfLines={2}>{theme.desc}</Text>
+       >{theme.desc}</Text>
       <View style={{ flexDirection: 'row', gap: 4 }}>
         <Act label={active ? L('reapply', 'Reapply') : L('setTheme', 'Set')} onClick={onSet} primary />
         <Act label={L('preview', 'Preview')} onClick={onPreview} />
@@ -141,7 +142,7 @@ function PreviewDialog({ theme, active, onApply, onClose, onDeactivate }) {
             {theme.colors.map((c) => <View key={c} style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: c, border: `1px solid ${t.separator}` }} />)}
           </View>
           <Text style={{ fontSize: 12, color: t.textDim, textAlign: 'start' }}>{theme.desc}</Text>
-          <ThemeMiniature theme={theme} width={504} height={283} />
+          <ThemeMiniature theme={theme} width={502} height={282} />
           <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
             {active ? <Button label={L('stopUsing', 'Use no theme')} onClick={onDeactivate} /> : null}
             <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={onClose} />
@@ -166,7 +167,7 @@ function LayerRow({ w, index, n, selected, onSelect, onEye, onUp, onDown, onDup,
       paddingHorizontal: 8, borderRadius: 8, cursor: 'pointer',
       backgroundColor: selected ? t.accentSubtle : 'transparent' }}>
       <Text style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: selected ? 600 : 400, color: w.hidden ? t.textDim : t.text, textAlign: 'start' }}
-        ellipsizeMode="tail" numberOfLines={1}>{label}</Text>
+       >{label}</Text>
       <Text onClick={(e) => { e.stopPropagation?.(); onUp(); }} style={{ fontSize: 12, color: index === n - 1 ? t.separator : t.textDim, padding: '2px 4px' }}>↑</Text>
       <Text onClick={(e) => { e.stopPropagation?.(); onDown(); }} style={{ fontSize: 12, color: index === 0 ? t.separator : t.textDim, padding: '2px 4px' }}>↓</Text>
       <Text onClick={(e) => { e.stopPropagation?.(); onDup(); }} style={{ fontSize: 12, color: t.textDim, padding: '2px 4px' }}>⧉</Text>
@@ -182,7 +183,7 @@ function StyleControl({ label, children }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 32 }}>
       <Text style={{ width: 92, fontSize: 12, color: t.textDim, textAlign: 'start' }}>{label}</Text>
-      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>{children}</View>
+      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>{children}</View>
     </View>
   );
 }
@@ -281,17 +282,17 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, area }) {
       ) : null}
       {w.kind === 'notes' ? (
         <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 260 }} />
+          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
         </StyleControl>
       ) : null}
       {w.kind === 'quote' ? (
         <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 260 }} />
+          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
         </StyleControl>
       ) : null}
       {w.kind === 'headline' || w.kind === 'label' ? (
         <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 260 }} />
+          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
         </StyleControl>
       ) : null}
     </View>
@@ -326,15 +327,17 @@ function AddDialog({ onAdd, onClose }) {
               </View>
             ))}
           </View>
-          <View style={{ height: 280, flexDirection: 'row', flexWrap: 'wrap', gap: 8, overflow: 'hidden' }}>
-            {list.map((sp) => (
-              <View key={sp.id} onClick={() => { onAdd(sp.id); onClose(); }} style={{ width: 172, paddingHorizontal: 10, height: 30,
-                borderRadius: 8, justifyContent: 'center', backgroundColor: t.control, cursor: 'pointer' }}>
-                <Text style={{ fontSize: 12, color: t.text }} ellipsizeMode="tail" numberOfLines={1}>{kindLabel(sp.id)}</Text>
-              </View>
-            ))}
-            {!list.length ? <Text style={{ fontSize: 12, color: t.textDim, padding: 12 }}>{L('noKinds', 'Nothing matches.')}</Text> : null}
-          </View>
+          <ScrollView style={{ height: 280 }} resetKey={`${cat}:${q}`}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingBottom: 8 }}>
+              {list.map((sp) => (
+                <View key={sp.id} onClick={() => { onAdd(sp.id); onClose(); }} style={{ width: 168, paddingHorizontal: 10, height: 30,
+                  borderRadius: 8, justifyContent: 'center', backgroundColor: t.control, cursor: 'pointer' }}>
+                  <Text style={{ fontSize: 12, color: t.text, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 }}>{kindLabel(sp.id)}</Text>
+                </View>
+              ))}
+              {!list.length ? <Text style={{ fontSize: 12, color: t.textDim, padding: 12 }}>{L('noKinds', 'Nothing matches.')}</Text> : null}
+            </View>
+          </ScrollView>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={onClose} />
           </View>
@@ -350,6 +353,7 @@ function AddDialog({ onAdd, onClose }) {
 export function ThemesSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
+  const [s] = useSettings();
   const live = useStore(tsLive);
   const [sel, setSel] = useState(null);            // the theme in the preview dialog
   const [selW, setSelW] = useState(null);          // the selected widget in the editor
@@ -359,7 +363,8 @@ export function ThemesSettings() {
   const [addOpen, setAddOpen] = useState(false);
   const hist = useRef(tsCreateHistory(40));
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
-  const themes = tsAllThemes();
+  // the catalog only changes with the themeStudio record — not on every live-list edit
+  const themes = useMemo(() => tsAllThemes(), [s.themeStudio]);
   const activeDef = live.def;
   const widgets = live.widgets || [];
   const selected = widgets.find((w) => w.id === selW) || null;
@@ -385,13 +390,20 @@ export function ThemesSettings() {
     hist.current.push(tsLive.get().widgets);
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
+  // continuous controls (the sliders): one undo step per burst, the live set still every frame
+  let lastSoft = 0;
+  const actSoft = (fn) => {
+    const now = Date.now();
+    if (now - lastSoft > 800) { hist.current.push(tsLive.get().widgets); lastSoft = now; }
+    try { fn(); } catch (e) { say({ err: errorText(e) }); }
+  };
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
   const redo = () => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next, area); };
   const canUndo = hist.current.canUndo;
   const canRedo = hist.current.canRedo;
 
   const cur = () => (tsLive.get().widgets || []).find((x) => x.id === selW) || {};
-  const onStyle = (patch) => act(() => tsSetInstance(selW, { style: { ...(cur().style || {}), ...patch } }));
+  const onStyle = (patch) => actSoft(() => tsSetInstance(selW, { style: { ...(cur().style || {}), ...patch } }));
   const onCfg = (patch) => act(() => tsSetInstance(selW, { cfg: { ...(cur().cfg || {}), ...patch } }));
   const onGeom = (nx, ny, nw, nh) => {
     if (nx != null || ny != null) act(() => tsMove(selW, nx ?? cur().x, ny ?? cur().y, area));
@@ -483,7 +495,7 @@ export function ThemesSettings() {
           <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
             justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}
             onClick={() => setPresetOpen(false)}>
-            <View onClick={(e) => e.stopPropagation?.()} style={{ width: 360, borderRadius: 12, backgroundColor: t.windowBg,
+            <View onClick={(e) => e.stopPropagation?.()} style={{ width: 360, borderRadius: 14, backgroundColor: t.windowBg,
               border: `1px solid ${t.separator}`, padding: 16, gap: 10 }}>
               <Text style={{ fontSize: 14, fontWeight: 600, color: t.text, textAlign: 'start' }}>
                 {typeof presetOpen === 'string' ? L('renameTitle', 'Rename the preset') : L('saveTitle', 'Save as a preset')}</Text>

@@ -7,8 +7,9 @@ import { settings } from '../sdk/settings.js';
 import { THEMES } from '../sdk/themestudio-themes.js';
 import {
   tsLive, tsInit, tsApplyTheme, tsDeactivate, tsMutate, tsResetTheme,
-  tsSaveCustom, tsDeleteCustom, tsRenameCustom, themeOf, tsAllThemes,
+  tsSaveCustom, tsDeleteCustom, tsRenameCustom, themeOf, tsAllThemes, tsPersistFlush,
 } from '../sdk/themestudio.js';
+const flush = () => tsPersistFlush();   // the persist debounce settles immediately in tests
 
 const AREA = { x: 0, y: 28, w: 1280, h: 692 };
 let checks = 0;
@@ -46,7 +47,9 @@ ok(saved.overrides['acid-press'] === undefined, 'an untouched theme writes no ov
 const w0 = tsLive.get().widgets[0];
 const moved = tsMutate((l) => l.map((x) => (x.id === w0.id ? { ...x, x: 400 } : x)), AREA);
 eq(moved[0].x, 400, 'the edit lands on the live list');
+flush();
 ok(settings.get().themeStudio.overrides['acid-press'], 'the override is persisted');
+flush();
 eq(settings.get().themeStudio.overrides['acid-press'].widgets.length, moved.length, '…with the whole list');
 
 // re-init reads the same state back (the boot path)
@@ -101,6 +104,7 @@ tsApplyTheme('deep-forest', AREA);
 tsMutate((l) => l.map((x) => (x.id === tsLive.get().widgets[0].id ? { ...x, x: 224 } : x)), AREA);
 const cid = tsSaveCustom('My Forest');
 ok(cid && cid.startsWith('custom-'), 'a custom preset is saved with a namespaced id');
+flush();
 const rec = settings.get().themeStudio.customs[cid];
 eq(rec.name, 'My Forest', 'with its name');
 eq(rec.base, 'deep-forest', 'and its base');
@@ -122,6 +126,7 @@ eq(themeOf(cid).name, 'Better Forest', 'the def follows');
 
 // appearance changes while a custom is active belong to the preset (the sync subscription)
 settings.set({ wallpaper: 'anime-1' });
+flush();
 const rec2 = settings.get().themeStudio.customs[cid];
 eq(rec2.appearance.wallpaper, 'anime-1', 'the preset recorded the new wallpaper');
 

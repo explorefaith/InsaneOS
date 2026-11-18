@@ -151,11 +151,16 @@ export function tsInit(area) {
 export function tsApplyTheme(id, area) {
   const def = themeOf(id);
   if (!def) return false;
+  tsPersistFlush();
   const saved = tsSaved();
-  const savedAppearance = saved.active ? saved.savedAppearance : snapshotAppearance();
+  const savedAppearance = saved.active && saved.savedAppearance ? saved.savedAppearance : snapshotAppearance();
   const appearance = def.appearance || {};
   const patch = {};
   for (const k of TS_APPEARANCE_KEYS) if (appearance[k] !== undefined) patch[k] = appearance[k];
+  // a theme stands either on a picture or on a background — the pair is written together so the
+  // previous theme's gradient (which Backdrop draws INSTEAD of any picture) never survives
+  if (patch.wallpaper === undefined) patch.wallpaper = appearance.wallpaper ?? null;
+  if (patch.wallpaperBg === undefined) patch.wallpaperBg = appearance.wallpaperBg ?? null;
   settings.set({ ...patch, themeStudio: { ...saved, active: id, savedAppearance } });
   const widgets = liveWidgets(def, overrideOf(saved, id), area);
   tsLive.set({ active: id, def, widgets, area });
@@ -165,6 +170,7 @@ export function tsApplyTheme(id, area) {
 // Back to no theme: the saved look returns (or, when there is none, the keys stay as they are —
 // an interrupted first apply must not blank the desktop).
 export function tsDeactivate(area) {
+  tsPersistFlush();
   const saved = tsSaved();
   const restore = saved.savedAppearance || {};
   write({ active: null, savedAppearance: null, overrides: saved.overrides, customs: saved.customs });
@@ -174,23 +180,41 @@ export function tsDeactivate(area) {
 
 // ---------------------------------------------------------------- edits (live list → persisted)
 
-function persistWidgets(list) {
-  const st = tsLive.get();
+// The pending write carries the state it was scheduled with, so a theme switch cannot steal it:
+// apply/deactivate flush first (tsPersistFlush). Exposed for the tests, which assert immediately.
+let pending = null;
+function persistNow() {
+  if (!pending) return;
+  const { active, def, area, widgets } = pending;
+  pending = null;
   const saved = tsSaved();
-  if (!st.active || !st.def) return;
-  if (saved.customs[st.active]) {
-    const c = saved.customs[st.active];
-    write({ ...saved, customs: { ...saved.customs, [st.active]: { ...c, widgets: list } } });
+  if (saved.customs[active]) {
+    const c = saved.customs[active];
+    write({ ...saved, customs: { ...saved.customs, [active]: { ...c, widgets } } });
     return;
   }
   // A built-in keeps its settings entry only when the list really left the plan — an untouched
   // theme must never write an override (the settings.json honesty rule).
-  const plan = resolvePlan(st.def.widgets || [], st.area, st.def.sw, st.def.sh);
-  const rec = planDiffers({ widgets: list }, plan) ? { widgets: list } : null;
+  const plan = resolvePlan(def.widgets || [], area, def.sw, def.sh);
+  const rec = planDiffers({ widgets }, plan) ? { widgets } : null;
   const overrides = { ...saved.overrides };
-  if (rec) overrides[st.active] = rec;
-  else delete overrides[st.active];
+  if (rec) overrides[active] = rec;
+  else delete overrides[active];
   write({ ...saved, overrides });
+}
+export function tsPersistFlush() {
+  clearTimeout(persistTimer);
+  persistNow();
+}
+let persistTimer = 0;
+function persistWidgets(list) {
+  const st = tsLive.get();
+  if (!st.active || !st.def) return;
+  // live list updates ride every frame; the settings write settles 400 ms after the last one —
+  // the classic widgets' own debounce (DesktopWidgets' saveTimer) — with the state it belongs to
+  pending = { active: st.active, def: st.def, area: st.area, widgets: list };
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(persistNow, 400);
 }
 
 // Run a pure model edit over the live list; `fn(list, area)` returns the next list or null.
@@ -229,7 +253,17 @@ export function tsResetInstance(id, area) {
   const st = tsLive.get();
   if (!st.active || !st.def || st.def.custom) return null;
   const plan = resolvePlan(st.def.widgets || [], area || st.area, st.def.sw, st.def.sh);
-  const p = plan.find((w) => w.id === id);
+  // ids carry the screen size (resolvePlan); after a resolution change the recomputed plan's ids
+  // differ, so fall back to the same ordinal of the same kind
+  let p = plan.find((w) => w.id === id);
+  if (!p) {
+    const cur = st.widgets.find((w) => w.id === id);
+    if (cur) {
+      const sameKind = plan.filter((w) => w.kind === cur.kind);
+      const ord = st.widgets.filter((w) => w.kind === cur.kind).findIndex((w) => w.id === id);
+      p = sameKind[Math.max(0, ord)] || sameKind[0];
+    }
+  }
   if (!p) return null;
   return tsSetInstance(id, { ...deepCopy(p) }, null, area);
 }
@@ -239,6 +273,7 @@ export function tsResetTheme(area) {
   const st = tsLive.get();
   if (!st.active || !st.def) return null;
   if (st.def.custom) return null;
+  tsPersistFlush();
   const saved = tsSaved();
   const overrides = { ...saved.overrides };
   delete overrides[st.active];

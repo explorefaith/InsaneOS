@@ -118,9 +118,11 @@ function LiveTile({ it, state, onPick, onRetry, codecsAny }) {
       </View>
       <Text style={{ fontSize: typeScale.caption, color: t.textDim, maxWidth: 168, textAlign: 'center' }}>{it.name}</Text>
       {stopped ? (
-        <Text onClick={onRetry} style={{ fontSize: typeScale.caption, color: t.accent, textDecoration: 'underline' }}>
-          {L('wallpaper.live.stopped', 'stopped — try again')}
-        </Text>
+        <View onClick={onRetry} style={{ borderBottomWidth: 1, borderBottomColor: t.accent }}>
+          <Text style={{ fontSize: typeScale.caption, color: t.accent }}>
+            {L('wallpaper.live.stopped', 'stopped — try again')}
+          </Text>
+        </View>
       ) : null}
     </View>
   );

@@ -33,6 +33,7 @@ const kindLabel = (id) => tOptional(`settings.kind.${id}`) || (TS_KINDS[id] || {
 
 const tsClock = sharedTicker((d) => d.getTime(), 1000);                 // the clocks, the calendar
 const tsStats = sharedTicker((d) => Math.floor(d.getTime() / 3000), 3000);   // monitor-driven kinds
+const tsSlow = sharedTicker((d) => Math.floor(d.getTime() / 60000), 60000);  // moon, year, week, countdown
 
 // ---------------------------------------------------------------- the style chain
 
@@ -213,7 +214,7 @@ function CalendarW({ widget, st }) {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
         {names.map((n, i) => (
           <View key={`h${i}`} style={{ width: `${100 / 7}%`, alignItems: 'center' }}>
-            <Text style={dim(st, { size: Math.max(9, (st.size || 12) - 2), weight: 700 })}>{n}</Text>
+            <Text style={dim(st, { size: Math.max(10, (st.size || 12) - 2), weight: 700 })}>{n}</Text>
           </View>
         ))}
         {cells.map((n, i) => n === null ? <View key={`e${i}`} style={{ width: `${100 / 7}%` }} /> : (
@@ -230,23 +231,17 @@ function CalendarW({ widget, st }) {
 }
 
 function AgendaW({ widget, st }) {
-  usePim();                                     // redraws when calendars change
-  const list = useRef([]);
-  try {
-    const start = new Date(); start.setHours(0, 0, 0, 0);
-    const end = new Date(start); end.setDate(end.getDate() + 1);
-    list.current = calendarEvents.range(start.getTime(), end.getTime()) || [];
-  } catch (e) { list.current = []; }            // no calendar service: the quiet line
-  const evs = list.current.filter((e) => e && e.title);
+  usePimCache();                                // redraws when calendars change; fills the cache
+  const evs = (pimCache.get().events || []).filter((e) => e && e.title);
   const st0 = eff(widget);
   return (
     <TSCard widget={widget} st={{ gap: 6 }}>
-      <Eyebrow st={st0} text={tOptional('shell.widgets.agenda') || 'Agenda'} />
+      <Eyebrow st={st0} text={kindLabel(widget.kind)} />
       {evs.length ? evs.slice(0, 3).map((e, i) => (
         <View key={e.uid || i} style={{ flexDirection: 'row', gap: 8, alignItems: 'baseline' }}>
           <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: st0.accent || st0.color, opacity: 0.8 }} />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={tx(st, { size: st.size })} ellipsizeMode="tail" numberOfLines={1}>{e.title}</Text>
+            <Text style={tx(st, { size: st.size })} style={[{}], ''}>{e.title}</Text>
             <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) })}>
               {new Date(e.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
@@ -280,9 +275,11 @@ function WeatherW({ widget, st }) {
           <Text style={dim(st, { size: Math.max(11, Math.round((st.size || 30) * 0.4)), weight: 600 })}>
             {tOptional('shell.weather.title') || 'Weather'}
           </Text>
-          <Text onClick={() => weatherConsent(true)} style={{ ...dim(st, { size: 11 }), color: st0.accent || st0.color, textDecoration: 'underline' }}>
-            {tOptional('shell.weather.allow') || 'Allow'}
-          </Text>
+          <View onClick={() => weatherConsent(true)} style={{ alignSelf: st.align === 'center' ? 'center' : 'flex-start', borderBottomWidth: 1, borderBottomColor: st0.accent || st0.color }}>
+            <Text style={dim(st, { size: 11, color: st0.accent || st0.color })}>
+              {tOptional('shell.weather.allow') || 'Allow'}
+            </Text>
+          </View>
         </View>
       );
     }
@@ -379,8 +376,8 @@ function MediaW({ widget, st }) {
       <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
         {np.cover ? <Image src={np.cover} style={{ width: 40, height: 40, borderRadius: 8 }} /> : null}
         <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-          <Text style={tx(st, { size: st.size })} ellipsizeMode="tail" numberOfLines={1}>{np.title}</Text>
-          {np.artist ? <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) })} ellipsizeMode="tail" numberOfLines={1}>{np.artist}</Text> : null}
+          <Text style={tx(st, { size: st.size })} style={[{}], ''}>{np.title}</Text>
+          {np.artist ? <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) })} style={[{}], ''}>{np.artist}</Text> : null}
         </View>
       </View>
       <Bar st={st0} pct={pct} color={st0.accent || st0.color} />
@@ -408,18 +405,17 @@ function NotesW({ widget, st }) {
 }
 
 function TodoW({ widget, st }) {
-  const rev = usePim();
+  usePimCache();
   const st0 = eff(widget);
-  let items = [];
-  try { items = (reminders.items() || []).filter((x) => x && !x.done); } catch (e) { items = []; }
+  const items = pimCache.get().todos || [];
   const toggle = (it) => { try { reminders.toggle(it); } catch (e) { /* gone */ } };
   return (
     <TSCard widget={widget} st={{ gap: 6 }}>
-      <Eyebrow st={st0} text={tOptional('shell.widgets.todo') || 'Tasks'} />
+      <Eyebrow st={st0} text={kindLabel(widget.kind)} />
       {items.length ? items.slice(0, 5).map((it) => (
         <View key={it.uid} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <View onClick={() => toggle(it)} style={{ width: 14, height: 14, borderRadius: 4, border: `1.5px solid ${st0.accent || st0.color}` }} />
-          <Text style={tx(st, { size: st.size })} ellipsizeMode="tail" numberOfLines={1}>{it.title}</Text>
+          <Text style={tx(st, { size: st.size })} style={[{}], ''}>{it.title}</Text>
         </View>
       )) : (
         <Text style={dim(st, { size: st.size })}>{tOptional('shell.widgets.todo.none') || 'All clear'}</Text>
@@ -440,16 +436,18 @@ function QuoteW({ widget, st }) {
 
 function PomodoroW({ widget, st }) {
   const t = useStore(clockTimer);
+  useStore(tsClock);                            // the countdown re-renders each second while it runs
   const st0 = eff(widget);
-  const left = timerLeft(t);
-  const mm = String(Math.floor(left / 60)).padStart(2, '0');
-  const ss = String(Math.floor(left % 60)).padStart(2, '0');
+  const left = timerLeft(t);                    // ms
+  const mm = String(Math.floor(left / 60000)).padStart(2, '0');
+  const ss = String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
   const running = t.state === 'running';
   const Btn = ({ label, onClick }) => (
     <Text onClick={onClick} style={{ ...tx(st, { size: 12, weight: 700 }), color: st0.accent || st0.color, padding: 4 }}>{label}</Text>
   );
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+      <Eyebrow st={st0} text={kindLabel(widget.kind)} />
       <Text style={tx(st, { size: st.size, lineHeight: 1.1 })}>{left > 0 ? `${mm}:${ss}` : '25:00'}</Text>
       <View style={{ flexDirection: 'row', gap: 6 }}>
         {!running ? <Btn label={t.state === 'paused' ? '▶' : 'Start'} onClick={() => (t.state === 'paused' ? timerResume() : timerStart(1500))} /> : null}
@@ -586,16 +584,30 @@ const sysInfo = () => tryDo(() => insane.system?.info?.() || null);
 // while a history widget is mounted — 60 points at the 3 s tick is three minutes).
 const HIST = {};
 const pushHist = (key, v) => {
-  if (!Number.isFinite(v)) return HIST[key] || [];
   const a = (HIST[key] ||= []);
-  a.push(v);
-  if (a.length > 60) a.shift();
+  const win = Math.floor(Date.now() / 3000);
+  if (a.win === win) return a;               // already sampled this window (any number of renders)
+  if (Number.isFinite(v)) {
+    a.win = win;
+    a.push(v);
+    if (a.length > 60) a.shift();
+  }
   return a;
+};
+
+// The sources the monitor publishes only while wanted (voltage, gpu, connections): ask once per
+// read and keep the last good answer — the first ticks render quiet, then the data arrives.
+const LASTGOOD = {};
+const wantAndTake = (src, want, take) => {
+  tryDo(want);
+  const v = tryDo(take);
+  if (v != null) LASTGOOD[src] = v;
+  return LASTGOOD[src] || null;
 };
 const netHist = () => {
   const s = monSample();
   if (!s) return pushHist('net', NaN);
-  return pushHist('net', (s.net?.rx || 0) + (s.net?.tx || 0));
+  return pushHist('net', ((s.net?.rx || 0) + (s.net?.tx || 0)) / 1048576);   // MB/s, like ioHistory
 };
 
 const pctOf = (a, b) => (Number.isFinite(a) && Number.isFinite(b) && b > 0 ? Math.max(0, Math.min(1, a / b)) : null);
@@ -642,16 +654,16 @@ const PROV = {
     const a = nextAlarmStore.get();
     return a && a.at ? { value: new Date(a.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sub: a.label || '' } : null;
   },
-  eventsCount: () => { const n = eventCount(); return n == null ? null : { value: `${n}`, sub: 'today' }; },
+  eventsCount: () => { const c = pimCache.get(); if (!c || !Array.isArray(c.events)) return null; return { value: `${c.events.length}`, sub: 'today' }; },
   sunTimes: () => {
     const s = sunTimes();
     if (!s) return null;
     const hm = (m) => (Number.isFinite(m) ? `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}` : '—');
-    return { rows: [['Sunrise', hm(s.rise)], ['Sunset', hm(s.set)]] };
+    return { rows: [['Sunrise', hm(s.sunrise)], ['Sunset', hm(s.sunset)]] };
   },
   cpu: () => { const s = monSample(); return s && Number.isFinite(s.cpu) ? { value: pctStr(s.cpu), pct: s.cpu } : null; },
   cpuCores: () => { const s = monSample(); return s && Array.isArray(s.cores) && s.cores.length ? { series: s.cores.map((v) => Math.max(0, Math.min(1, v))) } : null; },
-  cpuHistory: () => { const s = monSample(); const a = pushHist('cpu', s?.cpu); return a.length > 1 ? { series: a.slice(), value: pctStr(a[a.length - 1]), max: 1 } : null; },
+  cpuHistory: () => { const s = monSample(); const raw = s?.cpu; const a = pushHist('cpu', Array.isArray(raw) ? raw[raw.length - 1] : raw); return a.length > 1 ? { series: a.slice(), value: pctStr(a[a.length - 1]), max: 1 } : null; },
   loadAvg: () => { const s = monSample(); return s?.load ? { rows: [['1 min', s.load[0].toFixed(2)], ['5 min', s.load[1].toFixed(2)], ['15 min', s.load[2].toFixed(2)]] } : null; },
   load1: () => { const s = monSample(); return s?.load ? { value: s.load[0].toFixed(2), sub: `of ${sysInfo()?.cores || '?'} cores` } : null; },
   cpuModel: () => { const i = sysInfo(); return i?.cpu ? { text: i.cpu, sub: `${i.cores || '?'} cores` } : null; },
@@ -676,17 +688,17 @@ const PROV = {
   },
   pressure: () => {
     const p = tryDo(() => insane.system?.pressure?.());
-    const some = Number.isFinite(p?.some60) ? p.some60 / 100 : NaN;
+    const some = Number.isFinite(p?.some60) && p.some60 >= 0 ? p.some60 / 100 : NaN;   // -1: no PSI
     return Number.isFinite(some) ? { value: pctStr(some), pct: some, sub: 'PSI 60 s' } : null;
   },
   voltage: () => {
-    const v = tryDo(() => insane.monitor?.voltage?.());
+    const v = wantAndTake('voltage', () => insane.monitor?.wantVoltage?.(true), () => insane.monitor?.voltage?.());
     const val = v?.chips?.[0]?.in?.find((x) => Number.isFinite(x.v))?.v;
     return Number.isFinite(val) ? { value: `${val.toFixed(2)} V`, sub: v.chips[0].name || '' } : null;
   },
-  gpuName: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const c = g?.cards?.[0]?.name || g?.cards?.[0]?.card; return c ? { text: c } : null; },
-  gpuBusy: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const b = g?.cards?.[0]?.busy; const p = p100(Number(b)); return p == null ? null : { value: pctStr(p), pct: p }; },
-  gpuClients: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const n = g?.clients?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'using the GPU' } : null; },
+  gpuName: () => { const g = wantAndTake('gpu', () => insane.monitor?.wantGpu?.(true), () => insane.monitor?.gpu?.()); const c = g?.cards?.[0]?.name || g?.cards?.[0]?.card; return c ? { text: c } : null; },
+  gpuBusy: () => { const g = wantAndTake('gpu', () => insane.monitor?.wantGpu?.(true), () => insane.monitor?.gpu?.()); const p = Number(g?.cards?.[0]?.busy); return Number.isFinite(p) && p >= 0 ? { value: pctStr(p / 100), pct: Math.max(0, Math.min(1, p / 100)) } : null; },
+  gpuClients: () => { const g = wantAndTake('gpu', () => insane.monitor?.wantGpu?.(true), () => insane.monitor?.gpu?.()); const n = g?.clients?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'using the GPU' } : null; },
   diskUsed: () => {
     const list = tryDo(() => insane.disks?.list?.()) || [];
     const root = list.find((d) => d.system && Number.isFinite(d.fssize) && d.fssize > 0) || list.find((d) => Number.isFinite(d.fssize) && d.fssize > 0);
@@ -723,7 +735,7 @@ const PROV = {
     return { text: b.charging ? 'Charging' : b.onAC ? 'On power' : 'On battery', sub: b.percent >= 0 ? `${b.percent}%` : '' };
   },
   powerMode: () => ({ text: (qualityProfile() || 'auto').replace(/^./, (c) => c.toUpperCase()) }),
-  nightLight: () => ({ on: !!nightActive.get?.() }),
+  nightLight: () => ({ on: !!nightActive() }),
   mediaTitle: () => { const np = npStore.get(); return np?.title ? { text: np.title, sub: np.artist || '' } : null; },
   mediaProgress: () => {
     const np = npStore.get();
@@ -733,9 +745,9 @@ const PROV = {
     return { pct: p, value: mmss(np.pos || 0), sub: mmss(np.duration) };
   },
   mediaCover: () => { const np = npStore.get(); return np?.cover ? { src: np.cover } : null; },
-  volume: () => { const st = soundState.get(); const out = defaultSink(st); if (!out || !Number.isFinite(out.volume)) return null; return { value: `${Math.round(out.volume * 100)}%`, pct: out.volume, sub: out.mute ? 'muted' : '' }; },
-  mute: () => { const out = defaultSink(soundState.get()); if (!out) return null; return { on: !!(out.mute || out.volume === 0) }; },
-  audioOutput: () => { const out = defaultSink(soundState.get()); return out?.name ? { text: out.name, sub: out.port || '' } : null; },
+  volume: () => { const out = defaultSink(soundState.get()); if (!out || !Number.isFinite(out.level)) return null; return { value: `${Math.round(out.level * 100)}%`, pct: out.level, sub: out.mute ? 'muted' : '' }; },
+  mute: () => { const out = defaultSink(soundState.get()); if (!out) return null; return { on: !!out.mute || out.level === 0 }; },
+  audioOutput: () => { const out = defaultSink(soundState.get()); const name = out?.description || out?.name; return name ? { text: name, sub: out.activePort || '' } : null; },
   netDown: () => { const s = monSample(); return s?.net ? { value: `${formatBytes(s.net.rx)}/s`, sub: 'down' } : null; },
   netUp: () => { const s = monSample(); return s?.net ? { value: `${formatBytes(s.net.tx)}/s`, sub: 'up' } : null; },
   netTotalDown: () => { const s = monSample(); return s?.net && Number.isFinite(s.net.rxTotal) ? { value: formatBytes(s.net.rxTotal), sub: 'received' } : null; },
@@ -746,17 +758,19 @@ const PROV = {
     const rows = ifs.filter((x) => x.up).slice(0, 4).map((x) => [x.name, x.carrier ? 'connected' : 'no carrier']);
     return rows.length ? { rows } : null;
   },
-  connCount: () => { const c = tryDo(() => insane.monitor?.connections?.()); const n = c?.list?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'connections' } : null; },
+  connCount: () => { const c = wantAndTake('conns', () => insane.monitor?.want?.(true, true, false), () => insane.monitor?.connections?.()); const n = c?.list?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'connections' } : null; },
   wifiState: () => {
     const ifs = tryDo(() => insane.net?.interfaces?.()) || [];
     const wifi = ifs.find((x) => x.type === 'wifi' || /wl|ath|wlan/.test(x.name || ''));
     if (!wifi) return null;
     return { value: wifi.carrier ? 'Connected' : wifi.up ? 'Ready' : 'Off', sub: wifi.name, pct: wifi.carrier ? 1 : wifi.up ? 0.5 : 0 };
   },
-  bluetooth: () => { const b = btStore.get(); if (!b) return null; return { on: !!b.powered, sub: (b.connected || b.connections)?.length ? 'connected' : '' }; },
-  todoCount: () => { const n = openTodos().length; return { value: `${n}`, sub: 'open' }; },
+  bluetooth: () => { const b = btStore.get(); if (!b) return null; return { on: !!b.adapter?.powered, sub: (b.devices || []).some((d) => d.connected) ? 'connected' : '' }; },
+  todoCount: () => { const c = pimCache.get(); if (!c || !Array.isArray(c.todos)) return null; return { value: `${c.todos.length}`, sub: 'open' }; },
   todoFlagged: () => {
-    const items = tryDo(() => (reminders.items() || []).filter((x) => x && !x.done && x.flag)) || [];
+    const c = pimCache.get();
+    if (!c || !Array.isArray(c.todos)) return null;
+    const items = c.todos.filter((x) => x.flag);
     return items.length ? { rows: items.slice(0, 4).map((x) => [x.title, x.listName || '']) } : { rows: [] };
   },
   osVersion: () => { const i = sysInfo(); return i?.os ? { text: i.os, sub: i.version ? `Insane OS ${i.version}${i.channel ? ` · ${i.channel}` : ''}` : '' } : null; },
@@ -804,6 +818,27 @@ const PROV = {
 let battNow = null;
 function useBattRef() { return battNow; }
 
+// Calendar/Reminders are async (maild round-trips) — no provider may call them in render (a
+// Promise.filter is the fake-empty bug). One cache, filled by an effect keyed on the PIM
+// revision; until the first fetch lands the providers answer null (quiet), never a fake 0.
+const pimCache = createStore({ events: null, todos: null });
+function usePimCache() {
+  const rev = usePimDep();
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const start = new Date(); start.setHours(0, 0, 0, 0);
+        const end = new Date(start); end.setDate(end.getDate() + 1);
+        const evs = await calendarEvents.range(start.getTime(), end.getTime());
+        const todos = await reminders.items();
+        if (alive) pimCache.set({ events: evs || [], todos: (todos || []).filter((x) => x && !x.done) });
+      } catch (e) { if (alive) pimCache.set({ events: [], todos: null }); }
+    })();
+    return () => { alive = false; };
+  }, [rev]);
+}
+
 
 // ---------------------------------------------------------------- the provider deps + generic variants
 
@@ -813,16 +848,26 @@ function useBattRef() { return battNow; }
 // always; they notify only on a real change.
 function useProviderDeps(kind) {
   battNow = useBatt();
-  useStore(npStore);
-  useStore(weatherStore);
-  useStore(btStore);
-  useStore(nightActive);
-  useStore(soundState);
-  useStore(swStore);
-  usePimDep();
+  const fam = familyOf(specOf(kind)?.src);
+  if (fam.np) useStore(npStore);
+  if (fam.weather) useStore(weatherStore);
+  if (fam.bt) useStore(btStore);
+  if (fam.sound) useStore(soundState);
+  if (fam.sw) useStore(swStore);
+  if (fam.pim) usePimCache();
   const cat = specOf(kind)?.cat;
-  useStore(cat === 'time' || cat === 'ambient' ? tsClock : tsStats);
+  useStore(cat === 'time' ? tsClock : cat === 'ambient' ? tsSlow : tsStats);
 }
+
+// The push stores a widget's src actually needs — hooks stay stable per instance because a
+// widget's kind (and therefore its family) never changes after mount.
+const familyOf = (src) => ({
+  np: !!src && src.startsWith('media'),
+  weather: !!src && src.startsWith('weather'),
+  bt: src === 'bluetooth',
+  sound: src === 'volume' || src === 'mute' || src === 'audioOutput',
+  pim: src === 'todoCount' || src === 'todoFlagged' || src === 'eventsCount',
+});
 
 const quiet = (widget, st, text) => (
   <TSCard widget={widget} st={{ justifyContent: 'center' }}>
@@ -837,7 +882,7 @@ function ValueW({ widget, st }) {
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 4 }}>
       {d.sub && d.sub.length <= 12 ? <Eyebrow st={st} text={d.sub} /> : null}
-      <Text style={tx(st, { size: st.size || 30, lineHeight: 1.05, color: d.hot ? '#ff453a' : undefined })}>{d.value}</Text>
+      <Text style={tx(st, { size: st.size || 30, lineHeight: 1.05, color: d.hot ? '#ff453a' : undefined, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1, overflow: 'hidden' })}>{d.value}</Text>
       {d.pct != null ? <Bar st={st} pct={d.pct} color={st.accent || st.color} /> : null}
       {d.sub && d.sub.length > 12 ? <Text style={dim(st, { size: 10 })}>{d.sub}</Text> : null}
     </TSCard>
@@ -848,7 +893,7 @@ function RingW({ widget, st }) {
   useProviderDeps(widget.kind);
   const d = PROV[specOf(widget.kind)?.src]?.(widget);
   if (!d || d.pct == null) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
-  const face = Math.min(widget.w, widget.h) - (st.pad ?? 18) * 2 - 6;
+  const face = Math.min(widget.w, widget.h) - (st.pad ?? 18) * 2 - (d.sub ? 18 : 6);
   const seg = (ang, col, len) => (
     <View key={`${ang}`} style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, transform: `rotate(${ang}deg)` }}>
       <View style={{ position: 'absolute', left: face / 2 - 2.5, top: 3, width: 5, height: len,
@@ -926,7 +971,7 @@ function RowsW({ widget, st }) {
       <Eyebrow st={st} text={kindLabel(widget.kind)} />
       {d.rows.slice(0, 5).map(([k, v], i) => (
         <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={dim(st, { size: st.size || 12 })} ellipsizeMode="tail" numberOfLines={1}>{k}</Text>
+          <Text style={dim(st, { size: st.size || 12 })} style={[{}], ''}>{k}</Text>
           <Text style={tx(st, { size: st.size || 12 })}>{String(v)}</Text>
         </View>
       ))}
@@ -940,7 +985,7 @@ function TextW({ widget, st }) {
   if (!d?.text) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 3 }}>
-      <Text style={tx(st, { size: st.size || 15, lineHeight: 1.25 })} ellipsizeMode="tail" numberOfLines={2}>{d.text}</Text>
+      <Text style={tx(st, { size: st.size || 15, lineHeight: 1.25 , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 2)}>{d.text}</Text>
       {d.sub ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 15) * 0.72)) })}>{d.sub}</Text> : null}
     </TSCard>
   );
@@ -1017,7 +1062,7 @@ function WeekW({ widget, st }) {
           const wd = weekdayName((i + 1) % 7, true).slice(0, 2);
           return (
             <View key={i} style={{ flex: 1, alignItems: 'center', gap: 3 }}>
-              <Text style={dim(st, { size: 9 })}>{wd}</Text>
+              <Text style={dim(st, { size: 10 })}>{wd}</Text>
               <View style={{ width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: isToday ? accent : 'transparent' }}>
                 <Text style={tx(st, { size: st.size || 12, weight: isToday ? 700 : 400, color: isToday ? (st.paper || '#fff') : inMonth ? st.color : st.dim })}>
                   {inMonth ? day : '·'}
@@ -1111,8 +1156,8 @@ function ToggleW({ widget, st }) {
   const label = kindLabel(widget.kind);
   const flip = () => {
     const src = specOf(widget.kind)?.src;
-    if (src === 'nightLight') setNightManual(!nightActive.get());
-    else if (src === 'bluetooth') setBluetoothPower(!(btStore.get()?.powered));
+    if (src === 'nightLight') setNightManual(!nightActive());
+    else if (src === 'bluetooth') setBluetoothPower(!(btStore.get()?.adapter?.powered));
     else if (src === 'mute') {
       const out = defaultSink(soundState.get());
       if (out) sound.setMute('sink', out.index ?? out.id ?? 0, !out.mute);
@@ -1136,10 +1181,11 @@ function ToggleW({ widget, st }) {
 
 function TimerW({ widget, st }) {
   const t = useStore(clockTimer);
+  useStore(tsClock);
   const st0 = eff(widget);
-  const left = timerLeft(t);
-  const mm = String(Math.floor(left / 60)).padStart(2, '0');
-  const ss = String(Math.floor(left % 60)).padStart(2, '0');
+  const left = timerLeft(t);                    // ms
+  const mm = String(Math.floor(left / 60000)).padStart(2, '0');
+  const ss = String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
   const running = t.state === 'running';
   const Btn = ({ label, onClick }) => (
     <Text onClick={onClick} style={{ ...tx(st, { size: 12, weight: 700 }), color: st0.accent || st0.color, padding: 4 }}>{label}</Text>
@@ -1159,6 +1205,7 @@ function TimerW({ widget, st }) {
 
 function StopwatchW({ widget, st }) {
   const sw = useStore(swStore);
+  useStore(tsClock);
   const st0 = eff(widget);
   const ms = swElapsed(sw);
   const mm = String(Math.floor(ms / 60000)).padStart(2, '0');
@@ -1225,8 +1272,10 @@ export function installThemeWidgetBridge() {
 // Dock strip below — the same area the Widgets page clamps into). A theme that no longer
 // resolves degrades to no theme inside tsInit; the desktop keeps exactly what it shows.
 try {
+  installThemeWidgetBridge();                 // first: every later apply reaches the desktop
+} catch (e) { /* never block the shell */ }
+try {
   tsInit({ x: 0, y: 28, w: insane.screen.width, h: Math.max(200, insane.screen.height - 28 - 80) });
-  installThemeWidgetBridge();
 } catch (e) { /* a broken screen probe never blanks the desktop */ }
 
 export { TsWidget, eff as tsEffStyle, KIND_STYLE as TS_KIND_STYLE };
