@@ -789,5 +789,8 @@
   "widgets.tipMove": "Place on the desktop",
   "widgets.tipRemove": "Remove the newest one",
   "widgets.reset": "Reset layout",
-  "widgets.pick": "Pick a widget below"
+  "widgets.pick": "Pick a widget below",
+  "widgets.cat.time": "Time",
+  "widgets.cat.system": "System",
+  "widgets.cat.media": "Media"
 }

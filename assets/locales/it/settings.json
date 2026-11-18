@@ -789,5 +789,8 @@
   "widgets.tipMove": "Posiziona sul desktop",
   "widgets.tipRemove": "Rimuovi l'ultimo",
   "widgets.reset": "Reimposta la disposizione",
-  "widgets.pick": "Scegli un widget qui sotto"
+  "widgets.pick": "Scegli un widget qui sotto",
+  "widgets.cat.time": "Ora",
+  "widgets.cat.system": "Sistema",
+  "widgets.cat.media": "Media"
 }

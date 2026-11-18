@@ -789,5 +789,8 @@
   "widgets.tipMove": "Colocar na área de trabalho",
   "widgets.tipRemove": "Remover o último",
   "widgets.reset": "Redefinir a organização",
-  "widgets.pick": "Escolha um widget abaixo"
+  "widgets.pick": "Escolha um widget abaixo",
+  "widgets.cat.time": "Hora",
+  "widgets.cat.system": "Sistema",
+  "widgets.cat.media": "Mídia"
 }

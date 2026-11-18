@@ -789,5 +789,8 @@
   "widgets.tipMove": "Placer sur le bureau",
   "widgets.tipRemove": "Retirer le dernier",
   "widgets.reset": "Réinitialiser la disposition",
-  "widgets.pick": "Choisissez un widget ci-dessous"
+  "widgets.pick": "Choisissez un widget ci-dessous",
+  "widgets.cat.time": "Heure",
+  "widgets.cat.system": "Système",
+  "widgets.cat.media": "Médias"
 }

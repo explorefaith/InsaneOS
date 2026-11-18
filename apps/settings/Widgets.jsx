@@ -10,7 +10,7 @@ import {
   widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent,
   sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow,
 } from '@insaneos/sdk';
-import { Stack, Section, SettingRow, Actions, Note, PopUp } from './ui.jsx';
+import { Stack, Section, SettingRow, Actions, Note, PopUp, Columns } from './ui.jsx';
 import { useState } from 'react';
 
 // the compact native minis: no scale transform anywhere (this engine's parent scale does not
@@ -234,58 +234,66 @@ export function WidgetsSettings() {
         })}
       </Section>
       <Section title={tOptional('settings.widgets.gallery') || 'Add a widget'} footer={tOptional('settings.widgets.galleryHint') || 'Previews show the real widget at the chosen size. New ones land in a free spot on the desktop.'}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingVertical: 8, width: '100%' }}>
-          {WIDGET_CATALOG.map((c) => {
-            const size = SIZES[SIZES.findIndex(([k]) => k === (sz[c.type] || 'medium'))]?.[1] ?? 1;
-            const placed = countOfType(layout, c.type);
-            const open = cfgFor === c.type;
-            return (
-              <View key={c.type} style={{ width: 330, gap: 6 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 13, fontWeight: 700, color: t.text }}>{tOptional(`settings.widgets.type.${c.type}`) || c.type}</Text>
-                  {placed > 0 ? <Text style={{ fontSize: 10, color: t.textDim }}>{tOptional('settings.widgets.onDesktop') || 'On desktop'}: {placed}</Text> : null}
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
-                  <Preview type={c.type} cfg={cfgOf(c.type)} size={size} />
-                  {c.type === 'insane-media' ? (
-                    <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: t.accentSubtle }}>
-                      <Text style={{ fontSize: 9, fontWeight: 700, color: t.text }}>{tOptional('settings.widgets.sample') || 'Sample'}</Text>
+        <Columns>
+          {[['time', 'Time', ['insane-clock', 'insane-date', 'insane-calendar']],
+            ['system', 'System', ['insane-stats', 'insane-battery', 'insane-storage', 'insane-net']],
+            ['media', 'Media', ['insane-media', 'insane-visualizer']]].map(([key, label, types]) => (
+            <View key={key} style={{ gap: 8 }}>
+              <Text style={{ fontSize: 12, fontWeight: 700, color: t.textDim, letterSpacing: 1 }}>{tOptional(`settings.widgets.cat.${key}`) || label}</Text>
+              {types.map((type) => {
+                const c = catalogOf(type);
+                const size = SIZES[SIZES.findIndex(([k]) => k === (sz[type] || 'medium'))]?.[1] ?? 1;
+                const placed = countOfType(layout, type);
+                const open = cfgFor === type;
+                return (
+                  <View key={type} style={{ width: 330, gap: 6 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={{ fontSize: 13, fontWeight: 700, color: t.text }}>{tOptional(`settings.widgets.type.${type}`) || type}</Text>
+                      {placed > 0 ? <Text style={{ fontSize: 10, color: t.textDim }}>{tOptional('settings.widgets.onDesktop') || 'On desktop'}: {placed}</Text> : null}
                     </View>
-                  ) : null}
-                </View>
-                <Controls type={c.type} placed={placed} size={sz[c.type] || 'medium'}
-                  onSize={(k) => setSz((s) => ({ ...s, [c.type]: k }))}
-                  onAdd={() => place(c.type)}
-                  onRemove={() => removeNewest(c.type)}
-                  onConfigure={c.type === 'insane-clock' || c.type === 'insane-media' ? () => setCfgFor(open ? null : c.type) : null}
-                  cfgOpen={open}>
-                  {c.type === 'insane-clock' ? (
-                    <>
-                      <SettingRow label={tOptional('settings.widgets.cfgStyle') || 'Style'}>
-                        <PopUp width={140} value={cfgOf('insane-clock').style || 'digital'} onChange={(v) => setCfg('insane-clock', { style: v })}
-                          options={[['digital', tOptional('settings.widgets.cfgDigital') || 'Digital'], ['analog', tOptional('settings.widgets.cfgAnalog') || 'Analog']]} />
-                      </SettingRow>
-                      <SettingRow label={tOptional('settings.widgets.cfgFormat') || 'Hour format'}>
-                        <PopUp width={140} value={cfgOf('insane-clock').h24 === false ? '12' : '24'} onChange={(v) => setCfg('insane-clock', { h24: v === '24' })}
-                          options={[['24', tOptional('settings.widgets.cfg24') || '24-hour'], ['12', tOptional('settings.widgets.cfg12') || '12-hour']]} />
-                      </SettingRow>
-                      <SettingRow label={tOptional('settings.widgets.cfgSeconds') || 'Show seconds'}>
-                        <Toggle small on={!!cfgOf('insane-clock').seconds} onChange={(v) => setCfg('insane-clock', { seconds: v })} />
-                      </SettingRow>
-                    </>
-                  ) : null}
-                  {c.type === 'insane-media' ? (
-                    <SettingRow label={tOptional('settings.widgets.cfgIdle') || 'When nothing plays'}>
-                      <PopUp width={140} value={cfgOf('insane-media').idle || 'hide'} onChange={(v) => setCfg('insane-media', { idle: v })}
-                        options={[['hide', tOptional('settings.widgets.cfgIdleHide') || 'Hide the card'], ['idle', tOptional('settings.widgets.cfgIdleCard') || 'Show an idle card']]} />
-                    </SettingRow>
-                  ) : null}
-                </Controls>
-              </View>
-            );
-          })}
-        </View>
-        <Text style={cap}>{tOptional('settings.widgets.attribution') || ''}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
+                      <Preview type={type} cfg={cfgOf(type)} size={size} />
+                      {type === 'insane-media' ? (
+                        <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: t.accentSubtle }}>
+                          <Text style={{ fontSize: 9, fontWeight: 700, color: t.text }}>{tOptional('settings.widgets.sample') || 'Sample'}</Text>
+                        </View>
+                      ) : null}
+                    </View>
+                    <Controls placed={placed} size={sz[type] || 'medium'}
+                      onSize={(k) => setSz((st) => ({ ...st, [type]: k }))}
+                      onAdd={() => place(type)}
+                      onRemove={() => removeNewest(type)}
+                      onConfigure={type === 'insane-clock' || type === 'insane-media' ? () => setCfgFor(open ? null : type) : null}
+                      cfgOpen={open}>
+                      {type === 'insane-clock' ? (
+                        <>
+                          <SettingRow label={tOptional('settings.widgets.cfgStyle') || 'Style'}>
+                            <PopUp width={140} value={cfgOf(type).style || 'digital'} onChange={(v) => setCfg(type, { style: v })}
+                              options={[['digital', tOptional('settings.widgets.cfgDigital') || 'Digital'], ['analog', tOptional('settings.widgets.cfgAnalog') || 'Analog']]} />
+                          </SettingRow>
+                          <SettingRow label={tOptional('settings.widgets.cfgFormat') || 'Hour format'}>
+                            <PopUp width={140} value={cfgOf(type).h24 === false ? '12' : '24'} onChange={(v) => setCfg(type, { h24: v === '24' })}
+                              options={[['24', tOptional('settings.widgets.cfg24') || '24-hour'], ['12', tOptional('settings.widgets.cfg12') || '12-hour']]} />
+                          </SettingRow>
+                          <SettingRow label={tOptional('settings.widgets.cfgSeconds') || 'Show seconds'}>
+                            <Toggle small on={!!cfgOf(type).seconds} onChange={(v) => setCfg(type, { seconds: v })} />
+                          </SettingRow>
+                        </>
+                      ) : null}
+                      {type === 'insane-media' ? (
+                        <SettingRow label={tOptional('settings.widgets.cfgIdle') || 'When nothing plays'}>
+                          <PopUp width={140} value={cfgOf(type).idle || 'hide'} onChange={(v) => setCfg(type, { idle: v })}
+                            options={[['hide', tOptional('settings.widgets.cfgIdleHide') || 'Hide the card'], ['idle', tOptional('settings.widgets.cfgIdleCard') || 'Show an idle card']]} />
+                        </SettingRow>
+                      ) : null}
+                    </Controls>
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+        </Columns>
+                <Text style={cap}>{tOptional('settings.widgets.attribution') || ''}</Text>
       </Section>
     </Stack>
   );
