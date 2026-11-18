@@ -271,3 +271,30 @@ FAILS when any sidebar section id resolves to no glyph (33 glyphs / 27 sections 
    scale text — either draw the minis from the same components at a smaller natural size (pass a
    scale factor the cards honour natively) or keep minis unscaled inside a cropped window. Also
    re-check the bottom-left Visualizer default (the user reads its flat silent bands as broken).
+
+### M1c — the minis, the font, the transparency (the user's live feedback, 2026-11-18 23:45)
+
+**The blank minis: TWO approaches failed, rule 4 invoked.**
+1. `transformOrigin: 'top left'` + scale — blank (the engine does not honour the origin).
+2. Centre-compensation (the full-size card parked at negative offsets + scale) — **still blank on
+   the live desktop with the fix deployed** (the 23:43 bundle; the user's 23:45 screenshot).
+   Conclusion: this engine's `scale` paint does not render a node's CHILD SUBTREE the way CSS
+   does — per-node transforms (the clock hands) work, parent-scale-over-children does not.
+
+**The new hypothesis (next session, first thing)**: the On-your-desktop list renders **native
+compact content per type** in sdk/widgets.js (a `MiniCard({type,cfg})` with its own 1 s/3 s shared
+tickers): clock = small digital time, date = day + weekday, calendar = month + today, stats =
+CPU/Mem/Temp rows, battery = % + bar, net = ↓/↑, storage = used/total, media = title/artist or the
+idle text. No scale transform anywhere. The gallery previews at TRUE size keep the real
+components (they render correctly — the user's screenshot shows the gallery previews working).
+
+**Also in M1c**: the cards' typography refinement, and the transparency floor lowered (the cards
+read too milky — the Card's paper alpha blends 0.92→0.24; the widget cards need a glassier mix).
+
+**What IS live and working (the user's 23:45 screenshots prove it)**: the boot (no fallback), the
+clock with seconds, the Calendar with today highlighted, the System card with the temperature
+accent at 63 °C, the Battery card, **the Network card with the ↓/↑ rates and the totals** (M3
+part 2 live), the Settings page's gallery with the REAL previews including the tagged Sample Song
+(M1b part A live), the mini list's controls and the header row. The white bottom-left card is the
+Visualizer's silent state — it is now removable from the Widgets page (the E bridge made the
+defaults visible there).
