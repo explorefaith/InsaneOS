@@ -448,7 +448,17 @@ export const wm = {
     if (to === 'minimize') wm.minimize(id);
     else wm.snap(id, to);
   },
-  move: (id, x, y) => patch(id, { x: Math.round(x), y: Math.round(Math.max(workAreaOf(displayAt(x, y)).y, y)), maximized: false, snapped: null, restore: null, oskFrame: null }),
+  // dragging from JS keeps 48 px of the window on some display (the same rule grab.c applies to
+  // the compositor's own drags) — a maximized window dragged out can never vanish entirely
+  move: (id, x, y) => {
+    const w = windows.get().find((f) => f.id === id);
+    const d = displayAt(x, y) || mainDisplay();
+    const KEEP = 48;
+    const fw = w?.w || 200, fh = w?.h || 100;
+    const cx = Math.max(d.x - fw + KEEP, Math.min(x, d.x + d.w - KEEP));
+    const cy = Math.max(d.y - fh + KEEP, Math.min(y, d.y + d.h - KEEP));
+    patch(id, { x: Math.round(cx), y: Math.round(Math.max(workAreaOf(d).y, cy)), maximized: false, snapped: null, restore: null, oskFrame: null });
+  },
   resize: (id, w, h) => patch(id, { w: Math.round(w), h: Math.round(h) }),
   setFrame: (id, f) => patch(id, { ...f, maximized: false, snapped: null, restore: null, oskFrame: null }),
   // The on-screen keyboard moves the window with the field out of its way, and puts it back as it was

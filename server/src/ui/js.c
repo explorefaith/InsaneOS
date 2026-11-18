@@ -91,7 +91,9 @@ static void dump_exception(JSContext *c) {
     JS_FreeValue(c, e);
 }
 
-static void drain_jobs(void) {
+void drain_jobs_armed(void);   /* js_wm.c drains its end-of-drag jobs through the armed pattern */
+static void drain_jobs(void) { drain_jobs_armed(); }
+void drain_jobs_armed(void) {
     JSContext *c;
     int r;
     for (;;) {

@@ -24,6 +24,8 @@ static const Grab flow[] = {
     { KG_META | KG_ALT, 'h', 0, KG_TAKE },
     { KG_META | KG_ALT, 'd', 0, KG_TAKE },
     { KG_META, 0, KEY_COMMA, KG_TAKE },
+    { KG_META, 0, KEY_LEFT, KG_TAKE }, { KG_META, 0, KEY_RIGHT, KG_TAKE },
+    { KG_META, 0, KEY_UP, KG_TAKE }, { KG_META, 0, KEY_DOWN, KG_TAKE },
     { KG_META | KG_CTRL, 0, KEY_LEFT, KG_TAKE }, { KG_META | KG_CTRL, 0, KEY_RIGHT, KG_TAKE },
 };
 
@@ -37,6 +39,8 @@ static const Grab flow_desktops[] = {
     { KG_META | KG_ALT, 'h', 0, KG_TAKE },
     { KG_META | KG_ALT, 'd', 0, KG_TAKE },
     { KG_META, 0, KEY_COMMA, KG_TAKE },
+    { KG_META, 0, KEY_LEFT, KG_TAKE }, { KG_META, 0, KEY_RIGHT, KG_TAKE },
+    { KG_META, 0, KEY_UP, KG_TAKE }, { KG_META, 0, KEY_DOWN, KG_TAKE },
     { KG_META | KG_CTRL, 0, KEY_LEFT, KG_TAKE }, { KG_META | KG_CTRL, 0, KEY_RIGHT, KG_TAKE },
     { KG_CTRL, 0, KEY_LEFT, KG_TAKE }, { KG_CTRL, 0, KEY_RIGHT, KG_TAKE },
     { KG_CTRL, 0, KEY_UP, KG_TAKE }, { KG_CTRL, 0, KEY_DOWN, KG_TAKE },

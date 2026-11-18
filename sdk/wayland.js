@@ -9,6 +9,7 @@
 import { createElement as h } from 'react';
 import { View, Text, Surface, addListener, onShellKeyboard, shellHasKeyboard } from '@insaneos/runtime';
 import { windows, wm, registerBuiltinApp, windowChrome, pointerWorkArea, openingArea, getApp, placeLinuxWindow, activeDesktop } from './windows.js';
+import { screen, displayAt } from '@insaneos/runtime';
 import { acceptsAppRequest, keyboardSurface, focusedOn, surfaceState } from './desktopmodel.js';
 import { desktopOfSurface } from './desktops.js';
 import { useAppWindow } from './components.jsx';
@@ -58,10 +59,13 @@ addListener('pointermove', (e) => {
   if (drag.edges == null) { wm.move(drag.id, f.x + dx, f.y + dy); return; }
   const E = drag.edges;      // 1 arriba, 2 abajo, 4 izquierda, 8 derecha
   let { x, y, w: ww, h: hh } = f;
-  if (E & 8) ww = Math.max(160, f.w + dx);
-  if (E & 2) hh = Math.max(100, f.h + dy);
-  if (E & 4) { ww = Math.max(160, f.w - dx); x = f.x + f.w - ww; }
-  if (E & 1) { hh = Math.max(100, f.h - dy); y = f.y + f.h - hh; }
+  // upper clamps (grab.c's rule: the window never grows past the display's far edge)
+  const d = displayAt(f.x + f.w / 2, f.y + f.h / 2) || { x: 0, y: 0, w: screen.width, h: screen.height };
+  const maxX = d.x + d.w, maxY = d.y + d.h;
+  if (E & 8) ww = Math.min(Math.max(160, f.w + dx), Math.max(160, maxX - f.x));
+  if (E & 2) hh = Math.min(Math.max(100, f.h + dy), Math.max(100, maxY - f.y));
+  if (E & 4) { ww = Math.min(Math.max(160, f.w - dx), Math.max(160, f.x + f.w - d.x)); x = f.x + f.w - ww; }
+  if (E & 1) { hh = Math.min(Math.max(100, f.h - dy), Math.max(100, f.y + f.h - d.y)); y = f.y + f.h - hh; }
   wm.setFrame(drag.id, { x, y, w: ww, h: hh });
 });
 addListener('pointerup', () => { drag = null; });

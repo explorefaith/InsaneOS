@@ -184,8 +184,8 @@ void js_wm_end(int node, int edges, float dx, float dy, float dw, float dh) {
         JS_FreeValue(c, r);
         JS_FreeValue(c, args[0]);
         JS_FreeValue(c, args[1]);
-        JSContext *jc;
-        while (JS_ExecutePendingJob(JS_GetRuntime(c), &jc) > 0) {}
+        extern void drain_jobs_armed(void);
+        drain_jobs_armed();   /* armed: a runaway promise chain ends on the budget, not the compositor */
     }
     JS_FreeValue(c, f);
     JS_FreeValue(c, g);

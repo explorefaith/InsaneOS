@@ -636,8 +636,10 @@ export function FloatingWindows() {
     const offMove = addListener('pointermove', (e) => {
       const d = drag.current;
       if (!d) return;
-      const f = d.resize ? { ...d.frame, w: Math.max(160, d.frame.w + e.x - d.x), h: Math.max(90, d.frame.h + e.y - d.y) }
-        : { ...d.frame, x: d.frame.x + e.x - d.x, y: d.frame.y + e.y - d.y };
+      const KEEP = 48;
+      const base = displayAt(d.frame.x + d.frame.w / 2, d.frame.y + d.frame.h / 2) || screen;
+      const f = d.resize ? { ...d.frame, w: Math.min(Math.max(160, d.frame.w + e.x - d.x), Math.max(160, base.w - d.frame.x)), h: Math.min(Math.max(90, d.frame.h + e.y - d.y), Math.max(90, base.h - d.frame.y)) }
+        : { ...d.frame, x: Math.max(-d.frame.w + KEEP, Math.min(d.frame.x + e.x - d.x, base.w - KEEP)), y: Math.max(-d.frame.h + KEEP, Math.min(d.frame.y + e.y - d.y, base.h - KEEP)) };
       windows.set((ws) => ws.map((w) => (w.id === d.id ? { ...w, pip: f } : w)));
     });
     const offUp = addListener('pointerup', () => { drag.current = null; });

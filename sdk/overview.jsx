@@ -63,7 +63,8 @@ desktopList.subscribe(refresh);
 desktopNames.subscribe(refresh);
 
 // A fullscreen Linux app is presented above every layer: the overview wouldn't be seen.
-const blocked = () => typeof insane !== 'undefined' && !!insane.wayland?.fullscreen?.();
+const blocked = () => typeof insane !== 'undefined' && !!insane.wayland?.fullscreen?.()
+  || windows.get().some((w) => w.fullscreen && !w.minimized && !w.capture && onActiveDesktop(w));
 
 export function openOverview({ app = null } = {}) {
   if (blocked()) return;

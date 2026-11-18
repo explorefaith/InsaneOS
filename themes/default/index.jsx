@@ -64,7 +64,6 @@ import {
   useStore,
   dockIconRects,
   dockIdOfWindow,
-  revealMenuBar,
   DUR,
   windows,
   playFx,
@@ -99,7 +98,7 @@ function workAreaFor(p, d) {
 const areaFn = (d) => { const s = settings.get(); return workAreaFor(dockPrefs(s), d); };
 
 // chrome: borders (1 + 1) and title bar (40 + 1 separator) of Window.jsx's frame
-configureWindows({ apps, workArea: areaFn, chrome: { w: 2, h: 43 } });
+configureWindows({ apps, workArea: areaFn, chrome: { w: 2, h: 43 }, snap: true });
 
 // Pinned by default (the user changes the Dock by dragging and with «Keep in Dock»: settings.dockPinned).
 const DOCK_DEFAULT = [...DOCK_ORDER, ...apps.filter((a) => a.dock && !DOCK_ORDER.includes(a.id)).map((a) => a.id)];
@@ -183,7 +182,6 @@ const flowTable = (toggleLauncher) => [
   { id: 'launcher', keys: ['F4'], show: ['❖', 'F4'], run: toggleLauncher, label: 'shell.shortcuts.launcher', group: 'system' },
   { id: 'showDesktop', keys: ['Meta+F11'], run: toggleShowDesktop, label: 'shell.shortcuts.showDesktop', group: 'system' },
   { id: 'dockAutohide', keys: ['Meta+Alt+D'], run: toggleDockAutohide, label: 'shell.shortcuts.dockAutohide', group: 'system' },
-  { id: 'barReveal', keys: ['Meta+Alt+B'], run: revealMenuBar, label: 'shell.shortcuts.barReveal', group: 'system' },
   { id: 'switchApps', keys: switcherKeys('meta'), run: switchApps, label: 'shell.shortcuts.switchApps', group: 'windows' },
   { id: 'cycleWindows', keys: ['Meta+`', 'Meta+Shift+`'], run: cycleWindows, label: 'shell.shortcuts.cycleWindows', group: 'windows' },
   { id: 'minimize', keys: ['Meta+M'], run: minimizeFront, label: 'shell.shortcuts.minimize', group: 'windows' },
