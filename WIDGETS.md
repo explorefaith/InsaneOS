@@ -117,8 +117,23 @@ widget framework is JS). C is used where the brief asks for it: the M5 crypto ne
   updating, a machine without a sensor.
 - **Remaining in M3**: Storage and Network-throughput cards (providers: insane.monitor's disk/net
   samples — read defensively like the memory fix).
-### M4 — Now Playing depth (progress + transport controls) — NOT STARTED (the `nowPlaying`
-store and a media card already exist; the depth pass is the work)
+### M4 — Now Playing depth — **CHECKPOINT PASSED** (2026-11-18)
+
+- **Reuse, not rebuild**: the Control Center's own **`NowPlayingTile`** (sdk/media.js — title,
+  artist, cover art, the progress bar, ⏮ ⏸/▶ ⏭) is now the playing card's body — the same
+  component the CC uses, so the Flutter player / browsers / anything the CC reads works in the
+  widget by construction. The card keeps its NOW PLAYING label.
+- **Idle per the brief**: nothing playing → the card **hides** (the default) or shows a quiet
+  idle card ("Nothing playing"), per the widget's cfg (`idle: 'hide' | 'idle'`) through
+  `setWidgetCfg`; the Settings page grows the "When nothing plays" pop-up.
+- **Files**: `themes/default/components/DesktopWidgets.jsx` (MediaCard + the Tile import),
+  `apps/settings/Widgets.jsx` (the idle row), `assets/locales/*/settings.json` (cfgIdle /
+  cfgIdleHide / cfgIdleCard / mediaIdle ×5).
+- **Verification**: build-theme + i18n-check exit 0; widgetmodel 9/9; the lab mounted the media
+  widget with `idle: 'idle'` (nothing plays in the lab — the idle branch rendered) — 1039 frames,
+  layout 0.22 ms, **zero react errors**. The playing path is the CC's own live-verified tile.
+  **Manual**: a real player (the Flutter player, a browser) driving the tile in the widget,
+  the transport buttons, cover art.
 ### M5 — Crypto (Binance) — NOT STARTED (the closed C action, the parser test, the model test,
 the sparkline cards; lab mock server for the offline lab)
 ### M6 — Stopwatch/Timer, Quick Note — NOT STARTED

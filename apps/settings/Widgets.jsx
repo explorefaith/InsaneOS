@@ -52,6 +52,14 @@ export function WidgetsSettings() {
             </SettingRow>,
           ];
           // M2: the clock's depth — the face, the hour format and the seconds, per widget
+          if (w.type === 'insane-media') {
+            rows.push(
+              <SettingRow key={`${w.id}.idle`} label={tOptional('settings.widgets.cfgIdle') || 'When nothing plays'}>
+                <PopUp width={150} value={cfg.idle || 'hide'} onChange={(v) => setWidgetCfg(w.id, { idle: v })}
+                  options={[['hide', tOptional('settings.widgets.cfgIdleHide') || 'Hide the card'], ['idle', tOptional('settings.widgets.cfgIdleCard') || 'Show an idle card']]} />
+              </SettingRow>,
+            );
+          }
           if (w.type === 'insane-clock') {
             rows.push(
               <SettingRow key={`${w.id}.style`} label={tOptional('settings.widgets.cfgStyle') || 'Style'}>

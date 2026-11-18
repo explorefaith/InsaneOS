@@ -778,5 +778,9 @@
   "widgets.temp.warm": "Tiepida",
   "widgets.temp.hot": "Calda",
   "widgets.type.insane-net": "Rete",
-  "widgets.type.insane-storage": "Archiviazione"
+  "widgets.type.insane-storage": "Archiviazione",
+  "widgets.idle": "Quando non suona niente",
+  "widgets.hide": "Nascondi la scheda",
+  "widgets.card": "Mostra una scheda in attesa",
+  "widgets.text": "Niente in riproduzione"
 }

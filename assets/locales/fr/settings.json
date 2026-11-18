@@ -778,5 +778,9 @@
   "widgets.temp.warm": "Tiède",
   "widgets.temp.hot": "Chaud",
   "widgets.type.insane-net": "Réseau",
-  "widgets.type.insane-storage": "Stockage"
+  "widgets.type.insane-storage": "Stockage",
+  "widgets.idle": "Quand rien ne joue",
+  "widgets.hide": "Masquer la carte",
+  "widgets.card": "Afficher une carte au repos",
+  "widgets.text": "Rien ne joue"
 }

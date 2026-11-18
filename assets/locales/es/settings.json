@@ -778,5 +778,9 @@
   "widgets.temp.warm": "Templada",
   "widgets.temp.hot": "Caliente",
   "widgets.type.insane-net": "Red",
-  "widgets.type.insane-storage": "Almacenamiento"
+  "widgets.type.insane-storage": "Almacenamiento",
+  "widgets.idle": "Cuando no suena nada",
+  "widgets.hide": "Ocultar la tarjeta",
+  "widgets.card": "Mostrar tarjeta en reposo",
+  "widgets.text": "Nada suena"
 }

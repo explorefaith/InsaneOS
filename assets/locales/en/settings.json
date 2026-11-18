@@ -778,5 +778,9 @@
   "widgets.temp.warm": "Warm",
   "widgets.temp.hot": "Hot",
   "widgets.type.insane-net": "Network",
-  "widgets.type.insane-storage": "Storage"
+  "widgets.type.insane-storage": "Storage",
+  "widgets.idle": "When nothing plays",
+  "widgets.hide": "Hide the card",
+  "widgets.card": "Show an idle card",
+  "widgets.text": "Nothing playing"
 }

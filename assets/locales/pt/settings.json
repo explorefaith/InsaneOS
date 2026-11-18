@@ -778,5 +778,9 @@
   "widgets.temp.warm": "Morna",
   "widgets.temp.hot": "Quente",
   "widgets.type.insane-net": "Rede",
-  "widgets.type.insane-storage": "Armazenamento"
+  "widgets.type.insane-storage": "Armazenamento",
+  "widgets.idle": "Quando nada toca",
+  "widgets.hide": "Ocultar o cartão",
+  "widgets.card": "Mostrar cartão em repouso",
+  "widgets.text": "Nada tocando"
 }

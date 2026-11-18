@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -360,12 +360,22 @@ function BatteryCard({ widget }) {
 
 function MediaCard({ widget }) {
   const np = useStore(nowPlaying);
-  if (!np || !np.title) return null;
+  const cfg = widget.cfg || {};
+  if (!np || !np.title) {
+    // nothing playing: hide (the default) or a quiet idle card, per the widget's cfg
+    if (cfg.idle !== 'idle') return null;
+    return (
+      <Card widget={widget} style={{ gap: 8 }}>
+        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('shell.widgets.playing') || 'NOW PLAYING').toUpperCase()}</Text>
+        <Text style={{ fontSize: 13, color: INK_DIM }}>{tOptional('settings.widgets.mediaIdle') || 'Nothing playing'}</Text>
+      </Card>
+    );
+  }
+  // playing: the Control Center's own tile (title, artist, cover, progress, the transport)
   return (
     <Card widget={widget} style={{ gap: 8 }}>
       <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('shell.widgets.playing') || 'NOW PLAYING').toUpperCase()}</Text>
-      <Text style={{ fontSize: 15, fontWeight: 700, color: INK, whiteSpace: 'nowrap', overflow: 'hidden' }}>{np.title}</Text>
-      {np.artist ? <Text style={{ fontSize: 12, color: INK_DIM, whiteSpace: 'nowrap', overflow: 'hidden' }}>{np.artist}</Text> : null}
+      <NowPlayingTile />
     </Card>
   );
 }
