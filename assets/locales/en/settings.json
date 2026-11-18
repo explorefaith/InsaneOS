@@ -792,5 +792,8 @@
   "widgets.pick": "Pick a widget below",
   "widgets.cat.time": "Time",
   "widgets.cat.system": "System",
-  "widgets.cat.media": "Media"
+  "widgets.cat.media": "Media",
+  "widgets.pairBad": "Only uppercase letters and digits, 2–20 characters.",
+  "widgets.pairUnknown": "That pair returned nothing — check the symbol.",
+  "widgets.pairOffline": "Could not reach the market right now."
 }

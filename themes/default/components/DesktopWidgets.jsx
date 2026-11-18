@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults, placement, wm } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults, placement, wm, cryptoData, cryptoCloses, cryptoStart, cryptoStop, resizeWidget, Layer } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -298,6 +298,7 @@ registerWidgetType('insane-clock', ClockCard);
 registerWidgetType('insane-date', DateCard);
 registerWidgetType('insane-net', NetCard);
 registerWidgetType('insane-storage', StorageCard);
+registerWidgetType('crypto', CryptoCard);
 registerWidgetType('insane-stats', StatsCard);
 
 // ---- round 4 widgets ----
@@ -482,6 +483,55 @@ registerWidgetType('insane-calendar', CalendarCard);
 registerWidgetType('insane-battery', BatteryCard);
 registerWidgetType('insane-media', MediaCard);
 registerWidgetType('insane-visualizer', VisualizerCard);
+
+// M5: the crypto card — the price, the 24 h change and the sparkline of the last 24 h of closes,
+// green when up and red when down with the sign in the text, the Data: Binance attribution. The
+// data comes from sdk/crypto.js: one fetch per pair shared between every card showing it, the
+// card's mount refcounting the fetch. cfg.pair = the market (BTCUSDT…).
+function CryptoCard({ widget }) {
+  const [s] = useSettings();
+  const pair = (widget.cfg && widget.cfg.pair) || 'BTCUSDT';
+  const d = cryptoData.get()[pair] || null;
+  const closes = (cryptoCloses.get()[pair] || {}).closes || null;
+  useEffect(() => { cryptoStart(); return () => cryptoStop(); }, []);
+  const p = useStore(palette);
+  const ink = hex(p.ink);
+  const up = d && d.changePct >= 0;
+  const accent = d ? (up ? '#30d158' : '#ff453a') : INK_DIM;
+  const sign = d ? (up ? '▲' : '▼') : '';
+  const fmt = (v) => (isFinite(v) ? Number(v).toLocaleString(undefined, { maximumFractionDigits: v < 1 ? 6 : 2 }) : '—');
+  const max = closes ? Math.max(...closes.map((k) => k[1])) : 0;
+  const min = closes ? Math.min(...closes.map((k) => k[1])) : 0;
+  return (
+    <Card widget={widget} style={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{pair}</Text>
+        {d && d.stale ? <Text style={{ fontSize: 9, fontWeight: 700, color: '#ff9f0a' }}>{tOptional('settings.widgets.stale') || 'STALE'}</Text> : null}
+      </View>
+      {d ? (
+        <>
+          <Text style={{ fontSize: 26, fontWeight: 700, color: INK }}>{fmt(d.price)}</Text>
+          <Text style={{ fontSize: 12, fontWeight: 700, color: accent }}>{`${sign} ${fmt(d.change)} (${Number(d.changePct).toFixed(2)}%)`}</Text>
+          {closes && closes.length > 4 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 40, marginTop: 4 }}>
+              {closes.map((k, i) => {
+                const v = max > min ? 0.12 + 0.88 * ((k[1] - min) / (max - min)) : 0.5;
+                return <View key={i} style={{ flex: 1, height: `${Math.round(v * 100)}%`, minHeight: 3, borderRadius: 1, backgroundColor: ink, opacity: 0.8 }} />;
+              })}
+            </View>
+          ) : null}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 10, color: INK_DIM }}>{`H ${fmt(d.high)}`}</Text>
+            <Text style={{ fontSize: 10, color: INK_DIM }}>{`L ${fmt(d.low)}`}</Text>
+          </View>
+          {widget.cfg && widget.cfg.large ? <Text style={{ fontSize: 10, color: INK_DIM }}>{`Vol ${fmt(d.volume)} · ${tOptional('settings.widgets.binance') || 'Data: Binance'}`}</Text> : <Text style={{ fontSize: 9, color: INK_FAINT, textAlign: 'end' }}>{tOptional('settings.widgets.binance') || 'Data: Binance'}</Text>}
+        </>
+      ) : (
+        <Text style={{ fontSize: 12, color: INK_DIM }}>{tOptional('settings.widgets.waiting') || 'Waiting for the market data…'}</Text>
+      )}
+    </Card>
+  );
+}
 
 // ONE source of truth (the Settings page's bug: the defaults rendered straight through setWidgets,
 // so the desktop showed cards the Widgets page had never heard of). When nothing was saved yet the

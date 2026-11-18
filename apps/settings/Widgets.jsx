@@ -8,7 +8,7 @@
 import {
   View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
   widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent,
-  sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow,
+  sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow, admin, errorText, TextInput,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp, Columns } from './ui.jsx';
 import { useState } from 'react';
@@ -134,6 +134,17 @@ export function WidgetsSettings() {
   const [sz, setSz] = useState({});
   const [cfgFor, setCfgFor] = useState(null);            // the type whose gear is open
   const [pcfg, setPcfg] = useState({});                  // the preview cfg per type (the gear edits it)
+  const [pairText, setPairText] = useState('');
+  const [pairErr, setPairErr] = useState('');
+  const tryPair = (apply) => {
+    const sym = (pairText || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{2,20}$/.test(sym)) { setPairErr(tOptional('settings.widgets.pairBad') || 'Only uppercase letters and digits, 2–20 characters.'); return; }
+    admin.run('crypto-ticker', sym).then((ans) => {
+      try { const d = JSON.parse(ans); if (!d.symbol) throw new Error('x'); } catch (e) { setPairErr(tOptional('settings.widgets.pairUnknown') || 'That pair returned nothing — check the symbol.'); return; }
+      apply('crypto', { pair: sym });
+      setPairText(''); setPairErr('');
+    }, (e) => setPairErr(errorText(e)));
+  };
   const cap = (s) => ({ fontSize: 12, color: t.textDim, lineHeight: 1.4, textAlign: 'start' });
   const place = (type) => { try { addWidget(type, desktopArea()); } catch (e) { /* the model clamps */ } };
   const removeNewest = (type) => {
@@ -237,7 +248,8 @@ export function WidgetsSettings() {
         <Columns>
           {[['time', 'Time', ['insane-clock', 'insane-date', 'insane-calendar']],
             ['system', 'System', ['insane-stats', 'insane-battery', 'insane-storage', 'insane-net']],
-            ['media', 'Media', ['insane-media', 'insane-visualizer']]].map(([key, label, types]) => (
+            ['media', 'Media', ['insane-media', 'insane-visualizer']],
+            ['finance', 'Finance', ['crypto']]].map(([key, label, types]) => (
             <View key={key} style={{ gap: 8 }}>
               <Text style={{ fontSize: 12, fontWeight: 700, color: t.textDim, letterSpacing: 1 }}>{tOptional(`settings.widgets.cat.${key}`) || label}</Text>
               {types.map((type) => {
@@ -285,6 +297,21 @@ export function WidgetsSettings() {
                           <PopUp width={140} value={cfgOf(type).idle || 'hide'} onChange={(v) => setCfg(type, { idle: v })}
                             options={[['hide', tOptional('settings.widgets.cfgIdleHide') || 'Hide the card'], ['idle', tOptional('settings.widgets.cfgIdleCard') || 'Show an idle card']]} />
                         </SettingRow>
+                      ) : null}
+                      {type === 'crypto' ? (
+                        <>
+                          <SettingRow label={tOptional('settings.widgets.pair') || 'Market pair'}>
+                            <PopUp width={140} value={cfgOf(type).pair || 'BTCUSDT'} onChange={(v) => setCfg(type, { pair: v })}
+                              options={[['BTCUSDT', 'BTC / USDT'], ['ETHUSDT', 'ETH / USDT'], ['BNBUSDT', 'BNB / USDT'], ['SOLUSDT', 'SOL / USDT'], ['XRPUSDT', 'XRP / USDT'], ['DOGEUSDT', 'DOGE / USDT']]} />
+                          </SettingRow>
+                          <SettingRow label={tOptional('settings.widgets.pairCustom') || 'Any pair'} hint={tOptional('settings.widgets.pairHint') || 'https://… checked against the real market when you press Check'} stack>
+                            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', width: '100%' }}>
+                              <TextInput value={pairText || ''} onChange={setPairText} placeholder="ADAUSDT" style={{ flex: 1, minWidth: 0 }} onSubmit={() => tryPair(setCfg, setPairErr)} />
+                              <Button small label={tOptional('settings.widgets.check') || 'Check'} onClick={() => tryPair(setCfg, setPairErr)} />
+                            </View>
+                            {pairErr ? <Note tone="warn">{pairErr}</Note> : null}
+                          </SettingRow>
+                        </>
                       ) : null}
                     </Controls>
                   </View>

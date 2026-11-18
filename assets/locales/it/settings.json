@@ -792,5 +792,8 @@
   "widgets.pick": "Scegli un widget qui sotto",
   "widgets.cat.time": "Ora",
   "widgets.cat.system": "Sistema",
-  "widgets.cat.media": "Media"
+  "widgets.cat.media": "Media",
+  "widgets.pairBad": "Solo lettere maiuscole e cifre, 2–20 caratteri.",
+  "widgets.pairUnknown": "Quella coppia non ha restituito nulla — controlla il simbolo.",
+  "widgets.pairOffline": "Impossibile raggiungere il mercato in questo momento."
 }

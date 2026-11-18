@@ -24,6 +24,7 @@ export const WIDGET_CATALOG = [
   { type: 'insane-visualizer', w: 320, h: 118 },
   { type: 'insane-net', w: 300, h: 118 },
   { type: 'insane-storage', w: 300, h: 96 },
+  { type: 'crypto', w: 300, h: 150 },
 ];
 
 // Per-widget options (the clock's analog/12-24/seconds): merged into the entry's cfg and saved

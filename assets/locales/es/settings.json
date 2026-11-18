@@ -792,5 +792,8 @@
   "widgets.pick": "Elige un widget abajo",
   "widgets.cat.time": "Tiempo",
   "widgets.cat.system": "Sistema",
-  "widgets.cat.media": "Medios"
+  "widgets.cat.media": "Medios",
+  "widgets.pairBad": "Solo letras mayúsculas y dígitos, de 2 a 20 caracteres.",
+  "widgets.pairUnknown": "Ese par no devolvió nada — revisa el símbolo.",
+  "widgets.pairOffline": "No se pudo alcanzar el mercado ahora mismo."
 }
