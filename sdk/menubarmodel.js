@@ -25,6 +25,9 @@
 // 0.8.8.6) shows the bar as it was: no migration. The Cleaner item (the apple) keeps its own key,
 // cleaner.menuItem, which Cleaner → Settings already writes; the Settings row writes the same key.
 export const MENUBAR_DEFAULTS = {
+  autohide: true,       // bug C: with an app window on the desktop the bar hides (the Dock's own
+                        // machine, sdk/autohide.js); the top edge reveals it and it goes again
+                        // 2.5 s after the pointer leaves. With no window open it never hides.
   keyboard: false,      // the keyboard layout's label in the bar (US, FR…): off by default since round 4 —
                         // the unwanted visible label is gone, switching stays in Settings → Keyboard and
                         // the row in Menu Bar settings brings the item back for those who used it

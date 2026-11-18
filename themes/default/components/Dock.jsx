@@ -9,7 +9,7 @@
 // this file only draws it and says where things are. The Trash is always the last item.
 import {
   View, Text, screen, appName, useLocale, addListener, t as tr, useStore, settings, dockDrag, dockPoof, beginDockDrag,
-  registerDockTarget, dockDragJustEnded, refreshTrash, Layer, useDockCovered, dockIconRects, DUR,
+  registerDockTarget, dockDragJustEnded, refreshTrash, Layer, useDockCovered, dockIconRects, DUR, useAutohide,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
@@ -82,73 +82,8 @@ export function TrashIcon({ size: s, full, dark }) {
 // while `covered` (a window is where the Dock is) and comes back as soon as nothing covers it; the
 // pointer at the edge still brings it over the windows, and it goes again when the pointer leaves.
 const COVER_MS = 300;         // a window just covered the Dock: it slides away after this
-function useAutohide(mode, position, rectRef, keepOpen, areaRef, force, covered) {
-  const enabled = mode !== 'never';
-  const may = enabled && (mode === 'always' || !!covered);          // may it hide now
-  const [p, setP] = useState(may ? 0 : 1);     // 0 hidden … 1 in view
-  const want = useRef(!may);
-  const keep = useRef(keepOpen);
-  keep.current = keepOpen;
-  const mayHide = useRef(may);
-  mayHide.current = may;
-  const api = useRef(null);
-  useEffect(() => {
-    if (!enabled) { want.current = true; setP(1); return undefined; }
-    want.current = !mayHide.current;
-    setP(want.current ? 1 : 0);
-    let timer = 0, raf = 0, from = 0, t0 = 0, px = -1, py = -1;
-    const animate = (to) => {
-      cancelAnimationFrame(raf);
-      t0 = performance.now();
-      const step = (now) => {
-        const k = Math.min(1, (now - t0) / SLIDE_MS), e = 1 - (1 - k) * (1 - k);
-        setP(from + (to - from) * e);
-        if (k < 1) raf = requestAnimationFrame(step);
-        else from = to;
-      };
-      raf = requestAnimationFrame(step);
-    };
-    const set = (on) => {
-      if (want.current === on) return;
-      want.current = on;
-      from = on ? 0 : 1;
-      animate(on ? 1 : 0);
-    };
-    const stop = () => { if (timer) { clearTimeout(timer); timer = 0; } };
-    const isOver = () => {
-      const r = rectRef.current;
-      return !!r && px >= r.x0 - 8 && px < r.x1 + 8 && py >= r.y0 - 8 && py < r.y1 + 8;
-    };
-    // hides after ms unless, by then, the pointer is on it, a menu of it is open or nothing covers it
-    const hideSoon = (ms) => {
-      if (!timer) timer = setTimeout(() => { timer = 0; if (!keep.current && mayHide.current && !isOver()) set(false); }, ms);
-    };
-    api.current = {
-      show: () => { stop(); set(true); },
-      // 'overlap': a window started or stopped covering the Dock ('always' ↔ 'overlap' too)
-      cover: (on) => {
-        stop();
-        if (!on) set(true);
-        else if (want.current && !keep.current && !isOver()) hideSoon(COVER_MS);
-      },
-    };
-    const off = addListener('pointermove', (e) => {
-      px = e.x; py = e.y;
-      // the edge of the display the Dock is on (the main one: docs/DISPLAYS.md)
-      const A = areaRef.current, inX = e.x >= A.x && e.x < A.x + A.w, inY = e.y >= A.y && e.y < A.y + A.h;
-      const edge = position === 'bottom' ? inX && e.y >= A.y + A.h - 2 : position === 'left' ? inY && e.x <= A.x + 1 : inY && e.x >= A.x + A.w - 2;
-      if (!want.current) {
-        if (edge && !timer) timer = setTimeout(() => { timer = 0; set(true); }, 120);
-        else if (!edge) stop();
-      } else if (!isOver() && !keep.current && mayHide.current) hideSoon(500);
-      else stop();
-    });
-    return () => { off(); stop(); cancelAnimationFrame(raf); api.current = null; };
-  }, [enabled, position]);
-  useEffect(() => { if (force && enabled) api.current?.show(); }, [force, enabled]);
-  useEffect(() => { if (enabled) api.current?.cover(may); }, [may, enabled]);
-  return p;
-}
+// The auto-hide machine itself (edge trigger, timers, slide, cover) lives in sdk/autohide.js now
+// (bug C): the same behavior, shared with the menu bar. COVER_MS stays — it is the Dock's own feel.
 
 // Positions that glide to their new value in `ms` (ease-out) while `active`; otherwise they jump.
 // Values are numbers by key; a key seen for the first time starts where `origin(key)` says, or at
@@ -344,7 +279,9 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
     : position === 'left' ? { x0: AX, x1: AX + MARGIN + bar, y0: restStart, y1: restStart + base.len }
       : { x0: AR - MARGIN - bar, x1: AR, y0: restStart, y1: restStart + base.len };
   const covered = useDockCovered(restRect, hideMode === 'overlap');
-  const shown = useAutohide(hideMode, position, rect, keepOpen || hovered >= 0 || dragging, areaRef, external, covered);
+  const shown = useAutohide({ enabled: hideMode !== 'never', mayHide: hideMode === 'always' || !!covered,
+    position, rectRef: rect, keepOpen: keepOpen || hovered >= 0 || dragging, areaRef, force: external, covered,
+    revealMs: 120, hideMs: 500, slideMs: SLIDE_MS, coverMs: COVER_MS });
   const hide = Math.round((1 - shown) * (bar + MARGIN + 2));
 
   // Drop target (sdk/dock.js): the index among the shown pinned items, or the Trash. Computed from

@@ -486,6 +486,8 @@
   "dock.menubar.title": "Barra de menús",
   "dock.menubar.titleTaskbar": "Barra de tareas",
   "dock.menubar.footer": "Lo que aparece junto al reloj. Un clic en el reloj abre tus notificaciones y el calendario.",
+  "dock.menubar.autohide": "Ocultarse con ventanas de aplicaciones",
+  "dock.menubar.autohideHint": "Con una ventana abierta la barra se esconde; el borde superior de la pantalla la trae de vuelta, y vuelve a ocultarse 2,5 s después de que el puntero la deje.",
   "dock.menubar.everyDisplay": "Mostrar la barra de menús en todas las pantallas",
   "dock.menubar.everyDisplayHint": "Cada pantalla tiene su propia barra con el reloj y los íconos de estado. Los menús de la app se ven encendidos en la pantalla de la ventana que estás usando.",
   "dock.menubar.everyDisplayTaskbar": "Mostrar la barra de tareas en todas las pantallas",

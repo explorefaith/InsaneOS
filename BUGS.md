@@ -104,15 +104,28 @@ default (Settings → Keyboard keeps it available). Order/spacing of the remaini
 
 **Verification**: the user confirmed from their own screenshots (panel shows no crown).
 
-## C. Shared auto-hide for the top bar — OPEN
+## C. Shared auto-hide for the top bar — FIXED (code + lab), edge reveal needs the live pass
 
-**Requirement**: with any app window open, the top bar auto-hides like the dock; edge reveal;
-hides 2–3 s after the cursor leaves. ONE reusable auto-hide component (edge trigger, delay timer,
-show/hide animation) used by dock AND top bar; timer cancel/restart on re-enter; no stacked
-timers; no hiding while a bar menu/popup is open; current behavior preserved when no window is
-open; fullscreen apps handled. (After A is stable.)
+**What landed (2026-11-18)**: the Dock's battle-tested auto-hide hook moved verbatim into
+**`sdk/autohide.js`** as `useAutohide({ enabled, mayHide, position, areaRef, rectRef, keepOpen,
+force, covered, revealMs, hideMs, slideMs, coverMs, over, edgePx })` — generalized to all four
+edges ('top' added) with each surface's own feel in parameters. The Dock consumes it with its
+exact old numbers (reveal 120 ms, hide 500 ms, cover 300 ms, slide = DUR.dockSlide) — behavior
+unchanged by construction. **The menu bar consumes the same machine**: position 'top', the leave
+waits 2500 ms (the task's 2–3 s), hidden while `appsOpen()` (motionmodel's app-window-in-view
+predicate — the same one the live wallpaper's desktopCovered uses, so minimized/PiP windows and
+other-desktop windows don't count) and revealed by the top edge; a menu, the Control Center or
+the clock panel holds it open (keepOpen); with **no window open it never hides** — the bar the
+user knows. Fullscreen counts as covered (an app window in view). The strip floats over windows
+anyway (`workAreaFor` reserves nothing for it), so no work-area change was needed. The bar slides
+with `translateY(-(1-slide)·height)`; a toggle lives in Settings → Desktop & Dock → Menu Bar
+(`menuBar.autohide`, default on, five catalogs).
 
-**Status**: not started. Waiting on the dock/top-bar architecture notes (docs/ARCHITECTURE_NOTES.md).
+**Verified**: build-theme + i18n-check exit 0; switcher/hwkeys model tests green; the lab ran the
+testbench's window cycles over the new code (the cover transitions exercised) — 1244 frames,
+layout 0.17 ms / paint 17.64 ms average, zero react errors. **Manual (live desktop)**: the top
+edge reveals the hidden bar, it hides 2.5 s after the pointer leaves, a bar menu holds it, and
+the Dock's auto-hide still behaves exactly as before.
 
 ## D. No way to uninstall installed apps — FIXED; the first deploy carried a REGRESSION, now fixed
 

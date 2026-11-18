@@ -98,6 +98,8 @@ function MenuBarSection({ classic }) {
   );
   return (
     <Section title={tr(classic ? 'settings.dock.menubar.titleTaskbar' : 'settings.dock.menubar.title')} footer={tr('settings.dock.menubar.footer')}>
+      {/* bug C: the bar hides while an app window is open (the Dock's own machine) — on by default */}
+      {row('autohide', p.autohide, true)}
       {/* a full bar on each display: Insane Flow's menu bar, Insane Classic's taskbar (the same setting) */}
       {row('everyDisplay', menuBarEveryDisplay(s), true, classic ? 'everyDisplayTaskbar' : 'everyDisplay')}
       {getApp('cleaner') ? row('cleaner', cleanerItemShown(s), true) : null}

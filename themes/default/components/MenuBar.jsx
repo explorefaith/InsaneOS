@@ -4,7 +4,7 @@
 // <MenuBars> draws one full bar per display (0.8.8.6; Settings → Desktop & Dock → Menu Bar → "Show the menu bar on
 // every display", on by default): the app's menus are lit on the focused window's display and dimmed on the others,
 // where a click lights that bar and opens the menu there. sdk/menubarmodel.js decides which bar is lit.
-import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut } from '@insaneos/sdk';
+import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut, windows, activeDesktop, appsOpen, useAutohide } from '@insaneos/sdk';
 import { useState, useRef, useEffect } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -119,6 +119,20 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
   const dim = !active;
   const close = () => setOpen(null);
 
+  // Bug C: with an app window on the desktop the bar hides like the Dock (the same machine,
+  // sdk/autohide.js), the top edge brings it back, and it goes again 2.5 s after the pointer
+  // leaves. A menu or a panel of the bar holds it; with no window open it never hides — the
+  // bar the user knows. The strip floats over windows anyway, so the work area is untouched.
+  const ws = useStore(windows);
+  useStore(activeDesktop);
+  const rectRef = useRef(null);
+  rectRef.current = { x0: area.x, y0: area.y, x1: area.x + area.w, y1: area.y + height };
+  const areaRef = useRef(area);
+  areaRef.current = area;
+  const keepOpen = open != null || !!controlCenter || !!clockPanel;
+  const slide = useAutohide({ enabled: bar.autohide, mayHide: appsOpen(ws, activeDesktop.get()),
+    position: 'top', areaRef, rectRef, keepOpen, hideMs: 2500 });
+
   const menus = {
     logo: { items: [
       { label: tr('shell.menu.about'), onClick: () => wm.open('about') },
@@ -166,6 +180,7 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
       <View style={{
         position: 'absolute', left: area.x, top: area.y, width: area.w, height, flexDirection: 'row', alignItems: 'center',
         justifyContent: island ? 'center' : 'flex-start',
+        transform: `translateY(${(-((1 - slide) * height)).toFixed(1)}px)`,
         ...(island ? {} : { paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: t.glassFilter }),
       }}>
         <View style={island ? {

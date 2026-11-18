@@ -486,6 +486,8 @@
   "dock.menubar.title": "Menu Bar",
   "dock.menubar.titleTaskbar": "Taskbar",
   "dock.menubar.footer": "What appears next to the clock. A click on the clock opens your notifications and the calendar.",
+  "dock.menubar.autohide": "Auto-hide with app windows",
+  "dock.menubar.autohideHint": "With an app window open the bar slides away; the top edge of the screen brings it back, and it hides again 2.5 s after the pointer leaves.",
   "dock.menubar.everyDisplay": "Show the menu bar on every display",
   "dock.menubar.everyDisplayHint": "Each display gets its own bar with the clock and the status items. The app's menus are lit on the display with the window you're using.",
   "dock.menubar.everyDisplayTaskbar": "Show the taskbar on every display",
