@@ -7,11 +7,11 @@
 // translucent paper imitates the glass look instead.
 import {
   View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
-  widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent,
+  widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent, Layer,
   sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow, admin, errorText, TextInput,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp, Columns } from './ui.jsx';
-import { useState } from 'react';
+import { createElement as h, useState } from 'react';
 
 // the compact native minis: no scale transform anywhere (this engine's parent scale does not
 // render child subtrees — two approaches failed), just small real data per type. One shared tick.
@@ -103,6 +103,12 @@ function IconBtn({ glyph, label, onClick, danger, small, active }) {
 // the size segments + the icon controls under a preview (shared by the gallery and the list)
 function Controls({ placed, size, onSize, onAdd, onRemove, onConfigure, cfgOpen, children }) {
   const t = useTheme();
+  const Act = ({ label, onClick, primary, disabled }) => (
+    <View onClick={disabled ? undefined : onClick} style={{ flex: 1, height: 26, borderRadius: 7, justifyContent: 'center', alignItems: 'center',
+      cursor: disabled ? 'default' : 'pointer', backgroundColor: primary ? t.accent : t.control, opacity: disabled ? 0.4 : 1 }}>
+      <Text style={{ fontSize: 11.5, fontWeight: 600, color: primary ? '#ffffff' : t.text, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1, overflow: 'hidden' }}>{label}</Text>
+    </View>
+  );
   return (
     <View style={{ gap: 4 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -112,9 +118,12 @@ function Controls({ placed, size, onSize, onAdd, onRemove, onConfigure, cfgOpen,
         ))}
         <View style={{ flex: 1 }} />
         {placed > 0 ? <Text style={{ fontSize: 10, color: t.textDim }}>{tOptional('settings.widgets.onDesktop') || 'On desktop'}: {placed}</Text> : null}
-        <IconBtn glyph="+" label={tOptional('settings.widgets.tipAdd') || 'Add to the desktop'} onClick={onAdd} />
-        {onConfigure ? <IconBtn glyph="⚙" label={tOptional('settings.widgets.tipConfigure') || 'Configure'} onClick={onConfigure} /> : null}
         {placed > 0 && onRemove ? <IconBtn glyph="✕" danger label={tOptional('settings.widgets.tipRemove') || 'Remove the newest one'} onClick={onRemove} /> : null}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        <Act primary label={tOptional('settings.widgets.set') || 'Set'} onClick={onAdd} />
+        <Act label={tOptional('settings.widgets.preview') || 'Preview'} onClick={() => setPreviewFor(type)} />
+        <Act label={tOptional('settings.widgets.customize') || 'Customize'} onClick={onConfigure || onAdd} disabled={!onConfigure} />
       </View>
       {cfgOpen ? (
         <View style={{ padding: 8, gap: 2, borderRadius: 10, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', border: `1px solid ${t.separator}` }}>
@@ -125,10 +134,39 @@ function Controls({ placed, size, onSize, onAdd, onRemove, onConfigure, cfgOpen,
   );
 }
 
+// The bigger preview: the widget's own card component at its true size, in the chosen cfg, over
+// a modal layer. No scale transforms — the real size is the point.
+function PreviewDialog({ type, cfg, onClose }) {
+  const t = useTheme();
+  const c = catalogOf(type) || { w: 300, h: 120 };
+  const C = widgetComponent(type);
+  return (
+    <Layer name="modal">
+      <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
+        justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={onClose}>
+        <View onClick={(e) => e.stopPropagation?.()} style={{ padding: 18, borderRadius: 14, gap: 12, alignItems: 'center',
+          backgroundColor: t.windowBg, border: `1px solid ${t.separator}`, boxShadow: '0 18px 60px rgba(0,0,0,0.45)' }}>
+          <Text style={{ fontSize: 14, fontWeight: 700, color: t.text, textAlign: 'center' }}>
+            {tOptional(`settings.widgets.type.${type}`) || type}
+          </Text>
+          <View style={{ width: c.w, height: c.h }}>
+            {C ? h(C, { widget: { type, id: 'preview', x: 0, y: 0, w: c.w, h: c.h, cfg } }) : null}
+          </View>
+          <Text style={{ fontSize: 10, color: t.textDim }}>
+            {tOptional('settings.widgets.trueSize') || 'True size — this is exactly what the desktop draws.'}
+          </Text>
+          <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={onClose} />
+        </View>
+      </View>
+    </Layer>
+  );
+}
+
 export function WidgetsSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const layout = useStore(widgetLayout);
+  const [previewFor, setPreviewFor] = useState(null);
   useStore(miniTick);
   const editing = useStore(widgetsEditing);
   const [sz, setSz] = useState({});

@@ -259,5 +259,9 @@
  "wallpaper.collectionHint": "Kolekcija atkeliauja su OS — be atsisiuntimų, o pasirinkimas išlieka po paleidimo iš naujo. Spustelėjus paveikslą klausiama, kur jį pritaikyti.",
  "wallpaper.yourPic": "Jūsų paveikslas",
  "wallpaper.yourPics": "Jūsų paveikslai",
- "wallpaper.yourPicsHint": "Paveikslai, kuriuos pridėjote. Jie lieka tik šiame kompiuteryje."
+ "wallpaper.yourPicsHint": "Paveikslai, kuriuos pridėjote. Jie lieka tik šiame kompiuteryje.",
+ "widgets.customize": "Tinkinti",
+ "widgets.preview": "Peržiūra",
+ "widgets.set": "Nustatyti",
+ "widgets.trueSize": "Tikras dydis — būtent tai piešia darbalaukis."
 }
