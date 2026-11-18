@@ -70,6 +70,25 @@ VERIFIED → BLOCKED.
   the CC's DND toggle writes the same key.
 - Boot units under tools/boot/systemd/ — the pending audit checks restart policies.
 
+## 7. VERIFIED WORKING (self-audit, evidence-quoted)
+
+- **Process monitoring + safe termination** (brief §6): apps/monitor/Processes.jsx — Stop
+  (SIGTERM) / Force Quit (SIGKILL) behind a confirmation sheet (StopSheet :231, confirm copy
+  :254-255), signalled by insane-server for the user's own processes and via the root helper's
+  proc-signal for others (admins only); both check the process start time so a reused PID is
+  never hit, and both refuse the protected set (PID 1, kernel threads, the session, Insane OS's
+  services, PipeWire) — the table marks them `prot`.
+- **Power actions** (brief §7): reboot/poweroff through `insane.session.power(...)` → sessiond
+  (root) — insane-server runs nothing itself (sdk/power.jsx:8); the ask state machine
+  (ask/sent/denied/unavailable) surfaces admin denial honestly; suspend comes from the login
+  screen and sessiond guards it with idle-inhibit (sessiond.c:720-723).
+- **Notifications** (brief §8): sdk/notify.js carries prefs (dnd + schedule + per-app) and the
+  seen history; the island bar tracks unread against `seen.current` (IslandStrip.jsx:100) — the
+  notification center's history, per-app controls and DND exist.
+- **Bounded restarts**: sessiond's boot-time test restarts at most a set number of boots, a
+  login cancels the pending restart (sessiond.c:850-864) — no unbounded restart loop on the
+  boot path.
+
 ## Agent audit reports (round 1)
 
 - WM/workspace agent: running.
