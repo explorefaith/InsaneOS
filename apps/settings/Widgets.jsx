@@ -4,8 +4,8 @@
 // widgets from the catalog, sizes and removes the placed ones, and enters the desktop's arrange
 // mode (drag, remove, snap to the grid) — the same mode the desktop's right-click opens.
 import {
-  View, Text, Button, useTheme, useLocale, useStore, tOptional, screen,
-  widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget,
+  View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
+  widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp } from './ui.jsx';
 
@@ -42,14 +42,32 @@ export function WidgetsSettings() {
         {layout.map((w) => {
           const c = catalogOf(w.type) || { w: 300, h: 120 };
           const size = sizeOf(w, c);
-          return (
+          const cfg = w.cfg || {};
+          const rows = [
             <SettingRow key={w.id} label={tOptional(`settings.widgets.type.${w.type}`) || (c.name || w.type)}
               hint={`${Math.round(w.w)} × ${Math.round(w.h)}`}>
               <PopUp width={150} value={size} onChange={(v) => setSize(w.id, SIZES.find(([k]) => k === v)?.[1] ?? 1)}
-                options={SIZES.map(([k, sc]) => [k, tOptional(`settings.widgets.size.${k}`) || (k === 'small' ? 'Small' : k === 'medium' ? 'Medium' : 'Large')])} />
+                options={SIZES.map(([k]) => [k, tOptional(`settings.widgets.size.${k}`) || (k === 'small' ? 'Small' : k === 'medium' ? 'Medium' : 'Large')])} />
               <Button small label={tOptional('settings.widgets.remove') || 'Remove'} onClick={() => { try { removeWidget(w.id); } catch (e) { /* already gone */ } }} />
-            </SettingRow>
-          );
+            </SettingRow>,
+          ];
+          // M2: the clock's depth — the face, the hour format and the seconds, per widget
+          if (w.type === 'insane-clock') {
+            rows.push(
+              <SettingRow key={`${w.id}.style`} label={tOptional('settings.widgets.cfgStyle') || 'Style'}>
+                <PopUp width={150} value={cfg.style || 'digital'} onChange={(v) => setWidgetCfg(w.id, { style: v })}
+                  options={[['digital', tOptional('settings.widgets.cfgDigital') || 'Digital'], ['analog', tOptional('settings.widgets.cfgAnalog') || 'Analog']]} />
+              </SettingRow>,
+              <SettingRow key={`${w.id}.format`} label={tOptional('settings.widgets.cfgFormat') || 'Hour format'}>
+                <PopUp width={150} value={cfg.h24 === false ? '12' : '24'} onChange={(v) => setWidgetCfg(w.id, { h24: v === '24' })}
+                  options={[['24', tOptional('settings.widgets.cfg24') || '24-hour'], ['12', tOptional('settings.widgets.cfg12') || '12-hour']]} />
+              </SettingRow>,
+              <SettingRow key={`${w.id}.secs`} label={tOptional('settings.widgets.cfgSeconds') || 'Show seconds'}>
+                <Toggle small on={!!cfg.seconds} onChange={(v) => setWidgetCfg(w.id, { seconds: v })} />
+              </SettingRow>,
+            );
+          }
+          return rows;
         })}
       </Section>
       <Section title={tOptional('settings.widgets.gallery') || 'Add a widget'} footer={tOptional('settings.widgets.galleryHint') || 'New widgets land in a free spot on the desktop; arrange them there.'}>

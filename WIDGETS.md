@@ -64,7 +64,27 @@ widget framework is JS). C is used where the brief asks for it: the M5 crypto ne
 - **Still manual (live desktop)**: add/remove/resize from the page, the arrange drag feel, size
   presets' look, persistence across logout/login, Dark/Light + accent on glass.
 
-### M2 — Time widgets (clock analog option, date/day, calendar depth) — NOT STARTED
+### M2 — Time widgets: clock depth + Date and Day — **CHECKPOINT PASSED** (2026-11-18)
+
+- **Clock depth** (`DesktopWidgets.jsx` ClockCard): per-widget cfg (`widget.cfg` in
+  settings.desktopWidgets — the model's `setWidgetCfg`, compare-before-set, rides every move/resize
+  and survives reload): **Digital/Analog** (the analog face drawn with views — ring, ticks, hour /
+  minute / optional second hands rotating via wrapper views around the face centre), **24-hour /
+  12-hour** (AM/PM), **seconds** (digital `:ss` / the thin second hand). The tick stays the shared
+  1 s ticker — minute/second aligned, never per frame. 12 h is off by default: the card has always
+  read 24 h, so the upgrade changes nothing until the user opts in.
+- **New Date and Day card** (`insane-date`, 220×150): weekday, the big day number, month + year —
+  `weekdayName`/`monthName` in the system locale; added to `WIDGET_CATALOG` and registered.
+- **Settings page**: each placed clock grows Style / Hour format / Show-seconds rows
+  (`setWidgetCfg` through the Settings page's own pop-ups and toggle).
+- **Files**: `sdk/widgetmodel.js` (catalog entry + `setWidgetCfg`), `sdk/index.js` (export),
+  `themes/default/components/DesktopWidgets.jsx` (ClockCard depth + DateCard),
+  `apps/settings/Widgets.jsx` (the cfg rows), `assets/locales/*/settings.json` (eight new keys ×5).
+- **Verification**: build-theme + i18n-check exit 0; the lab mounted the **analog clock with the
+  seconds hand and the Date card** through testbench window cycles — 1115 frames, layout 0.21 ms,
+  paint 21.0 ms average, **zero react errors**, 8 slow frames = the testbench's own bursts (the
+  same count as the pre-M2 run — no widget-caused frame). **Still manual**: the analog face's look
+  on glass in Light/Dark, the 12 h labels' placement, the cfg pop-ups' feel on the real desktop.
 ### M3 — System widgets (temperature depth with the adaptive color) — NOT STARTED
 ### M4 — Now Playing depth (progress + transport controls) — NOT STARTED (the `nowPlaying`
 store and a media card already exist; the depth pass is the work)

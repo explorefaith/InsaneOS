@@ -128,15 +128,58 @@ function ClockCard({ widget }) {
   const p = useStore(palette);
   const ink = hex(p.ink);
   const d = new Date(now || Date.now());
-  const hh = String(d.getHours()).padStart(2, '0');
+  const cfg = widget.cfg || {};
+  const analog = cfg.style === 'analog';
+  const h24 = cfg.h24 !== false;                       // the card has always been 24 h: that stays
+  const secs = !!cfg.seconds;
+  let hh = d.getHours();
+  const ampm = h24 ? '' : hh < 12 ? ' AM' : ' PM';
+  if (!h24) hh = hh % 12 || 12;
   const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  const face = 104;
+  const hand = (ang, len, w, op) => (
+    <View style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, transform: `rotate(${ang}deg)` }}>
+      <View style={{ position: 'absolute', left: face / 2 - w / 2, top: face / 2 - len, width: w, height: len,
+        borderTopLeftRadius: w / 2, borderTopRightRadius: w / 2, backgroundColor: ink, opacity: op }} />
+    </View>
+  );
   return (
-    <Card widget={widget}>
-      <Text style={{ fontSize: 52, fontWeight: 800, color: INK, letterSpacing: -1.2, lineHeight: 1.05 }}>
-        {hh}:{mm}</Text>
+    <Card widget={widget} style={{ gap: 10 }}>
+      {analog ? (
+        <View style={{ width: face, height: face, alignSelf: 'center' }}>
+          <View style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, borderRadius: face / 2, border: `2px solid ${INK}` }} />
+          {[0, 90, 180, 270].map((a) => (
+            <View key={a} style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, transform: `rotate(${a}deg)` }}>
+              <View style={{ position: 'absolute', left: face / 2 - 1, top: 3, width: 2, height: 6, borderRadius: 1, backgroundColor: INK_DIM }} />
+            </View>
+          ))}
+          {hand(((d.getHours() % 12) + d.getMinutes() / 60) * 30, face * 0.26, 3.5, 1)}
+          {hand(d.getMinutes() * 6, face * 0.38, 2.5, 1)}
+          {secs ? hand(d.getSeconds() * 6, face * 0.4, 1.2, 0.7) : null}
+          <View style={{ position: 'absolute', left: face / 2 - 3, top: face / 2 - 3, width: 6, height: 6, borderRadius: 3, backgroundColor: INK }} />
+        </View>
+      ) : (
+        <Text style={{ fontSize: 52, fontWeight: 800, color: INK, letterSpacing: -1.2, lineHeight: 1.05 }}>
+          {String(hh).padStart(2, '0')}:{mm}{secs ? `:${ss}` : ''}{ampm}</Text>
+      )}
       <Text style={{ fontSize: 15, fontWeight: 600, color: INK_DIM, marginTop: 2 }}>
         {weekdayName(d.getDay(), false)}, {d.getDate()} {monthName(d.getMonth())}</Text>
       <View style={{ marginTop: 10, height: 2, width: 34, borderRadius: 1, backgroundColor: ink, opacity: 0.8 }} />
+    </Card>
+  );
+}
+
+// Date and Day (M2): the weekday, the month and the day, in the system locale and time zone —
+// the calendar shows the month grid; this card is the today-at-a-glance.
+function DateCard({ widget }) {
+  const now = useStore(clockTicker);
+  const d = new Date(now || Date.now());
+  return (
+    <Card widget={widget} style={{ gap: 4 }}>
+      <Text style={{ fontSize: 15, fontWeight: 600, color: INK_DIM }}>{weekdayName(d.getDay(), false)}</Text>
+      <Text style={{ fontSize: 56, fontWeight: 800, color: INK, letterSpacing: -1, lineHeight: 1.02 }}>{d.getDate()}</Text>
+      <Text style={{ fontSize: 16, fontWeight: 600, color: INK_DIM }}>{monthName(d.getMonth())} {d.getFullYear()}</Text>
     </Card>
   );
 }
@@ -193,6 +236,7 @@ function useWorkArea() {
 const X = () => Math.max(40, insane.screen.width - 342);
 
 registerWidgetType('insane-clock', ClockCard);
+registerWidgetType('insane-date', DateCard);
 registerWidgetType('insane-stats', StatsCard);
 setWidgets('insane-clock', [{ id: 'clock', x: X(), y: 104, w: 300, h: 132 }]);
 setWidgets('insane-stats', [{ id: 'stats', x: X(), y: 252, w: 300, h: 158 }]);

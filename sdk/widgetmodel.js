@@ -16,12 +16,30 @@ export const WIDGET_GRID = 4;
 // What the gallery offers, in its order. w/h are the default card sizes.
 export const WIDGET_CATALOG = [
   { type: 'insane-clock', w: 300, h: 132 },
+  { type: 'insane-date', w: 220, h: 150 },
   { type: 'insane-calendar', w: 300, h: 316 },
   { type: 'insane-battery', w: 300, h: 96 },
   { type: 'insane-stats', w: 300, h: 158 },
   { type: 'insane-media', w: 300, h: 112 },
   { type: 'insane-visualizer', w: 320, h: 118 },
 ];
+
+// Per-widget options (the clock's analog/12-24/seconds): merged into the entry's cfg and saved
+// with the layout. A no-op write changes nothing (compare before set — the React #185 lesson:
+// a store write must never fire without a real change).
+export function setWidgetCfg(id, patch) {
+  const layout = widgetLayout.get() || [];
+  let changed = false;
+  const next = layout.map((w) => {
+    if (w.id !== id) return w;
+    const cfg = { ...(w.cfg || {}), ...patch };
+    if (JSON.stringify(cfg) === JSON.stringify(w.cfg)) return w;
+    changed = true;
+    return { ...w, cfg };
+  });
+  if (changed) widgetLayout.set(next);
+  return changed;
+}
 
 export const widgetLayout = createStore(null);      // null: the theme draws its defaults
 export const widgetsEditing = createStore(false);

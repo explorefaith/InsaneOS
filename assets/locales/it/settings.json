@@ -765,5 +765,13 @@
   "widgets.type.insane-visualizer": "Visualizzatore",
   "widgets.size.large": "Grande",
   "widgets.size.medium": "Medio",
-  "widgets.size.small": "Piccolo"
+  "widgets.size.small": "Piccolo",
+  "widgets.type.insane-date": "Data e giorno",
+  "widgets.cfgStyle": "Stile",
+  "widgets.cfgDigital": "Digitale",
+  "widgets.cfgAnalog": "Analogico",
+  "widgets.cfgFormat": "Formato ore",
+  "widgets.cfg24": "24 ore",
+  "widgets.cfg12": "12 ore",
+  "widgets.cfgSeconds": "Mostra i secondi"
 }
