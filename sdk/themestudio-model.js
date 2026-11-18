@@ -329,6 +329,60 @@ export function liveWidgets(themeDef, saved, area) {
   return resolvePlan(themeDef.widgets || [], area, themeDef.sw, themeDef.sh);
 }
 
+
+// ---------------------------------------------------------------- rich text (per-segment style)
+// A widget's text can be a run of independently styled segments: cfg.rich = [{t, font?, size?,
+// weight?, italic?, color?, tracking?}, …]. A segment without a style key inherits the widget's
+// effective style. The engine has no inline layout, so the renderer expands the segments into
+// word tokens inside a wrapping row — word-wrap with per-run styles (richSegments feeds it).
+const RICH_MAX_SEGMENTS = 12;
+const RICH_MAX_TEXT = 400;
+
+export function richValid(v) {
+  if (!Array.isArray(v)) return null;
+  const segs = v.filter((g) => g && typeof g.t === 'string' && g.t.length)
+    .slice(0, RICH_MAX_SEGMENTS)
+    .map((g) => {
+      const o = { t: g.t.slice(0, RICH_MAX_TEXT) };
+      for (const k of ['font', 'size', 'weight', 'italic', 'color', 'tracking']) if (g[k] !== undefined) o[k] = g[k];
+      return o;
+    });
+  return segs.length ? segs : null;
+}
+
+// The segments to draw: the styled run when it is valid, otherwise one plain segment from the
+// widget's plain text (cfg.text) — the two paths never mix.
+export function richSegments(cfg, fallbackText) {
+  const rich = richValid((cfg || {}).rich);
+  if (rich) return rich;
+  const t = typeof fallbackText === 'string' && fallbackText ? fallbackText : '';
+  return t ? [{ t }] : [];
+}
+
+// Split a segment at a character offset (the editor's "style part of a word" path): returns a new
+// segment list, or the same list when the index/offset make no split.
+export function richSplit(segs, si, offset) {
+  if (!Array.isArray(segs) || !segs[si]) return segs;
+  const g = segs[si];
+  if (!(offset > 0 && offset < g.t.length)) return segs;
+  const a = { ...g, t: g.t.slice(0, offset) };
+  const b = { t: g.t.slice(offset) };
+  const out = [...segs];
+  out.splice(si, 1, a, b);
+  return richValid(out) || segs;
+}
+
+// Word tokens for the wrapping row: every token carries its segment's style. Whitespace stays
+// glued to the token it follows so the row wraps at words, not letters.
+export function richTokens(segs) {
+  const out = [];
+  for (const g of segs) {
+    const words = g.t.split(/(\s+)/).filter((w) => w.length);
+    for (const w of words) out.push({ t: w, g });
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- undo / redo
 
 // Push-based history of per-theme widget lists. Contract: `push(state)` records the state

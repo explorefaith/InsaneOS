@@ -77,6 +77,7 @@ export {
   resolvePlan as tsResolvePlan, liveWidgets as tsLiveWidgets, resolveStyle, withAlpha,
   newInstance as tsNewInstance, createHistory as tsCreateHistory, planDiffers as tsPlanDiffers,
   alignW as tsAlignW, distributeW as tsDistributeW,
+  richValid as tsRichValid, richSegments as tsRichSegments, richTokens as tsRichTokens, richSplit as tsRichSplit,
 } from './themestudio-model.js';
 export { THEMES as TS_THEME_CATALOG } from './themestudio-themes.js';
 export { TS_WIDGET_SPECS, TS_CATS, TS_VARIANTS, TS_PROVIDERS, specOf, specsOfCat } from './ts-widget-specs.js';

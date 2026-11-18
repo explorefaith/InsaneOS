@@ -14,6 +14,7 @@ import {
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
+  tsRichSegments, tsRichSplit,
   TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
@@ -296,6 +297,9 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
           <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
         </StyleControl>
       ) : null}
+      {w.kind === 'label' || w.kind === 'headline' || w.kind === 'quote' || w.kind === 'notes' ? (
+        <RichEditor w={w} onCfg={onCfg} pal={w._palette || []} />
+      ) : null}
     </View>
   );
 }
@@ -424,6 +428,65 @@ function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
   );
 }
 
+
+
+function RichEditor({ w, onCfg, pal }) {
+  const t = useTheme();
+  const segs = tsRichSegments(w.cfg || {}, null) || [];
+  const setSegs = (next) => onCfg({ rich: next, text: next.map((g) => g.t).join('') });
+  const patch = (i, p) => {
+    const next = segs.map((g, j) => (j === i ? { ...g, ...p } : g));
+    setSegs(next);
+  };
+  const split = (i) => setSegs(tsRichSplit(segs, i, Math.floor((segs[i]?.t || '').length / 2)));
+  const isRich = Array.isArray((w.cfg || {}).rich);
+  return (
+    <View style={{ gap: 8, padding: 10, borderRadius: 10, border: `1px solid ${t.separator}` }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 700, color: t.text, textAlign: 'start' }}>{L('richTitle', 'Styled segments')}</Text>
+        <Button small
+          label={isRich ? L('richOff', 'Plain text') : L('richOn', 'Style segments')}
+          onClick={() => {
+            if (isRich) onCfg({ rich: null, text: segs.map((g) => g.t).join('') });
+            else setSegs([{ t: (w.cfg || {}).text || 'Text' }]);
+          }} />
+      </View>
+      {isRich ? (
+        <View style={{ gap: 6 }}>
+          {segs.map((g, i) => (
+            <View key={i} style={{ gap: 6, padding: 8, borderRadius: 8, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                <TextInput value={g.t} onChange={(v) => patch(i, { t: v })} style={{ flex: 1, minWidth: 0 }} />
+                <Button small label="½" onClick={() => split(i)} />
+                <Button small label="×" onClick={() => setSegs(segs.filter((_, j) => j !== i))} />
+              </View>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                <PopUp value={g.weight ?? ''} onChange={(v) => patch(i, { weight: v === '' ? null : v })} width={92}
+                  options={[['', 'W'], ...[400, 500, 600, 700, 800].map((x) => [x, `${x}`])]} />
+                <PopUp value={g.size ?? ''} onChange={(v) => patch(i, { size: v === '' ? null : v })} width={92}
+                  options={[['', 'Size'], ...STEPS.slice(6).map((x) => [x, `${x}`])]} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ fontSize: 11, color: t.textDim }}>{L('italic', 'Italic')}</Text>
+                  <Toggle value={!!g.italic} onChange={(v) => patch(i, { italic: v ? true : null })} />
+                </View>
+                {[null, ...(pal || []).slice(0, 3), '#f5f5f7', '#1d1d1f'].map((c, ci) => (
+                  <View key={ci} onClick={() => patch(i, { color: c })} style={{ width: 16, height: 16, borderRadius: 8,
+                    backgroundColor: c || 'transparent', border: `2px solid ${(g.color || null) === c ? t.accent : t.separator}`,
+                    alignItems: 'center', justifyContent: 'center' }}>
+                    {c === null ? <Text style={{ fontSize: 8, color: t.textDim }}>A</Text> : null}
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
+          {segs.length < 12 ? <Button small label={L('richAdd', '+ Segment')} onClick={() => setSegs([...segs, { t: ' ' }])} /> : null}
+        </View>
+      ) : (
+        <Text style={{ fontSize: 11, color: t.textDim, textAlign: 'start' }}>{L('richHint', 'Split the text into runs and style each one — font weight, size, italics and ink, segment by segment.')}</Text>
+      )}
+    </View>
+  );
+}
 
 // ---------------------------------------------------------------- the page
 

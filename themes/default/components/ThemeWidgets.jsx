@@ -22,7 +22,7 @@ import {
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
-  stopwatch as swStore, swStart, swStop, swReset, swElapsed,
+  stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens,
 } from '@insaneos/sdk';
 
 const hex = (rgb) => (Array.isArray(rgb) ? `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}` : null);
@@ -426,9 +426,11 @@ function TodoW({ widget, st }) {
 
 function QuoteW({ widget, st }) {
   const cfg = widget.cfg || {};
+  const rich = tsRichSegments(cfg, null);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
-      <Text style={tx(st, { size: st.size, lineHeight: 1.35 })}>“{cfg.text || ''}”</Text>
+      {rich ? <RichFlow widget={widget} st={st} cfg={{ ...cfg, rich: [{ ...rich[0], t: `“${rich[0].t}` }, ...rich.slice(1)] }} />
+        : <Text style={tx(st, { size: st.size, lineHeight: 1.35 })}>“{cfg.text || ''}”</Text>}
       {cfg.by ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 17) * 0.7)), weight: 600 })}>{`— ${cfg.by}`}</Text> : null}
     </TSCard>
   );
@@ -511,9 +513,11 @@ function StorageW({ widget, st }) {
 
 function LabelW({ widget, st }) {
   const cfg = widget.cfg || {};
+  const rich = tsRichSegments(cfg, null);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 2 }}>
-      <Text style={tx(st, { size: st.size })}>{cfg.text || ''}</Text>
+      {rich ? <RichFlow widget={widget} st={st} cfg={cfg} />
+        : <Text style={tx(st, { size: st.size, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1, overflow: 'hidden' })}>{cfg.text || ''}</Text>}
       {cfg.sub ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 24) * 0.5)), weight: 500 })}>{cfg.sub}</Text> : null}
     </TSCard>
   );
@@ -521,9 +525,11 @@ function LabelW({ widget, st }) {
 
 function HeadlineW({ widget, st }) {
   const cfg = widget.cfg || {};
+  const rich = tsRichSegments(cfg, null);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center' }}>
-      <Text style={tx(st, { size: st.size, lineHeight: 1.05 })}>{cfg.text || ''}</Text>
+      {rich ? <RichFlow widget={widget} st={st} cfg={cfg} />
+        : <Text style={tx(st, { size: st.size, lineHeight: 1.05, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 2, overflow: 'hidden' })}>{cfg.text || ''}</Text>}
     </TSCard>
   );
 }
@@ -1226,6 +1232,23 @@ function StopwatchW({ widget, st }) {
 }
 
 // ---------------------------------------------------------------- registration + the bridge
+
+// ---- rich text: a styled run drawn as word tokens in a wrapping row (the engine has no inline
+// layout; word-splitting a segment keeps its style and reflows like a paragraph)
+function RichFlow({ widget, st, cfg }) {
+  const segs = tsRichSegments(cfg, (cfg || {}).text);
+  if (!segs.length) return null;
+  const tokens = tsRichTokens(segs);
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline',
+      justifyContent: st.align === 'center' ? 'center' : st.align === 'right' ? 'flex-end' : 'flex-start' }}>
+      {tokens.map((tk, i) => {
+        const seg = resolveStyle(st, tk.g || {});
+        return <Text key={i} style={tx(seg, { size: seg.size ?? st.size })}>{tk.t}</Text>;
+      })}
+    </View>
+  );
+}
 
 // Every renderer variant the spec table names, implemented once (sdk/ts-widget-specs.js).
 const VARIANTS = {
