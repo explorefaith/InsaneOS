@@ -108,6 +108,34 @@ Shortcut-conflict sweep (the agent's): no unintended conflicts; ❖`'s double ro
 
 VERIFIED WORKING (the agent's trace): drag (grab.c per-frame clamp), 8-edge resize, minimize/restore genie, maximize (dblclick + jitter guard), close guards, Classic's snap layouts + ❖arrows, center, fullscreen + Esc, PiP stickiness, focus/stacking per desktopmodel, Alt-Tab/❖Tab switcher (hold-open, digits, exclusions), workspaces (create/remove/switch/move/keyboard nav/indicator/rename/reorder, state saved, session restore), the shared Overview (grid, placeholders, drag to another desktop), hot corners.
 
+## 9. Session/lock audit (round 1 — agent report, 9 findings)
+
+The audit verified the whole login chain against the C (crypt_r on shadow, constant-time compare,
+timing-equalized unknown accounts, escalating fail waits, per-user spawn flock, drop-privileges
+exec of the root-owned binary, keyring root-only and wiped) and confirmed **lock = taking the
+session off the monitor** (EVIOCREVOKE on every lent fd, left-framebuffer removal, DROP_MASTER,
+text consoles blocked) — nothing to bypass.
+
+| ID | Sev | Finding | Status |
+|---|---|---|---|
+| S1 | P1 | the AUTOLOGIN worker restarted unconditionally on every reap — a session that never came up spawned a full attempt forever; the success path re-lent the monitor indefinitely | FIXED (retries only before the first show, bounded at 3, 20 s apart; after that the login screen takes over) |
+| S2 | P1 | a theme bundle that THROWS at boot returned −1 before the fallback/recovery paths — the greeter died and came back at a bounded rate forever = a permanent dark display; a session re-failed at every login | FIXED (all load failures now walk the fallback themes and the recovery screen; the error stays on the log) |
+| S3 | P2 | a failed greeter lend left the display dark with nothing scheduled (the session-failure path re-showed the greeter; the greeter path didn't) | FIXED (greeter_retry_at +2 s) |
+| S4 | P2 | a login worker killed without replying wedged the greeter's submit on busy forever | FIXED (a login_replied flag; the reap answers the generic error) |
+| S5 | P2 | sleeplock_monitor_taken was dead code — the sleep inhibitor released after the 4 s hold, not on RP_UNDISPLAY (SESSIONS.md said otherwise) | FIXED (mirror.c's RP_UNDISPLAY calls it now) |
+| S6 | P3 | lock/switch parsed by substring — any future field containing the word would take the monitor back | FIXED (the parsed field compared, like power/display) |
+| S7 | P3 | an invalid username at the greeter answered busy ("another request in progress") | FIXED (answers fail) |
+| S8 | P3 | no password visibility toggle on the login screen | FIXED (an eye beside the submit arrow; the field re-mounts with secure off) |
+| S9 | P3 | the autologin failure loop spammed session-creation logs | FIXED (part of S1: one clear line per bounded retry) |
+
+VERIFIED WORKING (the agent's trace): authentication entirely the system's own; login flow
+end-to-end; the lock's monitor take-back; unlock as the normal login path; switch user keeps the
+background session; logout through session.quit; shell-crash → the login screen returns (never a
+blank display); shutdown/reboot with the admin ask state machine; suspend/resume wiring with
+idle-inhibit and the done_sleep latch; autologin gated once per boot; greeter lifecycle (10 s
+linger, stale-binary kill, rate-bounded crash restart); insaneos.service KillMode/Delegate;
+no-display path; greeter i18n complete.
+
 ## Agent audit reports (round 1)
 
 - WM/workspace agent: running.

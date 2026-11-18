@@ -20,6 +20,7 @@
 #include "sharewire.h"
 #include "../vault/vclient.h"
 #include "../media/mstream.h"
+#include "../hw/sleeplock.h"
 #include "../par.h"
 #include "../canvas.h"
 
@@ -325,6 +326,7 @@ static void handle(Client *c, int type, const unsigned char *d, uint32_t n) {
     case RP_UNDISPLAY:
         if (c->seat) share_session(SHARE_S_LEFT);   /* before anything else is composed */
         if (c->seat && cb.undisplay) cb.undisplay();
+        sleeplock_monitor_taken();                  /* the monitor left: the sleep inhibitor releases now, not after the 4 s hold */
         break;
     case RP_VIDEO:
         /* u8 codec (0 none, 1 H.264, 2 VP8), u8 sound, u16 0, u32 kbit/s: this viewer's video */

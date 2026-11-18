@@ -238,6 +238,7 @@ function Greeter() {
   const [info, setInfo] = useState({ users: [], host: '', mode: 'login', user: '' });
   const [sel, setSel] = useState('');
   const [pass, setPass] = useState('');
+  const [showPass, setShowPass] = useState(false);
   // entrance: the whole login composition rises and fades in once, over ~0.8 s
   const [enter, setEnter] = useState(0);
   useEffect(() => {
@@ -402,10 +403,14 @@ function Greeter() {
             {locked ? <Text style={{ marginTop: 2, fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{t('greeter.locked')}</Text> : null}
             {user ? (
               <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', transform: [{ translateX: shake }] }}>
-                <TextInput key={`${user.name}#${focusRev}`} secure autoFocus value={pass} onChange={(v) => { setPass(v); if (msg) setMsg(''); }} onSubmit={submit}
+                <TextInput key={`${user.name}#${focusRev}#${showPass}`} secure={!showPass} autoFocus value={pass} onChange={(v) => { setPass(v); if (msg) setMsg(''); }} onSubmit={submit}
                   onCancel={() => setPass('')} placeholder={t('greeter.password')} size={14}
                   style={{ width: 250, height: 38, borderRadius: 19, paddingLeft: 16, paddingRight: 40, backgroundColor: 'rgba(255,255,255,0.13)',
                     border: '1px solid rgba(255,255,255,0.24)' }} />
+                <View onClick={() => setShowPass((v) => !v)} style={{ position: 'absolute', right: 38, top: 5, width: 28, height: 28, borderRadius: 14,
+                  alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{showPass ? '🙈' : '👁'}</Text>
+                </View>
                 <View onClick={submit} style={{ position: 'absolute', right: 5, top: 5, width: 28, height: 28, borderRadius: 14, alignItems: 'center',
                   justifyContent: 'center', backgroundColor: pass && !busy ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)' }}>
                   <Text style={{ fontSize: 14, fontWeight: 700, color: '#2a1f3d', marginTop: -1 }}>{busy ? '…' : '→'}</Text>

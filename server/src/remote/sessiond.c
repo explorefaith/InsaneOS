@@ -563,6 +563,9 @@ static pid_t worker_pid = -1;
 static int wk_r = -1, wk_w = -1;        /* workers → main (SOCK_SEQPACKET, with fds) */
 static int has_monitor;
 static char shown = '-', shown_user[33];
+static int autologin_tries;                 /* failed autologin attempts in this boot (bounded at 3) */
+static int login_replied;                   /* the login worker already answered the greeter (ok/fail/error) */
+static double autologin_retry_at;           /* and not more often than every 20 s */
 
 /* Pending action while another child works (creating a session can take a few seconds). */
 typedef enum { W_NONE, W_GREETER, W_LOGIN, W_AUTOLOGIN } WorkKind;
@@ -923,7 +926,11 @@ static void from_worker(void) {
         if (greeter_asked_at) sd_log("monitor: the login screen (%s), %.0f ms after the screen went dark", greeter_mode, (rd_now() - greeter_asked_at) * 1000);
         greeter_asked_at = 0;
         set_shown('g', NULL);
-        if (sd_mon_show(fd, "-", keep_lend())) { sd_mon_lost(); set_shown('-', NULL); }
+        if (sd_mon_show(fd, "-", keep_lend())) {
+            sd_mon_lost();
+            set_shown('-', NULL);
+            greeter_retry_at = rd_now() + 2;      /* the lend failed: try the login screen again, never a dark display */
+        }
         return;
     }
     if (sscanf(buf, "show u %32s", user) == 1 && fd >= 0 && sd_valid_username(user)) {
@@ -934,7 +941,7 @@ static void from_worker(void) {
         return;
     }
     if (fd >= 0) close(fd);
-    if (!strncmp(buf, "greeter-in ", 11) && shown == 'g') sd_mon_greeter(buf + 11);
+    if (!strncmp(buf, "greeter-in ", 11) && shown == 'g') { login_replied = 1; sd_mon_greeter(buf + 11); }
 }
 
 /* Restart or shut down from the session on the monitor (0.8.1: the apple menu, the Classic start
@@ -1004,7 +1011,7 @@ static void from_shown(int type, const char *j) {
             save_main_display(m);
             return;
         }
-        if (strstr(j, "\"lock\"")) {
+        if (!strcmp(a, "lock")) {
             sd_log("%s locked the screen", shown_user);
             struct passwd *lp = sd_valid_username(shown_user) ? getpwnam(shown_user) : NULL;
             if (lp) rd_tokens_drop_uid(lp->pw_uid);        /* locking also signs that user's browsers out */
@@ -1015,7 +1022,7 @@ static void from_shown(int type, const char *j) {
             greeter_sleep_left_s = jint(j, "sleepLeft", 86400);
             leave_for_greeter("lock");
         }
-        else if (strstr(j, "\"switch\"")) { sd_log("%s is switching user", shown_user); leave_for_greeter("switch"); }
+        else if (!strcmp(a, "switch")) { sd_log("%s is switching user", shown_user); leave_for_greeter("switch"); }
         return;
     }
     if (type != RP_GREETER || shown != 'g') return;
@@ -1027,7 +1034,9 @@ static void from_shown(int type, const char *j) {
         jstr(j, "user", u, sizeof u);
         jstr(j, "pass", pass, sizeof pass);
         boot_test_cancel("a login at the login screen");
-        if (!sd_valid_username(u) || start_worker(W_LOGIN, u, pass)) sd_mon_greeter("{\"t\":\"busy\"}");
+        if (!sd_valid_username(u)) sd_mon_greeter("{\"t\":\"fail\"}");   /* a bad name is a failure, not a busy */
+        else if (!start_worker(W_LOGIN, u, pass)) sd_mon_greeter("{\"t\":\"busy\"}");
+        else login_replied = 0;
         explicit_bzero(pass, sizeof pass);
     } else if (!strcmp(t, "bootTestCancel")) {
         boot_test_cancel("from the login screen");
@@ -1550,7 +1559,30 @@ int main(int argc, char **argv) {
                         sd_log("the login screen died %d times in 20 s: waiting 3 s before starting it again", greeter_deaths);
                     } else show_greeter(greeter_mode, greeter_user);
                 }
-                else if (k == W_AUTOLOGIN && start_worker(W_AUTOLOGIN, pending_user, NULL)) pending = k;
+                else if (k == W_LOGIN && shown == 'g' && !login_replied) {
+                    /* killed without replying (an OOM hit, a crash mid-verify): the greeter's
+                     * submit arrow stayed busy forever — answer with the generic error */
+                    sd_log("the login worker died without an answer");
+                    sd_mon_greeter("{\"t\":\"error\"}");
+                }
+                else if (k == W_AUTOLOGIN) {
+                    /* once the session has been shown, an autologin worker exiting is a normal
+                     * worker reap — restarting it re-lent the monitor forever; and a session that
+                     * never comes up (a broken bundle) retried immediately, spawning a full
+                     * session attempt every wait_socket cycle without end. Bounded, rate-limited,
+                     * only before the first show. */
+                    if (shown == 'u' || shown == 'g') sd_log("autologin: worker exited after the session was shown — not restarting it");
+                    else if (autologin_tries >= 3) {
+                        sd_log("autologin: %d failed attempts — stopping; the login screen takes over", autologin_tries);
+                        greeter_retry_at = rd_now() + 1;
+                    } else if (rd_now() < autologin_retry_at) greeter_retry_at = autologin_retry_at;
+                    else {
+                        autologin_tries++;
+                        autologin_retry_at = rd_now() + 20;
+                        sd_log("autologin: retrying the session (%d of 3)", autologin_tries);
+                        if (start_worker(W_AUTOLOGIN, pending_user, NULL)) pending = k;
+                    }
+                }
                 else if (shown == 'u' && (WIFSIGNALED(st) || (WIFEXITED(st) && WEXITSTATUS(st)))) {
                     /* the session's compositor died while it was on the monitor: the login screen comes
                      * back, never a blank display. The dead process's closed socket usually gets here

@@ -2350,7 +2350,10 @@ static int start_theme(const char *theme, int greeter, char *used, size_t n) {
     snprintf(used, n, "%s", theme);
     int r = js_init(theme);
     if (r == 0) return 0;
-    if (r != JS_REFUSED && codesig_state() != CODE_INVALID) return -1;
+    /* every load failure goes on to the fallback themes and the recovery screen: an early exit
+     * here made a greeter whose bundle throws die and come back until the display stayed dark —
+     * the sessiond restart policy is bounded in rate, not in count, so nothing ever recovered
+     * (the audit's finding; the error is still on the stderr log either way) */
     if (r == JS_REFUSED) snprintf(ui.theme_failed, sizeof ui.theme_failed, "%s", theme);   /* insane.themes.use won't go back to it */
     if (!greeter && codesig_state() != CODE_INVALID) {
         char root[PATH_MAX], tmp[PATH_MAX];
