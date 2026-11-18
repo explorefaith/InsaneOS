@@ -85,7 +85,26 @@ widget framework is JS). C is used where the brief asks for it: the M5 crypto ne
   paint 21.0 ms average, **zero react errors**, 8 slow frames = the testbench's own bursts (the
   same count as the pre-M2 run — no widget-caused frame). **Still manual**: the analog face's look
   on glass in Light/Dark, the 12 h labels' placement, the cfg pop-ups' feel on the real desktop.
-### M3 — System widgets (temperature depth with the adaptive color) — NOT STARTED
+### M3 — System widgets — **PARTIAL: temperature adaptive color DONE** (2026-11-18); Storage and
+Network-throughput cards remain
+
+- **Temperature adaptive color** (`sdk/widgetmodel.js` `tempColor`/`tempWord`/`TEMP_THRESHOLDS` +
+  the StatsCard): the accent dot, the CPU bar and the temperature bar shift **interpolated**
+  teal → amber → red across configurable thresholds (`settings.widgetsTempThresholds` overrides
+  the sane defaults cool 45 / warm 65 / hot 80); the label carries the translated state word
+  (Cool/Warm/Hot — color is never the only signal); no sensor → the row disappears and the ink
+  accent stays (graceful). The sampling stays the shared 3 s ticker (paused when no stats widget
+  is mounted — the sharedTicker refcount) and never writes a store without a real change.
+- **Files**: `sdk/widgetmodel.js` (the ramp + `setWidgetCfg` from M2), `sdk/index.js` (exports),
+  `themes/default/components/DesktopWidgets.jsx` (StatsCard), `assets/locales/*/settings.json`
+  (widgets.temp.cool/warm/hot ×5).
+- **Verification**: `tests/widgetmodel_test.mjs` (9/9: the ramp's endpoints, interpolation,
+  monotonic red channel, the state words, no-sensor default; `setWidgetCfg` merge/compare/ride);
+  build + i18n exit 0; the lab mounted the stats card through testbench cycles — 1174 frames,
+  layout 0.19 ms, zero react errors. **Manual**: the color shift under real CPU load, the word
+  updating, a machine without a sensor.
+- **Remaining in M3**: Storage and Network-throughput cards (providers: insane.monitor's disk/net
+  samples — read defensively like the memory fix).
 ### M4 — Now Playing depth (progress + transport controls) — NOT STARTED (the `nowPlaying`
 store and a media card already exist; the depth pass is the work)
 ### M5 — Crypto (Binance) — NOT STARTED (the closed C action, the parser test, the model test,

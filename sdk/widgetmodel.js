@@ -106,3 +106,25 @@ export function resizeWidget(id, dw, dh, area) {
   const layout = widgetLayout.get() || [];
   widgetLayout.set(layout.map((w) => (String(w.id) === String(id) ? clampWidget({ ...w, w: w.w + dw, h: w.h + dh }, area) : w)));
 }
+
+// M3: the temperature's adaptive color — cool teal-blue, warm amber, hot red, interpolated
+// between the thresholds (no jumpy steps). The thresholds are sane defaults; settings
+// widgetsTempThresholds overrides them. The label carries the state word too: color alone never
+// carries the meaning.
+export const TEMP_THRESHOLDS = { cool: 45, warm: 65, hot: 80 };
+const HEX = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, k) => { const A = HEX(a), B = HEX(b); return `#${A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join('')}`; };
+export function tempColor(t, th = TEMP_THRESHOLDS) {
+  const T = Math.max(0, Math.min(110, Number(t)));
+  if (!isFinite(T)) return '#3fa9c9';
+  if (T <= th.cool) return mix('#3fa9c9', '#3fa9c9', 0);
+  if (T <= th.warm) return mix('#3fa9c9', '#f5a623', (T - th.cool) / (th.warm - th.cool));
+  if (T <= th.hot) return mix('#f5a623', '#ff453a', (T - th.warm) / (th.hot - th.warm));
+  return '#ff453a';
+}
+// 'cool' | 'warm' | 'hot' — the word for the label (translated by the caller).
+export function tempWord(t, th = TEMP_THRESHOLDS) {
+  const T = Number(t);
+  if (!isFinite(T)) return 'cool';
+  return T <= th.warm ? 'cool' : T <= th.hot ? 'warm' : 'hot';
+}

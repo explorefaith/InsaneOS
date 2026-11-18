@@ -773,5 +773,8 @@
   "widgets.cfgFormat": "Formato de hora",
   "widgets.cfg24": "24 horas",
   "widgets.cfg12": "12 horas",
-  "widgets.cfgSeconds": "Mostrar segundos"
+  "widgets.cfgSeconds": "Mostrar segundos",
+  "widgets.temp.cool": "Fresca",
+  "widgets.temp.warm": "Templada",
+  "widgets.temp.hot": "Caliente"
 }

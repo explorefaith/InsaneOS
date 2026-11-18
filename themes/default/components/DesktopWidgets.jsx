@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -208,15 +208,21 @@ function StatsCard({ widget }) {
   } catch { /* monitor asleep */ }
   const s = stats.current;
   if (s.cpu == null) return null;
+  // M3: the accent follows the temperature when a sensor reads it — interpolated teal → amber →
+  // red, thresholds from settings (widgetsTempThresholds) over sane defaults; the label carries
+  // the state word so color is never the only signal. No sensor: the ink accent stays.
+  const th = { ...TEMP_THRESHOLDS, ...((settings.get().widgetsTempThresholds) || {}) };
+  const tc = s.temp != null && isFinite(s.temp) ? tempColor(s.temp, th) : ink;
+  const word = s.temp != null && isFinite(s.temp) ? tOptional(`settings.widgets.temp.${tempWord(s.temp, th)}`) || '' : '';
   return (
     <Card widget={widget} style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, letterSpacing: 1.2 }}>{(tOptional('shell.widgets.system') || 'SYSTEM').toUpperCase()}</Text>
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ink, opacity: 0.85 }} />
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: tc, opacity: 0.85 }} />
       </View>
-      <Row label="CPU" value={`${Math.round((s.cpu || 0) * 100)}%`} pct={s.cpu || 0} ink={ink} />
+      <Row label="CPU" value={`${Math.round((s.cpu || 0) * 100)}%`} pct={s.cpu || 0} ink={tc} />
       {s.ram != null ? <Row label="Memory" value={`${Math.round(s.ram * 100)}%`} pct={s.ram} ink={ink} /> : null}
-      {s.temp != null ? <Row label="Temperature" value={`${s.temp}°C`} pct={Math.max(0, Math.min(1, (s.temp - 35) / 55))} ink={ink} /> : null}
+      {s.temp != null ? <Row label="Temperature" value={`${s.temp}°C${word ? ` · ${word}` : ''}`} pct={Math.max(0, Math.min(1, (s.temp - 35) / 55))} ink={tc} /> : null}
     </Card>
   );
 }
