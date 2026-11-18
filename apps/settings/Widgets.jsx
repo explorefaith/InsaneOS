@@ -27,10 +27,13 @@ function Preview({ type, cfg, size }) {
   const c = catalogOf(type) || { w: 300, h: 120 };
   const w = Math.round((c.w * size) / 4) * 4, h = Math.round((c.h * size) / 4) * 4;
   if (!C) return <Note>{tOptional('settings.widgets.missing') || 'This widget could not be loaded.'}</Note>;
+  // previews drop the seconds: a live second hand would repaint the glass page every second, and
+  // over the video wallpaper that repaint costs the blur — the depth stays readable without it
+  const pc = { ...(cfg || {}), seconds: false };
   return (
     <View style={{ width: w + 8, height: h + 8, padding: 4, borderRadius: 12, overflow: 'hidden',
       backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', border: `1px solid ${t.separator}` }}>
-      <C widget={{ type, id: 'preview', x: 0, y: 0, w, h, cfg: cfg || {}, sample: true }} />
+      <C widget={{ type, id: 'preview', x: 0, y: 0, w, h, cfg: pc, sample: true }} />
     </View>
   );
 }
@@ -108,41 +111,76 @@ export function WidgetsSettings() {
   };
   return (
     <Stack>
-      <Section title={tOptional('settings.widgets.placed') || 'Widgets on the desktop'} footer={tOptional('settings.widgets.placedHint') || 'Widgets live behind app windows, above the wallpaper. Arrange them right on the desktop.'}>
-        <Actions start>
-          <Button label={tOptional('settings.widgets.arrange') || 'Arrange on desktop'} onClick={() => widgetsEditing.set(true)} />
-        </Actions>
+      <Section title={tOptional('settings.widgets.placed') || 'Widgets on the desktop'}
+        footer={tOptional('settings.widgets.placedHint') || 'Widgets live behind app windows, above the wallpaper. Arrange them right on the desktop.'}
+        accessory={(
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <Button small label={tOptional('settings.widgets.arrange') || 'Arrange on desktop'} onClick={() => widgetsEditing.set(true)} />
+            <Button small label={tOptional('settings.widgets.reset') || 'Reset layout'} onClick={() => loadWidgets(widgetDefaults(screen.width, screen.height))} />
+          </View>
+        )}>
         {editing ? <Note>{tOptional('settings.widgets.editing') || 'Arrange mode is on — drag the cards on the desktop, then close it there.'}</Note> : null}
-        {!layout.length ? <Note>{tOptional('settings.widgets.none') || 'No widgets yet — add one from the gallery below.'}</Note> : null}
-        {layout.map((w) => {
-          const c = catalogOf(w.type) || { w: 300, h: 120 };
-          const size = sizeOf(w, c);
+        {layout.length === 0 ? (
+          <View style={{ alignItems: 'center', gap: 8, paddingVertical: 16 }}>
+            <View style={{ flexDirection: 'row', gap: 5 }}>
+              {[0, 1, 2, 3].map((i) => (
+                <View key={i} style={{ width: 26, height: 26, borderRadius: 7, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)', border: `1px solid ${t.separator}` }} />
+              ))}
+            </View>
+            <Text style={{ fontSize: 12, color: t.textDim }}>{tOptional('settings.widgets.pickEmpty') || 'Pick a widget below'}</Text>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: '100%' }}>
+            {layout.map((w) => {
+              const c = catalogOf(w.type) || { w: 300, h: 120 };
+              const cfg = w.cfg || {};
+              const size = sizeOf(w, c);
+              const k = 0.35;
+              const C = widgetComponent(w.type);
+              return (
+                <View key={w.id} style={{ width: Math.round(c.w * k) + 8, gap: 4 }}>
+                  <View style={{ width: Math.round(c.w * k), height: Math.round(c.h * k), borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}` }}>
+                    {C ? (
+                      <View style={{ width: c.w, height: c.h, transform: `scale(${k})`, transformOrigin: 'top left' }}>
+                        <C widget={{ type: w.type, id: w.id, x: 0, y: 0, w: c.w, h: c.h, cfg: { ...cfg, seconds: false }, sample: true }} />
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={{ fontSize: 11, fontWeight: 600, color: t.text, textAlign: 'center' }}>{tOptional(`settings.widgets.type.${w.type}`) || w.type}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 3 }}>
+                    {SIZES.map(([sk]) => (
+                      <IconBtn key={sk} small glyph={sk === 'small' ? 'S' : sk === 'medium' ? 'M' : 'L'} label={tOptional(`settings.widgets.size.${sk}`)}
+                        onClick={() => setSize(w.id, SIZES.find(([kk]) => kk === sk)?.[1] ?? 1)} active={size === sk} />
+                    ))}
+                    <IconBtn small glyph="✕" danger label={tOptional('settings.widgets.remove') || 'Remove'}
+                      onClick={() => { try { removeWidget(w.id); } catch (e) { /* already gone */ } }} />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+        {layout.filter((w) => w.type === 'insane-clock' || w.type === 'insane-media').map((w) => {
           const cfg = w.cfg || {};
-          const rows = [
-            <SettingRow key={w.id} label={tOptional(`settings.widgets.type.${w.type}`) || (c.name || w.type)}>
-              <PopUp width={150} value={size} onChange={(v) => setSize(w.id, SIZES.find(([k]) => k === v)?.[1] ?? 1)}
-                options={SIZES.map(([k]) => [k, tOptional(`settings.widgets.size.${k}`) || (k === 'small' ? 'Small' : k === 'medium' ? 'Medium' : 'Large')])} />
-              <Button small label={tOptional('settings.widgets.remove') || 'Remove'} onClick={() => { try { removeWidget(w.id); } catch (e) { /* already gone */ } }} />
-            </SettingRow>,
-          ];
+          const rows = [];
           if (w.type === 'insane-clock') {
             rows.push(
-              <SettingRow key={`${w.id}.style`} label={tOptional('settings.widgets.cfgStyle') || 'Style'}>
+              <SettingRow key={`${w.id}.style`} label={`${tOptional(`settings.widgets.type.${w.type}`) || 'Clock'} · ${tOptional('settings.widgets.cfgStyle') || 'Style'}`}>
                 <PopUp width={150} value={cfg.style || 'digital'} onChange={(v) => setWidgetCfg(w.id, { style: v })}
                   options={[['digital', tOptional('settings.widgets.cfgDigital') || 'Digital'], ['analog', tOptional('settings.widgets.cfgAnalog') || 'Analog']]} />
               </SettingRow>,
-              <SettingRow key={`${w.id}.format`} label={tOptional('settings.widgets.cfgFormat') || 'Hour format'}>
+              <SettingRow key={`${w.id}.format`} label={`${tOptional('settings.widgets.cfgFormat') || 'Hour format'} · ${tOptional(`settings.widgets.type.${w.type}`) || 'Clock'}`}>
                 <PopUp width={150} value={cfg.h24 === false ? '12' : '24'} onChange={(v) => setWidgetCfg(w.id, { h24: v === '24' })}
                   options={[['24', tOptional('settings.widgets.cfg24') || '24-hour'], ['12', tOptional('settings.widgets.cfg12') || '12-hour']]} />
               </SettingRow>,
-              <SettingRow key={`${w.id}.secs`} label={tOptional('settings.widgets.cfgSeconds') || 'Show seconds'}>
+              <SettingRow key={`${w.id}.secs`} label={`${tOptional('settings.widgets.cfgSeconds') || 'Show seconds'} · ${tOptional(`settings.widgets.type.${w.type}`) || 'Clock'}`}>
                 <Toggle small on={!!cfg.seconds} onChange={(v) => setWidgetCfg(w.id, { seconds: v })} />
               </SettingRow>,
             );
           }
           if (w.type === 'insane-media') {
             rows.push(
-              <SettingRow key={`${w.id}.idle`} label={tOptional('settings.widgets.cfgIdle') || 'When nothing plays'}>
+              <SettingRow key={`${w.id}.idle`} label={`${tOptional('settings.widgets.cfgIdle') || 'When nothing plays'} · ${tOptional('settings.widgets.type.insane-media') || 'Media'}`}>
                 <PopUp width={150} value={cfg.idle || 'hide'} onChange={(v) => setWidgetCfg(w.id, { idle: v })}
                   options={[['hide', tOptional('settings.widgets.cfgIdleHide') || 'Hide the card'], ['idle', tOptional('settings.widgets.cfgIdleCard') || 'Show an idle card']]} />
               </SettingRow>,

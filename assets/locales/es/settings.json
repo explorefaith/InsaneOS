@@ -786,5 +786,7 @@
   "widgets.sample": "Muestra",
   "widgets.tipAdd": "Añadir al escritorio",
   "widgets.tipConfigure": "Configurar",
-  "widgets.tipRemove": "Quitar el último"
+  "widgets.tipRemove": "Quitar el último",
+  "widgets.reset": "Restablecer la disposición",
+  "widgets.pick": "Elige un widget abajo"
 }

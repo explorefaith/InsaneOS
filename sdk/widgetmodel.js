@@ -130,3 +130,15 @@ export function tempWord(t, th = TEMP_THRESHOLDS) {
   if (!isFinite(T)) return 'cool';
   return T <= th.warm ? 'cool' : T <= th.hot ? 'warm' : 'hot';
 }
+
+// The reference defaults (the clock and the stats on the right, the visualizer bottom-left) as a
+// pure function of the screen — the theme loads them when settings.desktopWidgets is unset, and
+// Settings → Widgets' «Reset layout» puts them back.
+export function widgetDefaults(sw, sh) {
+  const X = Math.max(40, sw - 342);
+  return [
+    { type: 'insane-clock', id: 'clock', x: X, y: 104, w: 300, h: 132 },
+    { type: 'insane-stats', id: 'stats', x: X, y: 252, w: 300, h: 158 },
+    { type: 'insane-visualizer', id: 'viz', x: 40, y: Math.max(140, sh - 30 - 96 - 130), w: 320, h: 118 },
+  ];
+}

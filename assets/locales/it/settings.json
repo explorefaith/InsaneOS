@@ -786,5 +786,7 @@
   "widgets.sample": "Esempio",
   "widgets.tipAdd": "Aggiungi al desktop",
   "widgets.tipConfigure": "Configura",
-  "widgets.tipRemove": "Rimuovi l'ultimo"
+  "widgets.tipRemove": "Rimuovi l'ultimo",
+  "widgets.reset": "Reimposta la disposizione",
+  "widgets.pick": "Scegli un widget qui sotto"
 }

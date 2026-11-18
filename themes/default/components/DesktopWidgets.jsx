@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -487,13 +487,7 @@ registerWidgetType('insane-visualizer', VisualizerCard);
 // so the desktop showed cards the Widgets page had never heard of). When nothing was saved yet the
 // reference defaults become the layout itself, and every layout change maps onto the rendered
 // cards — Settings, the edit mode, the persistence and the desktop all see the same list.
-if (!settings.get().desktopWidgets) {
-  loadWidgets([
-    { type: 'insane-clock', id: 'clock', x: X(), y: 104, w: 300, h: 132 },
-    { type: 'insane-stats', id: 'stats', x: X(), y: 252, w: 300, h: 158 },
-    { type: 'insane-visualizer', id: 'viz', x: 40, y: Math.max(140, insane.screen.height - 30 - 96 - 130), w: 320, h: 118 },
-  ]);
-}
+if (!settings.get().desktopWidgets) loadWidgets(widgetDefaults(insane.screen.width, insane.screen.height));
 const layoutToRender = () => {
   const byType = {};
   for (const w of widgetLayout.get() || []) (byType[w.type] ||= []).push(w);
