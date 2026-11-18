@@ -28,12 +28,12 @@ int main(int argc, char **argv) {
     for (int i = 2; wrap && i < argc; i++) {
         float y = 4 + (float)(i - 2) * 180;
         canvas_rrect(&c, 9, y, (float)wrap + 2, 176, 0, 0xff303848u);
-        text_draw(&c, argv[i], 400, 18, 0, 10, y, (float)wrap, TEXT_LEFT, 0, 0xffffffffu);
+        text_draw(&c, argv[i], 400, 18, 0, 10, y, (float)wrap, TEXT_LEFT, 0, 0, 0xffffffffu);
     }
     for (int i = 2; !wrap && i < argc; i++) {
         float y = 4 + (float)(i - 2) * 2 * LH;
-        text_draw(&c, argv[i], 400, 18, 0, 10, y, W - 20, TEXT_LEFT, 1, 0xffffffffu);
-        text_draw(&c, argv[i], 600, 18, 0, 10, y + LH, W - 20, TEXT_RIGHT, 1, 0xff80c0ffu);
+        text_draw(&c, argv[i], 400, 18, 0, 10, y, W - 20, TEXT_LEFT, 1, 0, 0xffffffffu);
+        text_draw(&c, argv[i], 600, 18, 0, 10, y + LH, W - 20, TEXT_RIGHT, 1, 0, 0xff80c0ffu);
     }
     FILE *f = fopen(argv[1], "wb");
     if (!f) return 1;

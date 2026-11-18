@@ -91,7 +91,7 @@ static void measure(Node *n, float aw, float ah, float *ow, float *oh) {
             if (!n->measure_valid || fabsf(n->measure_maxw - maxw) > 0.5f) {
                 node_gather_text(n, text_buf, sizeof text_buf);
                 text_measure_ex(text_buf, TEXT_WEIGHT(s), s->font_size, s->line_height, maxw, s->nowrap,
-                                s->line_clamp, &n->measure_w, &n->measure_h);
+                                s->line_clamp, s->letter_spacing, &n->measure_w, &n->measure_h);
                 n->measure_maxw = maxw;
                 n->measure_valid = 1;
             }

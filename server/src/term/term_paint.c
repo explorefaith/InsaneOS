@@ -746,10 +746,10 @@ void term_paint(Canvas *c, int id, float x, float y, float w, float h, float op)
             char buf[16];
             strftime(buf, sizeof buf, "%H:%M:%S", &tm);
             float tw, th;
-            text_measure(buf, 400, 10, 0, 0, 1, &tw, &th);
+            text_measure(buf, 400, 10, 0, 0, 1, 0, &tw, &th);
             int ry = ROWY(row), tx = (int)(x + w) - pad - (int)tw - 6;
             fill(c, tx - 4, ry, (int)(x + w) - pad, ry + ch, 0xc0000000u | (dbg & 0xffffff));
-            text_draw(c, buf, 400, 10, 0, (float)tx, (float)ry + (ch - th) / 2, 0, TEXT_LEFT, 1, 0xa0000000u | (dfg & 0xffffff));
+            text_draw(c, buf, 400, 10, 0, (float)tx, (float)ry + (ch - th) / 2, 0, TEXT_LEFT, 1, 0, 0xa0000000u | (dfg & 0xffffff));
         }
     }
 

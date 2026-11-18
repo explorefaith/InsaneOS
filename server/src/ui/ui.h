@@ -24,7 +24,8 @@ typedef struct {
     uint8_t overflow_hidden, pointer_none, text_align, object_fit, nowrap;   /* pointer_none: POINTER_* */
     uint8_t dir;                /* DIR_INHERIT / DIR_LTR / DIR_RTL (CSS direction) */
     uint8_t wrap;               /* flexWrap: 'wrap' (children that don't fit move to another line) */
-    uint8_t mono;               /* fontFamily: 0 'sans-serif' (Inter), 1 'monospace' (JetBrains Mono), 2 'brand' (Plus Jakarta Sans) */
+    uint8_t family;             /* fontFamily: 0 'sans-serif' (Inter), 1 'monospace' (JetBrains Mono), 2 'brand' (Plus Jakarta Sans), 3.. the Theme Studio faces (E_FAMILY, style.c) */
+    uint8_t italic;             /* fontStyle: 'italic' (only families with an italic file; the rest fall back to the regular face) */
     uint8_t cursor;             /* cursor (CSS): CUR_* from cursor.h; 0 = the parent's */
     float grow, shrink;
     Dim basis, width, height, min_w, min_h, max_w, max_h;
@@ -41,6 +42,7 @@ typedef struct {
     float shadow_blur, shadow_x, shadow_y, backdrop_blur;
     float backdrop_saturate;    /* the backdrop blur's saturation boost (1 = the colours as they are) */
     float font_size, line_height, font_weight;
+    float letter_spacing;       /* letterSpacing: extra advance after every glyph, in px (shaped text ignores it) */
     float translate_x, translate_y;
     float z_index;
     /* Per-side and logical edges, scale/rotate: rarely used, so they live in an allocation of their
@@ -230,30 +232,31 @@ void  text_font_vmetrics(int font, float size, float *asc, float *desc);
 int   text_init(const char *font_dir);
 /* For InsaneBench's helper, which opens no files: one interface font already in memory (it must stay there) */
 int   text_init_mem(const unsigned char *data, size_t size);
-/* Weight + TEXT_MONO picks the monospaced font (JetBrains Mono) in text_measure/text_draw and in
- * insane.measureText: this way the font travels with the weight without changing the signatures. */
-#define TEXT_MONO 1000.0f
-/* Weight + TEXT_BRAND: the brand face of the Insane OS wordmark (Plus Jakarta Sans, docs/brand/README.md). */
-#define TEXT_BRAND 2000.0f
-#define TEXT_WEIGHT(s) ((s)->font_weight + ((s)->mono == 2 ? TEXT_BRAND : (s)->mono ? TEXT_MONO : 0))
+/* The face behind text_measure/text_draw (and insane.measureText) travels in the weight without
+ * changing the signatures: the family in the thousands (0 Inter, 1 JetBrains Mono, 2 the brand face
+ * of the wordmark (Plus Jakarta Sans, docs/brand/README.md), 3.. the Theme Studio faces) plus
+ * TEXT_ITALIC on top; font_for (text.c) resolves it to a loaded font. */
+#define TEXT_ITALIC 8000.0f
+#define TEXT_WEIGHT(s) ((s)->font_weight + (s)->family * 1000.0f + ((s)->italic ? TEXT_ITALIC : 0))
 float text_line_height(float size, float line_h);
 /* While painting a scaled display (paint.c): sizes passed to text_draw are physical, line breaks
  * and positions follow the logical metrics (size / scale), so text wraps exactly where layout said. */
 extern float text_paint_scale;
-void  text_measure(const char *s, float weight, float size, float line_h, float max_w, int nowrap, float *w, float *h);
+/* tracking = letterSpacing (extra advance after every glyph, px; only the fast, unshaped path honours it) */
+void  text_measure(const char *s, float weight, float size, float line_h, float max_w, int nowrap, float tracking, float *w, float *h);
 void  text_draw(Canvas *c, const char *s, float weight, float size, float line_h,
-                float x, float y, float box_w, int align, int nowrap, uint32_t argb);
+                float x, float y, float box_w, int align, int nowrap, float tracking, uint32_t argb);
 /* With truncation: at most max_lines lines (0 = all) and, if ellipsis, "…" where text is cut (the
  * last visible line when more text follows, and any nowrap line wider than box_w). */
 void  text_measure_ex(const char *s, float weight, float size, float line_h, float max_w, int nowrap,
-                      int max_lines, float *w, float *h);
+                      int max_lines, float tracking, float *w, float *h);
 void  text_draw_ex(Canvas *c, const char *s, float weight, float size, float line_h,
-                   float x, float y, float box_w, int align, int nowrap, int max_lines, int ellipsis, uint32_t argb);
+                   float x, float y, float box_w, int align, int nowrap, int max_lines, int ellipsis, float tracking, uint32_t argb);
 /* The truncated form of one line: the longest prefix that ends on a grapheme cluster (never inside
  * a ligature, a mark sequence, an emoji ZWJ sequence or a flag) and fits in box_w with "…" after it.
  * Writes it (with the "…") to out and returns its width; returns -1 and copies s if s already fits
  * and force is 0. Shaped text is re-shaped, so Arabic letters take their final forms. */
-float text_ellipsize(const char *s, float weight, float size, float box_w, int force, char *out, int out_size);
+float text_ellipsize(const char *s, float weight, float size, float box_w, int force, float tracking, char *out, int out_size);
 Otf  *text_font_otf(int font);
 float text_font_scale(int font, float size);
 int   text_font_kern_glyphs(int font, uint32_t a, uint32_t b);  /* font units */

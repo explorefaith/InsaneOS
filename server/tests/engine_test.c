@@ -123,7 +123,7 @@ static int is_mark_like(uint32_t c) {
  * boundary and it fits. Returns the prefix length in code points (-1 = not truncated). */
 static int check_cut(const char *name, const char *s, float w, int force) {
     char out[1024];
-    float tw = text_ellipsize(s, 400, 13, w, force, out, sizeof out);
+    float tw = text_ellipsize(s, 400, 13, w, force, 0, out, sizeof out);
     if (tw < 0) { CHECK(!strcmp(out, s), "%s: fits but changed", name); return -1; }
     size_t lo = strlen(out);
     CHECK(lo >= 3 && !strcmp(out + lo - 3, "\xe2\x80\xa6"), "%s w=%.0f: no ellipsis at the end: %s", name, w, out);
@@ -166,7 +166,7 @@ static void sweep(const char *name, const char *s) {
 /* Visual position of the "…" in the cut form: 0 = leftmost. */
 static void check_side(const char *name, const char *s, float w, int want_left) {
     char out[1024];
-    text_ellipsize(s, 400, 13, w, 1, out, sizeof out);
+    text_ellipsize(s, 400, 13, w, 1, 0, out, sizeof out);
     int vis[512];
     int n = text_layout_visual(out, 0, 13, vis, 512);
     uint32_t cps[512];
@@ -212,12 +212,12 @@ static void test_ellipsis(void) {
 
     /* fits: unchanged */
     char out[256];
-    CHECK(text_ellipsize("Short", 400, 13, 200, 0, out, sizeof out) < 0 && !strcmp(out, "Short"), "short text was cut");
+    CHECK(text_ellipsize("Short", 400, 13, 200, 0, 0, out, sizeof out) < 0 && !strcmp(out, "Short"), "short text was cut");
     /* forced (more lines follow) adds the ellipsis even if it fits */
-    text_ellipsize("Short", 400, 13, 200, 1, out, sizeof out);
+    text_ellipsize("Short", 400, 13, 200, 1, 0, out, sizeof out);
     CHECK(!strcmp(out, "Short\xe2\x80\xa6"), "forced: %s", out);
     /* a box smaller than the ellipsis: only the ellipsis */
-    text_ellipsize(ltr, 400, 13, 2, 0, out, sizeof out);
+    text_ellipsize(ltr, 400, 13, 2, 0, 0, out, sizeof out);
     CHECK(!strcmp(out, "\xe2\x80\xa6"), "tiny box: %s", out);
 
     sweep("LTR", ltr);
@@ -236,9 +236,9 @@ static void test_ellipsis(void) {
      * glyph before the ellipsis differs from the same letter in the middle of the word */
     {
         char a[256];
-        text_ellipsize(arabic, 400, 13, 60, 0, a, sizeof a);
+        text_ellipsize(arabic, 400, 13, 60, 0, 0, a, sizeof a);
         float w1, h1;
-        text_measure(a, 400, 13, 0, 0, 1, &w1, &h1);
+        text_measure(a, 400, 13, 0, 0, 1, 0, &w1, &h1);
         CHECK(w1 <= 60.5f, "Arabic cut form measures %.1f > 60", w1);
     }
 

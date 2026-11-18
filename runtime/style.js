@@ -235,11 +235,28 @@ function expand(k, v, out) {
     case 'fontWeight':
       out.fontWeight = typeof v === 'number' ? v : WEIGHTS[v] || parseFloat(v) || 400;
       return;
-    case 'fontFamily':
-      // three families: Inter ('sans-serif'), JetBrains Mono ('monospace', or a name containing "mono")
-      // and the brand face of the Insane OS wordmark ('brand': Plus Jakarta Sans, see InsaneWordmark)
-      out.fontFamily = /mono|courier|consol/i.test(String(v)) ? 'monospace' : /brand|jakarta/i.test(String(v)) ? 'brand' : 'sans-serif';
+    case 'fontStyle':
+      out.italic = /^italic|^oblique/i.test(String(v)) ? 1 : 0;
       return;
+    case 'letterSpacing':
+      out.letterSpacing = num(v);                        // px (negative tightens)
+      return;
+    case 'fontFamily': {
+      // The engine's faces: Inter ('sans-serif'), JetBrains Mono ('monospace'), the wordmark's
+      // Plus Jakarta Sans ('brand') and the Theme Studio display faces ('serif' Noto Serif Display,
+      // 'display' Noto Sans Display, 'narrow' Liberation Sans Narrow, 'compact' DejaVu Sans
+      // Condensed, 'book' DejaVu Serif Condensed). Unknown names resolve by their closest keyword.
+      const f = String(v);
+      out.fontFamily = /mono|courier|consol/i.test(f) ? 'monospace'
+                     : /dejavu sans|compact/i.test(f) ? 'compact'
+                     : /dejavu serif|liberation serif|book|georgia|times|merriweather/i.test(f) ? 'book'
+                     : /narrow|oswald|bebas|archivo|barlow|condens/i.test(f) ? 'narrow'
+                     : /serif display|noto serif|playfair|fraunces|dm serif|lora|crimson|^serif$/i.test(f) ? 'serif'
+                     : /brand|jakarta/i.test(f) ? 'brand'
+                     : /display|grotesk|outfit|sora|manrope|space|work sans/i.test(f) ? 'display'
+                     : 'sans-serif';
+      return;
+    }
     default:
       if (COLOR_KEYS.has(k)) out[k] = color(v);
       else if (DIM_KEYS.has(k)) out[k] = dim(v);

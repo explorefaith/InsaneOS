@@ -31,7 +31,8 @@ static const char *const E_DIRECTION[] = {"inherit", "ltr", "rtl", NULL};
 static const char *const E_FIT[]      = {"fill", "cover", "contain", "center", NULL};
 static const char *const E_WSPACE[]   = {"normal", "nowrap", NULL};
 static const char *const E_WRAP[]     = {"nowrap", "wrap", NULL};
-static const char *const E_FAMILY[]   = {"sans-serif", "monospace", "brand", NULL};
+static const char *const E_ITALIC[]   = {"normal", "italic", NULL};
+static const char *const E_FAMILY[]   = {"sans-serif", "monospace", "brand", "serif", "display", "narrow", "compact", "book", NULL};
 static const char *const E_CURSOR[]   = {CURSOR_CSS_NAMES, NULL};
 static const char *const E_TOVERFLOW[] = {"clip", "ellipsis", NULL};
 
@@ -44,7 +45,8 @@ static const StyleProp props[] = {
     P("position", ST_ENUM, absolute, E_POSITION),
     P("flexDirection", ST_ENUM, row, E_DIR),
     P("flexWrap", ST_ENUM, wrap, E_WRAP),
-    P("fontFamily", ST_ENUM, mono, E_FAMILY),
+    P("fontFamily", ST_ENUM, family, E_FAMILY),
+    P("fontStyle", ST_ENUM, italic, E_ITALIC),
     P("cursor", ST_ENUM, cursor, E_CURSOR),
     P("justifyContent", ST_ENUM, justify, E_JUSTIFY),
     P("alignItems", ST_ENUM, align_items, E_ALIGN),
@@ -92,6 +94,7 @@ static const StyleProp props[] = {
     P("fontSize", ST_FLOAT, font_size, NULL),
     P("lineHeight", ST_FLOAT, line_height, NULL),
     P("fontWeight", ST_FLOAT, font_weight, NULL),
+    P("letterSpacing", ST_FLOAT, letter_spacing, NULL),
     P("translateX", ST_FLOAT, translate_x, NULL),
     P("translateY", ST_FLOAT, translate_y, NULL),
     P("zIndex", ST_FLOAT, z_index, NULL),

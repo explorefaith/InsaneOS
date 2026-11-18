@@ -104,9 +104,9 @@ void media_annotate(uint32_t *px, int w, int h, const MediaOp *ops, int n, int o
             /* dark border so it reads over any background */
             for (int k = 0; k < 4; k++) {
                 float ox = (k & 1) ? 1.5f : -1.5f, oy = (k & 2) ? 1.5f : -1.5f;
-                text_draw(&c, o->text, 700, size, 0, o->x1 + ox, o->y1 + oy, (float)w - o->x1, TEXT_LEFT, 0, 0x99000000u);
+                text_draw(&c, o->text, 700, size, 0, o->x1 + ox, o->y1 + oy, (float)w - o->x1, TEXT_LEFT, 0, 0, 0x99000000u);
             }
-            text_draw(&c, o->text, 700, size, 0, o->x1, o->y1, (float)w - o->x1, TEXT_LEFT, 0, o->color);
+            text_draw(&c, o->text, 700, size, 0, o->x1, o->y1, (float)w - o->x1, TEXT_LEFT, 0, 0, o->color);
             break;
         }
         case 'z': {

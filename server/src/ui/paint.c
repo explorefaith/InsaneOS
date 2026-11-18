@@ -205,7 +205,7 @@ static void paint_node_body(Canvas *c, Node *n, float opacity) {
         int max_lines = text_max_lines(n, lih);
         int ellipsis = s->text_overflow || s->line_clamp;
         PROF(4, text_draw_ex(c, text_buf, TEXT_WEIGHT(s), s->font_size * k, s->line_height > 4 ? s->line_height * k : s->line_height,
-                             ix, iy, iw, al, s->nowrap, max_lines, ellipsis, with_opacity(s->color, op)));
+                             ix, iy, iw, al, s->nowrap, max_lines, ellipsis, s->letter_spacing, with_opacity(s->color, op)));
         text_paint_scale = 1;
         canvas_set_clip(c, old);
     }

@@ -119,6 +119,9 @@ done
 # the language catalogs go with the bundles: a new bundle asks for its new keys (the i18n check
 # in the build guarantees they exist here), and a catalog older than the bundle would show raw keys
 cp -a "$REPO"/assets/locales/. "$DEST/assets/locales/"
+# the fonts too: the Theme Studio display faces are new files, additive by design (a font not in
+# the running server's table is simply never opened, so an old binary stays correct)
+cp -a "$REPO"/assets/fonts/. "$DEST/assets/fonts/"
 install -m 644 "$REPO/code-manifest.json" "$DEST/code-manifest.json"
 # The rebuilt manifest is unsigned by design: the newly built insane-server is a development
 # build that accepts it (release builds demand the release key, which we don't have).

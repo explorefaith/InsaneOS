@@ -1009,7 +1009,7 @@ static JSValue f_measure_text(JSContext *c, JSValueConst this_val, int argc, JSV
     JS_ToFloat64(c, &size, argv[1]);
     JS_ToFloat64(c, &weight, argv[2]);
     float w = 0, h = 0;
-    if (s) { text_measure(s, (float)weight, (float)size, 0, 0, 1, &w, &h); JS_FreeCString(c, s); }
+    if (s) { text_measure(s, (float)weight, (float)size, 0, 0, 1, 0, &w, &h); JS_FreeCString(c, s); }
     return JS_NewFloat64(c, w);
 }
 
