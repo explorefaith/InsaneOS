@@ -141,7 +141,9 @@ export function WidgetsSettings() {
                 <View key={w.id} style={{ width: Math.round(c.w * k) + 8, gap: 4 }}>
                   <View style={{ width: Math.round(c.w * k), height: Math.round(c.h * k), borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}` }}>
                     {C ? (
-                      <View style={{ width: c.w, height: c.h, transform: `scale(${k})`, transformOrigin: 'top left' }}>
+                      // scale turns around the view's centre: park the full-size card so its centre
+                      // matches the mini's centre, and the scaled card fills the mini exactly
+                      <View style={{ position: 'absolute', left: (c.w * k - c.w) / 2, top: (c.h * k - c.h) / 2, width: c.w, height: c.h, transform: `scale(${k})` }}>
                         <C widget={{ type: w.type, id: w.id, x: 0, y: 0, w: c.w, h: c.h, cfg: { ...cfg, seconds: false }, sample: true }} />
                       </View>
                     ) : null}
