@@ -10,11 +10,11 @@
 // Save as preset keeps the result as the user's own, never overwriting a built-in.
 import {
   View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
-  TextInput, useStore, useSettings, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
+  TextInput, useStore, useSettings, settings, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
-  tsRichSegments, tsRichSplit,
+  tsRichSegments, tsRichSplit, fs, FilePicker, saveSettingsNow,
   TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
@@ -501,6 +501,7 @@ export function ThemesSettings() {
   const [presetName, setPresetName] = useState('');
   const [presetOpen, setPresetOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const hist = useRef(tsCreateHistory(40));
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
   // the catalog only changes with the themeStudio record — not on every live-list edit
@@ -538,6 +539,42 @@ export function ThemesSettings() {
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
+
+  // ---- backup / restore (Phase 2 §9F): a preset as one JSON file ----
+  const exportPreset = (id) => {
+    try {
+      const def = themes.find((x) => x.id === id);
+      if (!def) return;
+      const saved = settings.get().themeStudio || {};
+      const rec = saved.customs && saved.customs[id];
+      if (!rec) return;
+      const payload = { insane: 'theme', version: 1, name: rec.name, base: rec.base, widgets: rec.widgets, appearance: rec.appearance || {} };
+      const safe = rec.name.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'theme';
+      const path = `${fs.home()}/Desktop/${safe}.insanetheme.json`;
+      fs.write(path, JSON.stringify(payload, null, 1));
+      say(L('exportedNote', 'Exported to the Desktop.'));
+    } catch (e) { say({ err: errorText(e) }); }
+  };
+  const importTheme = (path) => {
+    try {
+      const txt = fs.read(path);
+      if (!txt) { say({ err: L('importBad', 'That file could not be read.') }); return; }
+      const j = JSON.parse(txt);
+      if (j.insane !== 'theme' || typeof j.name !== 'string' || !Array.isArray(j.widgets)) {
+        say({ err: L('importBad', 'That file is not an exported Insane OS theme.') });
+        return;
+      }
+      const id = tsSaveCustom(String(j.name).slice(0, 60) || 'Imported');
+      const saved = settings.get().themeStudio || {};
+      const rec = saved.customs && saved.customs[id];
+      if (!rec) { say({ err: L('importBad', 'The preset could not be written.') }); return; }
+      // the same validation the store applies to its own lists: one tsSetInstance-style write
+      const rec2 = { ...rec, base: typeof j.base === 'string' ? j.base : rec.base, appearance: j.appearance && typeof j.appearance === 'object' ? j.appearance : rec.appearance };
+      settings.set({ themeStudio: { ...saved, customs: { ...saved.customs, [id]: { ...rec2, widgets: j.widgets } } } });
+      tsPersistFlush();
+      say(L('importedNote', 'Imported — it is in the gallery now.'));
+    } catch (e) { say({ err: errorText(e) }); }
+  };
   const tsMutateList = (fn) => act(() => tsMutate(fn, area));
   const redo = () => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next, area); };
   const canUndo = hist.current.canUndo;
@@ -626,20 +663,30 @@ export function ThemesSettings() {
       )}
 
       {activeDef ? (
-        <Section title={L('presets', 'Your themes')} footer={L('presetsHint', 'A preset keeps the theme exactly as you customized it — the built-ins stay untouched.')}>
+        <Section title={L('presets', 'Your themes')}
+          footer={L('presetsHint', 'A preset keeps the theme exactly as you customized it — the built-ins stay untouched. Export writes the preset as a file you can carry; importing checks it before it lands.')}>
           <SettingRow label={L('saveAs', 'Save this look as a preset')} hint={activeDef.custom ? L('saveAsHintCustom', 'You are already on a preset — apply a built-in first to branch from it.') : undefined}>
             <Button small label={L('save', 'Save…')} disabled={activeDef.custom} onClick={() => { setPresetName(`${activeDef.name} ·`); setPresetOpen(true); }} />
           </SettingRow>
-          {tsAllThemes().filter((x) => x.custom).map((c) => (
+          {themes.filter((x) => x.custom).map((c) => (
             <SettingRow key={c.id} label={c.name} hint={c.desc}>
               <View style={{ flexDirection: 'row', gap: 6 }}>
                 <Button small label={L('applyTheme', 'Apply')} onClick={() => apply(c.id)} />
                 <Button small label={L('rename', 'Rename')} onClick={() => { setPresetName(c.name); setPresetOpen(c.id); }} />
+                <Button small label={L('export', 'Export')} onClick={() => exportPreset(c.id)} />
                 <Button small label="×" onClick={() => { try { tsDeleteCustom(c.id); } catch (e) { say({ err: errorText(e) }); } }} />
               </View>
             </SettingRow>
           ))}
+          <SettingRow label={L('importTheme', 'Import a theme file')} hint={L('importHint', 'A .json exported here earlier. It is validated before it lands — a broken file is refused, not applied.')}>
+            <Button small label={L('import', 'Import…')} onClick={() => setImportOpen(true)} />
+          </SettingRow>
         </Section>
+      ) : null}
+      {importOpen ? (
+        <FilePicker modal title={L('importTitle', 'Choose a theme file')} filter={/\.json$/i}
+          onPick={(f) => { importTheme(typeof f === 'string' ? f : f.path); setImportOpen(false); }}
+          onClose={() => setImportOpen(false)} />
       ) : null}
 
       {presetOpen ? (
