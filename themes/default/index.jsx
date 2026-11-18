@@ -333,10 +333,14 @@ function App() {
         {context && (
           <Menu x={context.x} y={context.y} onClose={() => setContext(null)} items={[
             { label: tr('shell.desktop.wallpaper'), onClick: () => wm.open('settings', { args: { section: 'wallpaper' } }) },
+            { label: tr('shell.desktop.themes') || 'Themes', onClick: () => wm.open('settings', { args: { section: 'themes' } }) },
+            { label: tr('shell.desktop.widgets') || 'Widgets', onClick: () => wm.open('settings', { args: { section: 'widgets' } }) },
+            { label: tr('shell.desktop.displays') || 'Display settings', onClick: () => wm.open('settings', { args: { section: 'displays' } }) },
             { label: tr('shell.desktop.openLaunchpad'), onClick: () => setLaunchpad(true) },
             { label: tr('shell.widgets.edit') || 'Edit Widgets', onClick: () => widgetsEditing.set(true) },
             { label: tr('shell.desktops.overview'), onClick: () => toggleOverview() },
             '-',
+            { label: tr('shell.desktop.terminal') || 'Open Terminal', onClick: () => wm.open('terminal') },
             { label: tr('shell.menu.settings'), onClick: () => wm.open('settings') },
             { label: tr('shell.menu.about'), onClick: () => wm.open('about') },
           ]} />
