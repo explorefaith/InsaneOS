@@ -8,9 +8,54 @@
 import {
   View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
   widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent,
+  sharedTicker, useBattery, nowPlaying, formatBytes,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp } from './ui.jsx';
 import { useState } from 'react';
+
+// the compact native minis: no scale transform anywhere (this engine's parent scale does not
+// render child subtrees — two approaches failed), just small real data per type. One shared tick.
+const miniTick = sharedTicker(() => Date.now(), 1000);
+function MiniContent({ type }) {
+  const t = useTheme();
+  const now = new Date();
+  const row = (label, value) => (
+    <Text style={{ fontSize: 10, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden' }}>{`${label}  ${value}`}</Text>
+  );
+  if (type === 'insane-clock') return (
+    <Text style={{ fontSize: 20, fontWeight: 700, color: t.text }}>{`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`}</Text>
+  );
+  if (type === 'insane-date') return (
+    <Text style={{ fontSize: 13, fontWeight: 700, color: t.text }}>{`${now.getDate()} ${now.toLocaleString([], { month: 'short' })}`}</Text>
+  );
+  if (type === 'insane-calendar') return (
+    <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{now.toLocaleString([], { month: 'long' })} {now.getFullYear()}</Text>
+  );
+  if (type === 'insane-media') {
+    const np = nowPlaying.get();
+    return <Text style={{ fontSize: 11, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden' }}>{np && np.title ? np.title : tOptional('settings.widgets.mediaIdle') || 'Nothing playing'}</Text>;
+  }
+  try {
+    const smp = insane.monitor?.sample?.() || {};
+    if (type === 'insane-stats') {
+      const cpu = smp.cpu ? Math.round((Array.isArray(smp.cpu) ? smp.cpu[smp.cpu.length - 1] : smp.cpu) * 100) : null;
+      const mem = smp.mem && smp.mem.total > 0 && isFinite(smp.mem.avail) ? Math.round((1 - smp.mem.avail / smp.mem.total) * 100) : null;
+      const tmp = smp.temp != null && isFinite(smp.temp) ? `${Math.round(smp.temp)}°C` : null;
+      return <View style={{ gap: 1 }}>{cpu != null ? row('CPU', `${cpu}%`) : null}{mem != null ? row('MEM', `${mem}%`) : null}{tmp ? row('TEMP', tmp) : null}</View>;
+    }
+    if (type === 'insane-net' && smp.net && isFinite(smp.net.rx)) {
+      const f = (b) => (b < 1024 ? `${Math.round(b)} B/s` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB/s` : `${(b / 1048576).toFixed(1)} MB/s`);
+      return <View style={{ gap: 1 }}>{row('↓', f(smp.net.rx))}{row('↑', f(smp.net.tx))}</View>;
+    }
+  } catch { /* monitor asleep */ }
+  try {
+    if (type === 'insane-storage') {
+      const d = (insane.disks?.list?.() || []).find((x) => x.system && isFinite(x.fssize) && x.fssize > 0) || (insane.disks?.list?.() || []).find((x) => isFinite(x.fssize) && x.fssize > 0);
+      if (d) return <Text style={{ fontSize: 10, color: t.textDim }}>{`${formatBytes(d.used)} / ${formatBytes(d.fssize)}`}</Text>;
+    }
+  } catch { /* no disks api */ }
+  return <Text style={{ fontSize: 11, color: t.textDim }}>·</Text>;
+}
 
 // Small/Medium/Large scale the catalog card's default; the model snaps to its grid and clamps.
 const SIZES = [['small', 0.7], ['medium', 1], ['large', 1.4]];
@@ -84,6 +129,7 @@ export function WidgetsSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
   const layout = useStore(widgetLayout);
+  useStore(miniTick);
   const editing = useStore(widgetsEditing);
   const [sz, setSz] = useState({});
   const [cfgFor, setCfgFor] = useState(null);            // the type whose gear is open
@@ -139,14 +185,8 @@ export function WidgetsSettings() {
               const C = widgetComponent(w.type);
               return (
                 <View key={w.id} style={{ width: Math.round(c.w * k) + 8, gap: 4 }}>
-                  <View style={{ width: Math.round(c.w * k), height: Math.round(c.h * k), borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}` }}>
-                    {C ? (
-                      // scale turns around the view's centre: park the full-size card so its centre
-                      // matches the mini's centre, and the scaled card fills the mini exactly
-                      <View style={{ position: 'absolute', left: (c.w * k - c.w) / 2, top: (c.h * k - c.h) / 2, width: c.w, height: c.h, transform: `scale(${k})` }}>
-                        <C widget={{ type: w.type, id: w.id, x: 0, y: 0, w: c.w, h: c.h, cfg: { ...cfg, seconds: false }, sample: true }} />
-                      </View>
-                    ) : null}
+                  <View style={{ width: Math.round(c.w * k), height: Math.round(c.h * k), padding: 8, borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}`, justifyContent: 'center' }}>
+                    <MiniContent type={w.type} />
                   </View>
                   <Text style={{ fontSize: 11, fontWeight: 600, color: t.text, textAlign: 'center' }}>{tOptional(`settings.widgets.type.${w.type}`) || w.type}</Text>
                   <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 3 }}>
