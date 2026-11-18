@@ -299,8 +299,6 @@ registerWidgetType('insane-date', DateCard);
 registerWidgetType('insane-net', NetCard);
 registerWidgetType('insane-storage', StorageCard);
 registerWidgetType('insane-stats', StatsCard);
-setWidgets('insane-clock', [{ id: 'clock', x: X(), y: 104, w: 300, h: 132 }]);
-setWidgets('insane-stats', [{ id: 'stats', x: X(), y: 252, w: 300, h: 158 }]);
 
 // ---- round 4 widgets ----
 
@@ -475,5 +473,22 @@ registerWidgetType('insane-calendar', CalendarCard);
 registerWidgetType('insane-battery', BatteryCard);
 registerWidgetType('insane-media', MediaCard);
 registerWidgetType('insane-visualizer', VisualizerCard);
-// the reference's bottom-left visualizer, out of the way of the right-side cards
-setWidgets('insane-visualizer', [{ id: 'viz', x: 40, y: Math.max(140, insane.screen.height - 30 - 96 - 130), w: 320, h: 118 }]);
+
+// ONE source of truth (the Settings page's bug: the defaults rendered straight through setWidgets,
+// so the desktop showed cards the Widgets page had never heard of). When nothing was saved yet the
+// reference defaults become the layout itself, and every layout change maps onto the rendered
+// cards — Settings, the edit mode, the persistence and the desktop all see the same list.
+if (!settings.get().desktopWidgets) {
+  loadWidgets([
+    { type: 'insane-clock', id: 'clock', x: X(), y: 104, w: 300, h: 132 },
+    { type: 'insane-stats', id: 'stats', x: X(), y: 252, w: 300, h: 158 },
+    { type: 'insane-visualizer', id: 'viz', x: 40, y: Math.max(140, insane.screen.height - 30 - 96 - 130), w: 320, h: 118 },
+  ]);
+}
+const layoutToRender = () => {
+  const byType = {};
+  for (const w of widgetLayout.get() || []) (byType[w.type] ||= []).push(w);
+  for (const c of WIDGET_CATALOG) setWidgets(c.type, byType[c.type] || []);
+};
+layoutToRender();
+widgetLayout.subscribe(layoutToRender);

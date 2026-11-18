@@ -186,3 +186,61 @@ live pass (state it in the manual list).
 (small/medium/large per the brief, the sparkline from the closes, green/red + sign, locale
 numbers, "Data: Binance"); the Settings page crypto rows; i18n ×5. Node model test for
 formatting/staleness/backoff.
+
+## CORRECTION ROUND (M1b) — the user rejected the first cut of Settings → Widgets (2026-11-18)
+
+**The user's verdict**: the "Add a widget" gallery was plain text tiles (a name and "300 × 132") —
+no one can tell what a widget looks like before adding it. A design failure, not polish.
+
+**The brief (binding), parts A–G**:
+- **A. Preview cards**: every gallery entry renders the REAL widget component at its true size
+  (scaled down only if the column is narrow, never cropped), in preview mode with clearly marked
+  sample data where offline (crypto, idle now-playing) and a small "Sample" tag; the gallery never
+  starts network calls; S/M/L switches update the preview immediately (the depth becomes visible);
+  previews ride ONE shared 1 s tick and exist only while the page is visible; **no backdrop blur
+  inside previews** (nested blur = the Bug A lag, fights the governor) — a flat translucent fill
+  imitating glass; Light/Dark + accent followed.
+- **B. Controls under each preview**: drawn icon buttons (the PaneGlyph grid/stroke), translated
+  tooltips and labels — a three-segment S/M/L, Add (+ adds another instance, an "On desktop: N"
+  badge, trash appears when N > 0), Configure (a gear popover with that widget's options), and
+  Move (live placement, part C). **Never show raw pixel sizes as text.**
+- **C. Place on desktop**: Move (or Add straight into Move) fades the Settings window away, dims
+  the desktop, shows a faint snap grid, and the chosen widget drags live at its real size
+  (clamped below the top bar, clear of the dock, lift shadow while dragging, click-and-hold); a
+  floating glass toolbar offers live S/M/L resize, snap on/off, Remove, Cancel, Done (Esc cancels,
+  Enter saves); Done saves through the settings path (the debounced rewrite — never from outside
+  the shell) and Settings returns; Cancel restores position, size and existence exactly; the other
+  widgets stay visible but dimmed in this mode; the existing "Arrange all" keeps every card
+  draggable. Dragging never lags: transform-only, one update per frame, no sibling re-layout, the
+  store committed ONCE at drag end — never a synchronous external-store set() inside an effect.
+- **D. "On your desktop" list**: one mini preview per placed widget with the same icon controls;
+  the empty state is a drawn illustration plus "Pick a widget below"; **fix the header** —
+  "Arrange on desktop" and "Reset layout" sit in a proper header row (the screenshot showed them
+  squeezed inside a card with a divider through the text).
+- **E. Single source of truth**: the screenshot's bug — the desktop showed a Clock and a System
+  card plus a blurred empty glass card with a dashed line bottom-left, while Settings said
+  "No widgets yet".
+  **Root cause (diagnosed 2026-11-18)**: THREE defaults rendered straight through
+  `setWidgets('insane-clock'/'insane-stats'/'insane-visualizer', …)` at DesktopWidgets.jsx module
+  level, bypassing `widgetLayout` entirely — the Settings page, the edit mode and the persistence
+  all read `widgetLayout` (empty: `settings.desktopWidgets` unset), so the page and the desktop
+  disagreed, and the bottom-left "empty glass card with a dashed line" is the **Visualizer default
+  being silent** (flat minimum bands are its idle drawing — not broken, just unmanaged).
+  **Fix applied this round**: the defaults now BECOME the layout (`loadWidgets(…)` when
+  `settings.desktopWidgets` is unset) and a bridge maps every `widgetLayout` change onto the
+  rendered cards (`layoutToRender()` groups by type → `setWidgets`; subscribed + fired once) —
+  one instance list that Settings, the badges, the "On your desktop" list and the desktop all
+  read. **Model test next session**: the defaults appear as instances, add/remove/move/cancel keep
+  the list and the render in step.
+- **F. Sidebar icon regression**: Widgets, Displays, Network, Bluetooth, Notifications, Printers &
+  Scanners and Sharing all show the same four-square fallback — find why those ids fall back
+  (PaneGlyph id mismatch against the GROUPS ids), add/fix the glyphs on the same grid and stroke,
+  add a node test that FAILS if any sidebar section id has no glyph.
+- **G. Gallery organization**: category headings — Time (Clock, Date and Day, Calendar), System
+  (System, Battery, Storage, Network), Media (Now Playing, Visualizer); Crypto under Finance only
+  when M5 exists; the grid uses the Columns primitive responsively (2–4 per row by width).
+
+**Status**: **E — fix applied + lab-verified** (the defaults-as-layout bridge renders through the
+testbench: 1573 frames, layout 0.18 ms, zero react errors; commit pending). **A, B, C, D, F, G —
+NOT STARTED**; the model tests for placement (snap, clamp, resolution change, cancel restores,
+duplicates) and the failing-if-no-glyph test are part of them.
