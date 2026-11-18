@@ -78,6 +78,7 @@ export {
   newInstance as tsNewInstance, createHistory as tsCreateHistory, planDiffers as tsPlanDiffers,
 } from './themestudio-model.js';
 export { THEMES as TS_THEME_CATALOG } from './themestudio-themes.js';
+export { TS_WIDGET_SPECS, TS_CATS, TS_VARIANTS, TS_PROVIDERS, specOf, specsOfCat } from './ts-widget-specs.js';
 export {
   tsLive, tsInit, tsApplyTheme, tsDeactivate, tsMutate, tsAdd, tsRemove, tsDuplicate,
   tsMove, tsResize, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,

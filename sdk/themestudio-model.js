@@ -31,28 +31,11 @@ export const TS_FONTS = [
   { id: 'book',       name: 'DejaVu Serif Condensed', weights: [400, 700],         italic: true,  role: 'serif' },
 ];
 
-// The widget archetypes. `defaults` are the instance fields a new instance gets when a theme
-// doesn't spell them out; `label` is for the layer panel and the add-menu.
-export const TS_KINDS = {
-  'clock-digital': { label: 'Digital clock',  defaults: { w: 300, h: 132 } },
-  'clock-analog':  { label: 'Analog clock',   defaults: { w: 148, h: 148 } },
-  'clock-world':   { label: 'World clock',    defaults: { w: 168, h: 168 } },
-  'calendar':      { label: 'Calendar',       defaults: { w: 288, h: 300 } },
-  'agenda':        { label: 'Agenda',         defaults: { w: 260, h: 128 } },
-  'weather':       { label: 'Weather',        defaults: { w: 168, h: 168 } },
-  'stats':         { label: 'System stats',   defaults: { w: 168, h: 158 } },
-  'battery':       { label: 'Battery',        defaults: { w: 148, h: 148 } },
-  'media':         { label: 'Now playing',    defaults: { w: 300, h: 92 } },
-  'notes':         { label: 'Notes',          defaults: { w: 220, h: 180 } },
-  'todo':          { label: 'Task list',      defaults: { w: 220, h: 196 } },
-  'quote':         { label: 'Quote',          defaults: { w: 240, h: 150 } },
-  'pomodoro':      { label: 'Pomodoro',       defaults: { w: 168, h: 180 } },
-  'network':       { label: 'Network',        defaults: { w: 208, h: 128 } },
-  'storage':       { label: 'Storage',        defaults: { w: 208, h: 108 } },
-  'label':         { label: 'Typography',     defaults: { w: 420, h: 96 } },
-  'headline':      { label: 'Headline',       defaults: { w: 400, h: 128 } },
-  'gauge':         { label: 'Gauge',          defaults: { w: 168, h: 120 } },
-};
+// The widget kinds: derived from the spec catalog (sdk/ts-widget-specs.js) — one table, so the
+// model, the renderer, the picker and the tests can never drift apart. The three legacy aliases
+// below keep the first catalog's ids alive (the built-in themes place them by id).
+import { specKinds } from './ts-widget-specs.js';
+export const TS_KINDS = specKinds();
 
 const uid = (() => {
   let n = 0;

@@ -18,10 +18,16 @@ import {
   nowPlaying, calendarEvents, reminders, usePim, weather, useWeather, weatherConsent, weatherGroup,
   clockTimer, timerStart, timerPause, timerResume, timerReset, timerLeft, formatBytes,
   weekdayName, monthName, tOptional, tsLive, resolveStyle, withAlpha,
-  registerWidgetType, setWidgets, tsByZ,
+  registerWidgetType, setWidgets, tsByZ, specOf, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
+  nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
+  setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
+  nextAlarm as nextAlarmStore, qualityProfile,
+  stopwatch as swStore, swStart, swStop, swReset, swElapsed,
 } from '@insaneos/sdk';
 
 const hex = (rgb) => (Array.isArray(rgb) ? `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}` : null);
+// The kind's name in the interface language, with the spec's English as the fallback.
+const kindLabel = (id) => tOptional(`settings.kind.${id}`) || (TS_KINDS[id] || {}).label || id;
 
 // ---------------------------------------------------------------- the shared tickers
 
@@ -565,17 +571,634 @@ function GaugeW({ widget, st }) {
   );
 }
 
-// ---------------------------------------------------------------- registration + the bridge
 
-const KINDS = {
-  'clock-digital': ClockDigital, 'clock-analog': ClockAnalog, 'clock-world': ClockWorld,
-  calendar: CalendarW, agenda: AgendaW, weather: WeatherW, stats: StatsW, battery: BatteryW,
-  media: MediaW, notes: NotesW, todo: TodoW, quote: QuoteW, pomodoro: PomodoroW,
-  network: NetworkW, storage: StorageW, label: LabelW, headline: HeadlineW, gauge: GaugeW,
+// ---------------------------------------------------------------- the providers
+// Every src in sdk/ts-widget-specs.js resolves here — real data only, read defensively: a source
+// this machine lacks (no sensor, no GPU, no voltage chip, no swap, no battery) yields null and
+// the variant draws its quiet state. Field shapes verified against the C that serves them
+// (docs/INSANE-DESKTOP-PERSONALIZATION-PROGRESS.md, "Architecture findings").
+
+const tryDo = (fn) => { try { return fn(); } catch (e) { return null; } };
+const monSample = () => tryDo(() => { insane.monitor?.start?.(); return insane.monitor?.sample?.() || null; });
+const sysInfo = () => tryDo(() => insane.system?.info?.() || null);
+
+// Client-side ring buffers of real samples (the monitor keeps no long history; these grow only
+// while a history widget is mounted — 60 points at the 3 s tick is three minutes).
+const HIST = {};
+const pushHist = (key, v) => {
+  if (!Number.isFinite(v)) return HIST[key] || [];
+  const a = (HIST[key] ||= []);
+  a.push(v);
+  if (a.length > 60) a.shift();
+  return a;
+};
+const netHist = () => {
+  const s = monSample();
+  if (!s) return pushHist('net', NaN);
+  return pushHist('net', (s.net?.rx || 0) + (s.net?.tx || 0));
 };
 
+const pctOf = (a, b) => (Number.isFinite(a) && Number.isFinite(b) && b > 0 ? Math.max(0, Math.min(1, a / b)) : null);
+const kb = (v) => (Number.isFinite(v) ? formatBytes(v * 1024) : null);
+const pctStr = (p) => (Number.isFinite(p) ? `${Math.round(p * 100)}%` : null);
+const p100 = (v) => (Number.isFinite(v) ? Math.max(0, Math.min(1, v <= 1 ? v : v / 100)) : null);
+const hms = (sec) => {
+  if (!Number.isFinite(sec) || sec < 0) return null;
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60);
+  return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+const clockNow = () => new Date();
+const isoWeek = (d) => {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil((((t - y0) / 86400000) + 1) / 7);
+};
+const moonAge = (d) => {
+  // a real derivation: the moon's age in days from a known new moon (2000-01-06 18:14 UTC)
+  const synodic = 29.530588853;
+  const known = Date.UTC(2000, 0, 6, 18, 14);
+  const days = (d.getTime() - known) / 86400000;
+  return ((days % synodic) + synodic) % synodic;
+};
+const moonName = (age) => {
+  const names = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
+  return names[Math.round((age / 29.530588853) * 8) % 8];
+};
+const eventCount = () => tryDo(() => {
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const end = new Date(start); end.setDate(end.getDate() + 1);
+  return (calendarEvents.range(start.getTime(), end.getTime()) || []).length;
+});
+const openTodos = () => tryDo(() => (reminders.items() || []).filter((x) => x && !x.done)) || [];
+
+const PROV = {
+  clockTime: () => ({ text: '' }),
+  clockDate: () => ({ text: '' }),
+  weekNumber: () => ({ value: `${isoWeek(clockNow())}`, sub: 'ISO week' }),
+  nextAlarm: () => {
+    const a = nextAlarmStore.get();
+    return a && a.at ? { value: new Date(a.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sub: a.label || '' } : null;
+  },
+  eventsCount: () => { const n = eventCount(); return n == null ? null : { value: `${n}`, sub: 'today' }; },
+  sunTimes: () => {
+    const s = sunTimes();
+    if (!s) return null;
+    const hm = (m) => (Number.isFinite(m) ? `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}` : '—');
+    return { rows: [['Sunrise', hm(s.rise)], ['Sunset', hm(s.set)]] };
+  },
+  cpu: () => { const s = monSample(); return s && Number.isFinite(s.cpu) ? { value: pctStr(s.cpu), pct: s.cpu } : null; },
+  cpuCores: () => { const s = monSample(); return s && Array.isArray(s.cores) && s.cores.length ? { series: s.cores.map((v) => Math.max(0, Math.min(1, v))) } : null; },
+  cpuHistory: () => { const s = monSample(); const a = pushHist('cpu', s?.cpu); return a.length > 1 ? { series: a.slice(), value: pctStr(a[a.length - 1]), max: 1 } : null; },
+  loadAvg: () => { const s = monSample(); return s?.load ? { rows: [['1 min', s.load[0].toFixed(2)], ['5 min', s.load[1].toFixed(2)], ['15 min', s.load[2].toFixed(2)]] } : null; },
+  load1: () => { const s = monSample(); return s?.load ? { value: s.load[0].toFixed(2), sub: `of ${sysInfo()?.cores || '?'} cores` } : null; },
+  cpuModel: () => { const i = sysInfo(); return i?.cpu ? { text: i.cpu, sub: `${i.cores || '?'} cores` } : null; },
+  cpuCoresCount: () => { const i = sysInfo(); return i?.cores ? { value: `${i.cores}`, sub: 'cores' } : null; },
+  ram: () => { const s = monSample(); const m = s?.mem; if (!m) return null; const p = pctOf(m.used, m.total); return p == null ? null : { value: pctStr(p), pct: p, sub: kb(m.used / 1024) }; },
+  ramApps: () => { const s = monSample(); return s?.mem && Number.isFinite(s.mem.apps) ? { value: kb(s.mem.apps / 1024), sub: 'apps hold' } : null; },
+  ramCache: () => { const s = monSample(); return s?.mem && Number.isFinite(s.mem.cache) ? { value: kb(s.mem.cache / 1024), sub: 'cached' } : null; },
+  ramHistory: () => { const s = monSample(); const p = s?.mem ? pctOf(s.mem.used, s.mem.total) : NaN; const a = pushHist('ram', p); return a.length > 1 ? { series: a.slice(), value: pctStr(a[a.length - 1]), max: 1 } : null; },
+  ramRows: () => {
+    const s = monSample(); const m = s?.mem;
+    if (!m) return null;
+    return { rows: [['Used', kb(m.used / 1024)], ['Apps', kb(m.apps / 1024)], ['System', kb(m.system / 1024)], ['Cache', kb(m.cache / 1024)], ['Swap', m.swapTotal ? kb(m.swapUsed / 1024) : 'none']] };
+  },
+  swap: () => { const s = monSample(); const m = s?.mem; if (!m || !m.swapTotal) return null; const p = pctOf(m.swapUsed, m.swapTotal); return p == null ? null : { value: pctStr(p), pct: p, sub: kb(m.swapUsed / 1024) }; },
+  tasksRunning: () => { const s = monSample(); return s?.tasks ? { value: `${s.tasks.running}`, sub: `of ${s.tasks.total}` } : null; },
+  tasksTotal: () => { const s = monSample(); return s?.tasks ? { value: `${s.tasks.total}`, sub: 'tasks' } : null; },
+  temp: () => { const s = monSample(); return s && Number.isFinite(s.temp) ? { value: `${Math.round(s.temp)}°C`, pct: Math.max(0, Math.min(1, (s.temp - 30) / 60)), hot: s.temp >= 70 } : null; },
+  diskTemp: () => {
+    const d = tryDo(() => insane.monitor?.diskTemps?.());
+    const t = d?.disks?.find((x) => Number.isFinite(x.temp))?.temp;
+    return Number.isFinite(t) ? { value: `${Math.round(t)}°C`, sub: d.disks[0].name } : null;
+  },
+  pressure: () => {
+    const p = tryDo(() => insane.system?.pressure?.());
+    const some = Number.isFinite(p?.some60) ? p.some60 / 100 : NaN;
+    return Number.isFinite(some) ? { value: pctStr(some), pct: some, sub: 'PSI 60 s' } : null;
+  },
+  voltage: () => {
+    const v = tryDo(() => insane.monitor?.voltage?.());
+    const val = v?.chips?.[0]?.in?.find((x) => Number.isFinite(x.v))?.v;
+    return Number.isFinite(val) ? { value: `${val.toFixed(2)} V`, sub: v.chips[0].name || '' } : null;
+  },
+  gpuName: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const c = g?.cards?.[0]?.name || g?.cards?.[0]?.card; return c ? { text: c } : null; },
+  gpuBusy: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const b = g?.cards?.[0]?.busy; const p = p100(Number(b)); return p == null ? null : { value: pctStr(p), pct: p }; },
+  gpuClients: () => { const g = tryDo(() => insane.monitor?.gpu?.()); const n = g?.clients?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'using the GPU' } : null; },
+  diskUsed: () => {
+    const list = tryDo(() => insane.disks?.list?.()) || [];
+    const root = list.find((d) => d.system && Number.isFinite(d.fssize) && d.fssize > 0) || list.find((d) => Number.isFinite(d.fssize) && d.fssize > 0);
+    if (!root) return null;
+    const p = pctOf(root.used, root.fssize);
+    return p == null ? null : { value: pctStr(p), pct: p, sub: `${formatBytes(root.used)} / ${formatBytes(root.fssize)}` };
+  },
+  diskFree: () => {
+    const list = tryDo(() => insane.disks?.list?.()) || [];
+    const root = list.find((d) => d.system && Number.isFinite(d.fssize) && d.fssize > 0) || list.find((d) => Number.isFinite(d.fssize) && d.fssize > 0);
+    return root ? { value: formatBytes(root.avail), sub: 'free' } : null;
+  },
+  diskList: () => {
+    const list = tryDo(() => insane.disks?.list?.()) || [];
+    const disks = list.filter((d) => Number.isFinite(d.fssize) && d.fssize > 0).slice(0, 4);
+    return disks.length ? { rows: disks.map((d) => [d.name || d.device || 'disk', `${pctStr(pctOf(d.used, d.fssize)) || '—'} · ${formatBytes(d.used)}`]) } : null;
+  },
+  ioRead: () => { const s = monSample(); return s?.disk ? { value: formatBytes(s.disk.read) + '/s', sub: 'read' } : null; },
+  ioWrite: () => { const s = monSample(); return s?.disk ? { value: formatBytes(s.disk.write) + '/s', sub: 'write' } : null; },
+  ioHistory: () => { const s = monSample(); const v = s?.disk ? (s.disk.read + s.disk.write) / 1048576 : NaN; const a = pushHist('io', v); return a.length > 1 ? { series: a.slice(), value: `${formatBytes(a[a.length - 1] * 1048576)}/s` } : null; },
+  battery: () => {
+    const b = useBattRef();
+    if (!b || !b.hasBattery) return null;
+    return { value: b.percent >= 0 ? `${b.percent}%` : '—', pct: Number.isFinite(b.percent) ? b.percent / 100 : null, sub: b.charging ? 'charging' : b.onAC ? 'on power' : 'on battery' };
+  },
+  batteryTime: () => {
+    const b = useBattRef();
+    if (!b || !b.hasBattery || !(b.minutesLeft > 0)) return null;
+    return { value: hms(b.minutesLeft * 60), sub: b.charging ? 'to full' : 'left' };
+  },
+  batteryState: () => {
+    const b = useBattRef();
+    if (!b || !b.hasBattery) return null;
+    return { text: b.charging ? 'Charging' : b.onAC ? 'On power' : 'On battery', sub: b.percent >= 0 ? `${b.percent}%` : '' };
+  },
+  powerMode: () => ({ text: (qualityProfile() || 'auto').replace(/^./, (c) => c.toUpperCase()) }),
+  nightLight: () => ({ on: !!nightActive.get?.() }),
+  mediaTitle: () => { const np = npStore.get(); return np?.title ? { text: np.title, sub: np.artist || '' } : null; },
+  mediaProgress: () => {
+    const np = npStore.get();
+    if (!np?.duration) return null;
+    const p = Math.max(0, Math.min(1, (np.pos || 0) / np.duration));
+    const mmss = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
+    return { pct: p, value: mmss(np.pos || 0), sub: mmss(np.duration) };
+  },
+  mediaCover: () => { const np = npStore.get(); return np?.cover ? { src: np.cover } : null; },
+  volume: () => { const st = soundState.get(); const out = defaultSink(st); if (!out || !Number.isFinite(out.volume)) return null; return { value: `${Math.round(out.volume * 100)}%`, pct: out.volume, sub: out.mute ? 'muted' : '' }; },
+  mute: () => { const out = defaultSink(soundState.get()); if (!out) return null; return { on: !!(out.mute || out.volume === 0) }; },
+  audioOutput: () => { const out = defaultSink(soundState.get()); return out?.name ? { text: out.name, sub: out.port || '' } : null; },
+  netDown: () => { const s = monSample(); return s?.net ? { value: `${formatBytes(s.net.rx)}/s`, sub: 'down' } : null; },
+  netUp: () => { const s = monSample(); return s?.net ? { value: `${formatBytes(s.net.tx)}/s`, sub: 'up' } : null; },
+  netTotalDown: () => { const s = monSample(); return s?.net && Number.isFinite(s.net.rxTotal) ? { value: formatBytes(s.net.rxTotal), sub: 'received' } : null; },
+  netTotalUp: () => { const s = monSample(); return s?.net && Number.isFinite(s.net.txTotal) ? { value: formatBytes(s.net.txTotal), sub: 'sent' } : null; },
+  netHistory: () => { const a = netHist(); return a.length > 1 ? { series: a.slice(), value: `${formatBytes(a[a.length - 1] * 1048576)}/s` } : null; },
+  netIfs: () => {
+    const ifs = tryDo(() => insane.net?.interfaces?.()) || [];
+    const rows = ifs.filter((x) => x.up).slice(0, 4).map((x) => [x.name, x.carrier ? 'connected' : 'no carrier']);
+    return rows.length ? { rows } : null;
+  },
+  connCount: () => { const c = tryDo(() => insane.monitor?.connections?.()); const n = c?.list?.length; return Number.isFinite(n) ? { value: `${n}`, sub: 'connections' } : null; },
+  wifiState: () => {
+    const ifs = tryDo(() => insane.net?.interfaces?.()) || [];
+    const wifi = ifs.find((x) => x.type === 'wifi' || /wl|ath|wlan/.test(x.name || ''));
+    if (!wifi) return null;
+    return { value: wifi.carrier ? 'Connected' : wifi.up ? 'Ready' : 'Off', sub: wifi.name, pct: wifi.carrier ? 1 : wifi.up ? 0.5 : 0 };
+  },
+  bluetooth: () => { const b = btStore.get(); if (!b) return null; return { on: !!b.powered, sub: (b.connected || b.connections)?.length ? 'connected' : '' }; },
+  todoCount: () => { const n = openTodos().length; return { value: `${n}`, sub: 'open' }; },
+  todoFlagged: () => {
+    const items = tryDo(() => (reminders.items() || []).filter((x) => x && !x.done && x.flag)) || [];
+    return items.length ? { rows: items.slice(0, 4).map((x) => [x.title, x.listName || '']) } : { rows: [] };
+  },
+  osVersion: () => { const i = sysInfo(); return i?.os ? { text: i.os, sub: i.version ? `Insane OS ${i.version}${i.channel ? ` · ${i.channel}` : ''}` : '' } : null; },
+  kernel: () => { const i = sysInfo(); return i?.kernel ? { text: i.kernel, sub: i.arch } : null; },
+  hostname: () => { const i = sysInfo(); return i?.hostname ? { text: i.hostname } : null; },
+  userName: () => { const i = sysInfo(); return i?.fullName || i?.user ? { text: i.fullName || i.user, sub: i.admin ? 'administrator' : '' } : null; },
+  arch: () => { const i = sysInfo(); return i?.arch ? { text: i.arch } : null; },
+  board: () => { const i = sysInfo(); return i?.board ? { text: i.board } : null; },
+  build: () => { const i = sysInfo(); return i?.build ? { text: `${i.version || ''} ${i.build}`, sub: i.channel || '' } : null; },
+  bootTime: () => { const i = sysInfo(); return i && Number.isFinite(i.bootSeconds) ? { value: `${Math.round(i.bootSeconds)}s`, sub: 'to first frame' } : null; },
+  uptime: () => { const s = monSample(); const u = s?.uptime ?? sysInfo()?.uptime; const v = hms(u); return v ? { value: v, sub: 'uptime' } : null; },
+  timezone: () => { const tz = tryDo(() => Intl.DateTimeFormat().resolvedOptions().timeZone); return tz ? { text: tz.replace(/_/g, ' ') } : null; },
+  displayInfo: () => {
+    const d = tryDo(() => insane.screen || null);
+    if (!d?.width) return null;
+    return { text: `${d.width}×${d.height}`, sub: `${d.scale ? `${d.scale}× ` : ''}scale` };
+  },
+  weatherTemp: () => { const w = weatherStore.get(); const t = w?.data?.current?.temperature_2m; return Number.isFinite(t) ? { value: `${Math.round(t)}°`, sub: 'outside' } : null; },
+  weatherCond: () => {
+    const w = weatherStore.get();
+    const code = w?.data?.current?.weather_code;
+    if (code == null) return null;
+    return { text: tOptional(`shell.weather.cond.${weatherGroup(code)}`) || '', sub: w.stale ? 'cached' : '' };
+  },
+  weatherHumidity: () => { const w = weatherStore.get(); const h = w?.data?.current?.relative_humidity_2m; return Number.isFinite(h) ? { value: `${Math.round(h)}%`, sub: 'humidity' } : null; },
+  weatherWind: () => { const w = weatherStore.get(); const v = w?.data?.current?.wind_speed_10m; return Number.isFinite(v) ? { value: `${Math.round(v)} km/h`, sub: 'wind' } : null; },
+  weatherRange: () => {
+    const w = weatherStore.get();
+    const d0 = w?.data?.daily?.temperature_2m_max?.[0], n0 = w?.data?.daily?.temperature_2m_min?.[0];
+    return Number.isFinite(d0) && Number.isFinite(n0) ? { value: `${Math.round(n0)}° / ${Math.round(d0)}°`, sub: 'today' } : null;
+  },
+  weatherForecast: () => {
+    const w = weatherStore.get();
+    const d = w?.data?.daily;
+    if (!d?.temperature_2m_max?.length) return null;
+    return { forecast: d.time.slice(0, 7).map((day, i) => ({ day, hi: d.temperature_2m_max[i], lo: d.temperature_2m_min[i], code: d.weather_code?.[i] })) };
+  },
+  dayProgress: () => { const d = clockNow(); const p = (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) / 86400; return { pct: p, value: pctStr(p) }; },
+  yearProgress: () => { const d = clockNow(); const y0 = new Date(d.getFullYear(), 0, 1), y1 = new Date(d.getFullYear() + 1, 0, 1); const p = (d - y0) / (y1 - y0); return { pct: p, value: pctStr(p) }; },
+  modeBadge: () => { const m = settings.get().mode; return { text: m === 'light' ? 'Light' : 'Dark', sub: '' }; },
+};
+
+// battery reads through the hook's store; the providers are plain functions, so the hook value
+// arrives via a ref the battery variant keeps (the hook itself runs in useProviderDeps).
+let battNow = null;
+function useBattRef() { return battNow; }
+
+
+// ---------------------------------------------------------------- the provider deps + generic variants
+
+// The hooks a generic widget's provider may need. The tick follows the kind's category: the
+// time and ambient kinds breathe once a second, the measured ones on the shared 3 s tick —
+// never both. The push stores (nowPlaying, weather, sound, bluetooth, night, PIM) subscribe
+// always; they notify only on a real change.
+function useProviderDeps(kind) {
+  battNow = useBatt();
+  useStore(npStore);
+  useStore(weatherStore);
+  useStore(btStore);
+  useStore(nightActive);
+  useStore(soundState);
+  useStore(swStore);
+  usePimDep();
+  const cat = specOf(kind)?.cat;
+  useStore(cat === 'time' || cat === 'ambient' ? tsClock : tsStats);
+}
+
+const quiet = (widget, st, text) => (
+  <TSCard widget={widget} st={{ justifyContent: 'center' }}>
+    <Text style={dim(st, { size: Math.max(11, Math.round((st.size || 14) * 0.8)) })}>{text || '—'}</Text>
+  </TSCard>
+);
+
+function ValueW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 4 }}>
+      {d.sub && d.sub.length <= 12 ? <Eyebrow st={st} text={d.sub} /> : null}
+      <Text style={tx(st, { size: st.size || 30, lineHeight: 1.05, color: d.hot ? '#ff453a' : undefined })}>{d.value}</Text>
+      {d.pct != null ? <Bar st={st} pct={d.pct} color={st.accent || st.color} /> : null}
+      {d.sub && d.sub.length > 12 ? <Text style={dim(st, { size: 10 })}>{d.sub}</Text> : null}
+    </TSCard>
+  );
+}
+
+function RingW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d || d.pct == null) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  const face = Math.min(widget.w, widget.h) - (st.pad ?? 18) * 2 - 6;
+  const seg = (ang, col, len) => (
+    <View key={`${ang}`} style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, transform: `rotate(${ang}deg)` }}>
+      <View style={{ position: 'absolute', left: face / 2 - 2.5, top: 3, width: 5, height: len,
+        borderBottomLeftRadius: 2.5, borderBottomRightRadius: 2.5, backgroundColor: col }} />
+    </View>
+  );
+  const parts = [];
+  for (let a = 0; a < 360; a += 6) parts.push(seg(a, withAlpha(st.color || '#888888', 0.15), 5));
+  const filled = Math.round((d.pct || 0) * 60);
+  for (let i = 0; i < filled; i++) parts.push(seg(i * 6, d.hot ? '#ff453a' : (st.accent || st.color || '#888888'), 5));
+  return (
+    <TSCard widget={widget} st={{ alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+      <View style={{ width: face, height: face }}>
+        {parts}
+        <View style={{ position: 'absolute', left: 0, top: 0, width: face, height: face, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={tx(st, { size: Math.max(13, Math.round(face * 0.26)), weight: 700 })}>{d.value}</Text>
+        </View>
+      </View>
+      {d.sub ? <Text style={dim(st, { size: 10 })}>{d.sub}</Text> : null}
+    </TSCard>
+  );
+}
+
+function ChartW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.series?.length) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  const bars = d.series.slice(-16);
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'flex-end', gap: 6 }}>
+      <Eyebrow st={st} text={kindLabel(widget.kind)} />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: Math.max(30, widget.h - (st.pad ?? 18) * 2 - 30) }}>
+        {bars.map((v, i) => (
+          <View key={i} style={{ flex: 1, height: `${Math.max(4, Math.round(v * 100))}%`, borderRadius: 2,
+            backgroundColor: st.accent || st.color, opacity: 0.85 }} />
+        ))}
+      </View>
+    </TSCard>
+  );
+}
+
+function SparkW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.series?.length) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  const max = d.max || Math.max(...d.series, 0.0001);
+  const min = Math.min(...d.series, 0);
+  const span = max - min || 1;
+  const n = d.series.length;
+  const w = widget.w - (st.pad ?? 18) * 2, h = Math.max(16, widget.h - (st.pad ?? 18) * 2 - 26);
+  const pts = d.series.map((v, i) => ({ x: (i / Math.max(1, n - 1)) * w, y: h - ((v - min) / span) * h }));
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'flex-end', gap: 4 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Eyebrow st={st} text={kindLabel(widget.kind)} />
+        <Text style={tx(st, { size: Math.max(11, st.size || 12) })}>{d.value || ''}</Text>
+      </View>
+      <View style={{ width: w, height: h }}>
+        {pts.map((p, i) => (i ? (
+          <View key={i} style={{ position: 'absolute', left: pts[i - 1].x, top: Math.min(pts[i - 1].y, p.y),
+            width: Math.max(2, p.x - pts[i - 1].x + 1.5), height: Math.max(2, Math.abs(p.y - pts[i - 1].y) + 1.5),
+            backgroundColor: st.accent || st.color, opacity: 0.8 }} />
+        ) : null))}
+      </View>
+    </TSCard>
+  );
+}
+
+function RowsW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.rows?.length) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 5 }}>
+      <Eyebrow st={st} text={kindLabel(widget.kind)} />
+      {d.rows.slice(0, 5).map(([k, v], i) => (
+        <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={dim(st, { size: st.size || 12 })} ellipsizeMode="tail" numberOfLines={1}>{k}</Text>
+          <Text style={tx(st, { size: st.size || 12 })}>{String(v)}</Text>
+        </View>
+      ))}
+    </TSCard>
+  );
+}
+
+function TextW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.text) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 3 }}>
+      <Text style={tx(st, { size: st.size || 15, lineHeight: 1.25 })} ellipsizeMode="tail" numberOfLines={2}>{d.text}</Text>
+      {d.sub ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 15) * 0.72)) })}>{d.sub}</Text> : null}
+    </TSCard>
+  );
+}
+
+function BarW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d || d.pct == null) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 12) * 0.85)) })}>{d.sub || ''}</Text>
+        <Text style={tx(st, { size: st.size || 12 })}>{d.value}</Text>
+      </View>
+      <Bar st={st} pct={d.pct} color={st.accent || st.color} />
+    </TSCard>
+  );
+}
+
+function ProgressW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d) return quiet(widget, st);
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Eyebrow st={st} text={kindLabel(widget.kind)} />
+        <Text style={tx(st, { size: st.size || 12 })}>{d.value}</Text>
+      </View>
+      <Bar st={st} pct={d.pct} color={st.accent || st.color} />
+    </TSCard>
+  );
+}
+
+function BinaryW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = clockNow();
+  const cols = [[d.getHours(), 2], [d.getMinutes(), 3], [d.getSeconds(), 3]];
+  const accent = st.accent || st.color;
+  return (
+    <TSCard widget={widget} st={{ alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {cols.map(([v, bits], ci) => (
+          <View key={ci} style={{ flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+            {Array.from({ length: bits }, (_, bi) => {
+              const on = !!(v & (1 << (bits - 1 - bi)));
+              return <View key={bi} style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: on ? accent : withAlpha(st.color || '#888888', 0.15) }} />;
+            })}
+          </View>
+        ))}
+      </View>
+      <Text style={dim(st, { size: 10 })}>{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`}</Text>
+    </TSCard>
+  );
+}
+
+function WeekW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = clockNow();
+  const today = d.getDate();
+  const dow = (d.getDay() + 6) % 7;                 // Monday-first
+  const weekStart = today - dow;
+  const monthLen = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const accent = st.accent || st.color;
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
+      <Eyebrow st={st} text={monthName(d.getMonth())} />
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        {Array.from({ length: 7 }, (_, i) => {
+          const day = weekStart + i;
+          const inMonth = day >= 1 && day <= monthLen;
+          const isToday = day === today;
+          const wd = weekdayName((i + 1) % 7, true).slice(0, 2);
+          return (
+            <View key={i} style={{ flex: 1, alignItems: 'center', gap: 3 }}>
+              <Text style={dim(st, { size: 9 })}>{wd}</Text>
+              <View style={{ width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: isToday ? accent : 'transparent' }}>
+                <Text style={tx(st, { size: st.size || 12, weight: isToday ? 700 : 400, color: isToday ? (st.paper || '#fff') : inMonth ? st.color : st.dim })}>
+                  {inMonth ? day : '·'}
+                </Text>
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    </TSCard>
+  );
+}
+
+function MoonW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const age = moonAge(clockNow());
+  const phase = age / 29.530588853;
+  const face = Math.min(widget.w, widget.h) - (st.pad ?? 18) * 2 - 10;
+  const shift = (phase < 0.5 ? (0.5 - phase) * 2 : (phase - 0.5) * 2) * face;
+  const waxing = phase < 0.5;
+  const lit = phase > 0.02 && phase < 0.98;
+  const ink = st.color || '#888888';
+  return (
+    <TSCard widget={widget} st={{ alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <View style={{ width: face, height: face, borderRadius: face / 2, backgroundColor: lit ? (st.accent || ink) : withAlpha(ink, 0.25), overflow: 'hidden' }}>
+        <View style={{ position: 'absolute', left: waxing ? -shift : shift, top: 0, width: face, height: face, borderRadius: face / 2, backgroundColor: withAlpha(ink, 0.85) }} />
+      </View>
+      <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 12) * 0.9)) })}>{moonName(age)}</Text>
+    </TSCard>
+  );
+}
+
+function CountdownW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const target = Date.parse((widget.cfg || {}).target || '');
+  if (!Number.isFinite(target)) {
+    return (
+      <TSCard widget={widget} st={{ justifyContent: 'center', gap: 4 }}>
+        <Eyebrow st={st} text={kindLabel(widget.kind)} />
+        <Text style={dim(st, { size: 11 })}>Set a date in the customize panel.</Text>
+      </TSCard>
+    );
+  }
+  const left = Math.max(0, target - Date.now());
+  const days = Math.floor(left / 86400000);
+  const hours = Math.floor((left % 86400000) / 3600000);
+  const mins = Math.floor((left % 3600000) / 60000);
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 4 }}>
+      <Eyebrow st={st} text={kindLabel(widget.kind)} />
+      <Text style={tx(st, { size: st.size || 30, lineHeight: 1.05 })}>{days > 0 ? `${days}d ${hours}h` : `${hours}h ${mins}m`}</Text>
+      <Text style={dim(st, { size: 10 })}>{new Date(target).toLocaleDateString()}</Text>
+    </TSCard>
+  );
+}
+
+function ForecastW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.forecast?.length) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
+  return (
+    <TSCard widget={widget} st={{ gap: 8 }}>
+      <Eyebrow st={st} text={kindLabel(widget.kind)} />
+      <View style={{ flexDirection: 'row', flex: 1 }}>
+        {d.forecast.slice(0, 7).map((f, i) => (
+          <View key={i} style={{ flex: 1, alignItems: 'center', gap: 2 }}>
+            <Text style={dim(st, { size: 10 })}>{i === 0 ? 'Today' : weekdayName(new Date(f.day).getDay(), true).slice(0, 3)}</Text>
+            <Text style={tx(st, { size: Math.max(12, st.size || 12) })}>{Number.isFinite(f.hi) ? `${Math.round(f.hi)}°` : '—'}</Text>
+            <Text style={dim(st, { size: 10 })}>{Number.isFinite(f.lo) ? `${Math.round(f.lo)}°` : '—'}</Text>
+          </View>
+        ))}
+      </View>
+    </TSCard>
+  );
+}
+
+function ImageW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  if (!d?.src) return quiet(widget, st);
+  return (
+    <TSCard widget={widget} st={{ padding: 8 }}>
+      <Image src={d.src} style={{ width: '100%', height: '100%', borderRadius: Math.max(2, (st.radius ?? 12) - 6), objectFit: 'cover' }} />
+    </TSCard>
+  );
+}
+
+function ToggleW({ widget, st }) {
+  useProviderDeps(widget.kind);
+  const d = PROV[specOf(widget.kind)?.src]?.(widget);
+  const label = kindLabel(widget.kind);
+  const flip = () => {
+    const src = specOf(widget.kind)?.src;
+    if (src === 'nightLight') setNightManual(!nightActive.get());
+    else if (src === 'bluetooth') setBluetoothPower(!(btStore.get()?.powered));
+    else if (src === 'mute') {
+      const out = defaultSink(soundState.get());
+      if (out) sound.setMute('sink', out.index ?? out.id ?? 0, !out.mute);
+    }
+  };
+  if (!d) return quiet(widget, st);
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={tx(st, { size: st.size || 12 })}>{label}</Text>
+        <View onClick={flip} style={{ width: 38, height: 22, borderRadius: 11, padding: 2,
+          backgroundColor: d.on ? (st.accent || st.color) : withAlpha(st.color || '#888888', 0.25), flexDirection: 'row' }}>
+          <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: st.paper || '#ffffff',
+            transform: `translateX(${d.on ? 16 : 0}px)` }} />
+        </View>
+      </View>
+      {d.sub ? <Text style={dim(st, { size: 10 })}>{d.sub}</Text> : null}
+    </TSCard>
+  );
+}
+
+function TimerW({ widget, st }) {
+  const t = useStore(clockTimer);
+  const st0 = eff(widget);
+  const left = timerLeft(t);
+  const mm = String(Math.floor(left / 60)).padStart(2, '0');
+  const ss = String(Math.floor(left % 60)).padStart(2, '0');
+  const running = t.state === 'running';
+  const Btn = ({ label, onClick }) => (
+    <Text onClick={onClick} style={{ ...tx(st, { size: 12, weight: 700 }), color: st0.accent || st0.color, padding: 4 }}>{label}</Text>
+  );
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+      <Eyebrow st={st0} text={kindLabel(widget.kind)} />
+      <Text style={tx(st, { size: st.size || 30, lineHeight: 1.1 })}>{left > 0 ? `${mm}:${ss}` : '05:00'}</Text>
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        {!running ? <Btn label={t.state === 'paused' ? '▶' : '5:00'} onClick={() => (t.state === 'paused' ? timerResume() : timerStart(300))} /> : null}
+        {running ? <Btn label="⏸" onClick={() => timerPause()} /> : null}
+        {t.state !== 'idle' ? <Btn label="Reset" onClick={() => timerReset()} /> : null}
+      </View>
+    </TSCard>
+  );
+}
+
+function StopwatchW({ widget, st }) {
+  const sw = useStore(swStore);
+  const st0 = eff(widget);
+  const ms = swElapsed(sw);
+  const mm = String(Math.floor(ms / 60000)).padStart(2, '0');
+  const ss = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+  const ds = Math.floor((ms % 1000) / 100);
+  return (
+    <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6, alignItems: 'center' }}>
+      <Eyebrow st={st0} text={kindLabel(widget.kind)} />
+      <Text style={tx(st, { size: st.size || 26, lineHeight: 1.1 })}>{`${mm}:${ss}.${ds}`}</Text>
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        <Text onClick={() => (sw.running ? swStop() : swStart())}
+          style={{ ...tx(st, { size: 12, weight: 700 }), color: st0.accent || st0.color, padding: 4 }}>
+          {sw.running ? 'Stop' : 'Start'}</Text>
+        {ms > 0 ? <Text onClick={() => swReset()} style={{ ...dim(st, { size: 12, weight: 700 }), padding: 4 }}>Reset</Text> : null}
+      </View>
+    </TSCard>
+  );
+}
+
+// ---------------------------------------------------------------- registration + the bridge
+
+// Every renderer variant the spec table names, implemented once (sdk/ts-widget-specs.js).
+const VARIANTS = {
+  clock: ClockDigital, 'clock-analog': ClockAnalog, world: ClockWorld, binary: BinaryW,
+  week: WeekW, calendar: CalendarW, agenda: AgendaW, countdown: CountdownW,
+  value: ValueW, ring: RingW, chart: ChartW, spark: SparkW, rows: RowsW, text: TextW,
+  bar: BarW, image: ImageW, progress: ProgressW, stats: StatsW, battery: BatteryW,
+  storage: StorageW, network: NetworkW, gauge: GaugeW, weather: WeatherW, forecast: ForecastW,
+  moon: MoonW, media: MediaW, todo: TodoW, notes: NotesW, quote: QuoteW, label: LabelW,
+  headline: HeadlineW, pomodoro: PomodoroW, timer: TimerW, stopwatch: StopwatchW, toggle: ToggleW,
+};
+
+// Coverage at load: a variant or provider the specs name but this file does not implement is a
+// loud console error (the lab's session log catches it), never a silent blank card.
+for (const v of TS_VARIANTS) if (!VARIANTS[v]) console.error(`themestudio: variant '${v}' has no renderer`);
+for (const p of TS_PROVIDERS) if (!PROV[p]) console.error(`themestudio: provider '${p}' has no data source`);
+
 function TsWidget({ widget }) {
-  const C = KINDS[widget.kind];
+  const v = specOf(widget.kind)?.v;
+  const C = (v && VARIANTS[v]) || null;
   if (!C) return null;
   return h(C, { widget, st: eff(widget), key: widget.id });
 }

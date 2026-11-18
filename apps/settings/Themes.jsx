@@ -13,12 +13,15 @@ import {
   TextInput, useStore, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
+  TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
 import { useRef, useState } from 'react';
 import { Section, SettingRow, Note, Actions, Stack, Columns, PopUp, Message } from './ui.jsx';
 
 const L = (k, fb) => tOptional(`settings.themes.${k}`) || fb;
+// The kind's name in the interface language (the spec's English as the fallback).
+const kindLabel = (id) => tOptional(`settings.kind.${id}`) || (TS_KINDS[id] || {}).label || id;
 
 // ---------------------------------------------------------------- the miniature desktop
 
@@ -85,15 +88,24 @@ function ThemeMiniature({ theme, width, height }) {
 
 // ---------------------------------------------------------------- the gallery card
 
-function ThemeCard({ theme, active, onOpen }) {
+function ThemeCard({ theme, active, onSet, onPreview, onCustomize }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
+  const Act = ({ label, onClick, primary }) => (
+    <View onClick={(e) => { e.stopPropagation?.(); onClick(); }} style={{ flex: 1, height: 24, borderRadius: 6,
+      justifyContent: 'center', alignItems: 'center', cursor: 'pointer',
+      backgroundColor: primary ? t.accent : t.control }}>
+      <Text style={{ fontSize: 11, fontWeight: 600, color: primary ? '#ffffff' : t.text }}>{label}</Text>
+    </View>
+  );
   return (
-    <View onClick={onOpen} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+    <View onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ width: 236, gap: 6, padding: 6, borderRadius: 12, cursor: 'pointer',
         border: `2px solid ${active ? t.accent : hover ? t.separator : 'transparent'}`,
         backgroundColor: active ? t.accentSubtle : 'transparent' }}>
-      <ThemeMiniature theme={theme} width={224} height={126} />
+      <View onClick={onPreview}>
+        <ThemeMiniature theme={theme} width={224} height={126} />
+      </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 2 }}>
         <Text style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: t.text, textAlign: 'start' }}
           ellipsizeMode="tail" numberOfLines={1}>{theme.name}</Text>
@@ -103,10 +115,11 @@ function ThemeCard({ theme, active, onOpen }) {
       </View>
       <Text style={{ fontSize: 11, color: t.textDim, paddingHorizontal: 2, minHeight: 26, textAlign: 'start' }}
         ellipsizeMode="tail" numberOfLines={2}>{theme.desc}</Text>
-      {active ? (
-        <Text style={{ fontSize: 10, fontWeight: 700, color: t.accent, paddingHorizontal: 2, letterSpacing: 0.5 }}>
-          {L('applied', 'Applied').toUpperCase()}</Text>
-      ) : null}
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        <Act label={active ? L('reapply', 'Reapply') : L('setTheme', 'Set')} onClick={onSet} primary />
+        <Act label={L('preview', 'Preview')} onClick={onPreview} />
+        <Act label={L('customize', 'Customize')} onClick={onCustomize} />
+      </View>
     </View>
   );
 }
@@ -147,7 +160,7 @@ const WEIGHTS = [400, 500, 600, 700, 800];
 
 function LayerRow({ w, index, n, selected, onSelect, onEye, onUp, onDown, onDup, onRemove }) {
   const t = useTheme();
-  const label = (TS_KINDS[w.kind] || {}).label || w.kind;
+  const label = kindLabel(w.kind);
   return (
     <View onClick={() => onSelect(w.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 34,
       paddingHorizontal: 8, borderRadius: 8, cursor: 'pointer',
@@ -184,7 +197,7 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, area }) {
     <View style={{ gap: 8, padding: 12, borderRadius: 12, border: `1px solid ${t.separator}`, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: t.text, textAlign: 'start' }}>
-          {(TS_KINDS[w.kind] || {}).label || w.kind}</Text>
+          {kindLabel(w.kind)}</Text>
         <Button small label="S" onClick={() => scale(0.8)} />
         <Button small label="M" onClick={() => scale(1)} />
         <Button small label="L" onClick={() => scale(1.25)} />
@@ -285,6 +298,53 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, area }) {
   );
 }
 
+// ---------------------------------------------------------------- the add-widget dialog
+
+// 105 kinds: a flat list is unusable. Category chips + a search field; the grid shows names only
+// (never raw pixel sizes). Adding places the widget at a free spot of the real work area.
+function AddDialog({ onAdd, onClose }) {
+  const t = useTheme();
+  const [cat, setCat] = useState('time');
+  const [q, setQ] = useState('');
+  const ql = q.trim().toLowerCase();
+  const list = ql ? TS_WIDGET_SPECS.filter((sp) => sp.label.toLowerCase().includes(ql))
+    : specsOfCat(cat);
+  return (
+    <Layer name="modal">
+      <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
+        justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={onClose}>
+        <View onClick={(e) => e.stopPropagation?.()} style={{ width: 560, borderRadius: 14, backgroundColor: t.windowBg,
+          border: `1px solid ${t.separator}`, boxShadow: '0 18px 60px rgba(0,0,0,0.45)', padding: 16, gap: 10 }}>
+          <Text style={{ fontSize: 15, fontWeight: 700, color: t.text, textAlign: 'start' }}>{L('addWidgetTitle', 'Add a widget')}</Text>
+          <SearchField value={q} onChange={setQ} placeholder={L('searchKinds', 'Search widgets…')} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {TS_CATS.map(([c, name]) => (
+              <View key={c} onClick={() => { setCat(c); setQ(''); }} style={{ paddingHorizontal: 10, height: 24, borderRadius: 12,
+                justifyContent: 'center', backgroundColor: !ql && cat === c ? t.accent : 'transparent',
+                border: `1px solid ${!ql && cat === c ? t.accent : t.separator}` }}>
+                <Text style={{ fontSize: 12, color: !ql && cat === c ? '#ffffff' : t.textDim }}>{name}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={{ height: 280, flexDirection: 'row', flexWrap: 'wrap', gap: 8, overflow: 'hidden' }}>
+            {list.map((sp) => (
+              <View key={sp.id} onClick={() => { onAdd(sp.id); onClose(); }} style={{ width: 172, paddingHorizontal: 10, height: 30,
+                borderRadius: 8, justifyContent: 'center', backgroundColor: t.control, cursor: 'pointer' }}>
+                <Text style={{ fontSize: 12, color: t.text }} ellipsizeMode="tail" numberOfLines={1}>{kindLabel(sp.id)}</Text>
+              </View>
+            ))}
+            {!list.length ? <Text style={{ fontSize: 12, color: t.textDim, padding: 12 }}>{L('noKinds', 'Nothing matches.')}</Text> : null}
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={onClose} />
+          </View>
+        </View>
+      </View>
+    </Layer>
+  );
+}
+
+
 // ---------------------------------------------------------------- the page
 
 export function ThemesSettings() {
@@ -296,6 +356,7 @@ export function ThemesSettings() {
   const [note, setNote] = useState(null);
   const [presetName, setPresetName] = useState('');
   const [presetOpen, setPresetOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const hist = useRef(tsCreateHistory(40));
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
   const themes = tsAllThemes();
@@ -357,7 +418,10 @@ export function ThemesSettings() {
         ) : null}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: '100%' }}>
           {themes.map((th) => (
-            <ThemeCard key={th.id} theme={th} active={live.active === th.id} onOpen={() => open(th.id)} />
+            <ThemeCard key={th.id} theme={th} active={live.active === th.id}
+              onSet={() => apply(th.id)}
+              onPreview={() => open(th.id)}
+              onCustomize={() => { if (live.active !== th.id) apply(th.id); else setSelW(null); }} />
           ))}
         </View>
       </Section>
@@ -366,11 +430,7 @@ export function ThemesSettings() {
         <Columns>
           <Section title={L('layers', 'Layers — the widgets of this theme')}
             footer={L('layersHint', 'Top of the list is frontmost. The eye hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look below.')}
-            accessory={(
-              <PopUp value="" onChange={(k) => { if (k) act(() => tsAdd(k, area)); }} width={170}
-                options={[['', L('addWidget', 'Add a widget…')],
-                  ...Object.keys(TS_KINDS).map((k) => [k, TS_KINDS[k].label])]} />
-            )}>
+            accessory={<Button small label={L('addWidget', 'Add a widget…')} onClick={() => setAddOpen(true)} />}>
             {byZ.length ? [...byZ].reverse().map((w, i) => (
               <LayerRow key={w.id} w={w} index={byZ.length - 1 - i} n={byZ.length} selected={selW === w.id}
                 onSelect={setSelW}
@@ -444,6 +504,9 @@ export function ThemesSettings() {
         </Layer>
       ) : null}
 
+      {addOpen ? (
+        <AddDialog onAdd={(kind) => act(() => tsAdd(kind, area))} onClose={() => setAddOpen(false)} />
+      ) : null}
       {selTheme ? (
         <PreviewDialog theme={selTheme} active={live.active === selTheme.id}
           onApply={() => { apply(selTheme.id); }}
