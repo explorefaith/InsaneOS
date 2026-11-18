@@ -64,6 +64,7 @@ import {
   useStore,
   dockIconRects,
   dockIdOfWindow,
+  revealMenuBar,
   DUR,
   windows,
   playFx,
