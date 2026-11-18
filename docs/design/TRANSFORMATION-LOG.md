@@ -67,3 +67,10 @@ Plan: `docs/design/transformation-plan.md`
   settings (Wi-Fi status, Bluetooth/Night Light/DND/dark toggles, volume, commit-on-release
   brightness). No logo, no OS name, nothing else. Lab: 0 errors; both themes build under the
   i18n gate.
+- **Round 2b (user feedback on the island's place)**: the island is not a left strip after all —
+  it is the reference's top-centre pill, and it auto-hides when an app opens (slides up off the
+  screen, a small ear left at the edge; the pointer at the top edge reveals it again, over the
+  window; an empty desktop keeps it on). Verified the engine's hit_test applies the world-inverse
+  transform (paint.c), so the hidden pill cannot eat clicks; translateY[] is the SDK's own
+  animation form. Panels drop down from the pill's items; NotificationCenter is anchored with its
+  own at=[x, 320] width so panelLeft keeps the computed x.

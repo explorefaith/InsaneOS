@@ -62,8 +62,8 @@ function BrightnessRow({ t }) {
   );
 }
 
-// top: the strip item's screen y already adjusted for this panel's own offset (IslandStrip anchors it)
-export function QuickSettings({ t, top, onClose }) {
+// top/left: the IslandStrip anchors this panel under the control button (Android-style, dropping down)
+export function QuickSettings({ t, top, left, onClose }) {
   const ref = useRef(null);
   const [s, set] = useSettings();
   const st = useSound();
@@ -76,7 +76,7 @@ export function QuickSettings({ t, top, onClose }) {
   const pct = out ? Math.round(out.level * 100) : 0;
   return (
     <View ref={ref} style={{
-      position: 'absolute', left: 74, top, width: 300, padding: 12, gap: 10, borderRadius: 20,
+      position: 'absolute', left, top, width: 300, padding: 12, gap: 10, borderRadius: 20,
       backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
     }}>

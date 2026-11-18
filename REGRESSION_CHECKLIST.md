@@ -32,9 +32,12 @@ the live desktop. Every fix commit states which lines were re-run and what passe
 - [ ] Control-center menus open and close; nothing hides while a menu is open (once C lands).
 
 ### Island strip and Auto accent (the desktop transformation)
-- [ ] The top menu bar is gone (windows use the full height); the island strip floats on the left
-      edge: open apps stacked with a running dot each, battery %, one-click screenshot, 24-hour clock,
-      the bell and the control button — and nothing else (no logo, no OS name, no menus).
+- [ ] The top menu bar is gone (windows use the full height); the island is a floating glass pill at
+      the top centre: open apps on the left, battery %, one-click screenshot, 24-hour clock, the bell
+      and the control button — and nothing else (no logo, no OS name, no menus).
+- [ ] Auto-hide: with an app open the island slides off the top (a small ear stays at the edge); the
+      pointer touching the top edge slides it back over the window; an empty desktop keeps it on.
+      While hidden it must not eat clicks over the window (hit-testing follows the transform).
 - [ ] Clicking an open app's icon opens the golden panel under the icon with that app's windows;
       a row brings the window forward, × closes it; a click outside closes the panel.
 - [ ] The control button opens the Android-style quick settings: Wi-Fi status (opens Settings),

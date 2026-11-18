@@ -18,11 +18,14 @@ of the matching [GitHub release](https://github.com/insaneos/Insane OS/releases)
 
 - **The island desktop: the menu bar is gone, and a shell that wears the wallpaper.** The top bar is
   removed entirely (windows use the full height; there is nothing left to auto-hide when an app opens).
-  In its place a floating glass island lives on the left edge: the open apps stacked one under another —
-  clicking one opens the golden panel under the icon with that app's windows (a row brings it forward,
-  × closes it) — and under them exactly what was asked for: the battery percentage, a one-click
-  screenshot, the time in 24-hour format, the notifications bell and the control button. No logo, no OS
-  name, no menus, no junk. The control button opens Android-style quick settings: the Wi-Fi status
+  In its place a floating glass island sits at the top centre, like the reference: the open apps in a
+  row — clicking one opens the golden panel under the icon with that app's windows (a row brings it
+  forward, × closes it) — then exactly what was asked for: the battery percentage, a one-click
+  screenshot, the time in 24-hour format, the notifications bell and the control button. It auto-hides
+  the moment an app opens (it slides up off the screen, a small ear at the edge; the pointer touching
+  the top edge slides it back over the window — hit-testing follows the transform, so a hidden island
+  never eats a click), and an empty desktop keeps it on. No logo, no OS name, no menus, no junk. The
+  control button opens Android-style quick settings, dropping down from the pill: the Wi-Fi status
   (opens Settings), Bluetooth with a real switch, Night Light, Do Not Disturb, dark mode, the volume
   slider and the brightness slider (committed once per drag through the display-brightness helper, not
   once per pixel). The accent follows the wallpaper by default (`accent: 'auto'`): the compositor reads
