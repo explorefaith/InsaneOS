@@ -126,6 +126,8 @@ void hw_act_wallpaper_image(const AdminReq *r, const char *arg, size_t len);
 void hw_act_wallpaper_login_image(const AdminReq *r, const char *arg, size_t len);
 void hw_act_wallpaper_login_video(const AdminReq *r, const char *arg, size_t len);
 void hw_act_wallpaper_web_get(const AdminReq *r, const char *arg, size_t len);
+void hw_act_crypto_ticker(const AdminReq *r, const char *arg, size_t len);
+void hw_act_crypto_klines(const AdminReq *r, const char *arg, size_t len);
 void hw_act_wallpaper_url_get(const AdminReq *r, const char *arg, size_t len);
 void hw_act_weather_get(const AdminReq *r, const char *arg, size_t len);
 
@@ -137,6 +139,8 @@ void hw_act_weather_get(const AdminReq *r, const char *arg, size_t len);
     { "wallpaper-login-image", hw_act_wallpaper_login_image, A_FORK }, \
     { "wallpaper-login-video", hw_act_wallpaper_login_video, A_FORK }, \
     { "wallpaper-web-get", hw_act_wallpaper_web_get, A_FORK | A_ANYONE }, \
+    { "crypto-ticker", hw_act_crypto_ticker, A_FORK | A_ANYONE }, \
+    { "crypto-klines", hw_act_crypto_klines, A_FORK | A_ANYONE }, \
     { "wallpaper-url-get", hw_act_wallpaper_url_get, A_FORK | A_ANYONE }, \
     { "weather-get", hw_act_weather_get, A_FORK | A_ANYONE }, \
     { "display-brightness", hw_act_brightness, A_ANYONE }, \

@@ -146,7 +146,24 @@ the sparkline cards; lab mock server for the offline lab)
 
 - Weather (out of scope by the brief: needs a data-source decision).
 
-### M5 — Crypto (Binance) — NOT STARTED; the full implementation plan (2026-11-18)
+### M5 — Crypto (Binance) — **C FOUNDATION LANDED** (commit `89dceea8`, 2026-11-18); the shell cards remain
+
+**Landed**: `server/src/hw/crypto_admin.c` — the two closed actions `crypto-ticker` and
+`crypto-klines`: https only, the two-host allowlist (api.binance.com then data-api.binance.vision),
+fixed endpoint templates, the strict symbol charset, one MiB cap, and both answers rebuilt in C
+from the parsed fields (the shell never sees Binance's raw bytes — Binance sends numbers as
+strings, the parser accepts both shapes). `tests/crypto_test.c` walks the pure parts: the symbol
+table, the ticker extraction from a real-shaped body, the klines walk on string closes, the
+malformed/missing-field refusals — **all checks passed** (with admin_err/admin_say/fetch_batch
+stubbed the way the wallpaper test stubs them). The error codes crypto.badSymbol/noData/badAnswer
+landed in the five catalogs; err-check + i18n-check exit 0; make build/insane-server clean.
+
+**Remaining in M5 (the shell side)**: `sdk/crypto.js` — the pairs store, one fetch per pair shared
+between widgets, the 15 s refresh with backoff on 429/418, the stale marking; the CryptoCard
+(small: pair/price/24h%; medium: + the sparkline from the closes + high/low; large: + volume +
+the last-updated time), green/red with the sign, locale numbers, the "Data: Binance" attribution;
+the Settings rows (presets + a validated text field). Fetch only while a crypto widget exists.
+
 
 **Discovered for the build** (use these, they are verified): `sec/json.h` has `json_parse(buf, n,
 &JDoc, NULL, 0)`, `json_get(JVal, key)`, `json_num(JVal, key, def)` (doubles ✓), `JVal->kid`/`len`
