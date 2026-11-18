@@ -84,7 +84,7 @@ export { SoundOutputList, useSoundOutputs } from './soundoutputs.js';   // choos
 export { monitor, useMonitor, monitorSamples, monitorProcesses, monitorConnections, monitorDevices, monitorDetail, MONITOR_HISTORY, diskTempHistory, DISK_TEMP_HISTORY, firewall, firewallState } from './monitor.js';
 export * as fwRule from './fwrule.js';            // checks what the user types for a firewall rule
 export * as netModel from './netmodel.js';        // (0.8.5) Monitor → Network: search tokens, filters, the tree
-export { packages, packageList, refreshPackages, packageFile, loadWasm } from './packages.js';
+export { packages, packageList, refreshPackages, packageFile, loadWasm, canUninstall, uninstallApp } from './packages.js';
 import { refreshPackages, forgetGonePackaged, packageList as packageListOf } from './packages.js';
 export {
   windows, wm, openedAt, useWindows, configureWindows, getApp, listApps, isLiveSystem, appIdOf, workArea, workAreaOf, pointerWorkArea, appMenus, useAppMenus, windowTitle, appRegistry, appMenuClick,
@@ -127,10 +127,10 @@ export { systemInfo, systemReport, insaneosVersion, useSystemInfo, useServerStat
 export * as fs from './fs.js';
 export { useDirectory } from './fs.js';
 export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver, shadeHex, alphaHex, deriveTokens } from './theme.js';
-export { useTween, reducedMotionNow, easeOutBack } from './animation.js';
+export { useTween, reducedMotionNow, easeOutBack, nextFrame, cancelFrame } from './animation.js';
 export { QUALITY_PROFILES, qualityProfile, qualityKnobs, qualityTick, renderQuality, isAdaptive } from './quality.js';
 export {
-  Button, Toggle, Segmented, SidebarItem, SectionTitle, ScrollView, TextInput, FormFields, hasTextFocus, takeTextFocus, releaseTextFocus, textFocusOwner, Stepper, Slider,
+  Button, Toggle, Segmented, SidebarItem, SectionTitle, ScrollView, TextInput, FormFields, hasTextFocus, takeTextFocus, releaseTextFocus, textFocusOwner, Stepper, Slider, Progress, Spinner,
   AppHost, useAppWindow, useKeyboard, focusToken, restoreFocus, pasteIntoFocused, FloatingWindows, useWindowState,
 } from './components.jsx';
 import { FloatingWindows } from './components.jsx';
@@ -337,3 +337,5 @@ export { insaneosWallpapers, userWallpaperName, wallpaperSrc, wallpaperThumb, fi
 export { appGroup, appMenuItems, runningApps, forceQuit, recentItems, storeUpdates, hideApp, hideOthers, toggleShowDesktop, appSettingsItem } from './appcontrol.js';
 export { windowMenuItems, moveResizeItems } from './windowmenu.js';
 export { setDesktopCount } from './desktops.js';
+export { weather, useWeather, weatherRefresh, weatherConsent, weatherGroup, WEATHER_PLACE_DEFAULT } from './weather.js';
+export { wallpaperAccent } from './accent.js';

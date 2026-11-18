@@ -28,6 +28,11 @@ const ALLOW = [
   [/^assets\/help\/[a-z]+\/windows\.md$/, /^(title: Windows|# Windows)$/m, 'the Help article about app windows'],
   [/^assets\/help\//, '[Windows](help:windows)', 'link to the Help article about app windows'],
   [/^assets\/locales\/fr\/(countries|emojikw)\.json$/, 'Macédoine', 'the country in French: the check reads "Mac" before an é as a whole word'],
+  // the shipped wallpaper artworks are called what they are called ("Crystal Apple", the catalog
+  // list in the release notes): names of our own assets, not another program
+  [/^assets\/locales\/en\/(settings|shell)\.json$/, 'Crystal Apple', 'the name of the shipped wallpaper artwork'],
+  [/^CHANGELOG\.md$/, 'Crystal Apple', 'the name of the shipped wallpaper artwork in its release notes'],
+  [/^CHANGELOG\.md$/, 'Apple, Eternal Dawn, Royal Flow', 'the list of shipped wallpaper names in the release notes'],
 ];
 
 function files() {

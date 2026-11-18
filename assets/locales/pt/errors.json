@@ -1,4 +1,5 @@
 {
+  "battery.limit.unsupported": "O firmware deste dispositivo não suporta um limite de carga (sem charge_control_end_threshold).",
   "admin.actionFailed": "A ação terminou com um erro",
   "admin.forkFailed": "Não foi possível iniciar a ação",
   "admin.invalidArgument": "Argumento inválido",
@@ -176,6 +177,9 @@
   "doc.badBlob": "Dados de documento inválidos",
   "doc.itemCount": "Entre 1 e {max} itens",
   "doc.noHelper": "O assistente de documentos (insane-doc) não está disponível",
+  "dotdeb.badPackage": "Uma entrada do catálogo do DotDeb não passou na validação.",
+  "dotdeb.noCatalog": "O catálogo do DotDeb não está instalado neste sistema.",
+  "dotdeb.unknownApp": "{id} não está no catálogo do DotDeb.",
   "errno.E2BIG": "Lista de argumentos longa demais",
   "errno.EACCES": "Permissão negada",
   "errno.EAGAIN": "Recurso temporariamente indisponível",
@@ -719,6 +723,7 @@
   "wallpaper.downloadFailed": "Não foi possível baixar o fundo",
   "wallpaper.removeFailed": "Não foi possível alterar o fundo",
   "wallpaper.notDownloaded": "Esse fundo não foi baixado",
+  "wallpaper.badUrl": "Esse URL não é permitido: apenas endereços https sem parte de usuário.",
   "wallpaper.badImage": "Esse arquivo não é uma imagem PNG ou JPEG",
   "wallpaper.imageTooBig": "Essa imagem é grande demais: até 64 MB e 100 megapixels",
   "wallpaper.imageUnreadable": "Não foi possível ler esse arquivo",
@@ -828,5 +833,7 @@
   "termconf.verifyFailed": "o arquivo novo não foi lido igual, então nada foi movido",
   "termconf.corrupt": "o arquivo não é um JSON válido para o Terminal",
   "termconf.newer": "o arquivo foi gravado por um Insane OS mais novo",
-  "vm.shareProtected": "Uma pasta compartilhada com escrita não pode ser nem conter um arquivo protegido deste computador (como a configuração do Terminal ou o settings.json): a máquina poderia mudar o que este computador executa. Compartilhe-a somente leitura, ou compartilhe uma pasta sem esse arquivo."
+  "vm.shareProtected": "Uma pasta compartilhada com escrita não pode ser nem conter um arquivo protegido deste computador (como a configuração do Terminal ou o settings.json): a máquina poderia mudar o que este computador executa. Compartilhe-a somente leitura, ou compartilhe uma pasta sem esse arquivo.",
+  "uninstall.unsupported": "Este aplicativo não pode ser desinstalado daqui.",
+  "weather.fetchFailed": "Não foi possível contactar o serviço de tempo"
 }

@@ -20,6 +20,7 @@ export const WIDGET_CATALOG = [
   { type: 'insane-battery', w: 300, h: 96 },
   { type: 'insane-stats', w: 300, h: 158 },
   { type: 'insane-media', w: 300, h: 112 },
+  { type: 'insane-visualizer', w: 320, h: 118 },
 ];
 
 export const widgetLayout = createStore(null);      // null: the theme draws its defaults

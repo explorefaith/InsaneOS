@@ -156,12 +156,24 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
 
   const cur = open && menus[open.name];
   const anchor = open && (refs[open.name] || { current: appRefs.current[open.name] });
+  // Island mode (settings.barStyle, the reference look): the bar is a floating centred pill instead of a
+  // full-width strip. Same items, same menus, same work-area reservation (windows never sit in this strip),
+  // so only the drawing changes — the pill hugs its content and sits inside the strip the work area already
+  // reserves. 'full' (and any unknown value) keeps the classic strip.
+  const island = s.barStyle !== 'full';
   return (
     <View style={{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }}>
       <View style={{
         position: 'absolute', left: area.x, top: area.y, width: area.w, height, flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: t.glassFilter,
+        justifyContent: island ? 'center' : 'flex-start',
+        ...(island ? {} : { paddingHorizontal: 8, backgroundColor: t.menuBg, backdropFilter: t.glassFilter }),
       }}>
+        <View style={island ? {
+          flexDirection: 'row', alignItems: 'center', height, paddingHorizontal: 10,
+          borderRadius: height / 2, backgroundColor: t.menuBg, backdropFilter: t.glassFilter,
+          border: `1px solid ${t.windowBorder}`, boxShadow: '0 10px 30px rgba(0,0,0,0.42)',
+          maxWidth: area.w - 24, overflow: 'hidden',
+        } : { flexDirection: 'row', alignItems: 'center', flex: 1 }}>
         <BarItem t={t} active={open?.name === 'logo'} anchorRef={refs.logo} onClick={() => toggle('logo', refs.logo)}>
           <InsaneGlyph size={16} color={t.menuText} />
         </BarItem>
@@ -192,6 +204,7 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
         <BarItem t={t} active={controlCenter} anchorRef={refs.cc} onClick={() => onControlCenter(itemAt(refs.cc))}><ControlGlyph t={t} /></BarItem>
         {bar.bell ? <BarItem t={t} active={clockPanel} anchorRef={refs.bell} onClick={() => onClock(itemAt(refs.bell))}><BellGlyph color={t.menuText} dot={unread ? t.accent : null} /></BarItem> : null}
         <BarItem t={t} active={clockPanel} anchorRef={refs.clock} onClick={() => onClock(itemAt(refs.clock))}><Label t={t}>{clock}</Label></BarItem>
+        </View>
       </View>
       {cur && <Menu x={open.x} y={area.y + height + 2} items={cur.items} onClose={close} anchor={anchor} width={260} />}
     </View>

@@ -77,6 +77,11 @@ static struct {
     int meter_pending;
     double peak;
     int peak_ready;
+    /* the spectrum (snd_spectrum): a record stream on the default sink's monitor while the desktop's
+     * visualizer wants it, its samples in a mono ring the bands are computed from on demand */
+    int spec_on, spec_pending, spec_pos, spec_fill;
+    uint32_t spec_source, spec_channel;
+    float spec_buf[2048];
     int debug;                          /* INSANE_SND_DEBUG=1: every packet to stderr */
     int samples_uploaded, uploading, play_after;   /* bits: pop, notify, error, chime, shutter… */
     double fx_vol;                                  /* the level the pending sample plays at */
@@ -86,6 +91,8 @@ static struct {
 static void disconnect(const char *why);
 static void upload_data(int which, uint32_t channel);
 static int play_sample_vol(int which, double vol);
+int snd_spectrum(int on);
+static int spec_start(void);
 
 /* ---- E/S ---- */
 
@@ -350,6 +357,7 @@ static void after_connected(void) {
     cmd_send(&t, tag, R_ACK, PA_CMD_SUBSCRIBE, 0);
     request_all();
     if (S.meter_source != PA_INVALID_INDEX) { uint32_t m = S.meter_source; S.meter_source = PA_INVALID_INDEX; snd_meter(m); }
+    if (S.spec_on) spec_start();            /* snd_spectrum(1) would see spec_on already set and return */
 }
 
 static const char *socket_path(char *buf, size_t cap) {
@@ -390,6 +398,9 @@ static int try_connect(void) {
     S.samples_uploaded = S.uploading = S.play_after = 0;
     S.meter_channel = PA_INVALID_INDEX;
     S.meter_pending = 0;
+    S.spec_channel = PA_INVALID_INDEX;
+    S.spec_pending = 0;
+    S.spec_pos = S.spec_fill = 0;
 
     /* cookie: PulseAudio's if it exists (pipewire-pulse doesn't require it) */
     uint8_t cookie[256] = { 0 };
@@ -471,7 +482,9 @@ static void on_reply(Pending p, TsIn *t) {
     case R_RECORD: {
         uint32_t ch = ts_get_u32(t);
         S.meter_pending = 0;
+        S.spec_pending = 0;
         if (t->err) break;
+        if (p.arg == S.spec_source && S.spec_on) { S.spec_channel = ch; break; }
         if (S.meter_source == PA_INVALID_INDEX || S.meter_source != p.arg) {   /* it was turned off in the meantime */
             TsOut o;
             uint32_t tag = cmd_begin(&o, PA_CMD_DELETE_RECORD_STREAM);
@@ -509,6 +522,15 @@ static void on_packet(uint32_t channel, const uint8_t *d, size_t n) {
             S.peak = m > 1 ? 1 : m;
             S.peak_ready = 1;
         }
+        if (channel == S.spec_channel && n >= 4) {  /* the spectrum's monitor: a mono ring of the latest samples */
+            for (size_t i = 0; i + 4 <= n; i += 4) {
+                float v;
+                memcpy(&v, d + i, 4);
+                S.spec_buf[S.spec_pos] = v;
+                S.spec_pos = (S.spec_pos + 1) % (int)(sizeof S.spec_buf / sizeof S.spec_buf[0]);
+                if (S.spec_fill < (int)(sizeof S.spec_buf / sizeof S.spec_buf[0])) S.spec_fill++;
+            }
+        }
         return;
     }
     TsIn t;
@@ -535,6 +557,7 @@ static void on_packet(uint32_t channel, const uint8_t *d, size_t n) {
     if (cmd == PA_CMD_RECORD_STREAM_KILLED) {       /* the meter's source disappeared */
         uint32_t ch = ts_get_u32(&t);
         if (ch == S.meter_channel) { S.meter_channel = PA_INVALID_INDEX; S.meter_source = PA_INVALID_INDEX; }
+        if (ch == S.spec_channel) S.spec_channel = PA_INVALID_INDEX;
     }
     /* REQUEST, STARTED, OVERFLOW...: we don't play our own streams (samples go to the cache) */
 }
@@ -834,6 +857,136 @@ int snd_move(int kind, uint32_t index, uint32_t device) {
  * pavucontrol's trick, a 25 Hz stream with PEAK_DETECT and resample.peaks: in PipeWire that is a
  * node at rate 25 with a quantum of 1, and on a VM it was seen next to PipeWire using ~36 % CPU
  * while Settings → Sound was open. A normal-rate stream is what every recorder asks for. */
+/* ---- the spectrum: what the desktop's audio visualizer reads ----
+ *
+ * While it is wanted (snd_spectrum(1)), a 48 kHz mono record stream runs on the default sink's monitor —
+ * what is being played, not what a microphone hears. The samples land in a ring; snd_spectrum_bands()
+ * windows the newest 1024, runs one radix-2 FFT and folds the magnitudes into log-spaced bands. The
+ * stream exists only while a consumer is interested, and both calls are cheap enough to sit in a render
+ * tick: the FFT is ~10k butterflies, the capture is the meter's own path. */
+
+#define SPEC_FFT 1024
+
+/* The default sink's monitor source index (0xffffffff = none or unknown yet). */
+static uint32_t sink_monitor(void) {
+    for (int i = 0; i < S.sinks.n; i++)
+        if (!strcmp(S.sinks.d[i].name, S.default_sink)) return S.sinks.d[i].monitor;
+    return PA_INVALID_INDEX;
+}
+
+static int spec_start(void) {
+    uint32_t src = sink_monitor();
+    if (src == PA_INVALID_INDEX || !dev_exists(SND_SOURCE, NULL, src)) return -1;
+    S.spec_source = src;
+    TsOut t;
+    uint32_t tag = cmd_begin(&t, PA_CMD_CREATE_RECORD_STREAM);
+    uint8_t mono = 0;                               /* PA_CHANNEL_POSITION_MONO */
+    ts_ss(&t, PA_SAMPLE_FLOAT32LE, 1, 48000);
+    ts_cmap(&t, 1, &mono);
+    ts_u32(&t, src);
+    ts_str(&t, NULL);
+    ts_u32(&t, 0xffffffffu);                        /* maxlength: the server's */
+    ts_bool(&t, 0);                                 /* corked */
+    ts_u32(&t, 1024 * 4);                           /* fragsize: 1024 samples, ~21 ms */
+    ts_bool(&t, 0); ts_bool(&t, 0); ts_bool(&t, 0); ts_bool(&t, 0); ts_bool(&t, 0);   /* no_remap … fix_channels */
+    ts_bool(&t, 1);                                 /* no_move */
+    ts_bool(&t, 0);                                 /* variable_rate */
+    ts_bool(&t, 0);                                 /* peak_detect: no, computed here */
+    ts_bool(&t, 1);                                 /* adjust_latency */
+    const char *kv[] = { "media.name", "Insane OS: spectrum", "application.id", "org.insaneos.Server" };
+    ts_proplist(&t, kv, 2);
+    ts_u32(&t, PA_INVALID_INDEX);                   /* direct_on_input */
+    ts_bool(&t, 0);                                 /* early_requests */
+    ts_bool(&t, 1);                                 /* dont_inhibit_auto_suspend */
+    ts_bool(&t, 0);                                 /* fail_on_suspend */
+    ts_u8(&t, 1);                                   /* one format: PCM */
+    ts_format_pcm(&t);
+    uint32_t vol = PA_VOLUME_NORM;
+    ts_cvol(&t, 1, &vol);
+    ts_bool(&t, 0);                                 /* muted */
+    ts_bool(&t, 0); ts_bool(&t, 0); ts_bool(&t, 0); ts_bool(&t, 0);   /* volume_set, muted_set, relative, passthrough */
+    S.spec_pending = 1;
+    return cmd_send(&t, tag, R_RECORD, PA_CMD_CREATE_RECORD_STREAM, src);
+}
+
+/* snd_spectrum(1) starts the monitor capture, snd_spectrum(0) stops it. Called again with 1 after a
+ * reconnect (after_connected) and when the default sink changes are seen in the next state's monitors. */
+int snd_spectrum(int on) {
+    on = !!on;
+    if (on == S.spec_on && S.fd >= 0) return 0;
+    S.spec_on = on;
+    if (!on) {
+        if (S.spec_channel != PA_INVALID_INDEX && S.fd >= 0) {
+            TsOut t;
+            uint32_t tag = cmd_begin(&t, PA_CMD_DELETE_RECORD_STREAM);
+            ts_u32(&t, S.spec_channel);
+            cmd_send(&t, tag, R_ACK, PA_CMD_DELETE_RECORD_STREAM, 0);
+        }
+        S.spec_channel = PA_INVALID_INDEX;
+        S.spec_source = PA_INVALID_INDEX;
+        S.spec_pos = S.spec_fill = 0;
+        return 0;
+    }
+    if (!S.connected) return 0;                     /* created on connect */
+    return spec_start();
+}
+
+/* n log-spaced band levels (0..1) of the newest ~21 ms of output, or 0 when nothing is captured yet. */
+int snd_spectrum_bands(float *out, int n) {
+    if (!out || n < 1 || n > 64) return -1;
+    if (!S.spec_on || S.spec_fill < SPEC_FFT) return 0;
+    static float hann[SPEC_FFT];
+    static int hann_ok;
+    if (!hann_ok) {
+        for (int i = 0; i < SPEC_FFT; i++) hann[i] = 0.5f - 0.5f * cosf((float)i / (SPEC_FFT - 1) * 2.0f * (float)M_PI);
+        hann_ok = 1;
+    }
+    double re[SPEC_FFT], im[SPEC_FFT];
+    for (int i = 0; i < SPEC_FFT; i++) {            /* the newest sample last; FFT magnitudes don't care about phase origin */
+        float v = S.spec_buf[(S.spec_pos + (int)(sizeof S.spec_buf / sizeof S.spec_buf[0]) - 1 - i) % (int)(sizeof S.spec_buf / sizeof S.spec_buf[0])];
+        re[i] = v * hann[i];
+        im[i] = 0;
+    }
+    for (int i = 1, j = 0; i < SPEC_FFT; i++) {     /* the bit-reversed order the butterflies below expect */
+        int bit = SPEC_FFT >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) { double tr = re[i]; re[i] = re[j]; re[j] = tr; double ti = im[i]; im[i] = im[j]; im[j] = ti; }
+    }
+    for (int len = 2; len <= SPEC_FFT; len <<= 1) {
+        double ang = -2.0 * M_PI / len;
+        double wr_len = cos(ang), wi_len = sin(ang);
+        for (int i = 0; i < SPEC_FFT; i += len) {
+            double wr = 1, wi = 0;
+            for (int j = 0; j < len / 2; j++) {
+                int a = i + j, b = i + j + len / 2;
+                double vr = re[b] * wr - im[b] * wi;
+                double vi = re[b] * wi + im[b] * wr;
+                re[b] = re[a] - vr; im[b] = im[a] - vi;
+                re[a] += vr; im[a] += vi;
+                double nwr = wr * wr_len - wi * wi_len;
+                wi = wr * wi_len + wi * wr_len;
+                wr = nwr;
+            }
+        }
+    }
+    /* bins 1..SPEC_FFT/2 folded onto n bands, geometric in the bin index (≈ logarithmic in frequency) */
+    double top = SPEC_FFT / 2 - 1;
+    for (int k = 0; k < n; k++) {
+        int lo = 1 + (int)(top * pow((double)k / n, 1.4));
+        int hi = 1 + (int)(top * pow((double)(k + 1) / n, 1.4));
+        if (hi <= lo) hi = lo + 1;
+        if (hi > SPEC_FFT / 2) hi = SPEC_FFT / 2;
+        double m = 0;
+        for (int b = lo; b < hi; b++) {
+            double mag = sqrt(re[b] * re[b] + im[b] * im[b]) / (SPEC_FFT / 4.0);
+            if (mag > m) m = mag;
+        }
+        out[k] = m > 1 ? 1 : (float)m;
+    }
+    return n;
+}
+
 int snd_meter(uint32_t source) {
     if (S.meter_channel != PA_INVALID_INDEX && S.fd >= 0) {
         TsOut t;

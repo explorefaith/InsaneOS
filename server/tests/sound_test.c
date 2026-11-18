@@ -12,7 +12,7 @@ static int fails;
 static int props_seen;
 static void on_prop(void *ud, const char *key, const char *val, uint32_t len) {
     (void)ud;
-    if (!strcmp(key, "application.name")) CHECK(!strcmp(val, "Insane OS") && len == 6);
+    if (!strcmp(key, "application.name")) CHECK(!strcmp(val, "Insane OS") && len == 9);
     if (!strcmp(key, "media.role")) CHECK(!strcmp(val, "event"));
     props_seen++;
 }

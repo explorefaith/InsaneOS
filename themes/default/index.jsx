@@ -1,6 +1,7 @@
-// "Insane Flow" theme (id default) — a menu bar and dock layout, with its own assets.
-// The theme builds the desktop (wallpaper, bar, dock, app launcher, Control Center) and the
-// window frames. Apps come from apps/ through the SDK.
+// "Insane Flow" theme (id default) — an island strip and dock layout, with its own assets.
+// The theme builds the desktop (wallpaper, the left island strip, dock, app launcher, quick settings)
+// and the window frames. Apps come from apps/ through the SDK. The top menu bar is gone: its work
+// went to the strip (IslandStrip.jsx), so windows use the full height.
 import {
   startShell,
   View,
@@ -36,6 +37,7 @@ import {
   PowerDialog,
   findWallpaper,
   wallpaperSrc,
+  wallpaperMedia,
   MotionWallpaper,
   Backdrop,
   useShortcuts,
@@ -60,11 +62,6 @@ import {
   toggleOverview,
   LevelHud,
   useStore,
-  notifyHistory,
-  menuBarEveryDisplay,
-  hasBar,
-  displayAt,
-  keepWindowsInWorkAreas,
   dockIconRects,
   dockIdOfWindow,
   DUR,
@@ -73,28 +70,24 @@ import {
 } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState } from 'react';
-import { makeTheme } from './tokens.js';
-import { MenuBars } from './components/MenuBar.jsx';
+import { makeTheme, wallpaperAccent, hexFromRgb } from './tokens.js';
+import { IslandStrip } from './components/IslandStrip.jsx';
 import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
-import { ControlCenter } from './components/ControlCenter.jsx';
 import { WidgetGallery, widgetsEditing } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
-import { NotificationCenter } from './components/NotificationCenter.jsx';
 import { Menu } from './components/Menu.jsx';
 
-const MENU_H = 28;
+const MENU_H = 0;   // the top bar is gone — the island strip lives on the left edge (IslandStrip.jsx)
 // The defaults: Files first and the app launcher after it; the Trash is always last (sdk/dockmodel.js).
 const DOCK_ORDER = ['files', DOCK_LAUNCHER, 'terminal', 'calculator', 'settings', 'about'];
 
-// Area for windows: below the menu bar and without the Dock's side (unless it hides, always or only under windows),
-// so maximized and new windows don't end up under the Dock.
-// Several displays (docs/DISPLAYS.md): the Dock goes on the main one; the menu bar on every display (each one's work
-// area starts below its own bar) unless Settings → Desktop & Dock → Menu Bar → "Show the menu bar on every display"
-// is off or the displays are mirrored, then only on the main one (sdk/menubarmodel.js hasBar).
-function workAreaFor(p, d, every) {
-  const bar = hasBar(d, every, screen.mirror) ? MENU_H : 0;
-  const a = { x: d.x, y: d.y + bar, w: d.w, h: d.h - bar };
+// Area for windows: the whole display, minus the Dock's side (unless it hides, always or only under windows),
+// so maximized and new windows don't end up under the Dock. The island strip floats over the left edge
+// (Layer "menubar"), the way floating panels always have — windows may slide under it.
+// Several displays (docs/DISPLAYS.md): the Dock goes on the main one.
+function workAreaFor(p, d) {
+  const a = { x: d.x, y: d.y, w: d.w, h: d.h };
   if (!d.main || p.dockAutohide) return a;
   const k = dockThickness(p.dockSize);
   if (p.dockPosition === 'left') { a.x += k; a.w -= k; }
@@ -102,7 +95,7 @@ function workAreaFor(p, d, every) {
   else a.h -= k;
   return a;
 }
-const areaFn = (d) => { const s = settings.get(); return workAreaFor(dockPrefs(s), d, menuBarEveryDisplay(s)); };
+const areaFn = (d) => { const s = settings.get(); return workAreaFor(dockPrefs(s), d); };
 
 // chrome: borders (1 + 1) and title bar (40 + 1 separator) of Window.jsx's frame
 configureWindows({ apps, workArea: areaFn, chrome: { w: 2, h: 43 } });
@@ -229,12 +222,6 @@ function App() {
     return { genie: true, p: Math.min(0.99, 1 - r.q), ...(!rc ? { x: main.x + main.w / 2 - 27, y: main.y + main.h - 63, w: 54, h: 54 } : rc) };
   };
   const [launchpad, setLaunchpad] = useState(false);
-  const [control, setControl] = useState(null);         // { area, at }: the display whose menu bar opened it, and the item
-  const [clockPanel, setClockPanel] = useState(null);   // the same, for the clock's notifications and calendar
-  const history = useStore(notifyHistory);
-  const seen = useRef(0);
-  if (clockPanel && history.length) seen.current = Math.max(seen.current, history[0].id);
-  const unread = history.some((n) => n.id > seen.current);
   const [context, setContext] = useState(null);
   const [dockCtx, setDockCtx] = useState(null);
   const [trashCtx, setTrashCtx] = useState(null);         // where the Trash's menu opens
@@ -243,27 +230,15 @@ function App() {
   const launcherApps = useLauncherApps();
   const dp = dockPrefs(s);
   // the work area follows the Dock live (position, size, auto-hide, another screen)
-  const every = menuBarEveryDisplay(s);
   useEffect(() => { configureWindows({ apps, workArea: areaFn }); },
-    [dp.dockPosition, dp.dockSize, dp.dockAutohide, every, screen.mirror, screen.width, screen.height]);
-  // the bar turned on for every display: windows at the top of the other displays move below their new bar
-  const barsWere = useRef(every);
-  useEffect(() => { if (barsWere.current !== every) { barsWere.current = every; keepWindowsInWorkAreas(); } }, [every]);
+    [dp.dockPosition, dp.dockSize, dp.dockAutohide, screen.mirror, screen.width, screen.height]);
   const main = mainDisplay();
   const all = screenDisplays();
-  // a panel opened from a bar goes on that bar's display, under the item; the same item again closes it
-  const panelToggle = (set, other) => (d, at) => { other(null); set((v) => (v && v.area.id === d.id ? null : { area: d, at })); };
-  // the focused window's frame decides which bar has the app's menus lit (sdk/menubarmodel.js activeBarId)
-  const fw = focused ? windows.find((w) => w.id === focused) : null;
-  const focusRect = fw ? wm.frame(fw) : null;
-  // a panel follows its display by id (moved in Settings → Displays) and closes when that display is unplugged
-  const ccArea = control && all.find((d) => d.id === control.area.id);
-  const clockArea = clockPanel && all.find((d) => d.id === clockPanel.area.id);
 
   // F4 opens the app launcher; ❖ too, but only if released without being used in a shortcut.
   const toggleLauncher = () => { closeOverview(); setLaunchpad((v) => !v); };
   useShortcuts({ grabs: switcherGrabs(flowGrabs()), table: flowTable(toggleLauncher), onSuperTap: toggleLauncher, appsPaste: true });
-  useEffect(() => addListener('keydown', (e) => { if (e.key === 'Escape') { setControl(null); setClockPanel(null); setContext(null); } }), []);
+  useEffect(() => addListener('keydown', (e) => { if (e.key === 'Escape') { setContext(null); } }), []);
 
   // Trackpad: a 3-finger swipe up opens the app launcher (4 fingers: the overview) and down closes
   // them; left/right switch desktops, or windows with only one desktop. See docs/TRACKPAD.md.
@@ -274,6 +249,28 @@ function App() {
   }), []);
 
   const wallpaper = findWallpaper(t.wallpapers, s.wallpaper);
+  // The Auto accent (settings.accent === 'auto'): the accent follows the wallpaper. Live wallpapers sample
+  // their playing frame (media.accent on the wallpaperMedia id); still wallpapers read the engine's decoded
+  // picture cache (media.accentFrom — the picture the Backdrop paints, so no second decode and no media
+  // job). The C side returns the dominant colour; the store write re-renders the shell and makeTheme
+  // tone-maps the hex per mode. An older server without these APIs (or a picture that never opens) leaves
+  // the store alone — makeTheme's violet fallback keeps the theme whole.
+  const wpLive = useStore(wallpaperMedia);
+  useStore(wallpaperAccent);
+  useEffect(() => {
+    if (s.accent !== 'auto') return undefined;
+    try {
+      const liveId = wallpaperMedia.get();
+      if (liveId) {
+        const a = insane.media.accent?.(liveId);
+        if (a) wallpaperAccent.set({ hex: hexFromRgb(a) });
+      } else if (wallpaper?.src) {
+        const a = insane.media.accentFrom?.(wallpaper.src);
+        if (a) wallpaperAccent.set({ hex: hexFromRgb(a) });
+      }
+    } catch { /* older server */ }
+    return undefined;
+  }, [s.accent, s.wallpaper, wpLive]);
   // Pinned and open apps; windows of the same app (Linux too) share a single icon. The app launcher
   // is a Dock item too (it moves, but can't be removed).
   const entries = useDockEntries(DOCK_DEFAULT, { recents: dp.dockRecents ? 3 : 0, launcher: { Icon: LaunchpadIcon, onOpen: () => setLaunchpad(true) } });
@@ -292,12 +289,10 @@ function App() {
         <DesktopWidgets layer="above" />
         {/* Everything above the windows goes in its layer (sdk/layers.js, docs/LAYERS.md): the
             order is the layers', not this tree's, and clicks follow it. Menus go to «popover»
-            by themselves (Menu.jsx). */}
+            by themselves (Menu.jsx). The island strip lives in the «menubar» layer, floating
+            over the left edge — windows may slide under it, panels open above everything. */}
         <Layer name="menubar">
-          <MenuBars t={t} height={MENU_H} displays={all} every={every} mirror={screen.mirror} focused={focused} focusRect={focusRect}
-            control={control ? control.area.id : null} clock={clockPanel ? clockPanel.area.id : null} unread={unread}
-            onClock={panelToggle(setClockPanel, setControl)} onControlCenter={panelToggle(setControl, setClockPanel)}
-            onLaunchpad={() => setLaunchpad(true)} />
+          <IslandStrip t={t} area={main} windows={mounted} focused={focused} />
         </Layer>
         <Layer name="dock">
         <Dock t={t} items={entries} running={entries.filter((e) => e.running).map((e) => e.id)}
@@ -322,11 +317,9 @@ function App() {
         <OverviewChrome />
         <DesktopHud />
         <LevelHud />
-        {ccArea && <Layer name="popover"><ControlCenter t={t} top={MENU_H} area={ccArea} at={control.at} onClose={() => setControl(null)} /></Layer>}
-        {clockArea && <Layer name="popover"><NotificationCenter t={t} top={MENU_H} area={clockArea} at={clockPanel.at} onClose={() => setClockPanel(null)} /></Layer>}
         {context && (
           <Menu x={context.x} y={context.y} onClose={() => setContext(null)} items={[
-            { label: tr('shell.desktop.wallpaper'), onClick: () => { const d = displayAt(context.x, context.y); setControl({ area: hasBar(d, every, screen.mirror) ? d : main, at: null }); } },
+            { label: tr('shell.desktop.wallpaper'), onClick: () => wm.open('settings', { args: { section: 'wallpaper' } }) },
             { label: tr('shell.desktop.openLaunchpad'), onClick: () => setLaunchpad(true) },
             { label: tr('shell.widgets.edit') || 'Edit Widgets', onClick: () => widgetsEditing.set(true) },
             { label: tr('shell.desktops.overview'), onClick: () => toggleOverview() },
@@ -337,6 +330,7 @@ function App() {
         )}
         {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
         <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
+
       </View>
     </ThemeProvider>
   );

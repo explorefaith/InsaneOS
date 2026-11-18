@@ -5,7 +5,7 @@
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener, Button, errorText, playFx, canUninstall, uninstallApp, Progress, Spinner } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -34,18 +34,34 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
   const rows = [];
   for (let i = 0; i < list.length; i += COLS) rows.push(list.slice(i, i + COLS));
   const open = (id) => { onClose(); onOpen(id); };
+  const [ctx, setCtx] = useState(null);                       // { app, x, y }
+  const [uninst, setUninst] = useState(null);                 // { app, busy, pct, done, error } — the uninstall sheet.
+  // Declared BEFORE the keyboard effect below: the effect's deps array names `uninst`, and a deps
+  // array is evaluated at call time — a declaration below it would put the binding in its temporal
+  // dead zone on every render (the launcher opened, the shell died with "M is not initialized").
   // the arrows and Enter belong to the grid while the launcher is open (the search field keeps the
-  // letters; the caret sliding along a one-line field costs nothing)
+  // letters; the caret sliding along a one-line field costs nothing) — and to nobody while the
+  // uninstall sheet is up: Enter there would open the app the sheet is about
   useEffect(() => addListener('keydown', (e) => {
+    if (uninst) return;
     if (e.key === 'ArrowRight') { setSel((n) => Math.min(list.length - 1, n + 1)); e.stopPropagation?.(); }
     else if (e.key === 'ArrowLeft') { setSel((n) => Math.max(0, n - 1)); e.stopPropagation?.(); }
     else if (e.key === 'ArrowDown') { setSel((n) => Math.min(list.length - 1, n + COLS)); e.stopPropagation?.(); }
     else if (e.key === 'ArrowUp') { setSel((n) => Math.max(0, n - COLS)); e.stopPropagation?.(); }
     else if (e.key === 'Enter' && list[sel]) { open(list[sel].id); e.stopPropagation?.(); }
-  }), [list, sel]);
+  }), [list, sel, uninst]);
   useStore(settings);                                         // «Keep in Dock» changes immediately
-  const [ctx, setCtx] = useState(null);                       // { app, x, y }
   const fg = glass ? '#fff' : t.text;
+  // The removal runs in the background (sdk/packages.js uninstallApp): a .lpk is gone at once, a
+  // Linux app's package reports its progress lines. The trash sound is the delete feedback.
+  const runUninstall = () => {
+    const app = uninst.app;
+    setUninst({ app, busy: true });
+    uninstallApp(app, (p) => setUninst((u) => (u && u.app === app ? { ...u, pct: p.total > 0 ? Math.round((p.done / p.total) * 100) : null } : u))).then((r) => {
+      if (r.ok) playFx('trash');
+      setUninst((u) => (u && u.app === app ? { ...u, busy: false, done: !!r.ok, error: r.ok ? null : r.error } : u));
+    });
+  };
 
   return (
     <View onClick={onClose} style={{
@@ -55,7 +71,7 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
     }}>
       <View onClick={(e) => e.stopPropagation()} style={{ marginTop: 48, width: 260 }}>
         <TextInput value={query} onChange={setQuery} placeholder={tr('shell.launchpad.search')} autoFocus
-          onSubmit={() => list[sel] && open(list[sel].id)} onCancel={onClose}
+          onSubmit={() => list[sel] && open(list[sel].id)} onCancel={uninst ? (uninst.busy ? undefined : () => setUninst(null)) : onClose}
           style={{ backgroundColor: glass ? 'rgba(255,255,255,0.14)' : t.inputBg, border: `1px solid ${glass ? 'rgba(255,255,255,0.22)' : t.separator}` }} />
       </View>
       {!q && (
@@ -96,7 +112,44 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
           { label: tr('shell.dock.open'), onClick: () => open(ctx.app.id) },
           ...(dockIdOf(ctx.app) ? [{ label: tr('shell.dock.keep'), checked: dock.isPinned(ctx.app), disabled: dock.isPinned(ctx.app) && !dock.canRemove(ctx.app),
             onClick: () => (dock.isPinned(ctx.app) ? dock.unpin(ctx.app) : dock.pin(ctx.app)) }] : []),
+          // Uninstall: only what can be removed (a .lpk package or a Linux app's own package; the
+          // built-in apps are Insane OS itself and never offer it — canUninstall, sdk/packages.js)
+          ...(canUninstall(ctx.app) ? [{ label: tr('shell.launchpad.uninstall'), onClick: () => setUninst({ app: ctx.app }) }] : []),
         ]} />
+      )}
+      {uninst && (
+        <View onClick={() => { if (!uninst.busy) setUninst(null); }} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',
+          alignItems: 'center', justifyContent: 'center', backgroundColor: glass ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.35)' }}>
+          <View onClick={(e) => e.stopPropagation()} style={{ width: 360, padding: 18, gap: 12, borderRadius: 14,
+            backgroundColor: t.windowBg || (glass ? 'rgba(40,40,46,0.92)' : '#ffffff'), border: `1px solid ${t.separator}`, boxShadow: '0 16px 44px rgba(0,0,0,0.5)' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <uninst.app.Icon size={40} />
+              <Text style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: fg, textAlign: 'start' }}>{tr('shell.launchpad.uninstallTitle', { name: appName(uninst.app) })}</Text>
+            </View>
+            <Text style={{ fontSize: 12, color: glass ? 'rgba(255,255,255,0.8)' : t.textDim, lineHeight: 1.5, textAlign: 'start' }}>{tr('shell.launchpad.uninstallBody')}</Text>
+            {uninst.busy ? (
+              <View style={{ gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 12, color: fg, textAlign: 'start' }}>{tr('shell.launchpad.uninstalling')}</Text>
+                  {uninst.pct == null ? <Spinner size={14} /> : null}
+                </View>
+                {uninst.pct != null ? <Progress pct={uninst.pct} width={324} /> : null}
+              </View>
+            ) : null}
+            {uninst.error ? <Text style={{ fontSize: 12, color: '#ff453a', lineHeight: 1.45, textAlign: 'start' }}>{tr('shell.launchpad.uninstallFailed', { name: appName(uninst.app), error: errorText(uninst.error) })}</Text> : null}
+            {uninst.done && !uninst.error ? <Text style={{ fontSize: 12, color: fg, textAlign: 'start' }}>{tr('shell.launchpad.uninstalled', { name: appName(uninst.app) })}</Text> : null}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+              {uninst.busy ? null : uninst.done || uninst.error ? (
+                <Button small label={tr('shell.launchpad.done')} onClick={() => setUninst(null)} />
+              ) : (
+                <>
+                  <Button small label={tr('shell.picker.cancel')} onClick={() => setUninst(null)} />
+                  <Button small destructive label={tr('shell.launchpad.uninstall')} onClick={runUninstall} />
+                </>
+              )}
+            </View>
+          </View>
+        </View>
       )}
     </View>
   );

@@ -10,10 +10,10 @@
 // "Pause when" switches. The still picture stays drawn underneath every live layer, so nothing can
 // blank the desktop. The Glass section stays at the bottom, as it was.
 import {
-  View, Text, Image, MediaView, useTheme, useSettings, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
-  media, useCodecs, useStore, errorText, fs, admin, GREETER_WALLPAPER, userWallpaperName, setLoginImage, setLoginStill, setLoginVideo,
+  View, Text, Image, MediaView, useTheme, useSettings, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle, TextInput,
+  media, useCodecs, useStore, errorText, fs, admin, GREETER_WALLPAPER, userWallpaperName, setLoginImage, setLoginStill, setLoginVideo, Progress,
   setLoginMotion, motionItems, MOTION_SECTIONS, motionThumb, motionPoster, motionDownloads, downloadMotion, removeMotion,
-  variantFor, motionDisabled, retryMotion, motionBusy, userVideoProblem, heavyVideoWarning, FilePicker,
+  variantFor, motionDisabled, retryMotion, motionBusy, userVideoProblem, heavyVideoWarning, FilePicker, addWallpaperImage,
   Layer, wm, useAppWindow,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -91,7 +91,7 @@ function PicTile({ item, onClick }) {
           <Image src={`asset:wallpapers/web/${item.id}.thumb.jpg`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </View>
       </View>
-      <Text style={{ fontSize: typeScale.caption, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: 168, textAlign: 'center' }}>{name}</Text>
+      <Text style={{ fontSize: typeScale.caption, color: t.textDim, maxWidth: 168, textAlign: 'center' }}>{name}</Text>
     </View>
   );
 }
@@ -118,7 +118,7 @@ function LiveTile({ it, state, onPick, onRetry, codecsAny }) {
           </View>
         ) : null}
       </View>
-      <Text style={{ fontSize: typeScale.caption, color: t.textDim, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: 168, textAlign: 'center' }}>{it.name}</Text>
+      <Text style={{ fontSize: typeScale.caption, color: t.textDim, maxWidth: 168, textAlign: 'center' }}>{it.name}</Text>
       {stopped ? (
         <Text onClick={onRetry} style={{ fontSize: typeScale.caption, color: t.accent, textDecoration: 'underline' }}>
           {L('wallpaper.live.stopped', 'stopped — try again')}
@@ -163,7 +163,10 @@ export function WallpaperSettings() {
   const [note, setNote] = useState('');
   const [previewPlaying, setPreviewPlaying] = useState(true);
   const [stats, setStats] = useState(null);
-  const [picker, setPicker] = useState(false);
+  const [picker, setPicker] = useState(false);            // the video picker (a file of the user's own)
+  const [imgPicker, setImgPicker] = useState(false);      // the picture picker (a file of the user's own)
+  const [url, setUrl] = useState('');
+  const [urlPct, setUrlPct] = useState(null);             // the URL download's percent, while it runs
   const [probe, setProbe] = useState(null);               // the picked video's probe, while its dialog is open
   const dl = useStore(motionDownloads);
   const starting = useStore(motionBusy);
@@ -221,6 +224,41 @@ export function WallpaperSettings() {
       setProbe(info);
       setDialog({ kind: 'user', path });
     }, (e) => { setBusy(''); setNote(errorText(e)); });
+  };
+
+  // ---- your own still picture: the closed wallpaper-image action checks it and keeps the user's copy ----
+  const pickOwnImage = (path) => {
+    setImgPicker(false);
+    setBusy('image');
+    addWallpaperImage(path).then((id) => {
+      setBusy('');
+      setDialog({ kind: 'ownpic', id, path });
+    }, (e) => { setBusy(''); setNote(errorText(e)); });
+  };
+
+  // ---- a video from an https address: the closed wallpaper-url-get action fetches it (capped, with
+  // progress), then the same probe as a picked file says whether it plays here ----
+  const downloadUrl = () => {
+    const u = url.trim();
+    if (!u || urlPct != null || busy) return;
+    setUrlPct(0);
+    setNote('');
+    admin.run('wallpaper-url-get', u, (line) => {
+      const m = /^PROGRESS (\d+)/.exec(line);
+      if (m) setUrlPct(Number(m[1]));
+    }).then((path) => {
+      setUrlPct(null);
+      setBusy('probe');
+      media.probe(String(path)).then((info) => {
+        setBusy('');
+        if (!info) { setNote(L('wallpaper.live.unreadable', 'That file could not be read as a video.')); return; }
+        const problem = userVideoProblem(info, codecs);
+        if (problem === 'unreadable') { setNote(L('wallpaper.live.unreadable', 'That file could not be read as a video.')); return; }
+        if (problem === 'format') { setNote(L('wallpaper.live.format', `This machine does not decode that format in hardware, so it would never play. (${codecs.join(', ') || 'no hardware formats'})`)); return; }
+        setProbe(info);
+        setDialog({ kind: 'user', path: String(path) });
+      }, (e) => { setBusy(''); setNote(errorText(e)); });
+    }, (e) => { setUrlPct(null); setNote(errorText(e)); });
   };
   const applyOwnDesktop = () => {
     const id = `user:own-${Date.now()}`;
@@ -300,7 +338,6 @@ export function WallpaperSettings() {
         </SettingRow>
         <Actions style={{ paddingVertical: spacing.s }}>
           <Button label={L('wallpaper.live.set', 'Set Live Wallpaper…')} onClick={() => setDialog({ kind: 'live' })} />
-          <Button small label={L('wallpaper.live.own', 'Your own video…')} onClick={() => setPicker(true)} />
           {liveOn ? <Button small label={L('wallpaper.live.stop', 'Back to the still wallpaper on both')} onClick={stopLive} /> : null}
         </Actions>
         {MOTION_SECTIONS.map((sec) => {
@@ -350,7 +387,26 @@ export function WallpaperSettings() {
           </SettingRow>
         </View>
       </Section>
+      <Section title={L('wallpaper.custom.title', 'Custom wallpaper')} footer={L('wallpaper.custom.hint', 'A picture of your own, for the desktop or the login screen. It is checked, and a copy is kept with the other wallpapers, so the choice survives a reboot.')}>
+        <Actions>
+          <Button label={L('wallpaper.custom.pick', 'Choose an image…')} onClick={() => setImgPicker(true)} />
+        </Actions>
+      </Section>
+      <Section title={L('wallpaper.customLive.title', 'Custom live wallpaper')} footer={L('wallpaper.customLive.hint', 'A video of your own or from an https address. It is probed before it is offered: what this machine cannot decode in hardware is refused.')}>
+        <Actions>
+          <Button label={L('wallpaper.live.own', 'Choose a video…')} onClick={() => setPicker(true)} />
+        </Actions>
+        <SettingRow label={L('wallpaper.customLive.url', 'From a URL')} hint={L('wallpaper.customLive.urlHint', 'Only https, up to 512 MB.')} stack>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', width: '100%' }}>
+            <TextInput value={url} onChange={setUrl} placeholder="https://…" style={{ flex: 1, minWidth: 0 }} onSubmit={downloadUrl} />
+            <Button small label={urlPct != null ? `${urlPct} %` : L('wallpaper.customLive.download', 'Download')} onClick={downloadUrl} disabled={urlPct != null} />
+          </View>
+          {urlPct != null ? <Progress pct={urlPct} width={320} /> : null}
+        </SettingRow>
+      </Section>
       <GlassSection />
+      {imgPicker ? <FilePicker modal title={L('wallpaper.custom.pickTitle', 'Choose an image')} filter={/\.(jpg|jpeg|png|webp|avif|bmp|gif)$/i}
+        onPick={(f) => pickOwnImage(typeof f === 'string' ? f : f.path)} onClose={() => setImgPicker(false)} /> : null}
       {picker ? <FilePicker modal title={L('wallpaper.live.pick', 'Choose a video')} filter={/\.(mp4|mkv|webm|mov|m4v|avi|ts)$/i}
         onPick={(f) => pickOwnVideo(typeof f === 'string' ? f : f.path)} onClose={() => setPicker(false)} /> : null}
       {dialog ? (
@@ -381,6 +437,14 @@ export function WallpaperSettings() {
             extra={<Text onClick={() => removeLive(dialog.item)} style={{ fontSize: 12, color: '#e5484d', textAlign: 'center', padding: 2 }}>
               {L('wallpaper.live.remove', 'Remove from this computer')}
             </Text>}
+            onClose={() => setDialog(null)} />
+        ) : dialog.kind === 'ownpic' ? (
+          <ApplyDialog title={L('wallpaper.applyTitle', 'Apply wallpaper')} kind="picture"
+            preview={<Image src={dialog.path} style={{ width: '100%', height: 120, borderRadius: 8, objectFit: 'cover' }} />}
+            options={{
+              login: () => applyLoginPicture(userWallpaperName(dialog.id)),
+              desktop: () => applyDesktopPicture(userWallpaperName(dialog.id)),
+            }}
             onClose={() => setDialog(null)} />
         ) : (
           <ApplyDialog title={L('wallpaper.live.ownTitle', 'Your video')}

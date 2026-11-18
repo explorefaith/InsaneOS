@@ -51,7 +51,7 @@ static void refresh(void) {
         autos[nautos++] = strdup(line);
     }
     if (f) fclose(f);
-    qsort(autos, (size_t)nautos, sizeof *autos, cmp_str);
+    if (nautos) qsort(autos, (size_t)nautos, sizeof *autos, cmp_str);       /* autos may still be null with none */
 }
 
 static int is_auto(const char *name) {

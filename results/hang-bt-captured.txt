@@ -1,0 +1,1736 @@
+########## stage 1 at 00:38:42 (silence 25s) ##########
+---- DRM connectors ----
+card0-DP-1: dpms=Off status=disconnected enabled=disabled
+card0-DP-2: dpms=Off status=disconnected enabled=disabled
+card0-eDP-1: dpms=On status=connected enabled=enabled
+card0-HDMI-A-1: dpms=Off status=disconnected enabled=disabled
+card0-HDMI-A-2: dpms=Off status=disconnected enabled=disabled
+---- session.log last 15 lines (what preceded the silence) ----
+tp: pointer: 9 frames, average latency 49.74 ms, max 77.53 ms (read → JS/Wayland)
+tp: pointer: 8 frames, average latency 0.21 ms, max 0.59 ms (read → JS/Wayland)
+tp: pointer: 73 frames, average latency 33.07 ms, max 177.49 ms (read → JS/Wayland)
+tp: pointer: 74 frames, average latency 0.14 ms, max 0.65 ms (read → JS/Wayland)
+tp: pointer: 13 frames, average latency 0.12 ms, max 0.34 ms (read → JS/Wayland)
+slow frame: 38.7 ms (layout 0.2, paint 35.0, blur 18.0 shrink 8, media 0.0, wayland 3.4, term 2.5, after the paint 3.4), gpu
+tp: pointer: 34 frames, average latency 0.13 ms, max 0.22 ms (read → JS/Wayland)
+tp: pointer: 28 frames, average latency 0.14 ms, max 0.18 ms (read → JS/Wayland)
+tp: pointer: 34 frames, average latency 1.44 ms, max 20.38 ms (read → JS/Wayland)
+slow frame: 37.4 ms (layout 0.5, paint 33.2, blur 14.8 shrink 8, media 0.0, wayland 3.8, term 1.9, after the paint 3.7), gpu
+tp: pointer: 103 frames, average latency 66.00 ms, max 219.72 ms (read → JS/Wayland)
+tp: pointer: 148 frames, average latency 88.96 ms, max 216.53 ms (read → JS/Wayland)
+slow frame: 38.2 ms (layout 0.6, paint 34.3, blur 16.0 shrink 8, media 0.0, wayland 3.3, term 1.7, after the paint 3.4), gpu
+tp: pointer: 165 frames, average latency 40.61 ms, max 232.01 ms (read → JS/Wayland)
+tp: pointer: 12 frames, average latency 0.10 ms, max 0.23 ms (read → JS/Wayland)
+---- sessiond journal tail ----
+Nov 18 00:36:58 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 Successfully initialized wpa_supplicant
+Nov 18 00:36:58 faith-pc insane-sessiond[1007]: insane-netd: net dhcp wlp59s0 started
+Nov 18 00:36:58 faith-pc systemd[926]: Created slice session.slice - User Core Session Slice.
+Nov 18 00:36:58 faith-pc systemd[926]: Started wireplumber.service - Multimedia Service Session Manager.
+Nov 18 00:36:59 faith-pc insane-sessiond[952]: insane-sessiond[952]: first frame on the monitor 11.148 s after the kernel started (Insane OS 0.8.8.6-beta, build 20261114.a3fbea6f, login): the boot splash can go
+Nov 18 00:37:00 faith-pc wireplumber[1160]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS09-9:1.0-0408:5343
+Nov 18 00:37:00 faith-pc wireplumber[1160]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS09-9:1.2-0408:5343
+Nov 18 00:37:00 faith-pc dbus-daemon[1157]: [session uid=1000 pid=1157 pidfd=5] Activating via systemd: service name='org.freedesktop.impl.portal.PermissionStore' unit='xdg-permission-store.service' requested by ':1.5' (uid=1000 pid=1160 comm="/usr/bin/wireplumber")
+Nov 18 00:37:00 faith-pc dbus-daemon[1157]: [session uid=1000 pid=1157 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: net wifi wlp59s0 scan-results
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: SME: Trying to authenticate with 8c:90:2d:bd:b6:f3 (SSID='Bornomala 2nd floor_5G' freq=5745 MHz)
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-REGDOM-CHANGE init=DRIVER type=COUNTRY alpha2=US
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: Trying to associate with 8c:90:2d:bd:b6:f3 (SSID='Bornomala 2nd floor_5G' freq=5745 MHz)
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: Associated with 8c:90:2d:bd:b6:f3
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: WPA: Key negotiation completed with 8c:90:2d:bd:b6:f3 [PTK=CCMP GTK=CCMP]
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-CONNECTED - Connection to 8c:90:2d:bd:b6:f3 completed [id=1 id_str=426f726e6f6d616c6120326e6420666c6f6f725f3547]
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: net wifi wlp59s0 connected Bornomala 2nd floor_5G
+Nov 18 00:37:03 faith-pc insane-sessiond[1007]: insane-netd: net dhcp wlp59s0 bound 192.168.0.101/24 192.168.0.1 7200
+Nov 18 00:37:04 faith-pc insane-sessiond[1236]: insane-sessiond[952]: explorearafat logged in on the monitor
+Nov 18 00:37:04 faith-pc insane-sessiond[1236]: insane-sessiond[952]: new session for explorearafat (1280x800)
+Nov 18 00:37:04 faith-pc insane-sessiond[952]: insane-sessiond[952]: monitor: explorearafat's session
+Nov 18 00:37:05 faith-pc insane-sessiond[952]: insane-sessiond[952]: monitor: take back 347 ms (notice 0, input 347 event0 revoke 83 event5 revoke 80 event6 revoke 56 event7 revoke 64 event8 revoke 64, 2 framebuffer(s) removed 0, release 0)
+Nov 18 00:37:16 faith-pc insane-sessiond[952]: insane-sessiond[952]: login screen: 1 process(es) of insaneos-greeter stopped (a session is on the monitor)
+Nov 18 00:38:09 faith-pc sudo[1755]: pam_unix(sudo:session): session opened for user root(uid=0) by (uid=1000)
+---- pid 1238 gdb (full) ----
+[New LWP 1264]
+[New LWP 1263]
+[New LWP 1262]
+[New LWP 1261]
+[New LWP 1256]
+[New LWP 1255]
+[New LWP 1252]
+[New LWP 1250]
+[New LWP 1249]
+[New LWP 1248]
+[New LWP 1247]
+[New LWP 1246]
+[New LWP 1245]
+[New LWP 1244]
+[New LWP 1243]
+[New LWP 1242]
+[New LWP 1241]
+[New LWP 1240]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+
+Thread 19 (Thread 0x7f6ac5b116c0 (LWP 1240) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x1) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac790c000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac790c000
+        self = 140096559978176
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x1}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 18 (Thread 0x7f6ac5ad06c0 (LWP 1241) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x2) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7331000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7331000
+        self = 140096559711936
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x2}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 17 (Thread 0x7f6ac5a8f6c0 (LWP 1242) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x3) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7323000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7323000
+        self = 140096559445696
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x3}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 16 (Thread 0x7f6ac5a4e6c0 (LWP 1243) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x4) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7315000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7315000
+        self = 140096559179456
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x4}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 15 (Thread 0x7f6ac5a0d6c0 (LWP 1244) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x5) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7307000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7307000
+        self = 140096558913216
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x5}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 14 (Thread 0x7f6ac59cc6c0 (LWP 1245) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x6) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7127000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7127000
+        self = 140096558646976
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x6}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 13 (Thread 0x7f6ac598b6c0 (LWP 1246) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x7) at src/par.c:55
+        seen = 264
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7119000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7119000
+        self = 140096558380736
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x7}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 12 (Thread 0x7f6ac57ff6c0 (LWP 1247) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557873955b9 in thread_main (arg=arg@entry=0x0) at src/backup/backup.c:462
+        now = 1794940624
+        machine = '\000' <repeats 4095 times>
+        lid = '\000' <repeats 17 times>
+        due = <optimized out>
+        all = {__val = {18446744067267100671, 0 <repeats 15 times>}}
+        tid = <optimized out>
+        np = <optimized out>
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac592d000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac592d000
+        self = 140096556758720
+        args = {routine = 0x555787393eef <thread_main>, arg_retval = 0x0}
+        sigset = {val = {0, 140096592470016, 140720446636032, 30, 140720454965808, 15950634320470276608, 140720454963712, 88167088833893, 140720454965840, 93834439018496, 20, 19, 0, 140096601247007, 140720454963728, 140720454965136}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 11 (Thread 0x7f6ac2a4f6c0 (LWP 1248) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac023b160, nfds=1, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7f6ac2a4cfe8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x00005557874dff2b in worker (arg=arg@entry=0x0) at src/cloud/cloud.c:2675
+        pf = <optimized out>
+        active = <optimized out>
+        timeout = <optimized out>
+        n = <optimized out>
+        sfo = <optimized out>
+        sfe = <optimized out>
+        son = <optimized out>
+        now = <optimized out>
+        again = <optimized out>
+        next_tick = 0
+        next_slow = 0
+        ticks = 0
+#6  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5917000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5917000
+        self = 140096508851904
+        args = {routine = 0x5557874dbb80 <worker>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 140720454963440, 140720454965792, 140096563096608, 4096, 93834422956704, 140096603116416, 140096598162325, 93834448541536, 140096601819460, 0, 140720454965616, 140096565160768, 140096601219794, 140096565160608, 140720454965616}}
+        retval = <optimized out>
+#7  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#8  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 10 (Thread 0x7f6ac224e6c0 (LWP 1249) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557874edcc7 in browser (arg=arg@entry=0x0) at src/cloud/cloud_files.c:608
+        gen = <optimized out>
+        kept = <optimized out>
+        key = <optimized out>
+        at = <optimized out>
+        sub = <optimized out>
+        ns = <optimized out>
+        d = <optimized out>
+        id = <optimized out>
+        path = <optimized out>
+        name = <optimized out>
+        rel = <optimized out>
+        polls = <optimized out>
+        dir = <optimized out>
+        done = 0
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5909000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5909000
+        self = 140096500459200
+        args = {routine = 0x5557874ed894 <browser>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 0, 140096565160512, 140096508851904, 140720454962968, 140096598208527, 140096565160992, 140096565160512, 9856, 140096601819460, 0, 140720454965056, 140096565161792, 140096601219794, 140096565161632, 140720454965056}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 9 (Thread 0x7f6ac204d6c0 (LWP 1250) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f8605d in pthread_cond_timedwait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557874f17b5 in keeper (arg=arg@entry=0x0) at src/cloud/cloud_files.c:490
+        t = <optimized out>
+        ids = <optimized out>
+        na = <optimized out>
+        seen = 0
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5771000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5771000
+        self = 140096498357952
+        args = {routine = 0x5557874f1355 <keeper>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 0, 140096565160512, 140096508851904, 140720454962968, 140096598208527, 140096565160992, 140096565160512, 9856, 140096601819460, 0, 140720454965056, 140096565161792, 140096601219794, 140096565161632, 140720454965056}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 8 (Thread 0x7f6abfa526c0 (LWP 1252) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac8005f59 in recvmsg () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d1270 in ___interceptor_recvmsg (fd=28, msg=0x7f6abf1820e0, flags=1073741824) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:3129
+        ctx = 0x7f6abfa48228
+        _ctx = {interceptor_name = 0x7f6ac834f900 "recvmsg"}
+        res = <optimized out>
+#5  0x00005557875b835d in read_packet (sock=sock@entry=28, rx=rx@entry=0x7f6abe852420, a=a@entry=0x555787807ce0 <vw_malloc>, flags=flags@entry=0) at src/vault/vwire.c:72
+        h = <optimized out>
+        buf = <optimized out>
+        u = <optimized out>
+        iov = <optimized out>
+        mh = <optimized out>
+        r = <optimized out>
+        fds = <optimized out>
+        nf = <optimized out>
+        bad = <optimized out>
+        need = <optimized out>
+#6  0x00005557875b9c0e in vw_recv (sock=sock@entry=28, m=m@entry=0x7f6abea52030, a=0x555787807ce0 <vw_malloc>) at src/vault/vwire.c:137
+        r = <optimized out>
+        rx = <optimized out>
+#7  0x00005557875b4f74 in read_loop (arg=arg@entry=0x1c) at src/vault/vclient.c:123
+        m = <optimized out>
+        r = <optimized out>
+        s = 28
+        lost = <optimized out>
+        orphans = <optimized out>
+        norph = <optimized out>
+        j = <optimized out>
+#8  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5753000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5753000
+        self = 140096458532544
+        args = {routine = 0x5557875b4d0f <read_loop>, arg_retval = 0x1c}
+        sigset = {val = {0, 140096608839182, 1169, 140096600897408, 140096608765952, 140720454952472, 140720454952468, 89129161409856, 140720454954496, 140096600920909, 140096600852312, 140720454952688, 140096570409216, 140720454952680, 140720454952468, 140096600824256}}
+        retval = <optimized out>
+#9  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#10 0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 7 (Thread 0x7f6ab93e96c0 (LWP 1255) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ab84e9070, nfds=2, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7f6ab93e73d8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x0000555787537f29 in loop (arg=arg@entry=0x0) at src/mail/mailc.c:613
+        p = <optimized out>
+        r = <optimized out>
+        m = <optimized out>
+        k = <optimized out>
+#6  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abdf8c000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abdf8c000
+        self = 140096351147712
+        args = {routine = 0x555787536570 <loop>, arg_retval = 0x0}
+        sigset = {val = {0, 140096601068858, 140096592470224, 140720454844784, 140096592470016, 89129170994496, 140720454846880, 30, 140720454844784, 1, 0, 140096601798863, 140720454844800, 11, 140096601798905, 93834418658833}}
+        retval = <optimized out>
+#7  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#8  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 6 (Thread 0x7f6ab80df6c0 (LWP 1256) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f8605d in pthread_cond_timedwait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557872a4bba in worker (arg=arg@entry=0x0) at src/monitor/mon.c:685
+        left = 29999.99944900001
+        ts = <optimized out>
+        ns = <optimized out>
+        dstart = <optimized out>
+        dt = <optimized out>
+        temps = <optimized out>
+        wait = <optimized out>
+        wc = <optimized out>
+        t0 = <optimized out>
+        b = <optimized out>
+        slept = 1
+        wp = <optimized out>
+        wg = <optimized out>
+        wv = <optimized out>
+        wgpu = <optimized out>
+        dpid = <optimized out>
+        idle = <optimized out>
+        next_watch = 125039.409463
+        next_volt = 0
+        volt_here = 1
+        geo = <optimized out>
+        geo_open = 0
+        geo_tried = 0
+        tick = 300
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abdf7e000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abdf7e000
+        self = 140096331183808
+        args = {routine = 0x5557872a4903 <worker>, arg_retval = 0x0}
+        sigset = {val = {0, 140096592470016, 140720446636032, 30, 140720454854816, 56, 140720454852720, 1, 112, 88373279809984, 140720454854816, 140096601040448, 112, 140096601803813, 140720454852736, 2}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 5 (Thread 0x7f6ab67c76c0 (LWP 1261) "insane-:disk$0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac55af000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac55af000
+        self = 140096304871104
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d650}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454953808, 16, 140720454951712, 1, 89472758722232, 140096601046667, 140720454951712, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 4 (Thread 0x7f6aa6dff6c0 (LWP 1262) "insane-ser:sh0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abfac3000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abfac3000
+        self = 140096042956480
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d6d0}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454954112, 16, 140720454952016, 1, 89953799373472, 140096601046667, 140720454952016, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 3 (Thread 0x7f6aa5af56c0 (LWP 1263) "insane:traceq0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abfa82000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abfa82000
+        self = 140096022992576
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d190}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454955600, 16, 140720454953504, 1, 91328184841888, 140096601046667, 140720454953504, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 2 (Thread 0x7f6aa47eb6c0 (LWP 1264) "insane-s:gdrv0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abe688000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abe688000
+        self = 140096003028672
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d110}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454955888, 16, 140720454953792, 1, 140096437845632, 140096601046667, 140720454953792, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 1 (Thread 0x7f6ac7db7d40 (LWP 1238) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac6704460, nfds=25, timeout=16) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7ffc08bb1b98
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x0000555786fb1000 in main (argc=<optimized out>, argv=<optimized out>) at src/main.c:2916
+        nrd = <optimized out>
+        tpd = <optimized out>
+        force_render = 0
+        nterm = 1
+        medbase = <optimized out>
+        td = <optimized out>
+        pfd = <optimized out>
+        n = 25
+        lbibase = <optimized out>
+        hwbase = 20
+        cursor_size_seen = 1
+        shd = <optimized out>
+        period = <optimized out>
+        abase = <optimized out>
+        bkbase = <optimized out>
+        lost = <optimized out>
+        scripted = 0
+        shd0 = <optimized out>
+        wants = <optimized out>
+        soft = <optimized out>
+        term_ids = <optimized out>
+        fabase = <optimized out>
+        mbase = <optimized out>
+        nbrk = 0
+        bwd = <optimized out>
+        ahead = <optimized out>
+        hz = <optimized out>
+        tnow = <optimized out>
+        nbase = <optimized out>
+        dkbase = <optimized out>
+        clbase = <optimized out>
+        brkbase = <optimized out>
+        nabr = 0
+        now = <optimized out>
+        unseen = <optimized out>
+        pace = <optimized out>
+        sbase = <optimized out>
+        nsh = 1
+        nmed = 0
+        tbase = <optimized out>
+        pbase = <optimized out>
+        zd = <optimized out>
+        wait = 16
+        lgbase = <optimized out>
+        shbase = <optimized out>
+        abr = <optimized out>
+        nm = 2
+        tick0 = <optimized out>
+        wbase = <optimized out>
+        nhw = 5
+        delay = 15.857411000004504
+        hwd = <optimized out>
+        mrd = <optimized out>
+        nlost = <optimized out>
+        pipe_sa = <optimized out>
+        card = <optimized out>
+        theme = <optimized out>
+        fonts = <optimized out>
+        shell = <optimized out>
+        user = <optimized out>
+        timeout_ms = <optimized out>
+        s = {out = {{kms = {fd = 37, conn_id = 99, crtc_id = 53, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}, width = 1920, height = 1080, buf = {{fb_id = 132, handle = 1, pitch = 7680, size = 8294400, map = 0x7f6ab4398000}, {fb_id = 135, handle = 2, pitch = 7680, size = 8294400, map = 0x7f6ab3baf000}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 53, fb_id = 0, x = 0, y = 0, gamma_size = 256, mode_valid = 1, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}}, on_flip = 0x555786fc088c <on_flip>, custom = 1, flip_ns = 114158969000, flip_submit_ns = 114148979196, flip_seq = 6598, cursor_handle = 32, cursor_w = 256, cursor_h = 256, cursor_pitch = 256, cursor_map = 0x7f6abd247000, cursor_size = 262144, cursor_ok = 1, cursor_visible = 1, borrowed = 1, modeset_pending = 0, presented = 1, shared = 0, driver = "i915", '\000' <repeats 27 times>, crtc_index = 0, scan_known = 1, nscan = 24, scan = {{fourcc = 875713112, modifier = 72057594037927941}, {fourcc = 875709016, modifier = 72057594037927941}, {fourcc = 875713089, modifier = 72057594037927941}, {fourcc = 875708993, modifier = 72057594037927941}, {fourcc = 875713112, modifier = 72057594037927940}, {fourcc = 875709016, modifier = 72057594037927940}, {fourcc = 875713089, modifier = 72057594037927940}, {fourcc = 875708993, modifier = 72057594037927940}, {fourcc = 875713112, modifier = 72057594037927939}, {fourcc = 875709016, modifier = 72057594037927939}, {fourcc = 875713089, modifier = 72057594037927939}, {fourcc = 875708993, modifier = 72057594037927939}, {fourcc = 875713112, modifier = 72057594037927938}, {fourcc = 875709016, modifier = 72057594037927938}, {fourcc = 875713089, modifier = 72057594037927938}, {fourcc = 875708993, modifier = 72057594037927938}, {fourcc = 875713112, modifier = 72057594037927937}, {fourcc = 875709016, modifier = 72057594037927937}, {fourcc = 875713089, modifier = 72057594037927937}, {fourcc = 875708993, modifier = 72057594037927937}, {fourcc = 875713112, modifier = 0}, {fourcc = 875709016, modifier = 0}, {fourcc = 875713089, modifier = 0}, {fourcc = 875708993, modifier = 0}, {fourcc = 0, modifier = 0} <repeats 72 times>}}, on = 1, d = {conn = 99, id = "IVO-8c69-0", '\000' <repeats 85 times>, name = "IVO 8C69", '\000' <repeats 55 times>, connector = "eDP-1", '\000' <repeats 26 times>, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}, rot = 0, auto_rot = 0, builtin = 1, scale = 100, recommended = 150, mm_w = 310, mm_h = 170, v = {x = 0, y = 0, w = 1920, h = 1080, pw = 1920, ph = 1080, k = 1, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 1920, h = 1080, pw = 1920, ph = 1080, k = 1, dx = 0, dy = 0}, scene = {px = 0x7f6ab33c5800, w = 1920, h = 1080, stride = 1920, clip = {x0 = 0, y0 = 0, x1 = 1920, y1 = 1080}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 1920, y1 = 482}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 1920, y1 = 482}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, npainted = 0, full_copy = 2, was_fs = 0, gpu = 0, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = -1, pgdragwhy = -1, pgdragsub = -1, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}}, main_out = 0, cap = {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = -1, y0 = -1, x1 = 1921, y1 = 1158}, pl = {r = {{x0 = -1, y0 = -1, x1 = 1921, y1 = 1158}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, n = 1}, pframes = 138, full = 1, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, input = {dev = {{fd = 39, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "AT Translated Set 2 keyboard", '\000' <repeats 51 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 1, bus = 17, typed = 1, leds = 7, led_state = 0}, {fd = 40, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SYNA3091:00 06CB:82F5 Mouse", '\000' <repeats 52 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 24, typed = 0, leds = 0, led_state = -1}, {fd = 41, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SYNA3091:00 06CB:82F5 Touchpad", '\000' <repeats 49 times>, tp = 0x51f0000e6280, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 24, typed = 0, leds = 0, led_state = -1}, {fd = 42, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "PS/2 Generic Mouse", '\000' <repeats 61 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 17, typed = 0, leds = 0, led_state = -1}, {fd = 43, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SynPS/2 Synaptics TouchPad", '\000' <repeats 53 times>, tp = 0x51f0000e5480, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 17, typed = 0, leds = 0, led_state = -1}, {fd = 0, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = '\000' <repeats 79 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 0, typed = 0, leds = 0, led_state = 0} <repeats 27 times>}, count = 5}, W = 1920, H = 1080, cx = 1033, cy = 946, ctrl = 0, alt = 0, moved = 0, wheel = 0, cursor_dirty = 0, buttons = {{down = 0, button = 0}, {down = 1, button = 0}, {down = 0, button = 0} <repeats 14 times>}, nbuttons = 0, quit = 0, debug = 0, frames = 1140, renders = 139, layout_total = 339.76505500001076, paint_total = 3035.4481679999335, rdx = 0, rdy = 0, lx = 1033, ly = 946, cursor_gen = 4026535955, cursor_mode = 1, cursor_hx = 2, cursor_hy = 2, hw_cursor = 1, hw_cursor_ok = 1, cursor_tex = 0x5040001a9490, cursor_tex_w = 24, cursor_tex_h = 24, headless = 0, greeter = 0, shift = 0, last_render = 114148.643513, gpu_paused = 0, gpu_fails = 0, gpu_fail_at = 0, motion_pending = 0, held = 0, shape = 1, over_app = 0, over_media = 0}
+        vt = -1
+        session_user = <optimized out>
+        ok = 1
+        mirror_in = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, clients = 0x555786f8a6fa <remote_clients>, refresh = 0x555786f87e15 <remote_refresh>, resize = 0x555786f91314 <remote_resize>, greeter = 0x555786f8a6ef <remote_greeter>, display = 0x555786f9e903 <display_attach>, undisplay = 0x555786f9e505 <display_detach>, scroll = 0x555786f8a6df <remote_scroll>, pinch = 0x555786f8a6bf <remote_pinch>, input_add = 0x555786f8a60d <remote_input_add>, notice = 0x555786f8a602 <remote_notice>}
+        share_host = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, scroll = 0x555786f8a6df <remote_scroll>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, resize = 0x555786f91314 <remote_resize>, activity = 0x555786f8976a <share_activity>, text = 0x555786f8681f <share_text>, event = 0x5557870da09a <js_share_event>, no_taps = 0x555786f8901a <share_no_taps>, person = 0x555786f86ff2 <share_person>, surface_up = 0x555786f845a4 <share_surface_up>, key_protected = 0x555786f88fc9 <share_key_protected>, point_protected = 0x555786f8a812 <share_point_protected>, restricted = 0x555786f8a802 <share_restricted>}
+        current = <optimized out>
+        mask = <optimized out>
+        stop_sa = <optimized out>
+        sfd = 36
+        start = 18744.333103000001
+[Inferior 1 (process 1238) detached]
+---- pid 1238 kernel stacks ----
+-- /proc/1238/task/1238/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] __x64_sys_poll+0xd0/0x180
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1240/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1241/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1242/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1243/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1244/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1245/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1246/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1247/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1248/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] do_restart_poll+0x59/0xa0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1249/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1250/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] futex_wait_restart+0x54/0x90
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1252/stack
+[<0>] __skb_wait_for_more_packets+0x12a/0x190
+[<0>] __unix_dgram_recvmsg+0x124/0x560
+[<0>] sock_recvmsg+0x9e/0xa0
+[<0>] ____sys_recvmsg+0x97/0x1d0
+[<0>] ___sys_recvmsg+0xbb/0xe0
+[<0>] __sys_recvmsg+0x83/0xe0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1255/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] do_restart_poll+0x59/0xa0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1256/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] futex_wait_restart+0x54/0x90
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1261/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1262/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1263/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1264/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+---- pid 1239 gdb (full) ----
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f6ac7f833a7 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+
+Thread 1 (Thread 0x7f6ac7db7d40 (LWP 1239) "insane-admin"):
+#0  0x00007f6ac7f833a7 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac6500230, nfds=3, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7ffc08baeae8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#4  0x0000555786fe79ee in helper (fd=fd@entry=3, user=user@entry=0x7ffc08bbfeb5 "explorearafat") at src/admin.c:883
+        pfd = <optimized out>
+        who = <optimized out>
+        n = 3
+        r = <optimized out>
+        pw = <optimized out>
+        home = <optimized out>
+        uname = <optimized out>
+        allowed = <optimized out>
+        req = <optimized out>
+        hc = <optimized out>
+        in = 0x531000000800 "3 video-optimize 15"
+        inlen = 0
+        ino = 5
+#5  0x0000555786fed490 in admin_start (user=user@entry=0x7ffc08bbfeb5 "explorearafat") at src/admin.c:1114
+        fd = <optimized out>
+        null = 6
+        rtp = <optimized out>
+        sv = <optimized out>
+        pid = <optimized out>
+#6  0x0000555786faa59f in main (argc=<optimized out>, argv=<optimized out>) at src/main.c:2615
+        pipe_sa = <optimized out>
+        card = <optimized out>
+        theme = <optimized out>
+        fonts = <optimized out>
+        shell = <optimized out>
+        user = <optimized out>
+        timeout_ms = <optimized out>
+        s = {out = {{kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 1, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 100, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 1280, h = 800, pw = 1280, ph = 800, k = 1, dx = 0, dy = 0}, scene = {px = 0x7f6ac4817800, w = 1280, h = 800, stride = 1280, clip = {x0 = 0, y0 = 0, x1 = 1280, y1 = 800}}, frame = 0x7f6ac442d800, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 1, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 2, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}}, main_out = 0, cap = {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 1, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, input = {dev = {{fd = 0, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = '\000' <repeats 79 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 0, typed = 0, leds = 0, led_state = 0} <repeats 32 times>}, count = 0}, W = 1280, H = 800, cx = 640, cy = 400, ctrl = 0, alt = 0, moved = 0, wheel = 0, cursor_dirty = 0, buttons = {{down = 0, button = 0} <repeats 16 times>}, nbuttons = 0, quit = 0, debug = 0, frames = 0, renders = 0, layout_total = 0, paint_total = 0, rdx = 0, rdy = 0, lx = 640, ly = 400, cursor_gen = 0, cursor_mode = 0, cursor_hx = 0, cursor_hy = 0, hw_cursor = 0, hw_cursor_ok = 0, cursor_tex = 0x0, cursor_tex_w = 0, cursor_tex_h = 0, headless = 1, greeter = 0, shift = 0, last_render = 0, gpu_paused = 0, gpu_fails = 0, gpu_fail_at = 0, motion_pending = 0, held = 0, shape = 0, over_app = 0, over_media = 0}
+        vt = -1
+        session_user = <optimized out>
+        ok = <optimized out>
+        mirror_in = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, clients = 0x555786f8a6fa <remote_clients>, refresh = 0x555786f87e15 <remote_refresh>, resize = 0x555786f91314 <remote_resize>, greeter = 0x555786f8a6ef <remote_greeter>, display = 0x555786f9e903 <display_attach>, undisplay = 0x555786f9e505 <display_detach>, scroll = 0x555786f8a6df <remote_scroll>, pinch = 0x555786f8a6bf <remote_pinch>, input_add = 0x555786f8a60d <remote_input_add>, notice = 0x555786f8a602 <remote_notice>}
+        share_host = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, scroll = 0x555786f8a6df <remote_scroll>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, resize = 0x555786f91314 <remote_resize>, activity = 0x555786f8976a <share_activity>, text = 0x555786f8681f <share_text>, event = 0x5557870da09a <js_share_event>, no_taps = 0x555786f8901a <share_no_taps>, person = 0x555786f86ff2 <share_person>, surface_up = 0x555786f845a4 <share_surface_up>, key_protected = 0x555786f88fc9 <share_key_protected>, point_protected = 0x555786f8a812 <share_point_protected>, restricted = 0x555786f8a802 <share_restricted>}
+        current = <optimized out>
+        mask = <optimized out>
+        stop_sa = <optimized out>
+        sfd = <optimized out>
+        start = <optimized out>
+[Inferior 1 (process 1239) detached]
+---- pid 1239 kernel stacks ----
+-- /proc/1239/task/1239/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] do_restart_poll+0x59/0xa0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+########## stage 1 done ##########
+########## stage 2 at 00:39:28 (silence 71s) ##########
+---- DRM connectors ----
+card0-DP-1: dpms=Off status=disconnected enabled=disabled
+card0-DP-2: dpms=Off status=disconnected enabled=disabled
+card0-eDP-1: dpms=On status=connected enabled=enabled
+card0-HDMI-A-1: dpms=Off status=disconnected enabled=disabled
+card0-HDMI-A-2: dpms=Off status=disconnected enabled=disabled
+---- session.log last 15 lines (what preceded the silence) ----
+tp: pointer: 8 frames, average latency 0.21 ms, max 0.59 ms (read → JS/Wayland)
+tp: pointer: 73 frames, average latency 33.07 ms, max 177.49 ms (read → JS/Wayland)
+tp: pointer: 74 frames, average latency 0.14 ms, max 0.65 ms (read → JS/Wayland)
+tp: pointer: 13 frames, average latency 0.12 ms, max 0.34 ms (read → JS/Wayland)
+slow frame: 38.7 ms (layout 0.2, paint 35.0, blur 18.0 shrink 8, media 0.0, wayland 3.4, term 2.5, after the paint 3.4), gpu
+tp: pointer: 34 frames, average latency 0.13 ms, max 0.22 ms (read → JS/Wayland)
+tp: pointer: 28 frames, average latency 0.14 ms, max 0.18 ms (read → JS/Wayland)
+tp: pointer: 34 frames, average latency 1.44 ms, max 20.38 ms (read → JS/Wayland)
+slow frame: 37.4 ms (layout 0.5, paint 33.2, blur 14.8 shrink 8, media 0.0, wayland 3.8, term 1.9, after the paint 3.7), gpu
+tp: pointer: 103 frames, average latency 66.00 ms, max 219.72 ms (read → JS/Wayland)
+tp: pointer: 148 frames, average latency 88.96 ms, max 216.53 ms (read → JS/Wayland)
+slow frame: 38.2 ms (layout 0.6, paint 34.3, blur 16.0 shrink 8, media 0.0, wayland 3.3, term 1.7, after the paint 3.4), gpu
+tp: pointer: 165 frames, average latency 40.61 ms, max 232.01 ms (read → JS/Wayland)
+tp: pointer: 12 frames, average latency 0.10 ms, max 0.23 ms (read → JS/Wayland)
+slow frame: 30.7 ms (layout 0.1, paint 28.2, blur 17.1 shrink 0, media 0.0, wayland 1.8, term 2.0, after the paint 2.4), gpu
+---- sessiond journal tail ----
+Nov 18 00:36:58 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 Successfully initialized wpa_supplicant
+Nov 18 00:36:58 faith-pc insane-sessiond[1007]: insane-netd: net dhcp wlp59s0 started
+Nov 18 00:36:58 faith-pc systemd[926]: Created slice session.slice - User Core Session Slice.
+Nov 18 00:36:58 faith-pc systemd[926]: Started wireplumber.service - Multimedia Service Session Manager.
+Nov 18 00:36:59 faith-pc insane-sessiond[952]: insane-sessiond[952]: first frame on the monitor 11.148 s after the kernel started (Insane OS 0.8.8.6-beta, build 20261114.a3fbea6f, login): the boot splash can go
+Nov 18 00:37:00 faith-pc wireplumber[1160]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS09-9:1.0-0408:5343
+Nov 18 00:37:00 faith-pc wireplumber[1160]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS09-9:1.2-0408:5343
+Nov 18 00:37:00 faith-pc dbus-daemon[1157]: [session uid=1000 pid=1157 pidfd=5] Activating via systemd: service name='org.freedesktop.impl.portal.PermissionStore' unit='xdg-permission-store.service' requested by ':1.5' (uid=1000 pid=1160 comm="/usr/bin/wireplumber")
+Nov 18 00:37:00 faith-pc dbus-daemon[1157]: [session uid=1000 pid=1157 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: net wifi wlp59s0 scan-results
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: SME: Trying to authenticate with 8c:90:2d:bd:b6:f3 (SSID='Bornomala 2nd floor_5G' freq=5745 MHz)
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-REGDOM-CHANGE init=DRIVER type=COUNTRY alpha2=US
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: Trying to associate with 8c:90:2d:bd:b6:f3 (SSID='Bornomala 2nd floor_5G' freq=5745 MHz)
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: Associated with 8c:90:2d:bd:b6:f3
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: WPA: Key negotiation completed with 8c:90:2d:bd:b6:f3 [PTK=CCMP GTK=CCMP]
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: daemon wpa:wlp59s0 wlp59s0: CTRL-EVENT-CONNECTED - Connection to 8c:90:2d:bd:b6:f3 completed [id=1 id_str=426f726e6f6d616c6120326e6420666c6f6f725f3547]
+Nov 18 00:37:02 faith-pc insane-sessiond[1007]: insane-netd: net wifi wlp59s0 connected Bornomala 2nd floor_5G
+Nov 18 00:37:03 faith-pc insane-sessiond[1007]: insane-netd: net dhcp wlp59s0 bound 192.168.0.101/24 192.168.0.1 7200
+Nov 18 00:37:04 faith-pc insane-sessiond[1236]: insane-sessiond[952]: explorearafat logged in on the monitor
+Nov 18 00:37:04 faith-pc insane-sessiond[1236]: insane-sessiond[952]: new session for explorearafat (1280x800)
+Nov 18 00:37:04 faith-pc insane-sessiond[952]: insane-sessiond[952]: monitor: explorearafat's session
+Nov 18 00:37:05 faith-pc insane-sessiond[952]: insane-sessiond[952]: monitor: take back 347 ms (notice 0, input 347 event0 revoke 83 event5 revoke 80 event6 revoke 56 event7 revoke 64 event8 revoke 64, 2 framebuffer(s) removed 0, release 0)
+Nov 18 00:37:16 faith-pc insane-sessiond[952]: insane-sessiond[952]: login screen: 1 process(es) of insaneos-greeter stopped (a session is on the monitor)
+Nov 18 00:38:09 faith-pc sudo[1755]: pam_unix(sudo:session): session opened for user root(uid=0) by (uid=1000)
+---- pid 1238 gdb (full) ----
+[New LWP 1264]
+[New LWP 1263]
+[New LWP 1262]
+[New LWP 1261]
+[New LWP 1256]
+[New LWP 1255]
+[New LWP 1252]
+[New LWP 1250]
+[New LWP 1249]
+[New LWP 1248]
+[New LWP 1247]
+[New LWP 1246]
+[New LWP 1245]
+[New LWP 1244]
+[New LWP 1243]
+[New LWP 1242]
+[New LWP 1241]
+[New LWP 1240]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+
+Thread 19 (Thread 0x7f6ac5b116c0 (LWP 1240) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x1) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac790c000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac790c000
+        self = 140096559978176
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x1}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 18 (Thread 0x7f6ac5ad06c0 (LWP 1241) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x2) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7331000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7331000
+        self = 140096559711936
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x2}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 17 (Thread 0x7f6ac5a8f6c0 (LWP 1242) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x3) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7323000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7323000
+        self = 140096559445696
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x3}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 16 (Thread 0x7f6ac5a4e6c0 (LWP 1243) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x4) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7315000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7315000
+        self = 140096559179456
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x4}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 15 (Thread 0x7f6ac5a0d6c0 (LWP 1244) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x5) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7307000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7307000
+        self = 140096558913216
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x5}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 14 (Thread 0x7f6ac59cc6c0 (LWP 1245) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x6) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7127000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7127000
+        self = 140096558646976
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x6}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 13 (Thread 0x7f6ac598b6c0 (LWP 1246) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x0000555786fe3f46 in worker (arg=arg@entry=0x7) at src/par.c:55
+        seen = 267
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac7119000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac7119000
+        self = 140096558380736
+        args = {routine = 0x555786fe3ecb <worker>, arg_retval = 0x7}
+        sigset = {val = {0, 140096601946767, 4954272017, 0, 89404039262464, 2352, 1497053800714368, 15950634320470276608, 0, 140096601819460, 140096565149920, 140720454965728, 128, 140096601305841, 140096603116416, 140096598162325}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 12 (Thread 0x7f6ac57ff6c0 (LWP 1247) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557873955b9 in thread_main (arg=arg@entry=0x0) at src/backup/backup.c:462
+        now = 1794940624
+        machine = '\000' <repeats 4095 times>
+        lid = '\000' <repeats 17 times>
+        due = <optimized out>
+        all = {__val = {18446744067267100671, 0 <repeats 15 times>}}
+        tid = <optimized out>
+        np = <optimized out>
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac592d000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac592d000
+        self = 140096556758720
+        args = {routine = 0x555787393eef <thread_main>, arg_retval = 0x0}
+        sigset = {val = {0, 140096592470016, 140720446636032, 30, 140720454965808, 15950634320470276608, 140720454963712, 88167088833893, 140720454965840, 93834439018496, 20, 19, 0, 140096601247007, 140720454963728, 140720454965136}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 11 (Thread 0x7f6ac2a4f6c0 (LWP 1248) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac023b160, nfds=1, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7f6ac2a4cfe8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x00005557874dff2b in worker (arg=arg@entry=0x0) at src/cloud/cloud.c:2675
+        pf = <optimized out>
+        active = <optimized out>
+        timeout = <optimized out>
+        n = <optimized out>
+        sfo = <optimized out>
+        sfe = <optimized out>
+        son = <optimized out>
+        now = <optimized out>
+        again = <optimized out>
+        next_tick = 0
+        next_slow = 0
+        ticks = 0
+#6  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5917000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5917000
+        self = 140096508851904
+        args = {routine = 0x5557874dbb80 <worker>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 140720454963440, 140720454965792, 140096563096608, 4096, 93834422956704, 140096603116416, 140096598162325, 93834448541536, 140096601819460, 0, 140720454965616, 140096565160768, 140096601219794, 140096565160608, 140720454965616}}
+        retval = <optimized out>
+#7  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#8  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 10 (Thread 0x7f6ac224e6c0 (LWP 1249) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557874edcc7 in browser (arg=arg@entry=0x0) at src/cloud/cloud_files.c:608
+        gen = <optimized out>
+        kept = <optimized out>
+        key = <optimized out>
+        at = <optimized out>
+        sub = <optimized out>
+        ns = <optimized out>
+        d = <optimized out>
+        id = <optimized out>
+        path = <optimized out>
+        name = <optimized out>
+        rel = <optimized out>
+        polls = <optimized out>
+        dir = <optimized out>
+        done = 0
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5909000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5909000
+        self = 140096500459200
+        args = {routine = 0x5557874ed894 <browser>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 0, 140096565160512, 140096508851904, 140720454962968, 140096598208527, 140096565160992, 140096565160512, 9856, 140096601819460, 0, 140720454965056, 140096565161792, 140096601219794, 140096565161632, 140720454965056}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 9 (Thread 0x7f6ac204d6c0 (LWP 1250) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f8605d in pthread_cond_timedwait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557874f17b5 in keeper (arg=arg@entry=0x0) at src/cloud/cloud_files.c:490
+        t = <optimized out>
+        ids = <optimized out>
+        na = <optimized out>
+        seen = 0
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5771000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5771000
+        self = 140096498357952
+        args = {routine = 0x5557874f1355 <keeper>, arg_retval = 0x0}
+        sigset = {val = {18446744067266838271, 0, 140096565160512, 140096508851904, 140720454962968, 140096598208527, 140096565160992, 140096565160512, 9856, 140096601819460, 0, 140720454965056, 140096565161792, 140096601219794, 140096565161632, 140720454965056}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 8 (Thread 0x7f6abfa526c0 (LWP 1252) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac8005f59 in recvmsg () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d1270 in ___interceptor_recvmsg (fd=28, msg=0x7f6abf1820e0, flags=1073741824) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:3129
+        ctx = 0x7f6abfa48228
+        _ctx = {interceptor_name = 0x7f6ac834f900 "recvmsg"}
+        res = <optimized out>
+#5  0x00005557875b835d in read_packet (sock=sock@entry=28, rx=rx@entry=0x7f6abe852420, a=a@entry=0x555787807ce0 <vw_malloc>, flags=flags@entry=0) at src/vault/vwire.c:72
+        h = <optimized out>
+        buf = <optimized out>
+        u = <optimized out>
+        iov = <optimized out>
+        mh = <optimized out>
+        r = <optimized out>
+        fds = <optimized out>
+        nf = <optimized out>
+        bad = <optimized out>
+        need = <optimized out>
+#6  0x00005557875b9c0e in vw_recv (sock=sock@entry=28, m=m@entry=0x7f6abea52030, a=0x555787807ce0 <vw_malloc>) at src/vault/vwire.c:137
+        r = <optimized out>
+        rx = <optimized out>
+#7  0x00005557875b4f74 in read_loop (arg=arg@entry=0x1c) at src/vault/vclient.c:123
+        m = <optimized out>
+        r = <optimized out>
+        s = 28
+        lost = <optimized out>
+        orphans = <optimized out>
+        norph = <optimized out>
+        j = <optimized out>
+#8  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac5753000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac5753000
+        self = 140096458532544
+        args = {routine = 0x5557875b4d0f <read_loop>, arg_retval = 0x1c}
+        sigset = {val = {0, 140096608839182, 1169, 140096600897408, 140096608765952, 140720454952472, 140720454952468, 89129161409856, 140720454954496, 140096600920909, 140096600852312, 140720454952688, 140096570409216, 140720454952680, 140720454952468, 140096600824256}}
+        retval = <optimized out>
+#9  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#10 0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 7 (Thread 0x7f6ab93e96c0 (LWP 1255) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ab84e9070, nfds=2, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7f6ab93e73d8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x0000555787537f29 in loop (arg=arg@entry=0x0) at src/mail/mailc.c:613
+        p = <optimized out>
+        r = <optimized out>
+        m = <optimized out>
+        k = <optimized out>
+#6  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abdf8c000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abdf8c000
+        self = 140096351147712
+        args = {routine = 0x555787536570 <loop>, arg_retval = 0x0}
+        sigset = {val = {0, 140096601068858, 140096592470224, 140720454844784, 140096592470016, 89129170994496, 140720454846880, 30, 140720454844784, 1, 0, 140096601798863, 140720454844800, 11, 140096601798905, 93834418658833}}
+        retval = <optimized out>
+#7  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#8  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 6 (Thread 0x7f6ab80df6c0 (LWP 1256) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f8605d in pthread_cond_timedwait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00005557872a4bba in worker (arg=arg@entry=0x0) at src/monitor/mon.c:685
+        left = 29999.999536000018
+        ts = <optimized out>
+        ns = <optimized out>
+        dstart = <optimized out>
+        dt = <optimized out>
+        temps = <optimized out>
+        wait = <optimized out>
+        wc = <optimized out>
+        t0 = <optimized out>
+        b = <optimized out>
+        slept = 1
+        wp = <optimized out>
+        wg = <optimized out>
+        wv = <optimized out>
+        wgpu = <optimized out>
+        dpid = <optimized out>
+        idle = <optimized out>
+        next_watch = 185070.43833100001
+        next_volt = 0
+        volt_here = 1
+        geo = <optimized out>
+        geo_open = 0
+        geo_tried = 0
+        tick = 300
+#5  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abdf7e000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abdf7e000
+        self = 140096331183808
+        args = {routine = 0x5557872a4903 <worker>, arg_retval = 0x0}
+        sigset = {val = {0, 140096592470016, 140720446636032, 30, 140720454854816, 56, 140720454852720, 1, 112, 88373279809984, 140720454854816, 140096601040448, 112, 140096601803813, 140720454852736, 2}}
+        retval = <optimized out>
+#6  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#7  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 5 (Thread 0x7f6ab67c76c0 (LWP 1261) "insane-:disk$0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6ac55af000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6ac55af000
+        self = 140096304871104
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d650}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454953808, 16, 140720454951712, 1, 89472758722232, 140096601046667, 140720454951712, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 4 (Thread 0x7f6aa6dff6c0 (LWP 1262) "insane-ser:sh0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abfac3000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abfac3000
+        self = 140096042956480
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d6d0}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454954112, 16, 140720454952016, 1, 89953799373472, 140096601046667, 140720454952016, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 3 (Thread 0x7f6aa5af56c0 (LWP 1263) "insane:traceq0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abfa82000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abfa82000
+        self = 140096022992576
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d190}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454955600, 16, 140720454953504, 1, 91328184841888, 140096601046667, 140720454953504, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 2 (Thread 0x7f6aa47eb6c0 (LWP 1264) "insane-s:gdrv0"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f839ac in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7f85e98 in pthread_cond_wait () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ab0dafc5d in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#5  0x00007f6ab0d7b2ab in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#6  0x00007f6ab0dafb8b in ?? () from /lib/x86_64-linux-gnu/libgallium-25.0.7-2+deb13u1.so
+No symbol table info available.
+#7  0x00007f6ac825b1d6 in asan_thread_start (arg=0x7f6abe688000) at ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+        t = 0x7f6abe688000
+        self = 140096003028672
+        args = {routine = 0x7f6ab0dafb70, arg_retval = 0x50200112d110}
+        sigset = {val = {18446744066193095423, 0, 7653510232, 1, 72197687281188865, 140096592470016, 140720446636032, 30, 140720454955888, 16, 140720454953792, 1, 140096437845632, 140096601046667, 140720454953792, 1}}
+        retval = <optimized out>
+#8  0x00007f6ac7f868bb in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#9  0x00007f6ac8004538 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+
+Thread 1 (Thread 0x7f6ac7db7d40 (LWP 1238) "insane-server"):
+#0  0x00007f6ac7f8e72e in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f83388 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#4  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac6704460, nfds=25, timeout=16) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7ffc08bb1b98
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#5  0x0000555786fb1000 in main (argc=<optimized out>, argv=<optimized out>) at src/main.c:2916
+        nrd = <optimized out>
+        tpd = <optimized out>
+        force_render = 0
+        nterm = 1
+        medbase = <optimized out>
+        td = <optimized out>
+        pfd = <optimized out>
+        n = 25
+        lbibase = <optimized out>
+        hwbase = 20
+        cursor_size_seen = 1
+        shd = <optimized out>
+        period = <optimized out>
+        abase = <optimized out>
+        bkbase = <optimized out>
+        lost = <optimized out>
+        scripted = 0
+        shd0 = <optimized out>
+        wants = <optimized out>
+        soft = <optimized out>
+        term_ids = <optimized out>
+        fabase = <optimized out>
+        mbase = <optimized out>
+        nbrk = 0
+        bwd = <optimized out>
+        ahead = <optimized out>
+        hz = <optimized out>
+        tnow = <optimized out>
+        nbase = <optimized out>
+        dkbase = <optimized out>
+        clbase = <optimized out>
+        brkbase = <optimized out>
+        nabr = 0
+        now = <optimized out>
+        unseen = <optimized out>
+        pace = <optimized out>
+        sbase = <optimized out>
+        nsh = 1
+        nmed = 0
+        tbase = <optimized out>
+        pbase = <optimized out>
+        zd = <optimized out>
+        wait = 16
+        lgbase = <optimized out>
+        shbase = <optimized out>
+        abr = <optimized out>
+        nm = 2
+        tick0 = <optimized out>
+        wbase = <optimized out>
+        nhw = 5
+        delay = 15.863540999998804
+        hwd = <optimized out>
+        mrd = <optimized out>
+        nlost = <optimized out>
+        pipe_sa = <optimized out>
+        card = <optimized out>
+        theme = <optimized out>
+        fonts = <optimized out>
+        shell = <optimized out>
+        user = <optimized out>
+        timeout_ms = <optimized out>
+        s = {out = {{kms = {fd = 37, conn_id = 99, crtc_id = 53, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}, width = 1920, height = 1080, buf = {{fb_id = 132, handle = 1, pitch = 7680, size = 8294400, map = 0x7f6ab4398000}, {fb_id = 135, handle = 2, pitch = 7680, size = 8294400, map = 0x7f6ab3baf000}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 53, fb_id = 0, x = 0, y = 0, gamma_size = 256, mode_valid = 1, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}}, on_flip = 0x555786fc088c <on_flip>, custom = 1, flip_ns = 160389958000, flip_submit_ns = 160371434347, flip_seq = 9374, cursor_handle = 32, cursor_w = 256, cursor_h = 256, cursor_pitch = 256, cursor_map = 0x7f6abd247000, cursor_size = 262144, cursor_ok = 1, cursor_visible = 1, borrowed = 1, modeset_pending = 0, presented = 1, shared = 0, driver = "i915", '\000' <repeats 27 times>, crtc_index = 0, scan_known = 1, nscan = 24, scan = {{fourcc = 875713112, modifier = 72057594037927941}, {fourcc = 875709016, modifier = 72057594037927941}, {fourcc = 875713089, modifier = 72057594037927941}, {fourcc = 875708993, modifier = 72057594037927941}, {fourcc = 875713112, modifier = 72057594037927940}, {fourcc = 875709016, modifier = 72057594037927940}, {fourcc = 875713089, modifier = 72057594037927940}, {fourcc = 875708993, modifier = 72057594037927940}, {fourcc = 875713112, modifier = 72057594037927939}, {fourcc = 875709016, modifier = 72057594037927939}, {fourcc = 875713089, modifier = 72057594037927939}, {fourcc = 875708993, modifier = 72057594037927939}, {fourcc = 875713112, modifier = 72057594037927938}, {fourcc = 875709016, modifier = 72057594037927938}, {fourcc = 875713089, modifier = 72057594037927938}, {fourcc = 875708993, modifier = 72057594037927938}, {fourcc = 875713112, modifier = 72057594037927937}, {fourcc = 875709016, modifier = 72057594037927937}, {fourcc = 875713089, modifier = 72057594037927937}, {fourcc = 875708993, modifier = 72057594037927937}, {fourcc = 875713112, modifier = 0}, {fourcc = 875709016, modifier = 0}, {fourcc = 875713089, modifier = 0}, {fourcc = 875708993, modifier = 0}, {fourcc = 0, modifier = 0} <repeats 72 times>}}, on = 1, d = {conn = 99, id = "IVO-8c69-0", '\000' <repeats 85 times>, name = "IVO 8C69", '\000' <repeats 55 times>, connector = "eDP-1", '\000' <repeats 26 times>, mode = {clock = 138800, hdisplay = 1920, hsync_start = 1944, hsync_end = 1992, htotal = 2080, hskew = 0, vdisplay = 1080, vsync_start = 1083, vsync_end = 1095, vtotal = 1112, vscan = 0, vrefresh = 60, flags = 10, type = 72, name = "1920x1080", '\000' <repeats 22 times>}, rot = 0, auto_rot = 0, builtin = 1, scale = 100, recommended = 150, mm_w = 310, mm_h = 170, v = {x = 0, y = 0, w = 1920, h = 1080, pw = 1920, ph = 1080, k = 1, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 1920, h = 1080, pw = 1920, ph = 1080, k = 1, dx = 0, dy = 0}, scene = {px = 0x7f6ab33c5800, w = 1920, h = 1080, stride = 1920, clip = {x0 = 0, y0 = 0, x1 = 1920, y1 = 1080}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 1920, y1 = 482}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 1920, y1 = 482}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, npainted = 0, full_copy = 2, was_fs = 0, gpu = 0, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = -1, pgdragwhy = -1, pgdragsub = -1, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}}, main_out = 0, cap = {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = -1, y0 = -1, x1 = 1921, y1 = 1158}, pl = {r = {{x0 = -1, y0 = -1, x1 = 1921, y1 = 1158}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 15 times>}, n = 1}, pframes = 140, full = 1, cdirty = 1, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, input = {dev = {{fd = 39, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "AT Translated Set 2 keyboard", '\000' <repeats 51 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 1, bus = 17, typed = 1, leds = 7, led_state = 0}, {fd = 40, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SYNA3091:00 06CB:82F5 Mouse", '\000' <repeats 52 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 24, typed = 0, leds = 0, led_state = -1}, {fd = 41, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SYNA3091:00 06CB:82F5 Touchpad", '\000' <repeats 49 times>, tp = 0x51f0000e6280, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 24, typed = 0, leds = 0, led_state = -1}, {fd = 42, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "PS/2 Generic Mouse", '\000' <repeats 61 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 17, typed = 0, leds = 0, led_state = -1}, {fd = 43, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = "SynPS/2 Synaptics TouchPad", '\000' <repeats 53 times>, tp = 0x51f0000e5480, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 17, typed = 0, leds = 0, led_state = -1}, {fd = 0, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = '\000' <repeats 79 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 0, typed = 0, leds = 0, led_state = 0} <repeats 27 times>}, count = 5}, W = 1920, H = 1080, cx = 1033, cy = 946, ctrl = 0, alt = 0, moved = 0, wheel = 0, cursor_dirty = 0, buttons = {{down = 0, button = 0}, {down = 1, button = 0}, {down = 0, button = 0} <repeats 14 times>}, nbuttons = 0, quit = 0, debug = 0, frames = 1675, renders = 141, layout_total = 339.87582800000382, paint_total = 3085.0287289999287, rdx = 0, rdy = 0, lx = 1033, ly = 946, cursor_gen = 4026535955, cursor_mode = 1, cursor_hx = 2, cursor_hy = 2, hw_cursor = 1, hw_cursor_ok = 1, cursor_tex = 0x5040001a9490, cursor_tex_w = 24, cursor_tex_h = 24, headless = 0, greeter = 0, shift = 0, last_render = 160371.03997799999, gpu_paused = 0, gpu_fails = 0, gpu_fail_at = 0, motion_pending = 0, held = 0, shape = 1, over_app = 0, over_media = 0}
+        vt = -1
+        session_user = <optimized out>
+        ok = 1
+        mirror_in = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, clients = 0x555786f8a6fa <remote_clients>, refresh = 0x555786f87e15 <remote_refresh>, resize = 0x555786f91314 <remote_resize>, greeter = 0x555786f8a6ef <remote_greeter>, display = 0x555786f9e903 <display_attach>, undisplay = 0x555786f9e505 <display_detach>, scroll = 0x555786f8a6df <remote_scroll>, pinch = 0x555786f8a6bf <remote_pinch>, input_add = 0x555786f8a60d <remote_input_add>, notice = 0x555786f8a602 <remote_notice>}
+        share_host = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, scroll = 0x555786f8a6df <remote_scroll>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, resize = 0x555786f91314 <remote_resize>, activity = 0x555786f8976a <share_activity>, text = 0x555786f8681f <share_text>, event = 0x5557870da09a <js_share_event>, no_taps = 0x555786f8901a <share_no_taps>, person = 0x555786f86ff2 <share_person>, surface_up = 0x555786f845a4 <share_surface_up>, key_protected = 0x555786f88fc9 <share_key_protected>, point_protected = 0x555786f8a812 <share_point_protected>, restricted = 0x555786f8a802 <share_restricted>}
+        current = <optimized out>
+        mask = <optimized out>
+        stop_sa = <optimized out>
+        sfd = 36
+        start = 18744.333103000001
+[Inferior 1 (process 1238) detached]
+---- pid 1238 kernel stacks ----
+-- /proc/1238/task/1238/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] __x64_sys_poll+0xd0/0x180
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1240/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1241/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1242/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1243/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1244/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1245/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1246/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1247/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1248/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] do_restart_poll+0x59/0xa0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1249/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1250/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] futex_wait_restart+0x54/0x90
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1252/stack
+[<0>] __skb_wait_for_more_packets+0x12a/0x190
+[<0>] __unix_dgram_recvmsg+0x124/0x560
+[<0>] sock_recvmsg+0x9e/0xa0
+[<0>] ____sys_recvmsg+0x97/0x1d0
+[<0>] ___sys_recvmsg+0xbb/0xe0
+[<0>] __sys_recvmsg+0x83/0xe0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1255/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] do_restart_poll+0x59/0xa0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1256/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] futex_wait_restart+0x54/0x90
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1261/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1262/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1263/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+-- /proc/1238/task/1264/stack
+[<0>] futex_wait_queue+0x68/0x90
+[<0>] __futex_wait+0x151/0x1d0
+[<0>] futex_wait+0x79/0x120
+[<0>] do_futex+0xcb/0x190
+[<0>] __x64_sys_futex+0x127/0x1e0
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+---- pid 1239 gdb (full) ----
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f6ac7f833a7 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+
+Thread 1 (Thread 0x7f6ac7db7d40 (LWP 1239) "insane-admin"):
+#0  0x00007f6ac7f833a7 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#1  0x00007f6ac7f833cd in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#2  0x00007f6ac7ff7746 in poll () from /lib/x86_64-linux-gnu/libc.so.6
+No symbol table info available.
+#3  0x00007f6ac82d4dc6 in ___interceptor_poll (fds=0x7f6ac6500230, nfds=3, timeout=-1) at ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:4124
+        ctx = 0x7ffc08baeae8
+        _ctx = {interceptor_name = 0x7f6ac834faa6 "poll"}
+        res = <optimized out>
+#4  0x0000555786fe79ee in helper (fd=fd@entry=3, user=user@entry=0x7ffc08bbfeb5 "explorearafat") at src/admin.c:883
+        pfd = <optimized out>
+        who = <optimized out>
+        n = 3
+        r = <optimized out>
+        pw = <optimized out>
+        home = <optimized out>
+        uname = <optimized out>
+        allowed = <optimized out>
+        req = <optimized out>
+        hc = <optimized out>
+        in = 0x531000000800 "3 video-optimize 15"
+        inlen = 0
+        ino = 5
+#5  0x0000555786fed490 in admin_start (user=user@entry=0x7ffc08bbfeb5 "explorearafat") at src/admin.c:1114
+        fd = <optimized out>
+        null = 6
+        rtp = <optimized out>
+        sv = <optimized out>
+        pid = <optimized out>
+#6  0x0000555786faa59f in main (argc=<optimized out>, argv=<optimized out>) at src/main.c:2615
+        pipe_sa = <optimized out>
+        card = <optimized out>
+        theme = <optimized out>
+        fonts = <optimized out>
+        shell = <optimized out>
+        user = <optimized out>
+        timeout_ms = <optimized out>
+        s = {out = {{kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 1, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 100, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 1280, h = 800, pw = 1280, ph = 800, k = 1, dx = 0, dy = 0}, scene = {px = 0x7f6ac4817800, w = 1280, h = 800, stride = 1280, clip = {x0 = 0, y0 = 0, x1 = 1280, y1 = 800}}, frame = 0x7f6ac442d800, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 1, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 2, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 0, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}}, main_out = 0, cap = {kms = {fd = -1, conn_id = 0, crtc_id = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, width = 0, height = 0, buf = {{fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}, {fb_id = 0, handle = 0, pitch = 0, size = 0, map = 0x0}}, front = 0, flip_pending = 0, saved = {set_connectors_ptr = 0, count_connectors = 0, crtc_id = 0, fb_id = 0, x = 0, y = 0, gamma_size = 0, mode_valid = 0, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}}, on_flip = 0x0, custom = 0, flip_ns = 0, flip_submit_ns = 0, flip_seq = 0, cursor_handle = 0, cursor_w = 0, cursor_h = 0, cursor_pitch = 0, cursor_map = 0x0, cursor_size = 0, cursor_ok = 0, cursor_visible = 0, borrowed = 0, modeset_pending = 0, presented = 0, shared = 0, driver = '\000' <repeats 31 times>, crtc_index = 0, scan_known = 0, nscan = 0, scan = {{fourcc = 0, modifier = 0} <repeats 96 times>}}, on = 0, d = {conn = 0, id = '\000' <repeats 95 times>, name = '\000' <repeats 63 times>, connector = '\000' <repeats 31 times>, mode = {clock = 0, hdisplay = 0, hsync_start = 0, hsync_end = 0, htotal = 0, hskew = 0, vdisplay = 0, vsync_start = 0, vsync_end = 0, vtotal = 0, vscan = 0, vrefresh = 0, flags = 0, type = 0, name = '\000' <repeats 31 times>}, rot = 0, auto_rot = 0, builtin = 0, scale = 0, recommended = 0, mm_w = 0, mm_h = 0, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}}, v = {x = 0, y = 0, w = 0, h = 0, pw = 0, ph = 0, k = 0, dx = 0, dy = 0}, scene = {px = 0x0, w = 0, h = 0, stride = 0, clip = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, frame = 0x0, pend = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, pl = {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, pframes = 0, full = 1, cdirty = 0, cur_on = 0, stale = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, curs = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, pstale = {{r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}, {r = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, n = 0}}, painted = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, npainted = 0, full_copy = 0, was_fs = 0, gpu = -1, wl_new = 0, gdragtaken = 0, gdrag_on = 0, gdragcpu = 0, gdragw = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, gdrag = {w = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, lpx = 0x0, lw = 0, lh = 0, lx = 0, ly = 0, bpx = 0x0, bw = 0, bh = 0, ldirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, bdirty = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0} <repeats 16 times>}, nl = 0, nb = 0, lfull = 0, bfull = 0, strip = {{x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, {x0 = 0, y0 = 0, x1 = 0, y1 = 0}}, nstrip = 0, ref = 0x0, frame = 0}, pgdrag = 0, pgdragwhy = 0, pgdragsub = 0, prep = 0, prep_whole = 0, prep_gpu = 0, prep_js = 0, prep_r = {x0 = 0, y0 = 0, x1 = 0, y1 = 0}, prep_px = 0x0, prep_gen = 0, prep_epoch = 0, prep_ms = 0, pph = {prev_flip = 0, wake = 0, from_flip = 0, render0 = 0, built = 0, paint_ms = 0, up_ms = 0, gdrag_ms = 0, swap_ms = 0, submit_ms = 0, up_px = 0, gdrag_px = 0, gdrag_full = 0, feed_ms = 0, feed_px = 0, submit = 0, period = 0, par = 0, gdrag = 0, gdrag_why = 0, gdrag_sub = 0, unshown = 0, piped = 0, sfrom_flip = 0, pre_end = 0, swake = 0, sub0 = 0, sub1 = 0}}, input = {dev = {{fd = 0, has_abs = 0, ax = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, ay = {value = 0, minimum = 0, maximum = 0, fuzz = 0, flat = 0, resolution = 0}, name = '\000' <repeats 79 times>, tp = 0x0, wheel_hires = 0, hwheel_hires = 0, keyboard = 0, bus = 0, typed = 0, leds = 0, led_state = 0} <repeats 32 times>}, count = 0}, W = 1280, H = 800, cx = 640, cy = 400, ctrl = 0, alt = 0, moved = 0, wheel = 0, cursor_dirty = 0, buttons = {{down = 0, button = 0} <repeats 16 times>}, nbuttons = 0, quit = 0, debug = 0, frames = 0, renders = 0, layout_total = 0, paint_total = 0, rdx = 0, rdy = 0, lx = 640, ly = 400, cursor_gen = 0, cursor_mode = 0, cursor_hx = 0, cursor_hy = 0, hw_cursor = 0, hw_cursor_ok = 0, cursor_tex = 0x0, cursor_tex_w = 0, cursor_tex_h = 0, headless = 1, greeter = 0, shift = 0, last_render = 0, gpu_paused = 0, gpu_fails = 0, gpu_fail_at = 0, motion_pending = 0, held = 0, shape = 0, over_app = 0, over_media = 0}
+        vt = -1
+        session_user = <optimized out>
+        ok = <optimized out>
+        mirror_in = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, clients = 0x555786f8a6fa <remote_clients>, refresh = 0x555786f87e15 <remote_refresh>, resize = 0x555786f91314 <remote_resize>, greeter = 0x555786f8a6ef <remote_greeter>, display = 0x555786f9e903 <display_attach>, undisplay = 0x555786f9e505 <display_detach>, scroll = 0x555786f8a6df <remote_scroll>, pinch = 0x555786f8a6bf <remote_pinch>, input_add = 0x555786f8a60d <remote_input_add>, notice = 0x555786f8a602 <remote_notice>}
+        share_host = {pointer = 0x555786f8d23e <remote_pointer>, button = 0x555786f8d172 <remote_button>, wheel = 0x555786f8d128 <remote_wheel>, scroll = 0x555786f8a6df <remote_scroll>, key = 0x555786f8a712 <remote_key>, clipboard = 0x555786f8a705 <remote_clip>, resize = 0x555786f91314 <remote_resize>, activity = 0x555786f8976a <share_activity>, text = 0x555786f8681f <share_text>, event = 0x5557870da09a <js_share_event>, no_taps = 0x555786f8901a <share_no_taps>, person = 0x555786f86ff2 <share_person>, surface_up = 0x555786f845a4 <share_surface_up>, key_protected = 0x555786f88fc9 <share_key_protected>, point_protected = 0x555786f8a812 <share_point_protected>, restricted = 0x555786f8a802 <share_restricted>}
+        current = <optimized out>
+        mask = <optimized out>
+        stop_sa = <optimized out>
+        sfd = <optimized out>
+        start = <optimized out>
+[Inferior 1 (process 1239) detached]
+---- pid 1239 kernel stacks ----
+-- /proc/1239/task/1239/stack
+[<0>] do_sys_poll+0x450/0x610
+[<0>] __x64_sys_poll+0x59/0x180
+[<0>] do_syscall_64+0x87/0x1b0
+[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e
+########## stage 2 done ##########

@@ -4,8 +4,9 @@
 import {
   View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
-  usePowerProfiles, admin,
-  panelLeft, inBar, useTween,
+  usePowerProfiles, admin, sharedTicker,
+  useWeather, weatherRefresh, weatherConsent, weatherGroup, WEATHER_PLACE_DEFAULT, wallpaperAccent,
+  panelLeft, inBar, useTween, useStore,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
@@ -181,6 +182,104 @@ function NetTile({ t, onClose, ifs }) {
 
 const inside = (inst, ref) => { for (let n = inst; n; n = n.parent) if (n === ref.current) return true; return false; };
 
+// Per-core bars under the CPU meter: the monitor thread's own reading of /proc/stat (insane.monitor,
+// only while someone is querying — start() here, and the thread sleeps again 3 s after the panel closes).
+const monitorTicker = sharedTicker(() => Date.now(), 1500);
+function CoreBars({ t }) {
+  const [, setAlive] = useState(0);
+  useEffect(() => {
+    try { insane.monitor?.start?.(); } catch { /* not available */ }
+    setAlive(1);
+    return () => { try { insane.monitor?.stop?.(); } catch { /* not available */ } };
+  }, []);
+  useStore(monitorTicker);
+  let cores = null;
+  try {
+    const smp = insane.monitor?.sample?.();
+    if (smp && Array.isArray(smp.cores)) cores = smp.cores;
+  } catch { /* monitor asleep */ }
+  if (!cores || !cores.length) return null;
+  return (
+    <View style={{ flexDirection: 'row', gap: 3, alignItems: 'flex-end', height: 26 }}>
+      {cores.slice(0, 16).map((v, i) => {
+        const pct = Number.isFinite(v) ? Math.max(4, Math.min(100, Math.round(v * 100))) : 4;
+        return <View key={i} style={{ flex: 1, height: `${pct}%`, minHeight: 3, borderRadius: 2, backgroundColor: t.accent, opacity: 0.72 }} />;
+      })}
+    </View>
+  );
+}
+
+// The weather footer: real conditions through the consent-gated weather-get action (sdk/weather.js).
+// A refresh runs once per panel open (the 30-minute cache guards it); the states are honest — the ask,
+// a loading line, the cached data with a stale mark, or "unavailable". Never invented weather.
+function WeatherTile({ t }) {
+  const w = useWeather();
+  useEffect(() => { weatherRefresh().catch(() => { }); }, []);
+  const place = WEATHER_PLACE_DEFAULT;
+  if (w.state === 'consent') {
+    return (
+      <Tile t={t} style={{ gap: 8 }}>
+        <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.weather.enable')}</Text>
+        <Text style={{ fontSize: 11, color: t.textDim }}>{tr('shell.weather.enableHint')}</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View onClick={() => weatherConsent(true)} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9, backgroundColor: t.accent }}>
+            <Text style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{tr('shell.weather.allow')}</Text>
+          </View>
+          <View onClick={() => weatherConsent(false)} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9, backgroundColor: t.hover, border: `1px solid ${t.separator}` }}>
+            <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.weather.decline')}</Text>
+          </View>
+        </View>
+      </Tile>
+    );
+  }
+  if (w.state === 'error' || (!w.data && w.state !== 'ok')) {
+    if (w.state === 'error') {
+      return (
+        <Tile t={t} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.weather.title')}</Text>
+          <Text style={{ fontSize: 11, color: t.textDim }}>{tr('shell.weather.unavailable')}</Text>
+        </Tile>
+      );
+    }
+    return (
+      <Tile t={t} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.weather.title')}</Text>
+        <Text style={{ fontSize: 11, color: t.textDim }}>…</Text>
+      </Tile>
+    );
+  }
+  const cur = w.data?.current;
+  const grp = weatherGroup(cur?.weather_code);
+  return (
+    <Tile t={t} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <Text style={{ fontSize: 26, fontWeight: 700, color: t.text }}>{Math.round(cur.temperature_2m)}°</Text>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr(`shell.weather.cond.${grp}`)}{w.stale ? ' ·' : ''}</Text>
+        <Text style={{ fontSize: 11, color: t.textDim }}>
+          {place.name} · {tr('shell.weather.humidity')}: {Math.round(cur.relative_humidity_2m)}% · {tr('shell.weather.wind')}: {Math.round(cur.wind_speed_10m)} km/h
+        </Text>
+      </View>
+      <View onClick={() => weatherRefresh(true)} style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: t.hover, border: `1px solid ${t.separator}` }}>
+        <Text style={{ fontSize: 11, fontWeight: 600, color: t.textDim }}>↻</Text>
+      </View>
+    </Tile>
+  );
+}
+
+// The accent row as labelled pill chips (the reference's theme row): "Auto" first — the accent that
+// follows the wallpaper (server-side media.accent; the dot shows the sampled colour) — then the named
+// presets. Hidden entirely when the running server predates media.accent, so an old binary never
+// offers an accent that can't resolve.
+function AccentChip({ t, label, dot, active, onPick }) {
+  return (
+    <View onClick={onPick} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5,
+      borderRadius: 9, backgroundColor: active ? t.accent : t.hover, border: `1px solid ${active ? t.accent : t.separator}` }}>
+      <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: dot }} />
+      <Text style={{ fontSize: 11, fontWeight: 600, color: active ? '#fff' : t.text }}>{label}</Text>
+    </View>
+  );
+}
+
 // area: the display of the menu bar it opened from (global coordinates); at: the [x, width] of the bar item that
 // opened it, so it sits under that item, inside that display (sdk/menubarmodel.js panelLeft)
 export function ControlCenter({ t, top, onClose, area = null, at = null }) {
@@ -199,6 +298,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   // entrance: rises 6 px and fades in over the panel duration (useTween skips it under Reduce Motion);
   // the close stays instant — a panel that lingers after its click would feel slow
   const enter = useTween(1, { from: 0 });
+  const canAuto = typeof insane !== 'undefined' && typeof insane.media?.accent === 'function';
   // a click on this display's bar is its items' own (the button toggles the panel); anywhere else closes it, another
   // display's bar too (its button then opens the panel there)
   useEffect(() => addListener('pointerdown', (e) => {
@@ -207,7 +307,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
 
   return (
     <View ref={ref} style={{
-      position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 16,
+      position: 'absolute', ...(left == null ? { right: 10 } : { left }), top: ay + top + 6, width: 320, padding: 12, gap: 10, borderRadius: 20,
       backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
       opacity: 0.4 + 0.6 * enter, transform: `translateY(${Math.round((1 - enter) * 6)}px)`,
@@ -226,6 +326,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       <OptimizeTile t={t} />
       <SoundTile t={t} />
       <NowPlayingTile />
+      <WeatherTile t={t} />
       {p.ccNetwork && typeof insane.net !== 'undefined' ? <NetTile t={t} onClose={onClose} ifs={ifs} /> : null}
       {radios.length || btShown ? (
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -235,10 +336,14 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       ) : null}
       <Tile t={t} style={{ gap: 10 }}>
         <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.accent')}</Text>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          {canAuto ? (
+            <AccentChip t={t} label={tr('shell.cc.accentAuto')} value="auto" active={s.accent === 'auto'}
+              dot={wallpaperAccent.get().hex || t.accents.violeta} onPick={() => set({ accent: 'auto' })} />
+          ) : null}
           {Object.entries(t.accents).map(([name, c]) => (
-            <View key={name} onClick={() => set({ accent: name })} style={{ width: 22, height: 22, borderRadius: 11,
-              backgroundColor: c, border: s.accent === name ? `2px solid ${t.text}` : '0 solid transparent' }} />
+            <AccentChip key={name} t={t} label={name[0].toUpperCase() + name.slice(1)} dot={c}
+              active={s.accent === name} onPick={() => set({ accent: name })} />
           ))}
         </View>
       </Tile>
@@ -255,6 +360,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       </Tile>
       {p.ccSystem ? <Tile t={t} style={{ gap: 12 }}>
         <Meter t={t} label="CPU" value={cpu} detail={tr('shell.cc.cpuDetail', { pct: Math.round(cpu * 100), count: info.cores })} />
+        <CoreBars t={t} />
         <Meter t={t} label={tr('shell.cc.memory')} value={used} detail={tr('shell.cc.memDetail', { used: formatBytes((info.memTotalKB - info.memAvailableKB) * 1024), total: formatBytes(info.memTotalKB * 1024) })} />
       </Tile> : null}
       <View style={{ flexDirection: 'row', gap: 10 }}>

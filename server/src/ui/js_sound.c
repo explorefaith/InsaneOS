@@ -129,6 +129,31 @@ static JSValue f_meter(JSContext *c, JSValueConst this_val, int argc, JSValueCon
     return JS_NewBool(c, snd_meter(idx) == 0);
 }
 
+/* spectrumOn(true|false): the desktop visualizer's capture of the default sink's monitor — kept only
+ * while a consumer wants it (the consumers refcount in the shell, sdk-side). */
+static JSValue f_spectrum_on(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    int on = argc >= 1 ? JS_ToBool(c, argv[0]) : 0;
+    return JS_NewBool(c, snd_spectrum(on) == 0);
+}
+
+/* spectrum(bands) → [levels 0..1] of what the default output is playing right now, or null before the
+ * capture's first window: the visualizer's bars are this, never invented animation. 48 kHz mono monitor
+ * → 1024-point FFT in sound/snd.c, folded into log-spaced bands. */
+static JSValue f_spectrum(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
+    (void)this_val;
+    int32_t want = 32;
+    if (argc >= 1) JS_ToInt32(c, &want, argv[0]);
+    if (want < 4) want = 4;
+    if (want > 64) want = 64;
+    float vals[64];
+    int n = snd_spectrum_bands(vals, want);
+    if (n <= 0) return JS_NULL;
+    JSValue arr = JS_NewArray(c);
+    for (int i = 0; i < n; i++) JS_SetPropertyUint32(c, arr, (uint32_t)i, JS_NewFloat64(c, vals[i]));
+    return arr;
+}
+
 static JSValue f_play(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv) {
     (void)this_val;
     if (argc < 1) return JS_FALSE;
@@ -149,6 +174,8 @@ static const JSCFunctionListEntry sound_funcs[] = {
     JS_CFUNC_DEF("setPort", 3, f_set_port),
     JS_CFUNC_DEF("move", 3, f_move),
     JS_CFUNC_DEF("meter", 1, f_meter),
+    JS_CFUNC_DEF("spectrumOn", 1, f_spectrum_on),
+    JS_CFUNC_DEF("spectrum", 1, f_spectrum),
     JS_CFUNC_DEF("play", 1, f_play),
 };
 

@@ -15,7 +15,8 @@ import * as sdk from './index.js';
 import { createStore } from './store.js';
 import { locale } from './i18n.js';
 import { setPackageApps, windows, wm, appIdOf } from './windows.js';
-import { iconFromFile } from './apps.js';
+import { iconFromFile, refreshApps } from './apps.js';
+import { admin } from './admin.js';
 import { forgetShareGrants } from './share.js';
 import { settings } from './settings.js';
 import { perms } from './privacy.js';
@@ -160,6 +161,50 @@ export const packages = {
     return ok;
   },
 };
+
+// Uninstall from the shell (the launcher's context menu). A .lpk package removes itself
+// (packages.remove — its windows close with it); a Linux app removes the Debian package that
+// brought it, through the administration helper, with progress. The built-in apps are part of
+// Insane OS: never removable (docs/SIGNING.md, "Verified system code"). A .lpk that arrived
+// inside a Debian package is that package's business — the Store draws the same line. A Linux
+// app without a package behind it (a bare .desktop) has no uninstall path here.
+const owningPackage = (a) => {
+  if (typeof insane.pkg === 'undefined' || !insane.pkg.available()) return null;
+  const want = new Set([a.desktopId, `${a.desktopId}.desktop`]);
+  try { return insane.pkg.installed({}).find((p) => p.app && want.has(p.app.id))?.name || null; }
+  catch (e) { return null; }
+};
+
+// 'package' | 'linux' | null — what the context menu may offer for this launcher entry.
+export function canUninstall(a) {
+  if (a.kind === 'package') return a.packaged ? null : 'package';
+  if (a.kind === 'linux') return owningPackage(a) ? 'linux' : null;
+  return null;
+}
+
+// Removes the app without blocking the interface: resolves { ok, error } when finished.
+// onProgress({ phase, done, total }) rides the helper's "progress <phase> <done> <total>" lines
+// (server/src/pkg/pkg.c) — the same lines the Store's job view shows.
+export function uninstallApp(a, onProgress) {
+  return new Promise((resolve) => {
+    const kind = canUninstall(a);
+    if (!kind) return resolve({ ok: false, error: 'uninstall.unsupported' });
+    if (kind === 'package') {
+      try { packages.remove(a.id); } catch (e) { return resolve({ ok: false, error: String(e?.message || e) }); }
+      return resolve({ ok: true });
+    }
+    const name = owningPackage(a);
+    if (!name) return resolve({ ok: false, error: 'uninstall.unsupported' });
+    const onLog = (line) => {
+      const m = /^progress (\w+) (\d+) (\d+)$/.exec(line);
+      if (m && onProgress) onProgress({ phase: m[1], done: Number(m[2]), total: Number(m[3]) });
+    };
+    admin.run('pkg-remove', name, onLog).then(
+      () => { refreshApps(); refreshPackages(); resolve({ ok: true }); },
+      (e) => resolve({ ok: false, error: String(e?.message || e) }),
+    );
+  });
+}
 
 // dpkg removes a packaged app behind the shell's back, so the shell keeps the ids it has seen and forgets the permissions
 // of those gone (a grant is forgotten by the share sweep). The app's data stays, as it does for every app.

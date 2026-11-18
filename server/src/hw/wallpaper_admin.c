@@ -648,4 +648,42 @@ void hw_act_wallpaper_web_get(const AdminReq *r, const char *arg, size_t len) {
     admin_say("OK", "%.16s", (char *)out);              /* i18n-ok: parsed by sdk/motion.jsx */
     free(out);
 }
+/* wallpaper-url-get "<url>": one video from a URL the user picked, for a live wallpaper of their
+ * own (Settings → Wallpaper → Custom live wallpaper). https only, no user-info part, no spaces or
+ * control characters; one file, capped (a wallpaper is not a movie collection). The bytes land in
+ * the store under the hex of the URL's sha256 — the same URL is not fetched twice — root-owned
+ * 0644 like the verified catalog videos, so the desktop and the login screen can both read them.
+ * Nothing here says the bytes are a video: the shell probes the copy with the media helper before
+ * it offers the choice, and says so when they are not. */
+#define WALLPAPER_URL_MAX (512ULL << 20)                /* 512 MiB: plenty for a wallpaper loop */
+void hw_act_wallpaper_url_get(const AdminReq *r, const char *arg, size_t len) {
+    (void)r;
+    if (strlen(arg) != len || !len || len >= 600) { admin_err("admin.invalidArgument", NULL); return; }
+    if (strncmp(arg, "https://", 8) || strchr(arg + 8, '@')) { admin_err("wallpaper.badUrl", NULL); return; }
+    for (size_t i = 0; i < len; i++) if ((unsigned char)arg[i] < 33 || (unsigned char)arg[i] == 127) { admin_err("wallpaper.badUrl", NULL); return; }
+    uint8_t h[32];
+    sha256(arg, len, h);
+    char hex[65];
+    for (int i = 0; i < 32; i++) snprintf(hex + i * 2, 3, "%02x", h[i]);
+    mkdir("/var/lib/insaneos", 0755);
+    mkdir(STORE, 0755);
+    chmod(STORE, 0755);
+    FetchItem it;
+    memset(&it, 0, sizeof it);
+    snprintf(it.url, sizeof it.url, "%s", arg);
+    snprintf(it.dest, sizeof it.dest, "%s/%s.mp4", STORE, hex);
+    struct stat st;
+    if (stat(it.dest, &st) || st.st_size <= 0) {         /* the same URL is not fetched twice */
+        int last = -1;
+        it.max = WALLPAPER_URL_MAX;
+        fetch_batch(&it, 1, progress, &last);
+        if (it.status != 200 || !it.size) {
+            unlink(it.dest);
+            admin_err("wallpaper.downloadFailed", NULL);
+            return;
+        }
+        chmod(it.dest, 0644);
+    }
+    admin_say("OK", "%s", it.dest);                     /* i18n-ok: a path for the shell to probe */
+}
 

@@ -12,6 +12,37 @@ of the matching [GitHub release](https://github.com/insaneos/Insane OS/releases)
 
 ### Added
 
+## [Unreleased]
+
+### Added
+
+- **The island desktop: the menu bar is gone, and a shell that wears the wallpaper.** The top bar is
+  removed entirely (windows use the full height; there is nothing left to auto-hide when an app opens).
+  In its place a floating glass island sits at the top centre, like the reference: the open apps in a
+  row — clicking one opens the golden panel under the icon with that app's windows (a row brings it
+  forward, × closes it) — then exactly what was asked for: the battery percentage, a one-click
+  screenshot, the time in 24-hour format, the notifications bell and the control button. It auto-hides
+  the moment an app opens (it slides up off the screen, a small ear at the edge; the pointer touching
+  the top edge slides it back over the window — hit-testing follows the transform, so a hidden island
+  never eats a click), and an empty desktop keeps it on. No logo, no OS name, no menus, no junk. The
+  control button opens Android-style quick settings, dropping down from the pill: the Wi-Fi status
+  (opens Settings), Bluetooth with a real switch, Night Light, Do Not Disturb, dark mode, the volume
+  slider and the brightness slider (committed once per drag through the display-brightness helper, not
+  once per pixel). The accent follows the wallpaper by default (`accent: 'auto'`): the compositor reads
+  the picture you set — through the new `media.accentFrom` engine-cache API, no second decode — and the
+  strip, panels and controls retint to match it, tone-mapped per light/dark; six hand-made presets and
+  the Auto chip sit in Settings → Appearance, and an older binary that can't sample falls back to the
+  violet gracefully (docs/design/transformation-plan.md). Also fixed here: Settings crashed on open
+  since the columns commit (`Columns` called `.find` on `useWindows()`'s object — the crash the first
+  live session caught, and the reason the lab now opens the app it touches).
+
+- **A real audio visualizer, and real weather.** The desktop's new Visualizer widget (and the gallery) draws what the machine is
+  actually playing: `snd_spectrum` captures the default sink's monitor only while a card is mounted, a 1024-point FFT in `sound/snd.c`
+  folds it into log-spaced bands, silence costs no frames at all, and nothing on screen is invented animation. The weather tile asks
+  once before its first request (`weatherConsent`), then reads Open-Meteo through a closed root action with the host hard-coded
+  (`weather-get`, server/src/hw/weather_admin.c), caches for 30 minutes, keeps the last truth on screen while refreshing and says
+  "unavailable" when offline. The Control Center's System tile now draws every CPU core from the monitor thread.
+
 - **Terminal: its own configuration file, wherever you want it.** Profiles, colors, key mappings, shortcuts, the hotkey
   and the windows to restore move out of `settings.json` into `~/.config/insaneos/terminal.json` (with a schema number),
   so they can be backed up, versioned or synced on their own. The move is automatic and loses nothing: `settings.json`

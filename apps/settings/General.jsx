@@ -4,7 +4,7 @@ import {
   admin, wm, InsaneLogo, InsaneWordmark, spacing, typeScale,
 } from '@insaneos/sdk';
 import { useState, version as reactVersion } from 'react';
-import { Stack, Section, ValueRow, Note, Message, Actions } from './ui.jsx';
+import { Stack, Section, ValueRow, Note, Message, Actions, Columns } from './ui.jsx';
 
 // Card with "key … value" rows (kept for other pages that list details).
 export function Card({ title, rows }) {
@@ -30,23 +30,25 @@ export function General() {
         <Text style={{ fontSize: typeScale.callout, color: t.textDim }}>{ver.channel ? tr('about.versionChannel', { v: ver.version, channel: ver.channel }) : tr('about.version', { v: ver.version })}</Text>
         <Text style={{ fontSize: typeScale.caption, color: t.textDim }}>{`${info.hostname} · ${info.os}`}</Text>
       </View>
-      <Card title={tr('settings.general.machine')} rows={[
-        [tr('settings.general.name'), info.hostname],
-        [tr('about.cpu'), tr('about.cpuValue', { cpu: cpu.slice(0, 44) || tr('about.cpuUnknown'), count: info.cores })],
-        [tr('about.memory'), tr('shell.cc.memDetail', { used: formatBytes((info.memUsedKB != null ? info.memUsedKB : info.memTotalKB - info.memAvailableKB) * 1024), total: formatBytes(info.memTotalKB * 1024) })],
-        info.diskTotal ? [tr('settings.general.storage'), tr('settings.general.storageValue', { free: formatBytes(info.diskFree), total: formatBytes(info.diskTotal) })] : null,
-        [tr('about.display'), `${screen.width} × ${screen.height}`],
-        [tr('about.uptime'), formatDuration(info.uptime)],
-      ]} />
-      <Card title={tr('settings.general.software')} rows={[
-        ['Insane OS', ver.channel ? `${ver.version} ${ver.channel}` : ver.version],
-        ver.build ? [tr('about.buildLabel'), ver.build] : null,
-        [tr('about.os'), info.os],
-        [tr('about.kernel'), `${info.kernel} (${info.arch})`],
-        [tr('about.server'), 'insane-server (C · DRM/KMS · evdev · Wayland)'],
-        [tr('about.engine'), `QuickJS + React ${reactVersion}`],
-        [tr('about.ram'), `${formatNumber(st.rssKB / 1024, 1)} MB (JS ${formatNumber(st.jsKB / 1024, 1)} MB)`],
-      ]} />
+      <Columns>
+        <Card title={tr('settings.general.machine')} rows={[
+          [tr('settings.general.name'), info.hostname],
+          [tr('about.cpu'), tr('about.cpuValue', { cpu: cpu.slice(0, 44) || tr('about.cpuUnknown'), count: info.cores })],
+          [tr('about.memory'), tr('shell.cc.memDetail', { used: formatBytes((info.memUsedKB != null ? info.memUsedKB : info.memTotalKB - info.memAvailableKB) * 1024), total: formatBytes(info.memTotalKB * 1024) })],
+          info.diskTotal ? [tr('settings.general.storage'), tr('settings.general.storageValue', { free: formatBytes(info.diskFree), total: formatBytes(info.diskTotal) })] : null,
+          [tr('about.display'), `${screen.width} × ${screen.height}`],
+          [tr('about.uptime'), formatDuration(info.uptime)],
+        ]} />
+        <Card title={tr('settings.general.software')} rows={[
+          ['Insane OS', ver.channel ? `${ver.version} ${ver.channel}` : ver.version],
+          ver.build ? [tr('about.buildLabel'), ver.build] : null,
+          [tr('about.os'), info.os],
+          [tr('about.kernel'), `${info.kernel} (${info.arch})`],
+          [tr('about.server'), 'insane-server (C · DRM/KMS · evdev · Wayland)'],
+          [tr('about.engine'), `QuickJS + React ${reactVersion}`],
+          [tr('about.ram'), `${formatNumber(st.rssKB / 1024, 1)} MB (JS ${formatNumber(st.jsKB / 1024, 1)} MB)`],
+        ]} />
+      </Columns>
     </Stack>
   );
 }

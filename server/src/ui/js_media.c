@@ -13,6 +13,7 @@
  *     or screen recording runs stops it at once (media_restricted below);
  *   - the decoder (insane-media) never receives a path: insane-server opens the file and passes the fd. */
 #include "js_media.h"
+#include "js_sys.h"
 #include "../media/media_int.h"
 #include "../media/proto.h"
 #include "../media/hwdec.h"
@@ -454,6 +455,96 @@ static JSValue f_pixels(JSContext *c, JSValueConst t, int argc, JSValueConst *ar
     return JS_NewArrayBufferCopy(c, out, (size_t)w * (size_t)h * 4);
 }
 
+/* The accent core both entry points share: a premultiplied-ARGB buffer → { r, g, b } of its dominant
+ * colour. A decimated grid keeps it O(4096) whatever the picture's size; 24 hue buckets weighted by
+ * saturation² and a mid-luminance preference pick the colour a human would call "the picture's colour",
+ * skipping near-grays and the near-black/near-white edges. Grayscale pictures return their average. The
+ * caller tone-maps for light/dark — this returns the picture's own colour. */
+static JSValue accent_from_px(JSContext *c, const uint32_t *px, int w, int h) {
+    int step = (int)sqrt((double)w * (double)h / 4096.0);
+    if (step < 1) step = 1;
+    double wsum[24] = {0}, rsum[24] = {0}, gsum[24] = {0}, bsum[24] = {0};
+    double all_r = 0, all_g = 0, all_b = 0, all_n = 0;
+    for (int y = 0; y < h; y += step)
+        for (int x = 0; x < w; x += step) {
+            uint32_t p = px[(size_t)y * (size_t)w + (size_t)x];
+            uint32_t a = p >> 24;
+            if (a < 128) continue;
+            double r = ((p >> 16) & 255) / 255.0, g = ((p >> 8) & 255) / 255.0, b = (p & 255) / 255.0;
+            if (a != 255) {                       /* premultiplied → straight, the convention pixels() un-composes */
+                double ia = 255.0 / a;
+                r *= ia; g *= ia; b *= ia;
+            }
+            all_r += r; all_g += g; all_b += b; all_n += 1;
+            double mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+            double mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+            double sat = mx > 0 ? (mx - mn) / mx : 0;
+            if (sat < 0.18) continue;             /* a gray pixel says nothing about the hue */
+            double l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            if (l < 0.04 || l > 0.97) continue;   /* letterboxing black and blown-out white don't either */
+            double hue;
+            if (mx == mn) hue = 0;
+            else {
+                double d = mx - mn;
+                if (mx == r) hue = (g - b) / d + (g < b ? 6 : 0);
+                else if (mx == g) hue = (b - r) / d + 2;
+                else hue = (r - g) / d + 4;
+                hue /= 6.0;
+            }
+            int bin = (int)(hue * 24) % 24;
+            double vw = 1 - (l - 0.52) * (l - 0.52) * 1.9;    /* mid tones carry the colour */
+            if (vw < 0.12) vw = 0.12;
+            double wt = sat * sat * vw;
+            wsum[bin] += wt; rsum[bin] += r * wt; gsum[bin] += g * wt; bsum[bin] += b * wt;
+        }
+    int best = -1;
+    for (int i = 0; i < 24; i++) if (wsum[i] > 0 && (best < 0 || wsum[i] > wsum[best])) best = i;
+    double r, g, b;
+    if (best >= 0) { r = rsum[best] / wsum[best]; g = gsum[best] / wsum[best]; b = bsum[best] / wsum[best]; }
+    else if (all_n > 0) { r = all_r / all_n; g = all_g / all_n; b = all_b / all_n; }
+    else return JS_NULL;
+    if (r > 1) r = 1;
+    if (g > 1) g = 1;
+    if (b > 1) b = 1;
+    JSValue o = JS_NewObject(c);
+    JS_SetPropertyStr(c, o, "r", JS_NewInt32(c, (int)(r * 255 + 0.5)));
+    JS_SetPropertyStr(c, o, "g", JS_NewInt32(c, (int)(g * 255 + 0.5)));
+    JS_SetPropertyStr(c, o, "b", JS_NewInt32(c, (int)(b * 255 + 0.5)));
+    return o;
+}
+
+/* accent(id) → { r, g, b } of the wallpaper's dominant colour, or null: the shell's "Auto" accent — the
+ * desktop retints from the picture (DesktopWidgets' ink sampler reads three 16×16 blocks; this reads the
+ * whole frame once per call, so the shell's whole palette can follow the wallpaper). Sources: screenshots
+ * and decoded pictures, the ones pixels() accepts — the live wallpapers' playing frame comes in here. */
+static JSValue f_accent(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
+    (void)t;
+    MediaSrc *s = argc ? media_src_get(arg_id(c, argv[0])) : NULL;
+    if (!s || !s->px || (s->kind != SK_CAPTURE && s->kind != SK_IMAGE)) return JS_NULL;
+    return accent_from_px(c, s->px, s->w, s->h);
+}
+
+/* accentFrom(src) → { r, g, b }: the same colour from the UI engine's decoded-picture cache — the still
+ * wallpapers' entry point. media_open_input is home-bound and the system assets live outside it, while the
+ * engine cache already holds the picture the desktop paints (the Backdrop's wallpaper), so this reads it
+ * with no second decode and no media job. Same src rules as a View's src (js.c's image loader): absolute,
+ * 'asset:<rel>' inside the system assets, or theme-relative. */
+static JSValue f_accent_from(JSContext *c, JSValueConst t, int argc, JSValueConst *argv) {
+    (void)t;
+    const char *src = argc ? JS_ToCString(c, argv[0]) : NULL;
+    if (!src || strstr(src, "..")) { if (src) JS_FreeCString(c, src); return JS_NULL; }
+    char path[2048];
+    if (src[0] == '/') snprintf(path, sizeof path, "%s", src);
+    else if (!strncmp(src, "asset:", 6)) snprintf(path, sizeof path, "%s/%s", js_sys_assets(), src + 6);
+    else snprintf(path, sizeof path, "%s/%s", ui.theme_dir, src);
+    JS_FreeCString(c, src);
+    Image *img = image_get(path);
+    int w = 0, h = 0;
+    const uint32_t *px = img ? image_decoded(img, &w, &h) : NULL;
+    if (!px || w < 1 || h < 1) return JS_NULL;
+    return accent_from_px(c, px, w, h);
+}
+
 /* ocr(id, langs) → { sid, req } of a insane-ocr request (the SDK waits for it: media.ocr): the text in a screenshot or
  * picture. The pixels go to the confined insane-ocr helper in a sealed memfd (src/doc/h_ocr.c); insane-server never
  * links Tesseract. One OCR session is kept and started again if it crashed. */
@@ -831,6 +922,8 @@ static const JSCFunctionListEntry media_funcs[] = {
     JS_CFUNC_DEF("screenshot", 2, f_screenshot),
     JS_CFUNC_DEF("crop", 5, f_crop),
     JS_CFUNC_DEF("pixels", 5, f_pixels),
+    JS_CFUNC_DEF("accent", 1, f_accent),
+    JS_CFUNC_DEF("accentFrom", 1, f_accent_from),
     JS_CFUNC_DEF("ocr", 2, f_ocr),
     JS_CFUNC_DEF("resize", 3, f_resize),
     JS_CFUNC_DEF("rotate", 2, f_rotate),

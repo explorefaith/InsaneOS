@@ -9,11 +9,13 @@ const eq = (name, a, b) => {
   else { bad++; console.error(`FAIL ${name}: ${JSON.stringify(a)} != ${JSON.stringify(b)}`); }
 };
 
-// the catalog: every entry well-formed, types unique
-eq('catalog has the five first widgets', WIDGET_CATALOG.length, 5);
-eq('types unique', new Set(WIDGET_CATALOG.map((c) => c.type)).size, 5);
+// the catalog: every entry well-formed, types unique (the visualizer joined in the island
+// transformation: the desktop's audio visualizer reads the machine's real output)
+eq('catalog has the six widgets', WIDGET_CATALOG.length, 6);
+eq('types unique', new Set(WIDGET_CATALOG.map((c) => c.type)).size, 6);
 eq('every entry has a size', WIDGET_CATALOG.every((c) => c.w >= 120 && c.h >= 80 && Number.isFinite(c.w) && Number.isFinite(c.h)), true);
 eq('clock known', !!catalogOf('insane-clock'), true);
+eq('visualizer known', !!catalogOf('insane-visualizer'), true);
 eq('unknown type', catalogOf('nope'), null);
 
 const AREA = { x: 0, y: 30, w: 1920, h: 1000 };     // the menu bar's strip already excluded

@@ -72,6 +72,7 @@ cp -a "$DEST/themes/greeter/theme.bundle.js" "$BK/themes/greeter-theme.bundle.js
 cp -a "$DEST/themes/classic/theme.bundle.js" "$BK/themes/classic-theme.bundle.js" 2>/dev/null || true
 cp -a "$DEST/assets/app-host.bundle.js" "$BK/assets/" 2>/dev/null || true
 cp -a "$DEST/assets/sysapps" "$BK/assets/sysapps" 2>/dev/null || true
+cp -a "$DEST/assets/locales" "$BK/assets/locales" 2>/dev/null || true
 cp -a "$DEST/code-manifest.json" "$BK/" 2>/dev/null || true
 cp -a "$DEST/code-manifest.sig" "$BK/" 2>/dev/null || true
 du -sh "$BK"
@@ -86,6 +87,7 @@ cp -a "$BK/bin/." /usr/lib/insaneos/bin/
 [ -f "$BK/themes/classic-theme.bundle.js" ] && cp -a "$BK/themes/classic-theme.bundle.js" /usr/lib/insaneos/themes/classic/theme.bundle.js
 [ -f "$BK/assets/app-host.bundle.js" ] && cp -a "$BK/assets/app-host.bundle.js" /usr/lib/insaneos/assets/app-host.bundle.js
 [ -d "$BK/assets/sysapps" ] && cp -a "$BK/assets/sysapps/." /usr/lib/insaneos/assets/sysapps/
+[ -d "$BK/assets/locales" ] && cp -a "$BK/assets/locales/." /usr/lib/insaneos/assets/locales/
 [ -f "$BK/code-manifest.json" ] && cp -a "$BK/code-manifest.json" /usr/lib/insaneos/code-manifest.json
 [ -f "$BK/code-manifest.sig" ] && cp -a "$BK/code-manifest.sig" /usr/lib/insaneos/code-manifest.sig
 echo "Reverted. Reboot (or log out and back in)."
@@ -114,6 +116,9 @@ for d in "$REPO"/assets/sysapps/*/; do
     install -m 644 "$d/app.js" "$DEST/assets/sysapps/$app/app.js"
   fi
 done
+# the language catalogs go with the bundles: a new bundle asks for its new keys (the i18n check
+# in the build guarantees they exist here), and a catalog older than the bundle would show raw keys
+cp -a "$REPO"/assets/locales/. "$DEST/assets/locales/"
 install -m 644 "$REPO/code-manifest.json" "$DEST/code-manifest.json"
 # The rebuilt manifest is unsigned by design: the newly built insane-server is a development
 # build that accepts it (release builds demand the release key, which we don't have).

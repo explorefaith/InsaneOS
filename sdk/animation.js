@@ -42,10 +42,11 @@ export function genieStrip(p, v, lead = 0.42) {
 export const reducedMotionNow = () => { try { return !!settings.get().reduceMotion; } catch (e) { return false; } };
 
 // The engine provides requestAnimationFrame; node (the scenes, the tests) does not: there a 16 ms
-// timeout keeps the same shape.
-const nextFrame = typeof requestAnimationFrame === 'function'
+// timeout keeps the same shape. Exported for the one other continuous animation in the SDK
+// (the Spinner's dots); every one-shot ramp goes through useTween instead.
+export const nextFrame = typeof requestAnimationFrame === 'function'
   ? requestAnimationFrame : (fn) => setTimeout(() => fn(performance.now()), 16);
-const cancelFrame = typeof cancelAnimationFrame === 'function'
+export const cancelFrame = typeof cancelAnimationFrame === 'function'
   ? cancelAnimationFrame : clearTimeout;
 
 // One shared rAF ramp for a numeric value. With `from` it animates on mount too (an entrance:

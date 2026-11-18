@@ -69,5 +69,9 @@
   "lang.ready": "PARUOŠTOS NAUDOTI",
   "lang.notYet": "DAR NEIŠVERSTA",
   "lang.notYetHint": "Insane OS dar neišversta į kalbą „{name}“. Jau dabar galite naudoti jos datų ir skaičių formatus, pasirinkę regioną žemiau, o kalbos paprašyti adresu github.com/insaneos/Insane OS/issues.",
-  "lang.none": "Jokia kalba neatitinka."
+  "lang.none": "Jokia kalba neatitinka.",
+  "dock.menubar.style": "Forma",
+  "dock.menubar.styleHint": "Meniu juosta piešiama kaip plaukiojanti salelė arba kaip visa juosta.",
+  "dock.menubar.styleIsland": "Salelė",
+  "dock.menubar.styleFull": "Visa"
 }

@@ -1,7 +1,7 @@
 // ui.jsx — the building blocks of every Settings page, on top of the SDK's GroupBox (docs/DESIGN.md,
 // "Settings"): a page column, titled sections (inset grouped boxes with hairlines between rows),
 // rows with the control or the value at the trailing edge, form rows, a pop-up button, a page header, badges and notes.
-import { View, Text, useTheme, addListener, GroupBox as InsetBox, spacing, typeScale, createStore, useStore, screen, ScrollView, Overlay } from '@insaneos/sdk';
+import { View, Text, useTheme, addListener, GroupBox as InsetBox, spacing, typeScale, createStore, useStore, screen, ScrollView, Overlay, useAppWindow, useWindows } from '@insaneos/sdk';
 import { createElement as h, useEffect, useRef, useState } from 'react';
 
 
@@ -125,6 +125,103 @@ export function Badge({ glyph, color, size = 26, children }) {
     <View style={{ width: size, height: size, borderRadius: Math.round(size * 0.24), alignItems: 'center', justifyContent: 'center',
       background: `linear-gradient(180deg, ${shade(color, 1.18)}, ${color})` }}>
       {children || <Text style={{ fontSize: Math.round(size * 0.55), fontWeight: 600, color: '#fff', lineHeight: size, textAlign: 'center' }}>{glyph}</Text>}
+    </View>
+  );
+}
+
+// PaneGlyph — one drawn, monochrome pictogram per Settings section, shared by the sidebar and the
+// pages that need the same pictures (Privacy's permissions, Network's devices…). Every glyph lives
+// on the same 20×20 grid, drawn with 2-unit strokes (or fills of the same weight) and rounded caps
+// in one color, so the set reads consistent — no unicode symbols whose weight and size vary with
+// the font. The engine has no vector paths, so each glyph is a small composition of views; a new
+// one is a case in the map below. size is the side of the square the glyph is drawn in.
+export function PaneGlyph({ id, size = 14, color = '#fff' }) {
+  const s = size / 20;                        // every coordinate below is a 20-unit grid fraction
+  const bar = (x, y, w, h, r) => ({ position: 'absolute', left: x * s, top: y * s, width: w * s, height: h * s, borderRadius: (r === undefined ? 1 : r) * s, backgroundColor: color });
+  const ring = (x, y, d, t) => ({ position: 'absolute', left: x * s, top: y * s, width: d * s, height: d * s, borderWidth: t * s, borderColor: color, borderRadius: (d * s) / 2 });
+  const disc = (x, y, d) => ({ position: 'absolute', left: x * s, top: y * s, width: d * s, height: d * s, borderRadius: (d * s) / 2, backgroundColor: color });
+  const turn = (deg) => ({ transform: `rotate(${deg}deg)` });
+  const G = {
+    general: () => [<View key="r" style={ring(2.5, 2.5, 15, 2)} />, <View key="d" style={bar(9, 5.5, 2, 2, 1)} />, <View key="s" style={bar(9, 9, 2, 6)} />],
+    appearance: () => [<View key="r" style={ring(2.5, 2.5, 15, 2)} />,
+      <View key="f" style={{ position: 'absolute', left: 4.5 * s, top: 4.5 * s, width: 5.5 * s, height: 11 * s, borderTopLeftRadius: 5.5 * s, borderBottomLeftRadius: 5.5 * s, backgroundColor: color }} />],
+    wallpaper: () => [<View key="r" style={{ position: 'absolute', left: 2 * s, top: 4 * s, width: 16 * s, height: 12 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2.5 * s, overflow: 'hidden' }}>
+      <View key="m" style={{ ...bar(-0.5, 1.5, 7, 7, 1), ...turn(45) }} />
+      <View key="n" style={{ ...bar(4.5, 3.5, 5, 5, 1), ...turn(45) }} />
+      <View key="u" style={bar(9.5, 0.5, 2, 2, 1)} />
+    </View>],
+    dock: () => [<View key="b" style={bar(1.5, 15, 17, 3, 1.5)} />, <View key="d1" style={bar(3, 9.5, 3, 3, 1)} />, <View key="d2" style={bar(8.5, 9.5, 3, 3, 1)} />, <View key="d3" style={bar(14, 9.5, 3, 3, 1)} />],
+    display: () => [<View key="r" style={{ position: 'absolute', left: 2 * s, top: 3.5 * s, width: 16 * s, height: 11 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2.5 * s }} />,
+      <View key="n" style={bar(8.5, 15.5, 3, 1.6)} />, <View key="b" style={bar(6, 17.4, 8, 1.6)} />],
+    globe: () => [<View key="r" style={ring(2.5, 2.5, 15, 2)} />, <View key="h" style={bar(4, 9, 12, 2)} />,
+      <View key="v" style={{ position: 'absolute', left: 7.5 * s, top: 2.5 * s, width: 5 * s, height: 15 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2.5 * s }} />],
+    wifi: () => [<View key="a1" style={{ position: 'absolute', left: 3.5 * s, top: 7 * s, width: 13 * s, height: 6.5 * s, borderTopWidth: 2 * s, borderLeftWidth: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6.5 * s, borderTopRightRadius: 6.5 * s, borderColor: color }} />,
+      <View key="a2" style={{ position: 'absolute', left: 6.5 * s, top: 10.5 * s, width: 7 * s, height: 3.5 * s, borderTopWidth: 2 * s, borderLeftWidth: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 3.5 * s, borderTopRightRadius: 3.5 * s, borderColor: color }} />,
+      <View key="d" style={bar(8.5, 14, 3, 3, 1.5)} />],
+    bt: () => [<View key="s" style={bar(9, 1.5, 2, 17)} />, <View key="a" style={{ ...bar(5, 6.5, 7, 2), ...turn(38) }} />, <View key="b" style={{ ...bar(8, 11.5, 7, 2), ...turn(-38) }} />],
+    sound: () => [<View key="b1" style={bar(3.5, 7, 2.5, 6)} />, <View key="b2" style={bar(8.5, 4, 2.5, 12)} />, <View key="b3" style={bar(13.5, 8, 2.5, 4)} />],
+    bell: () => [<View key="d" style={{ position: 'absolute', left: 4.5 * s, top: 3.5 * s, width: 11 * s, height: 9 * s, borderTopLeftRadius: 5.5 * s, borderTopRightRadius: 5.5 * s, backgroundColor: color }} />,
+      <View key="l" style={bar(3, 12.5, 14, 2, 1)} />, <View key="c" style={bar(8.5, 16, 3, 2.5, 1.25)} />],
+    printer: () => [<View key="p" style={bar(5.5, 2.5, 9, 3, 1)} />,
+      <View key="b" style={{ position: 'absolute', left: 2.5 * s, top: 6.5 * s, width: 15 * s, height: 8 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2 * s }} />,
+      <View key="s" style={bar(6, 9.5, 8, 2, 1)} />, <View key="o" style={bar(5.5, 15, 9, 3, 1)} />],
+    clipboard: () => [<View key="b" style={{ position: 'absolute', left: 3.5 * s, top: 3 * s, width: 13 * s, height: 14.5 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2 * s }} />,
+      <View key="c" style={bar(7, 1.5, 6, 3.5, 1.5)} />, <View key="l1" style={bar(6.5, 8, 7, 1.8, 0.9)} />, <View key="l2" style={bar(6.5, 11, 5, 1.8, 0.9)} />],
+    share: () => [<View key="a" style={bar(2.5, 5.5, 11, 2, 1)} />, <View key="h1" style={{ ...bar(11, 3.5, 6, 6, 1), ...turn(45) }} />,
+      <View key="b" style={bar(6.5, 12.5, 11, 2, 1)} />, <View key="h2" style={{ ...bar(3, 10.8, 6, 6, 1), ...turn(45) }} />],
+    cloud: () => [<View key="c1" style={disc(3.5, 8.5, 7)} />, <View key="c2" style={disc(7, 5.5, 8)} />, <View key="c3" style={disc(11.5, 8.5, 6.5)} />, <View key="b" style={bar(3.5, 12.5, 13.5, 3.5, 1.75)} />],
+    language: () => [<View key="l" style={{ ...bar(4.5, 3, 2.2, 13.5), ...turn(-14) }} />, <View key="r" style={{ ...bar(13.3, 3, 2.2, 13.5), ...turn(14) }} />, <View key="c" style={bar(6, 10.5, 8, 2.2, 1)} />],
+    clock: () => [<View key="r" style={ring(2.5, 2.5, 15, 2)} />, <View key="h" style={bar(9.1, 5.5, 1.8, 5.5, 0.9)} />, <View key="m" style={bar(9.1, 9.2, 5, 1.8, 0.9)} />],
+    keyboard: () => [<View key="r" style={{ position: 'absolute', left: 1.5 * s, top: 5 * s, width: 17 * s, height: 10 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2 * s }} />,
+      ...[4, 6.6, 9.2, 11.8, 14.4].map((x, i) => <View key={`k${i}`} style={bar(x, 7.5, 1.6, 1.6, 0.8)} />), <View key="sp" style={bar(5.5, 11, 9, 1.8, 0.9)} />],
+    trackpad: () => [<View key="r" style={{ position: 'absolute', left: 2.5 * s, top: 2.5 * s, width: 15 * s, height: 15 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2.5 * s }} />, <View key="l" style={bar(4.5, 11.5, 11, 1.8, 0.9)} />],
+    grid: () => [<View key="a" style={bar(2.5, 2.5, 6.5, 6.5, 1.5)} />, <View key="b" style={bar(11, 2.5, 6.5, 6.5, 1.5)} />, <View key="c" style={bar(2.5, 11, 6.5, 6.5, 1.5)} />, <View key="d" style={bar(11, 11, 6.5, 6.5, 1.5)} />],
+    ai: () => [<View key="v" style={{ ...bar(6.5, 1, 7, 18, 1), ...turn(45) }} />, <View key="h" style={{ ...bar(1, 6.5, 18, 7, 1), ...turn(45) }} />],
+    power: () => [<View key="t" style={bar(8, 1.5, 4, 8, 1)} />, <View key="m" style={bar(5.5, 8, 9, 2.6, 1)} />, <View key="b" style={bar(7.5, 9.5, 4, 9, 1)} />],
+    cooling: () => [0, 120, 240].map((r, i) => (
+      <View key={`f${i}`} style={{ position: 'absolute', left: 0, top: 0, width: 20 * s, height: 20 * s, ...turn(r) }}>
+        <View style={{ position: 'absolute', left: 8 * s, top: 0.5 * s, width: 4.5 * s, height: 7 * s, borderTopRightRadius: 4.5 * s, borderTopLeftRadius: 1.5 * s, borderBottomRightRadius: 1.5 * s, backgroundColor: color }} />
+      </View>
+    )).concat([<View key="h" style={disc(8.25, 8.25, 3.5)} />]),
+    firmware: () => [<View key="b" style={bar(6, 6, 8, 8, 1.5)} />,
+      ...[4, 8.5, 13].flatMap((y, i) => [<View key={`l${i}`} style={bar(1, y, 4, 1.8, 0.9)} />, <View key={`r${i}`} style={bar(15, y, 4, 1.8, 0.9)} />])],
+    lock: () => [<View key="s" style={{ position: 'absolute', left: 6 * s, top: 2.5 * s, width: 8 * s, height: 9 * s, borderWidth: 2 * s, borderBottomWidth: 0, borderColor: color, borderTopLeftRadius: 4 * s, borderTopRightRadius: 4 * s }} />,
+      <View key="b" style={bar(3.5, 8, 13, 9, 2)} />],
+    users: () => [<View key="h" style={disc(6.5, 3, 7)} />, <View key="s" style={{ position: 'absolute', left: 3.5 * s, top: 11.5 * s, width: 13 * s, height: 6.5 * s, borderTopLeftRadius: 6.5 * s, borderTopRightRadius: 6.5 * s, backgroundColor: color }} />],
+    updates: () => [<View key="s" style={bar(9, 2.5, 2, 8)} />, <View key="h" style={{ ...bar(6.8, 8.5, 6.4, 6.4, 1), ...turn(45) }} />,
+      <View key="t" style={bar(3, 15.5, 14, 2, 1)} />, <View key="l" style={bar(3, 12, 2, 5, 1)} />, <View key="r" style={bar(15, 12, 2, 5, 1)} />],
+    session: () => [<View key="r" style={{ position: 'absolute', left: 2.5 * s, top: 2.5 * s, width: 15 * s, height: 15 * s, borderWidth: 2 * s, borderTopWidth: 0, borderColor: color, borderRadius: (15 * s) / 2 }} />, <View key="s" style={bar(9, 1, 2, 8)} />],
+    camera: () => [<View key="b" style={{ position: 'absolute', left: 1.5 * s, top: 4.5 * s, width: 17 * s, height: 12 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 2.5 * s }} />,
+      <View key="v" style={bar(6.5, 2.5, 7, 3, 1.5)} />, <View key="l" style={disc(7.5, 8, 5)} />],
+    mic: () => [<View key="c" style={{ position: 'absolute', left: 6.5 * s, top: 2 * s, width: 7 * s, height: 11 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 3.5 * s }} />,
+      <View key="a" style={{ position: 'absolute', left: 4 * s, top: 7 * s, width: 12 * s, height: 9 * s, borderTopWidth: 0, borderLeftWidth: 2 * s, borderRightWidth: 2 * s, borderBottomWidth: 2 * s, borderBottomLeftRadius: 6 * s, borderBottomRightRadius: 6 * s, borderColor: color }} />,
+      <View key="s" style={bar(9, 16, 2, 3)} />],
+    folder: () => [<View key="t" style={bar(2, 4, 7, 3, 1)} />, <View key="b" style={bar(2, 6, 16, 10.5, 2)} />],
+    usb: () => [<View key="h" style={{ ...bar(6.8, 1, 6.4, 6.4, 1), ...turn(45) }} />, <View key="s" style={bar(9, 4, 2, 12)} />,
+      <View key="l" style={{ ...bar(4, 5.5, 2, 6.5), ...turn(22) }} />, <View key="r" style={{ ...bar(14, 5.5, 2, 6.5), ...turn(-22) }} />,
+      <View key="e1" style={bar(2.2, 4, 2.6, 2.6, 0.8)} />, <View key="e2" style={bar(15.2, 4, 2.6, 2.6, 0.8)} />, <View key="e3" style={bar(7.75, 14.5, 4.5, 4.5, 1)} />],
+    statusitem: () => [<View key="r" style={ring(3, 3, 14, 2)} />, <View key="n" style={{ ...bar(9, 9.2, 6.5, 2), ...turn(-40) }} />],
+  };
+  const draw = G[id] || G.grid;
+  return <View style={{ width: size, height: size, direction: 'ltr' }}>{draw().filter(Boolean)}</View>;
+}
+
+// Columns — two columns of sections on a wide window (the page opts in; the shared answer to the
+// maximized dead space, not a per-page hack). Under the threshold, or with fewer than two pieces,
+// the children simply stack as they always did. The threshold is the window's width: the sidebar
+// and the page paddings come out of it before the content is measured.
+export function Columns({ children, min = 1080 }) {
+  const win = useAppWindow();
+  const ws = useWindows();                 // { windows, visible, mounted, focused, desktop }
+  const w = (ws.windows.find((x) => x.id === win?.id) || {}).w || 0;
+  const kids = (Array.isArray(children) ? children.flat() : [children]).filter((c) => c != null && c !== false);
+  if (!w || w < min || kids.length < 2) return <View style={{ gap: 20 }}>{kids}</View>;
+  const half = Math.ceil(kids.length / 2);
+  const col = (list) => <View style={{ flex: 1, minWidth: 0, gap: 20 }}>{list}</View>;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 20 }}>
+      {col(kids.slice(0, half))}
+      {col(kids.slice(half))}
     </View>
   );
 }

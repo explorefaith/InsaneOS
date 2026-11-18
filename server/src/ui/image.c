@@ -81,6 +81,15 @@ static uint32_t *load_file(const char *path, int *w, int *h, int *opaque) {
     return px;
 }
 
+/* The decoded premultiplied ARGB of a cached image, for readers outside the engine (media.accentFrom reads
+ * the wallpaper's colours without a second decode). Null when the image isn't loaded. */
+const uint32_t *image_decoded(Image *img, int *w, int *h) {
+    if (!img || !img->px) return NULL;
+    if (w) *w = img->w;
+    if (h) *h = img->h;
+    return img->px;
+}
+
 /* A path may end in "#<digits>": a version of a file that is rewritten in place (Remote Desk's card pictures). The
  * cache keeps one entry for the file and loads it again, into the same Image, when the version changes. */
 Image *image_get(const char *spec) {

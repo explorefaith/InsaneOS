@@ -1,4 +1,5 @@
 {
+  "battery.limit.unsupported": "Il firmware di questo dispositivo non supporta un limite di ricarica (manca charge_control_end_threshold).",
   "admin.actionFailed": "L’azione è terminata con un errore",
   "admin.forkFailed": "Impossibile avviare l’azione",
   "admin.invalidArgument": "Argomento non valido",
@@ -176,6 +177,9 @@
   "doc.badBlob": "Dati del documento non validi",
   "doc.itemCount": "Tra 1 e {max} elementi",
   "doc.noHelper": "L’assistente per i documenti (insane-doc) non è disponibile",
+  "dotdeb.badPackage": "Una voce del catalogo di DotDeb non ha superato la validazione.",
+  "dotdeb.noCatalog": "Il catalogo di DotDeb non è installato su questo sistema.",
+  "dotdeb.unknownApp": "{id} non è nel catalogo di DotDeb.",
   "errno.E2BIG": "Elenco degli argomenti troppo lungo",
   "errno.EACCES": "Permesso negato",
   "errno.EAGAIN": "Risorsa temporaneamente non disponibile",
@@ -719,6 +723,7 @@
   "wallpaper.downloadFailed": "Impossibile scaricare lo sfondo",
   "wallpaper.removeFailed": "Impossibile cambiare lo sfondo",
   "wallpaper.notDownloaded": "Quello sfondo non è stato scaricato",
+  "wallpaper.badUrl": "Quell’URL non è consentito: solo indirizzi https senza parte utente.",
   "wallpaper.badImage": "Quel file non è un’immagine PNG o JPEG",
   "wallpaper.imageTooBig": "Quell’immagine è troppo grande: fino a 64 MB e 100 megapixel",
   "wallpaper.imageUnreadable": "Impossibile leggere quel file",
@@ -828,5 +833,7 @@
   "termconf.verifyFailed": "il nuovo file non si è riletto uguale, quindi non è stato spostato nulla",
   "termconf.corrupt": "il file non è un JSON valido per il Terminale",
   "termconf.newer": "il file è stato scritto da un Insane OS più recente",
-  "vm.shareProtected": "Una cartella condivisa in scrittura non può essere né contenere un file protetto di questo computer (come la configurazione del Terminale o settings.json): la macchina potrebbe cambiare ciò che questo computer esegue. Condividila in sola lettura, o condividi una cartella senza quel file."
+  "vm.shareProtected": "Una cartella condivisa in scrittura non può essere né contenere un file protetto di questo computer (come la configurazione del Terminale o settings.json): la macchina potrebbe cambiare ciò che questo computer esegue. Condividila in sola lettura, o condividi una cartella senza quel file.",
+  "uninstall.unsupported": "Questa app non può essere disinstallata da qui.",
+  "weather.fetchFailed": "Impossibile contattare il servizio meteo"
 }

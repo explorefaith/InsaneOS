@@ -6,7 +6,7 @@ import {
   BatteryGlyph, powerPrefs,
 } from '@insaneos/sdk';
 import { useEffect, useState } from 'react';
-import { GroupBox, SettingRow, PageHeader, PopUp, Stack, Badge } from './ui.jsx';
+import { GroupBox, SettingRow, PageHeader, PopUp, Stack, Badge, PaneGlyph } from './ui.jsx';
 
 const mins = (m) => m * 60;
 const duration = (tr, m) => (m >= 60 ? tr('prefs.power.hm', { h: Math.floor(m / 60), m: m % 60 }) : tr('prefs.power.m', { m }));
@@ -128,7 +128,7 @@ export function PowerSettings() {
   return (
     <Stack>
       {hasBattery ? <BatteryCard b={b} tr={tr} />
-        : <PageHeader icon={<Badge glyph="⚡" color="#30d158" size={44} />} title={tr('prefs.power.onPower')} subtitle={tr('prefs.power.noBattery')} />}
+        : <PageHeader icon={<Badge color="#30d158" size={44}><PaneGlyph id="power" size={26} /></Badge>} title={tr('prefs.power.onPower')} subtitle={tr('prefs.power.noBattery')} />}
       <GroupBox>
         <ProfileRow tr={tr} />
       <QualityRow tr={tr} />
