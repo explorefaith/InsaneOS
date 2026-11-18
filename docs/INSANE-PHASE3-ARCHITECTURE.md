@@ -89,6 +89,25 @@ VERIFIED → BLOCKED.
   login cancels the pending restart (sessiond.c:850-864) — no unbounded restart loop on the
   boot path.
 
+## 8. WM/workspace audit (round 1 — agent report, 10 findings)
+
+| ID | Sev | Finding | Status |
+|---|---|---|---|
+| W1 | P1 | js_wm_end drained promise jobs WITHOUT the interrupt budget — a runaway chain pending at drag end froze the compositor forever | FIXED (drain_jobs_armed exposed from js.c; make clean; C tests green except the documented imager pair) |
+| W2 | P2 | Insane Flow had NO Super+arrows snapping and no drag-to-edge snap (snap: true never set; wm.snapKey dead; keygrab kept ❖arrows only for Classic) | FIXED (snap: true + the shortcuts entry + keygrab rows for both flow tables; keygrab_test ok) |
+| W3 | P2 | Meta+Alt+B "reveal menu bar" ran a no-op (the top bar was removed; nothing subscribes) | FIXED (entry removed) |
+| W4 | P2 | the whole Window-menu feature set (Move & Resize halves/quarters/thirds, wm.arrange, wm.center) was unreachable in Flow after the bar's removal | FIXED (the CSD window menu carries Center + the full Move & Resize submenu) |
+| W5 | P2 | the JS maximized drag-out path clamped only the top — a maximized window could be dragged entirely off screen | FIXED (wm.move clamps every side to the pointer display with grab.c's 48 px keep) |
+| W6 | P3 | KG_TAKE shortcuts fire over a fullscreen Linux app (acting on invisible windows) | PARTIAL: the snap handler gates on wayland.fullscreen(); the general wl.c policy (gating ❖1..9/⌥F4 over fullscreen, while keeping ⌃⇧Esc force-quit reachable) is a UX decision — ledgered, not changed |
+| W7 | P3 | the CSD resize fallback (Linux windows via JS) had no upper clamps | FIXED (display-bounded, grab.c's rule) |
+| W8 | P3 | the PiP frame could be dragged/resized off screen | FIXED (48 px keep within its display) |
+| W9 | P3 | the Overview could open over an own-app fullscreen window (its cards unreachable under the floating layer) | FIXED (blocked() also checks own fullscreen on the active desktop) |
+| W10 | P3 | F4 (launcher) and F12 (Terminal) silently die over Linux windows (not in the keygrab tables) | LEDGERED: adding F-keys to the grab tables changes their behavior inside Linux apps — needs a UX call |
+
+Shortcut-conflict sweep (the agent's): no unintended conflicts; ❖`'s double role is deliberate and gated; Classic Overview's ❖Tab remap is handled on both sides; ❖+letters over Linux apps never double-fire.
+
+VERIFIED WORKING (the agent's trace): drag (grab.c per-frame clamp), 8-edge resize, minimize/restore genie, maximize (dblclick + jitter guard), close guards, Classic's snap layouts + ❖arrows, center, fullscreen + Esc, PiP stickiness, focus/stacking per desktopmodel, Alt-Tab/❖Tab switcher (hold-open, digits, exclusions), workspaces (create/remove/switch/move/keyboard nav/indicator/rename/reorder, state saved, session restore), the shared Overview (grid, placeholders, drag to another desktop), hot corners.
+
 ## Agent audit reports (round 1)
 
 - WM/workspace agent: running.
