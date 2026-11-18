@@ -312,6 +312,7 @@
   "shortcuts.startMenu": "Menu Start",
   "shortcuts.showDesktop": "Mostra la scrivania",
   "shortcuts.dockAutohide": "Nascondi o mostra il Dock automaticamente",
+  "shortcuts.barReveal": "Mostra la barra superiore",
   "shortcuts.switchApps": "Passa da un’app all’altra",
   "shortcuts.cycleWindows": "Finestra successiva dell’app",
   "shortcuts.minimize": "Riduci a icona la finestra",

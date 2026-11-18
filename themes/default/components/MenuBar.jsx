@@ -4,7 +4,7 @@
 // <MenuBars> draws one full bar per display (0.8.8.6; Settings → Desktop & Dock → Menu Bar → "Show the menu bar on
 // every display", on by default): the app's menus are lit on the focused window's display and dimmed on the others,
 // where a click lights that bar and opens the menu there. sdk/menubarmodel.js decides which bar is lit.
-import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut, windows, activeDesktop, appsOpen, useAutohide } from '@insaneos/sdk';
+import { View, Text, useStore, sharedTicker, barDisplays, activeBarId, pinBar, wm, getApp, session, useMenusWithSpeech, t as tr, appName, formatDate, formatTime, keyboard, useSettings, direction, screen, windowAppName, InsaneGlyph, spotlight, PrivacyIndicators, StatusItems, help, menuClock, appMenuItems, recentItems, storeUpdates, windowMenuItems, menuBarPrefs, runShortcut, windows, activeDesktop, appsOpen, useAutohide, menuBarReveal } from '@insaneos/sdk';
 import { useState, useRef, useEffect } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -133,11 +133,12 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
   rectRef.current = { x0: area.x, y0: area.y, x1: area.x + area.w, y1: area.y + height };
   const areaRef = useRef(area);
   areaRef.current = area;
+  const pulse = useStore(menuBarReveal);                      // the keyboard's reveal (Meta+Alt+B)
   const keepOpen = open != null || !!controlCenter || !!clockPanel;
   const hideMode = bar.autohideMode;                          // 'never' | 'apps' | 'always'
   const slide = useAutohide({ enabled: hideMode !== 'never',
     mayHide: hideMode === 'always' || appsOpen(ws, activeDesktop.get()),
-    position: 'top', areaRef, rectRef, keepOpen, hideMs: BAR_HIDE_MS });
+    position: 'top', areaRef, rectRef, keepOpen, force: pulse, hideMs: BAR_HIDE_MS });
 
   const menus = {
     logo: { items: [

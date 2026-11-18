@@ -5,6 +5,11 @@
 //   menuBarPrefs(settings)        { keyboard, osk, bell, calendar, ccSystem, ccNetwork, ccWifi, ccBluetooth }
 //   menuBarPatch(settings, k, v)  the settings change that turns one of them on or off
 //   outputChoices(soundState)     the outputs a sound panel offers, the default one marked
+import { createStore } from './store.js';
+// the keyboard's reveal pulse (the shortcut below): the bar's machine treats it as force-show
+export const menuBarReveal = createStore(0);
+export const revealMenuBar = () => menuBarReveal.set((n) => n + 1);
+
 //   monthCells(year, month, first) the days of a month calendar, padded to whole weeks
 //
 // A bar on every display (0.8.8.6): Insane Flow draws one full menu bar per display, each with its own clock, status

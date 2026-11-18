@@ -110,7 +110,7 @@ export { notify, dismissNotification, useNotifications, notifications, notifyHis
 export { playFx, soundFxPrefs } from './soundfx.js';
 export { widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, catalogOf, resizeWidget, setWidgetCfg, tempColor, tempWord, TEMP_THRESHOLDS } from './widgetmodel.js';
 export { registerStatusItem, StatusItems, statusItems } from './statusitems.js';
-export { MENUBAR_DEFAULTS, menuBarPrefs, menuBarPatch, cleanerItemShown, outputChoices, monthCells, weekStartFor } from './menubarmodel.js';   // what the bar shows (issue #58)
+export { MENUBAR_DEFAULTS, menuBarPrefs, menuBarPatch, cleanerItemShown, outputChoices, monthCells, weekStartFor, menuBarReveal, revealMenuBar } from './menubarmodel.js';   // what the bar shows (issue #58)
 export { menuBarEveryDisplay, barDisplays, hasBar, displayIdFor, activeBarId, pinBar, focusDisplayId, panelLeft, inBar, insideDisplay } from './menubarmodel.js';   // a bar on every display
 export { sharedTicker, idleStore } from './ticker.js';
 export { companion, statusItem, companionEvent, statusItemEvent } from './companion.js';
