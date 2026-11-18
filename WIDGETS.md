@@ -145,3 +145,44 @@ the sparkline cards; lab mock server for the offline lab)
 ## Ideas (not built)
 
 - Weather (out of scope by the brief: needs a data-source decision).
+
+### M5 — Crypto (Binance) — NOT STARTED; the full implementation plan (2026-11-18)
+
+**Discovered for the build** (use these, they are verified): `sec/json.h` has `json_parse(buf, n,
+&JDoc, NULL, 0)`, `json_get(JVal, key)`, `json_num(JVal, key, def)` (doubles ✓), `JVal->kid`/`len`
+for array walks; `pkg/http.h` `fetch_batch(FetchItem*, n, progress, ud)` writes to `dest.part` →
+`dest` (so fetch to a /tmp file, read, parse, unlink); the Makefile hw sources are Makefile line
+~59 (`SRC := src/hw/wallpaper_admin.c …` — add `src/hw/crypto_admin.c`), and
+`build/wallpaper-admin-test` (Makefile ~951) is the recipe template for the new C test (copy its
+exact prerequisites/compile line; check whether pkg/http.c needs adding for the fetch symbols).
+
+**New file `server/src/hw/crypto_admin.c`** (~140 lines):
+- `static int symbol_ok(s, n)`: only A–Z 0–9, length 2–20.
+- `static int fetch_url(host, path, dest, max)`: FetchItem (it.max = 1 MiB), fetch_batch, 200 && size > 0.
+- `crypto-ticker "<SYMBOL>"`: validate → try `https://api.binance.com/api/v3/ticker/24hr?symbol=X`,
+  on failure `https://data-api.binance.vision/...` (the allowlist's second host) → fetch to
+  `/tmp/crypto-t.json` (root, 0644) → read + `json_parse` → rebuild a TRUSTED small answer
+  `{"symbol":"X","price":N,"change":N,"changePct":N,"high":N,"low":N,"volume":N}` via
+  `json_num` (the shell never sees Binance's raw bytes) → unlink → `admin_say("OK", "%s", out)`.
+- `crypto-klines "<SYMBOL>"`: `…/api/v3/klines?symbol=X&interval=15m&limit=96` → parse the root
+  array, emit `{"closes":[[ms,close],…]}` from kid[0] (ms) and kid[4] (close) → OK passthrough.
+- No user-info in URLs, no redirects handling beyond fetch_batch's own, `admin_err` with codes:
+  `crypto.badSymbol`, `crypto.noData`, `crypto.badAnswer` (errors.json ×5).
+- `hw_admin.h`: two declarations + `HW_ADMIN_ACTIONS` entries `A_FORK | A_ANYONE`.
+
+**`tests/crypto_test.c`** (recipe = the wallpaper-admin-test copy): symbol_ok's accept/reject
+table (length, charset, lowercase rejected); ticker extraction from a real-shaped sample JSON,
+malformed JSON, an object missing fields, an empty body → the error paths; the klines walk on a
+two-row sample. No network in the test — the fetch paths are exercised by the lab mock.
+
+**The lab mock server** (offline): a tiny node script under tools/ (node:3001) serving the two
+endpoint shapes on api.binance.com paths; the lab instance reaches it via `--host-allowlist`…
+NO — the allowlist is compiled. For the mock: run the mock and point the lab's /etc/hosts? NO
+(root write). Honest alternative: the C test covers the parsing; the REAL endpoint needs the
+live pass (state it in the manual list).
+
+**Shell side (after the C lands)**: sdk/crypto.js — a small store: cfg list of pairs, refresh
+15 s (min 10 s), one fetch shared per pair, stale marking, backoff on 429/418; the CryptoCard
+(small/medium/large per the brief, the sparkline from the closes, green/red + sign, locale
+numbers, "Data: Binance"); the Settings page crypto rows; i18n ×5. Node model test for
+formatting/staleness/backoff.
