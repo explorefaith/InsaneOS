@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults, placement, wm } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -495,3 +495,52 @@ const layoutToRender = () => {
 };
 layoutToRender();
 widgetLayout.subscribe(layoutToRender);
+
+// Live placement (bug C part C): while the Settings window is minimized and ONE widget is handed
+// over, the desktop shows a glass toolbar bottom-centre — live S/M/L resize, the grid snap,
+// Remove, Cancel and Done (Esc and Enter from the keyboard). Done/Cancel clear the placement and
+// bring Settings back on the same section.
+export function PlaceLayer() {
+  const p = useStore(placement);
+  const editing = useStore(widgetsEditing);
+  const [snap, setSnap] = useState(true);
+  useEffect(() => {
+    if (!p) return undefined;
+    const exit = (keep) => {
+      const pl = placement.get();
+      if (pl && !keep) {
+        const list = (widgetLayout.get() || []).map((w) => (String(w.id) === String(pl.id) ? { ...w, ...pl.snapshot } : w));
+        loadWidgets(list);
+      }
+      placement.set(null);
+      widgetsEditing.set(false);
+      wm.open('settings', { args: { section: 'widgets' } });
+    };
+    const onKey = (e) => { if (e.key === 'Escape') exit(false); else if (e.key === 'Enter') exit(true); };
+    return addListener('keydown', onKey);
+  }, [p]);
+  if (!p || !editing) return null;
+  const w = (widgetLayout.get() || []).find((x) => String(x.id) === String(p.id));
+  const btn = (label, onClick, active) => (
+    <View onClick={onClick} style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
+      backgroundColor: active ? 'rgba(10,132,255,0.35)' : 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)' }}>
+      <Text style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{label}</Text>
+    </View>
+  );
+  return (
+    <Layer name="drag">
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 110, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8, borderRadius: 14,
+          backgroundColor: 'rgba(20,20,26,0.82)', border: '1px solid rgba(255,255,255,0.16)', boxShadow: '0 14px 40px rgba(0,0,0,0.5)' }}>
+          {btn('S', () => resizeWidget(p.id, -Math.round(w.w * 0.15), -Math.round(w.h * 0.15), useWorkArea()))}
+          {btn('M', () => resizeWidget(p.id, 0, 0, useWorkArea()))}
+          {btn('L', () => resizeWidget(p.id, Math.round(w.w * 0.15), Math.round(w.h * 0.15), useWorkArea()))}
+          {btn(snap ? '⌗ on' : '⌗ off', () => setSnap(!snap), snap)}
+          {btn('✕', () => { removeWidget(p.id); exit(true); })}
+          {btn('Cancel', () => exit(false))}
+          {btn('Done', () => exit(true), true)}
+        </View>
+      </View>
+    </Layer>
+  );
+}

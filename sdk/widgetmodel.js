@@ -142,3 +142,8 @@ export function widgetDefaults(sw, sh) {
     { type: 'insane-visualizer', id: 'viz', x: 40, y: Math.max(140, sh - 30 - 96 - 130), w: 320, h: 118 },
   ];
 }
+
+// Live placement (bug C's part C, M1b): the Settings page hands ONE widget to the desktop —
+// the window minimizes, the card drags in the edit mode, and this store carries the session:
+// the id and an exact snapshot for Cancel. Done or Cancel clears it and Settings re-opens.
+export const placement = createStore(null);

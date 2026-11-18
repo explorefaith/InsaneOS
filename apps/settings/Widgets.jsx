@@ -8,7 +8,7 @@
 import {
   View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
   widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent,
-  sharedTicker, useBattery, nowPlaying, formatBytes,
+  sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp } from './ui.jsx';
 import { useState } from 'react';
@@ -194,6 +194,8 @@ export function WidgetsSettings() {
                       <IconBtn key={sk} small glyph={sk === 'small' ? 'S' : sk === 'medium' ? 'M' : 'L'} label={tOptional(`settings.widgets.size.${sk}`)}
                         onClick={() => setSize(w.id, SIZES.find(([kk]) => kk === sk)?.[1] ?? 1)} active={size === sk} />
                     ))}
+                    <IconBtn small glyph="⇲" label={tOptional('settings.widgets.tipMove') || 'Place on the desktop'}
+                      onClick={() => { placement.set({ id: w.id, snapshot: { x: w.x, y: w.y, w: w.w, h: w.h } }); widgetsEditing.set(true); try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ } }} />
                     <IconBtn small glyph="✕" danger label={tOptional('settings.widgets.remove') || 'Remove'}
                       onClick={() => { try { removeWidget(w.id); } catch (e) { /* already gone */ } }} />
                   </View>

@@ -786,6 +786,7 @@
   "widgets.sample": "Sample",
   "widgets.tipAdd": "Add to the desktop",
   "widgets.tipConfigure": "Configure",
+  "widgets.tipMove": "Place on the desktop",
   "widgets.tipRemove": "Remove the newest one",
   "widgets.reset": "Reset layout",
   "widgets.pick": "Pick a widget below"

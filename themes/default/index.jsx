@@ -76,7 +76,7 @@ import { IslandStrip } from './components/IslandStrip.jsx';
 import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
-import { WidgetGallery, widgetsEditing } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
+import { WidgetGallery, widgetsEditing, PlaceLayer } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
 import { Menu } from './components/Menu.jsx';
 
 const MENU_H = 0;   // the top bar is gone — the island strip lives on the left edge (IslandStrip.jsx)
@@ -341,6 +341,7 @@ function App() {
         )}
         {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
         <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
+        <PlaceLayer />
         <BenchWidgets />
 
       </View>
