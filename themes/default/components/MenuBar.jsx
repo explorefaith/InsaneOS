@@ -16,6 +16,10 @@ const clockTicker = sharedTicker(format, 1000);
 // the [x, width] of a bar item (global), for the panel it opens to sit under it
 const itemAt = (ref) => { try { const [x, , w] = insane.getLayout(ref.current.id); return [x, w]; } catch (e) { return null; } };
 
+// bug C: how long the hidden bar waits after the pointer leaves before it slides away again
+// (the task's 2–3 s; the reveal delay and the cover delay are the shared hook's defaults).
+const BAR_HIDE_MS = 2500;
+
 function BarItem({ t, children, onClick, active, anchorRef }) {
   const [hover, setHover] = useState(false);
   return (
@@ -130,8 +134,10 @@ export function MenuBar({ t, height, focused, onLaunchpad, onControlCenter, cont
   const areaRef = useRef(area);
   areaRef.current = area;
   const keepOpen = open != null || !!controlCenter || !!clockPanel;
-  const slide = useAutohide({ enabled: bar.autohide, mayHide: appsOpen(ws, activeDesktop.get()),
-    position: 'top', areaRef, rectRef, keepOpen, hideMs: 2500 });
+  const hideMode = bar.autohideMode;                          // 'never' | 'apps' | 'always'
+  const slide = useAutohide({ enabled: hideMode !== 'never',
+    mayHide: hideMode === 'always' || appsOpen(ws, activeDesktop.get()),
+    position: 'top', areaRef, rectRef, keepOpen, hideMs: BAR_HIDE_MS });
 
   const menus = {
     logo: { items: [

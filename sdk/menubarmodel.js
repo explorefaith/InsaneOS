@@ -25,9 +25,11 @@
 // 0.8.8.6) shows the bar as it was: no migration. The Cleaner item (the apple) keeps its own key,
 // cleaner.menuItem, which Cleaner → Settings already writes; the Settings row writes the same key.
 export const MENUBAR_DEFAULTS = {
-  autohide: true,       // bug C: with an app window on the desktop the bar hides (the Dock's own
-                        // machine, sdk/autohide.js); the top edge reveals it and it goes again
-                        // 2.5 s after the pointer leaves. With no window open it never hides.
+  autohideMode: 'apps', // bug C: 'never' | 'apps' (hide while an app window is open — the default)
+                        // | 'always' (only the top edge brings it back). The machine is the Dock's
+                        // own (sdk/autohide.js); with no window open 'apps' never hides.
+  autohide: true,       // the boolean from the first Bug C cut, kept for settings.json files that
+                        // already carry it; menuBarPrefs maps it to autohideMode when no mode says
   keyboard: false,      // the keyboard layout's label in the bar (US, FR…): off by default since round 4 —
                         // the unwanted visible label is gone, switching stays in Settings → Keyboard and
                         // the row in Menu Bar settings brings the item back for those who used it
@@ -44,6 +46,8 @@ export function menuBarPrefs(s) {
   const own = s && typeof s.menuBar === 'object' && s.menuBar ? s.menuBar : {};
   const p = { ...MENUBAR_DEFAULTS };
   for (const k of Object.keys(MENUBAR_DEFAULTS)) if (typeof own[k] === 'boolean') p[k] = own[k];
+  if (typeof own.autohideMode === 'string' && ['never', 'apps', 'always'].includes(own.autohideMode)) p.autohideMode = own.autohideMode;
+  else if (own.autohide === false) p.autohideMode = 'never';   // the first cut's boolean, honored
   return p;
 }
 
@@ -52,10 +56,11 @@ export const cleanerItemShown = (s) => ((s && s.cleaner) || {}).menuItem !== fal
 
 // A shallow patch for settings.set: only "menuBar" (or "cleaner") changes, every other choice in it is kept.
 export function menuBarPatch(s, key, on) {
+  const own = s && typeof s.menuBar === 'object' && s.menuBar ? s.menuBar : {};
   if (key === 'everyDisplay') return { menuBarAllDisplays: !!on };
+  if (key === 'autohideMode') return { menuBar: { ...own, autohideMode: on } };
   if (key === 'cleaner') return { cleaner: { ...((s && s.cleaner) || {}), menuItem: !!on } };
   if (!(key in MENUBAR_DEFAULTS)) return {};
-  const own = s && typeof s.menuBar === 'object' && s.menuBar ? s.menuBar : {};
   return { menuBar: { ...own, [key]: !!on } };
 }
 

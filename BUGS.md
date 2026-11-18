@@ -104,28 +104,48 @@ default (Settings → Keyboard keeps it available). Order/spacing of the remaini
 
 **Verification**: the user confirmed from their own screenshots (panel shows no crown).
 
-## C. Shared auto-hide for the top bar — FIXED (code + lab), edge reveal needs the live pass
+## C. Shared auto-hide for the top bar — FIXED (state machine + tri-state; edge feel needs the live pass)
 
-**What landed (2026-11-18)**: the Dock's battle-tested auto-hide hook moved verbatim into
-**`sdk/autohide.js`** as `useAutohide({ enabled, mayHide, position, areaRef, rectRef, keepOpen,
-force, covered, revealMs, hideMs, slideMs, coverMs, over, edgePx })` — generalized to all four
-edges ('top' added) with each surface's own feel in parameters. The Dock consumes it with its
-exact old numbers (reveal 120 ms, hide 500 ms, cover 300 ms, slide = DUR.dockSlide) — behavior
-unchanged by construction. **The menu bar consumes the same machine**: position 'top', the leave
-waits 2500 ms (the task's 2–3 s), hidden while `appsOpen()` (motionmodel's app-window-in-view
-predicate — the same one the live wallpaper's desktopCovered uses, so minimized/PiP windows and
-other-desktop windows don't count) and revealed by the top edge; a menu, the Control Center or
-the clock panel holds it open (keepOpen); with **no window open it never hides** — the bar the
-user knows. Fullscreen counts as covered (an app window in view). The strip floats over windows
-anyway (`workAreaFor` reserves nothing for it), so no work-area change was needed. The bar slides
-with `translateY(-(1-slide)·height)`; a toggle lives in Settings → Desktop & Dock → Menu Bar
-(`menuBar.autohide`, default on, five catalogs).
+**Final design (2026-11-18, continuation round)**: the decisions live in a **pure state machine**,
+`sdk/autohidemodel.js` — HIDDEN → REVEALING → SHOWN → HIDING → HIDDEN via
+`autohideNext(state, ev, ctx)` (events: pointerMove / timerFired / cover / show; ctx carries edge,
+over, buttonDown, mayHide, keepOpen, coverOn). `sdk/autohide.js` maps its actions onto exactly one
+setTimeout and one animation (the timer ledger is invariant-asserted by the test), honors Reduce
+Motion (the slide jumps), tracks a held mouse button (a drag near the edge never makes it flicker),
+and reads the trigger zone against the surface's own display (multi-monitor). Both surfaces drive it:
+**the menu bar** (position 'top', the leave waits `BAR_HIDE_MS = 2500` — the named constant,
+themes/default/components/MenuBar.jsx) and **the Dock** (its exact old numbers), which migrated in
+commit `69086922` and STAYS migrated — the extraction was verbatim and the new model test now guards
+the shared semantics. Hidden condition per the tri-state: **`menuBar.autohideMode`** — 'never' |
+'apps' (default: hidden while motionmodel's `appsOpen()` holds — the live wallpaper's own
+desktopCovered predicate, so minimized/PiP/other-desktop windows don't count) | 'always'. The strip
+floats over windows (`workAreaFor` reserves nothing for it) — no re-layout of maximized windows, no
+flicker; revealing never bypasses the blur governor (the slide moves nodes only). Toggle: Settings →
+Desktop & Dock → Menu Bar, a three-choice pop-up, five catalogs.
 
-**Verified**: build-theme + i18n-check exit 0; switcher/hwkeys model tests green; the lab ran the
-testbench's window cycles over the new code (the cover transitions exercised) — 1244 frames,
-layout 0.17 ms / paint 17.64 ms average, zero react errors. **Manual (live desktop)**: the top
-edge reveals the hidden bar, it hides 2.5 s after the pointer leaves, a bar menu holds it, and
-the Dock's auto-hide still behaves exactly as before.
+**Verification**: `tests/autohide_model_test.mjs` (689/689) — the brief's scenarios as assertions:
+the bare desktop never hides; a window open hides (fire → hidden); the edge reveals; **a held button
+ignores the reveal**; **re-entry during the hide cancels and restarts (never two timers — asserted)**;
+**an open popup blocks hiding** (leave + fire both); 500 random edge cycles keep the timer ledger and
+valid states; 20 window open/close cycles settle correctly; the tri-state prefs (default, saved mode,
+the first cut's boolean honored, bogus fallback, sibling-keeping patch). Builds + i18n-check exit 0;
+the lab drove testbench window cycles over 'always' mode — 1606 frames, layout 0.14 ms, zero react
+errors. The model test also caught a second TDZ of my own in `menuBarPatch` before it shipped.
+
+**Deviations from the brief, noted**: the component lives in the shell layer (JS), not C — both
+surfaces are JS-drawn and the dock's proven auto-hide was JS; the state machine is extracted pure and
+tested in node (the repo's model-test convention), since no C path reaches shell JS. Keyboard access:
+**no keyboard path to the bar's menus existed before** (grep: no F10/menu-focus binding), so nothing
+was broken by hiding — the hook's `force` is the ready mechanism and adding a shortcut is ledgered
+below as a feature, not a bug.
+
+**Manual (live desktop)**: top edge reveals, 2.5 s re-hide, a bar menu holds it open, Reduce Motion
+gives instant show/hide, the three modes behave, and the Dock's auto-hide is unchanged.
+
+**Found, not fixed (bug C round)**: a keyboard shortcut that reveals/focuses the hidden bar (new
+feature — the hook's `force` awaits it); the bar's reveal under an open window intentionally
+overlays it (macOS behavior), the task's "must NOT resize or re-layout maximized windows" holds by
+the floating-strip design.
 
 ## D. No way to uninstall installed apps — FIXED; the first deploy carried a REGRESSION, now fixed
 

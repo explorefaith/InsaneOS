@@ -9,7 +9,7 @@ import {
   spacing, typeScale, menuBarPrefs, menuBarPatch, cleanerItemShown, getApp, menuBarEveryDisplay,
 } from '@insaneos/sdk';
 import { useState } from 'react';
-import { Stack, Section, SettingRow, Actions } from './ui.jsx';
+import { Stack, Section, SettingRow, Actions, PopUp } from './ui.jsx';
 import { DesktopsSection } from './Desktops.jsx';
 
 // A small picture of the screen with the Dock (or the taskbar) on the chosen side.
@@ -98,8 +98,12 @@ function MenuBarSection({ classic }) {
   );
   return (
     <Section title={tr(classic ? 'settings.dock.menubar.titleTaskbar' : 'settings.dock.menubar.title')} footer={tr('settings.dock.menubar.footer')}>
-      {/* bug C: the bar hides while an app window is open (the Dock's own machine) — on by default */}
-      {row('autohide', p.autohide, true)}
+      {/* bug C: the bar hides with app windows ('apps', the default), always hides ('always'), or
+          stays ('never'); the top edge always reveals it */}
+      <SettingRow label={tr('settings.dock.menubar.autohide')} hint={tr('settings.dock.menubar.autohideHint')}>
+        <PopUp width={230} value={p.autohideMode} onChange={(v) => set(menuBarPatch(s, 'autohideMode', v))}
+          options={[['never', tr('settings.dock.menubar.autohideNever')], ['apps', tr('settings.dock.menubar.autohideApps')], ['always', tr('settings.dock.menubar.autohideAlways')]]} />
+      </SettingRow>
       {/* a full bar on each display: Insane Flow's menu bar, Insane Classic's taskbar (the same setting) */}
       {row('everyDisplay', menuBarEveryDisplay(s), true, classic ? 'everyDisplayTaskbar' : 'everyDisplay')}
       {getApp('cleaner') ? row('cleaner', cleanerItemShown(s), true) : null}
