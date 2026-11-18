@@ -201,6 +201,8 @@ export function PaneGlyph({ id, size = 14, color = '#fff' }) {
       <View key="l" style={{ ...bar(4, 5.5, 2, 6.5), ...turn(22) }} />, <View key="r" style={{ ...bar(14, 5.5, 2, 6.5), ...turn(-22) }} />,
       <View key="e1" style={bar(2.2, 4, 2.6, 2.6, 0.8)} />, <View key="e2" style={bar(15.2, 4, 2.6, 2.6, 0.8)} />, <View key="e3" style={bar(7.75, 14.5, 4.5, 4.5, 1)} />],
     statusitem: () => [<View key="r" style={ring(3, 3, 14, 2)} />, <View key="n" style={{ ...bar(9, 9.2, 6.5, 2), ...turn(-40) }} />],
+    widgets: () => [<View key="a" style={bar(2.5, 2.5, 6.5, 6.5, 1.5)} />, <View key="b" style={{ position: 'absolute', left: 11 * s, top: 2.5 * s, width: 6.5 * s, height: 6.5 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 1.5 * s }} />,
+      <View key="c" style={{ position: 'absolute', left: 2.5 * s, top: 11 * s, width: 6.5 * s, height: 6.5 * s, borderWidth: 2 * s, borderColor: color, borderRadius: 3.25 * s }} />, <View key="d" style={bar(11.5, 12.5, 4, 4, 2)} />],
   };
   const draw = G[id] || G.grid;
   return <View style={{ width: size, height: size, direction: 'ltr' }}>{draw().filter(Boolean)}</View>;

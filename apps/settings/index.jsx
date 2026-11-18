@@ -651,7 +651,13 @@ function Session() {
 
 // Sidebar groups (as in TangoOS): [id, component, icon color]. The pictogram itself comes from the
 // shared PaneGlyph set (ui.jsx) — one drawn, monochrome icon per section, the same one the pages
-// that need a picture use.
+// that need a picture use. Section ids and glyph ids differ where English names diverge; the map
+// below is that bridge (tests/paneglyph_test.mjs fails if a section id has no glyph at all).
+const GLYPH_OF = {
+  widgets: 'widgets', displays: 'display', network: 'globe', bluetooth: 'bt',
+  notifications: 'bell', printers: 'printer', sharing: 'share', datetime: 'clock',
+  defaultapps: 'grid', privacy: 'lock',
+};
 const GROUPS = [
   [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
   [['network', NetworkSettings, '#0a84ff'], ['bluetooth', BluetoothSettings, '#0a84ff'], ['sound', SoundSettings, '#ff375f'], ['notifications', NotificationsSettings, '#ff3b30'], ['printers', PrintersSettings, '#636366'], ['clipboard', ClipboardSettings, '#5e5ce6'], ['sharing', SharingSettings, '#34c759'], ['cloud', CloudSettings, '#0a84ff']],
@@ -670,7 +676,7 @@ registerDockActions('settings', () => SECTIONS.filter(([id]) => sectionShown(id,
   .map(([id]) => ({ id, label: `settings.section.${id}`, args: { section: id } })));
 
 function SectionIcon({ id, color, size = 20 }) {
-  return <Badge color={color} size={size}><PaneGlyph id={id} size={Math.round(size * 0.62)} /></Badge>;
+  return <Badge color={color} size={size}><PaneGlyph id={GLYPH_OF[id] || id} size={Math.round(size * 0.62)} /></Badge>;
 }
 
 // Session user: initials, name and whether they are an administrator.
