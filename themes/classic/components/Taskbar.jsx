@@ -18,8 +18,7 @@ import {
   View, Text, Layer, useSettings, useWindows, wm, windowTitle, formatTime, formatDate, t as tr, settings, sharedTicker,
   useDockEntries, dockActivate, dockMenu, useStore, dockDrag, beginDockDrag, registerDockTarget, dockDragJustEnded,
   useTrash, openTrash, refreshTrash, trashMenu, StatusItems, PrivacyIndicators, keyboard, useSound, defaultSink, InsaneLogo,
-  mainDisplay, toggleShowDesktop, menuBarPrefs,
-} from '@insaneos/sdk';
+  mainDisplay, toggleShowDesktop, menuBarPrefs, useBattery, BatteryGlyph } from '@insaneos/sdk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 import { SearchGlyph, TaskViewGlyph, NetworkGlyph, SpeakerGlyph, BellGlyph, TrashGlyph } from '../glyphs.jsx';
@@ -214,6 +213,7 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
   );
 
   const level = out ? (out.mute || out.level === 0 ? 0 : out.level < 0.5 ? 1 : 2) : 2;
+  const batt = useBattery();
   const qsGlyphs = (
     <View style={{ flexDirection: vert ? 'column' : 'row', alignItems: 'center', gap: vert ? 6 : 8, direction: 'ltr' }}>
       <NetworkGlyph color={t.text} size={15} off={!net.online} />
@@ -228,6 +228,13 @@ export function Taskbar({ t, pos, align, area, start, onStart, onSearch, taskVie
       {!vert && bar.keyboard && keyboard.configured().length > 1 ? (
         <BarButton t={t} width={36} onClick={() => keyboard.next()}>
           <Text style={{ fontSize: 11, fontWeight: 600, color: t.text }}>{keyboard.label(keyboard.active())}</Text>
+        </BarButton>
+      ) : null}
+      {batt && batt.hasBattery ? (
+        <BarButton t={t} vert={vert} width={vert ? 44 : undefined} onClick={() => wm.open('settings', { args: { section: 'power' } })}
+          style={vert ? { height: 52 } : { paddingHorizontal: 8, gap: 6, flexDirection: 'row' }}>
+          <BatteryGlyph percent={batt.percent} charging={batt.charging} color={t.text} width={20} />
+          {vert ? null : <Text style={{ fontSize: 11, fontWeight: 600, color: t.text }}>{batt.percent >= 0 ? `${batt.percent}%` : '—'}</Text>}
         </BarButton>
       ) : null}
       <BarButton t={t} vert={vert} active={quick} width={vert ? 44 : 64} onClick={onQuick}>{qsGlyphs}</BarButton>

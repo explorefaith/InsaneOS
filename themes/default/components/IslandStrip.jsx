@@ -11,20 +11,44 @@
 // quick settings (QuickSettings.jsx).
 import {
   View, Text, useStore, sharedTicker, useBattery, runShortcut, notifyHistory, wm, getApp, windowTitle,
-  appName, addListener, useTween, tOptional,
+  appName, addListener, useTween, tOptional, formatDate,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { NotificationCenter } from './NotificationCenter.jsx';
 import { QuickSettings } from './QuickSettings.jsx';
 
-// the 24-hour clock: one timer shared by the strip (sdk/ticker.js stops it with the last subscriber)
+// the 24-hour clock: one timer shared by the strip (sdk/ticker.js stops it with the last subscriber);
+// the date rides a one-minute ticker — it changes once a day but the pill shows it always
 const clockTicker = sharedTicker((d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`, 1000);
+const dateTicker = sharedTicker((d) => formatDate(d, 'numeric'), 60000);
 
 const inside = (inst, ref) => { for (let n = inst; n; n = n.parent) if (n === ref.current) return true; return false; };
 
 const PILL_TOP = 6, PILL_H = 32, PANEL_TOP = PILL_TOP + PILL_H + 6;   // panels open under the pill
 
 // the strip's glyphs, drawn with views (no font dependency, like the old bar's)
+function NetGlyph({ color }) {
+  return (
+    <View style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 2 }}>
+      {[0, 1, 2].map((i) => (
+        <View key={i} style={{ position: 'absolute', bottom: 2 + i * 4, width: 12 - i * 4, height: 12 - i * 4,
+          borderRadius: (6 - i * 2), borderWidth: 1.6, borderColor: color,
+          borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: 'transparent' }} />
+      ))}
+      <View style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: color }} />
+    </View>
+  );
+}
+function AudioGlyph({ color }) {
+  return (
+    <View style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: 6, height: 8, borderTopWidth: 1.6, borderBottomWidth: 1.6, borderLeftWidth: 1.6, borderColor: color,
+        borderTopRightRadius: 1, borderBottomRightRadius: 1, marginLeft: -5 }} />
+      <View style={{ position: 'absolute', right: 3, top: 4, width: 4, height: 8, borderRadius: 2, borderWidth: 1.4, borderColor: color,
+        borderLeftColor: 'transparent', borderTopColor: 'transparent', borderBottomColor: 'transparent' }} />
+    </View>
+  );
+}
 function BellGlyph({ color, dot }) {
   return (
     <View style={{ width: 16, height: 16, alignItems: 'center' }}>
@@ -92,6 +116,7 @@ function AppPanel({ t, app, wins, left, top, onClose }) {
 // area: the display the island lives on; windows: the mounted windows; focused: the front window's id.
 export function IslandStrip({ t, area, windows, focused }) {
   const clock = useStore(clockTicker);
+  const date = useStore(dateTicker);
   const battery = useBattery();
   const [panel, setPanel] = useState(null);          // { kind, key, x, w, app?, wins? }
   const [revealed, setRevealed] = useState(false);
@@ -191,8 +216,15 @@ export function IslandStrip({ t, area, windows, focused }) {
         <StripButton t={t} anchor={(inst) => { refs.current['shot'] = { current: inst }; }} onClick={() => runShortcut('capture.full')}>
           <CameraGlyph color={t.menuText} />
         </StripButton>
-        <View style={{ paddingHorizontal: 2 }}>
-          <Text style={{ fontSize: 12, fontWeight: 600, color: t.menuText }}>{clock}</Text>
+        <StripButton t={t} anchor={(inst) => { refs.current['net'] = { current: inst }; }} onClick={() => openFor('quick', 'quick', 300)}>
+          <NetGlyph color={t.menuText} />
+        </StripButton>
+        <StripButton t={t} anchor={(inst) => { refs.current['audio'] = { current: inst }; }} onClick={() => openFor('quick', 'quick', 300)}>
+          <AudioGlyph color={t.menuText} />
+        </StripButton>
+        <View style={{ paddingHorizontal: 2, alignItems: 'center' }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: t.menuText, lineHeight: 1.1 }}>{clock}</Text>
+          <Text style={{ fontSize: 8, color: t.menuText, opacity: 0.6, lineHeight: 1.1 }}>{date}</Text>
         </View>
         <StripButton t={t} anchor={(inst) => { refs.current['bell'] = { current: inst }; }}
           onClick={() => {

@@ -7,7 +7,7 @@
 import {
   View, Text, Toggle, Slider, useSettings, useSound, defaultSink, sound, useBluetooth, setBluetoothPower,
   nightPrefs, useTheme, addListener, admin, wm, tOptional, t as tr,
-} from '@insaneos/sdk';
+  StatusItems, PrivacyIndicators } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
 const inside = (inst, ref) => { for (let n = inst; n; n = n.parent) if (n === ref.current) return true; return false; };
@@ -107,6 +107,10 @@ export function QuickSettings({ t, top, left, onClose }) {
         </View>
       ) : null}
       <BrightnessRow t={t} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>
+        <StatusItems color={t.text} />
+        <PrivacyIndicators />
+      </View>
     </View>
   );
 }

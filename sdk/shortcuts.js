@@ -191,8 +191,10 @@ export function useShortcuts({ grabs = '', table = [], onSuperTap: tap = null, a
   useEffect(() => { themeTable = table; setGrabs(grabs); changed(); }, [grabs]);
 }
 
-// Runs a module's entry by its id (Insane Classic's ❖⇧S is Screenshots' area capture).
-export function runShortcut(id) { added.find((x) => x.id === id)?.run(); }
+// Runs a module's entry by its id (Insane Classic's ❖⇧S is Screenshots' area capture). The
+// entry's `when` guard applies here too — the keyboard dispatcher honours it, so a button that
+// runs the same entry must not bypass it.
+export function runShortcut(id) { const e = added.find((x) => x.id === id); if (e && (typeof e.when !== 'function' || e.when())) e.run(); }
 
 export function addShortcuts(entries) {
   added = [...added, ...entries];

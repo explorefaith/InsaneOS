@@ -153,7 +153,7 @@ function Poof({ poof, size, reduce }) {
   );
 }
 
-export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTrashContext, trashFull = false, position = 'bottom', size = 54,
+export function Dock({ t, items: list, running, focusedApp = null, onOpen, onContext, onTrash, onTrashContext, trashFull = false, position = 'bottom', size = 54,
   magnify = true, maxSize = 86, hideMode = 'never', top = 0, keepOpen = false, area = { x: 0, y: 0, w: screen.width, h: screen.height } }) {
   // area: the display it is on (global coordinates); everything below is placed inside it
   const vert = position !== 'bottom';
@@ -452,7 +452,8 @@ export function Dock({ t, items: list, running, onOpen, onContext, onTrash, onTr
             style={{ position: 'absolute', ...place(i), width: sizes[i], height: sizes[i] }}>
             <app.Icon size={sizes[i]} />
             {running.includes(app.id) && (
-              <View style={{ position: 'absolute', ...dot(sizes[i]), width: 4, height: 4, borderRadius: 2, backgroundColor: dotColor }} />
+              <View style={{ position: 'absolute', ...dot(sizes[i]), width: app.id === focusedApp ? 14 : 4, height: 4, borderRadius: 2,
+                backgroundColor: app.id === focusedApp ? t.accent : dotColor }} />
             )}
           </View>
         )))}

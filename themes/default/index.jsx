@@ -79,7 +79,7 @@ import { Launchpad } from './components/Launchpad.jsx';
 import { WidgetGallery, widgetsEditing, PlaceLayer } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
 import { Menu } from './components/Menu.jsx';
 
-const MENU_H = 0;   // the top bar is gone — the island strip lives on the left edge (IslandStrip.jsx)
+const MENU_H = 0;   // the top bar is gone — the island strip lives top-centre (IslandStrip.jsx)
 // The defaults: Files first and the app launcher after it; the Trash is always last (sdk/dockmodel.js).
 const DOCK_ORDER = ['files', DOCK_LAUNCHER, 'terminal', 'calculator', 'settings', 'about'];
 
@@ -308,7 +308,7 @@ function App() {
           <IslandStrip t={t} area={main} windows={mounted} focused={focused} />
         </Layer>
         <Layer name="dock">
-        <Dock t={t} items={entries} running={entries.filter((e) => e.running).map((e) => e.id)}
+        <Dock t={t} items={entries} running={entries.filter((e) => e.running).map((e) => e.id)} focusedApp={focused ? getApp(focused)?.id : null}
           onOpen={(id) => byId.has(id) && dockActivate(byId.get(id))}
           onContext={(id, at) => byId.has(id) && setDockCtx({ entry: byId.get(id), at })}
           onTrash={openTrash} onTrashContext={(at) => setTrashCtx(at)} trashFull={trash.full}

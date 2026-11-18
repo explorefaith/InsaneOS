@@ -246,6 +246,9 @@ export function dockActivate(e) {
   if (!e.windows.length) { if (!launchDockItem(e.id) && e.launcherId) launchApp(e.launcherId); return; }
   const top = wm.focused();
   const here = e.windows.filter(onActiveDesktop);
+  // the app in front with only that window: the click minimizes it (Classic's taskbar behavior —
+  // restore then works through the same click)
+  if (top && e.windows.length === 1 && e.windows[0].id === top && here.some((w) => w.id === top)) { wm.minimize(top); return; }
   const idx = here.findIndex((w) => w.id === top);
   const next = idx >= 0 && here.length > 1 ? here[(idx + here.length - 1) % here.length] : pickWindow(e.windows, activeDesktop.get());
   wm.focus(next.id);

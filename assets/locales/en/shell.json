@@ -157,6 +157,7 @@
  "help.tour": "Welcome to Insane OS",
  "launchpad.done": "Done",
  "launchpad.empty": "No results",
+ "launchpad.recent": "Recent",
  "launchpad.search": "Search",
  "launchpad.uninstall": "Uninstall",
  "launchpad.uninstallBody": "The app is removed from the computer; your files and its settings stay.",

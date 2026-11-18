@@ -224,6 +224,8 @@ function App() {
             { label: tr('shell.desktops.overview'), onClick: () => openOverview() },
             '-',
             { label: tr('shell.classic.personalize'), onClick: () => wm.open('settings', { args: { section: 'appearance' } }) },
+            { label: tr('shell.desktop.themes') || 'Themes', onClick: () => wm.open('settings', { args: { section: 'themes' } }) },
+            { label: tr('shell.desktop.widgets') || 'Widgets', onClick: () => wm.open('settings', { args: { section: 'widgets' } }) },
             { label: tr('shell.desktop.wallpaper'), onClick: () => wm.open('settings', { args: { section: 'wallpaper' } }) },
             { label: tr('shell.classic.displaySettings'), onClick: () => wm.open('settings', { args: { section: 'displays' } }) },
           ]} />

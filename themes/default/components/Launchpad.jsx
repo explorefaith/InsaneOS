@@ -5,10 +5,11 @@
 // drag starts, and the app lands where it is dropped) or with a right click → Keep in Dock. It works
 // the same for Insane OS apps, .lpk packages and Linux apps (sdk/dock.js).
 import { View, Text, TextInput, ScrollView, screen, t as tr, appName, refreshApps, APP_CATEGORIES, appCategory, dock, dockIdOf, useStore, settings,
-  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener, Button, errorText, playFx, canUninstall, uninstallApp, Progress, Spinner } from '@insaneos/sdk';
+  beginDockDrag, dockDragJustEnded, scoreText, useTween, addListener, Button, errorText, playFx, canUninstall, uninstallApp, Progress, Spinner, wm } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
+const SETTINGS_SECTIONS = ['general', 'appearance', 'wallpaper', 'themes', 'widgets', 'network', 'sound', 'displays', 'keyboard', 'users', 'updates', 'session'];
 const COLS = 6, CELL = 130, ICON = 72;
 
 // area: the display it covers (the main one; global coordinates)
@@ -28,6 +29,15 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
     ...[a.name, a.genericName, a.comment].map((v) => scoreText(v || '', q, false) * 0.7),
     ...((Array.isArray(a.keywords) ? a.keywords : [a.keywords]).filter(Boolean).map((v) => scoreText(String(v), q, false) * 0.6)));
   const present = APP_CATEGORIES.filter((c) => apps.some((a) => appCategory(a) === c));
+  // the settings sections match the query too (the same list Spotlight offers; opening jumps to
+  // the section) — shown as rows under the app grid while searching
+  const settingsHits = q ? SETTINGS_SECTIONS
+    .map((id) => ({ id, name: tOptional(`settings.section.${id}`) || '', kw: tOptional(`settings.keywords.${id}`) || '' }))
+    .filter((x) => x.name && (x.name.toLowerCase().includes(q) || x.kw.toLowerCase().includes(q)))
+    .slice(0, 4) : [];
+  // the recently used apps (the Dock records them), shown above the grid when not searching
+  const recents = !q ? (settings.get().dockRecentApps || [])
+    .map((id) => apps.find((a) => a.id === id || a.launcherId === id)).filter(Boolean).slice(0, 6) : [];
   const list = q ? apps.map((a) => [scoreOf(a), a]).filter(([s]) => s > 0).sort((x, y) => y[0] - x[0]).map(([, a]) => a)
     : apps.filter((a) => !cat || appCategory(a) === cat);
   useEffect(() => { setSel(0); }, [query, cat]);
@@ -86,6 +96,33 @@ export function Launchpad({ t, apps, onOpen, onClose, area = { x: 0, y: 0, w: sc
       )}
       <ScrollView onClick={(e) => e.stopPropagation()} style={{ marginTop: q ? 40 : 14, height: area.h - 190, width: Math.min(COLS * CELL, area.w - 20) }}>
       <View style={{ gap: 26, paddingVertical: 16 }}>
+        {recents.length ? (
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontSize: 11, fontWeight: 700, color: fg, opacity: 0.6, letterSpacing: 1 }}>{tr('shell.launchpad.recent') || 'RECENT'}</Text>
+            <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+              {recents.map((a) => (
+                <View key={`r-${a.id}`} onClick={(e) => { e.stopPropagation(); open(a.id); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 8,
+                  paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: glass ? 'rgba(255,255,255,0.12)' : t.hover, cursor: 'pointer' }}>
+                  {a.Icon ? <a.Icon size={18} color={fg} /> : null}
+                  <Text style={{ fontSize: 12, fontWeight: 600, color: fg }}>{appName(a)}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        {settingsHits.length ? (
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontSize: 11, fontWeight: 700, color: fg, opacity: 0.6, letterSpacing: 1 }}>{tr('shell.spotlight.inSettings') || 'IN SETTINGS'}</Text>
+            {settingsHits.map((x) => (
+              <View key={`s-${x.id}`} onClick={(e) => { e.stopPropagation(); onClose(); wm.open('settings', { args: { section: x.id } }); }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
+                  backgroundColor: glass ? 'rgba(255,255,255,0.12)' : t.hover, cursor: 'pointer' }}>
+                <Text style={{ fontSize: 14 }}>⚙</Text>
+                <Text style={{ fontSize: 13, fontWeight: 600, color: fg }}>{x.name}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
         {rows.map((row, r) => (
           <View key={r} style={{ flexDirection: 'row' }}>
             {row.map((a, c) => {
