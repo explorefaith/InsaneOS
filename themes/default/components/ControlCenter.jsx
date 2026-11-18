@@ -3,7 +3,7 @@
 // Desktop & Dock → Control Center (issue #58, sdk/menubarmodel.js).
 import {
   View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
-  useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower,
+  useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower, wm, dndActive, useDisplays, admin,
   usePowerProfiles, admin, sharedTicker,
   useWeather, weatherRefresh, weatherConsent, weatherGroup, WEATHER_PLACE_DEFAULT, wallpaperAccent,
   panelLeft, inBar, useTween, useStore,
@@ -282,6 +282,69 @@ function AccentChip({ t, label, dot, active, onPick }) {
 
 // area: the display of the menu bar it opened from (global coordinates); at: the [x, width] of the bar item that
 // opened it, so it sits under that item, inside that display (sdk/menubarmodel.js panelLeft)
+
+// ---- the vertical pair (Phase 2 §8): two tall sliders on the panel's left rail. Volume rides
+// the sound state (the same store the volume keys drive); brightness rides the backlight list
+// through the closed display-brightness action — the same path Settings → Displays uses, with
+// the same 120 ms debounce. A machine without a backlight shows the honest disabled state.
+function VSlider({ t, value, max = 1, onChange, glyphTop, glyphBottom, label, disabled, disabledNote }) {
+  const H = 148, W = 30;
+  const anchor = useRef(null);
+  // the pointer events arrive in screen coordinates and the engine exposes no absolute node
+  // geometry, so the drag is delta-based: the press anchors the fraction, the move applies its
+  // offset — the same shape the desktop cards' drag uses
+  const down = (e) => {
+    if (disabled) return;
+    anchor.current = { y: e.y, frac: Math.max(0, Math.min(1, value / max)) };
+  };
+  const move = (e) => {
+    if (disabled || !anchor.current || !e.buttons) return;
+    const dy = (anchor.current.y - e.y) / H;
+    onChange(max * Math.max(0, Math.min(1, anchor.current.frac + dy)));
+  };
+  const frac = Math.max(0, Math.min(1, value / max));
+  return (
+    <View style={{ alignItems: 'center', gap: 4, opacity: disabled ? 0.45 : 1 }}>
+      <Text style={{ fontSize: 12, color: t.textDim }}>{glyphTop}</Text>
+      <View onMouseDown={down} onMouseMove={move}
+        onMouseUp={() => { anchor.current = null; }}
+        style={{ width: W, height: H, borderRadius: 15, backgroundColor: 'rgba(127,127,127,0.25)', overflow: 'hidden',
+          justifyContent: 'flex-end', cursor: disabled ? 'default' : 'pointer' }}>
+        <View style={{ height: `${Math.round(frac * 100)}%`, backgroundColor: t.accent, borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }} />
+      </View>
+      <Text style={{ fontSize: 12, color: t.textDim }}>{glyphBottom}</Text>
+      <Text style={{ fontSize: 10, color: disabled ? t.textDim : t.text }}>{disabled ? '—' : `${Math.round(frac * 100)}%`}</Text>
+      {disabled ? null : <Text style={{ fontSize: 10, color: t.textDim }}>{label}</Text>}
+      {disabled ? <Text style={{ fontSize: 10, color: t.textDim, textAlign: 'center' }}>{disabledNote}</Text> : null}
+    </View>
+  );
+}
+
+function VerticalPair({ t }) {
+  const { t: tr } = useLocale();
+  const st = useSound();
+  const out = defaultSink(st);
+  const vol = out && Number.isFinite(out.level) ? out.level : 0;
+  const setVol = (v) => {
+    if (!out) return;
+    const nv = Math.max(0, Math.min(1, v));
+    sound.setVolume('sink', out.index ?? out.id ?? 0, nv);
+    if (out.mute && nv > 0) sound.setMute('sink', out.index ?? out.id ?? 0, false);
+  };
+  const d = useDisplays();
+  const bl = (d.backlight || []);
+  const b0 = bl[0];
+  return (
+    <View style={{ gap: 8, alignItems: 'center' }}>
+      <VSlider t={t} value={vol} onChange={setVol} glyphTop="🔈" glyphBottom="🔊" label={tr('shell.cc.volume')} />
+      <VSlider t={t} value={b0 ? b0.value : 0} max={b0?.max || 100}
+        onChange={(v) => { const n = Math.max(1, Math.round(v)); try { admin.run('display-brightness', `${b0.name} ${n}`, undefined, { quiet: true }); } catch (e) { /* no helper */ } }}
+        glyphTop="☾" glyphBottom="☀" label={tr('shell.cc.brightness')}
+        disabled={!b0} disabledNote={tr('prefs.display.noBacklight')} />
+    </View>
+  );
+}
+
 export function ControlCenter({ t, top, onClose, area = null, at = null }) {
   const left = panelLeft(at, 320, area), ay = area ? area.y : 0;
   const [s, set] = useSettings();
@@ -312,7 +375,9 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
       boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
       opacity: 0.4 + 0.6 * enter, transform: `translateY(${Math.round((1 - enter) * 6)}px)`,
     }}>
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <VerticalPair t={t} />
+        <View style={{ flex: 1, gap: 10 }}>
         <Tile t={t} style={{ flex: 1, gap: 8 }}>
           <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.dark')}</Text>
           <Toggle on={s.mode === 'dark'} onChange={(on) => set({ mode: on ? 'dark' : 'light' })} />
@@ -363,6 +428,21 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
         <CoreBars t={t} />
         <Meter t={t} label={tr('shell.cc.memory')} value={used} detail={tr('shell.cc.memDetail', { used: formatBytes((info.memTotalKB - info.memAvailableKB) * 1024), total: formatBytes(info.memTotalKB * 1024) })} />
       </Tile> : null}
+      <Tile t={t} style={{ gap: 8 }}>
+        <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.capture')}</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View onClick={() => { onClose(); wm.open('screenshots'); }} style={{ flex: 1, height: 30, borderRadius: 8, backgroundColor: 'rgba(127,127,127,0.16)', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+            <Text style={{ fontSize: 12, color: t.text }}>{tr('shell.cc.screenshot')}</Text>
+          </View>
+          <View onClick={() => { onClose(); wm.open('recorder'); }} style={{ flex: 1, height: 30, borderRadius: 8, backgroundColor: 'rgba(127,127,127,0.16)', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+            <Text style={{ fontSize: 12, color: t.text }}>{tr('shell.cc.record')}</Text>
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ fontSize: 12, color: t.text }}>{tr('shell.cc.dnd')}</Text>
+          <Toggle on={dndActive()} onChange={(on) => set({ notifications: { ...(s.notifications || {}), dnd: on } })} />
+        </View>
+      </Tile>
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <Tile t={t} style={{ flex: 1, alignItems: 'center' }}>
           <View onClick={() => { onClose(); wm.open('settings'); }}><Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.menu.settings')}</Text></View>
@@ -370,6 +450,7 @@ export function ControlCenter({ t, top, onClose, area = null, at = null }) {
         <Tile t={t} style={{ flex: 1, alignItems: 'center' }}>
           <View onClick={() => session.quit()}><Text style={{ fontSize: 12, fontWeight: 600, color: '#ff5f57' }}>{tr('shell.menu.logout')}</Text></View>
         </Tile>
+      </View>
       </View>
     </View>
   );
