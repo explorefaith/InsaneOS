@@ -4,7 +4,7 @@
 //   src       the base image (the original size), `asset:` path
 //   thumb     320×180 for grids (Settings, Control Center); never decode the full image for those
 //   variants  [{ w, h, src }] from small to large: wallpaperSrc() picks the one that fits a screen
-import index from '../assets/wallpapers/index.json';
+import index from '../assets/wallpapers/index.json' with { type: 'json' };
 
 // The desktop of a new user (sdk/settings.js DEFAULTS) and the fallback for an unknown id.
 export const DEFAULT_WALLPAPER = 'lumo-celestial';

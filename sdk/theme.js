@@ -49,6 +49,46 @@ export const alphaHex = (hex, a) => {
   return `rgba(${parseInt(h[1], 16)}, ${parseInt(h[2], 16)}, ${parseInt(h[3], 16)}, ${a})`;
 };
 
+// A raw hex accent a theme (or the Theme Studio) picked: keep its hue, pull the saturation into a
+// legible band and place the lightness per mode — a screaming or muddy colour never sits on the
+// panels. A gray tone maps to a neutral ink (the premium keep).
+export function toneHex(hex, dark) {
+  const h = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(hex));
+  if (!h) return null;
+  const [r0, g0, b0] = [1, 2, 3].map((i) => parseInt(h[i], 16) / 255);
+  const mx = Math.max(r0, g0, b0), mn = Math.min(r0, g0, b0);
+  if (mx - mn < 0.02) {
+    const v = dark ? 0.62 : 0.42;
+    return rgbToHex(v * 255, v * 255, v * 255);
+  }
+  const l0 = 0.2126 * r0 + 0.7152 * g0 + 0.0722 * b0;
+  const s0 = (mx - mn) / (1 - Math.abs(2 * l0 - 1) || 1e-6);
+  const s = Math.max(dark ? 0.45 : 0.5, Math.min(dark ? 0.82 : 0.85, s0));
+  const l = dark ? 0.62 : 0.44;
+  let hue;
+  const d = mx - mn;
+  if (mx === r0) hue = ((g0 - b0) / d + (g0 < b0 ? 6 : 0)) / 6;
+  else if (mx === g0) hue = ((b0 - r0) / d + 2) / 6;
+  else hue = ((r0 - g0) / d + 4) / 6;
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  return rgbToHex(hue2rgb(p, q, hue + 1 / 3) * 255, hue2rgb(p, q, hue) * 255, hue2rgb(p, q, hue - 1 / 3) * 255);
+}
+const rgbToHex = (r, g, b) => '#' + [r, g, b].map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+
+// The theme accent from settings.accent: a named accent of the theme's table, a raw hex
+// (tone-mapped), or anything else falls back to `fallback` (usually azul). The 'auto' case is the
+// theme's own (the wallpaper sample) — pass the resolved hex here when it is already decided.
+export const resolveAccent = (value, accents, dark, fallback) =>
+  (accents && accents[value]) || (/^#[0-9a-f]{6}$/i.test(value || '') ? (toneHex(value, dark) || fallback) : fallback);
+
 // Tokens every theme receives from its own accent and mode unless it provides them. The shadows were
 // literals repeated in six places (window frames, menus, panels, banners); the accent shades repeat
 // every hover/press rule. docs/DESIGN.md keeps the numbers here now.

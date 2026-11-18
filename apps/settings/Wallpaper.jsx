@@ -14,21 +14,19 @@ import {
   media, useCodecs, useStore, errorText, fs, admin, GREETER_WALLPAPER, userWallpaperName, setLoginImage, setLoginStill, setLoginVideo, Progress,
   setLoginMotion, motionItems, MOTION_SECTIONS, motionThumb, motionPoster, motionDownloads, downloadMotion, removeMotion,
   variantFor, motionDisabled, retryMotion, motionBusy, userVideoProblem, heavyVideoWarning, FilePicker, addWallpaperImage,
-  Layer, wm, useAppWindow,
+  Layer, wm, useAppWindow, insaneosWallpapers, wallpaperThumb,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Section, SettingRow, Note, Actions, Stack } from './ui.jsx';
 
 const L = (k, fb) => tOptional(`settings.${k}`) || fb;
-const WEB_CATALOG = '/usr/share/backgrounds/insaneos/web.json';
 const YOUR_VIDEO = '/usr/share/backgrounds/insaneos/motion/galaxy.mp4';
 const MOV_STORE = '/var/lib/insaneos/wallpapers';        // where verified catalog videos live (docs/WALLPAPERS.md)
 const cap = (t) => ({ fontSize: typeScale.caption, color: t.textDim });
 
-// The picture collection, from the catalog the package ships. No catalog (an old install): the page says so.
-function readCatalog() {
-  try { return JSON.parse(fs.read(WEB_CATALOG)).items || []; } catch (e) { return []; }
-}
+// The picture collection (the brief's rule: only the user's groups are shown — Anime, Wallpapers,
+// Soft Anime). These ship with the OS, so nothing is downloaded and nothing can arrive halfway.
+const COLLECTION_CATS = [['anime', 'Anime'], ['wallpaper', 'Wallpapers'], ['sanime', 'Soft Anime']];
 
 // The catalog variant to fetch for this screen: the smallest that covers it, in a format this
 // machine decodes in hardware (sdk/motionmodel.js). Null: nothing fits.
@@ -77,21 +75,21 @@ function ApplyDialog({ title, kind, preview, options, onClose, note, extra }) {
   );
 }
 
-function PicTile({ item, onClick }) {
+// A collection tile: the real 320×180 thumb, the chosen ring, the name. A thumb that cannot
+// decode leaves the quiet plate — the tile never breaks the grid.
+function SystemTile({ item, src, chosen, onClick, name }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
-  const name = (item.title || '').replace(/\.(jpg|jpeg|png)$/i, '');
   return (
     <View onClick={onClick}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ alignItems: 'center', gap: 6, width: 168 }}>
-      <View style={{ padding: 2, borderRadius: 10, border: `2px solid ${hover ? t.textDim : 'transparent'}`,
-        transform: hover ? 'translateY(-1px)' : 'none' }}>
-        <View style={{ width: 160, height: 90, borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}`, backgroundColor: 'rgba(0,0,0,0.35)' }}>
-          <Image src={`asset:wallpapers/web/${item.id}.thumb.jpg`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      style={{ alignItems: 'center', gap: 6, width: 176 }}>
+      <View style={{ padding: 2, borderRadius: 10, border: `2px solid ${chosen ? t.accent : hover ? t.textDim : 'transparent'}` }}>
+        <View style={{ width: 168, height: 95, borderRadius: 8, overflow: 'hidden', border: `1px solid ${t.separator}`, backgroundColor: 'rgba(127,127,127,0.18)' }}>
+          {src ? <Image src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
         </View>
       </View>
-      <Text style={{ fontSize: typeScale.caption, color: t.textDim, maxWidth: 168, textAlign: 'center' }}>{name}</Text>
+      <Text style={{ fontSize: typeScale.caption, color: chosen ? t.text : t.textDim, maxWidth: 176, textAlign: 'center', fontWeight: chosen ? 600 : 400 }}>{name}</Text>
     </View>
   );
 }
@@ -157,8 +155,7 @@ export function WallpaperSettings() {
   const { t: tr } = useLocale();
   const [s, set] = useSettings();
   const codecs = useCodecs();
-  const [items, setItems] = useState(() => readCatalog());
-  const [dialog, setDialog] = useState(null);             // { kind: 'picture'|'live'|'motion'|'user', ... }
+  const [dialog, setDialog] = useState(null);             // { kind: 'live'|'motion'|'user'|'syspic'|'ownpic', ... }
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
   const [previewPlaying, setPreviewPlaying] = useState(true);
@@ -170,9 +167,22 @@ export function WallpaperSettings() {
   const [probe, setProbe] = useState(null);               // the picked video's probe, while its dialog is open
   const dl = useStore(motionDownloads);
   const starting = useStore(motionBusy);
-  useEffect(() => { if (!items.length) { const iv = setInterval(() => { const it = readCatalog(); if (it.length) { setItems(it); clearInterval(iv); } }, 2000); return () => clearInterval(iv); } }, [items.length]);
-  const cats = ['nature', 'anime', 'cars'];
-  const catName = (c) => L(`wallpaper.cat.${c}`, c === 'nature' ? 'Nature' : c === 'anime' ? 'Anime' : 'Cars');
+  // ---- the collection (the only picture gallery the brief asks for) ----
+  const applySysDesktop = (id) => {
+    set({ wallpaper: id, wallpaperBg: null, motion: {} });
+    setDialog(null);
+    setNote(L('wallpaper.appliedDesktop', 'Applied to the desktop.'));
+  };
+  const applySysLogin = (id) => {
+    setLoginStill(id).then(() => { setDialog(null); setNote(L('wallpaper.appliedLogin', 'Applied to the login screen.')); }, (e) => setNote(errorText(e)));
+  };
+  const sysName = (it) => tOptional(it.nameKey) || it.name || it.id;
+  const yourPics = (s.wallpaperImages || []).map((id) => {
+    const name = userWallpaperName(id);
+    if (!name) return null;
+    const base = `${fs.home()}/.local/share/insaneos/wallpapers/${name}`;
+    return { id, name, src: `${base}.thumb.jpg`, full: `${base}.jpg` };
+  }).filter(Boolean);
 
   // ---- pictures ----
   const applyDesktopPicture = (name) => {
@@ -185,15 +195,6 @@ export function WallpaperSettings() {
   const applyLoginPicture = (name) => {
     setLoginImage(name).then(() => { setBusy(''); setDialog(null); setNote(L('wallpaper.appliedLogin', 'Applied to the login screen.')); }, (e) => { setBusy(''); setNote(errorText(e)); });
   };
-  const pickPicture = (item) => {
-    if (busy) return;
-    setBusy(item.id);
-    admin.run('wallpaper-web-get', `${item.id} 1920`, null, { quiet: true }).then((name) => {
-      setBusy('');
-      setDialog({ kind: 'picture', item, name });
-    }, (e) => { setBusy(''); setNote(errorText(e)); });
-  };
-
   // ---- the supplied video ----
   const setLiveDesktop = () => {
     const video = { id: 'user:galaxy', name: 'insane-galaxy.mp4', path: YOUR_VIDEO };
@@ -309,21 +310,31 @@ export function WallpaperSettings() {
     <Stack>
       {note ? <Note>{note}</Note> : null}
       {starting ? <Note>{L('wallpaper.live.starting', 'Starting the live wallpaper…')}</Note> : null}
-      {!items.length ? <Note>{L('wallpaper.noCatalog', 'The picture collection is not installed on this system yet.')}</Note> : null}
-      {cats.map((c) => {
-        const list = items.filter((it) => it.category === c);
+      {COLLECTION_CATS.map(([c, fallback]) => {
+        const list = insaneosWallpapers.filter((it) => it.category === c);
         if (!list.length) return null;
         return (
-          <Section key={c} title={catName(c)}>
+          <Section key={c} title={L(`wallpaper.cat.${c}`, fallback)}
+            footer={c === 'anime' ? L('wallpaper.collectionHint', 'The collection ships with the OS — no downloads, and the choice survives a reboot. Clicking a picture asks where to apply it.') : undefined}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingVertical: spacing.m }}>
               {list.map((it) => (
-                <PicTile key={it.id} item={it} onClick={() => pickPicture(it)} />
+                <SystemTile key={it.id} item={it} name={sysName(it)} src={wallpaperThumb(it)} chosen={s.wallpaper === it.id}
+                  onClick={() => setDialog({ kind: 'syspic', item: it })} />
               ))}
             </View>
-            {c === 'cars' ? <Text style={cap(t)}>{L('wallpaper.credit', 'Pictures from Wikimedia Commons, under their free licenses. Clicking one asks where to apply it.')}</Text> : null}
           </Section>
         );
       })}
+      {yourPics.length ? (
+        <Section title={L('wallpaper.yourPics', 'Your pictures')} footer={L('wallpaper.yourPicsHint', 'The pictures you added below. They stay on this computer only.')}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingVertical: spacing.m }}>
+            {yourPics.map((p) => (
+              <SystemTile key={p.id} name={L('wallpaper.yourPic', 'Your picture')} src={p.src} chosen={s.wallpaper === p.id}
+                onClick={() => setDialog({ kind: 'ownpic2', pic: p })} />
+            ))}
+          </View>
+        </Section>
+      ) : null}
       <Section title={L('wallpaper.live.title', 'Live wallpaper')} footer={L('wallpaper.live.hint', 'Videos decode in hardware only, capped at 30 frames a second. The still picture stays underneath every live layer, so nothing can blank the desktop.')}>
         {s.reduceMotion ? <Note tone="warn">{L('wallpaper.live.reduceMotion', 'Reduce Motion is on (Settings → Appearance): the live wallpaper stays paused until you turn it off.')}</Note> : null}
         {!codecs.length ? <Note>{L('wallpaper.live.nohw', 'Moving wallpapers need a compatible GPU. The still posters below stand in for the videos.')}</Note> : null}
@@ -410,13 +421,20 @@ export function WallpaperSettings() {
       {picker ? <FilePicker modal title={L('wallpaper.live.pick', 'Choose a video')} filter={/\.(mp4|mkv|webm|mov|m4v|avi|ts)$/i}
         onPick={(f) => pickOwnVideo(typeof f === 'string' ? f : f.path)} onClose={() => setPicker(false)} /> : null}
       {dialog ? (
-        dialog.kind === 'picture' ? (
-          <ApplyDialog title={L('wallpaper.applyTitle', 'Apply wallpaper')} kind="picture" note={busy ? L('wallpaper.downloading', 'Downloading the picture…') : ''}
-            preview={<Image src={`asset:wallpapers/web/${dialog.item.id}.thumb.jpg`} style={{ width: '100%', height: 120, borderRadius: 8, objectFit: 'cover' }} />}
+        dialog.kind === 'syspic' ? (
+          <ApplyDialog title={sysName(dialog.item)} kind="picture"
+            preview={<Image src={wallpaperThumb(dialog.item)} style={{ width: '100%', height: 130, borderRadius: 8, objectFit: 'cover' }} />}
             options={{
-              busy: !!busy,
-              login: () => applyLoginPicture(dialog.name),
-              desktop: () => applyDesktopPicture(dialog.name),
+              login: () => applySysLogin(dialog.item.id),
+              desktop: () => applySysDesktop(dialog.item.id),
+            }}
+            onClose={() => setDialog(null)} />
+        ) : dialog.kind === 'ownpic2' ? (
+          <ApplyDialog title={L('wallpaper.applyTitle', 'Apply wallpaper')} kind="picture"
+            preview={<Image src={dialog.pic.full} style={{ width: '100%', height: 130, borderRadius: 8, objectFit: 'cover' }} />}
+            options={{
+              login: () => applyLoginPicture(dialog.pic.name),
+              desktop: () => applyDesktopPicture(dialog.pic.name),
             }}
             onClose={() => setDialog(null)} />
         ) : dialog.kind === 'live' ? (

@@ -2,7 +2,7 @@
 // apps (sdk/theme.js); the shape keys (controlRadius, menuHighlight, selection, inputFocus,
 // buttonBorder, popupBg) restyle the SDK's shared controls, so every app takes this look without
 // being changed. The rest belongs to this theme (docs/DESIGN.md, "Insane Classic").
-import { insaneosWallpapers } from '@insaneos/sdk';
+import { insaneosWallpapers, resolveAccent } from '@insaneos/sdk';
 
 // The same names as the default theme's, so the user's accent survives a theme switch.
 export const accents = {
@@ -23,7 +23,7 @@ export function makeTheme({ mode, accent, effects, glassBlur, glassSaturate }) {
   const gs = glass && gb ? Math.max(1, Math.min(2, Number.isFinite(glassSaturate) ? glassSaturate : 1.2)) : 1;
   return {
     mode,
-    accent: accents[accent] || accents.azul,
+    accent: resolveAccent(accent, accents, dark, accents.azul),
     accents,
     wallpapers,
     effects: glass,

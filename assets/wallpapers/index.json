@@ -141,5 +141,135 @@
    }
   ],
   "file": "cosmos/insaneos-stellar-voyage.jpg"
+ },
+ {
+  "id": "anime-1",
+  "category": "anime",
+  "thumb": "thumbs/anime/insaneos-anime-1.jpg",
+  "variants": [
+   {
+    "w": 738,
+    "h": 414,
+    "file": "anime/insaneos-anime-1.jpg"
+   }
+  ],
+  "file": "anime/insaneos-anime-1.jpg"
+ },
+ {
+  "id": "anime-2",
+  "category": "anime",
+  "thumb": "thumbs/anime/insaneos-anime-2.jpg",
+  "variants": [
+   {
+    "w": 168,
+    "h": 299,
+    "file": "anime/insaneos-anime-2.jpg"
+   }
+  ],
+  "file": "anime/insaneos-anime-2.jpg"
+ },
+ {
+  "id": "anime-3",
+  "category": "anime",
+  "thumb": "thumbs/anime/insaneos-anime-3.jpg",
+  "variants": [
+   {
+    "w": 622,
+    "h": 344,
+    "file": "anime/insaneos-anime-3.jpg"
+   }
+  ],
+  "file": "anime/insaneos-anime-3.jpg"
+ },
+ {
+  "id": "anime-4",
+  "category": "anime",
+  "thumb": "thumbs/anime/insaneos-anime-4.jpg",
+  "variants": [
+   {
+    "w": 597,
+    "h": 335,
+    "file": "anime/insaneos-anime-4.jpg"
+   }
+  ],
+  "file": "anime/insaneos-anime-4.jpg"
+ },
+ {
+  "id": "wallpaper-1",
+  "category": "wallpaper",
+  "thumb": "thumbs/wallpaper/insaneos-wallpaper-1.jpg",
+  "variants": [
+   {
+    "w": 738,
+    "h": 414,
+    "file": "wallpaper/insaneos-wallpaper-1.jpg"
+   }
+  ],
+  "file": "wallpaper/insaneos-wallpaper-1.jpg"
+ },
+ {
+  "id": "wallpaper-2",
+  "category": "wallpaper",
+  "thumb": "thumbs/wallpaper/insaneos-wallpaper-2.jpg",
+  "variants": [
+   {
+    "w": 597,
+    "h": 335,
+    "file": "wallpaper/insaneos-wallpaper-2.jpg"
+   }
+  ],
+  "file": "wallpaper/insaneos-wallpaper-2.jpg"
+ },
+ {
+  "id": "wallpaper-3",
+  "category": "wallpaper",
+  "thumb": "thumbs/wallpaper/insaneos-wallpaper-3.jpg",
+  "variants": [
+   {
+    "w": 738,
+    "h": 414,
+    "file": "wallpaper/insaneos-wallpaper-3.jpg"
+   }
+  ],
+  "file": "wallpaper/insaneos-wallpaper-3.jpg"
+ },
+ {
+  "id": "sanime-1",
+  "category": "sanime",
+  "thumb": "thumbs/sanime/insaneos-sanime-1.jpg",
+  "variants": [
+   {
+    "w": 597,
+    "h": 335,
+    "file": "sanime/insaneos-sanime-1.jpg"
+   }
+  ],
+  "file": "sanime/insaneos-sanime-1.jpg"
+ },
+ {
+  "id": "sanime-2",
+  "category": "sanime",
+  "thumb": "thumbs/sanime/insaneos-sanime-2.jpg",
+  "variants": [
+   {
+    "w": 595,
+    "h": 380,
+    "file": "sanime/insaneos-sanime-2.jpg"
+   }
+  ],
+  "file": "sanime/insaneos-sanime-2.jpg"
+ },
+ {
+  "id": "sanime-4",
+  "category": "sanime",
+  "thumb": "thumbs/sanime/insaneos-sanime-4.jpg",
+  "variants": [
+   {
+    "w": 738,
+    "h": 414,
+    "file": "sanime/insaneos-sanime-4.jpg"
+   }
+  ],
+  "file": "sanime/insaneos-sanime-4.jpg"
  }
 ]

@@ -8,7 +8,7 @@
 // pixels are sampled (wallpaperMedia → insane.media.pixels) and the most saturated block is
 // desaturated and darkened into an ink colour, so the accent always belongs to the picture
 // without ever shouting. Fallback: the OS violet, muted.
-import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults, placement, wm, cryptoData, cryptoCloses, cryptoStart, cryptoStop, resizeWidget, Layer } from '@insaneos/sdk';
+import { registerWidgetType, setWidgets, BatteryGlyph, useStore, sharedTicker, wallpaperMedia, useSettings, createStore, weekdayName, monthName, tOptional, settings, widgetLayout, widgetsEditing, loadWidgets, addWidget, removeWidget, moveWidget, WIDGET_CATALOG, battery, useBattery, nowPlaying, tempColor, tempWord, TEMP_THRESHOLDS, formatBytes, NowPlayingTile, widgetDefaults, placement, wm, cryptoData, cryptoCloses, cryptoStart, cryptoStop, resizeWidget, Layer, tsLive } from '@insaneos/sdk';
 export { widgetsEditing, widgetLayout };
 import { View, Text, addListener } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
@@ -538,13 +538,21 @@ function CryptoCard({ widget }) {
 // reference defaults become the layout itself, and every layout change maps onto the rendered
 // cards — Settings, the edit mode, the persistence and the desktop all see the same list.
 if (!settings.get().desktopWidgets) loadWidgets(widgetDefaults(insane.screen.width, insane.screen.height));
+// While a Theme Studio theme is active its composition owns the desktop (one composition at a
+// time — sdk/themestudio.js): the classic cards stand down, their layout stays saved underneath
+// and comes back when the Studio theme is deactivated.
 const layoutToRender = () => {
+  if (tsLive.get().active) {
+    for (const c of WIDGET_CATALOG) setWidgets(c.type, []);
+    return;
+  }
   const byType = {};
   for (const w of widgetLayout.get() || []) (byType[w.type] ||= []).push(w);
   for (const c of WIDGET_CATALOG) setWidgets(c.type, byType[c.type] || []);
 };
 layoutToRender();
 widgetLayout.subscribe(layoutToRender);
+tsLive.subscribe(layoutToRender);
 
 // Live placement (bug C part C): while the Settings window is minimized and ONE widget is handed
 // over, the desktop shows a glass toolbar bottom-centre — live S/M/L resize, the grid snap,

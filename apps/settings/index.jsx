@@ -24,6 +24,7 @@ import { SwitcherSettings } from './Switcher.jsx';
 import { BrowserFrameSettings } from './BrowserFrame.jsx';
 // the rebuilt wallpaper page (desktop + login screen, picture / live / solid)
 import { WallpaperSettings } from './Wallpaper.jsx';
+import { ThemesSettings } from './Themes.jsx';
 // hardware pages (docs/SETTINGS.md)
 import { DisplaysSettings } from './Displays.jsx';
 import { BluetoothSettings } from './Bluetooth.jsx';
@@ -659,12 +660,14 @@ const GLYPH_OF = {
   defaultapps: 'grid', privacy: 'lock',
 };
 const GROUPS = [
-  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
+  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['themes', ThemesSettings, '#bf5af2'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
   [['network', NetworkSettings, '#0a84ff'], ['bluetooth', BluetoothSettings, '#0a84ff'], ['sound', SoundSettings, '#ff375f'], ['notifications', NotificationsSettings, '#ff3b30'], ['printers', PrintersSettings, '#636366'], ['clipboard', ClipboardSettings, '#5e5ce6'], ['sharing', SharingSettings, '#34c759'], ['cloud', CloudSettings, '#0a84ff']],
   [['language', LanguageRegion, '#30b0c7'], ['datetime', DateTimeSettings, '#0a84ff'], ['keyboard', Keyboard, '#8e8e93'], ['trackpad', TrackpadSettings, '#8e8e93'], ['defaultapps', DefaultAppsSettings, '#8e8e93'], ['ai', AISettings, '#bf5af2']],
   [['power', PowerSettings, '#30d158'], ['cooling', CoolingSettings, '#32ade6'], ['firmware', FirmwareSettings, '#5e5ce6'], ['privacy', PrivacySettings, '#0a84ff'], ['users', UsersSettings, '#0a84ff'], ['updates', Updates, '#8e8e93'], ['session', Session, '#ff453a']],
 ];
 const SECTIONS = GROUPS.flat();
+// The gallery pages (brief §6): no reading column — the grid is the content
+const WIDE_SECTIONS = new Set(['themes', 'wallpaper', 'widgets']);
 // Board firmware
 // only on a BCM2712 board (Raspberry Pi 5, 500, CM5: insane.system.info().board)
 const isPi5 = () => { try { return insane.system.info().board === 'pi5'; } catch (e) { return false; } };
@@ -715,8 +718,7 @@ export default function Settings() {
   const [section, setSectionState] = useState(lastSection);
   const [query, setQuery] = useState('');
   const setSection = (s) => { lastSection = s; setSectionState(s); };
-  // 'themes' (the old Themes page, links from older help) now opens Appearance
-  useEffect(() => { const sec = args?.section === 'themes' ? 'appearance' : args?.section; if (sec && SECTIONS.some(([id]) => id === sec)) setSection(sec); }, [args?.nonce]);
+  useEffect(() => { if (args?.section && SECTIONS.some(([id]) => id === args.section)) setSection(args.section); }, [args?.nonce]);
   const [, Body] = SECTIONS.find(([id]) => id === section) || SECTIONS[0];
   const q = query.trim().toLowerCase();
   // The glass window (manifest "glass": true) shows the wallpaper behind this sidebar: it goes
@@ -765,8 +767,9 @@ export default function Settings() {
         </View>
         <ScrollView resetKey={section} style={{ flex: 1 }}>
           <View style={{ paddingHorizontal: spacing.xxl, paddingTop: spacing.xl, alignItems: 'center' }}>
-            {/* Cloud's account page has two columns: it takes a wider column on wide windows */}
-            <View style={{ width: '100%', maxWidth: section === 'cloud' ? 980 : 920 }}>
+            {/* Gallery pages (Themes, Wallpaper, Widgets) use the whole width — their grids are the
+                content; form pages keep the reading column. Cloud's account page takes its own. */}
+            <View style={{ width: '100%', maxWidth: WIDE_SECTIONS.has(section) ? undefined : section === 'cloud' ? 980 : 920 }}>
               <Body page={args?.page} />
             </View>
           </View>

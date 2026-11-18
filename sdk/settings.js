@@ -124,7 +124,10 @@ globalThis.__insaneTiming = !!settings.get().debugTiming;
 let pending = 0;
 settings.subscribe(() => {
   clearTimeout(pending);
-  pending = setTimeout(() => insane.settings.save(JSON.stringify(settings.get(), null, 2)), 300);
+  pending = setTimeout(() => {
+    if (typeof insane === 'undefined') return;    // no host (a node test): nothing to save to
+    insane.settings.save(JSON.stringify(settings.get(), null, 2));
+  }, 300);
 });
 
 // Now, not in 300 ms; durable: on the disk before this returns (session restore's marker must survive

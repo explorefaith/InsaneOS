@@ -23,10 +23,10 @@ import path from 'node:path';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const src = process.argv[2];
 if (!src || !fs.statSync(src, { throwIfNoEntry: false })?.isDirectory()) {
-  console.error('usage: node tools/gen-wallpapers.mjs <source dir with signature/ lumo/ cosmos/>');
+  console.error('usage: node tools/gen-wallpapers.mjs <source dir with signature/ lumo/ cosmos/ …>');
   process.exit(2);
 }
-const CATEGORIES = ['signature', 'lumo', 'cosmos'];
+const CATEGORIES = ['signature', 'lumo', 'cosmos', 'anime', 'wallpaper', 'sanime'];
 const THUMB = [320, 180];
 const out = path.join(root, 'assets', 'wallpapers');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'insaneos-wp-'));
@@ -37,27 +37,36 @@ function size(file) {
     '-of', 'csv=p=0', file]).trim().split(',').map(Number);
   return { w, h };
 }
-// ffmpeg → PPM (with an optional filter) → cjpeg
+// ffmpeg → PPM (with an optional filter) → cjpeg; without cjpeg the ffmpeg mjpeg encoder does the
+// same job (yuvj444p keeps the 4:4:4 chroma, -q:v 3 lands at the same visual quality as cjpeg 90)
+const hasCjpeg = (() => { try { execFileSync('cjpeg', ['-version'], { stdio: 'ignore' }); return true; } catch (e) { return false; } })();
 function jpeg(input, output, vf, quality, sample) {
-  const ppm = path.join(tmp, 'frame.ppm');
-  run('ffmpeg', ['-loglevel', 'error', '-y', '-i', input, ...(vf ? ['-vf', vf] : []), '-pix_fmt', 'rgb24', ppm]);
   fs.mkdirSync(path.dirname(output), { recursive: true });
-  run('cjpeg', ['-quality', String(quality), '-sample', sample, '-optimize', '-outfile', output, ppm]);
+  if (hasCjpeg) {
+    const ppm = path.join(tmp, 'frame.ppm');
+    run('ffmpeg', ['-loglevel', 'error', '-y', '-i', input, ...(vf ? ['-vf', vf] : []), '-pix_fmt', 'rgb24', ppm]);
+    run('cjpeg', ['-quality', String(quality), '-sample', sample, '-optimize', '-outfile', output, ppm]);
+  } else {
+    const q = Math.max(2, Math.round(34 - (quality / 100) * 32));    // 90 → q:v 3, 85 → q:v 6
+    run('ffmpeg', ['-loglevel', 'error', '-y', '-i', input, ...(vf ? ['-vf', vf] : []),
+      '-pix_fmt', 'yuvj444p', '-q:v', String(q), '-huffman', 'optimal', output]);
+  }
 }
 
 const index = [];
+const IMG = /\.(png|jpe?g)$/;
 for (const cat of CATEGORIES) {
   const dir = path.join(src, cat);
   if (!fs.existsSync(dir)) continue;
-  const pngs = fs.readdirSync(dir).filter((n) => n.endsWith('.png')).sort();
+  const pngs = fs.readdirSync(dir).filter((n) => IMG.test(n)).sort();
   for (const name of pngs.filter((n) => !n.includes('@'))) {
-    const base = name.replace(/\.png$/, '');
+    const base = name.replace(IMG, '');
     if (!/^insaneos-[a-z0-9-]+$/.test(base)) throw new Error(`bad wallpaper name: ${name}`);
     const id = base.replace(/^insaneos-/, '');
     const entry = { id, category: cat, thumb: `thumbs/${cat}/${base}.jpg`, variants: [] };
-    const variants = [name, ...pngs.filter((n) => n.startsWith(`${base}@`) && /@\d+x\d+\.png$/.test(n))];
+    const variants = [name, ...pngs.filter((n) => n.startsWith(`${base}@`) && /@\d+x\d+\.(png|jpe?g)$/.test(n))];
     for (const v of variants) {
-      const file = `${cat}/${v.replace(/\.png$/, '.jpg')}`;
+      const file = `${cat}/${v.replace(IMG, '.jpg')}`;
       jpeg(path.join(dir, v), path.join(out, file), null, 90, '1x1');
       const { w, h } = size(path.join(dir, v));
       entry.variants.push({ w, h, file });
@@ -71,6 +80,16 @@ for (const cat of CATEGORIES) {
     index.push(entry);
   }
 }
-fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify(index, null, 1) + '\n');
+// Merge: the originals of an earlier collection may not be on this machine, so entries that were
+// not regenerated keep their place (an id present in both sides takes the fresh build).
+const keep = [];
+try {
+  const prev = JSON.parse(fs.readFileSync(path.join(out, 'index.json'), 'utf8'));
+  const fresh = new Set(index.map((e) => e.id));
+  for (const e of prev) if (e && e.id && !fresh.has(e.id)) keep.push(e);
+} catch (e) { /* first build */ }
+const all = [...keep, ...index];
+all.sort((a, b) => (CATEGORIES.indexOf(a.category) - CATEGORIES.indexOf(b.category)) || a.id.localeCompare(b.id));
+fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify(all, null, 1) + '\n');
 fs.rmSync(tmp, { recursive: true, force: true });
-console.log(`${index.length} wallpapers → assets/wallpapers/index.json`);
+console.log(`${all.length} wallpapers → assets/wallpapers/index.json (${keep.length} kept, ${index.length} fresh)`);

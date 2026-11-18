@@ -72,6 +72,18 @@ export { logs } from './logs.js';
 export { InsaneLogo, InsaneGlyph, InsaneWordmark } from './logo.js';
 export { Lumo, lumoSource } from './mascot.js';
 export { DesktopWidgets, registerWidgetType, setWidgets, desktopWidgets, widgetComponent } from './widgets.js';
+export {
+  TS_KINDS, TS_FONTS, TS_GRID, byZ as tsByZ,
+  resolvePlan as tsResolvePlan, liveWidgets as tsLiveWidgets, resolveStyle, withAlpha,
+  newInstance as tsNewInstance, createHistory as tsCreateHistory, planDiffers as tsPlanDiffers,
+} from './themestudio-model.js';
+export { THEMES as TS_THEME_CATALOG } from './themestudio-themes.js';
+export {
+  tsLive, tsInit, tsApplyTheme, tsDeactivate, tsMutate, tsAdd, tsRemove, tsDuplicate,
+  tsMove, tsResize, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
+  tsSaveCustom, tsRenameCustom, tsDeleteCustom, themeOf as tsThemeOf, tsAllThemes,
+  TS_APPEARANCE_KEYS,
+} from './themestudio.js';
 export { Markdown, markdownHeadings, parseMarkdown, parseInline, toggleTask } from './markdown.jsx';
 export {
   dock, useDockEntries, dockActivate, dockMenu, registerDockMenu, registerDockActions, dockQuickActions, launcherIdOf, dockIdOf, dockIdOfWindow,
@@ -126,7 +138,7 @@ export const windowIcon = (w) => windowIconOf(w, getAppOf);
 export { systemInfo, systemReport, insaneosVersion, useSystemInfo, useServerStats, useCpuUsage, formatBytes, formatDuration } from './system.js';
 export * as fs from './fs.js';
 export { useDirectory } from './fs.js';
-export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver, shadeHex, alphaHex, deriveTokens } from './theme.js';
+export { ThemeProvider, useTheme, DEFAULT_TOKENS, solidOver, shadeHex, alphaHex, deriveTokens, toneHex, resolveAccent } from './theme.js';
 export { useTween, reducedMotionNow, easeOutBack, nextFrame, cancelFrame } from './animation.js';
 export { QUALITY_PROFILES, qualityProfile, qualityKnobs, qualityTick, renderQuality, isAdaptive } from './quality.js';
 export {
