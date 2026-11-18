@@ -798,6 +798,7 @@
  "themes.preview": "Aperçu",
  "themes.reapply": "Réappliquer",
  "themes.rename": "Renommer",
+ "themes.renameBlank": "Donnez d’abord un nom au préréglage.",
  "themes.renameSave": "Renommer",
  "themes.renameTitle": "Renommer le préréglage",
  "themes.resetLayout": "Réinitialiser la disposition",

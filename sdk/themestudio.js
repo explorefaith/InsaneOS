@@ -49,7 +49,7 @@ function validInstance(w) {
 function validList(v) {
   return Array.isArray(v) ? v.filter(validInstance).map((w) => ({
     id: w.id, kind: w.kind, x: w.x, y: w.y, w: w.w, h: w.h,
-    z: w.z ?? 0, hidden: !!w.hidden, pinned: !!w.pinned, cfg: w.cfg || {}, style: w.style || {},
+    z: w.z ?? 0, hidden: !!w.hidden, pinned: !!w.pinned, locked: !!w.locked, cfg: w.cfg || {}, style: w.style || {},
   })) : null;
 }
 
@@ -218,12 +218,22 @@ function persistWidgets(list) {
 }
 
 // Run a pure model edit over the live list; `fn(list, area)` returns the next list or null.
+// The model's no-op paths return a fresh copy (never === the live list), so equality is checked
+// by value — a nudge already at the edge, forward from the top, S at minimum size must not re-set
+// the store, re-persist, or leave a junk undo entry.
+const sameWidgets = (a, b) => {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  const key = (w) => `${w.id}|${w.x}|${w.y}|${w.w}|${w.h}|${w.z}|${w.hidden}|${w.pinned}|${w.locked}|${JSON.stringify(w.cfg)}|${JSON.stringify(w.style)}`;
+  for (let i = 0; i < a.length; i++) if (key(a[i]) !== key(b[i])) return false;
+  return true;
+};
+
 export function tsMutate(fn, area) {
   const st = tsLive.get();
   if (!st.active || !st.def) return null;
   const a = area || st.area;
   const next = fn(st.widgets.map((w) => ({ ...w })), a);
-  if (!next || next === st.widgets) return st.widgets;
+  if (!next || sameWidgets(next, st.widgets)) return st.widgets;
   tsLive.set({ ...st, widgets: next });
   persistWidgets(next);
   return next;

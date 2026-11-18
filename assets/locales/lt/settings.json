@@ -230,6 +230,7 @@
  "themes.preview": "Peržiūra",
  "themes.reapply": "Taikyti dar kartą",
  "themes.rename": "Pervadinti",
+ "themes.renameBlank": "Pirmiausia duokite šablonui vardą.",
  "themes.renameSave": "Pervadinti",
  "themes.renameTitle": "Pervadinti šabloną",
  "themes.resetLayout": "Atstatyti išdėstymą",

@@ -798,6 +798,7 @@
  "themes.preview": "Pré-visualizar",
  "themes.reapply": "Reaplicar",
  "themes.rename": "Renomear",
+ "themes.renameBlank": "Dê primeiro um nome à predefinição.",
  "themes.renameSave": "Renomear",
  "themes.renameTitle": "Renomear a predefinição",
  "themes.resetLayout": "Redefinir disposição",

@@ -18,7 +18,7 @@ import {
   TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Section, SettingRow, Note, Actions, Stack, Columns, PopUp, Message } from './ui.jsx';
 
 const L = (k, fb) => tOptional(`settings.themes.${k}`) || fb;
@@ -204,7 +204,16 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
         <Button small label="S" onClick={() => scale(0.8)} />
         <Button small label="M" onClick={() => scale(1)} />
         <Button small label="L" onClick={() => scale(1.25)} />
+        <Button small label={w.locked ? L('unlock', 'Unlock') : L('lock', 'Lock')} onClick={() => onLock(!w.locked)} />
         <Button small label={L('resetWidget', 'Reset')} onClick={onReset} />
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <Text style={{ width: 92, fontSize: 12, color: t.textDim, textAlign: 'start' }}>{L('arrange', 'Arrange')}</Text>
+        {[['left', '⇤'], ['center-x', '⇔'], ['right', '⇥'], ['top', '⇧'], ['center-y', '⇕'], ['bottom', '⇩']].map(([edge, glyph]) => (
+          <Button key={edge} small label={glyph} onClick={() => onAlign(edge)} />
+        ))}
+        <Button small label={L('distributeX', 'Distribute X')} onClick={onDistributeX} />
+        <Button small label={L('distributeY', 'Distribute Y')} onClick={onDistributeY} />
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text style={{ width: 92, fontSize: 12, color: t.textDim, textAlign: 'start' }}>{L('position', 'Position')}</Text>
@@ -225,7 +234,7 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
           options={[['', L('themeWeight', 'Weight')], ...WEIGHTS.map((x) => [x, `${x}`])]} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{ fontSize: 12, color: t.textDim }}>{L('italic', 'Italic')}</Text>
-          <Toggle value={!!st.italic} onChange={(v) => set({ italic: v ? true : null })} />
+          <Toggle on={!!st.italic} onChange={(v) => set({ italic: v ? true : null })} />
         </View>
       </StyleControl>
       <StyleControl label={L('ink', 'Ink')}>
@@ -268,11 +277,11 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
         <StyleControl label={L('clock', 'Clock')}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Text style={{ fontSize: 12, color: t.textDim }}>24 h</Text>
-            <Toggle value={(w.cfg || {}).h24 !== false} onChange={(v) => onCfg({ h24: v ? true : false })} />
+            <Toggle on={(w.cfg || {}).h24 !== false} onChange={(v) => onCfg({ h24: v ? true : false })} />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Text style={{ fontSize: 12, color: t.textDim }}>{L('seconds', 'Seconds')}</Text>
-            <Toggle value={!!(w.cfg || {}).seconds} onChange={(v) => onCfg({ seconds: !!v })} />
+            <Toggle on={!!(w.cfg || {}).seconds} onChange={(v) => onCfg({ seconds: !!v })} />
           </View>
         </StyleControl>
       ) : null}
@@ -367,6 +376,8 @@ function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
   const drag = useRef(null);
   const live = useStore(tsLive);
   const guides = useRef(null);
+  const offs = useRef([]);
+  useEffect(() => () => { for (const off of offs.current.splice(0)) off(); }, []);
   const byZ = [...widgets].sort((a, b) => a.z - b.z);
   const start = (e, w) => {
     if (w.locked) return;
@@ -390,12 +401,12 @@ function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
       const d = drag.current;
       drag.current = null;
       guides.current = null;
-      offMove(); offUp();
+      for (const off of offs.current.splice(0)) off();
       if (d && d.moved) histRef.current.endDrag(tsLive.get().widgets.map((x) => ({ ...x })));
       else histRef.current.endDrag(d ? d.pre : null);
     };
-    const offMove = addListener('pointermove', move);
-    const offUp = addListener('pointerup', up);
+    offs.current.push(addListener('pointermove', move));
+    offs.current.push(addListener('pointerup', up));
   };
   const g = guides.current;
   return (
@@ -410,7 +421,7 @@ function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
         const ink = st.color || '#dddddd';
         const sel = w.id === selW;
         return (
-          <View key={w.id} onMouseDown={(e) => start(e, w)} style={{
+          <View key={w.id} onMouseDown={(e) => start(e, w)} onClick={(e) => e.stopPropagation?.()} style={{
             position: 'absolute', left: Math.round(w.x * k), top: Math.round(w.y * k),
             width: Math.max(6, Math.round(w.w * k)), height: Math.max(4, Math.round(w.h * k)),
             borderRadius: Math.min(10, Math.max(2, Math.round((st.radius ?? 14) * k * 2))),
@@ -467,7 +478,7 @@ function RichEditor({ w, onCfg, pal }) {
                   options={[['', 'Size'], ...STEPS.slice(6).map((x) => [x, `${x}`])]} />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Text style={{ fontSize: 11, color: t.textDim }}>{L('italic', 'Italic')}</Text>
-                  <Toggle value={!!g.italic} onChange={(v) => patch(i, { italic: v ? true : null })} />
+                  <Toggle on={!!g.italic} onChange={(v) => patch(i, { italic: v ? true : null })} />
                 </View>
                 {[null, ...(pal || []).slice(0, 3), '#f5f5f7', '#1d1d1f'].map((c, ci) => (
                   <View key={ci} onClick={() => patch(i, { color: c })} style={{ width: 16, height: 16, borderRadius: 8,
@@ -532,10 +543,10 @@ export function ThemesSettings() {
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
   // continuous controls (the sliders): one undo step per burst, the live set still every frame
-  let lastSoft = 0;
+  const lastSoft = useRef(0);
   const actSoft = (fn) => {
     const now = Date.now();
-    if (now - lastSoft > 800) { hist.current.push(tsLive.get().widgets); lastSoft = now; }
+    if (now - lastSoft.current > 800) { hist.current.push(tsLive.get().widgets); lastSoft.current = now; }
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
@@ -704,8 +715,12 @@ export function ThemesSettings() {
                 <Button primary label={typeof presetOpen === 'string' ? L('renameSave', 'Rename') : L('save', 'Save')}
                   onClick={() => {
                     try {
-                      if (typeof presetOpen === 'string') tsRenameCustom(presetOpen, presetName);
-                      else { const id = tsSaveCustom(presetName || activeDef.name); if (id) say(L('savedNote', 'Saved — it is in the gallery now.')); }
+                      if (typeof presetOpen === 'string') {
+                        if (!tsRenameCustom(presetOpen, presetName)) { say({ err: L('renameBlank', 'Give the preset a name first.') }); return; }
+                      } else {
+                        const id = tsSaveCustom(presetName || activeDef.name);
+                        if (id) say(L('savedNote', 'Saved — it is in the gallery now.'));
+                      }
                       setPresetOpen(false);
                     } catch (e) { say({ err: errorText(e) }); }
                   }} />

@@ -798,6 +798,7 @@
  "themes.preview": "Preview",
  "themes.reapply": "Reapply",
  "themes.rename": "Rename",
+ "themes.renameBlank": "Give the preset a name first.",
  "themes.renameSave": "Rename",
  "themes.renameTitle": "Rename the preset",
  "themes.resetLayout": "Reset layout",

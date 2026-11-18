@@ -209,8 +209,10 @@ export function WallpaperSettings() {
   };
   const stopLive = () => {
     set({ motion: {} });
+    // setLoginImage takes the full `image:<name>` id and strips it itself — the bare name made
+    // every login apply of a user picture fail with admin.invalidArgument
     const name = userWallpaperName(s.wallpaper);
-    const p = name ? setLoginImage(name) : setLoginStill(s.wallpaper || GREETER_WALLPAPER);
+    const p = name ? setLoginImage(s.wallpaper) : setLoginStill(s.wallpaper || GREETER_WALLPAPER);
     p.then(() => setNote(L('wallpaper.stoppedBoth', 'Back to the still wallpaper on both.')), (e) => setNote(errorText(e)));
   };
 
@@ -462,7 +464,7 @@ export function WallpaperSettings() {
           <ApplyDialog title={L('wallpaper.applyTitle', 'Apply wallpaper')} kind="picture"
             preview={<Image src={dialog.path} style={{ width: '100%', height: 120, borderRadius: 8, objectFit: 'cover' }} />}
             options={{
-              login: () => applyLoginPicture(userWallpaperName(dialog.id)),
+              login: () => applyLoginPicture(dialog.id),
               desktop: () => applyDesktopPicture(userWallpaperName(dialog.id)),
             }}
             onClose={() => setDialog(null)} />

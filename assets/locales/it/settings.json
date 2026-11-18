@@ -798,6 +798,7 @@
  "themes.preview": "Anteprima",
  "themes.reapply": "Riapplica",
  "themes.rename": "Rinomina",
+ "themes.renameBlank": "Dai prima un nome al preset.",
  "themes.renameSave": "Rinomina",
  "themes.renameTitle": "Rinomina il preset",
  "themes.resetLayout": "Ripristina disposizione",

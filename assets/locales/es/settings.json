@@ -798,6 +798,7 @@
  "themes.preview": "Vista previa",
  "themes.reapply": "Volver a aplicar",
  "themes.rename": "Renombrar",
+ "themes.renameBlank": "Ponle primero un nombre al preset.",
  "themes.renameSave": "Renombrar",
  "themes.renameTitle": "Renombrar el preset",
  "themes.resetLayout": "Restablecer diseño",
