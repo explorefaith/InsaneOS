@@ -122,6 +122,9 @@ cp -a "$REPO"/assets/locales/. "$DEST/assets/locales/"
 # the fonts too: the Theme Studio display faces are new files, additive by design (a font not in
 # the running server's table is simply never opened, so an old binary stays correct)
 cp -a "$REPO"/assets/fonts/. "$DEST/assets/fonts/"
+# The wallpaper collection: additive, so the user's added files and thumbs survive (the Phase-3
+# black-desktop lesson — a theme referencing a catalog id whose files never landed painted black)
+cp -a "$REPO"/assets/wallpapers/. "$DEST/assets/wallpapers/"
 install -m 644 "$REPO/code-manifest.json" "$DEST/code-manifest.json"
 # The rebuilt manifest is unsigned by design: the newly built insane-server is a development
 # build that accepts it (release builds demand the release key, which we don't have).
