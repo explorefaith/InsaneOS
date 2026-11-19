@@ -10,7 +10,7 @@ import { textDirection, direction } from './i18n.js';
 import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitThumb, barShown, barOpacity, hideTime, barWidth } from './scrollbar.js';
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
-import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow } from './animation.js';
+import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow, easeElegantBounce } from './animation.js';
 import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
@@ -39,11 +39,12 @@ export function Button({ label, onClick, primary, style, small, plain, disabled,
 }
 
 // small: the 36 × 20 switch of grouped forms (Settings rows) instead of 42 × 24. The knob moves
-// physically (direction: 'ltr'), also in right-to-left languages.
+// physically (direction: 'ltr'), also in right-to-left languages. It lands with the reference's
+// elegant-bounce curve: a fast travel, a slight overshoot at the far end, a settle.
 export function Toggle({ on, onChange, small }) {
   const t = useTheme();
   const w = small ? 36 : 42, h = small ? 20 : 24, k = h - 4;
-  const p = useTween(on ? 1 : 0, { dur: DUR.toggle });       // the knob travels; the track's colour follows the state
+  const p = useTween(on ? 1 : 0, { dur: DUR.toggle, ease: easeElegantBounce });   // the knob travels; the track's colour follows the state
   return (
     <View onClick={() => onChange(!on)} style={{ width: w, height: h, borderRadius: h / 2, direction: 'ltr',
       backgroundColor: on ? t.accent : t.control }}>
@@ -79,20 +80,22 @@ export function Segmented({ options, value, onChange, appearance = 'accent', sma
 }
 
 // Source-list row. Optional: detail (trailing text, e.g. a count) and indent (nesting level).
-export function SidebarItem({ label, selected, onClick, icon, detail, indent = 0 }) {
+// flat: draw no selection fill of its own — the container paints the selection (the Settings
+// sidebar's liquid pill, which morphs between rows); the row keeps the selected colours.
+export function SidebarItem({ label, selected, onClick, icon, detail, indent = 0, flat }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
   // selection 'indicator' (a theme token): a light fill and a short accent bar at the leading edge
   const ind = t.selection === 'indicator';
-  const filled = selected && !ind;
+  const filled = selected && !ind && !flat;
   const sel = t.mode === 'dark' ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)';
   return (
     <View onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ height: 28, paddingLeft: 10 + indent * 14, paddingRight: 10, borderRadius: t.controlRadiusSmall, flexDirection: 'row', alignItems: 'center', gap: 8,
-        backgroundColor: filled ? t.accent : selected ? sel : hover ? t.hover : 'transparent' }}>
+        backgroundColor: filled ? t.accent : selected && !flat ? sel : hover ? t.hover : 'transparent' }}>
       {selected && ind ? <View style={{ position: 'absolute', insetInlineStart: 0, top: 8, width: 3, height: 12, borderRadius: 2, backgroundColor: t.accent }} /> : null}
-      {typeof icon === 'string' ? <Text style={{ width: 18, textAlign: 'center', fontSize: 14, color: filled ? '#fff' : t.accent }}>{icon}</Text> : icon}
-      <Text style={{ flex: 1, fontSize: 13, fontWeight: selected && ind ? 600 : 500, color: filled ? '#fff' : t.text, whiteSpace: 'nowrap', overflow: 'hidden' }}>{label}</Text>
+      {typeof icon === 'string' ? <Text style={{ width: 18, textAlign: 'center', fontSize: 14, color: filled || (selected && flat) ? '#fff' : t.accent }}>{icon}</Text> : icon}
+      <Text style={{ flex: 1, fontSize: 13, fontWeight: selected && ind ? 600 : 500, color: filled || (selected && flat) ? '#fff' : t.text, whiteSpace: 'nowrap', overflow: 'hidden' }}>{label}</Text>
       {detail != null ? <Text style={{ fontSize: 11, color: filled ? 'rgba(255,255,255,0.8)' : t.textDim }}>{detail}</Text> : null}
     </View>
   );

@@ -190,12 +190,17 @@ The engine has no CSS transitions, so every animation is a JS ramp, and they all
 `useTween(target, { from, dur, ease, reduce })` re-renders at most once a frame, honors Reduce
 Motion by itself (it jumps to the target), and with `from` it also animates on mount (entrances).
 `reducedMotionNow()` reads the setting for code that doesn't tween. The durations are the `DUR`
-table — window open 200 / close 150, the genie 420 and back 360, the dock's slide 180, reorder 150
-and poof 320, the launch bounce 1100, and since 0.8.8.7 the interaction set: hover 100, panel 160,
-fade 150, toggle 160, banner 240. `easeOutBack` is for things that arrive from a distance (a
-banner slides in with a soft settle). Pressed controls settle 2 % (`accentPress` for primary
-buttons); the Toggle's knob travels over `DUR.toggle`; the arrows move a hovered `Slider` unless a
-text field has the keyboard.
+table — measured off the desktop's motion reference (the Shell Ninja Hyprland recording, frame by
+frame): window open 250 (a real rise from below, no scale wobble) / close 170, the genie 420 and
+back 360, the dock's slide 180, reorder 150 and poof 320, the launch bounce 1100, and the
+interaction set: hover 120, panel 200, fade 150, toggle 160, banner 240, pill 180 (the Settings
+sidebar's liquid pill) and page 170 (a settings page's settle). `bezier(p1, p2)` draws any cubic
+Bézier the way the compositor references define theirs; `easeElegantBounce` is the reference's own
+"elegant_bounce" curve — P1 (0.35, 1.38), P2 (0.24, 1.02), a fast rise that overshoots ~6 % and
+settles — and it drives the Toggle's knob landing and the sidebar's pill morph. `easeOutBack` is
+for things that arrive from a distance (a banner slides in with a soft settle). Pressed controls
+settle 2 % (`accentPress` for primary buttons); the arrows move a hovered `Slider` unless a text
+field has the keyboard.
 
 ## Insane Classic
 

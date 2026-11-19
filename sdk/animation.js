@@ -2,24 +2,33 @@
 // The theme and the SDK read these; nothing else hardcodes a millisecond of animation. The engine
 // has no CSS transitions (themes/README.md), so every animation is a JS ramp — useTween is the one
 // rAF loop they all share, and it honors Reduce Motion by itself.
+//
+// The curves below were measured frame-by-frame off the desktop's motion reference (the Shell Ninja
+// Hyprland recording, 26 696 frames at 30 fps, ~/.cache/arch-ref-frames): a window rises from below
+// and fades in over ~8 frames (250 ms) with a fast-out settle, the settings' active pill morphs
+// between rows in 4–6 frames (150–200 ms) with a slight overshoot, and the reference's own settings
+// page names the curve it applies — "elegant_bounce", P1 (0.35, 1.38), P2 (0.24, 1.02) — which
+// bezier() reproduces exactly.
 
 import { useEffect, useRef, useState } from 'react';
 import { settings } from './settings.js';
 
 export const DUR = {
-  open: 200,          // a window fades in and rises
-  close: 150,         // a window fades out, faster than it came
+  open: 250,          // a window rises from below and fades in (measured: ~8 frames)
+  close: 170,         // a window leaves faster than it came (the reference's 2× out speed)
   minimize: 420,      // the genie: the window's strips fly into its Dock icon
   restore: 360,       // …and back out of it, a little quicker than in
-  bounce: 1100,       // a Dock icon's launch hop (two hops, damped)
+  bounce: 1100,      // a Dock icon's launch hop (two hops, damped)
   dockSlide: 180,     // the Dock sliding away and back (auto-hide)
   reorder: 150,       // Dock neighbours making room for a dragged icon
   poof: 320,          // the «poof» when an icon is removed
-  hover: 100,         // a control's hover/press feedback
-  panel: 160,         // a panel, menu or popover appearing
+  hover: 120,         // a control's hover/press feedback
+  panel: 200,         // a panel, menu or popover appearing
   fade: 150,          // overlays, scrims, scrollbars
   toggle: 160,        // a Toggle's knob travelling
   banner: 240,        // a notification banner sliding in
+  pill: 180,          // the settings' active pill morphing between rows (measured: 4–6 frames)
+  page: 170,          // a settings page's content settling after a switch
 };
 
 // Easings. t is 0..1; each returns 0..1.
@@ -28,6 +37,36 @@ export const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
 export const easeIn = (t) => t * t;
 // A soft settle for things that arrive from a distance (banners, panels): fast out, gentle stop.
 export const easeOutBack = (t) => { const c = 1.2; return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2; };
+
+// A cubic Bézier easing, as the compositor reference defines its curves: two control points plus
+// the fixed ends (0,0) and (1,1). x is solved numerically (Newton, then a bisection guard), y comes
+// from the Bézier at that parameter — the same shape a CSS cubic-bezier() or Hyprland's
+// bezier = …, P1, P2 would draw. Values outside 0..1 on y overshoot and come back (a bounce).
+export function bezier(p1x, p1y, p2x, p2y) {
+  // x(t) = 3(1-t)²t·p1x + 3(1-t)t²·p2x + t³;  y(t) = 3(1-t)²t·p1y + 3(1-t)t²·p2y + t³
+  const bx = (t) => 3 * (1 - t) * (1 - t) * t * p1x + 3 * (1 - t) * t * t * p2x + t * t * t;
+  const by = (t) => 3 * (1 - t) * (1 - t) * t * p1y + 3 * (1 - t) * t * t * p2y + t * t * t;
+  return (x) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let lo = 0, hi = 1, t = x;                       // Newton first, bisection as the net
+    for (let i = 0; i < 8; i++) {
+      const e = bx(t) - x;
+      if (Math.abs(e) < 1e-5) return by(t);
+      const dx = (bx(t + 1e-4) - bx(t - 1e-4)) / 2e-4;
+      if (Math.abs(dx) < 1e-6) break;
+      const nt = t - e / dx;
+      if (nt <= lo || nt >= hi) break;
+      t = nt;
+    }
+    while (hi - lo > 1e-5) { const m = (lo + hi) / 2; if (bx(m) < x) lo = m; else hi = m; }
+    return by((lo + hi) / 2);
+  };
+}
+
+// The reference's own curve ("elegant_bounce", P1 (0.35, 1.38), P2 (0.24, 1.02)): a fast rise that
+// overshoots ~12 % and settles — the desktop's signature for things that land (pills, panels, windows).
+export const easeElegantBounce = bezier(0.35, 1.38, 0.24, 1.02);
 
 // The genie's per-strip progress: the bottom of the window leads, the top follows, each strip
 // easing in-out; lead is how much later the top starts (0..1 of the whole animation).

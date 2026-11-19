@@ -7,6 +7,7 @@ import {
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
   spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, heavyVideoWarning, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
   restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers, wallpaperAccent,
+  useTween, DUR, easeElegantBounce,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { SoundSettings } from './Sound.jsx';
@@ -682,6 +683,36 @@ function SectionIcon({ id, color, size = 20 }) {
   return <Badge color={color} size={size}><PaneGlyph id={GLYPH_OF[id] || id} size={Math.round(size * 0.62)} /></Badge>;
 }
 
+// The sidebar's liquid pill: the selection is one accent capsule that morphs from the old row to
+// the new one (the motion reference's settings sidebar, measured at 4–6 frames ≈ 180 ms with a
+// slight overshoot — easeElegantBounce). Rows are 28 px with a 1 px gap and a 12 px gap between
+// groups, so the row's offset is computed from the visible groups — the engine has no node
+// geometry (the ledgered lesson). `flat` rows paint no fill of their own; the pill sits under them.
+const ROW_PITCH = 29;                       // 28 px row + 1 px gap
+function pillY(groups, sel) {
+  let y = 0;
+  for (let g = 0; g < groups.length; g++) {
+    if (g) y += spacing.m;
+    for (const [id] of groups[g]) {
+      if (id === sel) return y;
+      y += ROW_PITCH;
+    }
+  }
+  return 0;
+}
+function LiquidPill({ groups, sel }) {
+  const t = useTheme();
+  const y = useTween(pillY(groups, sel), { from: pillY(groups, sel), dur: DUR.pill, ease: easeElegantBounce });
+  return <View style={{ position: 'absolute', left: 0, right: 0, top: Math.round(y), height: 28, borderRadius: 7, backgroundColor: t.accent }} />;
+}
+
+// The page's content settles in when the section changes (the reference switches content at once,
+// with a short fade landing it): one opacity ramp per section, remounted by the key.
+function PageSettle({ children }) {
+  const o = useTween(1, { from: 0, dur: DUR.page });
+  return <View style={{ opacity: o, width: '100%' }}>{children}</View>;
+}
+
 // Session user: initials, name and whether they are an administrator.
 function UserCard({ onClick, selected }) {
   const t = useTheme();
@@ -745,12 +776,13 @@ export default function Settings() {
           <UserCard onClick={() => setSection('users')} selected={section === 'users'} />
         </View>
         <ScrollView style={{ flex: 1, marginTop: spacing.xs }}>
-          <View style={{ paddingHorizontal: 10, paddingBottom: spacing.m }}>
+          <View style={{ paddingHorizontal: 10, paddingBottom: spacing.m, position: 'relative' }}>
+            {t.selection !== 'indicator' && groups.length ? <LiquidPill groups={groups} sel={section} /> : null}
             {groups.map((g, i) => (
               <View key={i} style={{ gap: 1, marginTop: i ? spacing.m : 0 }}>
                 {g.map(([id, , color]) => (
                   <SidebarItem key={id} label={tr(`settings.section.${id}`)} selected={id === section} onClick={() => setSection(id)}
-                    icon={<SectionIcon id={id} color={color} />} />
+                    flat={t.selection !== 'indicator'} icon={<SectionIcon id={id} color={color} />} />
                 ))}
               </View>
             ))}
@@ -770,7 +802,9 @@ export default function Settings() {
             {/* Gallery pages (Themes, Wallpaper, Widgets) use the whole width — their grids are the
                 content; form pages keep the reading column. Cloud's account page takes its own. */}
             <View style={{ width: '100%', maxWidth: WIDE_SECTIONS.has(section) ? undefined : section === 'cloud' ? 980 : 920 }}>
-              <Body page={args?.page} />
+              <PageSettle key={section}>
+                <Body page={args?.page} />
+              </PageSettle>
             </View>
           </View>
         </ScrollView>

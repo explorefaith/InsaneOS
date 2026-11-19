@@ -106,10 +106,10 @@ export function Window({ win, app, t, focused, fx }) {
   const glyphP = useTween((hover || lights?.glyphs === 'always') ? 1 : 0, { dur: DUR.hover });
   const geo = wm.frame(win);
   const fxs = fxStyle(fx, geo);
-  // opening fade: the window rises a little and fades in, unless motion is reduced —
-  // a JS ramp because the engine has no style transitions (the minimize effect works the same way)
+  // opening: the window rises from below and fades in, the motion reference's measured entrance
+  // (~250 ms, a real rise, no scale wobble) — a JS ramp because the engine has no style transitions
   const [enter, setEnter] = useState(() => (s?.reduceMotion ? 1 : 0));
-  // the close animation: the window fades and shrinks a little (wm.close keeps it for DUR.close)
+  // the close animation: the window drops away and fades, faster than it came (wm.close keeps it for DUR.close)
   const [closeP, setCloseP] = useState(0);
   useEffect(() => {
     if (!win.closing) return undefined;
@@ -124,15 +124,15 @@ export function Window({ win, app, t, focused, fx }) {
     const t0 = performance.now();                   // a time-based ramp: DUR.open from mount
     const iv = setInterval(() => setEnter((v) => {
       const k = Math.min(1, (performance.now() - t0) / DUR.open);
-      return k >= 1 ? 1 : Math.max(v, 0.2 + 0.8 * easeOutCubic(k));
+      return k >= 1 ? 1 : Math.max(v, easeOutCubic(k));
     }), 16);
     return () => clearInterval(iv);
   }, []);
   const enterStyle = enter < 1 && !fx
-    ? { opacity: 0.2 + 0.8 * enter, transform: `translateY(${Math.round((1 - enter) * 12)}px) scale(${(0.984 + 0.016 * enter).toFixed(3)})` }
+    ? { opacity: enter, transform: `translateY(${Math.round((1 - enter) * 44)}px)` }
     : null;
   const closeStyle = win.closing
-    ? { opacity: 1 - 0.9 * closeP, transform: `scale(${(1 - 0.04 * closeP).toFixed(4)})`, pointerEvents: 'none' }
+    ? { opacity: 1 - closeP, transform: `translateY(${Math.round(closeP * 16)}px)`, pointerEvents: 'none' }
     : null;
 
   // A maximized window is dragged out of its place by JS, but only once the pointer really moved: a
