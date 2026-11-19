@@ -80,22 +80,27 @@ export function Segmented({ options, value, onChange, appearance = 'accent', sma
 }
 
 // Source-list row. Optional: detail (trailing text, e.g. a count) and indent (nesting level).
+// sub: a second, dim line under the label (the Settings sidebar's two-line rows — 40 px tall).
 // flat: draw no selection fill of its own — the container paints the selection (the Settings
 // sidebar's liquid pill, which morphs between rows); the row keeps the selected colours.
-export function SidebarItem({ label, selected, onClick, icon, detail, indent = 0, flat }) {
+export function SidebarItem({ label, sub, selected, onClick, icon, detail, indent = 0, flat }) {
   const t = useTheme();
   const [hover, setHover] = useState(false);
   // selection 'indicator' (a theme token): a light fill and a short accent bar at the leading edge
   const ind = t.selection === 'indicator';
   const filled = selected && !ind && !flat;
   const sel = t.mode === 'dark' ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)';
+  const ink = filled || (selected && flat) ? '#fff' : t.text;
   return (
     <View onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ height: 28, paddingLeft: 10 + indent * 14, paddingRight: 10, borderRadius: t.controlRadiusSmall, flexDirection: 'row', alignItems: 'center', gap: 8,
+      style={{ height: sub ? 40 : 28, paddingLeft: 10 + indent * 14, paddingRight: 10, borderRadius: t.controlRadiusSmall, flexDirection: 'row', alignItems: 'center', gap: 8,
         backgroundColor: filled ? t.accent : selected && !flat ? sel : hover ? t.hover : 'transparent' }}>
-      {selected && ind ? <View style={{ position: 'absolute', insetInlineStart: 0, top: 8, width: 3, height: 12, borderRadius: 2, backgroundColor: t.accent }} /> : null}
+      {selected && ind ? <View style={{ position: 'absolute', insetInlineStart: 0, top: 14, width: 3, height: 12, borderRadius: 2, backgroundColor: t.accent }} /> : null}
       {typeof icon === 'string' ? <Text style={{ width: 18, textAlign: 'center', fontSize: 14, color: filled || (selected && flat) ? '#fff' : t.accent }}>{icon}</Text> : icon}
-      <Text style={{ flex: 1, fontSize: 13, fontWeight: selected && ind ? 600 : 500, color: filled || (selected && flat) ? '#fff' : t.text, whiteSpace: 'nowrap', overflow: 'hidden' }}>{label}</Text>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={{ fontSize: 13, fontWeight: selected && ind ? 600 : 500, color: ink, whiteSpace: 'nowrap', overflow: 'hidden' }}>{label}</Text>
+        {sub ? <Text style={{ fontSize: 10.5, color: filled || (selected && flat) ? 'rgba(255,255,255,0.72)' : t.textDim, whiteSpace: 'nowrap', overflow: 'hidden' }}>{sub}</Text> : null}
+      </View>
       {detail != null ? <Text style={{ fontSize: 11, color: filled ? 'rgba(255,255,255,0.8)' : t.textDim }}>{detail}</Text> : null}
     </View>
   );

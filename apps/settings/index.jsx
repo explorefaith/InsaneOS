@@ -243,6 +243,13 @@ function Appearance() {
         <SettingRow label={tr('settings.reduceMotion')} hint={tr('settings.reduceMotionHint')}>
           <Toggle small on={!!s.reduceMotion} onChange={(reduceMotion) => set({ reduceMotion })} />
         </SettingRow>
+        <SettingRow label={tOptional('settings.motionSpeed') || 'Motion speed'}
+          hint={tOptional('settings.motionSpeedHint') || 'How long the movement of the desktop takes: windows, panels, toggles. The default is the measured reference.'}>
+          <PopUp width={150} value={String(Number.isFinite(Number(s.motionScale)) && Number(s.motionScale) !== 1 ? s.motionScale : '1')}
+            onChange={(motionScale) => set({ motionScale: Number(motionScale) })}
+            options={[['0.8', tOptional('settings.motionSpeed.faster') || 'Faster (0.8×)'], ['1', tOptional('settings.motionSpeed.default') || 'Default (1×)'],
+              ['1.5', tOptional('settings.motionSpeed.relaxed') || 'Relaxed (1.5×)'], ['2', tOptional('settings.motionSpeed.slow') || 'Slow (2×)']]} />
+        </SettingRow>
       </Section>
       <Section title={tOptional('settings.lights.title') || 'Window Controls'}
         footer={tOptional('settings.lights.hint') || 'The close, minimize and zoom lights at the corner of every window.'}>
@@ -688,7 +695,7 @@ function SectionIcon({ id, color, size = 20 }) {
 // slight overshoot — easeElegantBounce). Rows are 28 px with a 1 px gap and a 12 px gap between
 // groups, so the row's offset is computed from the visible groups — the engine has no node
 // geometry (the ledgered lesson). `flat` rows paint no fill of their own; the pill sits under them.
-const ROW_PITCH = 29;                       // 28 px row + 1 px gap
+const ROW_PITCH = 41;                       // the two-line row (40 px) + 1 px gap
 function pillY(groups, sel) {
   let y = 0;
   for (let g = 0; g < groups.length; g++) {
@@ -703,7 +710,7 @@ function pillY(groups, sel) {
 function LiquidPill({ groups, sel }) {
   const t = useTheme();
   const y = useTween(pillY(groups, sel), { from: pillY(groups, sel), dur: DUR.pill, ease: easeElegantBounce });
-  return <View style={{ position: 'absolute', left: 0, right: 0, top: Math.round(y), height: 28, borderRadius: 7, backgroundColor: t.accent }} />;
+  return <View style={{ position: 'absolute', left: 0, right: 0, top: Math.round(y), height: 40, borderRadius: 8, backgroundColor: t.accent }} />;
 }
 
 // The page's content settles in when the section changes (the reference switches content at once,
@@ -781,7 +788,7 @@ export default function Settings() {
             {groups.map((g, i) => (
               <View key={i} style={{ gap: 1, marginTop: i ? spacing.m : 0 }}>
                 {g.map(([id, , color]) => (
-                  <SidebarItem key={id} label={tr(`settings.section.${id}`)} selected={id === section} onClick={() => setSection(id)}
+                  <SidebarItem key={id} label={tr(`settings.section.${id}`)} sub={tOptional(`settings.sectionSub.${id}`)} selected={id === section} onClick={() => setSection(id)}
                     flat={t.selection !== 'indicator'} icon={<SectionIcon id={id} color={color} />} />
                 ))}
               </View>

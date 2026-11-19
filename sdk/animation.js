@@ -80,6 +80,17 @@ export function genieStrip(p, v, lead = 0.42) {
 // already hold the settings object read it here.
 export const reducedMotionNow = () => { try { return !!settings.get().reduceMotion; } catch (e) { return false; } };
 
+// The motion speed (Settings → Appearance → Motion speed): every duration in the DUR table runs
+// through this — 0.8× snappier, 1× the measured reference, 1.5× or 2× more relaxed (the motion
+// reference's own settings page offers the same chips over its animation directives). Reduced
+// Motion still jumps to the target; this only stretches the travel.
+export function motionScaleNow() {
+  try {
+    const v = Number(settings.get().motionScale);
+    return Number.isFinite(v) && v >= 0.5 && v <= 3 ? v : 1;
+  } catch (e) { return 1; }
+}
+
 // The engine provides requestAnimationFrame; node (the scenes, the tests) does not: there a 16 ms
 // timeout keeps the same shape. Exported for the one other continuous animation in the SDK
 // (the Spinner's dots); every one-shot ramp goes through useTween instead.
@@ -100,7 +111,8 @@ export function useTween(target, { from = null, dur = DUR.panel, ease = easeOutC
   const raf = useRef(0);
   useEffect(() => {
     const jump = reduce ?? reducedMotionNow();
-    if (jump || dur <= 0 || at.current === target) {
+    const real = dur * motionScaleNow();
+    if (jump || real <= 0 || at.current === target) {
       if (raf.current) cancelFrame(raf.current);
       at.current = target;
       setV(target);
@@ -108,7 +120,7 @@ export function useTween(target, { from = null, dur = DUR.panel, ease = easeOutC
     }
     const start = performance.now();
     const step = (now) => {
-      const p = Math.min(1, (now - start) / dur);
+      const p = Math.min(1, (now - start) / real);
       const val = at.current + (target - at.current) * ease(p);
       at.current = val;
       setV(val);
