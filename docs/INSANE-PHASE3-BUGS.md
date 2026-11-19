@@ -89,6 +89,19 @@ Ledger lesson: "zero react errors" proves nothing about visibility — every wid
 with the bridge's count log in the session log, and the deploy must sync every asset directory a
 feature references.
 
+## Round 5 — the launcher-search crash (the user's live report)
+
+The user's machine: searching from the app launcher crashed the PC, the display went black. The
+crashed session's log was truncated by the reboot, so the exact throw is unrecoverable — but the
+systemic hole is proven and now closed:
+
+| ID | Sev | Finding | Status |
+|---|---|---|---|
+| R1 | P0 | the shell had NO error boundaries — one render throw anywhere (the launcher search re-render included) took the entire tree down to a black display; only app windows had boundaries | VERIFIED FIXED: ShellBoundary wraps the menu bar, dock, launcher, widget gallery, studio bar, both widget layers, every window frame, the taskbar, the start menu — and each Theme Studio card individually. A throwing panel now shows a small notice with a Retry in its place; the desktop stays alive. The boundary also logs the component name + stack, so the next occurrence names itself |
+| R2 | P2 | the image cache never drops entries (image.c:29's own comment) — with 21 wallpapers × 4K decodes (~33 MB each) a long session grows unbounded | LEDGERED for the next C round (needs a bounded-LRU change in image.c, careful with the paint path) |
+
+The recovery command for the user after this deploy: the same upgrade script.
+
 ## Open (ledgered, not bugs)
 
 - W6's general fullscreen-over-TAKE policy and W10's F-key grabs: UX decisions, not mechanical
