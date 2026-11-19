@@ -29,8 +29,48 @@ export const tsLive = createStore({ active: null, def: null, widgets: [], area: 
 // The desktop-arrange mode: the Studio canvas's twin on the real desktop — the cards drag
 // (pointer events land on the card's surface), one undo step per drag, Esc leaves.
 export const tsArranging = createStore(false);
+// The card picked on the desktop (arrange mode) and the look captured when the mode began —
+// Cancel restores it exactly; Save & Apply flushes and leaves.
+export const tsSelected = createStore(null);
+// ONE undo stack for the whole customize experience (the Themes page's editor AND the desktop
+// bar) — both push before their edits, so undo walks the user's steps regardless of surface.
+export const tsHistory = (() => {
+  let past = [], future = [], base = null;
+  const cap = 60;
+  return {
+    push(state) { if (past.length === 0 || past[past.length - 1] !== state) { past.push(state); if (past.length > cap) past.shift(); } future = []; },
+    undo(current) { if (!past.length) return null; future.push(current); const p = past.pop(); return p; },
+    redo(current) { if (!future.length) return null; past.push(current); return future.pop(); },
+    get canUndo() { return past.length > 0; },
+    get canRedo() { return future.length > 0; },
+    reset() { past = []; future = []; base = null; },
+    beginDrag(pre) { base = pre; },
+    endDrag(post) { if (base != null && base !== post) { past.push(base); if (past.length > cap) past.shift(); future = []; } base = null; },
+  };
+})();
+export const tsEntrySnapshot = createStore(null);
 // A desktop drag's pre-drag snapshot, handed to the Themes page (ONE undo step per desktop drag)
 export const tsDesktopUndo = createStore(null);
+
+// Enter/leave the desktop customize mode. Cancel(true) puts the entry look back; Save(false)
+// flushes the debounced persist and leaves everything as the person shaped it.
+export function tsEnterArrange() {
+  const st = tsLive.get();
+  tsEntrySnapshot.set(st.widgets ? st.widgets.map((w) => ({ ...w, cfg: JSON.parse(JSON.stringify(w.cfg || {})), style: JSON.parse(JSON.stringify(w.style || {})) })) : null);
+  tsSelected.set(null);
+  tsArranging.set(true);
+}
+export function tsExitArrange(cancel) {
+  if (cancel) {
+    const snap = tsEntrySnapshot.get();
+    if (snap) tsMutate(() => snap);
+    else tsResetTheme();
+  }
+  tsPersistFlush();
+  tsSelected.set(null);
+  tsEntrySnapshot.set(null);
+  tsArranging.set(false);
+}
 
 // ---------------------------------------------------------------- validation (a malformed
 // settings.themeStudio must never crash the shell — it degrades to "no theme")

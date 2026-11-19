@@ -84,7 +84,7 @@ export { TS_WIDGET_SPECS, TS_CATS, TS_VARIANTS, TS_PROVIDERS, specOf, specsOfCat
 export {
   tsLive, tsInit, tsApplyTheme, tsDeactivate, tsMutate, tsAdd, tsRemove, tsDuplicate,
   tsMove, tsResize, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
-  tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsPersistFlush, themeOf as tsThemeOf, tsAllThemes, tsArranging, tsDesktopUndo,
+  tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsPersistFlush, themeOf as tsThemeOf, tsAllThemes, tsArranging, tsDesktopUndo, tsSelected, tsEnterArrange, tsExitArrange, tsHistory,
   TS_APPEARANCE_KEYS,
 } from './themestudio.js';
 export { Markdown, markdownHeadings, parseMarkdown, parseInline, toggleTask } from './markdown.jsx';

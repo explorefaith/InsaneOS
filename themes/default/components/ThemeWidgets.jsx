@@ -18,7 +18,7 @@ import {
   nowPlaying, calendarEvents, reminders, usePim, weather, useWeather, weatherConsent, weatherGroup,
   clockTimer, timerStart, timerPause, timerResume, timerReset, timerLeft, formatBytes,
   weekdayName, monthName, tOptional, tsLive, resolveStyle, withAlpha,
-  registerWidgetType, setWidgets, tsByZ, tsArranging, tsDesktopUndo, tsMove, tsPersistFlush, tsInit, specOf, createStore, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
+  registerWidgetType, setWidgets, tsByZ, tsArranging, tsDesktopUndo, tsSelected, tsMove, tsPersistFlush, tsInit, specOf, createStore, tsHistory, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
@@ -90,9 +90,11 @@ function TSCard({ widget, children, st }) {
   const blurPx = s.blur ? Math.round(Math.max(0, Math.min(1, s.blur)) * 28) : 0;
   const effectsOn = settings.get().effects !== false;
   const arranging = useStore(tsArranging);
+  const picked = useStore(tsSelected) === widget.id;
   const down = (e) => {
-    if (!arranging || widget.locked) return;
+    if (!arranging || widget.locked) { if (arranging) tsSelected.set(null); return; }
     e.stopPropagation?.();
+    tsSelected.set(widget.id);
     arrangeDrag.current = { id: widget.id, x: e.x, y: e.y, ox: widget.x, oy: widget.y, moved: false, pre: tsLive.get().widgets.map((w) => ({ ...w })) };
     const move = (ev) => {
       const d = arrangeDrag.current;
@@ -106,7 +108,8 @@ function TSCard({ widget, children, st }) {
       offMove(); offUp();
       if (d && d.moved) {
         tsPersistFlush();
-        tsDesktopUndo.set(d.pre);               // the Themes page records ONE undo step per drag
+        tsHistory.beginDrag(d.pre);
+        tsHistory.endDrag(tsLive.get().widgets.map((w) => ({ ...w, cfg: JSON.parse(JSON.stringify(w.cfg || {})), style: JSON.parse(JSON.stringify(w.style || {})) })));
       }
     };
     const offMove = addListener('pointermove', move);

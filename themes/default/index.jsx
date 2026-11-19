@@ -76,6 +76,9 @@ import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
 import { WidgetGallery, widgetsEditing, PlaceLayer } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
 import './components/ThemeWidgets.jsx';   // registers 'ts-widget' (the Theme Studio's kinds) and installs the live bridge
+import { ThemeStudioBar } from './components/ThemeStudioBar.jsx';
+import { tsCreateHistory } from '@insaneos/sdk';
+const studioHist = { current: tsCreateHistory(40) };   // the desktop customize mode's undo (shared with the Themes page's hand-off)
 import { Menu } from './components/Menu.jsx';
 
 const MENU_H = 0;   // the top bar is gone — the island strip lives top-centre (IslandStrip.jsx)
@@ -346,6 +349,7 @@ function App() {
         )}
         {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
         <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
+        <Layer name="popover"><ThemeStudioBar area={{ x: 0, y: 28, w: main.w, h: Math.max(200, main.h - 28 - 80) }} hist={studioHist} /></Layer>
         <PlaceLayer />
         <BenchWidgets />
 

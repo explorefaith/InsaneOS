@@ -10,7 +10,7 @@
 // Save as preset keeps the result as the user's own, never overwriting a built-in.
 import {
   View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
-  TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
+  TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsHistory, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
@@ -514,7 +514,7 @@ export function ThemesSettings() {
   const [addOpen, setAddOpen] = useState(false);
   const [customizeFocus, setCustomizeFocus] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
-  const hist = useRef(tsCreateHistory(40));
+  const hist = useRef(tsHistory);   // shared with the desktop customize bar
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
   // the catalog only changes with the themeStudio record — not on every live-list edit
   const themes = useMemo(() => tsAllThemes(), [s.themeStudio]);
@@ -618,6 +618,12 @@ export function ThemesSettings() {
             <Button small label="↶" onClick={undo} disabled={!canUndo} />
             <Button small label="↷" onClick={redo} disabled={!canRedo} />
             <Button small label={L('resetLayout', 'Reset layout')} onClick={() => act(() => tsResetTheme(area))} />
+            <Button small label={L('arrangeDesktop', 'Arrange on the desktop')} onClick={() => {
+              const first = (tsLive.get().widgets || [])[0];
+              tsSelected.set(first ? first.id : null);
+              try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ }
+              tsEnterArrange();
+            }} />
             <Button small label={L('stopUsing', 'Use no theme')} onClick={stop} />
           </View>
         ) : null}>
@@ -628,10 +634,13 @@ export function ThemesSettings() {
               onPreview={() => open(th.id)}
               onCustomize={() => {
                 if (live.active !== th.id) apply(th.id);
-                // the editor must visibly respond: the theme's first widget comes up selected
+                // straight to the desktop (the user's ask): the bar rides there, the first card
+                // comes up picked, the Settings window steps aside
                 const first = (tsLive.get().widgets || [])[0];
+                tsSelected.set(first ? first.id : null);
                 setSelW(first ? first.id : null);
-                setCustomizeFocus((n) => n + 1);
+                try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ }
+                tsEnterArrange();
               }} />
           ))}
         </View>
