@@ -513,6 +513,16 @@ measured to lose; off for the other tilers (Adreno, Mali, Tegra) until they are 
 or `=1` still overrides, and the session log says which of the three decided. `build/gpu-scissor` stays
 in the tree as the tool a new driver gets measured with.
 
+**Fixed (2026-11-20):** that decision never actually fired on Intel hardware — `scissor_default` matched
+the driver-name substrings (`iris`, `i965`, `i915`), which no Mesa renderer string carries for real Intel
+GPUs (they say `Mesa Intel(R) UHD Graphics 620 (WHL GT2)`), so the default resolved "tiler or unmeasured"
+and the scissor sat off on the very GPU the win was measured on: every frame composed whole, and under
+interaction (scrolling, window drags) a 1920 × 1080 frame missed its vblank and ran on a two-vblank
+cadence — 30–35 ms frames, a laggy pointer, exactly the shape the session log's slow-frame lines show
+(`after the paint` ≫ paint). The match is on `intel` now; re-verified on the same card with
+`build/gpu-scissor --verify` (2 465 420 pixels, 0 differ) and the win re-measured (77.7 % at 1.5 %
+damage under a 4-core read load).
+
 ## What slows the GPU under CPU load (the experiment, 0.8.7)
 
 On the Pi 5 a frame's GPU time goes from about 1.5 ms alone to 14–16 ms under an all-core load with no clock change

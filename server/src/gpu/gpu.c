@@ -478,15 +478,18 @@ void gpu_info(GpuInfo *i) {
 
 /* The buffer-age scissor's default for this renderer: on for the drivers it was measured to win on
  * (the Intel ones, the software rasterizers), off for the tilers — V3D measured a loss, the rest
- * unmeasured — and off for anything else until it is measured (docs/GPU.md). */
+ * unmeasured — and off for anything else until it is measured (docs/GPU.md). The Intel match is on
+ * "intel", the hardware name Mesa's renderer strings carry ("Mesa Intel(R) UHD Graphics 620 …"):
+ * the driver-name substrings alone (iris, i965, i915) matched nothing modern, so the scissor sat
+ * off on exactly the GPU it was measured to win 71–89 % on. */
 static int scissor_default(const char *renderer) {
     char r[128];
     snprintf(r, sizeof r, "%s", renderer ? renderer : "");
     for (char *p = r; *p; p++) if (*p >= 'A' && *p <= 'Z') *p += 32;
     if (strstr(r, "v3d") || strstr(r, "vc4") || strstr(r, "freedreno") || strstr(r, "adreno") ||
         strstr(r, "panfrost") || strstr(r, "mali") || strstr(r, "lima") || strstr(r, "tegra")) return 0;
-    return strstr(r, "iris") || strstr(r, "i965") || strstr(r, "i915") || strstr(r, "llvmpipe") ||
-           strstr(r, "swrast") || strstr(r, "swr") || strstr(r, "softpipe");
+    return strstr(r, "intel") || strstr(r, "iris") || strstr(r, "i965") || strstr(r, "i915") ||
+           strstr(r, "llvmpipe") || strstr(r, "swrast") || strstr(r, "swr") || strstr(r, "softpipe");
 }
 
 int gpu_init(Kms *k) {
