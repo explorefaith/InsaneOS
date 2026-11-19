@@ -51,6 +51,18 @@ reports). Status: DISCOVERED → INVESTIGATING → FIXING → FIXED → TESTING 
 | G8 | P3 | no password visibility toggle on the greeter | VERIFIED (the eye beside the submit arrow) |
 | G9 | P3 | the autologin loop spammed session logs | VERIFIED (one line per bounded retry) |
 
+## Round 2 — display/GPU/hardware/performance (self-audit, the quota-limited agent's scope)
+
+No new defects. What was verified with quoted paths:
+
+| Area | Finding | Status |
+|---|---|---|
+| GPU fallback | every init failure (no-3d, no-gbm, no-egl, no-config, no-context, software renderer, shaders) prints its reason and composes on CPU — gpu.c:498-556's `goto fail` chain; a black screen is unreachable from GPU init | VERIFIED |
+| Resolution/hotplug | `display_take_resync()` → `outputs_apply()` between frames (main.c:2795); a failed new configuration restores the previous one (`display_resync_done`'s undo, display.c) | VERIFIED |
+| Startup | display attach and outputs apply run before the theme eval; the boot splash hand-off covers the gap; sessiond's boot-time test measures it (bootSeconds) | VERIFIED |
+| Unmanaged timers | swept every `setInterval(` in themes/sdk/apps: all effect-cleared, self-stopping (fade/backdrop), refcounted (crypto want, trash, tickers) or cheap-and-gated (motion's 5 s evaluate runs only with a player; diskwatch: 30 s temps, 6 h health) | VERIFIED (no bare runaway interval) |
+| Wi-Fi/BT/audio | the settings apps drive the real paths (net-wifi-* through netd, bt store + agent, the sound state) | VERIFIED (Phase-2 shapes + NETWORK.md) |
+
 ## Open (ledgered, not bugs)
 
 - W6's general fullscreen-over-TAKE policy and W10's F-key grabs: UX decisions, not mechanical
