@@ -71,6 +71,24 @@ No new defects. What was verified with quoted paths:
 | W10 | P3→WONTFIX (documented) | F4/F12 over Linux windows — taking them globally would break F4/F12 inside Linux apps (devtools); ❖ remains the desktop's key everywhere | CLOSED as a documented trade-off |
 | L4 | — | TS widgets now drag on the real desktop: right-click → Arrange widgets (while a theme is live), dashed borders, live tsMove per frame, Esc leaves, one undo step per desktop drag through tsDesktopUndo → the Themes page's history | VERIFIED (build + lab zero errors) |
 
+## Round 4 — the live-desktop report (black wallpaper, missing widgets, lag) — the audit gap closed
+
+The user's first real session found what the lab's "zero errors" never checked: the widgets were
+never VISIBLE. Four compounding bugs:
+
+| ID | Sev | One line | Status |
+|---|---|---|---|
+| D1 | P0 | upgrade-insaneos.sh never synced the wallpaper collection — every collection id (and Acid Press's own wallpaper) painted black | VERIFIED (additive sync in the script; the user copies once and the wallpaper returns) |
+| D2 | P0 | ThemeWidgets.jsx was orphaned — index.jsx never imported it: no ts-widget registration, no bridge, no tsInit | VERIFIED (bridge log: 'Acid Press — 13 widgets on the desktop') |
+| D3 | P1 | tsInit unimported inside ThemeWidgets.jsx itself — a silent catch hid the ReferenceError on every boot | VERIFIED (the boot now logs its result) |
+| D4 | P1 | tsRichSegments's empty array is truthy — Quote/Label/Headline/Notes rendered blank; QuoteW crashed on rich[0].t | VERIFIED (real-text fallback + length guards; the crash is gone) |
+| D5 | P2 | the pimCache used an unimported createStore (a bundle global reference) | VERIFIED |
+| D6 | P2 | five JSX sites carried a mangled duplicate style prop from the clamp sweep | VERIFIED |
+
+Ledger lesson: "zero react errors" proves nothing about visibility — every widget round now ends
+with the bridge's count log in the session log, and the deploy must sync every asset directory a
+feature references.
+
 ## Open (ledgered, not bugs)
 
 - W6's general fullscreen-over-TAKE policy and W10's F-key grabs: UX decisions, not mechanical
