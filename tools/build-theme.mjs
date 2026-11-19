@@ -17,6 +17,13 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const i18n = spawnSync('node', [path.join(root, 'tools', 'i18n-check.mjs')], { stdio: 'inherit' });
 if (i18n.status) process.exit(i18n.status || 1);
 
+// An SDK export used inside a surface without being bound there builds fine (esbuild leaves the
+// identifier bare) and throws a ReferenceError the first time its code path runs — the launcher's
+// search crashed exactly this way (tOptional at Launchpad.jsx, found live by the ShellBoundary's
+// own log). The import check fails the build on that class (tools/sdk-import-check.mjs).
+const imports = spawnSync('node', [path.join(root, 'tools', 'sdk-import-check.mjs')], { stdio: 'inherit' });
+if (imports.status) process.exit(imports.status || 1);
+
 // Virtual module '@insaneos/apps': one entry per apps/<id>/manifest.json.
 const appsPlugin = {
   name: 'insaneos-apps',

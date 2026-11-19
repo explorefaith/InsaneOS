@@ -13,6 +13,7 @@ import {
   TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsHistory, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
+  tsPersistFlush, tsSelected, tsEnterArrange,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha, Slider as SliderX,
   tsRichSegments, tsRichSplit, fs, FilePicker, saveSettingsNow, insaneosWallpapers as allWallpapers, wallpaperThumb as wThumb,
   TS_WIDGET_SPECS, TS_CATS, TS_ROUTES, variantEntries, specsOfCat, SearchField,

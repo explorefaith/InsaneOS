@@ -2,7 +2,7 @@
 // wallpaper and live CPU/RAM usage. The network, Wi-Fi, Bluetooth and CPU/RAM tiles can be turned off in Settings →
 // Desktop & Dock → Control Center (issue #58, sdk/menubarmodel.js).
 import {
-  View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional,
+  View, Text, Image, Button, Toggle, Slider, useSettings, useCpuUsage, useSystemInfo, formatBytes, wm, session, addListener, t as tr, tOptional, useLocale,
   useSound, defaultSink, sound, NowPlayingTile, findWallpaper, wallpaperThumb, menuBarPrefs, SoundOutputList, useSoundOutputs, useBluetooth, setBluetoothPower, wm, dndActive, useDisplays, admin,
   usePowerProfiles, admin, sharedTicker,
   useWeather, weatherRefresh, weatherConsent, weatherGroup, WEATHER_PLACE_DEFAULT, wallpaperAccent,

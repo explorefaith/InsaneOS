@@ -9,6 +9,7 @@ import {
   View, Text, Button, useTheme, useLocale, useStore, tOptional, screen, Toggle,
   widgetLayout, widgetsEditing, WIDGET_CATALOG, catalogOf, addWidget, removeWidget, resizeWidget, setWidgetCfg, widgetComponent, Layer,
   sharedTicker, useBattery, nowPlaying, formatBytes, placement, wm, useAppWindow, admin, errorText, TextInput,
+  loadWidgets, widgetDefaults,
 } from '@insaneos/sdk';
 import { Stack, Section, SettingRow, Actions, Note, PopUp, Columns } from './ui.jsx';
 import { createElement as h, useState } from 'react';
