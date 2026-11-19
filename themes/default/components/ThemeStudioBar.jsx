@@ -100,7 +100,23 @@ function CardStyleSheet({ t, w, area, hist }) {
         {[null, '#f5f5f7', '#1d1d1f'].map(swatch)}
         <TextInput value={st.color || ''} onChange={(v) => soft({ color: v || null })} placeholder="#hex" style={{ width: 90, height: 24, fontSize: 11 }} />
       </View>
-      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>Background</Text>
+        {[null, '#f4f1e7', '#1d1d1f', '#2b48d9', '#c8f14c', '#d24a3a'].map((c, i) => (
+          <View key={i} onClick={() => soft({ paper: c })} style={{ width: 18, height: 18, borderRadius: 9,
+            backgroundColor: c || 'transparent', border: `2px solid ${(st.paper || null) === c ? t.accent : t.separator}`,
+            alignItems: 'center', justifyContent: 'center' }}>
+            {c === null ? <Text style={{ fontSize: 8, color: t.textDim }}>T</Text> : null}
+          </View>
+        ))}
+        <TextInput value={st.paper || ''} onChange={(v) => soft({ paper: v || null })} placeholder="#hex" style={{ width: 84, height: 24, fontSize: 11 }} />
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>Blur</Text>
+        <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} width={140} onChange={(v) => soft({ blur: v || null })} />
+        <Text style={{ fontSize: 10, color: t.textDim, width: 32 }}>{`${Math.round((st.blur ?? 0.4) * 100)}%`}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>Surface</Text>
         <Slider value={st.alpha ?? 0.7} min={0.16} max={1} step={0.02} width={140} onChange={(v) => soft({ alpha: v })} />
         <Text style={{ fontSize: 10, color: t.textDim, width: 32 }}>{`${Math.round((st.alpha ?? 0.7) * 100)}%`}</Text>

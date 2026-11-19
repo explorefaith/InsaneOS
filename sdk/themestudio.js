@@ -18,12 +18,13 @@ import { settings } from './settings.js';
 import { createStore } from './store.js';
 import {
   TS_KINDS, resolvePlan, liveWidgets, newInstance, removeW, duplicateW,
-  moveW, resizeW, setW, zOrder, planDiffers, deepCopy,
+  moveW, resizeW, setW, zOrder, planDiffers, deepCopy, setW as setWModel,
 } from './themestudio-model.js';
 import { THEMES } from './themestudio-themes.js';
 
 // The appearance keys a theme owns while it is active.
-export const TS_APPEARANCE_KEYS = ['wallpaper', 'wallpaperBg', 'wallpaperFit', 'motion', 'mode', 'accent'];
+export const TS_APPEARANCE_KEYS = ['wallpaper', 'wallpaperBg', 'wallpaperFit', 'motion', 'mode', 'accent',
+  'glassBlur', 'glassTransparency', 'glassSaturate'];
 
 export const tsLive = createStore({ active: null, def: null, widgets: [], area: null });
 // The desktop-arrange mode: the Studio canvas's twin on the real desktop — the cards drag
@@ -282,6 +283,20 @@ export function tsMutate(fn, area) {
   tsLive.set({ ...st, widgets: next });
   persistWidgets(next);
   return next;
+}
+
+// Add a widget of a named style route (the 525-entry catalog): the kind is created and the
+// route's style patch rides it, so 'Clock · Glass' lands looking like glass on any theme.
+export function tsAddVariant(kind, stylePatch, area, at) {
+  const st = tsLive.get();
+  if (!st.active || !TS_KINDS[kind]) return null;
+  let made = null;
+  tsMutate((list, a) => {
+    made = newInstance(kind, list, a, at);
+    if (made) made = { ...made, style: { ...(made.style || {}), ...(stylePatch || {}) } };
+    return made ? [...list, made] : null;
+  }, area);
+  return made;
 }
 
 export function tsAdd(kind, area, at) {

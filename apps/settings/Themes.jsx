@@ -13,9 +13,9 @@ import {
   TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsHistory, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
-  tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
-  tsRichSegments, tsRichSplit, fs, FilePicker, saveSettingsNow,
-  TS_WIDGET_SPECS, TS_CATS, specsOfCat, SearchField,
+  tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha, Slider as SliderX,
+  tsRichSegments, tsRichSplit, fs, FilePicker, saveSettingsNow, insaneosWallpapers as allWallpapers, wallpaperThumb as wThumb,
+  TS_WIDGET_SPECS, TS_CATS, TS_ROUTES, variantEntries, specsOfCat, SearchField,
   resolveStyle, withAlpha, insaneosWallpapers, wallpaperThumb, Layer, wm, useAppWindow, errorText,
 } from '@insaneos/sdk';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
@@ -24,6 +24,12 @@ import { Section, SettingRow, Note, Actions, Stack, Columns, PopUp, Message } fr
 const L = (k, fb) => tOptional(`settings.themes.${k}`) || fb;
 // The kind's name in the interface language (the spec's English as the fallback).
 const kindLabel = (id) => tOptional(`settings.kind.${id}`) || (TS_KINDS[id] || {}).label || id;
+// a widget with a style route shows it: 'Digital clock · Glass'
+const widgetLabel = (w) => {
+  const base = kindLabel(w.kind);
+  const r = (w.cfg || {}).variantRoute;
+  return r ? `${base} · ${r.charAt(0).toUpperCase() + r.slice(1)}` : base;
+};
 
 // ---------------------------------------------------------------- the miniature desktop
 
@@ -163,7 +169,7 @@ const WEIGHTS = [400, 500, 600, 700, 800];
 
 function LayerRow({ w, index, n, selected, onSelect, onEye, onUp, onDown, onDup, onRemove }) {
   const t = useTheme();
-  const label = kindLabel(w.kind);
+  const label = widgetLabel(w);
   return (
     <View onClick={() => onSelect(w.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 34,
       paddingHorizontal: 8, borderRadius: 8, cursor: 'pointer',
@@ -200,7 +206,7 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
     <View style={{ gap: 8, padding: 12, borderRadius: 12, border: `1px solid ${t.separator}`, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: t.text, textAlign: 'start' }}>
-          {kindLabel(w.kind)}</Text>
+          {widgetLabel(w)}</Text>
         <Button small label="S" onClick={() => scale(0.8)} />
         <Button small label="M" onClick={() => scale(1)} />
         <Button small label="L" onClick={() => scale(1.25)} />
@@ -261,6 +267,22 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
         </View>
         <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round(st.radius ?? 16)}`}</Text>
       </StyleControl>
+      <StyleControl label={L('paper', 'Background')}>
+        {[null, '#f4f1e7', '#1d1d1f', '#2b48d9', '#c8f14c', '#d24a3a'].map((c, i) => (
+          <View key={i} onClick={() => set({ paper: c })} style={{ width: 20, height: 20, borderRadius: 10,
+            backgroundColor: c || 'transparent', border: `2px solid ${(st.paper || null) === c ? t.accent : t.separator}`,
+            alignItems: 'center', justifyContent: 'center' }}>
+            {c === null ? <Text style={{ fontSize: 9, color: t.textDim }}>T</Text> : null}
+          </View>
+        ))}
+        <TextInput value={st.paper || ''} onChange={(v) => set({ paper: v || null })} placeholder="#hex" style={{ width: 90 }} />
+      </StyleControl>
+      <StyleControl label={L('blur', 'Blur')}>
+        <View style={{ flex: 1, maxWidth: 220 }}>
+          <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} onChange={(v) => set({ blur: v || null })} />
+        </View>
+        <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.blur ?? 0.4) * 100)}%`}</Text>
+      </StyleControl>
       <StyleControl label={L('glass', 'Glass')}>
         <View style={{ flex: 1, maxWidth: 220 }}>
           <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} onChange={(v) => set({ blur: v || null })} />
@@ -320,10 +342,12 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
 function AddDialog({ onAdd, onClose }) {
   const t = useTheme();
   const [cat, setCat] = useState('time');
+  const [route, setRoute] = useState(null);            // null: all routes
   const [q, setQ] = useState('');
   const ql = q.trim().toLowerCase();
-  const list = ql ? TS_WIDGET_SPECS.filter((sp) => sp.label.toLowerCase().includes(ql))
-    : specsOfCat(cat);
+  const all = variantEntries();                        // 525: kind × style route, real data underneath
+  const list = (ql ? all.filter((sp) => sp.label.toLowerCase().includes(ql))
+    : all.filter((sp) => sp.cat === cat && (!route || sp.route === route)));
   return (
     <Layer name="modal">
       <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
@@ -341,12 +365,25 @@ function AddDialog({ onAdd, onClose }) {
               </View>
             ))}
           </View>
+          {!ql ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {[null, ...TS_ROUTES].map((r) => (
+                <View key={r ? r.id : 'all'} onClick={() => setRoute(r ? r.id : null)} style={{ paddingHorizontal: 10, height: 22,
+                  borderRadius: 11, justifyContent: 'center', cursor: 'pointer',
+                  backgroundColor: route === (r ? r.id : null) || (route === null && !r) ? t.accentSubtle : 'transparent',
+                  border: `1px solid ${route === (r ? r.id : null) || (route === null && !r) ? t.accent : t.separator}` }}>
+                  <Text style={{ fontSize: 11, color: route === (r ? r.id : null) || (route === null && !r) ? t.accent : t.textDim }}>
+                    {r ? r.label : L('allRoutes', 'All looks')}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
           <ScrollView style={{ height: 280 }} resetKey={`${cat}:${q}`}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingBottom: 8 }}>
               {list.map((sp) => (
-                <View key={sp.id} onClick={() => { onAdd(sp.id); onClose(); }} style={{ width: 168, paddingHorizontal: 10, height: 30,
+                <View key={sp.id} onClick={() => { onAdd(sp); onClose(); }} style={{ width: 168, paddingHorizontal: 10, height: 30,
                   borderRadius: 8, justifyContent: 'center', backgroundColor: t.control, cursor: 'pointer' }}>
-                  <Text style={{ fontSize: 12, color: t.text, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 }}>{kindLabel(sp.id)}</Text>
+                  <Text style={{ fontSize: 12, color: t.text, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 }}>{sp.label}</Text>
                 </View>
               ))}
               {!list.length ? <Text style={{ fontSize: 12, color: t.textDim, padding: 12 }}>{L('noKinds', 'Nothing matches.')}</Text> : null}
@@ -499,12 +536,75 @@ function RichEditor({ w, onCfg, pal }) {
   );
 }
 
+
+// ---------------------------------------------------------------- the theme look (Phase 2 ask)
+
+// The theme's own background and glass: the wallpaper grid (the shipped collection + the user's),
+// the solid/gradient background colour, and the three glass sliders — the same settings keys the
+// rest of the desktop honours, so the change is live and the preset snapshot keeps it.
+function ThemeLookSection({ s, set, onFlash }) {
+  const t = useTheme();
+  const glass = s.effects !== false;
+  const pics = allWallpapers.slice(0, 12);
+  return (
+    <Section title={L('look', 'Theme look — background, blur, transparency')}
+      footer={L('lookHint', 'The wallpaper and the glass sliders drive the whole desktop live. Saving the look as a preset keeps them with it.')}>
+      <Text style={{ fontSize: 11, fontWeight: 700, color: t.textDim, letterSpacing: 1, marginBottom: 6 }}>{L('lookBg', 'BACKGROUND')}</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {pics.map((w) => (
+          <View key={w.id} onClick={() => set({ wallpaper: w.id, wallpaperBg: null })}
+            style={{ width: 118, height: 66, borderRadius: 8, overflow: 'hidden',
+              border: `2px solid ${s.wallpaper === w.id && !s.wallpaperBg ? t.accent : t.separator}`, cursor: 'pointer' }}>
+            <Image src={wThumb(w)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </View>
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+        <Text style={{ fontSize: 11, color: t.textDim, width: 92 }}>{L('lookTint', 'Solid tint')}</Text>
+        {['#141418', '#1e2a38', '#2a2140', '#f2efe6', '#e8e3d8', null].map((c, i) => (
+          <View key={i} onClick={() => set({ wallpaperBg: c ? { kind: 'solid', a: c } : null })}
+            style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c || 'transparent',
+              border: `2px solid ${JSON.stringify(s.wallpaperBg || {}) === JSON.stringify(c ? { kind: 'solid', a: c } : {}) ? t.accent : t.separator}`,
+              alignItems: 'center', justifyContent: 'center' }}>
+            {c === null ? <Text style={{ fontSize: 9, color: t.textDim }}>Off</Text> : null}
+          </View>
+        ))}
+      </View>
+      <Text style={{ fontSize: 11, fontWeight: 700, color: t.textDim, letterSpacing: 1, marginTop: 12, marginBottom: 6 }}>{L('lookGlass', 'GLASS')}</Text>
+      <SettingRow label={L('lookBlur', 'Blur')} stack>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 11, color: t.textDim }}>0</Text>
+          <Slider value={Number.isFinite(s.glassBlur) ? s.glassBlur : 24} min={0} max={64} width={200}
+            onChange={(v) => set({ glassBlur: Math.round(v) })} />
+          <Text style={{ fontSize: 11, color: t.textDim, width: 40 }}>{`${Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24} px`}</Text>
+        </View>
+      </SettingRow>
+      <SettingRow label={L('lookTransparency', 'Transparency')} stack>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 11, color: t.textDim }}>{L('lookSolid', 'Solid')}</Text>
+          <Slider value={Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3} min={0} max={1} width={200}
+            onChange={(v) => set({ glassTransparency: Math.round(v * 100) / 100 })} />
+          <Text style={{ fontSize: 11, color: t.textDim, width: 40 }}>{`${Math.round((Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3) * 100)}%`}</Text>
+        </View>
+      </SettingRow>
+      <SettingRow label={L('lookSaturation', 'Saturation')} stack>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 11, color: t.textDim }}>1×</Text>
+          <Slider value={Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2} min={1} max={2} width={200}
+            onChange={(v) => set({ glassSaturate: Math.round(v * 100) / 100 })} />
+          <Text style={{ fontSize: 11, color: t.textDim, width: 40 }}>{`${Math.round((Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2) * 100)}%`}</Text>
+        </View>
+      </SettingRow>
+    </Section>
+  );
+}
+
 // ---------------------------------------------------------------- the page
 
 export function ThemesSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
-  const [s] = useSettings();
+  const [s, setS] = useSettings();
   const live = useStore(tsLive);
   const [sel, setSel] = useState(null);            // the theme in the preview dialog
   const [selW, setSelW] = useState(null);          // the selected widget in the editor
@@ -692,6 +792,8 @@ export function ThemesSettings() {
         </Section>
       )}
 
+      {activeDef ? <ThemeLookSection s={s} set={setS} /> : null}
+
       {activeDef ? (
         <Section title={L('presets', 'Your themes')}
           footer={L('presetsHint', 'A preset keeps the theme exactly as you customized it — the built-ins stay untouched. Export writes the preset as a file you can carry; importing checks it before it lands.')}>
@@ -750,7 +852,10 @@ export function ThemesSettings() {
       ) : null}
 
       {addOpen ? (
-        <AddDialog onAdd={(kind) => act(() => tsAdd(kind, area))} onClose={() => setAddOpen(false)} />
+        <AddDialog onAdd={(sp) => act(() => {
+          const made = tsAddVariant(sp.kind, sp.style, area);
+          if (made) tsSetInstance(made.id, { cfg: { ...(made.cfg || {}), variantRoute: sp.route } });
+        })} onClose={() => setAddOpen(false)} />
       ) : null}
       {selTheme ? (
         <PreviewDialog theme={selTheme} active={live.active === selTheme.id}

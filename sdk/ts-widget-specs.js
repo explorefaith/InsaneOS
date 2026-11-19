@@ -181,6 +181,43 @@ export const TS_WIDGET_SPECS = [
   { id: 'mode-badge', label: 'Appearance', cat: 'ambient', w: 168, h: 96, v: 'text', src: 'modeBadge' },
 ];
 
+
+// ---------------------------------------------------------------- style routes (the variant engine)
+//
+// 105 honest kinds × 5 curated looks = 525 selectable widgets. A route is a RELATIVE style patch
+// (the theme's baseline stays underneath — resolveStyle merges), so a route looks right on every
+// theme while every widget stays fully editable afterwards (paper, blur, transparency, ink…).
+export const TS_ROUTES = [
+  { id: 'classic', suffix: 'Classic', label: 'Classic', patch: {} },
+  { id: 'glass', suffix: 'Glass', label: 'Glass', patch: { alpha: 0.3, blur: 0.9, radius: 22, border: 'rgba(255,255,255,0.18)', shadow: 'soft' } },
+  { id: 'solid', suffix: 'Solid', label: 'Solid', patch: { alpha: 0.97, blur: null, radius: 6, border: 'none', shadow: 'lift' } },
+  { id: 'outline', suffix: 'Outline', label: 'Outline', patch: { alpha: 0.18, blur: null, radius: 10, border: 'rgba(127,127,127,0.55)', shadow: 'none' } },
+  { id: 'vivid', suffix: 'Vivid', label: 'Vivid', patch: { alpha: 0.55, blur: 0.45, radius: 14, border: 'none', shadow: 'lift' } },
+];
+
+// The full selectable catalog: kind × route. Every entry carries the kind's real data provider —
+// nothing here is a mock; the routes only dress it.
+export function variantEntries() {
+  const out = [];
+  for (const spec of TS_WIDGET_SPECS) {
+    for (const route of TS_ROUTES) {
+      out.push({
+        id: `${spec.id}·${route.id}`,
+        kind: spec.id,
+        route: route.id,
+        label: `${spec.label} · ${route.label}`,
+        cat: spec.cat,
+        w: spec.w, h: spec.h, v: spec.v, src: spec.src, cfg: spec.cfg,
+        style: route.patch,
+      });
+    }
+  }
+  return out;
+}
+
+export const TS_VARIANT_ROUTES = TS_ROUTES;
+
+
 // The kind table the model resolves: derived from the specs so the two can never drift.
 // (themestudio-model.TS_KINDS keeps this exact shape.)
 export const specKinds = () => Object.fromEntries(TS_WIDGET_SPECS.map((s) => [s.id, { label: s.label, defaults: { w: s.w, h: s.h } }]));
