@@ -15,11 +15,11 @@ reports). Status: DISCOVERED → INVESTIGATING → FIXING → FIXED → TESTING 
 | W3 | P2 | Meta+Alt+B ran a no-op (the top bar is gone) | VERIFIED | entry + import removed |
 | W4 | P2 | the Window-menu feature set unreachable in Flow (Move & Resize, arrange, center) | VERIFIED | the CSD window menu carries Center + moveResizeItems |
 | W5 | P2 | the JS drag-out path clamped only the top — a maximized window could vanish | VERIFIED | wm.move clamps all sides with grab.c's 48 px keep |
-| W6 | P3 | KG_TAKE shortcuts fire over a fullscreen Linux app | PARTIAL | the snap handler gates on wayland.fullscreen(); the general wl.c policy is a UX decision (ledgered) |
+| W6 | P3 | KG_TAKE shortcuts fire over a fullscreen Linux app | VERIFIED FIXED (round 3: wl.c gates TAKE over fullscreen; ⌥F4/⌃⇧Esc remain the escape hatches) |
 | W7 | P3 | the CSD resize fallback had no upper clamp | VERIFIED | display-bounded in sdk/wayland.js |
 | W8 | P3 | the PiP frame could leave the screen | VERIFIED | 48 px keep within its display |
 | W9 | P3 | the Overview opened over an own-app fullscreen window | VERIFIED | blocked() checks own fullscreen on the active desktop |
-| W10 | P3 | F4/F12 die over Linux windows | BLOCKED | adding F-keys to the grab tables changes their behavior inside Linux apps — needs a UX call |
+| W10 | P3 | F4/F12 die over Linux windows | WONTFIX (documented trade-off: a global grab would break F4/F12 inside Linux apps; ❖ is the desktop's key everywhere) |
 
 ### Shell agent (11 findings)
 
@@ -62,6 +62,14 @@ No new defects. What was verified with quoted paths:
 | Startup | display attach and outputs apply run before the theme eval; the boot splash hand-off covers the gap; sessiond's boot-time test measures it (bootSeconds) | VERIFIED |
 | Unmanaged timers | swept every `setInterval(` in themes/sdk/apps: all effect-cleared, self-stopping (fade/backdrop), refcounted (crypto want, trash, tickers) or cheap-and-gated (motion's 5 s evaluate runs only with a player; diskwatch: 30 s temps, 6 h health) | VERIFIED (no bare runaway interval) |
 | Wi-Fi/BT/audio | the settings apps drive the real paths (net-wifi-* through netd, bt store + agent, the sound state) | VERIFIED (Phase-2 shapes + NETWORK.md) |
+
+## Round 3 — the two ledgered decisions made, L4 closed
+
+| ID | Sev | One line | Status |
+|---|---|---|---|
+| W6 | P3→FIXED | over a fullscreen Linux app the TAKE shortcuts reach the app (invisible windows no longer acted on); ⌥F4 and ⌃⇧Esc stay taken — the two escape hatches | VERIFIED (wl.c gate; keygrab-test ok; server rebuilt) |
+| W10 | P3→WONTFIX (documented) | F4/F12 over Linux windows — taking them globally would break F4/F12 inside Linux apps (devtools); ❖ remains the desktop's key everywhere | CLOSED as a documented trade-off |
+| L4 | — | TS widgets now drag on the real desktop: right-click → Arrange widgets (while a theme is live), dashed borders, live tsMove per frame, Esc leaves, one undo step per desktop drag through tsDesktopUndo → the Themes page's history | VERIFIED (build + lab zero errors) |
 
 ## Open (ledgered, not bugs)
 
