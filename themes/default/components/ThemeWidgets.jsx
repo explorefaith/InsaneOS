@@ -18,7 +18,7 @@ import {
   nowPlaying, calendarEvents, reminders, usePim, weather, useWeather, weatherConsent, weatherGroup,
   clockTimer, timerStart, timerPause, timerResume, timerReset, timerLeft, formatBytes,
   weekdayName, monthName, tOptional, tsLive, resolveStyle, withAlpha,
-  registerWidgetType, setWidgets, tsByZ, tsArranging, tsDesktopUndo, tsMove, tsPersistFlush, specOf, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
+  registerWidgetType, setWidgets, tsByZ, tsArranging, tsDesktopUndo, tsMove, tsPersistFlush, tsInit, specOf, createStore, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
@@ -269,7 +269,7 @@ function AgendaW({ widget, st }) {
         <View key={e.uid || i} style={{ flexDirection: 'row', gap: 8, alignItems: 'baseline' }}>
           <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: st0.accent || st0.color, opacity: 0.8 }} />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={tx(st, { size: st.size })} style={[{}], ''}>{e.title}</Text>
+            <Text style={tx(st, { size: st.size , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 })}>{e.title}</Text>
             <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) })}>
               {new Date(e.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
@@ -404,8 +404,8 @@ function MediaW({ widget, st }) {
       <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
         {np.cover ? <Image src={np.cover} style={{ width: 40, height: 40, borderRadius: 8 }} /> : null}
         <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-          <Text style={tx(st, { size: st.size })} style={[{}], ''}>{np.title}</Text>
-          {np.artist ? <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) })} style={[{}], ''}>{np.artist}</Text> : null}
+          <Text style={tx(st, { size: st.size , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 })}>{np.title}</Text>
+          {np.artist ? <Text style={dim(st, { size: Math.max(10, (st.size || 13) - 2) , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 })}>{np.artist}</Text> : null}
         </View>
       </View>
       <Bar st={st0} pct={pct} color={st0.accent || st0.color} />
@@ -423,11 +423,13 @@ function MediaW({ widget, st }) {
 }
 
 function NotesW({ widget, st }) {
-  const text = (widget.cfg || {}).text || '';
+  const cfg = widget.cfg || {};
+  const rich = tsRichSegments(cfg, cfg.text);
   return (
     <TSCard widget={widget} st={{ gap: 8 }}>
-      <Eyebrow st={eff(widget)} text={tOptional('shell.widgets.note') || 'Note'} />
-      <Text style={tx(st, { size: st.size, lineHeight: 1.4 })}>{text || (tOptional('shell.widgets.note.empty') || 'A quiet place for a thought.')}</Text>
+      <Eyebrow st={eff(widget)} text={kindLabel(widget.kind)} />
+      {rich && rich.length ? <RichFlow widget={widget} st={st} cfg={cfg} />
+        : <Text style={tx(st, { size: st.size, lineHeight: 1.4 })}>{tOptional('shell.widgets.note.empty') || 'A quiet place for a thought.'}</Text>}
     </TSCard>
   );
 }
@@ -443,7 +445,7 @@ function TodoW({ widget, st }) {
       {items.length ? items.slice(0, 5).map((it) => (
         <View key={it.uid} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <View onClick={() => toggle(it)} style={{ width: 14, height: 14, borderRadius: 4, border: `1.5px solid ${st0.accent || st0.color}` }} />
-          <Text style={tx(st, { size: st.size })} style={[{}], ''}>{it.title}</Text>
+          <Text style={tx(st, { size: st.size , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 })}>{it.title}</Text>
         </View>
       )) : (
         <Text style={dim(st, { size: st.size })}>{tOptional('shell.widgets.todo.none') || 'All clear'}</Text>
@@ -454,10 +456,10 @@ function TodoW({ widget, st }) {
 
 function QuoteW({ widget, st }) {
   const cfg = widget.cfg || {};
-  const rich = tsRichSegments(cfg, null);
+  const rich = tsRichSegments(cfg, cfg.text);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 6 }}>
-      {rich ? <RichFlow widget={widget} st={st} cfg={{ ...cfg, rich: [{ ...rich[0], t: `“${rich[0].t}` }, ...rich.slice(1)] }} />
+      {rich && rich.length ? <RichFlow widget={widget} st={st} cfg={{ ...cfg, rich: [{ ...rich[0], t: `“${rich[0].t}` }, ...rich.slice(1)] }} />
         : <Text style={tx(st, { size: st.size, lineHeight: 1.35 })}>“{cfg.text || ''}”</Text>}
       {cfg.by ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 17) * 0.7)), weight: 600 })}>{`— ${cfg.by}`}</Text> : null}
     </TSCard>
@@ -541,10 +543,10 @@ function StorageW({ widget, st }) {
 
 function LabelW({ widget, st }) {
   const cfg = widget.cfg || {};
-  const rich = tsRichSegments(cfg, null);
+  const rich = tsRichSegments(cfg, cfg.text);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 2 }}>
-      {rich ? <RichFlow widget={widget} st={st} cfg={cfg} />
+      {rich && rich.length ? <RichFlow widget={widget} st={st} cfg={cfg} />
         : <Text style={tx(st, { size: st.size, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1, overflow: 'hidden' })}>{cfg.text || ''}</Text>}
       {cfg.sub ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 24) * 0.5)), weight: 500 })}>{cfg.sub}</Text> : null}
     </TSCard>
@@ -553,10 +555,10 @@ function LabelW({ widget, st }) {
 
 function HeadlineW({ widget, st }) {
   const cfg = widget.cfg || {};
-  const rich = tsRichSegments(cfg, null);
+  const rich = tsRichSegments(cfg, cfg.text);
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center' }}>
-      {rich ? <RichFlow widget={widget} st={st} cfg={cfg} />
+      {rich && rich.length ? <RichFlow widget={widget} st={st} cfg={cfg} />
         : <Text style={tx(st, { size: st.size, lineHeight: 1.05, whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 2, overflow: 'hidden' })}>{cfg.text || ''}</Text>}
     </TSCard>
   );
@@ -1005,7 +1007,7 @@ function RowsW({ widget, st }) {
       <Eyebrow st={st} text={kindLabel(widget.kind)} />
       {d.rows.slice(0, 5).map(([k, v], i) => (
         <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={dim(st, { size: st.size || 12 })} style={[{}], ''}>{k}</Text>
+          <Text style={dim(st, { size: st.size || 12 , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 1 })}>{k}</Text>
           <Text style={tx(st, { size: st.size || 12 })}>{String(v)}</Text>
         </View>
       ))}
@@ -1019,7 +1021,7 @@ function TextW({ widget, st }) {
   if (!d?.text) return quiet(widget, st, tOptional('shell.widgets.noData') || 'No data');
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center', gap: 3 }}>
-      <Text style={tx(st, { size: st.size || 15, lineHeight: 1.25 , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 2)}>{d.text}</Text>
+      <Text style={tx(st, { size: st.size || 15, lineHeight: 1.25 , whiteSpace: 'nowrap', textOverflow: 'ellipsis', numberOfLines: 2 })}>{d.text}</Text>
       {d.sub ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 15) * 0.72)) })}>{d.sub}</Text> : null}
     </TSCard>
   );
@@ -1309,11 +1311,16 @@ let bridgeInstalled = false;
 export function installThemeWidgetBridge() {
   if (bridgeInstalled) return;
   bridgeInstalled = true;
+  let lastCount = -1;
   const bridge = () => {
     const st = tsLive.get();
     if (!st.active || !st.def) { setWidgets('ts-widget', []); return; }
     const list = tsByZ(st.widgets).map((w) => ({ ...w, style: resolveStyle(st.def.style || {}, w.style || {}) }));
     setWidgets('ts-widget', list);
+    if (list.length !== lastCount) {
+      lastCount = list.length;
+      console.log(`themestudio: ${st.def.name} — ${list.length} widgets on the desktop`);
+    }
   };
   tsLive.subscribe(bridge);
   bridge();
@@ -1324,7 +1331,7 @@ export function installThemeWidgetBridge() {
 // resolves degrades to no theme inside tsInit; the desktop keeps exactly what it shows.
 try {
   installThemeWidgetBridge();                 // first: every later apply reaches the desktop
-} catch (e) { /* never block the shell */ }
+} catch (e) { console.error('themestudio: bridge install failed:', e && e.message || e); }
 
 // Esc leaves the desktop-arrange mode; a completed drag hands its pre-drag snapshot to the page
 // (tsDesktopUndo) so the Themes page records ONE undo step per drag.
@@ -1335,6 +1342,7 @@ try {
 } catch (e) { /* never block the shell */ }
 try {
   tsInit({ x: 0, y: 28, w: insane.screen.width, h: Math.max(200, insane.screen.height - 28 - 80) });
-} catch (e) { /* a broken screen probe never blanks the desktop */ }
+  console.log(`themestudio: boot — ${tsLive.get().active || 'no theme'}, ${tsLive.get().widgets.length} widgets`);
+} catch (e) { console.error('themestudio: boot init failed:', e && e.message || e); }
 
 export { TsWidget, eff as tsEffStyle, KIND_STYLE as TS_KIND_STYLE };

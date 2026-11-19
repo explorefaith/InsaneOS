@@ -75,6 +75,7 @@ import { Dock, LaunchpadIcon, dockThickness } from './components/Dock.jsx';
 import { Window } from './components/Window.jsx';
 import { Launchpad } from './components/Launchpad.jsx';
 import { WidgetGallery, widgetsEditing, PlaceLayer } from './components/DesktopWidgets.jsx';   // registers the widgets (clock, stats, calendar, battery, media)
+import './components/ThemeWidgets.jsx';   // registers 'ts-widget' (the Theme Studio's kinds) and installs the live bridge
 import { Menu } from './components/Menu.jsx';
 
 const MENU_H = 0;   // the top bar is gone — the island strip lives top-centre (IslandStrip.jsx)
