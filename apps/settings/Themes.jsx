@@ -608,22 +608,21 @@ export function ThemesSettings() {
   const live = useStore(tsLive);
   const [sel, setSel] = useState(null);            // the theme in the preview dialog
   const [selW, setSelW] = useState(null);          // the selected widget in the editor
+  const [view, setView] = useState('gallery');     // 'gallery': the cards | 'customize': the workshop
   const [note, setNote] = useState(null);
   const [presetName, setPresetName] = useState('');
   const [presetOpen, setPresetOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [customizeFocus, setCustomizeFocus] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
-  const hist = useRef(tsHistory);   // shared with the desktop customize bar
+  const hist = useRef(tsHistory);                  // shared with the desktop customize bar
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
-  // the catalog only changes with the themeStudio record — not on every live-list edit
   const themes = useMemo(() => tsAllThemes(), [s.themeStudio]);
   const activeDef = live.def;
   const widgets = live.widgets || [];
   const selected = widgets.find((w) => w.id === selW) || null;
 
   const say = (msg) => setNote({ ok: !msg.err, text: msg.err ? msg.err : msg });
-  const open = (id) => { setSel(id); };
+  const open = (id) => setSel(id);
   const apply = (id) => {
     try {
       hist.current.reset();
@@ -636,64 +635,22 @@ export function ThemesSettings() {
     try { tsDeactivate(area); hist.current.reset(); setSelW(null); say(L('stoppedNote', 'Back to the look you had before.')); }
     catch (e) { say({ err: errorText(e) }); }
   };
-  // push-before: the history keeps the state as it was BEFORE the edit; the store helpers own
-  // their tsMutate, so an action wraps one of them instead of double-running the mutation
   const act = (fn) => {
     if (!live.active) return;
     hist.current.push(tsLive.get().widgets);
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
-  // continuous controls (the sliders): one undo step per burst, the live set still every frame
-  const lastSoft = useRef(0);
   const actSoft = (fn) => {
     const now = Date.now();
     if (now - lastSoft.current > 800) { hist.current.push(tsLive.get().widgets); lastSoft.current = now; }
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
+  const lastSoft = useRef(0);
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
-  // a drag on the real desktop hands its pre-drag snapshot here: one undo step per drag
-  const deskPre = useStore(tsDesktopUndo);
-  useEffect(() => { if (deskPre) { hist.current.push(deskPre); tsDesktopUndo.set(null); } }, [deskPre]);
-
-  // ---- backup / restore (Phase 2 §9F): a preset as one JSON file ----
-  const exportPreset = (id) => {
-    try {
-      const def = themes.find((x) => x.id === id);
-      if (!def) return;
-      const saved = settings.get().themeStudio || {};
-      const rec = saved.customs && saved.customs[id];
-      if (!rec) return;
-      const payload = { insane: 'theme', version: 1, name: rec.name, base: rec.base, widgets: rec.widgets, appearance: rec.appearance || {} };
-      const safe = rec.name.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'theme';
-      const path = `${fs.home()}/Desktop/${safe}.insanetheme.json`;
-      fs.write(path, JSON.stringify(payload, null, 1));
-      say(L('exportedNote', 'Exported to the Desktop.'));
-    } catch (e) { say({ err: errorText(e) }); }
-  };
-  const importTheme = (path) => {
-    try {
-      const txt = fs.read(path);
-      if (!txt) { say({ err: L('importBad', 'That file could not be read.') }); return; }
-      const j = JSON.parse(txt);
-      if (j.insane !== 'theme' || typeof j.name !== 'string' || !Array.isArray(j.widgets)) {
-        say({ err: L('importBad', 'That file is not an exported Insane OS theme.') });
-        return;
-      }
-      const id = tsSaveCustom(String(j.name).slice(0, 60) || 'Imported');
-      const saved = settings.get().themeStudio || {};
-      const rec = saved.customs && saved.customs[id];
-      if (!rec) { say({ err: L('importBad', 'The preset could not be written.') }); return; }
-      // the same validation the store applies to its own lists: one tsSetInstance-style write
-      const rec2 = { ...rec, base: typeof j.base === 'string' ? j.base : rec.base, appearance: j.appearance && typeof j.appearance === 'object' ? j.appearance : rec.appearance };
-      settings.set({ themeStudio: { ...saved, customs: { ...saved.customs, [id]: { ...rec2, widgets: j.widgets } } } });
-      tsPersistFlush();
-      say(L('importedNote', 'Imported — it is in the gallery now.'));
-    } catch (e) { say({ err: errorText(e) }); }
-  };
-  const tsMutateList = (fn) => act(() => tsMutate(fn, area));
   const redo = () => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next, area); };
   const canUndo = hist.current.canUndo;
   const canRedo = hist.current.canRedo;
+  const tsMutateList = (fn) => act(() => tsMutate(fn, area));
 
   const cur = () => (tsLive.get().widgets || []).find((x) => x.id === selW) || {};
   const onStyle = (patch) => actSoft(() => tsSetInstance(selW, { style: { ...(cur().style || {}), ...patch } }));
@@ -703,60 +660,81 @@ export function ThemesSettings() {
     if (nw != null || nh != null) act(() => tsResize(selW, nw ?? cur().w, nh ?? cur().h, area));
   };
 
+  const exportPreset = (id) => {
+    try {
+      const def = themes.find((x) => x.id === id);
+      if (!def) return;
+      const saved = settings.get().themeStudio || {};
+      const rec = saved.customs && saved.customs[id];
+      if (!rec) return;
+      const payload = { insane: 'theme', version: 1, name: rec.name, base: rec.base, widgets: rec.widgets, appearance: rec.appearance || {} };
+      const safe = rec.name.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'theme';
+      fs.write(`${fs.home()}/Desktop/${safe}.insanetheme.json`, JSON.stringify(payload, null, 1));
+      say(L('exportedNote', 'Exported to the Desktop.'));
+    } catch (e) { say({ err: errorText(e) }); }
+  };
+  const importTheme = (path) => {
+    try {
+      const txt = fs.read(path);
+      if (!txt) { say({ err: L('importBad', 'That file could not be read.') }); return; }
+      const j = JSON.parse(txt);
+      if (j.insane !== 'theme' || typeof j.name !== 'string' || !Array.isArray(j.widgets)) {
+        say({ err: L('importBad', 'That file is not an exported Insane OS theme.') }); return;
+      }
+      const id = tsSaveCustom(String(j.name).slice(0, 60) || 'Imported');
+      const saved = settings.get().themeStudio || {};
+      const rec = saved.customs && saved.customs[id];
+      if (!rec) { say({ err: L('importBad', 'The preset could not be written.') }); return; }
+      const rec2 = { ...rec, base: typeof j.base === 'string' ? j.base : rec.base, appearance: j.appearance && typeof j.appearance === 'object' ? j.appearance : rec.appearance };
+      settings.set({ themeStudio: { ...saved, customs: { ...saved.customs, [id]: { ...rec2, widgets: j.widgets } } } });
+      tsPersistFlush();
+      say(L('importedNote', 'Imported — it is in the gallery now.'));
+    } catch (e) { say({ err: errorText(e) }); }
+  };
+
   const byZ = [...widgets].sort((a, b) => a.z - b.z);
   const selTheme = sel ? themes.find((x) => x.id === sel) : null;
   const pal = activeDef ? (activeDef.colors || []) : [];
 
-  return (
-    <Stack>
-      <Message msg={note} />
-      <Section
-        title={L('gallery', 'Themes')}
-        footer={L('galleryHint', 'Each theme is a whole desktop: a wallpaper, a palette, its widgets and their typography. Applying follows the live desktop and survives a reboot; the originals never change.')}
-        accessory={activeDef ? (
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            <Button small label="↶" onClick={undo} disabled={!canUndo} />
-            <Button small label="↷" onClick={redo} disabled={!canRedo} />
-            <Button small label={L('resetLayout', 'Reset layout')} onClick={() => act(() => tsResetTheme(area))} />
-            <Button small label={L('arrangeDesktop', 'Arrange on the desktop')} onClick={() => {
-              const first = (tsLive.get().widgets || [])[0];
-              tsSelected.set(first ? first.id : null);
-              try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ }
-              tsEnterArrange();
-            }} />
-            <Button small label={L('stopUsing', 'Use no theme')} onClick={stop} />
-          </View>
-        ) : null}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: '100%' }}>
-          {themes.map((th) => (
-            <ThemeCard key={th.id} theme={th} active={live.active === th.id}
-              onSet={() => apply(th.id)}
-              onPreview={() => open(th.id)}
-              onCustomize={() => {
-                if (live.active !== th.id) apply(th.id);
-                // straight to the desktop (the user's ask): the bar rides there, the first card
-                // comes up picked, the Settings window steps aside
-                const first = (tsLive.get().widgets || [])[0];
-                tsSelected.set(first ? first.id : null);
-                setSelW(first ? first.id : null);
-                try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ }
-                tsEnterArrange();
-              }} />
-          ))}
-        </View>
-      </Section>
+  const goCustomize = (th) => {
+    if (live.active !== th.id) apply(th.id);
+    const first = (tsLive.get().widgets || [])[0];
+    tsSelected.set(first ? first.id : null);
+    setSelW(first ? first.id : null);
+    setView('customize');
+  };
+  const goDesktop = () => {
+    const first = (tsLive.get().widgets || [])[0];
+    tsSelected.set(first ? first.id : null);
+    try { wm.minimize?.(useAppWindow().id); } catch (e) { /* wm older */ }
+    tsEnterArrange();
+  };
 
-      {activeDef ? (
+  // ---------------- the customize workshop: the whole theme, one focused page ----------------
+  if (view === 'customize' && activeDef) {
+    const backBar = (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <Button small label={'← ' + L('back', 'Back to the themes')} onClick={() => { setView('gallery'); setSelW(null); }} />
+        <Text style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{activeDef.name}</Text>
+        <View style={{ flex: 1 }} />
+        <Button small label="↶" onClick={undo} disabled={!canUndo} />
+        <Button small label="↷" onClick={redo} disabled={!canRedo} />
+        <Button small label={L('resetLayout', 'Reset layout')} onClick={() => act(() => tsResetTheme(area))} />
+        <Button small label={L('arrangeDesktop', 'Arrange on the desktop')} onClick={goDesktop} />
+        <Button small label={L('stopUsing', 'Use no theme')} onClick={stop} />
+      </View>
+    );
+    return (
+      <Stack>
+        <Message msg={note} />
+        {backBar}
         <Section title={L('livePreview', 'Live preview')}
           footer={L('livePreviewHint', 'Click a block to select it; drag it and the real desktop follows. The centre lines are the alignment guides.')}>
           <StudioCanvas widgets={live.widgets} area={area} selW={selW} onSelect={setSelW} histRef={hist} />
         </Section>
-      ) : null}
-
-      {activeDef ? (
         <Columns>
-          <Section title={customizeFocus % 2 ? L('layers', 'Layers — the widgets of this theme') : L('layers', 'Layers — the widgets of this theme')}
-            footer={L('layersHint', 'Top of the list is frontmost. The eye hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look below.')}
+          <Section title={L('layers', 'Layers — the widgets of this theme')}
+            footer={L('layersHint', 'Top of the list is frontmost. The dot hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look.')}
             accessory={<Button small label={L('addWidget', 'Add a widget…')} onClick={() => setAddOpen(true)} />}>
             {byZ.length ? [...byZ].reverse().map((w, i) => (
               <LayerRow key={w.id} w={w} index={byZ.length - 1 - i} n={byZ.length} selected={selW === w.id}
@@ -768,7 +746,6 @@ export function ThemesSettings() {
                 onRemove={() => { act(() => tsRemove(w.id, area)); if (selW === w.id) setSelW(null); }} />
             )) : <Text style={{ fontSize: 12, color: t.textDim }}>{L('noWidgets', 'This theme carries no widgets on the desktop.')}</Text>}
           </Section>
-
           <Section title={L('customize', 'Customize')}>
             {selected ? (
               <WidgetEditor w={{ ...selected, _palette: pal }} area={area}
@@ -786,15 +763,7 @@ export function ThemesSettings() {
             </Actions>
           </Section>
         </Columns>
-      ) : (
-        <Section title={L('customizeNone', 'Nothing applied')}>
-          <Text style={{ fontSize: 12, color: t.textDim }}>{L('customizeNoneHint', 'The desktop keeps its current look. Apply a theme to start customizing it.')}</Text>
-        </Section>
-      )}
-
-      {activeDef ? <ThemeLookSection s={s} set={setS} /> : null}
-
-      {activeDef ? (
+        <ThemeLookSection s={s} set={setS} />
         <Section title={L('presets', 'Your themes')}
           footer={L('presetsHint', 'A preset keeps the theme exactly as you customized it — the built-ins stay untouched. Export writes the preset as a file you can carry; importing checks it before it lands.')}>
           <SettingRow label={L('saveAs', 'Save this look as a preset')} hint={activeDef.custom ? L('saveAsHintCustom', 'You are already on a preset — apply a built-in first to branch from it.') : undefined}>
@@ -814,49 +783,67 @@ export function ThemesSettings() {
             <Button small label={L('import', 'Import…')} onClick={() => setImportOpen(true)} />
           </SettingRow>
         </Section>
-      ) : null}
-      {importOpen ? (
-        <FilePicker modal title={L('importTitle', 'Choose a theme file')} filter={/\.json$/i}
-          onPick={(f) => { importTheme(typeof f === 'string' ? f : f.path); setImportOpen(false); }}
-          onClose={() => setImportOpen(false)} />
-      ) : null}
-
-      {presetOpen ? (
-        <Layer name="modal">
-          <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
-            justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}
-            onClick={() => setPresetOpen(false)}>
-            <View onClick={(e) => e.stopPropagation?.()} style={{ width: 360, borderRadius: 14, backgroundColor: t.windowBg,
-              border: `1px solid ${t.separator}`, padding: 16, gap: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: 600, color: t.text, textAlign: 'start' }}>
-                {typeof presetOpen === 'string' ? L('renameTitle', 'Rename the preset') : L('saveTitle', 'Save as a preset')}</Text>
-              <TextInput value={presetName} onChange={setPresetName} autoFocus />
-              <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
-                <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={() => setPresetOpen(false)} />
-                <Button primary label={typeof presetOpen === 'string' ? L('renameSave', 'Rename') : L('save', 'Save')}
-                  onClick={() => {
-                    try {
-                      if (typeof presetOpen === 'string') {
-                        if (!tsRenameCustom(presetOpen, presetName)) { say({ err: L('renameBlank', 'Give the preset a name first.') }); return; }
-                      } else {
-                        const id = tsSaveCustom(presetName || activeDef.name);
-                        if (id) say(L('savedNote', 'Saved — it is in the gallery now.'));
-                      }
-                      setPresetOpen(false);
-                    } catch (e) { say({ err: errorText(e) }); }
-                  }} />
+        {importOpen ? (
+          <FilePicker modal title={L('importTitle', 'Choose a theme file')} filter={/\.json$/i}
+            onPick={(f) => { importTheme(typeof f === 'string' ? f : f.path); setImportOpen(false); }}
+            onClose={() => setImportOpen(false)} />
+        ) : null}
+        {addOpen ? (
+          <AddDialog onAdd={(sp) => act(() => {
+            const made = tsAddVariant(sp.kind, sp.style, area);
+            if (made) tsSetInstance(made.id, { cfg: { ...(made.cfg || {}), variantRoute: sp.route } });
+          })} onClose={() => setAddOpen(false)} />
+        ) : null}
+        {presetOpen ? (
+          <Layer name="modal">
+            <View style={{ position: 'absolute', left: 0, top: 0, width: screen.width, height: screen.height,
+              justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}
+              onClick={() => setPresetOpen(false)}>
+              <View onClick={(e) => e.stopPropagation?.()} style={{ width: 360, borderRadius: 14, backgroundColor: t.windowBg,
+                border: `1px solid ${t.separator}`, padding: 16, gap: 10 }}>
+                <Text style={{ fontSize: 14, fontWeight: 600, color: t.text, textAlign: 'start' }}>
+                  {typeof presetOpen === 'string' ? L('renameTitle', 'Rename the preset') : L('saveTitle', 'Save as a preset')}</Text>
+                <TextInput value={presetName} onChange={setPresetName} autoFocus />
+                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
+                  <Button label={tOptional('settings.wallpaper.cancel') || 'Cancel'} onClick={() => setPresetOpen(false)} />
+                  <Button primary label={typeof presetOpen === 'string' ? L('renameSave', 'Rename') : L('save', 'Save')}
+                    onClick={() => {
+                      try {
+                        if (typeof presetOpen === 'string') {
+                          if (!tsRenameCustom(presetOpen, presetName)) { say({ err: L('renameBlank', 'Give the preset a name first.') }); return; }
+                        } else {
+                          const id = tsSaveCustom(presetName || activeDef.name);
+                          if (id) say(L('savedNote', 'Saved — it is in the gallery now.'));
+                        }
+                        setPresetOpen(false);
+                      } catch (e) { say({ err: errorText(e) }); }
+                    }} />
+                </View>
               </View>
             </View>
-          </View>
-        </Layer>
-      ) : null}
+          </Layer>
+        ) : null}
+      </Stack>
+    );
+  }
 
-      {addOpen ? (
-        <AddDialog onAdd={(sp) => act(() => {
-          const made = tsAddVariant(sp.kind, sp.style, area);
-          if (made) tsSetInstance(made.id, { cfg: { ...(made.cfg || {}), variantRoute: sp.route } });
-        })} onClose={() => setAddOpen(false)} />
-      ) : null}
+  // ---------------- the gallery: the cards, nothing else ----------------
+  return (
+    <Stack>
+      <Message msg={note} />
+      <Section
+        title={L('gallery', 'Themes')}
+        footer={L('galleryHint', 'Each theme is a whole desktop: a wallpaper, a palette, its widgets and their typography. Applying follows the live desktop and survives a reboot; the originals never change.')}
+        accessory={null}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: '100%' }}>
+          {themes.map((th) => (
+            <ThemeCard key={th.id} theme={th} active={live.active === th.id}
+              onSet={() => apply(th.id)}
+              onPreview={() => open(th.id)}
+              onCustomize={() => goCustomize(th)} />
+          ))}
+        </View>
+      </Section>
       {selTheme ? (
         <PreviewDialog theme={selTheme} active={live.active === selTheme.id}
           onApply={() => { apply(selTheme.id); }}
