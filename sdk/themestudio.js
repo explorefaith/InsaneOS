@@ -26,6 +26,11 @@ import { THEMES } from './themestudio-themes.js';
 export const TS_APPEARANCE_KEYS = ['wallpaper', 'wallpaperBg', 'wallpaperFit', 'motion', 'mode', 'accent'];
 
 export const tsLive = createStore({ active: null, def: null, widgets: [], area: null });
+// The desktop-arrange mode: the Studio canvas's twin on the real desktop — the cards drag
+// (pointer events land on the card's surface), one undo step per drag, Esc leaves.
+export const tsArranging = createStore(false);
+// A desktop drag's pre-drag snapshot, handed to the Themes page (ONE undo step per desktop drag)
+export const tsDesktopUndo = createStore(null);
 
 // ---------------------------------------------------------------- validation (a malformed
 // settings.themeStudio must never crash the shell — it degrades to "no theme")

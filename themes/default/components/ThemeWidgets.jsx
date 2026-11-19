@@ -18,7 +18,7 @@ import {
   nowPlaying, calendarEvents, reminders, usePim, weather, useWeather, weatherConsent, weatherGroup,
   clockTimer, timerStart, timerPause, timerResume, timerReset, timerLeft, formatBytes,
   weekdayName, monthName, tOptional, tsLive, resolveStyle, withAlpha,
-  registerWidgetType, setWidgets, tsByZ, specOf, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
+  registerWidgetType, setWidgets, tsByZ, tsArranging, tsDesktopUndo, tsMove, tsPersistFlush, specOf, TS_VARIANTS, TS_KINDS, TS_WIDGET_SPECS, TS_PROVIDERS, soundState, defaultSink, sound,
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
@@ -80,18 +80,46 @@ const dim = (st, over = {}) => tx(st, { ...over, color: over.color ?? st.dim ?? 
 
 // ---------------------------------------------------------------- the surface
 
+// The desktop-arrange drag: live tsMove per frame, one store commit at the end. The pre-drag
+// snapshot travels in a module ref — the Themes page pushes it into its history when it opens.
+const arrangeDrag = { current: null };
+
 function TSCard({ widget, children, st }) {
   const style = eff(widget);
   const s = { ...style, ...st };
   const blurPx = s.blur ? Math.round(Math.max(0, Math.min(1, s.blur)) * 28) : 0;
   const effectsOn = settings.get().effects !== false;
+  const arranging = useStore(tsArranging);
+  const down = (e) => {
+    if (!arranging || widget.locked) return;
+    e.stopPropagation?.();
+    arrangeDrag.current = { id: widget.id, x: e.x, y: e.y, ox: widget.x, oy: widget.y, moved: false, pre: tsLive.get().widgets.map((w) => ({ ...w })) };
+    const move = (ev) => {
+      const d = arrangeDrag.current;
+      if (!d) return;
+      d.moved = true;
+      try { tsMove(d.id, d.ox + (ev.x - d.x), d.oy + (ev.y - d.y)); } catch (err) { /* clamped */ }
+    };
+    const up = () => {
+      const d = arrangeDrag.current;
+      arrangeDrag.current = null;
+      offMove(); offUp();
+      if (d && d.moved) {
+        tsPersistFlush();
+        tsDesktopUndo.set(d.pre);               // the Themes page records ONE undo step per drag
+      }
+    };
+    const offMove = addListener('pointermove', move);
+    const offUp = addListener('pointerup', up);
+  };
   return (
-    <View style={[{
+    <View onMouseDown={down} style={[{
       position: 'absolute', left: widget.x, top: widget.y, width: widget.w, height: widget.h,
       padding: s.pad ?? 18, borderRadius: s.radius ?? 16, gap: 6, overflow: 'hidden',
       backgroundColor: s.paper ? withAlpha(s.paper, s.alpha ?? 0.7) : 'transparent',
       backdropFilter: effectsOn && blurPx ? `blur(${blurPx}px) saturate(1.15)` : undefined,
-      border: s.border && s.border !== 'none' ? `1px solid ${s.border}` : undefined,
+      border: arranging ? `1.5px dashed ${s.accent || '#7ab2ff'}` : (s.border && s.border !== 'none' ? `1px solid ${s.border}` : undefined),
+      cursor: arranging && !widget.locked ? 'move' : undefined,
       boxShadow: s.shadow === 'lift' ? '0 18px 44px rgba(8,8,14,0.4)'
         : s.shadow === 'soft' ? '0 10px 30px rgba(12,12,20,0.18)'
         : undefined,
@@ -1296,6 +1324,14 @@ export function installThemeWidgetBridge() {
 // resolves degrades to no theme inside tsInit; the desktop keeps exactly what it shows.
 try {
   installThemeWidgetBridge();                 // first: every later apply reaches the desktop
+} catch (e) { /* never block the shell */ }
+
+// Esc leaves the desktop-arrange mode; a completed drag hands its pre-drag snapshot to the page
+// (tsDesktopUndo) so the Themes page records ONE undo step per drag.
+try {
+  addListener('keydown', (e) => {
+    if (e.key === 'Escape' && tsArranging.get()) tsArranging.set(false);
+  });
 } catch (e) { /* never block the shell */ }
 try {
   tsInit({ x: 0, y: 28, w: insane.screen.width, h: Math.max(200, insane.screen.height - 28 - 80) });

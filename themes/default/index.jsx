@@ -66,8 +66,7 @@ import {
   dockIdOfWindow,
   DUR,
   windows,
-  playFx,
-} from '@insaneos/sdk';
+  playFx, tsLive, tsArranging } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState } from 'react';
 import { makeTheme, wallpaperAccent, hexFromRgb } from './tokens.js';
@@ -335,7 +334,8 @@ function App() {
             { label: tr('shell.desktop.widgets') || 'Widgets', onClick: () => wm.open('settings', { args: { section: 'widgets' } }) },
             { label: tr('shell.desktop.displays') || 'Display settings', onClick: () => wm.open('settings', { args: { section: 'displays' } }) },
             { label: tr('shell.desktop.openLaunchpad'), onClick: () => setLaunchpad(true) },
-            { label: tr('shell.widgets.edit') || 'Edit Widgets', onClick: () => widgetsEditing.set(true) },
+            { label: tsLive.get().active ? (tr('shell.desktop.arrange') || 'Arrange widgets') : (tr('shell.widgets.edit') || 'Edit Widgets'),
+              onClick: () => (tsLive.get().active ? tsArranging.set(true) : widgetsEditing.set(true)) },
             { label: tr('shell.desktops.overview'), onClick: () => toggleOverview() },
             '-',
             { label: tr('shell.desktop.terminal') || 'Open Terminal', onClick: () => wm.open('terminal') },

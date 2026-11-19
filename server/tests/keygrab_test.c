@@ -24,6 +24,8 @@ int main(void) {
     CHECK(keygrab_set("flow"));
     CHECK(keygrab_match(KEY_LEFT, 0, KG_CTRL) == KG_PASS);
     CHECK(keygrab_match(KEY_UP, 0, KG_CTRL) == KG_PASS);
+    CHECK(keygrab_match(KEY_LEFT, 0, KG_META) == KG_TAKE);
+    CHECK(keygrab_match(KEY_UP, 0, KG_META) == KG_TAKE);
     CHECK(keygrab_match(KEY_LEFT, 0, KG_META | KG_CTRL) == KG_TAKE);
     CHECK(keygrab_set("flow-desktops"));
     CHECK(keygrab_match(KEY_LEFT, 0, KG_CTRL) == KG_TAKE);

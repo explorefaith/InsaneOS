@@ -10,7 +10,7 @@
 // Save as preset keeps the result as the user's own, never overwriting a built-in.
 import {
   View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
-  TextInput, useStore, useSettings, settings, screen, tsLive, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
+  TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha,
@@ -550,6 +550,9 @@ export function ThemesSettings() {
     try { fn(); } catch (e) { say({ err: errorText(e) }); }
   };
   const undo = () => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev, area); };
+  // a drag on the real desktop hands its pre-drag snapshot here: one undo step per drag
+  const deskPre = useStore(tsDesktopUndo);
+  useEffect(() => { if (deskPre) { hist.current.push(deskPre); tsDesktopUndo.set(null); } }, [deskPre]);
 
   // ---- backup / restore (Phase 2 §9F): a preset as one JSON file ----
   const exportPreset = (id) => {

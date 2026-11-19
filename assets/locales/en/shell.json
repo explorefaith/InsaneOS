@@ -119,6 +119,7 @@
  "code.recovery.logout": "Log Out",
  "code.recovery.session": "Insane OS checks its own code before running it. A part of the desktop no longer matches the signed copy, so it was not started. Your files were not touched.",
  "code.recovery.title": "This Insane OS component was modified and was not loaded",
+ "desktop.arrange": "Arrange widgets",
  "desktop.displays": "Display settings",
  "desktop.openLaunchpad": "Open Apps",
  "desktop.terminal": "Open Terminal",

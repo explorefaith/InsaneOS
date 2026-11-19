@@ -119,6 +119,7 @@
  "code.recovery.logout": "Cerrar sesión",
  "code.recovery.session": "Insane OS verifica su propio código antes de ejecutarlo. Una parte del escritorio ya no coincide con la copia firmada, así que no se inició. Tus archivos no se tocaron.",
  "code.recovery.title": "Este componente de Insane OS fue modificado y no se cargó",
+ "desktop.arrange": "Colocar widgets",
  "desktop.displays": "Pantallas",
  "desktop.openLaunchpad": "Abrir Aplicaciones",
  "desktop.terminal": "Abrir terminal",

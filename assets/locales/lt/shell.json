@@ -117,6 +117,7 @@
  "code.recovery.logout": "Atsijungti",
  "code.recovery.session": "Insane OS patikrina savo kodą prieš jį vykdydama. Dalis darbalaukio nebeatitinka pasirašytos kopijos, todėl nebuvo paleista. Jūsų failai nepaliesti.",
  "code.recovery.title": "Šis Insane OS komponentas buvo pakeistas ir nebuvo įkeltas",
+ "desktop.arrange": "Valdiklius išdėstyti",
  "desktop.displays": "Ekranai",
  "desktop.openLaunchpad": "Atidaryti programas",
  "desktop.terminal": "Atidaryti terminalą",

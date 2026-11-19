@@ -119,6 +119,7 @@
  "code.recovery.logout": "Esci",
  "code.recovery.session": "Insane OS controlla il proprio codice prima di eseguirlo. Una parte della scrivania non corrisponde più alla copia firmata, quindi non è stata avviata. I tuoi file non sono stati toccati.",
  "code.recovery.title": "Questo componente di Insane OS è stato modificato e non è stato caricato",
+ "desktop.arrange": "Sistema widget",
  "desktop.displays": "Schermi",
  "desktop.openLaunchpad": "Apri App",
  "desktop.terminal": "Apri Terminale",

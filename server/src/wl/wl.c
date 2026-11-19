@@ -2891,6 +2891,13 @@ int wl_key(int code, int value, const KeyInfo *k) {
         char letter = keygrab_letter(code, k->base);
         int how = keygrab_match(code, letter, mods);
         if (how == KG_HOLD && fs_surf && fs_surf->content) how = KG_PASS;   /* presented above the switcher */
+        if (how == KG_TAKE && fs_surf && fs_surf->content) {
+            /* a fullscreen app covers everything: the desktop shortcuts would act on windows nobody
+             * can see. Two keys stay taken — the ways out: ⌥F4 closes the fullscreen app itself,
+             * ⌃⇧Esc opens Force Quit when the app is hung. Everything else reaches the app. */
+            int escape_hatch = (k->alt && code == KEY_F4) || (k->ctrl && k->shift && code == KEY_ESC);
+            if (!escape_hatch) how = KG_PASS;
+        }
         if (how != KG_PASS) {
             *was_grabbed = 1;
             if (how == KG_HOLD) grab_hold = mods & (KG_ALT | KG_META);
