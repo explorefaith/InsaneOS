@@ -22,7 +22,7 @@ import {
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
-  stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens,
+  stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens, parseColor,
 } from '@insaneos/sdk';
 
 const hex = (rgb) => (Array.isArray(rgb) ? `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}` : null);
@@ -112,18 +112,24 @@ function TSCard({ widget, children, st }) {
     const offMove = addListener('pointermove', move);
     const offUp = addListener('pointerup', up);
   };
+  const dark = s.modeDark ?? (s.paper ? (() => { const c = parseColor(s.paper); return c ? (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) < 140 : false; })() : false);
   return (
     <View onMouseDown={down} style={[{
       position: 'absolute', left: widget.x, top: widget.y, width: widget.w, height: widget.h,
       padding: s.pad ?? 18, borderRadius: s.radius ?? 16, gap: 6, overflow: 'hidden',
       backgroundColor: s.paper ? withAlpha(s.paper, s.alpha ?? 0.7) : 'transparent',
       backdropFilter: effectsOn && blurPx ? `blur(${blurPx}px) saturate(1.15)` : undefined,
-      border: arranging ? `1.5px dashed ${s.accent || '#7ab2ff'}` : (s.border && s.border !== 'none' ? `1px solid ${s.border}` : undefined),
+      border: arranging ? `1.5px dashed ${s.accent || '#7ab2ff'}`
+        : s.border && s.border !== 'none' ? `1px solid ${s.border}`
+        : `1px solid rgba(${dark ? '255,255,255,0.16' : '20,20,30,0.14'})`,
       cursor: arranging && !widget.locked ? 'move' : undefined,
       boxShadow: s.shadow === 'lift' ? '0 18px 44px rgba(8,8,14,0.4)'
         : s.shadow === 'soft' ? '0 10px 30px rgba(12,12,20,0.18)'
         : undefined,
     }, widget._extra]}>
+      {/* the top light edge: a 1 px line that makes the surface read as glass */}
+      <View style={{ position: 'absolute', left: 8, right: 8, top: 0, height: 1,
+        backgroundColor: `rgba(${dark ? '255,255,255,0.22' : '255,255,255,0.5'})`, borderRadius: 1 }} />
       {children}
     </View>
   );
@@ -131,15 +137,19 @@ function TSCard({ widget, children, st }) {
 
 // The one-line label above a card's content (the quiet uppercase micro-label — a structural
 // device: it names the real thing underneath).
-const Eyebrow = ({ st, text }) => (
-  <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.4, color: st.dim || st.color, opacity: 0.7, textAlign: st.align || 'left' }}>
-    {(text || '').toUpperCase()}
-  </Text>
+const Eyebrow = ({ st, text, tick = true }) => (
+  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5,
+    justifyContent: st.align === 'center' ? 'center' : st.align === 'right' ? 'flex-end' : 'flex-start' }}>
+    {tick && text ? <View style={{ width: 8, height: 2, borderRadius: 1, backgroundColor: st.accent || st.color, opacity: 0.85 }} /> : null}
+    <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.4, color: st.dim || st.color, opacity: 0.72, textAlign: st.align || 'left' }}>
+      {(text || '').toUpperCase()}
+    </Text>
+  </View>
 );
 
 const Bar = ({ st, pct, color }) => (
-  <View style={{ height: 4, borderRadius: 2, backgroundColor: withAlpha(st.color || '#888888', 0.14) }}>
-    <View style={{ width: `${Math.max(2, Math.min(100, Math.round(pct * 100)))}%`, height: 4, borderRadius: 2, backgroundColor: color || st.accent || st.color }} />
+  <View style={{ height: 5, borderRadius: 3, backgroundColor: withAlpha(st.color || '#888888', 0.13), overflow: 'hidden' }}>
+    <View style={{ width: `${Math.max(2, Math.min(100, Math.round(pct * 100)))}%`, height: 5, borderRadius: 3, backgroundColor: color || st.accent || st.color }} />
   </View>
 );
 
@@ -157,11 +167,14 @@ function ClockDigital({ widget, st }) {
   const ss = cfg.seconds ? String(d.getSeconds()).padStart(2, '0') : '';
   return (
     <TSCard widget={widget} st={{ justifyContent: 'center' }}>
-      <View>
-        <Text style={tx(st, { size: st.size, lineHeight: 1.04 })}>{`${hh}:${mm}${ss ? `:${ss}` : ''}`}</Text>
-        <Text style={dim(st, { size: Math.max(12, Math.round((st.size || 56) * 0.22)), weight: 600 })}>
-          {`${weekdayName(d.getDay(), false)}${ampm}`}
-        </Text>
+      <View style={{ gap: 2 }}>
+        <Text style={tx(st, { size: st.size, lineHeight: 1.02, tracking: typeof st.tracking === 'number' ? st.tracking : -1 })}>{`${hh}:${mm}${ss ? `:${ss}` : ''}`}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+          <Text style={dim(st, { size: Math.max(12, Math.round((st.size || 56) * 0.22)), weight: 600 })}>
+            {weekdayName(d.getDay(), false)}
+          </Text>
+          {ampm ? <Text style={dim(st, { size: Math.max(10, Math.round((st.size || 56) * 0.18)), weight: 700 })}>{ampm}</Text> : null}
+        </View>
       </View>
     </TSCard>
   );
@@ -937,9 +950,9 @@ function RingW({ widget, st }) {
     </View>
   );
   const parts = [];
-  for (let a = 0; a < 360; a += 6) parts.push(seg(a, withAlpha(st.color || '#888888', 0.15), 5));
-  const filled = Math.round((d.pct || 0) * 60);
-  for (let i = 0; i < filled; i++) parts.push(seg(i * 6, d.hot ? '#ff453a' : (st.accent || st.color || '#888888'), 5));
+  for (let a = 0; a < 360; a += 4.5) parts.push(seg(a, withAlpha(st.color || '#888888', 0.13), 4));
+  const filled = Math.round((d.pct || 0) * 80);
+  for (let i = 0; i < filled; i++) parts.push(seg(i * 4.5, d.hot ? '#ff453a' : (st.accent || st.color || '#888888'), 4));
   return (
     <TSCard widget={widget} st={{ alignItems: 'center', justifyContent: 'center', gap: 4 }}>
       <View style={{ width: face, height: face }}>

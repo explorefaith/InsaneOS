@@ -74,7 +74,7 @@ export { Lumo, lumoSource } from './mascot.js';
 export { DesktopWidgets, registerWidgetType, setWidgets, desktopWidgets, widgetComponent } from './widgets.js';
 export {
   TS_KINDS, TS_FONTS, TS_GRID, byZ as tsByZ,
-  resolvePlan as tsResolvePlan, liveWidgets as tsLiveWidgets, resolveStyle, withAlpha,
+  resolvePlan as tsResolvePlan, liveWidgets as tsLiveWidgets, resolveStyle, withAlpha, parseColor,
   newInstance as tsNewInstance, createHistory as tsCreateHistory, planDiffers as tsPlanDiffers,
   alignW as tsAlignW, distributeW as tsDistributeW,
   richValid as tsRichValid, richSegments as tsRichSegments, richTokens as tsRichTokens, richSplit as tsRichSplit,

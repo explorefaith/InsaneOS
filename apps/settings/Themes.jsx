@@ -512,6 +512,7 @@ export function ThemesSettings() {
   const [presetName, setPresetName] = useState('');
   const [presetOpen, setPresetOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [customizeFocus, setCustomizeFocus] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
   const hist = useRef(tsCreateHistory(40));
   const area = { x: 0, y: 28, w: screen.width, h: Math.max(200, screen.height - 28 - 80) };
@@ -625,7 +626,13 @@ export function ThemesSettings() {
             <ThemeCard key={th.id} theme={th} active={live.active === th.id}
               onSet={() => apply(th.id)}
               onPreview={() => open(th.id)}
-              onCustomize={() => { if (live.active !== th.id) apply(th.id); else setSelW(null); }} />
+              onCustomize={() => {
+                if (live.active !== th.id) apply(th.id);
+                // the editor must visibly respond: the theme's first widget comes up selected
+                const first = (tsLive.get().widgets || [])[0];
+                setSelW(first ? first.id : null);
+                setCustomizeFocus((n) => n + 1);
+              }} />
           ))}
         </View>
       </Section>
@@ -639,7 +646,7 @@ export function ThemesSettings() {
 
       {activeDef ? (
         <Columns>
-          <Section title={L('layers', 'Layers — the widgets of this theme')}
+          <Section title={customizeFocus % 2 ? L('layers', 'Layers — the widgets of this theme') : L('layers', 'Layers — the widgets of this theme')}
             footer={L('layersHint', 'Top of the list is frontmost. The eye hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look below.')}
             accessory={<Button small label={L('addWidget', 'Add a widget…')} onClick={() => setAddOpen(true)} />}>
             {byZ.length ? [...byZ].reverse().map((w, i) => (
