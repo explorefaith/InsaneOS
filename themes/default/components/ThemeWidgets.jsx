@@ -22,7 +22,7 @@ import {
   nowPlaying as npStore, weather as weatherStore, bluetooth as btStore,
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
-  stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens, parseColor,
+  stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens, parseColor, ShellBoundary,
 } from '@insaneos/sdk';
 
 const hex = (rgb) => (Array.isArray(rgb) ? `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}` : null);
@@ -1316,7 +1316,8 @@ function TsWidget({ widget }) {
   const v = specOf(widget.kind)?.v;
   const C = (v && VARIANTS[v]) || null;
   if (!C) return null;
-  return h(C, { widget, st: eff(widget), key: widget.id });
+  // one broken card shows its own quiet notice; the other cards and the layer stay alive
+  return h(ShellBoundary, { name: `widget ${widget.kind}`, key: widget.id }, h(C, { widget, st: eff(widget) }));
 }
 
 registerWidgetType('ts-widget', TsWidget);

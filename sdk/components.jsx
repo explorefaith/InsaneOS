@@ -574,6 +574,32 @@ export function useWindowState(key, initial) {
 // One error boundary per app window (Phase 1 stability): an app that throws during render shows a
 // small fallback inside its own window — the shell and every other window stay alive. "Reopen"
 // remounts the app fresh, as wm.open would.
+
+// The shell's own error boundary: every major surface (island, dock, launcher, widgets, studio
+// bar, overview) runs inside one — a panel that throws during render shows a small notice IN its
+// place and the rest of the desktop stays alive and interactive. The lesson from the field: a
+// single render throw used to take the whole tree down to a black display.
+export class ShellBoundary extends Component {
+  constructor(props) { super(props); this.state = { failed: false, nonce: 0 }; }
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(e) { console.error(`shell surface '${this.props.name || '?'}' crashed while rendering:`, e?.message ? `${e.message}\n${e.stack || ''}` : e); }
+  retry() { this.setState((s2) => ({ failed: false, nonce: s2.nonce + 1 })); }
+  render() {
+    if (this.state.failed) {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12,
+          backgroundColor: 'rgba(20,20,26,0.9)', borderRadius: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: '#f5f5f7' }}>{`${this.props.name || 'Panel'} had a problem`}</Text>
+          <Text style={{ fontSize: 11, color: 'rgba(245,245,247,0.6)' }}>The rest of the desktop is unaffected.</Text>
+          <Text onClick={() => this.retry()} style={{ fontSize: 12, color: '#7ab2ff', border: '1px solid #7ab2ff',
+            borderRadius: 6, padding: '3px 12px' }}>Retry</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 class AppBoundary extends Component {
   constructor(props) { super(props); this.state = { failed: false, nonce: 0 }; }
   static getDerivedStateFromError() { return { failed: true }; }

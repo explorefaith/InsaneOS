@@ -66,7 +66,7 @@ import {
   dockIdOfWindow,
   DUR,
   windows,
-  playFx, tsLive, tsArranging } from '@insaneos/sdk';
+  playFx, tsLive, tsArranging , ShellBoundary } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState } from 'react';
 import { makeTheme, wallpaperAccent, hexFromRgb } from './tokens.js';
@@ -296,25 +296,31 @@ function App() {
         <Backdrop wallpaper={wallpaper} bg={s.wallpaperBg || null} fit={s.wallpaperFit} displays={all}
           onContextMenu={(e) => setContext({ x: e.x, y: e.y })} />
         {all.map((d) => <MotionWallpaper key={d.id + ':' + d.x} display={d} />)}
-        <DesktopWidgets layer="below" />
+        <ShellBoundary name="widgets (below)"><DesktopWidgets layer="below" /></ShellBoundary>
         <OverviewBackdrop />
-        {mounted.map((w) => <Window key={w.id} win={w} app={getApp(w.id)} t={t} focused={w.id === focused} fx={minFx(w.id) || restFx(w.id)} />)}
+        {mounted.map((w) => <ShellBoundary key={w.id} name={`window ${getApp(w.id)?.name || w.id}`}>
+          <Window win={w} app={getApp(w.id)} t={t} focused={w.id === focused} fx={minFx(w.id) || restFx(w.id)} />
+        </ShellBoundary>)}
         {minimizing.filter((x) => !mounted.includes(x.win)).map(({ win }) => <Window key={win.id} win={win} app={getApp(win.id)} t={t} focused={false} fx={minFx(win.id)} />)}
-        <DesktopWidgets layer="above" />
+        <ShellBoundary name="widgets (above)"><DesktopWidgets layer="above" /></ShellBoundary>
         {/* Everything above the windows goes in its layer (sdk/layers.js, docs/LAYERS.md): the
             order is the layers', not this tree's, and clicks follow it. Menus go to «popover»
             by themselves (Menu.jsx). The island strip lives in the «menubar» layer, floating
             over the left edge — windows may slide under it, panels open above everything. */}
         <Layer name="menubar">
-          <IslandStrip t={t} area={main} windows={mounted} focused={focused} />
+          <ShellBoundary name="menu bar">
+            <IslandStrip t={t} area={main} windows={mounted} focused={focused} />
+          </ShellBoundary>
         </Layer>
         <Layer name="dock">
+        <ShellBoundary name="dock">
         <Dock t={t} items={entries} running={entries.filter((e) => e.running).map((e) => e.id)} focusedApp={focused ? getApp(focused)?.id : null}
           onOpen={(id) => byId.has(id) && dockActivate(byId.get(id))}
           onContext={(id, at) => byId.has(id) && setDockCtx({ entry: byId.get(id), at })}
           onTrash={openTrash} onTrashContext={(at) => setTrashCtx(at)} trashFull={trash.full}
           position={dp.dockPosition} size={dp.dockSize} magnify={dp.dockMagnify} maxSize={dp.dockMagnifySize}
           hideMode={dp.dockHide} top={MENU_H} keepOpen={!!dockCtx || !!trashCtx} area={main} />
+          </ShellBoundary>
         </Layer>
         {dockCtx && <DockMenu pos={dp.dockPosition} at={dockCtx.at} onClose={() => setDockCtx(null)} items={dockMenu(byId.get(dockCtx.entry.id) || dockCtx.entry)} />}
         {trashCtx && <DockMenu pos={dp.dockPosition} at={trashCtx} onClose={() => setTrashCtx(null)} items={trashMenu({ onEmpty: () => setAskEmpty(true) })} />}
@@ -347,9 +353,9 @@ function App() {
             { label: tr('shell.menu.about'), onClick: () => wm.open('about') },
           ]} />
         )}
-        {launchpad && <Layer name="overlay"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></Layer>}
-        <Layer name="overlay"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></Layer>
-        <Layer name="popover"><ThemeStudioBar area={{ x: 0, y: 28, w: main.w, h: Math.max(200, main.h - 28 - 80) }} hist={studioHist} /></Layer>
+        {launchpad && <Layer name="overlay"><ShellBoundary name="app launcher"><Launchpad t={t} apps={launcherApps} onOpen={launchApp} onClose={() => setLaunchpad(false)} area={main} /></ShellBoundary></Layer>}
+        <Layer name="overlay"><ShellBoundary name="widget gallery"><WidgetGallery workArea={{ x: 0, y: MENU_H, w: main.w, h: main.h - MENU_H - 96 }} onClose={() => widgetsEditing.set(false)} /></ShellBoundary></Layer>
+        <Layer name="popover"><ShellBoundary name="theme studio"><ThemeStudioBar area={{ x: 0, y: 28, w: main.w, h: Math.max(200, main.h - 28 - 80) }} hist={studioHist} /></ShellBoundary></Layer>
         <PlaceLayer />
         <BenchWidgets />
 

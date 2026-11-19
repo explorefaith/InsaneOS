@@ -17,8 +17,7 @@ import {
   emptyTrash, ConfirmDialog, PowerDialog, findWallpaper, wallpaperSrc, MotionWallpaper, Backdrop, snapPreview, notifyHistory, setBannerPlacement, Text,
   useShortcuts, runShortcut, AppSwitcher, openSwitcher, switcherKeys, switcherGrabs, switcherHold, toggleShowDesktop, spotlight, launchApp, dockActivate,
   classicDesktopKeys, desktopSwipe, DesktopHud, OverviewBackdrop, OverviewChrome, openOverview, closeOverview, toggleOverview, overview, LevelHud,
-  menuBarPrefs, menuBarEveryDisplay, barDisplays, pointerDisplay, keepWindowsInWorkAreas,
-} from '@insaneos/sdk';
+  menuBarPrefs, menuBarEveryDisplay, barDisplays, pointerDisplay, keepWindowsInWorkAreas, ShellBoundary } from '@insaneos/sdk';
 import { apps } from '@insaneos/apps';
 import { useEffect, useRef, useState, Fragment } from 'react';
 import { makeTheme } from './tokens.js';
@@ -207,16 +206,17 @@ function App() {
         <Layer name="dock">
           {bars.map((d) => (
             <View key={d.id + ':' + d.x} style={{ position: 'absolute', left: d.x, top: d.y, width: d.w, height: d.h, pointerEvents: 'box-none' }}>
-              <Taskbar t={t} pos={pos} align={align} area={d} start={open === 'start' && pd.id === d.id} onStart={() => { closeOverview(); toggle('start', d); }}
+              <ShellBoundary name="taskbar"><Taskbar t={t} pos={pos} align={align} area={d} start={open === 'start' && pd.id === d.id} onStart={() => { closeOverview(); toggle('start', d); }}
                 onSearch={() => { closeOverview(); toggle('start', d); }} taskView={taskView} onTaskView={() => toggleOverview()}
                 quick={open === 'quick' && pd.id === d.id} onQuick={() => toggle('quick', d)}
                 notif={open === 'notif' && pd.id === d.id} onNotif={() => toggle('notif', d)} unread={unread}
                 onEmptyTrash={() => setAskEmpty(d.id)} />
+              </ShellBoundary>
             </View>
           ))}
         </Layer>
         {/* keyed on the display: another bar's button opens the panel anew on its own display */}
-        {open === 'start' && <Layer name="overlay"><StartMenu key={pd.id} t={t} box={startBox(pos, align, pd)} onClose={close} isOnBar={isOnBar} /></Layer>}
+        {open === 'start' && <Layer name="overlay"><ShellBoundary name="start menu"><StartMenu key={pd.id} t={t} box={startBox(pos, align, pd)} onClose={close} isOnBar={isOnBar} /></ShellBoundary></Layer>}
         {open === 'quick' && <Layer name="popover"><QuickSettings key={pd.id} t={t} at={qsAt} onClose={close} isOnBar={isOnBar} /></Layer>}
         {open === 'notif' && <Layer name="popover"><NotificationCenter key={pd.id} t={t} at={ncAt} onClose={close} isOnBar={isOnBar} /></Layer>}
         {desk && (

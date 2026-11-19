@@ -146,7 +146,7 @@ export { useTween, reducedMotionNow, easeOutBack, nextFrame, cancelFrame } from 
 export { QUALITY_PROFILES, qualityProfile, qualityKnobs, qualityTick, renderQuality, isAdaptive } from './quality.js';
 export {
   Button, Toggle, Segmented, SidebarItem, SectionTitle, ScrollView, TextInput, FormFields, hasTextFocus, takeTextFocus, releaseTextFocus, textFocusOwner, Stepper, Slider, Progress, Spinner,
-  AppHost, useAppWindow, useKeyboard, focusToken, restoreFocus, pasteIntoFocused, FloatingWindows, useWindowState,
+  AppHost, ShellBoundary, useAppWindow, useKeyboard, focusToken, restoreFocus, pasteIntoFocused, FloatingWindows, useWindowState,
 } from './components.jsx';
 import { FloatingWindows } from './components.jsx';
 // One stacking order for the desktop: <Layer name>, <Overlay anchor> (docs/LAYERS.md)
