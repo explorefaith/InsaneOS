@@ -684,11 +684,8 @@ export function ThemesSettings() {
     try {
       hist.current.reset();
       setSelW(null);
-      if (tsApplyTheme(id, area)) {
-        say(L('appliedNote', 'Applied — the desktop followed.'));
-        const wid = settings.get().wallpaper;
-        if (s.lockFollowTheme !== false && wid && !String(wid).startsWith('image:')) setLoginStill(wid).catch(() => {});
-      } else say({ err: L('missingTheme', 'That theme is gone.') });
+      if (tsApplyTheme(id, area)) say(L('appliedNote', 'Applied — the desktop followed.'));
+      else say({ err: L('missingTheme', 'That theme is gone.') });
     } catch (e) { say({ err: errorText(e) }); }
   };
   const stop = () => {

@@ -15,6 +15,7 @@
 // wallpaperBg, wallpaperFit, motion, mode, accent) — the same keys Settings → Wallpaper and
 // Appearance already drive, so the live desktop updates through the paths that always worked.
 import { settings } from './settings.js';
+import { admin } from './admin.js';
 import { createStore } from './store.js';
 import {
   TS_KINDS, resolvePlan, liveWidgets, newInstance, removeW, duplicateW,
@@ -208,6 +209,13 @@ export function tsApplyTheme(id, area) {
   if (patch.wallpaper === undefined) patch.wallpaper = appearance.wallpaper ?? null;
   if (patch.wallpaperBg === undefined) patch.wallpaperBg = appearance.wallpaperBg ?? null;
   settings.set({ ...patch, themeStudio: { ...saved, active: id, savedAppearance } });
+  // the lock screen follows the theme (the toggle lives in the theme look): its picture lands on
+  // the login screen with the apply itself — every path that applies a theme brings the lock
+  // screen along, not only the Themes page's own button. User pictures use the login-image flow
+  // and are skipped here; a refusal is logged, never swallowed silently.
+  if (settings.get().lockFollowTheme !== false && patch.wallpaper && !String(patch.wallpaper).startsWith('image:')) {
+    admin.run('wallpaper-login', `still ${patch.wallpaper}`).catch((e) => console.error('themestudio: the login screen did not follow the theme:', e && e.message ? e.message : e));
+  }
   const widgets = liveWidgets(def, overrideOf(saved, id), area);
   tsLive.set({ active: id, def, widgets, area });
   return true;
