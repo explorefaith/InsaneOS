@@ -11,6 +11,7 @@ import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitT
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
 import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow, easeElegantBounce, easeDefaultNow, motionScaleNow } from './animation.js';
+import { clipboard } from './clipboard.js';
 import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
@@ -588,10 +589,20 @@ export function useWindowState(key, initial) {
 // place and the rest of the desktop stays alive and interactive. The lesson from the field: a
 // single render throw used to take the whole tree down to a black display.
 export class ShellBoundary extends Component {
-  constructor(props) { super(props); this.state = { failed: false, nonce: 0 }; }
+  constructor(props) { super(props); this.state = { failed: false, nonce: 0, copied: false }; }
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch(e) { console.error(`shell surface '${this.props.name || '?'}' crashed while rendering:`, e?.message ? `${e.message}\n${e.stack || ''}` : e); }
-  retry() { this.setState((s2) => ({ failed: false, nonce: s2.nonce + 1 })); }
+  componentDidCatch(e) {
+    this.err = e;                                     // kept off state: the report, not a re-render
+    console.error(`shell surface '${this.props.name || '?'}' crashed while rendering:`, e?.message ? `${e.message}\n${e.stack || ''}` : e);
+  }
+  retry() { this.setState((s2) => ({ failed: false, nonce: s2.nonce + 1, copied: false })); }
+  copyReport() {
+    const e = this.err;
+    const report = [`Insane OS panel crash`, `surface: ${this.props.name || '?'}`, `message: ${e && e.message ? e.message : String(e)}`,
+      e && e.stack ? `stack:\n${e.stack}` : ''].join('\n');
+    try { clipboard.set(report); } catch (err) { /* clipboard refused: the notice stays */ }
+    this.setState({ copied: true });
+  }
   render() {
     if (this.state.failed) {
       return (
@@ -599,8 +610,12 @@ export class ShellBoundary extends Component {
           backgroundColor: 'rgba(20,20,26,0.9)', borderRadius: 10 }}>
           <Text style={{ fontSize: 12, fontWeight: 600, color: '#f5f5f7' }}>{`${this.props.name || 'Panel'} had a problem`}</Text>
           <Text style={{ fontSize: 11, color: 'rgba(245,245,247,0.6)' }}>The rest of the desktop is unaffected.</Text>
-          <Text onClick={() => this.retry()} style={{ fontSize: 12, color: '#7ab2ff', border: '1px solid #7ab2ff',
-            borderRadius: 6, padding: '3px 12px' }}>Retry</Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Text onClick={() => this.retry()} style={{ fontSize: 12, color: '#7ab2ff', border: '1px solid #7ab2ff',
+              borderRadius: 6, padding: '3px 12px' }}>Retry</Text>
+            <Text onClick={() => this.copyReport()} style={{ fontSize: 12, color: 'rgba(245,245,247,0.75)', border: '1px solid rgba(245,245,247,0.35)',
+              borderRadius: 6, padding: '3px 12px' }}>{this.state.copied ? 'Copied' : 'Copy report'}</Text>
+          </View>
         </View>
       );
     }

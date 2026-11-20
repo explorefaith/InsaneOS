@@ -11,7 +11,7 @@
 import {
   View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
   TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsHistory, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
-  tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
+  tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme, setLoginStill,
   tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, tsAddVariant, TS_KINDS, TS_FONTS,
   tsPersistFlush, tsSelected, tsEnterArrange,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha, Slider as SliderX,
@@ -684,8 +684,11 @@ export function ThemesSettings() {
     try {
       hist.current.reset();
       setSelW(null);
-      if (tsApplyTheme(id, area)) say(L('appliedNote', 'Applied — the desktop followed.'));
-      else say({ err: L('missingTheme', 'That theme is gone.') });
+      if (tsApplyTheme(id, area)) {
+        say(L('appliedNote', 'Applied — the desktop followed.'));
+        const wid = settings.get().wallpaper;
+        if (s.lockFollowTheme !== false && wid && !String(wid).startsWith('image:')) setLoginStill(wid).catch(() => {});
+      } else say({ err: L('missingTheme', 'That theme is gone.') });
     } catch (e) { say({ err: errorText(e) }); }
   };
   const stop = () => {
@@ -899,6 +902,47 @@ export function ThemesSettings() {
               onCustomize={() => goCustomize(th)} />
           ))}
         </View>
+      </Section>
+      <Section
+        title={L('storeTitle', 'Theme store')}
+        footer={L('storeHint', 'Ready-made twists of the built-ins, made here on this machine — one click installs one into your gallery as your own.')}
+        accessory={null}>
+        {STORE_PACKS.map((pack) => {
+          const items = storeItems().filter((it) => it.pack === pack.id);
+          const installedNames = new Set(themes.filter((x) => x.custom).map((x) => x.name));
+          return (
+            <View key={pack.id} style={{ marginBottom: 10 }}>
+              <Text style={{ fontSize: 11, fontWeight: 700, color: t.textDim, letterSpacing: 1, marginBottom: 6, textAlign: 'start' }}>{pack.name}</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                {items.map((it) => {
+                  const done = installedNames.has(it.name);
+                  const def = { ...it.def, id: `store-${it.key}`, name: it.name, desc: it.desc, custom: true,
+                    appearance: { ...(it.def.appearance || {}), ...it.appearance },
+                    widgets: tsResolvePlan(it.def.widgets || [], area, it.def.sw || 1280, it.def.sh || 720), sw: it.def.sw || 1280, sh: it.def.sh || 720 };
+                  return (
+                    <View key={it.key} style={{ width: 190, gap: 6, padding: 6, borderRadius: 12, border: `1px solid ${t.separator}` }}>
+                      <ThemeMiniature theme={def} width={176} height={99} />
+                      <Text style={{ fontSize: 12, fontWeight: 600, color: t.text, textAlign: 'start' }}>{it.name}</Text>
+                      <Text style={{ fontSize: 10.5, color: t.textDim, minHeight: 24, textAlign: 'start' }}>{it.desc}</Text>
+                      <Button small primary={!done} label={done ? L('storeInstalled', 'In your gallery') : L('storeInstall', 'Install')} disabled={done}
+                        onClick={() => {
+                          try {
+                            const saved = settings.get().themeStudio || {};
+                            const id = `custom-${Date.now().toString(36)}-${Math.floor(Math.random() * 1296).toString(36).padStart(2, '0')}`;
+                            settings.set({ themeStudio: { ...saved, customs: { ...(saved.customs || {}), [id]: { name: it.name, base: it.base,
+                              widgets: tsResolvePlan(it.def.widgets || [], area, it.def.sw || 1280, it.def.sh || 720),
+                              appearance: { ...(it.def.appearance || {}), ...it.appearance } } } } });
+                            tsPersistFlush();
+                            say(L('storeInstalledNote', 'Installed — it is in the gallery now.'));
+                          } catch (e) { say({ err: errorText(e) }); }
+                        }} />
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
       </Section>
       {selTheme ? (
         <PreviewDialog theme={selTheme} active={live.active === selTheme.id}
