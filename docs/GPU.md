@@ -523,6 +523,19 @@ cadence — 30–35 ms frames, a laggy pointer, exactly the shape the session lo
 `build/gpu-scissor --verify` (2 465 420 pixels, 0 differ) and the win re-measured (77.7 % at 1.5 %
 damage under a 4-core read load).
 
+**Changed (2026-11-21):** the pipeline is auto **by default** now, with the engagement the two
+runs together finally pin down. The 2026-10-29 Pi 5 run measured a real regression, and this
+session's laptop measured the opposite on the same code: the difference is whether the frame's
+CPU part fits a refresh period. Engaging while the JS work outgrows the period cannot hide any
+sync — it only delays input by up to a frame (the Pi 5's 17–29 ms). Engaging while it fits turns
+the serial build→flip→build cadence (two vblanks a frame: 30–35 ms on the laptop, even with tiny
+damage — the session log's `after the paint` dwarfing its paint) into one frame per vblank. So
+`fpipe_note` now carries the build time **and** the JS work separately, engages after two
+vblank-missing frames whose JS work fits one, and lets go the moment the work outgrows the period
+or the desktop goes idle. INSANE_PIPELINE=0 (serial) and =2 (always) still override;
+`build/fpipe-test` (59 checks) walks the guard: the Pi 5 shape never engages, the laptop shape
+engages and holds, the overgrown shape never engages.
+
 ## What slows the GPU under CPU load (the experiment, 0.8.7)
 
 On the Pi 5 a frame's GPU time goes from about 1.5 ms alone to 14–16 ms under an all-core load with no clock change

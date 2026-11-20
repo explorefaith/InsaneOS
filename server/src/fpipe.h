@@ -8,10 +8,14 @@
 #ifndef INSANE_FPIPE_H
 #define INSANE_FPIPE_H
 
-/* INSANE_PIPELINE, read once at startup: 1 auto (on while frames are heavy, fpipe_note), 2 always, anything
- * else (and unset) off: every frame is built after the flip, as before 0.8.6. Off by default since the
- * Raspberry Pi 5 run of 2026-10-29: auto gave 2-5 more frames a second under an all-core load but 17-29 ms
- * more pointer latency, and engaged even alone at 60 fps (docs/GPU.md, "The frame pipeline"). */
+/* INSANE_PIPELINE, read once at startup: unset or 1 = auto (on while a frame misses its vblank and
+ * the CPU part of the next one fits inside one — fpipe_note), 2 always, 0 off: every frame is built
+ * after the flip, as before 0.8.6. Auto by default since 2026-11-21, with a guard the Pi 5 run of
+ * 2026-10-29 taught: auto engaged even when the CPU work itself outgrew the period (where prepainting
+ * cannot help and only adds latency — that run's 17-29 ms of pointer latency). The engagement now
+ * requires the frame's JS work to fit a vblank; machines whose work outgrew the period keep the old
+ * serial behaviour by construction, machines like the laptop where only the flip's sync inflated the
+ * frame get the pipeline. (docs/GPU.md, "The frame pipeline".) */
 enum { FPIPE_OFF, FPIPE_AUTO, FPIPE_ALWAYS };
 typedef struct {
     int mode;
@@ -22,14 +26,15 @@ typedef struct {
 /* A gap this long without a frame is an idle desktop: auto lets go at the next frame (fpipe_note). */
 #define FPIPE_IDLE_MS 500.0
 void fpipe_init(FPipe *p, const char *env);
-/* after each frame the main display got, at now_ms: the CPU time it took (input excluded: JS frame
- * callbacks, layout, paint, the upload and the flip's submission) against the refresh period. Auto
- * engages after 2 frames in a row above 60 % of the period (where a frame plus the GPU's part stops
- * fitting before the next vblank) and lets go after 60 in a row below 40 %, like the paint threads
- * (main.c), or when this frame came more than FPIPE_IDLE_MS after the last one: an idle desktop gives
- * no frames to count, and the first change after it (a click, a key) is then shown without a frame of
- * the pipeline's latency; heavy frames engage it again after 2 (this one counts as the first). */
-void fpipe_note(FPipe *p, double now_ms, double cpu_ms, double period_ms);
+/* after each frame the main display got, at now_ms: built_ms (the whole build, the flip's sync waits
+ * included — what a missed vblank inflates) and js_ms (the part prepainting can overlap: the JS frame
+ * callbacks, layout and paint) against the refresh period. Auto engages after 2 frames in a row that
+ * missed their vblank while the JS work fits one (the only case prepainting helps), and lets go the
+ * moment the JS work outgrows the period (the Pi 5 case, where it only added latency) or when this
+ * frame came more than FPIPE_IDLE_MS after the last one: an idle desktop gives no frames to count,
+ * and the first change after it (a click, a key) is then shown without a frame of the pipeline's
+ * latency. While engaged there is no light-run release: a fast build is the pipeline's own doing. */
+void fpipe_note(FPipe *p, double now_ms, double built_ms, double js_ms, double period_ms);
 int  fpipe_engaged(const FPipe *p);
 
 /* A display's prepared frame */

@@ -2092,7 +2092,7 @@ static double out_period_ms(const Out *o) { return o->kms.mode.vrefresh ? 1000.0
 /* a main display's frame for the pipeline's auto mode (fpipe_note); with -d its changes are logged */
 static void pipe_note(const Server *s, double ms, const Out *o) {
     int was = fpipe_engaged(&fpipe);
-    fpipe_note(&fpipe, now_ms(), ms, out_period_ms(o));
+    fpipe_note(&fpipe, now_ms(), ms, ui.layout_ms + ui.paint_ms, out_period_ms(o));
     if (s->debug && was != fpipe_engaged(&fpipe))
         fprintf(stderr, "frames: pipeline %s (a frame took %.1f ms of %.1f)\n", was ? "off" : "on", ms, out_period_ms(o));
 }
@@ -2710,8 +2710,8 @@ int main(int argc, char **argv) {
     keylag_init(s.greeter);                 /* key latency trace, only with INSANE_INPUT_DEBUG=1 (keylag.h) */
     plag_init(s.greeter);                   /* pointer latency trace, same env (plag.h) */
     fpipe_init(&fpipe, getenv("INSANE_PIPELINE"));
-    fprintf(stderr, "insane-server: frame pipeline %s (INSANE_PIPELINE: unset or 0 off, 1 while frames are heavy, 2 always)\n",
-            fpipe.mode == FPIPE_OFF ? "off" : fpipe.mode == FPIPE_ALWAYS ? "always" : "while frames are heavy");
+    fprintf(stderr, "insane-server: frame pipeline %s (INSANE_PIPELINE: unset or 1 auto — on while a frame misses its vblank and the CPU part fits one, 0 off, 2 always)\n",
+            fpipe.mode == FPIPE_OFF ? "off" : fpipe.mode == FPIPE_ALWAYS ? "always" : "auto");
     int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
 
     double start = now_ms();

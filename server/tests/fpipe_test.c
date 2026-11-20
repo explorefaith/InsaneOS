@@ -1,11 +1,14 @@
 /* fpipe_test.c — the frame pipeline's decisions (src/fpipe.c, docs/GPU.md "The frame pipeline"):
- *   - INSANE_PIPELINE and the auto mode's hysteresis;
+ *   - INSANE_PIPELINE (unset/1 auto by default, 0 off, 2 always) and the auto mode's engagement:
+ *     two frames in a row that missed their vblank (built beyond 90 % of the period) while the JS
+ *     part fits one (under 60 %) — the guard that keeps the Pi 5's outgrown case on the serial build;
  *   - what a display does next (build, submit, prepare, wait) and when input waits for the flip;
  *   - a display driven the way main.c drives it, on a vblank grid: a frame whose CPU part plus the GPU's
  *     part passes the period is shown every other vblank without the pipeline and at every vblank with
  *     it; a light frame is shown at every vblank either way; an idle display builds at once; nothing is
  *     prepared twice for one flip (no busy loop);
- *   - auto lets go after an idle gap (FPIPE_IDLE_MS without a frame);
+ *   - auto lets go after an idle gap (FPIPE_IDLE_MS without a frame) or the moment the JS work
+ *     outgrows the period;
  *   - the JS frame callbacks run once per frame shown, also when a prepare painted nothing. */
 #include "fpipe.h"
 
@@ -13,54 +16,58 @@
 #include <string.h>
 
 static int fails, checks;
-static double clock_ms = 1000;               /* the frames of test_mode/test_auto come one period apart */
-static void note(FPipe *p, double cpu_ms, double period_ms) { clock_ms += 16.67; fpipe_note(p, clock_ms, cpu_ms, period_ms); }
+static double clock_ms = 1000;
+static void note(FPipe *p, double built_ms, double js_ms, double period_ms) { clock_ms += 16.67; fpipe_note(p, clock_ms, built_ms, js_ms, period_ms); }
+static void note_at(FPipe *p, double at, double built_ms, double js_ms, double period_ms) { clock_ms = at; fpipe_note(p, at, built_ms, js_ms, period_ms); }
 #define CHECK(c) do { checks++; if (!(c)) { fails++; fprintf(stderr, "%s:%d: CHECK(%s) failed\n", __FILE__, __LINE__, #c); } } while (0)
 
 static void test_mode(void) {
     FPipe p;
-    fpipe_init(&p, NULL);                       /* unset: off (the default since the Pi 5 run) */
-    CHECK(p.mode == FPIPE_OFF && !fpipe_engaged(&p));
+    fpipe_init(&p, NULL);                       /* unset: auto (the default since 2026-11-21) */
+    CHECK(p.mode == FPIPE_AUTO && !fpipe_engaged(&p));
+    fpipe_init(&p, "");
+    CHECK(p.mode == FPIPE_AUTO);
+    fpipe_init(&p, "1");
+    CHECK(p.mode == FPIPE_AUTO);
     fpipe_init(&p, "0");
     CHECK(p.mode == FPIPE_OFF && !fpipe_engaged(&p));
-    note(&p, 30, 16.67);                        /* off stays off, however heavy */
-    note(&p, 30, 16.67);
+    note(&p, 30, 2, 16.67);                     /* off stays off, however heavy */
+    note(&p, 30, 2, 16.67);
     CHECK(!fpipe_engaged(&p));
     fpipe_init(&p, "2");
     CHECK(p.mode == FPIPE_ALWAYS && fpipe_engaged(&p));
-    note(&p, 1, 16.67);
+    note(&p, 1, 1, 16.67);
     CHECK(fpipe_engaged(&p));
-    fpipe_init(&p, "1");
-    CHECK(p.mode == FPIPE_AUTO);
-    CHECK(!fpipe_engaged(&p));
     fpipe_init(&p, "yes");                      /* anything else: off */
-    CHECK(p.mode == FPIPE_OFF);
-    fpipe_init(&p, "");
     CHECK(p.mode == FPIPE_OFF);
 }
 
 static void test_auto(void) {
     FPipe p;
     fpipe_init(&p, "1");
-    note(&p, 13, 16.67);                        /* one heavy frame: not yet */
+    note(&p, 30, 2, 16.67);                     /* one vblank-missing frame: not yet */
     CHECK(!fpipe_engaged(&p));
-    note(&p, 5, 16.67);                         /* the run is broken */
-    note(&p, 13, 16.67);
+    note(&p, 8, 2, 16.67);                      /* a build inside its own vblank: the run is broken */
+    note(&p, 30, 2, 16.67);
     CHECK(!fpipe_engaged(&p));
-    note(&p, 13, 16.67);                        /* two in a row above 60 % */
+    note(&p, 30, 2, 16.67);                     /* two in a row that missed, with room to prepaint */
     CHECK(fpipe_engaged(&p));
-    for (int i = 0; i < 59; i++) note(&p, 5, 16.67);
-    CHECK(fpipe_engaged(&p));                   /* 59 light ones: still on */
-    note(&p, 8, 16.67);                         /* 48 %: neither light nor a reason to stay; the run restarts */
-    for (int i = 0; i < 59; i++) note(&p, 5, 16.67);
+    /* the Pi 5's case: the JS work itself outgrew the period — let go at once, never re-engage */
+    note(&p, 30, 18, 16.67);
+    CHECK(!fpipe_engaged(&p));
+    note(&p, 30, 18, 16.67);
+    CHECK(!fpipe_engaged(&p));
+    note(&p, 30, 2, 16.67);                     /* capable again: two in a row engage it */
+    CHECK(!fpipe_engaged(&p));
+    note(&p, 30, 2, 16.67);
     CHECK(fpipe_engaged(&p));
-    note(&p, 5, 16.67);                         /* the 60th light frame in a row */
-    CHECK(!fpipe_engaged(&p));
-    note(&p, 9, 16.67);                         /* 54 %: under 60 %, stays off */
-    note(&p, 9, 16.67);
-    CHECK(!fpipe_engaged(&p));
-    note(&p, 13, 0);                            /* no period: ignored */
-    note(&p, 13, 0);
+    /* while engaged a fast build is the pipeline's own doing: no light-run release */
+    for (int i = 0; i < 200; i++) note(&p, 6, 2, 16.67);
+    CHECK(fpipe_engaged(&p));
+    /* no period: ignored */
+    fpipe_init(&p, "1");
+    note(&p, 30, 2, 0);
+    note(&p, 30, 2, 0);
     CHECK(!fpipe_engaged(&p));
 }
 
@@ -87,7 +94,9 @@ static void test_step(void) {
 /* One display driven like main.c's loop on a vblank grid (period P, µs). Every frame has cpu µs of CPU work
  * (input, JS, layout, paint) and sub µs to submit (upload, swap, flip ioctl); the GPU then needs gpu µs, and a
  * flip lands on the first vblank after both. animate: there is always a next frame to build. Returns the flips
- * shown in n periods; *prepares counts frames painted ahead, *spins render calls that did nothing. */
+ * shown in n periods; *prepares counts frames painted ahead, *spins render calls that did nothing. The note
+ * carries built = the flip's landing minus the frame's start (what a real build's sync waits inflate) and
+ * js = the frame's own CPU part. */
 typedef struct { long shown, prepares, spins, max_latency; } Sim;
 static Sim simulate(int mode, long cpu, long sub, long gpu, int animate, long n) {
     const long P = 16667;
@@ -110,21 +119,23 @@ static Sim simulate(int mode, long cpu, long sub, long gpu, int animate, long n)
         if (animate) { damage = 1; input_t = t; }       /* new input every wake: the frame shows it */
         int eligible = fpipe_engaged(&fp);
         int step = fpipe_step(eligible, pending, prep, damage, damage);
-        long busy = 0;
+        long busy = 0, built = 0;
         if (step == FPIPE_SUBMIT) {
             busy += sub;
             prep = FPIPE_NONE;
             inflight_input = prep_input;
             flip_at = ((t + busy + gpu) / P + 1) * P;   /* the next vblank after the GPU is done */
             pending = 1;
-            fpipe_note(&fp, (double)t / 1000, (double)(cpu + sub) / 1000, P / 1000.0);
+            built = flip_at - t;                        /* the submit's own wait, as a real build measures it */
+            fpipe_note(&fp, (double)t / 1000, (double)built / 1000, 0, P / 1000.0);
         } else if (step == FPIPE_BUILD) {
             busy += cpu + sub;
             damage = 0;
             inflight_input = input_t;
             flip_at = ((t + busy + gpu) / P + 1) * P;
             pending = 1;
-            fpipe_note(&fp, (double)t / 1000, (double)(cpu + sub) / 1000, P / 1000.0);
+            built = flip_at - t;
+            fpipe_note(&fp, (double)t / 1000, (double)built / 1000, (double)cpu / 1000, P / 1000.0);
         }
         /* then, like render_frame, the next frame may be painted ahead */
         if (fpipe_step(fpipe_engaged(&fp), pending, prep, 0, damage) == FPIPE_PREPARE) {
@@ -141,72 +152,71 @@ static Sim simulate(int mode, long cpu, long sub, long gpu, int animate, long n)
 }
 
 static void test_sim(void) {
-    /* the Pi 5 under an all-core load (docs/BENCHMARK.md): about 13 ms of CPU, 1 ms to submit, 3 ms of GPU */
+    /* the Pi 5 under an all-core load (docs/BENCHMARK.md): about 13 ms of CPU, 1 ms to submit, 3 ms of GPU —
+     * the JS work outgrows the period, so auto must never engage: exactly the serial build's pace */
     Sim off = simulate(FPIPE_OFF, 13000, 1000, 3000, 1, 600);
-    Sim on = simulate(FPIPE_ALWAYS, 13000, 1000, 3000, 1, 600);
     Sim au = simulate(FPIPE_AUTO, 13000, 1000, 3000, 1, 600);
+    Sim on = simulate(FPIPE_ALWAYS, 13000, 1000, 3000, 1, 600);
     CHECK(off.shown >= 299 && off.shown <= 301 && off.prepares == 0);   /* every other vblank: 30 Hz */
-    CHECK(on.shown >= 598 && on.prepares >= 597);                       /* every vblank: 60 Hz */
-    CHECK(au.shown >= 596);                                             /* auto engages after two frames */
+    CHECK(au.shown == off.shown && au.prepares == 0);                   /* the guard: auto stays off here */
+    CHECK(on.shown >= 598 && on.prepares >= 597);                       /* every vblank: 60 Hz (forced) */
     CHECK(on.max_latency <= 3 * 16667 && off.max_latency <= 3 * 16667); /* input to screen: within 3 periods */
-    /* a light frame: every vblank either way, and auto never engages */
+    /* the laptop's shape (docs/GPU.md): 5 ms of CPU, 1 ms to submit, 2 ms of GPU — the serial build
+     * already holds 60 Hz, and the pipeline overlaps the sync without costing a frame of latency */
     Sim l_off = simulate(FPIPE_OFF, 5000, 1000, 2000, 1, 600), l_au = simulate(FPIPE_AUTO, 5000, 1000, 2000, 1, 600);
-    CHECK(l_off.shown >= 598 && l_au.shown >= 598 && l_au.prepares == 0);
+    CHECK(l_off.shown >= 598 && l_au.shown >= 598 && l_au.prepares > 0);
     CHECK(l_au.max_latency <= 2 * 16667);                               /* not one frame more than without it */
     /* heavier than a period even pipelined: one frame per 21 ms of CPU (about 47 a second instead of 30),
-     * never more than one ahead (input within 3 periods), and no busy loop */
+     * never more than one ahead (input within 3 periods), and no busy loop — and auto never engages
+     * (its JS work is 20 ms against a 16.67 ms period) */
     Sim h = simulate(FPIPE_ALWAYS, 20000, 1000, 3000, 1, 600), h_off = simulate(FPIPE_OFF, 20000, 1000, 3000, 1, 600);
     CHECK(h.shown >= 460 && h.shown <= 480 && h.spins == 0 && h.max_latency <= 3 * 16667);
     CHECK(h_off.shown >= 299 && h_off.shown <= 301);
-    CHECK(on.spins == 0 && au.spins == 0);
+    Sim h_au = simulate(FPIPE_AUTO, 20000, 1000, 3000, 1, 600);
+    CHECK(h_au.shown == h_off.shown && h_au.prepares == 0);
+    CHECK(on.spins == 0 && au.spins == 0 && h_au.spins == 0);
     /* idle: one change is built and shown at once, nothing is prepared */
     Sim idle = simulate(FPIPE_ALWAYS, 13000, 1000, 3000, 0, 60);
     CHECK(idle.shown == 1 && idle.prepares == 0);
 }
 
-/* Auto mode after an idle desktop: no frames come, so nothing counted the light ones; the first frame after a gap
- * longer than FPIPE_IDLE_MS lets go (a heavy one counts as the first of the two that engage it again). */
+/* Auto after an idle desktop: no frames come, so nothing is counted; the first frame after a gap longer than
+ * FPIPE_IDLE_MS lets go, and a vblank-missing one counts as the first of the two that engage it again. */
 static void test_idle(void) {
     FPipe p;
     fpipe_init(&p, "1");
-    fpipe_note(&p, 1000, 13, 16.67);
-    fpipe_note(&p, 1016.7, 13, 16.67);
+    note_at(&p, 1000, 30, 2, 16.67);
+    note_at(&p, 1016.7, 30, 2, 16.67);
     CHECK(fpipe_engaged(&p));
-    fpipe_note(&p, 1416.7, 13, 16.67);          /* 400 ms later: not idle */
+    note_at(&p, 1416.7, 30, 2, 16.67);          /* 400 ms later: not idle */
     CHECK(fpipe_engaged(&p));
-    fpipe_note(&p, 1916.7, 5, 16.67);           /* exactly FPIPE_IDLE_MS later: not yet idle */
+    note_at(&p, 1916.7, 30, 2, 16.67);          /* exactly FPIPE_IDLE_MS later: not yet idle */
     CHECK(fpipe_engaged(&p));
-    fpipe_note(&p, 2600, 5, 16.67);             /* 683 ms without a frame: off at once, not after 60 light frames */
-    CHECK(!fpipe_engaged(&p) && p.light == 0 && p.heavy == 0);
-    fpipe_note(&p, 2616.7, 13, 16.67);          /* heavy again: two in a row engage it, as from the start */
-    CHECK(!fpipe_engaged(&p));
-    fpipe_note(&p, 2633.4, 13, 16.67);
-    CHECK(fpipe_engaged(&p));
-    fpipe_note(&p, 5000, 13, 16.67);            /* a heavy frame after a gap: off, and it is the first of two */
+    note_at(&p, 2600, 30, 2, 16.67);            /* 683 ms without a frame: off at once; this very
+                                                 * frame counts as the first of the two that re-engage */
     CHECK(!fpipe_engaged(&p) && p.heavy == 1);
-    fpipe_note(&p, 5016.7, 13, 16.67);
+    note_at(&p, 2616.7, 30, 2, 16.67);
     CHECK(fpipe_engaged(&p));
-    /* the gap restarts the light count too (the light frames before it are not carried over) */
-    for (int i = 0; i < 59; i++) fpipe_note(&p, 5100 + i * 16.67, 5, 16.67);
-    CHECK(fpipe_engaged(&p) && p.light == 59);
+    /* the JS work outgrowing the period lets go even without a gap */
+    note_at(&p, 2633.4, 30, 18, 16.67);
+    CHECK(!fpipe_engaged(&p));
     /* always and off ignore the gap */
     fpipe_init(&p, "2");
-    fpipe_note(&p, 1000, 5, 16.67);
-    fpipe_note(&p, 9000, 5, 16.67);
+    note_at(&p, 1000, 5, 2, 16.67);
+    note_at(&p, 9000, 5, 2, 16.67);
     CHECK(fpipe_engaged(&p));
     fpipe_init(&p, "0");
-    fpipe_note(&p, 1000, 13, 16.67);
-    fpipe_note(&p, 1016.7, 13, 16.67);
-    fpipe_note(&p, 9000, 13, 16.67);
+    note_at(&p, 1000, 30, 2, 16.67);
+    note_at(&p, 1016.7, 30, 2, 16.67);
+    note_at(&p, 9000, 30, 2, 16.67);
     CHECK(!fpipe_engaged(&p));
-    /* a frame-by-frame run: a heavy drag engages it, the desktop goes idle for 2 s, then a light click: the
-     * click's frame lets go, so the next input waits for the flip as without the pipeline */
+    /* a frame-by-frame run: a heavy drag engages it, the desktop goes idle for 2 s, then a light click
+     * whose build fits its own vblank: nothing to gain, the pipeline stays off */
     fpipe_init(&p, "1");
     double t = 1000;
-    for (int i = 0; i < 100; i++, t += 16.67) fpipe_note(&p, t, 13, 16.67);
+    for (int i = 0; i < 100; i++, t += 16.67) note_at(&p, t, 30, 2, 16.67);
     CHECK(fpipe_engaged(&p));
-    t += 2000;
-    fpipe_note(&p, t, 4, 16.67);
+    note_at(&p, t + 2000, 8, 4, 16.67);         /* a 2 s gap lets go; the click's build fits its vblank */
     CHECK(!fpipe_engaged(&p));
     CHECK(fpipe_blocked(fpipe_engaged(&p), 1, FPIPE_NONE));      /* input during that frame's flip waits for it */
 }
@@ -243,7 +253,7 @@ static void sim_callbacks(int mode, int hold, long n, long *shown, long *cbs) {
             prep_js = 0;
             flip_at = ((t + busy + gpu) / P + 1) * P;
             pending = 1;
-            fpipe_note(&fp, (double)t / 1000, (double)busy / 1000, P / 1000.0);
+            fpipe_note(&fp, (double)t / 1000, (double)(flip_at - t) / 1000, (double)cpu / 1000, P / 1000.0);
         }
         if (fpipe_step(eligible, pending, prep, 0, prep_only) == FPIPE_PREPARE) {
             prep = FPIPE_EMPTY;                    /* nothing to paint */
@@ -263,8 +273,8 @@ static void test_callbacks(void) {
     CHECK(shown >= 598 && cbs >= 2 * shown - 1);
     sim_callbacks(FPIPE_ALWAYS, 1, 600, &shown, &cbs);               /* with it: once, as with the pipeline off */
     CHECK(shown >= 598 && cbs >= shown && cbs <= shown + 2 && cbs <= off_cbs + 1);   /* (+1: one prepared at the end) */
-    sim_callbacks(FPIPE_AUTO, 1, 600, &shown, &cbs);                 /* light frames: auto never engages */
-    CHECK(shown >= 598 && cbs == off_cbs);
+    sim_callbacks(FPIPE_AUTO, 1, 600, &shown, &cbs);                 /* auto engages here and holds the same rule */
+    CHECK(shown >= 598 && cbs >= shown && cbs <= off_cbs + 3);
     /* the rule: only after a prepare that painted nothing and whose callbacks asked again */
     CHECK(fpipe_hold_callbacks(FPIPE_EMPTY, 1));
     CHECK(!fpipe_hold_callbacks(FPIPE_EMPTY, 0) && !fpipe_hold_callbacks(FPIPE_READY, 1) && !fpipe_hold_callbacks(FPIPE_NONE, 1));
