@@ -720,6 +720,7 @@ export const THEMES = [
       w('stats', 72, 394, { w: 168, h: 158 }),
       w('battery', 72, 568, { w: 148, h: 136 }),
       w('cpu-history', 440, 68, { w: 320, h: 120 }),
+      w('crypto-price', 1056, 416, { w: 220, h: 150, c: { pair: 'BTCUSDT' } }),
       w('media', 440, 204, { w: 320, h: 96 }),
       w('todo', 440, 316, { w: 240, h: 180 }),
       w('notes', 440, 512, { w: 240, h: 170 }),

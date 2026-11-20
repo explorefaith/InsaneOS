@@ -23,6 +23,7 @@ import {
   setBluetoothPower, nightActive, setNightManual, sunTimes, useBattery as useBatt, usePim as usePimDep,
   nextAlarm as nextAlarmStore, qualityProfile,
   stopwatch as swStore, swStart, swStop, swReset, swElapsed, tsRichSegments, tsRichTokens, parseColor, ShellBoundary,
+  cryptoData, cryptoCloses, cryptoStart, cryptoStop,
 } from '@insaneos/sdk';
 
 const hex = (rgb) => (Array.isArray(rgb) ? `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}` : null);
@@ -699,6 +700,7 @@ const eventCount = () => tryDo(() => {
 const openTodos = () => tryDo(() => (reminders.items() || []).filter((x) => x && !x.done)) || [];
 
 const PROV = {
+  crypto: () => null,                       // the data flows through cryptoData/cryptoCloses stores; CryptoW subscribes directly
   clockTime: () => ({ text: '' }),
   clockDate: () => ({ text: '' }),
   weekNumber: () => ({ value: `${isoWeek(clockNow())}`, sub: 'ISO week' }),
@@ -1277,6 +1279,57 @@ function StopwatchW({ widget, st }) {
   );
 }
 
+// The market card: pair from cfg (the editor offers the majors), the shared Binance stores from
+// sdk/crypto.js — one fetch per pair however many cards show it, the mount refcounting the fetch.
+// Green when up, red when down, the 24 h closes as quiet bars, the attribution at the foot.
+const CRYPTO_PAIRS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'DOGEUSDT'];
+function CryptoW({ widget, st }) {
+  const pair = (widget.cfg || {}).pair || 'BTCUSDT';
+  const data = useStore(cryptoData);
+  const closesStore = useStore(cryptoCloses);
+  useEffect(() => { cryptoStart(); return () => cryptoStop(); }, []);
+  const d = data[pair] || null;
+  const closes = (closesStore[pair] || {}).closes || null;
+  const st0 = eff(widget);
+  const up = d && Number(d.changePct) >= 0;
+  const tint = d ? (up ? '#30d158' : '#ff453a') : (st.color || st0.color);
+  const fmt = (v) => (Number.isFinite(v) ? Number(v).toLocaleString(undefined, { maximumFractionDigits: v < 1 ? 6 : 2 }) : '—');
+  const max = closes ? Math.max(...closes.map((k) => k[1])) : 0;
+  const min = closes ? Math.min(...closes.map((k) => k[1])) : 0;
+  const big = widget.kind === 'crypto-price';
+  return (
+    <TSCard widget={widget} st={{ gap: 6 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Eyebrow st={st0} text={pair} />
+        {d && d.stale ? <Text style={{ fontSize: 9, fontWeight: 700, color: '#ff9f0a' }}>{tOptional('settings.widgets.stale') || 'STALE'}</Text> : null}
+      </View>
+      {d ? (
+        <>
+          <Text style={tx(st, { size: big ? (st.size || 30) : (st.size || 22), lineHeight: 1.05 })}>{fmt(d.price)}</Text>
+          <Text style={{ fontSize: 12, fontWeight: 700, color: tint }}>{`${up ? '▲' : '▼'} ${fmt(d.change)} (${Number(d.changePct).toFixed(2)}%)`}</Text>
+          {big && closes && closes.length > 4 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: Math.max(18, Math.round(widget.h * 0.22)), marginTop: 2 }}>
+              {closes.map((k, i) => {
+                const v = max > min ? 0.12 + 0.88 * ((k[1] - min) / (max - min)) : 0.5;
+                return <View key={i} style={{ flex: 1, height: `${Math.round(v * 100)}%`, minHeight: 2, borderRadius: 1, backgroundColor: st.color || st0.color, opacity: 0.75 }} />;
+              })}
+            </View>
+          ) : null}
+          {big ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={dim(st, { size: 10 })}>{`H ${fmt(d.high)}`}</Text>
+              <Text style={dim(st, { size: 10 })}>{`L ${fmt(d.low)}`}</Text>
+            </View>
+          ) : null}
+          <Text style={{ fontSize: 9, color: st.dim || st0.dim, textAlign: 'end', opacity: 0.8 }}>{tOptional('settings.widgets.binance') || 'Data: Binance'}</Text>
+        </>
+      ) : (
+        <Text style={dim(st, { size: 12 })}>{tOptional('settings.widgets.waiting') || 'Waiting for the market data…'}</Text>
+      )}
+    </TSCard>
+  );
+}
+
 // ---------------------------------------------------------------- registration + the bridge
 
 // ---- rich text: a styled run drawn as word tokens in a wrapping row (the engine has no inline
@@ -1305,6 +1358,7 @@ const VARIANTS = {
   storage: StorageW, network: NetworkW, gauge: GaugeW, weather: WeatherW, forecast: ForecastW,
   moon: MoonW, media: MediaW, todo: TodoW, notes: NotesW, quote: QuoteW, label: LabelW,
   headline: HeadlineW, pomodoro: PomodoroW, timer: TimerW, stopwatch: StopwatchW, toggle: ToggleW,
+  crypto: CryptoW,
 };
 
 // Coverage at load: a variant or provider the specs name but this file does not implement is a

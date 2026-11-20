@@ -37,9 +37,11 @@ export const TS_VARIANTS = [
   'value', 'ring', 'chart', 'spark', 'rows', 'text', 'bar', 'image', 'progress',
   'stats', 'battery', 'storage', 'network', 'gauge', 'weather', 'forecast', 'moon',
   'media', 'todo', 'notes', 'quote', 'label', 'headline', 'pomodoro', 'timer', 'stopwatch', 'toggle',
+  'crypto',
 ];
 
 export const TS_PROVIDERS = [
+  'crypto',
   'clockTime', 'clockDate', 'weekNumber', 'nextAlarm', 'eventsCount', 'sunTimes',
   'cpu', 'cpuCores', 'cpuHistory', 'loadAvg', 'load1', 'cpuModel', 'cpuCoresCount',
   'ram', 'ramApps', 'ramCache', 'ramHistory', 'ramRows', 'swap',
@@ -178,6 +180,8 @@ export const TS_WIDGET_SPECS = [
   { id: 'weather-forecast', label: '7-day forecast', cat: 'ambient', w: 320, h: 150, v: 'forecast', src: 'weatherForecast' },
   { id: 'day-progress', label: 'Day progress', cat: 'ambient', w: 220, h: 96, v: 'progress', src: 'dayProgress' },
   { id: 'year-progress', label: 'Year progress', cat: 'ambient', w: 220, h: 96, v: 'progress', src: 'yearProgress' },
+  { id: 'crypto-price', label: 'Crypto price', cat: 'network', w: 220, h: 150, v: 'crypto', src: 'crypto' },
+  { id: 'crypto-ticker', label: 'Crypto ticker', cat: 'network', w: 168, h: 92, v: 'crypto', src: 'crypto' },
   { id: 'mode-badge', label: 'Appearance', cat: 'ambient', w: 168, h: 96, v: 'text', src: 'modeBadge' },
 ];
 

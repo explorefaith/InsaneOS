@@ -12,7 +12,7 @@ import {
   View, Text, Image, ScrollView, useTheme, useLocale, tOptional, spacing, typeScale, Button, Slider, Toggle,
   TextInput, useStore, useSettings, settings, screen, tsLive, tsDesktopUndo, tsHistory, tsAllThemes, tsApplyTheme, tsDeactivate, tsMutate, tsAdd,
   tsRemove, tsDuplicate, tsResize, tsMove, tsZ, tsSetInstance, tsResetInstance, tsResetTheme,
-  tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, TS_KINDS, TS_FONTS,
+  tsSaveCustom, tsRenameCustom, tsDeleteCustom, tsCreateHistory, tsResolvePlan, tsAddVariant, TS_KINDS, TS_FONTS,
   tsPersistFlush, tsSelected, tsEnterArrange,
   tsAlignW, tsDistributeW, addListener, resolveStyle as rsResolveStyle, withAlpha as rsWithAlpha, Slider as SliderX,
   tsRichSegments, tsRichSplit, fs, FilePicker, saveSettingsNow, insaneosWallpapers as allWallpapers, wallpaperThumb as wThumb,
@@ -196,7 +196,7 @@ function StyleControl({ label, children }) {
   );
 }
 
-function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onAlignXY, onSpace, onZ, onDup, onRemove, area }) {
+export function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlignXY, onSpace, onZ, onDup, onRemove, area }) {
   const t = useTheme();
   const st = w.style || {};
   const [adv, setAdv] = useState(false);
@@ -249,6 +249,14 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onA
         <G title={L('yourText', 'Your text')}>
           <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 240 }} />
           {adv ? <RichEditor w={w} onCfg={onCfg} pal={w._palette || []} /> : null}
+        </G>
+      ) : null}
+      {w.kind === 'crypto-price' || w.kind === 'crypto-ticker' ? (
+        <G title={L('market', 'Market')}>
+          <SettingRow label={L('pair', 'Coin pair')}>
+            <PopUp value={(w.cfg || {}).pair || 'BTCUSDT'} onChange={(v) => onCfg({ pair: v })} width={170}
+              options={CRYPTO_PAIRS.map((x) => [x, x.slice(0, -4) + ' / ' + x.slice(-4)])} />
+          </SettingRow>
         </G>
       ) : null}
       {w.kind === 'media' ? (
@@ -376,8 +384,9 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onA
 // 105 kinds: a flat list is unusable. Category chips + a search field; the grid shows names only
 // (never raw pixel sizes). Adding places the widget at a free spot of the real work area.
 const ROUTE_NAMES = { classic: 'Classic', glass: 'See-through', solid: 'Filled', outline: 'Border only', vivid: 'Colourful' };
+const CRYPTO_PAIRS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'DOGEUSDT'];
 
-function AddDialog({ onAdd, onClose }) {
+export function AddDialog({ onAdd, onClose }) {
   const t = useTheme();
   const [cat, setCat] = useState('time');
   const [route, setRoute] = useState(null);            // null: all routes
@@ -446,7 +455,7 @@ function AddDialog({ onAdd, onClose }) {
 // scaled children blank). A block click selects; a drag moves the real widget live through
 // tsMove, with one undo step per drag (the history's beginDrag/endDrag coalescing) and the
 // alignment guides drawn while a drag snaps.
-function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
+export function StudioCanvas({ widgets, area, selW, onSelect, histRef }) {
   const t = useTheme();
   const W = 520;
   const k = W / area.w;

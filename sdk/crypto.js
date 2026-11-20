@@ -10,6 +10,7 @@
 // with stale: true. Never a store write without a real change (the React #185 lesson).
 import { createStore } from './store.js';
 import { widgetLayout } from './widgetmodel.js';
+import { tsLive } from './themestudio.js';
 import { admin } from './admin.js';
 
 export const REFRESH_MS = 15000;
@@ -18,7 +19,9 @@ export const cryptoData = createStore({});
 export const cryptoCloses = createStore({});
 
 export function cryptoPairs() {
-  return [...new Set((widgetLayout.get() || []).filter((w) => w.type === 'crypto').map((w) => (w.cfg && w.cfg.pair) || '').filter(Boolean))];
+  const classic = (widgetLayout.get() || []).filter((w) => w.type === 'crypto').map((w) => (w.cfg && w.cfg.pair) || '');
+  const studio = (tsLive.get().widgets || []).filter((w) => w.kind === 'crypto-price' || w.kind === 'crypto-ticker').map((w) => (w.cfg && w.cfg.pair) || '');
+  return [...new Set([...classic, ...studio].filter(Boolean))];
 }
 
 let iv = 0, want = 0, fails = 0, skip = 0;

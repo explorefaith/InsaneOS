@@ -30,6 +30,21 @@ for (const m of barrel.matchAll(/export\s*{([^}]+)}\s*from/g)) {
   }
 }
 for (const m of barrel.matchAll(/export\s+(?:const|function|class)\s+([A-Za-z_$][\w$]*)/g)) exports_.add(m[1]);
+// the barrel can lag the modules (a symbol used in an app before anyone exported it — the
+// tsAddVariant case): every sdk module's own exports are candidates too
+for (const m of barrel.matchAll(/from '\.\/([\w.]+)'/g)) {
+  const mod = path.join(root, 'sdk', m[1].replace(/\.js$/, '') + '.js');
+  try {
+    const src = fs.readFileSync(mod, 'utf8');
+    for (const mm of src.matchAll(/export\s+(?:async\s+)?(?:const|function\*?|class)\s+([A-Za-z_$][\w$]*)/g)) exports_.add(mm[1]);
+    for (const mm of src.matchAll(/export\s*{([^}]+)}/g)) {
+      for (const part of mm[1].split(',')) {
+        const name = part.split(' as ').map((x) => x.trim()).filter(Boolean).pop();
+        if (name) exports_.add(name);
+      }
+    }
+  } catch (e) { /* not a plain module */ }
+}
 
 const files = execSync(`find ${path.join(root, 'themes')} ${path.join(root, 'apps')} -name '*.jsx' -o -name '*.js'`)
   .toString().split('\n').filter((f) => f && !f.includes('theme.bundle.js') && !f.includes('.vm-e2e.') && !f.includes('node_modules'));
@@ -45,6 +60,9 @@ const SUPPRESSED = new Set([
   'apps/notes/index.jsx:emoji', 'apps/photos/index.jsx:toast', 'apps/files/dialogs.jsx:help',
   'apps/cleaner/dashboard.jsx:cleaner', 'apps/cleaner/ui.jsx:cleaner', 'apps/cleaner/storage.jsx:share',
   'apps/cleaner/duplicates.jsx:smart', 'apps/cleaner/index.jsx:emptyTrash',
+  'themes/default/components/Menu.jsx:list', 'themes/default/components/Dock.jsx:list', 'themes/classic/components/Menu.jsx:list',
+  'apps/imager/platform.js:list', 'apps/imager/platform.js:write', 'apps/screenshots/index.jsx:copy',
+  'apps/editor/EditorView.jsx:home', 'apps/editor/EditorView.jsx:move',
 ]);
 let problems = 0;
 for (const file of files) {
