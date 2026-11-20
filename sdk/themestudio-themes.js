@@ -685,7 +685,7 @@ export const THEMES = [
     id: 'crimson-ninja', name: 'Crimson Ninja',
     desc: 'The reference\u2019s red rice: near-black ink over the red artwork, sharp crimson accents, quiet dark cards.',
     colors: ['#120407', '#F2B8C6', '#E8285A'],
-    appearance: { wallpaper: 'anime-1', wallpaperFit: 'fill', mode: 'dark', accent: '#E8285A', motion: {} },
+    appearance: { wallpaper: 'anime-2', wallpaperFit: 'fill', mode: 'dark', accent: '#E8285A', motion: {} },
     style: { font: 'brand', weight: 500, color: '#F2B8C6', dim: 'rgba(242,184,198,0.55)', paper: '#170409', alpha: 0.72, radius: 16, border: 'rgba(232,40,90,0.35)', pad: 20, shadow: 'soft', accent: '#E8285A' },
     sw: 1280, sh: 720,
     widgets: [
@@ -711,8 +711,8 @@ export const THEMES = [
     id: 'violet-ninja', name: 'Violet Ninja',
     desc: 'The reference\u2019s first rice: near-black violet, the anime companion on the right, glass cards with a violet edge.',
     colors: ['#0B0614', '#C9B8E8', '#8B5CF6'],
-    appearance: { wallpaperBg: { kind: 'gradient', a: '#120A1E', b: '#05030A', angle: 165 }, wallpaperFit: 'fill', mode: 'dark', accent: '#8B5CF6', motion: {} },
-    style: { font: 'brand', weight: 500, color: '#E6DCFA', dim: 'rgba(230,220,250,0.55)', paper: '#1A1228', alpha: 0.66, radius: 18, border: 'rgba(139,92,246,0.4)', pad: 20, shadow: 'soft', blur: 0.4, accent: '#8B5CF6' },
+    appearance: { wallpaper: 'anime-1', wallpaperFit: 'fill', mode: 'dark', accent: '#C47CE0', motion: {} },
+    style: { font: 'brand', weight: 500, color: '#EFE6FA', dim: 'rgba(239,230,250,0.55)', paper: '#150E20', alpha: 0.62, radius: 18, border: 'rgba(196,124,224,0.45)', pad: 20, shadow: 'soft', blur: 0.4, accent: '#C47CE0' },
     sw: 1280, sh: 720,
     widgets: [
       w('clock-digital', 72, 68, { w: 340, h: 126, s: { size: 56 }, c: { h24: false } }),
