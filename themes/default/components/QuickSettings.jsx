@@ -6,7 +6,7 @@
 // is one round trip, not one per pixel. A click outside closes it.
 import {
   View, Text, Toggle, Slider, useSettings, useSound, defaultSink, sound, useBluetooth, setBluetoothPower,
-  nightPrefs, useTheme, addListener, admin, wm, tOptional, t as tr,
+  setNightManual, useBattery, useTheme, addListener, admin, wm, tOptional, t as tr,
   StatusItems, PrivacyIndicators } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 
@@ -76,10 +76,16 @@ export function QuickSettings({ t, top, left, onClose }) {
   const pct = out ? Math.round(out.level * 100) : 0;
   return (
     <View ref={ref} style={{
-      position: 'absolute', left, top, width: 300, padding: 12, gap: 10, borderRadius: 20,
+      position: 'absolute', left, top, width: 380, padding: 14, gap: 10, borderRadius: 22,
       backgroundColor: t.panelBg, backdropFilter: t.glassFilter, border: `1px solid ${t.windowBorder}`,
-      boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
+      boxShadow: '0 18px 48px rgba(0,0,0,0.4)',
     }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={{ flex: 1, fontSize: 13, fontWeight: 700, color: t.text, textAlign: 'start' }}>{tr('shell.cc.title') || 'Control Centre'}</Text>
+        <View onClick={onClose} style={{ width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backgroundColor: 'rgba(127,127,127,0.16)' }}>
+          <Text style={{ fontSize: 12, color: t.text }}>×</Text>
+        </View>
+      </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Tile t={t} label={tr('shell.cc.wifi')} sub={wifi ? `${wifi.name} · ${wifiIp}` : tr('shell.cc.notConnected')}
           onClick={() => wm.open('settings', { args: { section: 'network', page: 'wifi' } })} style={{ flex: 1 }} />
@@ -90,7 +96,7 @@ export function QuickSettings({ t, top, left, onClose }) {
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Tile t={t} label={tOptional('settings.night.title') || 'Night Light'}
-          toggle={!!nightPrefs(s).on} onToggle={(on) => set({ night: { ...nightPrefs(s), on } })} style={{ flex: 1 }} />
+          toggle={!!nightPrefs(s).manual?.on} onToggle={(on) => setNightManual(on)} style={{ flex: 1 }} />
         <Tile t={t} label={tOptional('shell.cc.dnd') || 'Do Not Disturb'}
           toggle={!!s.notifications?.dnd} onToggle={(on) => set({ notifications: { ...(s.notifications || {}), dnd: on } })} style={{ flex: 1 }} />
       </View>
@@ -103,11 +109,22 @@ export function QuickSettings({ t, top, left, onClose }) {
               <Text style={{ fontSize: 12, color: t.textDim }}>{out.mute || pct === 0 ? '🔇' : pct < 40 ? '🔈' : pct < 75 ? '🔉' : '🔊'}</Text>
             </View>
           </View>
-          <Slider value={Math.min(1, out.level)} width={272} onChange={(v) => sound.setVolume('sink', out.index, v)} />
+          <Slider value={Math.min(1, out.level)} width={350} onChange={(v) => sound.setVolume('sink', out.index, v)} />
         </View>
       ) : null}
       <BrightnessRow t={t} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View onClick={() => { onClose(); wm.open('screenshots'); }} style={{ flex: 1, height: 32, borderRadius: 9, justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backgroundColor: 'rgba(127,127,127,0.14)', border: `1px solid ${t.separator}` }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.screenshot')}</Text>
+        </View>
+        <View onClick={() => { onClose(); wm.open('recorder'); }} style={{ flex: 1, height: 32, borderRadius: 9, justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backgroundColor: 'rgba(127,127,127,0.14)', border: `1px solid ${t.separator}` }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.cc.record')}</Text>
+        </View>
+        <View onClick={() => { onClose(); wm.open('settings'); }} style={{ flex: 1, height: 32, borderRadius: 9, justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backgroundColor: 'rgba(127,127,127,0.14)', border: `1px solid ${t.separator}` }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{tr('shell.menu.settings')}</Text>
+        </View>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 2 }}>
         <StatusItems color={t.text} />
         <PrivacyIndicators />
       </View>
