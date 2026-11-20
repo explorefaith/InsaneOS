@@ -289,7 +289,16 @@ export function WallpaperSettings() {
     if (!v) { setNote(L('wallpaper.live.noformat', 'None of this video\'s formats decodes in hardware here.')); return; }
     setBusy(it.id);
     downloadMotion(it, v).then(() => { setBusy(''); setDialog({ kind: 'motion', item: it }); },
-      (e) => { setBusy(''); setNote(errorText(e)); });
+      async (e) => {
+        // The video could not be fetched (its download source is gone): the poster shipped with
+        // the system IS this wallpaper's own frame — put that on the desktop instead of a dead end.
+        setBusy('');
+        try {
+          const id = await addWallpaperImage('/usr/share/backgrounds/insaneos/motion/' + it.id + '.poster.jpg');
+          set({ wallpaper: id, wallpaperBg: null, motion: {} });
+          setNote(L('wallpaper.live.poster', 'The video could not be fetched right now — its still frame is on the desktop instead.'));
+        } catch (e2) { setNote(errorText(e)); }
+      });
   };
   const applyLiveDesktop = (it) => {
     const p = storedPathOf(it, s);
