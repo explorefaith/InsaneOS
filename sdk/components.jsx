@@ -10,7 +10,7 @@ import { textDirection, direction } from './i18n.js';
 import { SCROLLBAR, scrollbarMode, thumbGeometry, offsetForThumb, nearEdge, hitThumb, barShown, barOpacity, hideTime, barWidth } from './scrollbar.js';
 import { ime, useIme, Preedit } from './ime.js';
 import { noteTextField } from './textfocus.js';
-import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow, easeElegantBounce } from './animation.js';
+import { useTween, DUR, nextFrame, cancelFrame, reducedMotionNow, easeElegantBounce, easeDefaultNow, motionScaleNow } from './animation.js';
 import { settings } from './settings.js';
 import { fieldKey, insertAt, caretAt, clampPos } from './textfieldmodel.js';
 import { Layer } from './layers.js';
@@ -44,7 +44,7 @@ export function Button({ label, onClick, primary, style, small, plain, disabled,
 export function Toggle({ on, onChange, small }) {
   const t = useTheme();
   const w = small ? 36 : 42, h = small ? 20 : 24, k = h - 4;
-  const p = useTween(on ? 1 : 0, { dur: DUR.toggle, ease: easeElegantBounce });   // the knob travels; the track's colour follows the state
+  const p = useTween(on ? 1 : 0, { dur: DUR.toggle, ease: easeDefaultNow() });   // the knob travels; the track's colour follows the state
   return (
     <View onClick={() => onChange(!on)} style={{ width: w, height: h, borderRadius: h / 2, direction: 'ltr',
       backgroundColor: on ? t.accent : t.control }}>

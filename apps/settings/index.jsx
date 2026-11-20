@@ -7,7 +7,7 @@ import {
   reloadCatalogs, tOptional, statusText, fs, useStore, SidebarItem, Toggle, Slider, Button, TextInput, ScrollView, SearchField, Hairline, useSystemInfo, useAppWindow, useTrackpads,
   spacing, typeScale, registerDockActions, hasTouchpad, findWallpaper, wallpaperThumb, WALLPAPER_CATEGORIES, GREETER_WALLPAPER, DEFAULT_WALLPAPER, setLoginStill, setLoginImage, addWallpaperImage, removeWallpaperImage, userWallpaperName, Layer,  MOTION_SECTIONS, MOTION_RATES, motionBusy, motionItems, motionThumb, motionDownloads, useCodecs, downloadMotion, removeMotion, setLoginMotion, variantFor, userVideoProblem, heavyVideoWarning, media, FilePicker, screenDisplays, errorText, wm, Segmented, osk,
   restoreMode, setRestoreMode, restoreBrowsers, setRestoreBrowsers, preferredLanguages, setPreferredLanguages, LANGUAGE_NAMES, Overlay, ToolbarButton, regionOf, localeOf, regionCountry, insaneosWallpapers, wallpaperAccent,
-  useTween, DUR, easeElegantBounce,
+  useTween, DUR, easeElegantBounce, easeDefaultNow, motionScaleNow,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { SoundSettings } from './Sound.jsx';
@@ -16,6 +16,7 @@ import { CloudSettings, CloudHeaderAction, CloudSheets } from './Cloud.jsx';
 import { UsersSettings } from './Users.jsx';
 import { NetworkSettings } from './Network.jsx';
 import { General, Updates } from './General.jsx';
+import { default as MotionSettings } from './Motion.jsx';
 import { ClipboardSettings } from './Clipboard.jsx';
 import { PrivacySettings } from './Privacy.jsx';
 import { PrintersSettings } from './Printers.jsx';
@@ -242,13 +243,6 @@ function Appearance() {
         </SettingRow>
         <SettingRow label={tr('settings.reduceMotion')} hint={tr('settings.reduceMotionHint')}>
           <Toggle small on={!!s.reduceMotion} onChange={(reduceMotion) => set({ reduceMotion })} />
-        </SettingRow>
-        <SettingRow label={tOptional('settings.motionSpeed') || 'Motion speed'}
-          hint={tOptional('settings.motionSpeedHint') || 'How long the movement of the desktop takes: windows, panels, toggles. The default is the measured reference.'}>
-          <PopUp width={150} value={String(Number.isFinite(Number(s.motionScale)) && Number(s.motionScale) !== 1 ? s.motionScale : '1')}
-            onChange={(motionScale) => set({ motionScale: Number(motionScale) })}
-            options={[['0.8', tOptional('settings.motionSpeed.faster') || 'Faster (0.8×)'], ['1', tOptional('settings.motionSpeed.default') || 'Default (1×)'],
-              ['1.5', tOptional('settings.motionSpeed.relaxed') || 'Relaxed (1.5×)'], ['2', tOptional('settings.motionSpeed.slow') || 'Slow (2×)']]} />
         </SettingRow>
       </Section>
       <Section title={tOptional('settings.lights.title') || 'Window Controls'}
@@ -665,10 +659,10 @@ function Session() {
 const GLYPH_OF = {
   widgets: 'widgets', displays: 'display', network: 'globe', bluetooth: 'bt',
   notifications: 'bell', printers: 'printer', sharing: 'share', datetime: 'clock',
-  defaultapps: 'grid', privacy: 'lock',
+  defaultapps: 'grid', privacy: 'lock', motion: 'motion',
 };
 const GROUPS = [
-  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['themes', ThemesSettings, '#bf5af2'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
+  [['general', General, '#8e8e93'], ['appearance', Appearance, '#3a3a3c'], ['motion', MotionSettings, '#5e5ce6'], ['wallpaper', WallpaperSettings, '#30b0c7'], ['themes', ThemesSettings, '#bf5af2'], ['dock', DockSettings, '#3a3a3c'], ['widgets', WidgetsSettings, '#5e5ce6'], ['displays', DisplaysSettings, '#0a84ff']],
   [['network', NetworkSettings, '#0a84ff'], ['bluetooth', BluetoothSettings, '#0a84ff'], ['sound', SoundSettings, '#ff375f'], ['notifications', NotificationsSettings, '#ff3b30'], ['printers', PrintersSettings, '#636366'], ['clipboard', ClipboardSettings, '#5e5ce6'], ['sharing', SharingSettings, '#34c759'], ['cloud', CloudSettings, '#0a84ff']],
   [['language', LanguageRegion, '#30b0c7'], ['datetime', DateTimeSettings, '#0a84ff'], ['keyboard', Keyboard, '#8e8e93'], ['trackpad', TrackpadSettings, '#8e8e93'], ['defaultapps', DefaultAppsSettings, '#8e8e93'], ['ai', AISettings, '#bf5af2']],
   [['power', PowerSettings, '#30d158'], ['cooling', CoolingSettings, '#32ade6'], ['firmware', FirmwareSettings, '#5e5ce6'], ['privacy', PrivacySettings, '#0a84ff'], ['users', UsersSettings, '#0a84ff'], ['updates', Updates, '#8e8e93'], ['session', Session, '#ff453a']],
@@ -709,7 +703,7 @@ function pillY(groups, sel) {
 }
 function LiquidPill({ groups, sel }) {
   const t = useTheme();
-  const y = useTween(pillY(groups, sel), { from: pillY(groups, sel), dur: DUR.pill, ease: easeElegantBounce });
+  const y = useTween(pillY(groups, sel), { from: pillY(groups, sel), dur: DUR.pill * motionScaleNow('pill'), ease: easeDefaultNow() });
   return <View style={{ position: 'absolute', left: 0, right: 0, top: Math.round(y), height: 40, borderRadius: 8, backgroundColor: t.accent }} />;
 }
 

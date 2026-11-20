@@ -2,7 +2,7 @@
 // (the SDK's AppHost); the theme only decides how the frame looks. Moving and resizing (invisible
 // borders on all 4 sides and 4 corners, <WindowShell>) is done by insane-server in C
 // (docs/WINDOWS.md); the JS drag below is only kept for a maximized window.
-import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings, DUR, easeOutCubic, useTween , moveResizeItems, motionScaleNow } from '@insaneos/sdk';
+import { View, Text, addListener, wm, AppHost, windowTitle, WindowShell, moveToDesktopItems, t as tr, solidOver, useSettings, DUR, easeOutCubic, useTween , moveResizeItems, motionScaleNow, easeDefaultNow } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Menu } from './Menu.jsx';
 
@@ -115,7 +115,7 @@ export function Window({ win, app, t, focused, fx }) {
     if (!win.closing) return undefined;
     setCloseP(0);
     const t0 = performance.now();
-    const iv = setInterval(() => setCloseP(Math.min(1, (performance.now() - t0) / (DUR.close * motionScaleNow()))), 16);
+    const iv = setInterval(() => setCloseP(Math.min(1, (performance.now() - t0) / (DUR.close * motionScaleNow('close')))), 16);
     return () => clearInterval(iv);
   }, [win.closing]);
   const glass = !win.fullscreen && !win.maximized && app.glass ? glassPrefs(s || {}) : { on: false, alpha: 1, blur: 0 };
@@ -123,8 +123,8 @@ export function Window({ win, app, t, focused, fx }) {
     if (enter >= 1) return undefined;               // reduce motion starts at 1: no animation
     const t0 = performance.now();                   // a time-based ramp: DUR.open from mount
     const iv = setInterval(() => setEnter((v) => {
-      const k = Math.min(1, (performance.now() - t0) / (DUR.open * motionScaleNow()));
-      return k >= 1 ? 1 : Math.max(v, easeOutCubic(k));
+      const k = Math.min(1, (performance.now() - t0) / (DUR.open * motionScaleNow('open')));
+      return k >= 1 ? 1 : Math.max(v, easeDefaultNow()(k));
     }), 16);
     return () => clearInterval(iv);
   }, []);

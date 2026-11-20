@@ -17,7 +17,7 @@ import {
   Layer, wm, useAppWindow, insaneosWallpapers, wallpaperThumb,
 } from '@insaneos/sdk';
 import { useEffect, useRef, useState } from 'react';
-import { Section, SettingRow, Note, Actions, Stack } from './ui.jsx';
+import { Section, SettingRow, Note, Actions, Stack, PopUp } from './ui.jsx';
 
 const L = (k, fb) => tOptional(`settings.${k}`) || fb;
 const YOUR_VIDEO = '/usr/share/backgrounds/insaneos/motion/galaxy.mp4';
@@ -314,6 +314,13 @@ export function WallpaperSettings() {
     <Stack>
       {note ? <Note>{note}</Note> : null}
       {starting ? <Note>{L('wallpaper.live.starting', 'Starting the live wallpaper…')}</Note> : null}
+      <Section title={L('wallpaper.fade.title', 'Wallpaper transition')} footer={L('wallpaper.fade.hint', 'How the old picture hands the desktop to the new one: the quick crossfade, or the recording\u2019s slower burn.')}>
+        <SettingRow label={L('wallpaper.fade.label', 'Change over')}>
+          <PopUp width={190} value={s.wallpaperFade === 'cinematic' ? 'cinematic' : 'quick'}
+            onChange={(wallpaperFade) => set({ wallpaperFade })}
+            options={[['quick', L('wallpaper.fade.quick', 'Quick (0.45 s)')], ['cinematic', L('wallpaper.fade.cinematic', 'Cinematic (1.2 s)')]]} />
+        </SettingRow>
+      </Section>
       {COLLECTION_CATS.map(([c, fallback]) => {
         const list = insaneosWallpapers.filter((it) => it.category === c);
         if (!list.length) return null;

@@ -68,6 +68,9 @@ export function bezier(p1x, p1y, p2x, p2y) {
 // overshoots ~12 % and settles — the desktop's signature for things that land (pills, panels, windows).
 export const easeElegantBounce = bezier(0.35, 1.38, 0.24, 1.02);
 
+// The Toggle, the pill and the window ramps pass their own curves today; they switch to the
+// setting through easeDefaultNow() where the code reads it (Window.jsx, components.jsx).
+
 // The genie's per-strip progress: the bottom of the window leads, the top follows, each strip
 // easing in-out; lead is how much later the top starts (0..1 of the whole animation).
 export function genieStrip(p, v, lead = 0.42) {
@@ -80,15 +83,31 @@ export function genieStrip(p, v, lead = 0.42) {
 // already hold the settings object read it here.
 export const reducedMotionNow = () => { try { return !!settings.get().reduceMotion; } catch (e) { return false; } };
 
-// The motion speed (Settings → Appearance → Motion speed): every duration in the DUR table runs
-// through this — 0.8× snappier, 1× the measured reference, 1.5× or 2× more relaxed (the motion
-// reference's own settings page offers the same chips over its animation directives). Reduced
-// Motion still jumps to the target; this only stretches the travel.
-export function motionScaleNow() {
+// The motion speed (Settings → Motion): every duration in the DUR table runs through this —
+// 0.8× snappier, 1× the measured reference, 1.5× or 2× more relaxed (the motion reference's own
+// settings page offers the same chips over its animation directives). A directive can carry its
+// own multiplier (prefs.motionSpeeds.open for the window entrance, .close, .panel, .pill, .toggle);
+// the global one still applies on top. Reduced Motion still jumps to the target; these only
+// stretch the travel.
+export function motionScaleNow(key) {
+  let v = 1;
   try {
-    const v = Number(settings.get().motionScale);
-    return Number.isFinite(v) && v >= 0.5 && v <= 3 ? v : 1;
-  } catch (e) { return 1; }
+    const g = Number(settings.get().motionScale);
+    if (Number.isFinite(g) && g >= 0.5 && g <= 3) v = g;
+    if (key) {
+      const m = Number((settings.get().motionSpeeds || {})[key]);
+      if (Number.isFinite(m) && m >= 0.5 && m <= 3) v *= m;
+    }
+  } catch (e) { /* defaults */ }
+  return Math.max(0.25, Math.min(6, v));
+}
+
+// The landing curve (Settings → Motion): 'bounce' is the reference's elegant_bounce (the default),
+// 'smooth' is the plain fast-out. useTween's default ease and the components that animate landings
+// read this, so the whole desktop switches character at once.
+export function easeDefaultNow() {
+  try { return settings.get().motionCurve === 'smooth' ? easeOutCubic : easeElegantBounce; }
+  catch (e) { return easeElegantBounce; }
 }
 
 // The engine provides requestAnimationFrame; node (the scenes, the tests) does not: there a 16 ms
@@ -105,13 +124,14 @@ export const cancelFrame = typeof cancelAnimationFrame === 'function'
 // the target. Example:
 //   const lift = useTween(hovered ? 1 : 0, { dur: DUR.hover });
 //   <View style={{ opacity: 0.85 + 0.15 * lift, transform: [{ translateY: -2 * lift }] }}>
-export function useTween(target, { from = null, dur = DUR.panel, ease = easeOutCubic, reduce } = {}) {
+export function useTween(target, { from = null, dur = DUR.panel, ease, reduce } = {}) {
   const [v, setV] = useState(from != null && from !== target ? from : target);
   const at = useRef(from != null && from !== target ? from : target);
   const raf = useRef(0);
   useEffect(() => {
     const jump = reduce ?? reducedMotionNow();
     const real = dur * motionScaleNow();
+    const curve = ease || easeDefaultNow();
     if (jump || real <= 0 || at.current === target) {
       if (raf.current) cancelFrame(raf.current);
       at.current = target;
@@ -121,7 +141,7 @@ export function useTween(target, { from = null, dur = DUR.panel, ease = easeOutC
     const start = performance.now();
     const step = (now) => {
       const p = Math.min(1, (now - start) / real);
-      const val = at.current + (target - at.current) * ease(p);
+      const val = at.current + (target - at.current) * curve(p);
       at.current = val;
       setV(val);
       if (p < 1) raf.current = nextFrame(step);

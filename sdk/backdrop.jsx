@@ -5,12 +5,18 @@
 // mode. The live wallpaper is a layer of its own (sdk/motion.jsx MotionWallpaper) drawn over this — a
 // failure there just leaves what is here, so no config error is ever a black screen.
 //
-// A change of wallpaper crossfades (450 ms): the previous layer stays on top, fading out, while the new
+// A change of wallpaper crossfades (450 ms quick, 1200 ms cinematic — the setting): the previous layer stays on top, fading out, while the new
 // one is already there underneath. Reduce motion jumps straight to the new one.
 import { createElement as h, useEffect, useRef, useState } from 'react';
 import { Image, View } from '@insaneos/runtime';
 import { settings } from './settings.js';
 import { wallpaperSrc } from './wallpapers.js';
+
+// The crossfade's length: the setting (Settings → Wallpaper → Wallpaper transition) — quick, the
+// measured reference's pace, or cinematic, the reference recording's slower burn (1.2 s).
+const fadeMs = () => {
+  try { return settings.get().wallpaperFade === 'cinematic' ? 1200 : 450; } catch (e) { return 450; }
+};
 
 // The user's fit mode → the engine's objectFit (server/src/ui/style.c E_FIT: fill, cover, contain, center).
 export const fitOf = (mode) => ({ fill: 'cover', fit: 'contain', stretch: 'fill', center: 'center' }[mode] || 'cover');
@@ -22,8 +28,6 @@ export function bgStyle(bg, opacity = 1) {
   if (bg.kind === 'gradient' && bg.b) return { ...base, background: `linear-gradient(${Math.round(+bg.angle || 180)}deg, ${bg.a}, ${bg.b})` };
   return { ...base, backgroundColor: bg.a };
 }
-
-const DUR_MS = 450;
 
 // The background itself. displays: [{ id, x, y, w, h, scale }] (the desktop's own rects; the greeter and
 // the Settings preview pass one box). wallpaper: the resolved still wallpaper (findWallpaper), null with a
@@ -40,7 +44,7 @@ export function Backdrop({ wallpaper, bg, fit, displays, onContextMenu, opacity 
     const t0 = performance.now();
     setFade({ wallpaper: before.wallpaper, bg: before.bg, fit: before.fit, p: 0 });
     const iv = setInterval(() => {
-      const p = Math.min(1, (performance.now() - t0) / DUR_MS);
+      const p = Math.min(1, (performance.now() - t0) / fadeMs());
       if (p >= 1) { clearInterval(iv); setFade(null); return; }
       setFade((f) => (f ? { ...f, p } : f));
     }, 16);
