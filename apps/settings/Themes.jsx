@@ -658,6 +658,30 @@ function ThemeLookSection({ s, set, onFlash }) {
 
 // ---------------------------------------------------------------- the page
 
+// ---------------------------------------------------------------- the theme store
+// The video's Plugins page, honest version: everything here is generated on this machine from the
+// built-ins (a wallpaper swap, an accent remix) — no network, nothing to download, install is one
+// click and lands in the gallery as the person's own preset.
+const STORE_WALLPAPERS = ['crystal-apple', 'lumo-aurora', 'violet-horizon', 'event-horizon', 'anime-3', 'wallpaper-3'];
+const STORE_PACKS = [
+  { id: 'wallpapers', name: 'Fresh wallpapers', desc: 'The themes you know, each on a new picture from the collection.' },
+  { id: 'accents', name: 'Accent remix', desc: 'The themes you know, wearing a different colour.' },
+];
+const storeItems = () => {
+  const defs = (tsAllThemes() || []).filter((x) => !x.custom);
+  const pick = (ids) => ids.map((id) => defs.find((d) => d.id === id)).filter(Boolean);
+  const wall = pick(['bouquet-atelier', 'zen-paper', 'slate-grid', 'dawn-meridian', 'iris-night', 'crimson-ninja']);
+  const acc = pick(['zen-paper', 'slate-grid', 'bouquet-atelier', 'violet-ninja', 'dawn-meridian', 'meadow-study']);
+  const accents = ['#30d158', '#0a84ff', '#bf5af2', '#ff2e88', '#ff9f0a', '#30b0c7'];
+  return [
+    ...wall.map((d, i) => ({ key: `wall-${d.id}`, pack: 'wallpapers', name: `${d.name} · ${STORE_WALLPAPERS[i % STORE_WALLPAPERS.length].split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')}`,
+      desc: 'Same widgets, same typography — a new picture.', base: d.id,
+      appearance: { wallpaper: STORE_WALLPAPERS[i % STORE_WALLPAPERS.length], wallpaperBg: null }, def: d })),
+    ...acc.map((d, i) => ({ key: `acc-${d.id}`, pack: 'accents', name: `${d.name} · ${accents[i]}`, desc: 'Same everything — a new accent colour.',
+      base: d.id, appearance: { accent: accents[i] }, def: d })),
+  ];
+};
+
 export function ThemesSettings() {
   const t = useTheme();
   const { t: tr } = useLocale();
