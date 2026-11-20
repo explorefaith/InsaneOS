@@ -168,20 +168,19 @@ function PreviewDialog({ theme, active, onApply, onClose, onDeactivate }) {
 const STEPS = [12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 40, 44, 48, 56, 64, 72, 80, 96];
 const WEIGHTS = [400, 500, 600, 700, 800];
 
-function LayerRow({ w, index, n, selected, onSelect, onEye, onUp, onDown, onDup, onRemove }) {
+function LayerRow({ w, selected, onSelect, onEye, onRemove }) {
   const t = useTheme();
   const label = widgetLabel(w);
   return (
-    <View onClick={() => onSelect(w.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 34,
+    <View onClick={() => onSelect(w.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36,
       paddingHorizontal: 8, borderRadius: 8, cursor: 'pointer',
       backgroundColor: selected ? t.accentSubtle : 'transparent' }}>
+      <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: w.hidden ? 'transparent' : t.accent, border: `2px solid ${w.hidden ? t.separator : t.accent}` }} />
       <Text style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: selected ? 600 : 400, color: w.hidden ? t.textDim : t.text, textAlign: 'start' }}
        >{label}</Text>
-      <Text onClick={(e) => { e.stopPropagation?.(); onUp(); }} style={{ fontSize: 12, color: index === n - 1 ? t.separator : t.textDim, padding: '2px 4px' }}>↑</Text>
-      <Text onClick={(e) => { e.stopPropagation?.(); onDown(); }} style={{ fontSize: 12, color: index === 0 ? t.separator : t.textDim, padding: '2px 4px' }}>↓</Text>
-      <Text onClick={(e) => { e.stopPropagation?.(); onDup(); }} style={{ fontSize: 12, color: t.textDim, padding: '2px 4px' }}>⧉</Text>
-      <Text onClick={(e) => { e.stopPropagation?.(); onEye(); }} style={{ fontSize: 12, color: t.textDim, padding: '2px 4px' }}>{w.hidden ? '○' : '●'}</Text>
-      <Text onClick={(e) => { e.stopPropagation?.(); onRemove(); }} style={{ fontSize: 13, color: t.textDim, padding: '2px 4px' }}>×</Text>
+      <Text onClick={(e) => { e.stopPropagation?.(); onEye(); }} style={{ fontSize: 13, color: w.hidden ? t.separator : t.textDim, padding: '2px 5px' }}
+       >{w.hidden ? '○' : '●'}</Text>
+      <Text onClick={(e) => { e.stopPropagation?.(); onRemove(); }} style={{ fontSize: 13, color: t.textDim, padding: '2px 5px' }}>×</Text>
     </View>
   );
 }
@@ -197,140 +196,176 @@ function StyleControl({ label, children }) {
   );
 }
 
-function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onDistributeX, onDistributeY, area }) {
+function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onAlignXY, onSpace, onZ, onDup, onRemove, area }) {
   const t = useTheme();
   const st = w.style || {};
+  const [adv, setAdv] = useState(false);
   const set = (patch) => onStyle(patch);
   const nudge = (dx, dy) => onGeom(w.x + dx, w.y + dy);
   const scale = (f) => onGeom(null, null, Math.round((w.w * f) / 4) * 4, Math.round((w.h * f) / 4) * 4);
+  const textSize = (px) => set({ size: px === null ? null : px });
+  const sizeChips = [['tsSmall', 'Small', 13], ['tsMedium', 'Medium', 18], ['tsLarge', 'Large', 24], ['tsHuge', 'Huge', 34]];
+  const G = ({ title, children }) => (
+    <View style={{ gap: 6 }}>
+      <Text style={{ fontSize: 11, fontWeight: 700, color: t.textDim, letterSpacing: 1 }}>{title}</Text>
+      {children}
+    </View>
+  );
+  const Swatches = ({ colors, value, onPick, clearLabel }) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+      {[null, ...colors].map((c, i) => (
+        <View key={i} onClick={() => onPick(c)} style={{ width: 24, height: 24, borderRadius: 12,
+          backgroundColor: c || 'transparent', border: `2px solid ${(value || null) === c ? t.accent : t.separator}`,
+          alignItems: 'center', justifyContent: 'center' }}>
+          {c === null ? <Text style={{ fontSize: 9, color: t.textDim }}>{clearLabel}</Text> : null}
+        </View>
+      ))}
+    </View>
+  );
+  const isTexty = w.kind === 'clock-digital' || w.kind === 'headline' || w.kind === 'label';
   return (
-    <View style={{ gap: 8, padding: 12, borderRadius: 12, border: `1px solid ${t.separator}`, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: t.text, textAlign: 'start' }}>
+    <View style={{ gap: 14, padding: 12, borderRadius: 12, border: `1px solid ${t.separator}`, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <Text style={{ flex: 1, minWidth: 130, fontSize: 14, fontWeight: 700, color: t.text, textAlign: 'start' }}>
           {widgetLabel(w)}</Text>
-        <Button small label="S" onClick={() => scale(0.8)} />
-        <Button small label="M" onClick={() => scale(1)} />
-        <Button small label="L" onClick={() => scale(1.25)} />
+        <Button small label={L('sizeBigger', 'Bigger')} onClick={() => scale(1.25)} />
+        <Button small label={L('sizeSmaller', 'Smaller')} onClick={() => scale(0.8)} />
+        <Button small label={w.hidden ? L('show', 'Show') : L('hide', 'Hide')} onClick={() => onStyle({ hidden: !w.hidden })} />
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <Button small label={L('copyWidget', 'Make a copy')} onClick={onDup} />
+        <Button small label={L('removeWidget', 'Remove')} onClick={onRemove} />
         <Button small label={w.locked ? L('unlock', 'Unlock') : L('lock', 'Lock')} onClick={() => onLock(!w.locked)} />
         <Button small label={L('resetWidget', 'Reset')} onClick={onReset} />
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        <Text style={{ width: 92, fontSize: 12, color: t.textDim, textAlign: 'start' }}>{L('arrange', 'Arrange')}</Text>
-        {[['left', '⇤'], ['center-x', '⇔'], ['right', '⇥'], ['top', '⇧'], ['center-y', '⇕'], ['bottom', '⇩']].map(([edge, glyph]) => (
-          <Button key={edge} small label={glyph} onClick={() => onAlign(edge)} />
-        ))}
-        <Button small label={L('distributeX', 'Distribute X')} onClick={onDistributeX} />
-        <Button small label={L('distributeY', 'Distribute Y')} onClick={onDistributeY} />
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={{ width: 92, fontSize: 12, color: t.textDim, textAlign: 'start' }}>{L('position', 'Position')}</Text>
-        <Button small label="←" onClick={() => nudge(-4, 0)} />
-        <Button small label="→" onClick={() => nudge(4, 0)} />
-        <Button small label="↑" onClick={() => nudge(0, -4)} />
-        <Button small label="↓" onClick={() => nudge(0, 4)} />
-        <Text style={{ fontSize: 11, color: t.textDim }}>{`${w.x}, ${w.y}`}</Text>
-      </View>
-      <StyleControl label={L('font', 'Typeface')}>
-        <PopUp value={st.font || ''} onChange={(v) => set({ font: v || null })} width={190}
-          options={[['', L('themeFont', 'Theme default')], ...TS_FONTS.map((f) => [f.id, f.name])]} />
-      </StyleControl>
-      <StyleControl label={L('size', 'Size')}>
-        <PopUp value={st.size ?? ''} onChange={(v) => set({ size: v === '' ? null : v })} width={110}
-          options={[['', L('themeSize', 'Default')], ...STEPS.map((x) => [x, `${x}`])]} />
-        <PopUp value={st.weight ?? ''} onChange={(v) => set({ weight: v === '' ? null : v })} width={110}
-          options={[['', L('themeWeight', 'Weight')], ...WEIGHTS.map((x) => [x, `${x}`])]} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={{ fontSize: 12, color: t.textDim }}>{L('italic', 'Italic')}</Text>
-          <Toggle on={!!st.italic} onChange={(v) => set({ italic: v ? true : null })} />
-        </View>
-      </StyleControl>
-      <StyleControl label={L('ink', 'Ink')}>
-        {[null, ...(w._palette || ['#1d1d1f', '#f5f5f7'])].map((c, i) => (
-          <View key={i} onClick={() => set({ color: c })} style={{ width: 20, height: 20, borderRadius: 10,
-            backgroundColor: c || 'transparent', border: `2px solid ${(st.color || null) === c ? t.accent : t.separator}`,
-            alignItems: 'center', justifyContent: 'center' }}>
-            {c === null ? <Text style={{ fontSize: 9, color: t.textDim }}>A</Text> : null}
-          </View>
-        ))}
-        <TextInput value={st.color || ''} onChange={(v) => set({ color: v ? v : null })}
-          placeholder="#hex" style={{ width: 110 }} />
-      </StyleControl>
-      <StyleControl label={L('surface', 'Surface')}>
-        <View style={{ flex: 1, maxWidth: 220 }}>
-          <Slider value={st.alpha ?? 0.7} min={0.16} max={1} step={0.02}
-            onChange={(v) => set({ alpha: v })} />
-        </View>
-        <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.alpha ?? 0.7) * 100)}%`}</Text>
-      </StyleControl>
-      <StyleControl label={L('corners', 'Corners')}>
-        <View style={{ flex: 1, maxWidth: 220 }}>
-          <Slider value={st.radius ?? 16} min={0} max={28} step={1} onChange={(v) => set({ radius: Math.round(v) })} />
-        </View>
-        <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round(st.radius ?? 16)}`}</Text>
-      </StyleControl>
-      <StyleControl label={L('paper', 'Background')}>
-        {[null, '#f4f1e7', '#1d1d1f', '#2b48d9', '#c8f14c', '#d24a3a'].map((c, i) => (
-          <View key={i} onClick={() => set({ paper: c })} style={{ width: 20, height: 20, borderRadius: 10,
-            backgroundColor: c || 'transparent', border: `2px solid ${(st.paper || null) === c ? t.accent : t.separator}`,
-            alignItems: 'center', justifyContent: 'center' }}>
-            {c === null ? <Text style={{ fontSize: 9, color: t.textDim }}>T</Text> : null}
-          </View>
-        ))}
-        <TextInput value={st.paper || ''} onChange={(v) => set({ paper: v || null })} placeholder="#hex" style={{ width: 90 }} />
-      </StyleControl>
-      <StyleControl label={L('blur', 'Blur')}>
-        <View style={{ flex: 1, maxWidth: 220 }}>
-          <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} onChange={(v) => set({ blur: v || null })} />
-        </View>
-        <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.blur ?? 0.4) * 100)}%`}</Text>
-      </StyleControl>
-      <StyleControl label={L('glass', 'Glass')}>
-        <View style={{ flex: 1, maxWidth: 220 }}>
-          <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} onChange={(v) => set({ blur: v || null })} />
-        </View>
-        <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.blur ?? 0.4) * 100)}%`}</Text>
-      </StyleControl>
-      <StyleControl label={L('align', 'Align')}>
-        <PopUp value={st.align || 'left'} onChange={(v) => set({ align: v === 'left' ? null : v })} width={130}
-          options={[['left', L('alignLeft', 'Left')], ['center', L('alignCentre', 'Centre')], ['right', L('alignRight', 'Right')]]} />
-        <PopUp value={st.shadow || 'soft'} onChange={(v) => set({ shadow: v === 'soft' ? null : v })} width={130}
-          options={[['soft', L('shadowSoft', 'Soft shadow')], ['lift', L('shadowLift', 'Lifted')], ['none', L('shadowNone', 'None')]]} />
-      </StyleControl>
-      {w.kind === 'clock-digital' ? (
-        <StyleControl label={L('clock', 'Clock')}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={{ fontSize: 12, color: t.textDim }}>24 h</Text>
-            <Toggle on={(w.cfg || {}).h24 !== false} onChange={(v) => onCfg({ h24: v ? true : false })} />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={{ fontSize: 12, color: t.textDim }}>{L('seconds', 'Seconds')}</Text>
-            <Toggle on={!!(w.cfg || {}).seconds} onChange={(v) => onCfg({ seconds: !!v })} />
-          </View>
-        </StyleControl>
+
+      {w.kind === 'clock-digital' || w.kind === 'clock-analog' ? (
+        <G title={L('clock', 'Clock')}>
+          <SettingRow label={L('h24', 'Show 24-hour time')}><Toggle small on={w.kind === 'clock-digital' && (w.cfg || {}).h24 !== false} onChange={(v) => onCfg({ h24: !!v })} /></SettingRow>
+          <SettingRow label={L('seconds', 'Show seconds')}><Toggle small on={!!(w.cfg || {}).seconds} onChange={(v) => onCfg({ seconds: !!v })} /></SettingRow>
+        </G>
+      ) : null}
+      {w.kind === 'notes' || w.kind === 'quote' || w.kind === 'headline' || w.kind === 'label' ? (
+        <G title={L('yourText', 'Your text')}>
+          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 240 }} />
+          {adv ? <RichEditor w={w} onCfg={onCfg} pal={w._palette || []} /> : null}
+        </G>
       ) : null}
       {w.kind === 'media' ? (
-        <StyleControl label={L('idle', 'Idle')}>
-          <PopUp value={(w.cfg || {}).idle || 'idle'} onChange={(v) => onCfg({ idle: v })} width={170}
+        <G title={L('whenIdle', 'When nothing is playing')}>
+          <PopUp value={(w.cfg || {}).idle || 'idle'} onChange={(v) => onCfg({ idle: v })} width={200}
             options={[['idle', L('idleCard', 'Show a quiet card')], ['hide', L('idleHide', 'Hide the widget')]]} />
-        </StyleControl>
+        </G>
       ) : null}
-      {w.kind === 'notes' ? (
-        <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
-        </StyleControl>
-      ) : null}
-      {w.kind === 'quote' ? (
-        <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
-        </StyleControl>
-      ) : null}
-      {w.kind === 'headline' || w.kind === 'label' ? (
-        <StyleControl label={L('text', 'Text')}>
-          <TextInput value={(w.cfg || {}).text || ''} onChange={(v) => onCfg({ text: v })} style={{ width: 220 }} />
-        </StyleControl>
-      ) : null}
-      {w.kind === 'label' || w.kind === 'headline' || w.kind === 'quote' || w.kind === 'notes' ? (
-        <RichEditor w={w} onCfg={onCfg} pal={w._palette || []} />
+
+      <G title={L('placeTitle', 'Place it')}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+          <View>
+            {['top', 'center-y', 'bottom'].map((ye) => (
+              <View key={ye} style={{ flexDirection: 'row', gap: 4, marginBottom: 4 }}>
+                {['left', 'center-x', 'right'].map((xe) => (
+                  <View key={xe + ye} onClick={() => onAlignXY(xe, ye)} style={{ width: 30, height: 26, borderRadius: 7, cursor: 'pointer',
+                    justifyContent: 'center', alignItems: 'center', backgroundColor: t.control }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: t.textDim }} />
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+          <View style={{ gap: 6 }}>
+            <View style={{ flexDirection: 'row', gap: 4 }}>
+              <Button small label="←" onClick={() => nudge(-8, 0)} />
+              <Button small label="→" onClick={() => nudge(8, 0)} />
+              <Button small label="↑" onClick={() => nudge(0, -8)} />
+              <Button small label="↓" onClick={() => nudge(0, 8)} />
+            </View>
+            <Button small label={L('spaceEvenly', 'Space all widgets evenly')} onClick={onSpace} />
+          </View>
+        </View>
+        <Text style={{ fontSize: 11, color: t.textDim, textAlign: 'start' }}>{L('placeHint', 'Tap a spot to snap the widget there; the arrows nudge it gently.')}</Text>
+      </G>
+
+      <G title={L('styleTitle', 'Style it')}>
+        {isTexty || w.kind === 'notes' || w.kind === 'quote' || w.kind === 'agenda' ? (
+          <SettingRow label={L('textSize', 'Text size')} stack>
+            <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+              <Button small label={L('tsTheme', 'Theme default')} onClick={() => textSize(null)} />
+              {sizeChips.map(([k, label, px]) => (
+                <Button key={k} small label={L(k, label)} onClick={() => textSize(px)} />
+              ))}
+            </View>
+          </SettingRow>
+        ) : null}
+        <SettingRow label={L('color', 'Text colour')} stack>
+          <Swatches colors={w._palette || ['#1d1d1f', '#f5f5f7']} value={st.color} onPick={(c) => set({ color: c })} clearLabel="A" />
+        </SettingRow>
+        <SettingRow label={L('cardColor', 'Card colour')} stack>
+          <Swatches colors={['#f4f1e7', '#1d1d1f', '#2b48d9', '#c8f14c', '#d24a3a']} value={st.paper} onPick={(c) => set({ paper: c })} clearLabel="T" />
+        </SettingRow>
+        <SettingRow label={L('seeThrough', 'See-through')} stack hint={L('seeThroughHint', 'Slide left for a solid card, right for a see-through one.')}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flex: 1, maxWidth: 220 }}>
+              <Slider value={st.alpha ?? 0.7} min={0.16} max={1} step={0.02} onChange={(v) => set({ alpha: v })} />
+            </View>
+            <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.alpha ?? 0.7) * 100)}%`}</Text>
+          </View>
+        </SettingRow>
+        <SettingRow label={L('roundness', 'Corner roundness')} stack>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flex: 1, maxWidth: 220 }}>
+              <Slider value={st.radius ?? 16} min={0} max={28} step={1} onChange={(v) => set({ radius: Math.round(v) })} />
+            </View>
+            <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round(st.radius ?? 16)}`}</Text>
+          </View>
+        </SettingRow>
+        <SettingRow label={L('shadow', 'Shadow')}>
+          <PopUp value={st.shadow || 'soft'} onChange={(v) => set({ shadow: v === 'soft' ? null : v })} width={150}
+            options={[['soft', L('shadowSoft', 'Soft shadow')], ['lift', L('shadowLift', 'Lifted')], ['none', L('shadowNone', 'No shadow')]]} />
+        </SettingRow>
+        {isTexty ? (
+          <SettingRow label={L('italic', 'Slanted text')}>
+            <Toggle small on={!!st.italic} onChange={(v) => set({ italic: v ? true : null })} />
+          </SettingRow>
+        ) : null}
+      </G>
+
+      <View onClick={() => setAdv(!adv)} style={{ cursor: 'pointer', paddingVertical: 6 }}>
+        <Text style={{ fontSize: 12, fontWeight: 600, color: t.accent, textAlign: 'start' }}>
+          {adv ? L('hideAdvanced', '− Hide advanced options') : L('showAdvanced', '+ Show advanced options')}</Text>
+      </View>
+      {adv ? (
+        <G title={L('advanced', 'Advanced')}>
+          <StyleControl label={L('typeface', 'Typeface')}>
+            <PopUp value={st.font || ''} onChange={(v) => set({ font: v || null })} width={190}
+              options={[['', L('themeFont', 'Theme default')], ...TS_FONTS.map((f) => [f.id, f.name])]} />
+          </StyleControl>
+          {isTexty ? (
+            <StyleControl label={L('weight', 'Thickness')}>
+              <PopUp value={st.weight ?? ''} onChange={(v) => set({ weight: v === '' ? null : v })} width={150}
+                options={[['', L('themeWeight', 'Theme default')], [400, L('weightNormal', 'Normal')], [500, L('weightMedium', 'Medium')], [700, L('weightBold', 'Bold')]]} />
+            </StyleControl>
+          ) : null}
+          <StyleControl label={L('color', 'Text colour')}>
+            <TextInput value={st.color || ''} onChange={(v) => set({ color: v ? v : null })} placeholder="#hex" style={{ width: 110 }} />
+          </StyleControl>
+          <StyleControl label={L('cardColor', 'Card colour')}>
+            <TextInput value={st.paper || ''} onChange={(v) => set({ paper: v || null })} placeholder="#hex" style={{ width: 110 }} />
+          </StyleControl>
+          <StyleControl label={L('blur', 'Frosted glass')}>
+            <View style={{ flex: 1, maxWidth: 220 }}>
+              <Slider value={st.blur ?? 0.4} min={0} max={1} step={0.05} onChange={(v) => set({ blur: v || null })} />
+            </View>
+            <Text style={{ fontSize: 11, color: t.textDim, width: 34 }}>{`${Math.round((st.blur ?? 0.4) * 100)}%`}</Text>
+          </StyleControl>
+          <StyleControl label={L('textAlign', 'Text align')}>
+            <PopUp value={st.align || 'left'} onChange={(v) => set({ align: v === 'left' ? null : v })} width={130}
+              options={[['left', L('alignLeft', 'Left')], ['center', L('alignCentre', 'Centre')], ['right', L('alignRight', 'Right')]]} />
+          </StyleControl>
+          <StyleControl label={L('order', 'In front of / behind')}>
+            <Button small label={L('forward', 'Bring forward')} onClick={() => onZ('forward')} />
+            <Button small label={L('backward', 'Send back')} onClick={() => onZ('backward')} />
+          </StyleControl>
+        </G>
       ) : null}
     </View>
   );
@@ -340,6 +375,8 @@ function WidgetEditor({ w, onStyle, onGeom, onCfg, onReset, onLock, onAlign, onD
 
 // 105 kinds: a flat list is unusable. Category chips + a search field; the grid shows names only
 // (never raw pixel sizes). Adding places the widget at a free spot of the real work area.
+const ROUTE_NAMES = { classic: 'Classic', glass: 'See-through', solid: 'Filled', outline: 'Border only', vivid: 'Colourful' };
+
 function AddDialog({ onAdd, onClose }) {
   const t = useTheme();
   const [cat, setCat] = useState('time');
@@ -368,15 +405,18 @@ function AddDialog({ onAdd, onClose }) {
           </View>
           {!ql ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-              {[null, ...TS_ROUTES].map((r) => (
-                <View key={r ? r.id : 'all'} onClick={() => setRoute(r ? r.id : null)} style={{ paddingHorizontal: 10, height: 22,
-                  borderRadius: 11, justifyContent: 'center', cursor: 'pointer',
-                  backgroundColor: route === (r ? r.id : null) || (route === null && !r) ? t.accentSubtle : 'transparent',
-                  border: `1px solid ${route === (r ? r.id : null) || (route === null && !r) ? t.accent : t.separator}` }}>
-                  <Text style={{ fontSize: 11, color: route === (r ? r.id : null) || (route === null && !r) ? t.accent : t.textDim }}>
-                    {r ? r.label : L('allRoutes', 'All looks')}</Text>
-                </View>
-              ))}
+              {[null, ...TS_ROUTES].map((r) => {
+                const name = r ? (ROUTE_NAMES[r.id] || r.label) : L('styleAll', 'All styles');
+                const on = route === (r ? r.id : null) || (route === null && !r);
+                return (
+                  <View key={r ? r.id : 'all'} onClick={() => setRoute(r ? r.id : null)} style={{ paddingHorizontal: 10, height: 22,
+                    borderRadius: 11, justifyContent: 'center', cursor: 'pointer',
+                    backgroundColor: on ? t.accentSubtle : 'transparent',
+                    border: `1px solid ${on ? t.accent : t.separator}` }}>
+                    <Text style={{ fontSize: 11, color: on ? t.accent : t.textDim }}>{name}</Text>
+                  </View>
+                );
+              })}
             </View>
           ) : null}
           <ScrollView style={{ height: 280 }} resetKey={`${cat}:${q}`}>
@@ -572,7 +612,14 @@ function ThemeLookSection({ s, set, onFlash }) {
         ))}
       </View>
       <Text style={{ fontSize: 11, fontWeight: 700, color: t.textDim, letterSpacing: 1, marginTop: 12, marginBottom: 6 }}>{L('lookGlass', 'GLASS')}</Text>
-      <SettingRow label={L('lookBlur', 'Blur')} stack>
+      <SettingRow label={L('lookPresets', 'Quick looks')} stack hint={L('lookPresetsHint', 'One tap picks a whole feel: Frosted is soft and dreamy, Clear is almost invisible, Balanced sits between.')}>
+        <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+          {[['lookFrosted', 'Frosted', 32, 0.25, 1.25], ['lookBalanced', 'Balanced', 24, 0.3, 1.2], ['lookClear', 'Clear', 8, 0.55, 1.1]].map(([k, label, b, tr_, sat]) => (
+            <Button key={k} small label={L(k, label)} onClick={() => set({ glassBlur: b, glassTransparency: tr_, glassSaturate: sat })} />
+          ))}
+        </View>
+      </SettingRow>
+      <SettingRow label={L('lookBlur', 'Blur behind windows')} stack>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ fontSize: 11, color: t.textDim }}>0</Text>
           <Slider value={Number.isFinite(s.glassBlur) ? s.glassBlur : 24} min={0} max={64} width={200}
@@ -580,7 +627,7 @@ function ThemeLookSection({ s, set, onFlash }) {
           <Text style={{ fontSize: 11, color: t.textDim, width: 40 }}>{`${Number.isFinite(s.glassBlur) ? Math.round(s.glassBlur) : 24} px`}</Text>
         </View>
       </SettingRow>
-      <SettingRow label={L('lookTransparency', 'Transparency')} stack>
+      <SettingRow label={L('lookTransparency', 'See-through')} stack>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ fontSize: 11, color: t.textDim }}>{L('lookSolid', 'Solid')}</Text>
           <Slider value={Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3} min={0} max={1} width={200}
@@ -588,7 +635,7 @@ function ThemeLookSection({ s, set, onFlash }) {
           <Text style={{ fontSize: 11, color: t.textDim, width: 40 }}>{`${Math.round((Number.isFinite(s.glassTransparency) ? s.glassTransparency : 0.3) * 100)}%`}</Text>
         </View>
       </SettingRow>
-      <SettingRow label={L('lookSaturation', 'Saturation')} stack>
+      <SettingRow label={L('lookSaturate', 'Colour pop')} stack>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ fontSize: 11, color: t.textDim }}>1×</Text>
           <Slider value={Number.isFinite(s.glassSaturate) ? s.glassSaturate : 1.2} min={1} max={2} width={200}
@@ -714,15 +761,18 @@ export function ThemesSettings() {
   // ---------------- the customize workshop: the whole theme, one focused page ----------------
   if (view === 'customize' && activeDef) {
     const backBar = (
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-        <Button small label={'← ' + L('back', 'Back to the themes')} onClick={() => { setView('gallery'); setSelW(null); }} />
-        <Text style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{activeDef.name}</Text>
-        <View style={{ flex: 1 }} />
-        <Button small label="↶" onClick={undo} disabled={!canUndo} />
-        <Button small label="↷" onClick={redo} disabled={!canRedo} />
-        <Button small label={L('resetLayout', 'Reset layout')} onClick={() => act(() => tsResetTheme(area))} />
-        <Button small label={L('arrangeDesktop', 'Arrange on the desktop')} onClick={goDesktop} />
-        <Button small label={L('stopUsing', 'Use no theme')} onClick={stop} />
+      <View style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <Button small label={'← ' + L('back', 'Back to the themes')} onClick={() => { setView('gallery'); setSelW(null); }} />
+          <Text style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{activeDef.name}</Text>
+          <View style={{ flex: 1 }} />
+          <Button small label={L('undo', 'Undo')} onClick={undo} disabled={!canUndo} />
+          <Button small label={L('redo', 'Redo')} onClick={redo} disabled={!canRedo} />
+          <Button small label={L('startOver', 'Start over')} onClick={() => act(() => tsResetTheme(area))} />
+          <Button small label={L('editDesktop', 'Edit on the desktop')} onClick={goDesktop} />
+          <Button small label={L('stopTheme', 'Stop using')} onClick={stop} />
+        </View>
+        <Note>{L('stepsHint', 'Three steps: click a widget on the canvas, style it below, drag it where you like. Everything is live — Undo takes any change back, and Start over puts the theme back exactly as it came.')}</Note>
       </View>
     );
     return (
@@ -734,16 +784,13 @@ export function ThemesSettings() {
           <StudioCanvas widgets={live.widgets} area={area} selW={selW} onSelect={setSelW} histRef={hist} />
         </Section>
         <Columns>
-          <Section title={L('layers', 'Layers — the widgets of this theme')}
-            footer={L('layersHint', 'Top of the list is frontmost. The dot hides a widget without removing it; ⧉ duplicates; × removes. Click a row to edit its look.')}
+          <Section title={L('widgetsTitle', 'Your widgets')}
+            footer={L('widgetsHint', 'Click one to edit it. The dot hides a widget without deleting it; × removes it — Undo brings it back.')}
             accessory={<Button small label={L('addWidget', 'Add a widget…')} onClick={() => setAddOpen(true)} />}>
-            {byZ.length ? [...byZ].reverse().map((w, i) => (
-              <LayerRow key={w.id} w={w} index={byZ.length - 1 - i} n={byZ.length} selected={selW === w.id}
+            {byZ.length ? [...byZ].reverse().map((w) => (
+              <LayerRow key={w.id} w={w} selected={selW === w.id}
                 onSelect={setSelW}
                 onEye={() => act(() => tsSetInstance(w.id, { hidden: !w.hidden }))}
-                onUp={() => act(() => tsZ(w.id, 'forward', area))}
-                onDown={() => act(() => tsZ(w.id, 'backward', area))}
-                onDup={() => act(() => tsDuplicate(w.id, area))}
                 onRemove={() => { act(() => tsRemove(w.id, area)); if (selW === w.id) setSelW(null); }} />
             )) : <Text style={{ fontSize: 12, color: t.textDim }}>{L('noWidgets', 'This theme carries no widgets on the desktop.')}</Text>}
           </Section>
@@ -752,16 +799,15 @@ export function ThemesSettings() {
               <WidgetEditor w={{ ...selected, _palette: pal }} area={area}
                 onStyle={onStyle} onCfg={onCfg} onGeom={onGeom}
                 onLock={(on) => act(() => tsSetInstance(selected.id, { locked: on }))}
-                onAlign={(edge) => tsMutateList((l) => tsAlignW(l, selected.id, edge, area))}
-                onDistributeX={() => tsMutateList((l) => tsDistributeW(l, 'x', area))}
-                onDistributeY={() => tsMutateList((l) => tsDistributeW(l, 'y', area))}
+                onAlignXY={(xe, ye) => { tsMutateList((l) => tsAlignW(l, selected.id, xe, area)); tsMutateList((l) => tsAlignW(l, selected.id, ye, area)); }}
+                onSpace={() => tsMutateList((l) => tsDistributeW(l, 'x', area))}
+                onZ={(d) => act(() => tsZ(selected.id, d, area))}
+                onDup={() => act(() => tsDuplicate(selected.id, area))}
+                onRemove={() => { act(() => tsRemove(selected.id, area)); setSelW(null); }}
                 onReset={() => act(() => tsResetInstance(selected.id, area))} />
             ) : (
-              <Text style={{ fontSize: 12, color: t.textDim, paddingVertical: 8 }}>{L('pickWidget', 'Pick a widget from the layers to edit its type, size, colours and surface.')}</Text>
+              <Text style={{ fontSize: 12, color: t.textDim, paddingVertical: 8 }}>{L('pickWidget', 'Click a widget — here or on the canvas — and its controls appear here.')}</Text>
             )}
-            <Actions style={{ marginTop: 10 }}>
-              <Button small label={L('duplicate', 'Duplicate selected')} onClick={() => selected && act(() => tsDuplicate(selected.id, area))} disabled={!selected} />
-            </Actions>
           </Section>
         </Columns>
         <ThemeLookSection s={s} set={setS} />

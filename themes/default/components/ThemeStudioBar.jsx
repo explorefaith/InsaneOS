@@ -73,16 +73,14 @@ function CardStyleSheet({ t, w, area, hist }) {
       border: `1px solid ${t.windowBorder}`, boxShadow: '0 14px 40px rgba(0,0,0,0.4)' }}>
       <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
         <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>Size</Text>
-        <Chip t={t} label="S" onClick={() => scale(0.8)} />
-        <Chip t={t} label="M" onClick={() => scale(1)} />
-        <Chip t={t} label="L" onClick={() => scale(1.25)} />
-        <Chip t={t} label="−" onClick={() => setGeom(null, null, -8, -8)} />
-        <Chip t={t} label="+" onClick={() => setGeom(null, null, 8, 8)} />
+        <Chip t={t} label={tr('shell.studio.bigger') || 'Bigger'} onClick={() => scale(1.25)} />
+        <Chip t={t} label={tr('shell.studio.smaller') || 'Smaller'} onClick={() => scale(0.8)} />
+        <Chip t={t} label={tr('shell.studio.normalSize') || 'Normal'} onClick={() => scale(1)} />
       </View>
       <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>Align</Text>
-        {[['left', '⇤'], ['center-x', '⇔'], ['right', '⇥'], ['top', '⇧'], ['center-y', '⇕'], ['bottom', '⇩']].map(([edge, glyph]) => (
-          <Chip key={edge} t={t} label={glyph} onClick={() => tsMutate((l) => tsAlignW(l, w.id, edge, area))} />
+        <Text style={{ fontSize: 11, color: t.textDim, width: 64 }}>{tr('shell.studio.snap') || 'Snap to'}</Text>
+        {[['left', 'Left'], ['center-x', 'Centre'], ['right', 'Right'], ['top', 'Top'], ['center-y', 'Middle'], ['bottom', 'Bottom']].map(([edge, word]) => (
+          <Chip key={edge} t={t} label={word} onClick={() => tsMutate((l) => tsAlignW(l, w.id, edge, area))} />
         ))}
       </View>
       <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -91,8 +89,8 @@ function CardStyleSheet({ t, w, area, hist }) {
           onChange={(v) => soft({ font: v || null })} width={150} />
         <PopIn t={t} value={st.size ?? ''} options={[['', 'Size'], ...STEPS.map((x) => [x, `${x}`])]}
           onChange={(v) => soft({ size: v === '' ? null : v })} width={90} />
-        <PopIn t={t} value={st.weight ?? ''} options={[['', 'W'], ...WEIGHTS.map((x) => [x, `${x}`])]}
-          onChange={(v) => soft({ weight: v === '' ? null : v })} width={80} />
+        <PopIn t={t} value={st.weight ?? ''} options={[['', tr('shell.studio.weightTheme') || 'Weight'], [400, tr('shell.studio.weightNormal') || 'Normal'], [500, tr('shell.studio.weightMedium') || 'Medium'], [700, tr('shell.studio.weightBold') || 'Bold']]}
+          onChange={(v) => soft({ weight: v === '' ? null : v })} width={110} />
         <Chip t={t} label="Italic" active={!!st.italic} onClick={() => soft({ italic: st.italic ? null : true })} />
       </View>
       <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -194,8 +192,8 @@ export function ThemeStudioBar({ area, hist }) {
         <Text style={{ fontSize: 12, fontWeight: 700, color: t.text, width: w ? undefined : 160 }}>
           {w ? label : tr('shell.studio.pick') || 'Tap a card to edit it'}</Text>
         <View style={{ flex: 1 }} />
-        <BarButton t={t} label="↶" onClick={() => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev); }} />
-        <BarButton t={t} label="↷" onClick={() => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next); }} />
+        <BarButton t={t} label={tr('shell.studio.undo') || 'Undo'} onClick={() => { const prev = hist.current.undo(tsLive.get().widgets); if (prev) tsMutate(() => prev); }} />
+        <BarButton t={t} label={tr('shell.studio.redo') || 'Redo'} onClick={() => { const next = hist.current.redo(tsLive.get().widgets); if (next) tsMutate(() => next); }} />
         <BarButton t={t} label={tr('shell.studio.reset') || 'Reset layout'} onClick={() => { hist.current.push(tsLive.get().widgets); tsExitArrange(false); hist.current.reset(); tsEnterArrange(); }} />
         <BarButton t={t} label={tr('shell.studio.cancel') || 'Cancel'} onClick={() => tsExitArrange(true)} />
         <BarButton t={t} label={tr('shell.studio.save') || 'Save & Apply'} primary wide
@@ -203,11 +201,11 @@ export function ThemeStudioBar({ area, hist }) {
       </View>
       {w ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <BarButton t={t} label={sheetOpen ? '▲ Style' : '▼ Style'} onClick={() => setSheetOpen(!sheetOpen)} />
-          <BarButton t={t} label={w.locked ? '🔒' : '🔓'} onClick={() => act(() => tsSetInstance(w.id, { locked: !w.locked }))} />
-          <BarButton t={t} label="⧉" onClick={() => act(() => tsDuplicate(w.id, area))} />
-          <BarButton t={t} label="↑" onClick={() => act(() => tsZ(w.id, 'forward', area))} />
-          <BarButton t={t} label="↓" onClick={() => act(() => tsZ(w.id, 'backward', area))} />
+          <BarButton t={t} label={sheetOpen ? (tr('shell.studio.hideStyle') || 'Hide styling') : (tr('shell.studio.showStyle') || 'Show styling')} onClick={() => setSheetOpen(!sheetOpen)} />
+          <BarButton t={t} label={w.locked ? (tr('shell.studio.unlock') || 'Unlock') : (tr('shell.studio.lock') || 'Lock')} onClick={() => act(() => tsSetInstance(w.id, { locked: !w.locked }))} />
+          <BarButton t={t} label={tr('shell.studio.copy') || 'Copy'} onClick={() => act(() => tsDuplicate(w.id, area))} />
+          <BarButton t={t} label={tr('shell.studio.forward') || 'In front'} onClick={() => act(() => tsZ(w.id, 'forward', area))} />
+          <BarButton t={t} label={tr('shell.studio.behind') || 'Behind'} onClick={() => act(() => tsZ(w.id, 'backward', area))} />
           <BarButton t={t} label="✕" danger onClick={() => { hist.current.push(tsLive.get().widgets); try { tsRemove(w.id, area); } catch (e) { /* gone */ } }} />
           <Text style={{ fontSize: 10, color: t.textDim }}>{`${w.x}, ${w.y}`}</Text>
         </View>
